@@ -1,4 +1,4 @@
-use ethers::types::U256;
+use crate::types::{U256, U256Extension};
 use std::ops::{Add, BitAnd, BitOrAssign, BitXor, Div, Mul, MulAssign};
 
 use crate::{
@@ -24,7 +24,7 @@ pub fn mul_div(a: U256, b: U256, denominator: U256) -> Result<U256, UniswapV3Mat
     let mut prod_1 = mm
         .overflowing_sub(prod_0)
         .0
-        .overflowing_sub(ruint::Uint::<256, 4>::from((mm < prod_0) as u8))
+        .overflowing_sub(U256::from((mm < prod_0) as u8))
         .0;
 
     // Handle non-overflow cases, 256 by 256 division
@@ -32,9 +32,7 @@ pub fn mul_div(a: U256, b: U256, denominator: U256) -> Result<U256, UniswapV3Mat
         if denominator == RUINT_ZERO {
             return Err(UniswapV3MathError::DenominatorIsZero);
         }
-        return Ok(U256::from_little_endian(
-            &prod_0.div(denominator).as_le_bytes(),
-        ));
+        return Ok(prod_0.div(denominator));
     }
 
     // Make sure the result is less than 2**256.
@@ -54,7 +52,7 @@ pub fn mul_div(a: U256, b: U256, denominator: U256) -> Result<U256, UniswapV3Mat
 
     // Subtract 256 bit number from 512 bit number
     prod_1 = prod_1
-        .overflowing_sub(ruint::Uint::<256, 4>::from((remainder > prod_0) as u8))
+        .overflowing_sub(U256::from((remainder > prod_0) as u8))
         .0;
     prod_0 = prod_0.overflowing_sub(remainder).0;
 
@@ -106,7 +104,7 @@ pub fn mul_div(a: U256, b: U256, denominator: U256) -> Result<U256, UniswapV3Mat
     // We don't need to compute the high bits of the result and prod1
     // is no longer required.
 
-    Ok(U256::from_little_endian(&(prod_0 * inv).as_le_bytes()))
+    Ok(prod_0 * inv)
 }
 
 pub fn mul_div_rounding_up(
@@ -124,7 +122,7 @@ pub fn mul_div_rounding_up(
         if result == U256::MAX {
             Err(UniswapV3MathError::ResultIsU256MAX)
         } else {
-            Ok(result + 1)
+            Ok(result + U256::one())
         }
     } else {
         Ok(result)
@@ -134,9 +132,9 @@ pub fn mul_div_rounding_up(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ethers::types::U256;
+    use crate::types::U256;
 
-    const Q128: U256 = U256([0, 0, 1, 0]);
+    const Q128: U256 = U256::from_limbs([0, 0, 1, 0]);
 
     #[test]
     fn test_mul_div() {
@@ -165,11 +163,11 @@ mod test {
 
     use std::ops::{Div, Mul, Sub};
 
-    use ethers::types::U256;
+    use crate::types::{U256, U256Extension};
 
     use super::mul_div;
 
-    const Q128: U256 = U256([0, 0, 1, 0]);
+    const Q128: U256 = U256::from_limbs([0, 0, 1, 0]);
 
     #[test]
     fn test_mul_div() {
@@ -192,7 +190,7 @@ mod test {
         );
 
         // Reverts on overflow with all max inputs
-        let result = mul_div(U256::MAX, U256::MAX, U256::MAX.sub(1));
+        let result = mul_div(U256::MAX, U256::MAX, U256::MAX.sub(U256::one()));
         assert_eq!(
             result.err().unwrap().to_string(),
             "Denominator is less than or equal to prod_1"
@@ -205,17 +203,17 @@ mod test {
         // Accurate without phantom overflow
         let result = mul_div(
             Q128,
-            U256::from(50).mul(Q128).div(100),
-            U256::from(150).mul(Q128).div(100),
+            U256::from(50).mul(Q128).div(U256::from(100)),
+            U256::from(150).mul(Q128).div(U256::from(100)),
         );
-        assert_eq!(result.unwrap(), Q128.div(3));
+        assert_eq!(result.unwrap(), Q128.div(U256::from(3)));
 
         // Accurate with phantom overflow
         let result = mul_div(Q128, U256::from(35).mul(Q128), U256::from(8).mul(Q128));
-        assert_eq!(result.unwrap(), U256::from(4375).mul(Q128).div(1000));
+        assert_eq!(result.unwrap(), U256::from(4375).mul(Q128).div(U256::from(1000)));
 
         // Accurate with phantom overflow and repeating decimal
         let result = mul_div(Q128, U256::from(1000).mul(Q128), U256::from(3000).mul(Q128));
-        assert_eq!(result.unwrap(), Q128.div(3));
+        assert_eq!(result.unwrap(), Q128.div(U256::from(3)));
     }
 }

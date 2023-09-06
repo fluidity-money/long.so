@@ -1,9 +1,6 @@
-use crate::{abi, bit_math, error::UniswapV3MathError};
-use ethers::{
-    providers::Middleware,
-    types::{BlockNumber, H160, U256},
-};
-use std::{collections::HashMap, sync::Arc};
+use crate::{bit_math, error::UniswapV3MathError};
+use crate::types::{U256, U256Extension};
+use std::collections::HashMap;
 
 //Returns next and initialized
 //current_word is the current word in the TickBitmap of the pool based on `tick`. TickBitmap[word_pos] = current_word
@@ -19,7 +16,7 @@ pub fn next_initialized_tick_within_one_word(
     let (word_pos, bit_pos) = position(compressed);
 
     if lte {
-        let mask = (U256::one() << bit_pos) - 1 + (U256::one() << bit_pos);
+        let mask = (U256::one().wrapping_shl(bit_pos.into())) - U256::one() + (U256::one().wrapping_shl(bit_pos.into()));
 
         let masked = tick_bitmap[&word_pos] & mask;
 
@@ -37,7 +34,7 @@ pub fn next_initialized_tick_within_one_word(
 
         Ok((next, initialized))
     } else {
-        let mask = !((U256::one() << bit_pos) - U256::one());
+        let mask = !((U256::one().wrapping_shl(bit_pos.into())) - U256::one());
 
         let masked = tick_bitmap[&word_pos] & mask;
 
@@ -61,6 +58,7 @@ pub fn next_initialized_tick_within_one_word(
 //Returns next and initialized. This function calls the node to get the word at the word_pos.
 //current_word is the current word in the TickBitmap of the pool based on `tick`. TickBitmap[word_pos] = current_word
 //Where word_pos is the 256 bit offset of the ticks word_pos.. word_pos := tick >> 8
+#[cfg(disabled)]
 pub async fn next_initialized_tick_within_one_word_from_provider<M: Middleware>(
     tick: i32,
     tick_spacing: i32,
