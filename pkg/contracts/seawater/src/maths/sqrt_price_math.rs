@@ -1,8 +1,10 @@
 use crate::{
     error::UniswapV3MathError,
-    full_math::{mul_div, mul_div_rounding_up},
-    unsafe_math::div_rounding_up,
-    utils::{ruint_to_u256, u256_to_ruint},
+    maths::{
+        full_math::{mul_div, mul_div_rounding_up},
+        unsafe_math::div_rounding_up,
+        utils::{ruint_to_u256, u256_to_ruint},
+    }
 };
 use crate::types::{I256, U256, U256Extension};
 
@@ -240,7 +242,7 @@ mod test {
 
     use crate::types::{U256, U256Extension};
 
-    use crate::sqrt_price_math::{_get_amount_1_delta, get_next_sqrt_price_from_output, MAX_U160};
+    use super::{_get_amount_1_delta, get_next_sqrt_price_from_output, MAX_U160};
 
     use super::{_get_amount_0_delta, get_next_sqrt_price_from_input};
 

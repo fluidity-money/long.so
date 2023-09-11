@@ -3,7 +3,7 @@ use std::ops::{Add, BitAnd, BitOrAssign, BitXor, Div, Mul, MulAssign};
 
 use crate::{
     error::UniswapV3MathError,
-    utils::{u256_to_ruint, RUINT_MAX_U256, RUINT_ONE, RUINT_THREE, RUINT_TWO, RUINT_ZERO},
+    maths::utils::{u256_to_ruint, RUINT_MAX_U256, RUINT_ONE, RUINT_THREE, RUINT_TWO, RUINT_ZERO},
 };
 
 // returns (uint256 result)

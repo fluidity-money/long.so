@@ -2,10 +2,12 @@ use crate::types::{I256, U256, U256Extension, I256Extension};
 
 use crate::{
     error::UniswapV3MathError,
-    full_math::{mul_div, mul_div_rounding_up},
-    sqrt_price_math::{
-        _get_amount_0_delta, _get_amount_1_delta, get_next_sqrt_price_from_input,
-        get_next_sqrt_price_from_output,
+    maths::{
+        full_math::{mul_div, mul_div_rounding_up},
+        sqrt_price_math::{
+            _get_amount_0_delta, _get_amount_1_delta, get_next_sqrt_price_from_input,
+            get_next_sqrt_price_from_output,
+        },
     },
 };
 
@@ -151,9 +153,9 @@ pub fn compute_swap_step(
 
 mod test {
     #[allow(unused)]
-    use crate::sqrt_price_math::{get_next_sqrt_price_from_input, get_next_sqrt_price_from_output};
+    use crate::maths::sqrt_price_math::{get_next_sqrt_price_from_input, get_next_sqrt_price_from_output};
     #[allow(unused)]
-    use crate::swap_math::compute_swap_step;
+    use super::compute_swap_step;
     #[allow(unused)]
     use crate::types::{I256, U256, U256Extension, I256Extension};
 
