@@ -115,9 +115,7 @@ mod test {
 
     use crate::types::{U256, U256Extension};
 
-    use crate::bit_math::least_significant_bit;
-
-    use super::most_significant_bit;
+    use super::{least_significant_bit, most_significant_bit};
 
     #[test]
     fn test_most_significant_bit() {

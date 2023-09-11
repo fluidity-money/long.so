@@ -6,4 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-uniswap_v3_math = { path = "uniswap-v3-math" }
+stylus-sdk = "0.2.4"
+thiserror = "1.0.48"

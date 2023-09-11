@@ -1,6 +1,11 @@
 // reexports and extension traits
 
-pub type U256 = alloy_primitives::U256;
+// reexport so we can keep the types the same
+pub use stylus_sdk;
+
+pub type TickBitmap = stylus_sdk::storage::StorageMap<i16, stylus_sdk::storage::StorageU256>;
+
+pub type U256 = stylus_sdk::alloy_primitives::U256;
 pub trait U256Extension: Sized {
     fn from_hex_str(value: &str) -> Self;
     fn from_dec_str(value: &str) -> Option<Self>;
@@ -35,7 +40,7 @@ impl U256Extension for U256 {
 
 }
 
-pub type I256 = alloy_primitives::I256;
+pub type I256 = stylus_sdk::alloy_primitives::I256;
 
 pub trait I256Extension: Sized {
     fn zero() -> Self;
@@ -52,3 +57,4 @@ impl I256Extension for I256 {
     }
 
 }
+

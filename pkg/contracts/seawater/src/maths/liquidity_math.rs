@@ -23,7 +23,7 @@ pub fn add_delta(x: u128, y: i128) -> Result<u128, UniswapV3MathError> {
 #[cfg(test)]
 mod test {
 
-    use crate::liquidity_math::add_delta;
+    use super::add_delta;
 
     #[test]
     fn test_add_delta() {
