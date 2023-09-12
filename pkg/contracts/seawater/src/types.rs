@@ -37,7 +37,6 @@ impl U256Extension for U256 {
         debug_assert!(!value.starts_with("0x"));
         value.parse().ok()
     }
-
 }
 
 pub type I256 = stylus_sdk::alloy_primitives::I256;
@@ -55,6 +54,6 @@ impl I256Extension for I256 {
     fn one() -> Self {
         Self::ONE
     }
-
 }
 
+pub type Address = stylus_sdk::alloy_primitives::Address;
