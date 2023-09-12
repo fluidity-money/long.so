@@ -5,10 +5,12 @@
     )
 ]
 
-mod position;
 mod test_shims;
-mod tick;
 mod types;
+mod position;
+mod tick;
+mod error;
+mod maths;
 
 use position::*;
 use stylus_sdk::prelude::*;
