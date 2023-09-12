@@ -1,0 +1,13 @@
+[workspace]
+
+members = [
+    "seawater",
+    "erc1155-token"
+]
+
+[profile.release]
+codegen-units = 1
+strip = true
+lto = true
+panic = "abort"
+opt-level = "s"
