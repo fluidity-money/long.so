@@ -1,11 +1,13 @@
-use ethers::types::{I256, U256};
+use crate::types::{I256, U256, U256Extension, I256Extension};
 
 use crate::{
     error::UniswapV3MathError,
-    full_math::{mul_div, mul_div_rounding_up},
-    sqrt_price_math::{
-        _get_amount_0_delta, _get_amount_1_delta, get_next_sqrt_price_from_input,
-        get_next_sqrt_price_from_output,
+    maths::{
+        full_math::{mul_div, mul_div_rounding_up},
+        sqrt_price_math::{
+            _get_amount_0_delta, _get_amount_1_delta, get_next_sqrt_price_from_input,
+            get_next_sqrt_price_from_output,
+        },
     },
 };
 
@@ -151,11 +153,11 @@ pub fn compute_swap_step(
 
 mod test {
     #[allow(unused)]
-    use crate::sqrt_price_math::{get_next_sqrt_price_from_input, get_next_sqrt_price_from_output};
+    use crate::maths::sqrt_price_math::{get_next_sqrt_price_from_input, get_next_sqrt_price_from_output};
     #[allow(unused)]
-    use crate::swap_math::compute_swap_step;
+    use super::compute_swap_step;
     #[allow(unused)]
-    use ethers::types::{I256, U256};
+    use crate::types::{I256, U256, U256Extension, I256Extension};
 
     #[test]
     fn test_compute_swap_step() {
@@ -181,9 +183,8 @@ mod test {
         assert_eq!(fee_amount, U256::from_dec_str("5988667735148").unwrap());
         assert_eq!(amount_out, U256::from_dec_str("9925619580021728").unwrap());
 
-        let mut le_bytes = [0 as u8; 32];
-        amount.to_little_endian(&mut le_bytes);
-        assert!(amount_in + fee_amount < U256::from_little_endian(&mut le_bytes));
+        let le_bytes: [u8; U256::BYTES] = amount.to_le_bytes();
+        assert!(amount_in + fee_amount < U256::from_le_bytes(le_bytes));
 
         let price_after_whole_input_amount =
             get_next_sqrt_price_from_input(price, liquidity, amount_in, zero_for_one).unwrap();
@@ -209,9 +210,8 @@ mod test {
         assert_eq!(amount_out, U256::from_dec_str("9925619580021728").unwrap());
         assert!(amount_out < (amount * -I256::one()).into_raw());
 
-        let mut le_bytes = [0 as u8; 32];
-        amount.to_little_endian(&mut le_bytes);
-        assert!(amount_in + fee_amount < U256::from_little_endian(&mut le_bytes));
+        let le_bytes: [u8; U256::BYTES] = amount.to_le_bytes();
+        assert!(amount_in + fee_amount < U256::from_le_bytes(le_bytes));
 
         let price_after_whole_output_amount = get_next_sqrt_price_from_output(
             price,
@@ -228,7 +228,7 @@ mod test {
 
         //exact amount in that is fully spent in one for zero
         let price = U256::from_dec_str("79228162514264337593543950336").unwrap();
-        let price_target = U256::from("0xe6666666666666666666666666");
+        let price_target = U256::from_hex_str("0xe6666666666666666666666666");
         let liquidity = 2e18 as u128;
         let amount = I256::from_dec_str("1000000000000000000").unwrap();
         let fee = 600;
@@ -365,11 +365,11 @@ mod test {
         //handles intermediate insufficient liquidity in zero for one exact output case
 
         let price = U256::from_dec_str("20282409603651670423947251286016").unwrap();
-        let price_target = price * 11 / 10;
+        let price_target = price * U256::from(11) / U256::from(10);
         let liquidity = 1024;
         // virtual reserves of one are only 4
         // https://www.wolframalpha.com/input/?i=1024+%2F+%2820282409603651670423947251286016+%2F+2**96%29
-        let amount_remaining = -I256::from(4);
+        let amount_remaining = -I256::unchecked_from(4);
         let fee = 3000;
 
         let (sqrt_p, amount_in, amount_out, fee_amount) =
@@ -385,11 +385,11 @@ mod test {
         //handles intermediate insufficient liquidity in one for zero exact output case
 
         let price = U256::from_dec_str("20282409603651670423947251286016").unwrap();
-        let price_target = price * 9 / 10;
+        let price_target = price * U256::from(9) / U256::from(10);
         let liquidity = 1024;
         // virtual reserves of zero are only 262144
         // https://www.wolframalpha.com/input/?i=1024+*+%2820282409603651670423947251286016+%2F+2**96%29
-        let amount_remaining = -I256::from(263000);
+        let amount_remaining = -I256::unchecked_from(263000);
         let fee = 3000;
 
         let (sqrt_p, amount_in, amount_out, fee_amount) =

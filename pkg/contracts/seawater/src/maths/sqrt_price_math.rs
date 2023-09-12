@@ -1,14 +1,17 @@
 use crate::{
     error::UniswapV3MathError,
-    full_math::{mul_div, mul_div_rounding_up},
-    unsafe_math::div_rounding_up,
-    utils::{ruint_to_u256, u256_to_ruint},
+    maths::{
+        full_math::{mul_div, mul_div_rounding_up},
+        unsafe_math::div_rounding_up,
+        utils::{ruint_to_u256, u256_to_ruint},
+    }
 };
-use ethers::types::{I256, U256};
+use crate::types::{I256, U256, U256Extension};
 
-pub const MAX_U160: U256 = U256([18446744073709551615, 18446744073709551615, 4294967295, 0]);
-pub const Q96: U256 = U256([0, 4294967296, 0, 0]);
-pub const FIXED_POINT_96_RESOLUTION: U256 = U256([96, 0, 0, 0]);
+pub const MAX_U160: U256 = U256::from_limbs([18446744073709551615, 18446744073709551615, 4294967295, 0]);
+pub const Q96: U256 = U256::from_limbs([0, 4294967296, 0, 0]);
+pub const FIXED_POINT_96_RESOLUTION: U256 = U256::from_limbs([96, 0, 0, 0]);
+pub const FIXED_POINT_96_RESOLUTION_USIZE: usize = 96;
 
 // returns (sqrtQX96)
 pub fn get_next_sqrt_price_from_input(
@@ -109,7 +112,7 @@ pub fn get_next_sqrt_price_from_amount_1_rounding_down(
 ) -> Result<U256, UniswapV3MathError> {
     if add {
         let quotient = if amount <= MAX_U160 {
-            (amount << FIXED_POINT_96_RESOLUTION) / liquidity
+            (amount.wrapping_shl(FIXED_POINT_96_RESOLUTION_USIZE)) / U256::from(liquidity)
         } else {
             mul_div(amount, Q96, U256::from(liquidity))?
         };
@@ -123,7 +126,7 @@ pub fn get_next_sqrt_price_from_amount_1_rounding_down(
         }
     } else {
         let quotient = if amount <= MAX_U160 {
-            div_rounding_up(amount << FIXED_POINT_96_RESOLUTION, U256::from(liquidity))
+            div_rounding_up(amount.wrapping_shl(FIXED_POINT_96_RESOLUTION_USIZE), U256::from(liquidity))
         } else {
             mul_div_rounding_up(amount, Q96, U256::from(liquidity))?
         };
@@ -178,13 +181,13 @@ pub fn _get_amount_1_delta(
         mul_div_rounding_up(
             U256::from(liquidity),
             sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96,
-            U256::from("0x1000000000000000000000000"),
+            U256::from_hex_str("0x1000000000000000000000000"),
         )
     } else {
         mul_div(
             U256::from(liquidity),
             sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96,
-            U256::from("0x1000000000000000000000000"),
+            U256::from_hex_str("0x1000000000000000000000000"),
         )
     }
 }
@@ -237,9 +240,9 @@ pub fn get_amount_1_delta(
 mod test {
     use std::ops::{Add, Sub};
 
-    use ethers::types::U256;
+    use crate::types::{U256, U256Extension};
 
-    use crate::sqrt_price_math::{_get_amount_1_delta, get_next_sqrt_price_from_output, MAX_U160};
+    use super::{_get_amount_1_delta, get_next_sqrt_price_from_output, MAX_U160};
 
     use super::{_get_amount_0_delta, get_next_sqrt_price_from_input};
 
@@ -362,7 +365,7 @@ mod test {
         let result = get_next_sqrt_price_from_input(
             U256::from_dec_str("79228162514264337593543950336").unwrap(),
             1,
-            U256::MAX / 2,
+            U256::MAX / U256::from(2),
             true,
         );
 
@@ -568,7 +571,7 @@ mod test {
             false,
         );
 
-        assert_eq!(amount_0_rounded_down.unwrap(), amount_0.sub(1));
+        assert_eq!(amount_0_rounded_down.unwrap(), amount_0.sub(U256::one()));
 
         // works for prices that overflow
         let amount_0_up = _get_amount_0_delta(
@@ -587,7 +590,7 @@ mod test {
         )
         .unwrap();
 
-        assert_eq!(amount_0_up, amount_0_down.add(1));
+        assert_eq!(amount_0_up, amount_0_down.add(U256::one()));
     }
 
     #[test]
@@ -633,7 +636,7 @@ mod test {
             false,
         );
 
-        assert_eq!(amount_1_rounded_down.unwrap(), amount_1.sub(1));
+        assert_eq!(amount_1_rounded_down.unwrap(), amount_1.sub(U256::one()));
     }
 
     #[test]
