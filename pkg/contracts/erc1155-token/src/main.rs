@@ -14,9 +14,9 @@ use stylus_sdk::prelude::*;
 
 #[entrypoint]
 #[solidity_storage]
-pub struct Erc1155Token {
+pub struct ERC1155Token {
 }
 
 #[external]
-impl Erc1155Token {
+impl ERC1155Token {
 }
