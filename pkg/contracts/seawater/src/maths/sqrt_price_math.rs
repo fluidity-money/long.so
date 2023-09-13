@@ -1,14 +1,15 @@
+use crate::types::{U256Extension, I256, U256};
 use crate::{
     error::UniswapV3MathError,
     maths::{
         full_math::{mul_div, mul_div_rounding_up},
         unsafe_math::div_rounding_up,
         utils::{ruint_to_u256, u256_to_ruint},
-    }
+    },
 };
-use crate::types::{I256, U256, U256Extension};
 
-pub const MAX_U160: U256 = U256::from_limbs([18446744073709551615, 18446744073709551615, 4294967295, 0]);
+pub const MAX_U160: U256 =
+    U256::from_limbs([18446744073709551615, 18446744073709551615, 4294967295, 0]);
 pub const Q96: U256 = U256::from_limbs([0, 4294967296, 0, 0]);
 pub const FIXED_POINT_96_RESOLUTION: U256 = U256::from_limbs([96, 0, 0, 0]);
 pub const FIXED_POINT_96_RESOLUTION_USIZE: usize = 96;
@@ -126,7 +127,10 @@ pub fn get_next_sqrt_price_from_amount_1_rounding_down(
         }
     } else {
         let quotient = if amount <= MAX_U160 {
-            div_rounding_up(amount.wrapping_shl(FIXED_POINT_96_RESOLUTION_USIZE), U256::from(liquidity))
+            div_rounding_up(
+                amount.wrapping_shl(FIXED_POINT_96_RESOLUTION_USIZE),
+                U256::from(liquidity),
+            )
         } else {
             mul_div_rounding_up(amount, Q96, U256::from(liquidity))?
         };
@@ -240,7 +244,7 @@ pub fn get_amount_1_delta(
 mod test {
     use std::ops::{Add, Sub};
 
-    use crate::types::{U256, U256Extension};
+    use crate::types::{U256Extension, U256};
 
     use super::{_get_amount_1_delta, get_next_sqrt_price_from_output, MAX_U160};
 

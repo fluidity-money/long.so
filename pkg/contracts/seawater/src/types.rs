@@ -56,4 +56,58 @@ impl I256Extension for I256 {
     }
 }
 
+pub type U128 = stylus_sdk::alloy_primitives::U128;
+pub type I128 = stylus_sdk::alloy_primitives::I128;
+pub type I32 = stylus_sdk::alloy_primitives::I32;
+pub type U8 = stylus_sdk::alloy_primitives::U8;
+
+// ersatz From and Into
+// wraps into W
+pub trait Wrap<W> {
+    fn unwrap(&self) -> W;
+    fn wrap(arg: &W) -> Self;
+}
+
+impl Wrap<i128> for I128 {
+    fn unwrap(&self) -> i128 {
+        i128::from_le_bytes(self.to_le_bytes())
+    }
+
+    fn wrap(arg: &i128) -> Self {
+        I128::from_le_bytes(arg.to_le_bytes())
+    }
+}
+impl Wrap<u128> for U128 {
+    fn unwrap(&self) -> u128 {
+        u128::from_le_bytes(self.to_le_bytes())
+    }
+
+    fn wrap(arg: &u128) -> Self {
+        U128::from_le_bytes(arg.to_le_bytes())
+    }
+}
+impl Wrap<i32> for I32 {
+    fn unwrap(&self) -> i32 {
+        self.as_i32()
+    }
+
+    fn wrap(arg: &i32) -> Self {
+        I32::unchecked_from(*arg)
+    }
+}
+impl Wrap<u8> for U8 {
+    fn unwrap(&self) -> u8 {
+        self.as_limbs()[0] as u8
+    }
+
+    fn wrap(arg: &u8) -> Self {
+        Self::from_limbs([*arg as u64])
+    }
+}
+
+pub type U160 = stylus_sdk::alloy_primitives::U160;
+
+pub type U32 = stylus_sdk::alloy_primitives::U32;
+pub type I64 = stylus_sdk::alloy_primitives::I64;
+
 pub type Address = stylus_sdk::alloy_primitives::Address;

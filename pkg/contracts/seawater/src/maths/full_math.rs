@@ -1,10 +1,12 @@
-use crate::types::{U256, U256Extension};
+use crate::types::{U256Extension, U256};
 use std::ops::{Add, BitAnd, BitOrAssign, BitXor, Div, Mul, MulAssign};
 
 use crate::{
     error::UniswapV3MathError,
     maths::utils::{u256_to_ruint, RUINT_MAX_U256, RUINT_ONE, RUINT_THREE, RUINT_TWO, RUINT_ZERO},
 };
+
+pub const Q128: U256 = U256::from_limbs([0, 0, 1, 0]);
 
 // returns (uint256 result)
 pub fn mul_div(a: U256, b: U256, denominator: U256) -> Result<U256, UniswapV3MathError> {
@@ -163,7 +165,7 @@ mod test {
 
     use std::ops::{Div, Mul, Sub};
 
-    use crate::types::{U256, U256Extension};
+    use crate::types::{U256Extension, U256};
 
     use super::mul_div;
 
@@ -210,7 +212,10 @@ mod test {
 
         // Accurate with phantom overflow
         let result = mul_div(Q128, U256::from(35).mul(Q128), U256::from(8).mul(Q128));
-        assert_eq!(result.unwrap(), U256::from(4375).mul(Q128).div(U256::from(1000)));
+        assert_eq!(
+            result.unwrap(),
+            U256::from(4375).mul(Q128).div(U256::from(1000))
+        );
 
         // Accurate with phantom overflow and repeating decimal
         let result = mul_div(Q128, U256::from(1000).mul(Q128), U256::from(3000).mul(Q128));

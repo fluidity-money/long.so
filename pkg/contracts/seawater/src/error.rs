@@ -36,4 +36,16 @@ pub enum UniswapV3MathError {
     SafeCastToU160Overflow,
     #[error("Middleware error when getting next_initialized_tick_within_one_word")]
     MiddlewareError(String),
+
+    #[error("Liquidity higher than max")]
+    LiquidityTooHigh,
+
+    #[error("Fee growth sub overflow")]
+    FeeGrowthSub,
+}
+
+impl From<UniswapV3MathError> for Vec<u8> {
+    fn from(val: UniswapV3MathError) -> Self {
+        format!("{}", val).into()
+    }
 }
