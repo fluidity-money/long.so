@@ -1,12 +1,65 @@
-use crate::types::{Address, U256};
+use crate::types::{Address, U256, U128, U256Extension};
+use crate::types::Wrap;
+use crate::maths::liquidity_math;
+use crate::error::*;
+use crate::maths::full_math;
 use stylus_sdk::alloy_primitives::aliases::B256;
 use stylus_sdk::crypto;
 use stylus_sdk::prelude::*;
 use stylus_sdk::storage::*;
 
 #[solidity_storage]
+pub struct StoragePositions {
+    pub positions: StorageMap<StoragePositionKey, StoragePositionInfo>,
+}
+impl StoragePositions {
+    pub fn update(
+        &mut self,
+        position: StoragePositionKey,
+        delta: i128,
+        fee_growth_inside_0: U256,
+        fee_growth_inside_1: U256,
+    ) -> Result<(), UniswapV3MathError> {
+        let mut info = self.positions.setter(position);
+
+        let liquidity_next = liquidity_math::add_delta(info.liquidity.get().unwrap(), delta)?;
+
+        let owed_fees_0 = full_math::mul_div(
+            fee_growth_inside_0.checked_sub(info.fee_growth_inside_0.get())
+                .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+            U256::from(info.liquidity.get()),
+            full_math::Q128,
+        )?;
+
+        let owed_fees_1 = full_math::mul_div(
+            fee_growth_inside_1.checked_sub(info.fee_growth_inside_1.get())
+                .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+            U256::from(info.liquidity.get()),
+            full_math::Q128,
+        )?;
+
+        // update storage
+        if delta != 0 {
+            info.liquidity.set(U128::wrap(&liquidity_next));
+        }
+        info.fee_growth_inside_0.set(fee_growth_inside_0);
+        info.fee_growth_inside_1.set(fee_growth_inside_1);
+        if !owed_fees_0.is_zero() || !owed_fees_1.is_zero() {
+            // overflow is the user's problem, they should withdraw earlier
+            let new_fees_0 = info.token_owed_0.get().wrapping_add(U128::wrapping_from(owed_fees_0));
+            info.token_owed_0.set(new_fees_0);
+
+            let new_fees_1 = info.token_owed_1.get().wrapping_add(U128::wrapping_from(owed_fees_1));
+            info.token_owed_1.set(new_fees_1);
+        }
+
+        Ok(())
+    }
+}
+
+#[solidity_storage]
 pub struct StoragePositionInfo {
-    pub liquidity: StorageI128,
+    pub liquidity: StorageU128,
     pub fee_growth_inside_0: StorageU256,
     pub fee_growth_inside_1: StorageU256,
     pub token_owed_0: StorageU128,

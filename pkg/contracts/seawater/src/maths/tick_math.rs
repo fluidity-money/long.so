@@ -1,6 +1,6 @@
 use std::ops::{BitOr, Neg, Shl, Shr};
 
-use crate::types::{I256, U256, U256Extension};
+use crate::types::{U256Extension, I256, U256};
 
 use crate::error::UniswapV3MathError;
 
@@ -8,7 +8,8 @@ pub const MIN_TICK: i32 = -887272;
 pub const MAX_TICK: i32 = -MIN_TICK;
 
 pub const MIN_SQRT_RATIO: U256 = U256::from_limbs([4295128739, 0, 0, 0]);
-pub const MAX_SQRT_RATIO: U256 = U256::from_limbs([6743328256752651558, 17280870778742802505, 4294805859, 0]);
+pub const MAX_SQRT_RATIO: U256 =
+    U256::from_limbs([6743328256752651558, 17280870778742802505, 4294805859, 0]);
 
 pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
     let abs_tick = if tick < 0 {

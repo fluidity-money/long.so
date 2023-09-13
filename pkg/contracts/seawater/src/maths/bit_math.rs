@@ -1,6 +1,6 @@
 use std::ops::ShrAssign;
 
-use crate::types::{U256, U256Extension};
+use crate::types::{U256Extension, U256};
 
 use crate::error::UniswapV3MathError;
 
@@ -113,7 +113,7 @@ pub fn least_significant_bit(mut x: U256) -> Result<u8, UniswapV3MathError> {
 #[cfg(test)]
 mod test {
 
-    use crate::types::{U256, U256Extension};
+    use crate::types::{U256Extension, U256};
 
     use super::{least_significant_bit, most_significant_bit};
 
