@@ -1,0 +1,6 @@
+[profile.default]
+src = 'sol'
+out = 'out'
+libs = ['lib']
+
+remappings = ["@opensezppling/=lib/openzeppelin-contracts/"]
