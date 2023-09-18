@@ -1,21 +1,16 @@
-#![cfg_attr(
-    not(
-        any(test, feature = "export-abi")),
-        no_main
-    )
-]
+#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
 
-mod test_shims;
-mod types;
-mod position;
-mod tick;
 mod error;
 mod maths;
+mod position;
+mod test_shims;
+mod tick;
+mod types;
 
 use position::*;
 use stylus_sdk::prelude::*;
 use stylus_sdk::storage::*;
-use types::{Address, U256, I256};
+use types::{Address, I256, U256};
 
 extern crate alloc;
 
@@ -60,4 +55,3 @@ impl StoragePool {
         todo!()
     }
 }
-

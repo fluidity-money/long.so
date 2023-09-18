@@ -1,5 +1,4 @@
 // SPDX-Identifier: CC0
-
 pragma solidity 0.8.16;
 
 /// @title ERC-721 Non-Fungible Token Standard (with metadata)
@@ -100,14 +99,14 @@ interface IERC721Metadata /* is ERC165 */ {
     function isApprovedForAll(address _owner, address _operator) external view returns (bool);
 
     /// @notice A descriptive name for a collection of NFTs in this contract
-    function name() external view returns (string);
+    function name() external view returns (string memory);
 
     /// @notice An abbreviated name for NFTs in this contract
-    function symbol() external view returns (string);
+    function symbol() external view returns (string memory);
 
     /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
     /// @dev Throws if `_tokenId` is not a valid NFT. URIs are defined in RFC
     ///  3986. The URI may point to a JSON file that conforms to the "ERC721
     ///  Metadata JSON Schema".
-    function tokenURI(uint256) external view returns (string);
+    function tokenURI(uint256) external view returns (string memory);
 }
