@@ -66,9 +66,6 @@ pub struct StoragePositionInfo {
     pub token_owed_1: StorageU128,
 }
 
-impl StoragePositionInfo {
-    pub fn update(&mut self, delta: i128, fee_growth_inside_0: U256, fee_growth_inside_1: U256) {}
-}
 pub struct StoragePositionKey {
     pub address: Address,
     pub lower: i32,

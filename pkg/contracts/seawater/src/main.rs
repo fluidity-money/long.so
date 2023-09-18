@@ -8,16 +8,9 @@ mod tick;
 mod types;
 
 use alloc::vec::Vec;
-use position::*;
-use stylus_sdk::prelude::*;
-use stylus_sdk::storage::*;
-use types::{Address, Wrap, I256, U160, U256, U128, I128, I32, U8, U256Extension, I256Extension};
-use maths::sqrt_price_math;
-use maths::tick_bitmap;
-use maths::tick_math;
-use maths::liquidity_math;
-use maths::swap_math;
-use maths::full_math;
+use stylus_sdk::{prelude::*, storage::*};
+use types::{Address, Wrap, I256, U256, U128, I32, I256Extension};
+use maths::{sqrt_price_math, tick_bitmap, tick_math, full_math, liquidity_math, swap_math};
 
 extern crate alloc;
 
@@ -51,7 +44,6 @@ pub struct StoragePool {
 
 #[external]
 impl StoragePool {
-    #[allow(unused)]
     pub fn update_position(
         &mut self,
         owner: Address,
@@ -66,9 +58,6 @@ impl StoragePool {
             delta,
             self.fee_growth_global_0.get(),
             self.fee_growth_global_1.get(),
-            U160::from(0), // seconds per liquidity
-            0,             // tick cumulative
-            1,             // time
             false,
             self.max_liquidity_per_tick.get().unwrap(),
         )?;
@@ -79,9 +68,6 @@ impl StoragePool {
             delta,
             self.fee_growth_global_0.get(),
             self.fee_growth_global_1.get(),
-            U160::from(0), // seconds per liquidity
-            0,             // tick cumulative
-            1,             // time
             true,
             self.max_liquidity_per_tick.get().unwrap(),
         )?;
@@ -96,7 +82,7 @@ impl StoragePool {
         )?;
 
         self.positions.update(
-            StoragePositionKey{
+            position::StoragePositionKey{
                 address: owner,
                 lower,
                 upper,
@@ -104,7 +90,7 @@ impl StoragePool {
             delta,
             fee_growth_inside_0,
             fee_growth_inside_1,
-        );
+        )?;
 
         // clear unneeded storage
         if flip_lower {
@@ -157,8 +143,8 @@ impl StoragePool {
                         tick_math::get_sqrt_ratio_at_tick(lower)?,
                         tick_math::get_sqrt_ratio_at_tick(upper)?,
                         delta,
-                        )?,
-                        )
+                    )?,
+                )
             };
             Ok((amount_0, amount_1))
         } else {
@@ -166,7 +152,6 @@ impl StoragePool {
         }
     }
 
-    #[allow(unused)]
     pub fn swap(
         &mut self,
         zero_for_one: bool,
@@ -238,6 +223,7 @@ impl StoragePool {
                 state.amount_remaining,
                 self.fee.get().unwrap(),
             )?;
+            state.price = next_sqrt_price;
 
             // update state
             match exact_in {
