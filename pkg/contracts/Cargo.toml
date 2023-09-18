@@ -15,3 +15,9 @@ debug = false
 rpath = false
 debug-assertions = false
 incremental = false
+
+[workspace.dependencies]
+stylus-sdk = "0.4.1"
+thiserror = "1.0.48"
+tiny-keccak = "2.0.2"
+wee_alloc = "0.4.5"
