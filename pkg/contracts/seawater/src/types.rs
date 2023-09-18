@@ -105,6 +105,16 @@ impl Wrap<u8> for U8 {
     }
 }
 
+impl Wrap<u32> for U32 {
+    fn unwrap(&self) -> u32 {
+        self.as_limbs()[0] as u32
+    }
+
+    fn wrap(arg: &u32) -> Self {
+        Self::from_limbs([*arg as u64])
+    }
+}
+
 pub type U160 = stylus_sdk::alloy_primitives::U160;
 
 pub type U32 = stylus_sdk::alloy_primitives::U32;

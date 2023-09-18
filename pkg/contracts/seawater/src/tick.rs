@@ -11,7 +11,7 @@ pub struct StorageTicks {
 
 #[solidity_storage]
 pub struct StorageTickBitmap {
-    pub bitmap: StorageMap<U256, StorageU256>,
+    pub bitmap: StorageMap<i16, StorageU256>,
 }
 impl StorageTickBitmap {
     pub fn flip(&mut self, tick: i32, spacing: u8) {
@@ -151,6 +151,28 @@ impl StorageTicks {
                 .and_then(|x| x.checked_sub(fee_growth_above_1))
                 .ok_or(UniswapV3MathError::FeeGrowthSub)?,
         ))
+    }
+
+    pub fn cross(
+        &mut self,
+        tick: i32,
+        fee_growth_global_0: U256,
+        fee_growth_global_1: U256,
+     ) -> i128 {
+        let mut info = self.ticks.setter(tick);
+
+        let new_fee_growth_outside_0 = fee_growth_global_0 - info.fee_growth_outside_0.get();
+        info.fee_growth_outside_0.set(new_fee_growth_outside_0);
+
+
+        let new_fee_growth_outside_1 = fee_growth_global_1 - info.fee_growth_outside_1.get();
+        info.fee_growth_outside_1.set(new_fee_growth_outside_1);
+
+        // update secondsPerLiquidityOutside
+        // update tickCumulativeOutside
+        // update secondsOutside
+
+        info.liquidity_net.unwrap()
     }
 
     pub fn clear(&mut self, tick: i32) {

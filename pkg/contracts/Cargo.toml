@@ -8,7 +8,7 @@ members = [
 [profile.release]
 codegen-units = 1
 panic = "abort"
-opt-level = "z"
+opt-level = 3
 strip = true
 lto = true
 debug = false
@@ -20,4 +20,4 @@ incremental = false
 stylus-sdk = "0.4.1"
 thiserror = "1.0.48"
 tiny-keccak = "2.0.2"
-wee_alloc = "0.4.5"
+wee_alloc = "*"
