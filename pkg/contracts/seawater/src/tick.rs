@@ -13,9 +13,19 @@ pub struct StorageTicks {
 pub struct StorageTickBitmap {
     pub bitmap: StorageMap<i16, StorageU256>,
 }
+
 impl StorageTickBitmap {
     pub fn flip(&mut self, tick: i32, spacing: u8) {
-        todo!()
+        let spacing = spacing as i32;
+        assert!(tick % spacing == 0); // ensure the tick lies on a valid space
+
+        let spaced_tick = tick / spacing;
+        let (word_pos, bit_pos) = ((spaced_tick >> 8) as i16, (spaced_tick % 256));
+
+        let mask = U256::one().wrapping_shl(bit_pos as usize);
+        let bitmap = self.bitmap.get(word_pos) ^ mask;
+
+        self.bitmap.setter(word_pos).set(bitmap);
     }
 }
 
@@ -42,9 +52,6 @@ impl StorageTicks {
         liquidity_delta: i128,
         fee_growth_global_0: U256,
         fee_growth_global_1: U256,
-        seconds_per_liquidity: U160,
-        tick_cumulative: i64,
-        time: u32,
         upper: bool,
         max_liquidity: u128,
     ) -> Result<bool, UniswapV3MathError> {
@@ -67,11 +74,6 @@ impl StorageTicks {
             if tick <= cur_tick {
                 info.fee_growth_outside_0.set(fee_growth_global_0);
                 info.fee_growth_outside_1.set(fee_growth_global_1);
-                info.seconds_per_liquidity_outside
-                    .set(seconds_per_liquidity);
-                info.tick_cumulative_outside
-                    .set(I64::unchecked_from(tick_cumulative));
-                info.seconds_outside.set(U32::from_limbs([time.into()]));
             }
             info.initialised.set(true);
         }
@@ -167,10 +169,6 @@ impl StorageTicks {
 
         let new_fee_growth_outside_1 = fee_growth_global_1 - info.fee_growth_outside_1.get();
         info.fee_growth_outside_1.set(new_fee_growth_outside_1);
-
-        // update secondsPerLiquidityOutside
-        // update tickCumulativeOutside
-        // update secondsOutside
 
         info.liquidity_net.unwrap()
     }
