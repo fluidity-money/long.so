@@ -214,6 +214,15 @@ pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, UniswapV3Mat
     Ok(tick)
 }
 
+pub fn get_min_tick(spacing: u8) -> i32 {
+    let spacing = spacing as i32;
+    (MIN_TICK / spacing) * spacing
+}
+pub fn get_max_tick(spacing: u8) -> i32 {
+    let spacing = spacing as i32;
+    (MAX_TICK / spacing) * spacing
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

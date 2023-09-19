@@ -1,8 +1,8 @@
-use crate::types::{Address, U256, U128, U256Extension};
-use crate::types::Wrap;
-use crate::maths::liquidity_math;
 use crate::error::*;
 use crate::maths::full_math;
+use crate::maths::liquidity_math;
+use crate::types::Wrap;
+use crate::types::{Address, U256Extension, U128, U256};
 use stylus_sdk::alloy_primitives::aliases::B256;
 use stylus_sdk::crypto;
 use stylus_sdk::prelude::*;
@@ -25,14 +25,16 @@ impl StoragePositions {
         let liquidity_next = liquidity_math::add_delta(info.liquidity.get().unwrap(), delta)?;
 
         let owed_fees_0 = full_math::mul_div(
-            fee_growth_inside_0.checked_sub(info.fee_growth_inside_0.get())
+            fee_growth_inside_0
+                .checked_sub(info.fee_growth_inside_0.get())
                 .ok_or(UniswapV3MathError::FeeGrowthSub)?,
             U256::from(info.liquidity.get()),
             full_math::Q128,
         )?;
 
         let owed_fees_1 = full_math::mul_div(
-            fee_growth_inside_1.checked_sub(info.fee_growth_inside_1.get())
+            fee_growth_inside_1
+                .checked_sub(info.fee_growth_inside_1.get())
                 .ok_or(UniswapV3MathError::FeeGrowthSub)?,
             U256::from(info.liquidity.get()),
             full_math::Q128,
@@ -46,10 +48,16 @@ impl StoragePositions {
         info.fee_growth_inside_1.set(fee_growth_inside_1);
         if !owed_fees_0.is_zero() || !owed_fees_1.is_zero() {
             // overflow is the user's problem, they should withdraw earlier
-            let new_fees_0 = info.token_owed_0.get().wrapping_add(U128::wrapping_from(owed_fees_0));
+            let new_fees_0 = info
+                .token_owed_0
+                .get()
+                .wrapping_add(U128::wrapping_from(owed_fees_0));
             info.token_owed_0.set(new_fees_0);
 
-            let new_fees_1 = info.token_owed_1.get().wrapping_add(U128::wrapping_from(owed_fees_1));
+            let new_fees_1 = info
+                .token_owed_1
+                .get()
+                .wrapping_add(U128::wrapping_from(owed_fees_1));
             info.token_owed_1.set(new_fees_1);
         }
 

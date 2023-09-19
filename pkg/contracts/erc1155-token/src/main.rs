@@ -1,9 +1,4 @@
-#![cfg_attr(
-    not(
-        any(test, feature = "export-abi")),
-        no_main
-    )
-]
+#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
 
 extern crate alloc;
 
@@ -14,9 +9,7 @@ use stylus_sdk::prelude::*;
 
 #[entrypoint]
 #[solidity_storage]
-pub struct ERC1155Token {
-}
+pub struct ERC1155Token {}
 
 #[external]
-impl ERC1155Token {
-}
+impl ERC1155Token {}
