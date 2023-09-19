@@ -160,12 +160,11 @@ impl StorageTicks {
         tick: i32,
         fee_growth_global_0: U256,
         fee_growth_global_1: U256,
-     ) -> i128 {
+    ) -> i128 {
         let mut info = self.ticks.setter(tick);
 
         let new_fee_growth_outside_0 = fee_growth_global_0 - info.fee_growth_outside_0.get();
         info.fee_growth_outside_0.set(new_fee_growth_outside_0);
-
 
         let new_fee_growth_outside_1 = fee_growth_global_1 - info.fee_growth_outside_1.get();
         info.fee_growth_outside_1.set(new_fee_growth_outside_1);
