@@ -439,14 +439,10 @@ where
 {
     type Storage = Self;
     #[inline(never)]
-    fn route(
-        storage: &mut S,
-        selector: u32,
-        input: &[u8],
-    ) -> Option<stylus_sdk::ArbResult> {
-        use stylus_sdk::{function_selector, alloy_sol_types::SolType};
-        use stylus_sdk::abi::{internal, AbiType, Router};
+    fn route(storage: &mut S, selector: u32, input: &[u8]) -> Option<stylus_sdk::ArbResult> {
         use alloc::vec;
+        use stylus_sdk::abi::{internal, AbiType, Router};
+        use stylus_sdk::{alloy_sol_types::SolType, function_selector};
         #[allow(non_upper_case_globals)]
         const SELECTOR_init: u32 = u32::from_be_bytes({
             const DIGEST: [u8; 32] = ::stylus_sdk::keccak_const::Keccak256::new()
@@ -499,12 +495,9 @@ where
                 if let Err(err) = internal::deny_value("init") {
                     return Some(Err(err));
                 }
-                let args = match <<(
-                    U256,
-                    u32,
-                    u8,
-                    u128,
-                ) as AbiType>::SolType as SolType>::decode(input, true) {
+                let args = match <<(U256, u32, u8, u128) as AbiType>::SolType as SolType>::decode(
+                    input, true,
+                ) {
                     Ok(args) => args,
                     Err(err) => {
                         internal::failed_to_decode_arguments(err);
@@ -528,18 +521,16 @@ where
                 if let Err(err) = internal::deny_value("update_position") {
                     return Some(Err(err));
                 }
-                let args = match <<(
-                    Address,
-                    i32,
-                    i32,
-                    i128,
-                ) as AbiType>::SolType as SolType>::decode(input, true) {
-                    Ok(args) => args,
-                    Err(err) => {
-                        internal::failed_to_decode_arguments(err);
-                        return Some(Err(::alloc::vec::Vec::new()));
-                    }
-                };
+                let args =
+                    match <<(Address, i32, i32, i128) as AbiType>::SolType as SolType>::decode(
+                        input, true,
+                    ) {
+                        Ok(args) => args,
+                        Err(err) => {
+                            internal::failed_to_decode_arguments(err);
+                            return Some(Err(::alloc::vec::Vec::new()));
+                        }
+                    };
                 let result = Self::update_position(
                     core::borrow::BorrowMut::borrow_mut(storage),
                     args.0,
@@ -557,11 +548,9 @@ where
                 if let Err(err) = internal::deny_value("swap") {
                     return Some(Err(err));
                 }
-                let args = match <<(
-                    bool,
-                    I256,
-                    U256,
-                ) as AbiType>::SolType as SolType>::decode(input, true) {
+                let args = match <<(bool, I256, U256) as AbiType>::SolType as SolType>::decode(
+                    input, true,
+                ) {
                     Ok(args) => args,
                     Err(err) => {
                         internal::failed_to_decode_arguments(err);

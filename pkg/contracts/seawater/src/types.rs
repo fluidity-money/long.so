@@ -41,7 +41,6 @@ impl U256Extension for U256 {
     fn one() -> Self {
         uint!(1_U256)
     }
-
 }
 
 pub type I256 = stylus_sdk::alloy_primitives::I256;
