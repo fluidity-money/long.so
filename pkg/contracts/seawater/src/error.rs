@@ -45,8 +45,15 @@ pub enum UniswapV3MathError {
 }
 
 impl From<UniswapV3MathError> for Vec<u8> {
+    // tests panic with the message - this is a hack to get debuginfo
+    #[cfg(test)]
     fn from(val: UniswapV3MathError) -> Self {
         panic!("{}", val);
-        //format!("{}", val).into()
+    }
+
+    // runtime panics with no message - this lets us optimise the strings away
+    #[cfg(not(test))]
+    fn from(_val: UniswapV3MathError) -> Self {
+        panic!()
     }
 }
