@@ -4,10 +4,13 @@
 pub use stylus_sdk;
 
 pub type TickBitmap = stylus_sdk::storage::StorageMap<i16, stylus_sdk::storage::StorageU256>;
+use ruint_macro::uint;
 
 pub type U256 = stylus_sdk::alloy_primitives::U256;
 pub trait U256Extension: Sized {
+    #[cfg(test)]
     fn from_hex_str(value: &str) -> Self;
+    #[cfg(test)]
     fn from_dec_str(value: &str) -> Option<Self>;
     fn is_zero(&self) -> bool;
     fn zero() -> Self;
@@ -15,9 +18,16 @@ pub trait U256Extension: Sized {
 }
 
 impl U256Extension for U256 {
+    #[cfg(test)]
     fn from_hex_str(value: &str) -> Self {
         debug_assert!(value.starts_with("0x"));
         value.parse().unwrap()
+    }
+
+    #[cfg(test)]
+    fn from_dec_str(value: &str) -> Option<Self> {
+        debug_assert!(!value.starts_with("0x"));
+        value.parse().ok()
     }
 
     fn is_zero(&self) -> bool {
@@ -29,14 +39,9 @@ impl U256Extension for U256 {
     }
 
     fn one() -> Self {
-        // little endian
-        Self::from_limbs([1, 0, 0, 0])
+        uint!(1_U256)
     }
 
-    fn from_dec_str(value: &str) -> Option<Self> {
-        debug_assert!(!value.starts_with("0x"));
-        value.parse().ok()
-    }
 }
 
 pub type I256 = stylus_sdk::alloy_primitives::I256;

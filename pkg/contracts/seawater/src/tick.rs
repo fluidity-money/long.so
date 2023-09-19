@@ -50,8 +50,8 @@ impl StorageTicks {
         tick: i32,
         cur_tick: i32,
         liquidity_delta: i128,
-        fee_growth_global_0: U256,
-        fee_growth_global_1: U256,
+        fee_growth_global_0: &U256,
+        fee_growth_global_1: &U256,
         upper: bool,
         max_liquidity: u128,
     ) -> Result<bool, UniswapV3MathError> {
@@ -72,8 +72,8 @@ impl StorageTicks {
             // initialise ourself
 
             if tick <= cur_tick {
-                info.fee_growth_outside_0.set(fee_growth_global_0);
-                info.fee_growth_outside_1.set(fee_growth_global_1);
+                info.fee_growth_outside_0.set(*fee_growth_global_0);
+                info.fee_growth_outside_1.set(*fee_growth_global_1);
             }
             info.initialised.set(true);
         }
@@ -105,8 +105,8 @@ impl StorageTicks {
         lower_tick: i32,
         upper_tick: i32,
         cur_tick: i32,
-        fee_growth_global_0: U256,
-        fee_growth_global_1: U256,
+        fee_growth_global_0: &U256,
+        fee_growth_global_1: &U256,
     ) -> Result<(U256, U256), UniswapV3MathError> {
         let lower = self.ticks.get(lower_tick);
         let upper = self.ticks.get(upper_tick);
@@ -158,8 +158,8 @@ impl StorageTicks {
     pub fn cross(
         &mut self,
         tick: i32,
-        fee_growth_global_0: U256,
-        fee_growth_global_1: U256,
+        fee_growth_global_0: &U256,
+        fee_growth_global_1: &U256,
     ) -> i128 {
         let mut info = self.ticks.setter(tick);
 

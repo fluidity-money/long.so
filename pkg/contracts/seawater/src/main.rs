@@ -79,8 +79,8 @@ impl StoragePool {
             lower,
             self.cur_tick.get().unwrap(),
             delta,
-            self.fee_growth_global_0.get(),
-            self.fee_growth_global_1.get(),
+            &self.fee_growth_global_0.get(),
+            &self.fee_growth_global_1.get(),
             false,
             self.max_liquidity_per_tick.get().unwrap(),
         )?;
@@ -89,8 +89,8 @@ impl StoragePool {
             lower,
             self.cur_tick.get().unwrap(),
             delta,
-            self.fee_growth_global_0.get(),
-            self.fee_growth_global_1.get(),
+            &self.fee_growth_global_0.get(),
+            &self.fee_growth_global_1.get(),
             true,
             self.max_liquidity_per_tick.get().unwrap(),
         )?;
@@ -100,8 +100,8 @@ impl StoragePool {
             lower,
             upper,
             self.cur_tick.get().unwrap(),
-            self.fee_growth_global_0.get(),
-            self.fee_growth_global_1.get(),
+            &self.fee_growth_global_0.get(),
+            &self.fee_growth_global_1.get(),
         )?;
 
         self.positions.update(
@@ -299,7 +299,7 @@ impl StoragePool {
                         false => (self.fee_growth_global_0.get(), state.fee_growth_global),
                     };
 
-                    let liquidity_net = self.ticks.cross(step_next_tick, fee_0, fee_1);
+                    let liquidity_net = self.ticks.cross(step_next_tick, &fee_0, &fee_1);
 
                     // flip the liquidity delta if we're moving leftwards
                     let liquidity_net = match zero_for_one {

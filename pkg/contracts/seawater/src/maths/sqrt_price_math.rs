@@ -7,6 +7,7 @@ use crate::{
         utils::{ruint_to_u256, u256_to_ruint},
     },
 };
+use ruint_macro::uint;
 
 pub const MAX_U160: U256 =
     U256::from_limbs([18446744073709551615, 18446744073709551615, 4294967295, 0]);
@@ -185,13 +186,13 @@ pub fn _get_amount_1_delta(
         mul_div_rounding_up(
             U256::from(liquidity),
             sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96,
-            U256::from_hex_str("0x1000000000000000000000000"),
+            uint!(0x1000000000000000000000000_U256),
         )
     } else {
         mul_div(
             U256::from(liquidity),
             sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96,
-            U256::from_hex_str("0x1000000000000000000000000"),
+            uint!(0x1000000000000000000000000_U256),
         )
     }
 }
