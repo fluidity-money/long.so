@@ -1,12 +1,12 @@
 #![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
 #![cfg_attr(test, feature(lazy_cell, const_trait_impl))]
 
-mod error;
-mod maths;
-mod position;
-mod test_shims;
-mod tick;
-mod types;
+pub mod error;
+pub mod maths;
+pub mod position;
+pub mod test_shims;
+pub mod tick;
+pub mod types;
 
 use alloc::vec::Vec;
 use maths::{full_math, liquidity_math, sqrt_price_math, swap_math, tick_bitmap, tick_math};
@@ -46,8 +46,8 @@ pub struct StoragePool {
     tick_bitmap: tick::StorageTickBitmap,
 }
 
+#[external]
 impl StoragePool {
-    #[inline(never)]
     pub fn init(
         &mut self,
         price: U256,
@@ -67,7 +67,6 @@ impl StoragePool {
         Ok(())
     }
 
-    #[inline(never)]
     pub fn update_position(
         &mut self,
         owner: Address,
@@ -177,7 +176,6 @@ impl StoragePool {
         }
     }
 
-    #[inline(never)]
     pub fn swap(
         &mut self,
         zero_for_one: bool,
@@ -433,6 +431,7 @@ mod test {
     }
 }
 
+#[cfg(no)]
 impl<S> stylus_sdk::abi::Router<S> for StoragePool
 where
     S: stylus_sdk::storage::TopLevelStorage + core::borrow::BorrowMut<Self>,
