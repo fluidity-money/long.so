@@ -99,7 +99,6 @@ pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
         })
 }
 
-
 pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, UniswapV3MathError> {
     if !(sqrt_price_x_96 >= MIN_SQRT_RATIO && sqrt_price_x_96 < MAX_SQRT_RATIO) {
         return Err(UniswapV3MathError::R);
@@ -224,7 +223,8 @@ mod reference {
         let f = r.shr(128);
         log_2 = log_2.bitor(I256::from_raw(f.shl(50)));
 
-        let log_sqrt10001 = log_2.wrapping_mul(I256::from_raw(uint!(255738958999603826347141_U256)));
+        let log_sqrt10001 =
+            log_2.wrapping_mul(I256::from_raw(uint!(255738958999603826347141_U256)));
 
         let tick_low = ((log_sqrt10001
             - I256::from_raw(uint!(3402992956809132418596140100660247210_U256)))
@@ -412,9 +412,7 @@ mod test {
             if tick.is_err() {
                 errs += 1;
             }
-            assert!(
-                (tick.is_err() && reference.is_err()) || (tick.unwrap() == reference.unwrap()),
-            );
+            assert!((tick.is_err() && reference.is_err()) || (tick.unwrap() == reference.unwrap()),);
         }
         // make sure that we're actually testing the function
         assert!(errs < 10);
