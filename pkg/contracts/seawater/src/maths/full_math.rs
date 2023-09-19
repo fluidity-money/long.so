@@ -9,18 +9,13 @@ use crate::{
 pub const Q128: U256 = U256::from_limbs([0, 0, 1, 0]);
 
 // returns (uint256 result)
-pub fn mul_div(a: U256, b: U256, denominator: U256) -> Result<U256, UniswapV3MathError> {
-    //NOTE: Converting to ruint to allow for unchecked div which does not exist for U256
-    let a = u256_to_ruint(a);
-    let b = u256_to_ruint(b);
-    let mut denominator = u256_to_ruint(denominator);
-
+pub fn mul_div(a: U256, b: U256, mut denominator: U256) -> Result<U256, UniswapV3MathError> {
     // 512-bit multiply [prod1 prod0] = a * b
     // Compute the product mod 2**256 and mod 2**256 - 1
     // then use the Chinese Remainder Theorem to reconstruct
     // the 512 bit result. The result is stored in two 256
     // variables such that product = prod1 * 2**256 + prod0
-    let mm = a.mul_mod(b, RUINT_MAX_U256);
+    let mm = a.mul_mod(b, U256::MAX);
 
     let mut prod_0 = a.overflowing_mul(b).0; // Least significant 256 bits of the product
     let mut prod_1 = mm
@@ -92,12 +87,14 @@ pub fn mul_div(a: U256, b: U256, denominator: U256) -> Result<U256, UniswapV3Mat
     // Thanks to Hensel's lifting lemma, this also works in modular
     // arithmetic, doubling the correct bits in each step.
 
-    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**8
-    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**16
-    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**32
-    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**64
-    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**128
-    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**256
+    for _ in 0..6 {
+        inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**8
+    }
+    //inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**16
+    //inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**32
+    //inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**64
+    //inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**128
+    //inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**256
 
     // Because the division is now exact we can divide by multiplying
     // with the modular inverse of denominator. This will give us the

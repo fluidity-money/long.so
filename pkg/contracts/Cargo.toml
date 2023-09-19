@@ -9,7 +9,7 @@ members = [
 codegen-units = 1
 panic = "abort"
 opt-level = "z"
-strip = true
+# strip = true
 lto = true
 debug = false
 rpath = false
@@ -17,7 +17,8 @@ debug-assertions = false
 incremental = false
 
 [workspace.dependencies]
-stylus-sdk = { version = "0.4.1", default-features = false, features = [] }
+#stylus-sdk = { version = "0.4.1", default-features = false, features = [] }
+stylus-sdk = { version = "0.4.1" }
 thiserror = "1.0.48"
 tiny-keccak = "2.0.2"
 wee_alloc = "*"

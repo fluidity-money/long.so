@@ -46,8 +46,8 @@ pub struct StoragePool {
     tick_bitmap: tick::StorageTickBitmap,
 }
 
-#[external]
 impl StoragePool {
+    #[inline(never)]
     pub fn init(
         &mut self,
         price: U256,
@@ -67,6 +67,7 @@ impl StoragePool {
         Ok(())
     }
 
+    #[inline(never)]
     pub fn update_position(
         &mut self,
         owner: Address,
@@ -176,6 +177,7 @@ impl StoragePool {
         }
     }
 
+    #[inline(never)]
     pub fn swap(
         &mut self,
         zero_for_one: bool,
@@ -404,7 +406,7 @@ mod test {
     fn with_storage<T, F: FnOnce(&mut StoragePool) -> T>(f: F) -> T {
         let mut storage = unsafe { <StoragePool as StorageType>::new(U256::ZERO, 0) };
         let res = f(&mut storage);
-        stylus_sdk::storage::StorageCache::flush();
+        //stylus_sdk::storage::StorageCache::flush();
         test_shims::log_storage();
         test_shims::reset_storage();
 
@@ -428,5 +430,156 @@ mod test {
                 Ok((I256::unchecked_from(9996), I256::unchecked_from(1000))),
             );
         });
+    }
+}
+
+impl<S> stylus_sdk::abi::Router<S> for StoragePool
+where
+    S: stylus_sdk::storage::TopLevelStorage + core::borrow::BorrowMut<Self>,
+{
+    type Storage = Self;
+    #[inline(never)]
+    fn route(
+        storage: &mut S,
+        selector: u32,
+        input: &[u8],
+    ) -> Option<stylus_sdk::ArbResult> {
+        use stylus_sdk::{function_selector, alloy_sol_types::SolType};
+        use stylus_sdk::abi::{internal, AbiType, Router};
+        use alloc::vec;
+        #[allow(non_upper_case_globals)]
+        const SELECTOR_init: u32 = u32::from_be_bytes({
+            const DIGEST: [u8; 32] = ::stylus_sdk::keccak_const::Keccak256::new()
+                .update("init".as_bytes())
+                .update(b"(")
+                .update(<U256 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
+                .update(b",")
+                .update(<u32 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
+                .update(b",")
+                .update(<u8 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
+                .update(b",")
+                .update(<u128 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
+                .update(b")")
+                .finalize();
+            ::stylus_sdk::abi::internal::digest_to_selector(DIGEST)
+        });
+        #[allow(non_upper_case_globals)]
+        const SELECTOR_update_position: u32 = u32::from_be_bytes({
+            const DIGEST: [u8; 32] = ::stylus_sdk::keccak_const::Keccak256::new()
+                .update("updatePosition".as_bytes())
+                .update(b"(")
+                .update(<Address as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
+                .update(b",")
+                .update(<i32 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
+                .update(b",")
+                .update(<i32 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
+                .update(b",")
+                .update(<i128 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
+                .update(b")")
+                .finalize();
+            ::stylus_sdk::abi::internal::digest_to_selector(DIGEST)
+        });
+        #[allow(non_upper_case_globals)]
+        const SELECTOR_swap: u32 = u32::from_be_bytes({
+            const DIGEST: [u8; 32] = ::stylus_sdk::keccak_const::Keccak256::new()
+                .update("swap".as_bytes())
+                .update(b"(")
+                .update(<bool as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
+                .update(b",")
+                .update(<I256 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
+                .update(b",")
+                .update(<U256 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
+                .update(b")")
+                .finalize();
+            ::stylus_sdk::abi::internal::digest_to_selector(DIGEST)
+        });
+        match selector {
+            #[allow(non_upper_case_globals)]
+            SELECTOR_init => {
+                if let Err(err) = internal::deny_value("init") {
+                    return Some(Err(err));
+                }
+                let args = match <<(
+                    U256,
+                    u32,
+                    u8,
+                    u128,
+                ) as AbiType>::SolType as SolType>::decode(input, true) {
+                    Ok(args) => args,
+                    Err(err) => {
+                        internal::failed_to_decode_arguments(err);
+                        return Some(Err(::alloc::vec::Vec::new()));
+                    }
+                };
+                let result = Self::init(
+                    core::borrow::BorrowMut::borrow_mut(storage),
+                    args.0,
+                    args.1,
+                    args.2,
+                    args.3,
+                );
+                match result {
+                    Ok(result) => Some(Ok(internal::encode_return_type(result))),
+                    Err(err) => Some(Err(err.into())),
+                }
+            }
+            #[allow(non_upper_case_globals)]
+            SELECTOR_update_position => {
+                if let Err(err) = internal::deny_value("update_position") {
+                    return Some(Err(err));
+                }
+                let args = match <<(
+                    Address,
+                    i32,
+                    i32,
+                    i128,
+                ) as AbiType>::SolType as SolType>::decode(input, true) {
+                    Ok(args) => args,
+                    Err(err) => {
+                        internal::failed_to_decode_arguments(err);
+                        return Some(Err(::alloc::vec::Vec::new()));
+                    }
+                };
+                let result = Self::update_position(
+                    core::borrow::BorrowMut::borrow_mut(storage),
+                    args.0,
+                    args.1,
+                    args.2,
+                    args.3,
+                );
+                match result {
+                    Ok(result) => Some(Ok(internal::encode_return_type(result))),
+                    Err(err) => Some(Err(err.into())),
+                }
+            }
+            #[allow(non_upper_case_globals)]
+            SELECTOR_swap => {
+                if let Err(err) = internal::deny_value("swap") {
+                    return Some(Err(err));
+                }
+                let args = match <<(
+                    bool,
+                    I256,
+                    U256,
+                ) as AbiType>::SolType as SolType>::decode(input, true) {
+                    Ok(args) => args,
+                    Err(err) => {
+                        internal::failed_to_decode_arguments(err);
+                        return Some(Err(::alloc::vec::Vec::new()));
+                    }
+                };
+                let result = Self::swap(
+                    core::borrow::BorrowMut::borrow_mut(storage),
+                    args.0,
+                    args.1,
+                    args.2,
+                );
+                match result {
+                    Ok(result) => Some(Ok(internal::encode_return_type(result))),
+                    Err(err) => Some(Err(err.into())),
+                }
+            }
+            _ => None,
+        }
     }
 }
