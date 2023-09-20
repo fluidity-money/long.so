@@ -1,10 +1,6 @@
 use crate::types::{U256Extension, U256};
-use std::ops::{Add, BitAnd, BitOrAssign, BitXor, Div, Mul, MulAssign};
 
-use crate::{
-    error::UniswapV3MathError,
-    maths::utils::{u256_to_ruint, RUINT_MAX_U256, RUINT_ONE, RUINT_THREE, RUINT_TWO, RUINT_ZERO},
-};
+use crate::error::UniswapV3MathError;
 
 pub const Q128: U256 = U256::from_limbs([0, 0, 1, 0]);
 
