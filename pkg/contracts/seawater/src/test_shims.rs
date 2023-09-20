@@ -51,7 +51,7 @@ pub extern "C" fn storage_store_bytes32(key: *const u8, value: *const u8) {
         (storage::read_word(key), storage::read_word(value))
     };
 
-    storage::STORAGE.try_lock().unwrap().insert(key, value);
+    storage::STORAGE.lock().unwrap().insert(key, value);
 }
 
 #[cfg(test)]
@@ -61,7 +61,7 @@ pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
     let key = unsafe { storage::read_word(key) };
 
     let value = storage::STORAGE
-        .try_lock()
+        .lock()
         .unwrap()
         .get(&key)
         .map(storage::Word::to_owned)
@@ -72,10 +72,10 @@ pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
 
 #[cfg(test)]
 pub fn log_storage() {
-    println!("{:?}", storage::STORAGE.try_lock().unwrap());
+    println!("{:?}", storage::STORAGE.lock().unwrap());
 }
 
 #[cfg(test)]
 pub fn reset_storage() {
-    storage::STORAGE.try_lock().unwrap().clear();
+    storage::STORAGE.lock().unwrap().clear();
 }

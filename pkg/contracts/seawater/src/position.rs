@@ -63,6 +63,29 @@ impl StoragePositions {
 
         Ok(())
     }
+    pub fn collect_fees(
+        &mut self,
+        key: StoragePositionKey,
+        amount_0: u128,
+        amount_1: u128,
+    ) -> (u128, u128) {
+        let mut position = self.positions.setter(key);
+
+        let owed_0 = position.token_owed_0.get().unwrap();
+        let owed_1 = position.token_owed_1.get().unwrap();
+
+        let amount_0 = u128::min(amount_0, owed_0);
+        let amount_1 = u128::min(amount_1, owed_1);
+
+        if amount_0 > 0 {
+            position.token_owed_0.set(U128::wrap(&(owed_0 - amount_0)));
+        }
+        if amount_1 > 0 {
+            position.token_owed_1.set(U128::wrap(&(owed_1 - amount_1)));
+        }
+
+        (amount_0, amount_1)
+    }
 }
 
 #[solidity_storage]
