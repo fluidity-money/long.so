@@ -1,6 +1,6 @@
-use std::ops::{BitOr, Neg, Shl, Shr};
+use std::ops::Neg;
 
-use crate::types::{U256Extension, I256, U256};
+use crate::types::{U256Extension, U256};
 
 use crate::error::UniswapV3MathError;
 use ruint_macro::uint;
