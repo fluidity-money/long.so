@@ -16,4 +16,11 @@ wee_alloc.workspace = true
 rand = "0.8.5"
 
 [features]
+default = ["init_enabled", "update_position_enabled", "swap_enabled"]
+
+init_enabled = []
+update_position_enabled = []
+swap_enabled = []
+
 export-abi = ["stylus-sdk/export-abi"]
+
