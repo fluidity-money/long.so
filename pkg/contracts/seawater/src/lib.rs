@@ -47,26 +47,7 @@ pub struct StoragePool {
 }
 
 impl StoragePool {
-    pub fn init(
-        &mut self,
-        price: U256,
-        fee: u32,
-        tick_spacing: u8,
-        max_liquidity_per_tick: u128,
-    ) -> Result<(), Revert> {
-        self.sqrt_price.set(price);
-        self.cur_tick
-            .set(I32::wrap(&tick_math::get_tick_at_sqrt_ratio(price)?));
-
-        self.fee.set(U32::wrap(&fee));
-        self.tick_spacing.set(U8::wrap(&tick_spacing));
-        self.max_liquidity_per_tick
-            .set(U128::wrap(&max_liquidity_per_tick));
-
-        Ok(())
-    }
-
-    pub fn update_position(
+    pub fn update_position_internal(
         &mut self,
         owner: Address,
         lower: i32,
@@ -175,7 +156,7 @@ impl StoragePool {
         }
     }
 
-    pub fn swap(
+    pub fn swap_internal(
         &mut self,
         zero_for_one: bool,
         amount: I256,
@@ -354,6 +335,139 @@ impl StoragePool {
 
         Ok((amount_0, amount_1))
     }
+
+    pub fn collect_protocol_internal(&mut self, amount_0: u128, amount_1: u128) -> (u128, u128) {
+        let owed_0 = self.protocol_fee_0.get().unwrap();
+        let owed_1 = self.protocol_fee_1.get().unwrap();
+
+        let amount_0 = u128::min(amount_0, owed_0);
+        let amount_1 = u128::min(amount_1, owed_1);
+
+        if amount_0 > 0 {
+            self.protocol_fee_0.set(U128::wrap(&(owed_0 - amount_0)));
+        }
+        if amount_1 > 1 {
+            self.protocol_fee_1.set(U128::wrap(&(owed_1 - amount_1)));
+        }
+
+        (amount_0, amount_1)
+    }
+}
+
+#[external]
+impl StoragePool {
+    pub fn init(
+        &mut self,
+        price: U256,
+        fee: u32,
+        tick_spacing: u8,
+        max_liquidity_per_tick: u128,
+    ) -> Result<(), Revert> {
+        self.sqrt_price.set(price);
+        self.cur_tick
+            .set(I32::wrap(&tick_math::get_tick_at_sqrt_ratio(price)?));
+
+        self.fee.set(U32::wrap(&fee));
+        self.tick_spacing.set(U8::wrap(&tick_spacing));
+        self.max_liquidity_per_tick
+            .set(U128::wrap(&max_liquidity_per_tick));
+
+        Ok(())
+    }
+
+    pub fn update_position(
+        &mut self,
+        owner: Address,
+        lower: i32,
+        upper: i32,
+        delta: i128,
+    ) -> Result<(I256, I256), Revert> {
+        let (token_0_delta, token_1_delta) =
+            self.update_position_internal(owner, lower, upper, delta)?;
+
+        // TODO transfer tokens
+
+        Ok((token_0_delta, token_1_delta))
+    }
+
+    pub fn swap(
+        &mut self,
+        zero_for_one: bool,
+        amount: I256,
+        price_limit: U256,
+    ) -> Result<(I256, I256), Revert> {
+        let (token_0_delta, token_1_delta) =
+            self.swap_internal(zero_for_one, amount, price_limit)?;
+
+        // TODO transfer tokens
+
+        Ok((token_0_delta, token_1_delta))
+    }
+
+    pub fn collect(
+        &mut self,
+        owner: Address,
+        lower: i32,
+        upper: i32,
+        amount_0: u128,
+        amount_1: u128,
+    ) -> Result<(u128, u128), Revert> {
+        let (owed_0, owed_1) = self.positions.collect_fees(
+            position::StoragePositionKey {
+                address: owner,
+                lower,
+                upper,
+            },
+            amount_1,
+            amount_1,
+        );
+
+        // TODO transfer tokens
+
+        Ok((owed_0, owed_1))
+    }
+
+    pub fn collect_protocol(
+        &mut self,
+        _recipient: Address,
+        amount_0: u128,
+        amount_1: u128,
+    ) -> Result<(u128, u128), Revert> {
+        let (owed_0, owed_1) = self.collect_protocol_internal(amount_0, amount_1);
+
+        // TODO transfer
+
+        Ok((owed_0, owed_1))
+    }
+
+    pub fn swap_exact_0_for_1(
+        &mut self,
+        amount_0_in: I256,
+        limit: U256,
+    ) -> Result<(I256, I256), Revert> {
+        self.swap(true, amount_0_in, limit)
+    }
+    pub fn swap_0_for_exact_1(
+        &mut self,
+        amount_1_out: I256,
+        limit: U256,
+    ) -> Result<(I256, I256), Revert> {
+        self.swap(true, -amount_1_out, limit)
+    }
+    pub fn swap_exact_1_for_0(
+        &mut self,
+        amount_1_in: I256,
+        limit: U256,
+    ) -> Result<(I256, I256), Revert> {
+        self.swap(false, amount_1_in, limit)
+    }
+    pub fn swap_1_for_exact_0(
+        &mut self,
+        amount_0_out: I256,
+        limit: U256,
+    ) -> Result<(I256, I256), Revert> {
+        self.swap(false, -amount_0_out, limit)
+    }
 }
 
 #[cfg(test)]
@@ -384,6 +498,7 @@ mod test {
         panic!("encode_sqrt_price did not converge after 1000000 iters")
     }
 
+    // splits a q96 fixed point into whole and fractional components
     fn split_q96(val: U256) -> (U256, U256) {
         (val >> 96, val % Q96)
     }
@@ -400,10 +515,11 @@ mod test {
         assert_eq!(split_q96(price).0, U256::from(3));
     }
 
+    // this is probably unsound! we don't ensure a real lock on storage
     fn with_storage<T, F: FnOnce(&mut StoragePool) -> T>(f: F) -> T {
         let mut storage = unsafe { <StoragePool as StorageType>::new(U256::ZERO, 0) };
         let res = f(&mut storage);
-        //stylus_sdk::storage::StorageCache::flush();
+        stylus_sdk::storage::StorageCache::flush();
         test_shims::log_storage();
         test_shims::reset_storage();
 
@@ -412,7 +528,6 @@ mod test {
 
     #[test]
     fn test_update_position() {
-        // TODO get real values for this
         with_storage(|storage| {
             storage
                 .init(encode_sqrt_price(1, 10), 0, 1, u128::MAX)
@@ -428,146 +543,35 @@ mod test {
             );
         });
     }
-}
 
-impl<S> stylus_sdk::abi::Router<S> for StoragePool
-where
-    S: stylus_sdk::storage::TopLevelStorage + core::borrow::BorrowMut<Self>,
-{
-    type Storage = Self;
-    #[inline(always)]
-    fn route(storage: &mut S, selector: u32, input: &[u8]) -> Option<stylus_sdk::ArbResult> {
-        use stylus_sdk::abi::{internal, AbiType};
-        use stylus_sdk::alloy_sol_types::SolType;
-        #[allow(non_upper_case_globals)]
-        const SELECTOR_init: u32 = u32::from_be_bytes({
-            const DIGEST: [u8; 32] = ::stylus_sdk::keccak_const::Keccak256::new()
-                .update("init".as_bytes())
-                .update(b"(")
-                .update(<U256 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
-                .update(b",")
-                .update(<u32 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
-                .update(b",")
-                .update(<u8 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
-                .update(b",")
-                .update(<u128 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
-                .update(b")")
-                .finalize();
-            ::stylus_sdk::abi::internal::digest_to_selector(DIGEST)
-        });
-        #[allow(non_upper_case_globals)]
-        const SELECTOR_update_position: u32 = u32::from_be_bytes({
-            const DIGEST: [u8; 32] = ::stylus_sdk::keccak_const::Keccak256::new()
-                .update("updatePosition".as_bytes())
-                .update(b"(")
-                .update(<Address as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
-                .update(b",")
-                .update(<i32 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
-                .update(b",")
-                .update(<i32 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
-                .update(b",")
-                .update(<i128 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
-                .update(b")")
-                .finalize();
-            ::stylus_sdk::abi::internal::digest_to_selector(DIGEST)
-        });
-        #[allow(non_upper_case_globals)]
-        const SELECTOR_swap: u32 = u32::from_be_bytes({
-            const DIGEST: [u8; 32] = ::stylus_sdk::keccak_const::Keccak256::new()
-                .update("swap".as_bytes())
-                .update(b"(")
-                .update(<bool as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
-                .update(b",")
-                .update(<I256 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
-                .update(b",")
-                .update(<U256 as ::stylus_sdk::abi::AbiType>::ABI.as_bytes())
-                .update(b")")
-                .finalize();
-            ::stylus_sdk::abi::internal::digest_to_selector(DIGEST)
-        });
-        match selector {
-            #[cfg(feature = "init_enabled")]
-            #[allow(non_upper_case_globals)]
-            SELECTOR_init => {
-                if let Err(err) = internal::deny_value("init") {
-                    return Some(Err(err));
-                }
-                let args = match <<(U256, u32, u8, u128) as AbiType>::SolType as SolType>::decode(
-                    input, true,
-                ) {
-                    Ok(args) => args,
-                    Err(err) => {
-                        internal::failed_to_decode_arguments(err);
-                        return Some(Err(::alloc::vec::Vec::new()));
-                    }
-                };
-                let result = Self::init(
-                    core::borrow::BorrowMut::borrow_mut(storage),
-                    args.0,
-                    args.1,
-                    args.2,
-                    args.3,
-                );
-                match result {
-                    Ok(result) => Some(Ok(internal::encode_return_type(result))),
-                    Err(err) => Some(Err(err)),
-                }
-            }
-            #[cfg(feature = "update_position_enabled")]
-            #[allow(non_upper_case_globals)]
-            SELECTOR_update_position => {
-                if let Err(err) = internal::deny_value("update_position") {
-                    return Some(Err(err));
-                }
-                let args =
-                    match <<(Address, i32, i32, i128) as AbiType>::SolType as SolType>::decode(
-                        input, true,
-                    ) {
-                        Ok(args) => args,
-                        Err(err) => {
-                            internal::failed_to_decode_arguments(err);
-                            return Some(Err(::alloc::vec::Vec::new()));
-                        }
-                    };
-                let result = Self::update_position(
-                    core::borrow::BorrowMut::borrow_mut(storage),
-                    args.0,
-                    args.1,
-                    args.2,
-                    args.3,
-                );
-                match result {
-                    Ok(result) => Some(Ok(internal::encode_return_type(result))),
-                    Err(err) => Some(Err(err)),
-                }
-            }
-            #[cfg(feature = "swap_enabled")]
-            #[allow(non_upper_case_globals)]
-            SELECTOR_swap => {
-                if let Err(err) = internal::deny_value("swap") {
-                    return Some(Err(err));
-                }
-                let args = match <<(bool, I256, U256) as AbiType>::SolType as SolType>::decode(
-                    input, true,
-                ) {
-                    Ok(args) => args,
-                    Err(err) => {
-                        internal::failed_to_decode_arguments(err);
-                        return Some(Err(::alloc::vec::Vec::new()));
-                    }
-                };
-                let result = Self::swap(
-                    core::borrow::BorrowMut::borrow_mut(storage),
-                    args.0,
-                    args.1,
-                    args.2,
-                );
-                match result {
-                    Ok(result) => Some(Ok(internal::encode_return_type(result))),
-                    Err(err) => Some(Err(err)),
-                }
-            }
-            _ => None,
-        }
+    #[test]
+    fn test_swap() -> Result<(), Revert> {
+        with_storage(|storage| {
+            storage.init(encode_sqrt_price(100, 1), 0, 1, u128::MAX)?;
+
+            storage.update_position(
+                address!("737B7865f84bDc86B5c8ca718a5B7a6d905776F6"),
+                tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(50, 1))?,
+                tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
+                100,
+            )?;
+
+            storage.update_position(
+                address!("737B7865f84bDc86B5c8ca718a5B7a6d905776F6"),
+                tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(80, 1))?,
+                tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
+                100,
+            )?;
+
+            storage.swap_exact_0_for_1(I256::unchecked_from(10), encode_sqrt_price(60, 1))?;
+
+            storage.swap_exact_1_for_0(I256::unchecked_from(10), encode_sqrt_price(120, 1))?;
+
+            storage.swap_0_for_exact_1(I256::unchecked_from(10), encode_sqrt_price(60, 1))?;
+
+            storage.swap_1_for_exact_0(I256::unchecked_from(10000), encode_sqrt_price(120, 1))?;
+
+            Ok(())
+        })
     }
 }
