@@ -18,6 +18,7 @@ fn test_mul_div() {
         let a = rand_u256(&mut rng);
         let b = rand_u256(&mut rng);
         let denom = rand_u256(&mut rng);
+        println!("testing {} {} {}", a, b, denom);
 
         let res = full_math::mul_div(a, b, denom);
         let reference = reference::full_math::mul_div(a, b, denom);
@@ -45,6 +46,7 @@ fn test_get_tick_at_sqrt_ratio() {
             rng.gen_range(0..=4294805859),
             0,
         ]);
+        println!("testing {}", ratio);
 
         let tick = tick_math::get_tick_at_sqrt_ratio(ratio);
         let reference = reference::tick_math::get_tick_at_sqrt_ratio(ratio);
