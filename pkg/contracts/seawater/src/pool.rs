@@ -1,27 +1,12 @@
-#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
-#![cfg_attr(test, feature(lazy_cell, const_trait_impl))]
-
-pub mod error;
-pub mod maths;
-pub mod position;
-pub mod test_shims;
-pub mod tick;
-pub mod types;
-
 use alloc::vec::Vec;
-use maths::{full_math, liquidity_math, sqrt_price_math, swap_math, tick_bitmap, tick_math};
+use crate::maths::{full_math, liquidity_math, sqrt_price_math, swap_math, tick_bitmap, tick_math};
 use stylus_sdk::{prelude::*, storage::*};
-use types::{Address, I256Extension, Wrap, I256, I32, U128, U256, U32, U8};
-
-extern crate alloc;
+use crate::types::{Address, I256Extension, Wrap, I256, I32, U128, U256, U32, U8};
+use crate::position;
+use crate::tick;
 
 type Revert = Vec<u8>;
 
-/// Initializes a custom, global allocator for Rust programs compiled to WASM.
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
-#[entrypoint]
 #[solidity_storage]
 pub struct StoragePool {
     // immutables
@@ -47,7 +32,26 @@ pub struct StoragePool {
 }
 
 impl StoragePool {
-    pub fn update_position_internal(
+    pub fn init(
+        &mut self,
+        price: U256,
+        fee: u32,
+        tick_spacing: u8,
+        max_liquidity_per_tick: u128,
+    ) -> Result<(), Revert> {
+        self.sqrt_price.set(price);
+        self.cur_tick
+            .set(I32::wrap(&tick_math::get_tick_at_sqrt_ratio(price)?));
+
+        self.fee.set(U32::wrap(&fee));
+        self.tick_spacing.set(U8::wrap(&tick_spacing));
+        self.max_liquidity_per_tick
+            .set(U128::wrap(&max_liquidity_per_tick));
+
+        Ok(())
+    }
+
+    fn update_position(
         &mut self,
         owner: Address,
         lower: i32,
@@ -156,7 +160,7 @@ impl StoragePool {
         }
     }
 
-    pub fn swap_internal(
+    pub fn swap(
         &mut self,
         zero_for_one: bool,
         amount: I256,
@@ -250,7 +254,7 @@ impl StoragePool {
                 }
                 false => {
                     state.amount_remaining += I256::unchecked_from(step_amount_out);
-                    state.amount_remaining +=
+                    state.amount_calculated +=
                         I256::unchecked_from(step_amount_in + step_fee_amount);
                 }
             }
@@ -336,7 +340,7 @@ impl StoragePool {
         Ok((amount_0, amount_1))
     }
 
-    pub fn collect_protocol_internal(&mut self, amount_0: u128, amount_1: u128) -> (u128, u128) {
+    pub fn collect_protocol(&mut self, amount_0: u128, amount_1: u128) -> (u128, u128) {
         let owed_0 = self.protocol_fee_0.get().unwrap();
         let owed_1 = self.protocol_fee_1.get().unwrap();
 
@@ -351,57 +355,6 @@ impl StoragePool {
         }
 
         (amount_0, amount_1)
-    }
-}
-
-#[external]
-impl StoragePool {
-    pub fn init(
-        &mut self,
-        price: U256,
-        fee: u32,
-        tick_spacing: u8,
-        max_liquidity_per_tick: u128,
-    ) -> Result<(), Revert> {
-        self.sqrt_price.set(price);
-        self.cur_tick
-            .set(I32::wrap(&tick_math::get_tick_at_sqrt_ratio(price)?));
-
-        self.fee.set(U32::wrap(&fee));
-        self.tick_spacing.set(U8::wrap(&tick_spacing));
-        self.max_liquidity_per_tick
-            .set(U128::wrap(&max_liquidity_per_tick));
-
-        Ok(())
-    }
-
-    pub fn update_position(
-        &mut self,
-        owner: Address,
-        lower: i32,
-        upper: i32,
-        delta: i128,
-    ) -> Result<(I256, I256), Revert> {
-        let (token_0_delta, token_1_delta) =
-            self.update_position_internal(owner, lower, upper, delta)?;
-
-        // TODO transfer tokens
-
-        Ok((token_0_delta, token_1_delta))
-    }
-
-    pub fn swap(
-        &mut self,
-        zero_for_one: bool,
-        amount: I256,
-        price_limit: U256,
-    ) -> Result<(I256, I256), Revert> {
-        let (token_0_delta, token_1_delta) =
-            self.swap_internal(zero_for_one, amount, price_limit)?;
-
-        // TODO transfer tokens
-
-        Ok((token_0_delta, token_1_delta))
     }
 
     pub fn collect(
@@ -418,7 +371,7 @@ impl StoragePool {
                 lower,
                 upper,
             },
-            amount_1,
+            amount_0,
             amount_1,
         );
 
@@ -426,56 +379,15 @@ impl StoragePool {
 
         Ok((owed_0, owed_1))
     }
-
-    pub fn collect_protocol(
-        &mut self,
-        _recipient: Address,
-        amount_0: u128,
-        amount_1: u128,
-    ) -> Result<(u128, u128), Revert> {
-        let (owed_0, owed_1) = self.collect_protocol_internal(amount_0, amount_1);
-
-        // TODO transfer
-
-        Ok((owed_0, owed_1))
-    }
-
-    pub fn swap_exact_0_for_1(
-        &mut self,
-        amount_0_in: I256,
-        limit: U256,
-    ) -> Result<(I256, I256), Revert> {
-        self.swap(true, amount_0_in, limit)
-    }
-    pub fn swap_0_for_exact_1(
-        &mut self,
-        amount_1_out: I256,
-        limit: U256,
-    ) -> Result<(I256, I256), Revert> {
-        self.swap(true, -amount_1_out, limit)
-    }
-    pub fn swap_exact_1_for_0(
-        &mut self,
-        amount_1_in: I256,
-        limit: U256,
-    ) -> Result<(I256, I256), Revert> {
-        self.swap(false, amount_1_in, limit)
-    }
-    pub fn swap_1_for_exact_0(
-        &mut self,
-        amount_0_out: I256,
-        limit: U256,
-    ) -> Result<(I256, I256), Revert> {
-        self.swap(false, -amount_0_out, limit)
-    }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::test_shims;
     use sqrt_price_math::Q96;
     use stylus_sdk::alloy_primitives::address;
-    use types::*;
+    use crate::types::*;
 
     // encodes a a/b price as a sqrt.q96 price
     fn encode_sqrt_price(num: u64, denom: u64) -> U256 {
@@ -563,13 +475,13 @@ mod test {
                 100,
             )?;
 
-            storage.swap_exact_0_for_1(I256::unchecked_from(10), encode_sqrt_price(60, 1))?;
+            storage.swap(true, I256::unchecked_from(-10), encode_sqrt_price(60, 1))?;
 
-            storage.swap_exact_1_for_0(I256::unchecked_from(10), encode_sqrt_price(120, 1))?;
+            storage.swap(true, I256::unchecked_from(10), encode_sqrt_price(50, 1))?;
 
-            storage.swap_0_for_exact_1(I256::unchecked_from(10), encode_sqrt_price(60, 1))?;
+            storage.swap(false, I256::unchecked_from(10), encode_sqrt_price(120, 1))?;
 
-            storage.swap_1_for_exact_0(I256::unchecked_from(10000), encode_sqrt_price(120, 1))?;
+            storage.swap(false, I256::unchecked_from(-10000), encode_sqrt_price(120, 1))?;
 
             Ok(())
         })
