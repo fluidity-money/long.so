@@ -1,9 +1,9 @@
-use alloc::vec::Vec;
 use crate::maths::{full_math, liquidity_math, sqrt_price_math, swap_math, tick_bitmap, tick_math};
-use stylus_sdk::{prelude::*, storage::*};
-use crate::types::{Address, I256Extension, Wrap, I256, I32, U128, U256, U32, U8};
 use crate::position;
 use crate::tick;
+use crate::types::{Address, I256Extension, Wrap, I256, I32, U128, U256, U32, U8};
+use alloc::vec::Vec;
+use stylus_sdk::{prelude::*, storage::*};
 
 type Revert = Vec<u8>;
 
@@ -51,7 +51,7 @@ impl StoragePool {
         Ok(())
     }
 
-    fn update_position(
+    pub fn update_position(
         &mut self,
         owner: Address,
         lower: i32,
@@ -385,9 +385,9 @@ impl StoragePool {
 mod test {
     use super::*;
     use crate::test_shims;
+    use crate::types::*;
     use sqrt_price_math::Q96;
     use stylus_sdk::alloy_primitives::address;
-    use crate::types::*;
 
     // encodes a a/b price as a sqrt.q96 price
     fn encode_sqrt_price(num: u64, denom: u64) -> U256 {
@@ -481,7 +481,11 @@ mod test {
 
             storage.swap(false, I256::unchecked_from(10), encode_sqrt_price(120, 1))?;
 
-            storage.swap(false, I256::unchecked_from(-10000), encode_sqrt_price(120, 1))?;
+            storage.swap(
+                false,
+                I256::unchecked_from(-10000),
+                encode_sqrt_price(120, 1),
+            )?;
 
             Ok(())
         })

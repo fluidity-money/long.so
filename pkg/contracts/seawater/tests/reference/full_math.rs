@@ -1,8 +1,8 @@
-use seawater::types::{U256Extension, U256};
+use libseawater::types::{U256Extension, U256};
 use std::ops::{Add, BitAnd, BitOrAssign, BitXor, Div, Mul, MulAssign};
 
-use seawater::maths::full_math::*;
-use seawater::{
+use libseawater::maths::full_math::*;
+use libseawater::{
     error::UniswapV3MathError,
     maths::utils::{u256_to_ruint, RUINT_MAX_U256, RUINT_ONE, RUINT_THREE, RUINT_TWO, RUINT_ZERO},
 };
