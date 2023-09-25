@@ -1,3 +1,4 @@
+use alloc::vec::Vec;
 use thiserror::Error;
 
 // TODO: make these errors better, some errors in univ3 libs are just require(condition) without a message.
@@ -34,6 +35,25 @@ pub enum UniswapV3MathError {
     R,
     #[error("Overflow when casting to U160")]
     SafeCastToU160Overflow,
-    #[error("Middleware error when getting next_initialized_tick_within_one_word")]
-    MiddlewareError(String),
+    //#[error("Middleware error when getting next_initialized_tick_within_one_word")]
+    //MiddlewareError(String),
+    #[error("Liquidity higher than max")]
+    LiquidityTooHigh,
+
+    #[error("Fee growth sub overflow")]
+    FeeGrowthSub,
+}
+
+impl From<UniswapV3MathError> for Vec<u8> {
+    // tests panic with the message - this is a hack to get debuginfo
+    #[cfg(test)]
+    fn from(val: UniswapV3MathError) -> Self {
+        panic!("{}", val);
+    }
+
+    // runtime panics with no message - this lets us optimise the strings away
+    #[cfg(not(test))]
+    fn from(_val: UniswapV3MathError) -> Self {
+        panic!()
+    }
 }

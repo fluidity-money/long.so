@@ -1,8 +1,10 @@
 use std::ops::ShrAssign;
 
-use crate::types::{U256, U256Extension};
+use crate::types::{U256Extension, U256};
 
 use crate::error::UniswapV3MathError;
+
+use ruint_macro::uint;
 
 pub fn most_significant_bit(mut x: U256) -> Result<u8, UniswapV3MathError> {
     let mut r = 0;
@@ -11,41 +13,41 @@ pub fn most_significant_bit(mut x: U256) -> Result<u8, UniswapV3MathError> {
         return Err(UniswapV3MathError::ZeroValue);
     }
 
-    if x >= U256::from_hex_str("0x100000000000000000000000000000000") {
+    if x >= uint!(0x100000000000000000000000000000000_U256) {
         x.shr_assign(128);
         r += 128;
     }
 
-    if x >= U256::from_hex_str("0x10000000000000000") {
+    if x >= uint!(0x10000000000000000_U256) {
         x.shr_assign(64);
         r += 64;
     }
 
-    if x >= U256::from_hex_str("0x100000000") {
+    if x >= uint!(0x100000000_U256) {
         x.shr_assign(32);
         r += 32;
     }
 
-    if x >= U256::from_hex_str("0x10000") {
+    if x >= uint!(0x10000_U256) {
         x.shr_assign(16);
         r += 16;
     }
 
-    if x >= U256::from_hex_str("0x100") {
+    if x >= uint!(0x100_U256) {
         x.shr_assign(8);
         r += 8;
     }
 
-    if x >= U256::from_hex_str("0x10") {
+    if x >= uint!(0x10_U256) {
         x.shr_assign(4);
         r += 4;
     }
-    if x >= U256::from_hex_str("0x4") {
+    if x >= uint!(0x4_U256) {
         x.shr_assign(2);
         r += 2;
     }
 
-    if x >= U256::from_hex_str("0x2") {
+    if x >= uint!(0x2_U256) {
         r += 1;
     }
 
@@ -91,19 +93,19 @@ pub fn least_significant_bit(mut x: U256) -> Result<u8, UniswapV3MathError> {
         x >>= 8;
     }
 
-    if x & U256::from(0xf) > U256::zero() {
+    if x & uint!(0xf_U256) > U256::zero() {
         r -= 4;
     } else {
         x >>= 4;
     }
 
-    if x & U256::from(0x3) > U256::zero() {
+    if x & uint!(0x3_U256) > U256::zero() {
         r -= 2;
     } else {
         x >>= 2;
     }
 
-    if x & U256::from(0x1) > U256::zero() {
+    if x & uint!(0x1_U256) > U256::zero() {
         r -= 1;
     }
 
@@ -113,7 +115,7 @@ pub fn least_significant_bit(mut x: U256) -> Result<u8, UniswapV3MathError> {
 #[cfg(test)]
 mod test {
 
-    use crate::types::{U256, U256Extension};
+    use crate::types::{U256Extension, U256};
 
     use super::{least_significant_bit, most_significant_bit};
 

@@ -2,12 +2,24 @@
 
 members = [
     "seawater",
-    "erc1155-token"
 ]
 
 [profile.release]
 codegen-units = 1
+panic = "abort"
+opt-level = "z"
 strip = true
 lto = true
-panic = "abort"
-opt-level = "s"
+debug = false
+rpath = false
+debug-assertions = false
+incremental = false
+
+[workspace.dependencies]
+#stylus-sdk = { version = "0.4.1", default-features = false, features = [] }
+stylus-sdk = { version = "0.4.1" }
+thiserror = "1.0.48"
+tiny-keccak = "2.0.2"
+wee_alloc = "*"
+ruint = "*"
+ruint-macro = "1.1.0"
