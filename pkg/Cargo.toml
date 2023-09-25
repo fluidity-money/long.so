@@ -2,7 +2,6 @@
 
 members = [
     "seawater",
-    "erc1155-token"
 ]
 
 [profile.release]
