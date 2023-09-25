@@ -53,7 +53,6 @@ pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
         })
 }
 
-
 pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, UniswapV3MathError> {
     if !(sqrt_price_x_96 >= MIN_SQRT_RATIO && sqrt_price_x_96 < MAX_SQRT_RATIO) {
         return Err(UniswapV3MathError::R);
@@ -87,6 +86,7 @@ pub fn get_min_tick(spacing: u8) -> i32 {
     let spacing = spacing as i32;
     (MIN_TICK / spacing) * spacing
 }
+
 pub fn get_max_tick(spacing: u8) -> i32 {
     let spacing = spacing as i32;
     (MAX_TICK / spacing) * spacing

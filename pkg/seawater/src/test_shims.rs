@@ -5,7 +5,6 @@
 pub extern "C" fn native_keccak256(bytes: *const u8, len: usize, output: *mut u8) {
     // SAFETY
     // stylus promises `bytes` will have length `len`, `output` will have length one word
-
     use std::slice;
     use tiny_keccak::{Hasher, Keccak};
 

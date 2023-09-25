@@ -39,7 +39,8 @@ impl U256Extension for U256 {
     }
 
     fn one() -> Self {
-        uint!(1_U256)
+        // little endian
+        Self::from_limbs([1, 0, 0, 0])
     }
 }
 
