@@ -1,57 +1,12 @@
-#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
+#![cfg_attr(test, feature(lazy_cell, const_trait_impl))]
 
-mod error;
-mod maths;
-mod position;
-mod test_shims;
-mod tick;
-mod types;
+use libseawater::user_entrypoint as stylus_entrypoint;
 
-use position::*;
-use stylus_sdk::prelude::*;
-use stylus_sdk::storage::*;
-use types::{Address, I256, U256};
-
-extern crate alloc;
-
-type Revert = Vec<u8>;
-
-/// Initializes a custom, global allocator for Rust programs compiled to WASM.
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
-#[entrypoint]
-#[solidity_storage]
-pub struct StoragePool {
-    positions: StorageMap<StoragePositionKey, StoragePositionInfo>,
+pub extern "C" fn user_entrypoint(len: usize) -> usize {
+    stylus_entrypoint(len)
 }
 
-#[external]
-impl StoragePool {
-    #[allow(unused)]
-    pub fn update_position(
-        &mut self,
-        owner: Address,
-        lower: i32,
-        upper: i32,
-        delta: i128,
-    ) -> Result<(), Revert> {
-        let position = self.positions.get(StoragePositionKey {
-            address: owner,
-            lower,
-            upper,
-        });
-
-        todo!()
-    }
-
-    #[allow(unused)]
-    pub fn swap(
-        &mut self,
-        zero_for_one: bool,
-        amount: I256,
-        price_limit: U256,
-    ) -> Result<(I256, I256), Revert> {
-        todo!()
-    }
-}
+// for whatever reason, even with `#![no_main]` or `#[cfg(test)] fn main(){}` this crate fails to
+// build for tests without this
+//#[cfg(not(target_arch = "wasm32"))]
+fn main() {}

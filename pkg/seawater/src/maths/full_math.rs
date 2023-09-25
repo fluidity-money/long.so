@@ -1,110 +1,54 @@
-use crate::types::{U256, U256Extension};
-use std::ops::{Add, BitAnd, BitOrAssign, BitXor, Div, Mul, MulAssign};
+use crate::types::{U256Extension, U256};
 
-use crate::{
-    error::UniswapV3MathError,
-    maths::utils::{u256_to_ruint, RUINT_MAX_U256, RUINT_ONE, RUINT_THREE, RUINT_TWO, RUINT_ZERO},
-};
+use crate::error::UniswapV3MathError;
 
-// returns (uint256 result)
-pub fn mul_div(a: U256, b: U256, denominator: U256) -> Result<U256, UniswapV3MathError> {
-    //NOTE: Converting to ruint to allow for unchecked div which does not exist for U256
-    let a = u256_to_ruint(a);
-    let b = u256_to_ruint(b);
-    let mut denominator = u256_to_ruint(denominator);
+pub const Q128: U256 = U256::from_limbs([0, 0, 1, 0]);
 
-    // 512-bit multiply [prod1 prod0] = a * b
-    // Compute the product mod 2**256 and mod 2**256 - 1
-    // then use the Chinese Remainder Theorem to reconstruct
-    // the 512 bit result. The result is stored in two 256
-    // variables such that product = prod1 * 2**256 + prod0
-    let mm = a.mul_mod(b, RUINT_MAX_U256);
-
-    let mut prod_0 = a.overflowing_mul(b).0; // Least significant 256 bits of the product
-    let mut prod_1 = mm
-        .overflowing_sub(prod_0)
-        .0
-        .overflowing_sub(U256::from((mm < prod_0) as u8))
-        .0;
-
-    // Handle non-overflow cases, 256 by 256 division
-    if prod_1 == RUINT_ZERO {
-        if denominator == RUINT_ZERO {
-            return Err(UniswapV3MathError::DenominatorIsZero);
-        }
-        return Ok(prod_0.div(denominator));
+// mul_mod, but specialised for U256 to not use an allocation
+pub fn mul_mod(a: U256, b: U256, mut modulus: U256) -> U256 {
+    if modulus == U256::ZERO {
+        return U256::ZERO;
     }
 
-    // Make sure the result is less than 2**256.
-    // Also prevents denominator == 0
-    if denominator <= prod_1 {
+    // alloc a 512 bit result
+    let mut product = [0; 8];
+    let overflow = ruint::algorithms::addmul(&mut product, a.as_limbs(), b.as_limbs());
+    debug_assert!(!overflow);
+
+    // compute modulus
+    // SAFETY - ruint code
+    unsafe { ruint::algorithms::div(&mut product, modulus.as_limbs_mut()) };
+
+    modulus
+}
+
+pub fn _mul_div(
+    a: U256,
+    b: U256,
+    mut denom_and_rem: U256,
+) -> Result<(U256, bool), UniswapV3MathError> {
+    if denom_and_rem == U256::ZERO {
+        return Err(UniswapV3MathError::DenominatorIsZero);
+    }
+
+    let mut mul_and_quo = a.widening_mul::<256, 4, 512, 8>(b);
+
+    unsafe {
+        ruint::algorithms::div(mul_and_quo.as_limbs_mut(), denom_and_rem.as_limbs_mut());
+    }
+
+    let limbs = mul_and_quo.into_limbs();
+    if limbs[4..] != [0_u64; 4] {
         return Err(UniswapV3MathError::DenominatorIsLteProdOne);
     }
 
-    ///////////////////////////////////////////////
-    // 512 by 256 division.
-    ///////////////////////////////////////////////
-    //
+    let has_carry = denom_and_rem != U256::ZERO;
 
-    // Make division exact by subtracting the remainder from [prod1 prod0]
-    // Compute remainder using mulmod
-    let remainder = a.mul_mod(b, denominator);
+    Ok((U256::from_limbs_slice(&limbs[0..4]), has_carry))
+}
 
-    // Subtract 256 bit number from 512 bit number
-    prod_1 = prod_1
-        .overflowing_sub(U256::from((remainder > prod_0) as u8))
-        .0;
-    prod_0 = prod_0.overflowing_sub(remainder).0;
-
-    // Factor powers of two out of denominator
-    // Compute largest power of two divisor of denominator.
-    // Always >= 1.
-    let mut twos = RUINT_ZERO
-        .overflowing_sub(denominator)
-        .0
-        .bitand(denominator);
-
-    // Divide denominator by power of two
-
-    denominator = denominator.wrapping_div(twos);
-
-    // Divide [prod1 prod0] by the factors of two
-    prod_0 = prod_0.wrapping_div(twos);
-
-    // Shift in bits from prod1 into prod0. For this we need
-    // to flip `twos` such that it is 2**256 / twos.
-    // If twos is zero, then it becomes one
-    twos = (RUINT_ZERO.overflowing_sub(twos).0.wrapping_div(twos)).add(RUINT_ONE);
-
-    prod_0.bitor_assign(prod_1 * twos);
-
-    // Invert denominator mod 2**256
-    // Now that denominator is an odd number, it has an inverse
-    // modulo 2**256 such that denominator * inv = 1 mod 2**256.
-    // Compute the inverse by starting with a seed that is correct
-    // correct for four bits. That is, denominator * inv = 1 mod 2**4
-
-    let mut inv = RUINT_THREE.mul(denominator).bitxor(RUINT_TWO);
-
-    // Now use Newton-Raphson iteration to improve the precision.
-    // Thanks to Hensel's lifting lemma, this also works in modular
-    // arithmetic, doubling the correct bits in each step.
-
-    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**8
-    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**16
-    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**32
-    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**64
-    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**128
-    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**256
-
-    // Because the division is now exact we can divide by multiplying
-    // with the modular inverse of denominator. This will give us the
-    // correct result modulo 2**256. Since the precoditions guarantee
-    // that the outcome is less than 2**256, this is the final result.
-    // We don't need to compute the high bits of the result and prod1
-    // is no longer required.
-
-    Ok(prod_0 * inv)
+pub fn mul_div(a: U256, b: U256, denom: U256) -> Result<U256, UniswapV3MathError> {
+    Ok(_mul_div(a, b, denom)?.0)
 }
 
 pub fn mul_div_rounding_up(
@@ -112,13 +56,9 @@ pub fn mul_div_rounding_up(
     b: U256,
     denominator: U256,
 ) -> Result<U256, UniswapV3MathError> {
-    let result = mul_div(a, b, denominator)?;
+    let (result, rem) = _mul_div(a, b, denominator)?;
 
-    let a = u256_to_ruint(a);
-    let b = u256_to_ruint(b);
-    let denominator = u256_to_ruint(denominator);
-
-    if a.mul_mod(b, denominator) > RUINT_ZERO {
+    if rem {
         if result == U256::MAX {
             Err(UniswapV3MathError::ResultIsU256MAX)
         } else {
@@ -143,7 +83,7 @@ mod tests {
         assert_eq!(result.err().unwrap().to_string(), "Denominator is 0");
 
         // Revert if the denominator is zero and numerator overflows
-        let result = mul_div(Q128, Q128, U256::zero());
+        let result = mul_div(Q128, Q128, U256::one());
         assert_eq!(
             result.err().unwrap().to_string(),
             "Denominator is less than or equal to prod_1"
@@ -163,7 +103,7 @@ mod test {
 
     use std::ops::{Div, Mul, Sub};
 
-    use crate::types::{U256, U256Extension};
+    use crate::types::{U256Extension, U256};
 
     use super::mul_div;
 
@@ -176,7 +116,7 @@ mod test {
         assert_eq!(result.err().unwrap().to_string(), "Denominator is 0");
 
         // Revert if the denominator is zero and numerator overflows
-        let result = mul_div(Q128, Q128, U256::zero());
+        let result = mul_div(Q128, Q128, U256::one());
         assert_eq!(
             result.err().unwrap().to_string(),
             "Denominator is less than or equal to prod_1"
@@ -210,7 +150,10 @@ mod test {
 
         // Accurate with phantom overflow
         let result = mul_div(Q128, U256::from(35).mul(Q128), U256::from(8).mul(Q128));
-        assert_eq!(result.unwrap(), U256::from(4375).mul(Q128).div(U256::from(1000)));
+        assert_eq!(
+            result.unwrap(),
+            U256::from(4375).mul(Q128).div(U256::from(1000))
+        );
 
         // Accurate with phantom overflow and repeating decimal
         let result = mul_div(Q128, U256::from(1000).mul(Q128), U256::from(3000).mul(Q128));

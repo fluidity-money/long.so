@@ -1,96 +1,52 @@
-use std::ops::{BitOr, Neg, Shl, Shr};
+use std::ops::Neg;
 
-use crate::types::{I256, U256, U256Extension};
+use crate::types::{U256Extension, U256};
 
 use crate::error::UniswapV3MathError;
+use ruint_macro::uint;
 
 pub const MIN_TICK: i32 = -887272;
 pub const MAX_TICK: i32 = -MIN_TICK;
 
 pub const MIN_SQRT_RATIO: U256 = U256::from_limbs([4295128739, 0, 0, 0]);
-pub const MAX_SQRT_RATIO: U256 = U256::from_limbs([6743328256752651558, 17280870778742802505, 4294805859, 0]);
+pub const MAX_SQRT_RATIO: U256 =
+    U256::from_limbs([6743328256752651558, 17280870778742802505, 4294805859, 0]);
 
 pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
-    let abs_tick = if tick < 0 {
-        U256::from(tick.neg())
-    } else {
-        U256::from(tick)
-    };
+    let mut abs_tick = tick.abs();
 
-    if abs_tick > U256::from(MAX_TICK) {
+    if abs_tick > MAX_TICK {
         return Err(UniswapV3MathError::T);
     }
 
-    let mut ratio = if abs_tick & (U256::from(0x1)) != U256::zero() {
-        U256::from_hex_str("0xfffcb933bd6fad37aa2d162d1a594001")
+    // calculate (1/1.0001)^(i/2)
+    // = (1/1.0001)^(floor(i/2)) * maybe (1/1.0001)^(0.5)
+
+    let mut result = if (abs_tick & 0x1) != 0 {
+        uint!(0xfffcb933bd6fad37aa2d162d1a594001_U256) // 1 * (1/1.0001)^0.5
     } else {
-        U256::from_hex_str("0x100000000000000000000000000000000")
+        U256::one() << 128 // 1
     };
 
-    if !(abs_tick & (U256::from(0x2))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0xfff97272373d413259a46990580e213a")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x4))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0xfff2e50f5f656932ef12357cf3c7fdcc")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x8))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0xffe5caca7e10e4e61c3624eaa0941cd0")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x10))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0xffcb9843d60f6159c9db58835c926644")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x20))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0xff973b41fa98c081472e6896dfb254c0")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x40))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0xff2ea16466c96a3843ec78b326b52861")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x80))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0xfe5dee046a99a2a811c461f1969c3053")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x100))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0xfcbe86c7900a88aedcffc83b479aa3a4")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x200))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0xf987a7253ac413176f2b074cf7815e54")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x400))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0xf3392b0822b70005940c7a398e4b70f3")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x800))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0xe7159475a2c29b7443b29c7fa6e889d9")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x1000))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0xd097f3bdfd2022b8845ad8f792aa5825")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x2000))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0xa9f746462d870fdf8a65dc1f90e061e5")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x4000))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0x70d869a156d2a1b890bb3df62baf32f7")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x8000))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0x31be135f97d08fd981231505542fcfa6")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x10000))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0x9aa508b5b7a84e1c677de54f3e99bc9")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x20000))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0x5d6af8dedb81196699c329225ee604")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x40000))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0x2216e584f5fa1ea926041bedfe98")) >> 128
-    }
-    if !(abs_tick & (U256::from(0x80000))).is_zero() {
-        ratio = (ratio * U256::from_hex_str("0x48a170391f7dc42444e8fa2")) >> 128
+    abs_tick = abs_tick >> 1;
+
+    let mut ratio = uint!(0xfff97272373d413259a46990580e213a_U256); // 1/1.0001
+
+    while abs_tick != 0 {
+        if (abs_tick & 1) != 0 {
+            result = (result * ratio) >> 128;
+        }
+        ratio = (ratio * ratio) >> 128;
+        abs_tick = abs_tick >> 1;
     }
 
+    // invert back from 1/1.0001^i to 1.0001^i
     if tick > 0 {
-        ratio = U256::MAX / ratio;
+        result = U256::MAX / result;
     }
 
-    Ok((ratio >> 32)
-        + if (ratio % (U256::one() << 32)).is_zero() {
+    Ok((result >> 32)
+        + if (result % (U256::one() << 32)).is_zero() {
             U256::zero()
         } else {
             U256::one()
@@ -102,115 +58,38 @@ pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, UniswapV3Mat
         return Err(UniswapV3MathError::R);
     }
 
-    let ratio = sqrt_price_x_96.shl(32);
-    let mut r = ratio;
-    let mut msb = U256::zero();
+    // binary search
+    let mut low_bound = MIN_TICK;
+    let mut high_bound = MAX_TICK;
 
-    let mut f = if r > U256::from_hex_str("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") {
-        U256::one().shl(7)
-    } else {
-        U256::zero()
-    };
-    msb = msb.bitor(f);
-    r = r.shr(usize::try_from(f).unwrap());
+    let mut closest = low_bound;
+    while low_bound <= high_bound {
+        let mid = (low_bound + high_bound) / 2;
+        let mid_price = get_sqrt_ratio_at_tick(mid)?;
 
-    f = if r > U256::from_hex_str("0xFFFFFFFFFFFFFFFF") {
-        U256::one().shl(6)
-    } else {
-        U256::zero()
-    };
-    msb = msb.bitor(f);
-    r = r.shr(usize::try_from(f).unwrap());
-
-    f = if r > U256::from_hex_str("0xFFFFFFFF") {
-        U256::one().shl(5)
-    } else {
-        U256::zero()
-    };
-    msb = msb.bitor(f);
-    r = r.shr(usize::try_from(f).unwrap());
-
-    f = if r > U256::from_hex_str("0xFFFF") {
-        U256::one().shl(4)
-    } else {
-        U256::zero()
-    };
-    msb = msb.bitor(f);
-    r = r.shr(usize::try_from(f).unwrap());
-
-    f = if r > U256::from_hex_str("0xFF") {
-        U256::one().shl(3)
-    } else {
-        U256::zero()
-    };
-    msb = msb.bitor(f);
-    r = r.shr(usize::try_from(f).unwrap());
-
-    f = if r > U256::from_hex_str("0xF") {
-        U256::one().shl(2)
-    } else {
-        U256::zero()
-    };
-    msb = msb.bitor(f);
-    r = r.shr(usize::try_from(f).unwrap());
-
-    f = if r > U256::from_hex_str("0x3") {
-        U256::one().shl(1)
-    } else {
-        U256::zero()
-    };
-    msb = msb.bitor(f);
-    r = r.shr(usize::try_from(f).unwrap());
-
-    f = if r > U256::from_hex_str("0x1") {
-        U256::one()
-    } else {
-        U256::zero()
-    };
-
-    msb = msb.bitor(f);
-
-    r = if msb >= U256::from(128) {
-        ratio.shr(usize::try_from(msb - U256::from(127)).unwrap())
-    } else {
-        ratio.shl(usize::try_from(U256::from(127) - msb).unwrap())
-    };
-
-    let mut log_2: I256 = (I256::from_raw(msb) - I256::unchecked_from(128)).shl(64);
-
-    for i in (51..=63).rev() {
-        r = r.overflowing_mul(r).0.shr(127);
-        let f = r.shr(128);
-        log_2 = log_2.bitor(I256::from_raw(f.shl(i)));
-
-        r = r.shr(usize::try_from(f).unwrap());
+        if mid_price > sqrt_price_x_96 {
+            high_bound = mid - 1;
+        }
+        if mid_price < sqrt_price_x_96 {
+            closest = mid;
+            low_bound = mid + 1;
+        }
+        if mid_price == sqrt_price_x_96 {
+            return Ok(mid);
+        }
     }
 
-    r = r.overflowing_mul(r).0.shr(127);
-    let f = r.shr(128);
-    log_2 = log_2.bitor(I256::from_raw(f.shl(50)));
+    Ok(closest)
+}
 
-    let log_sqrt10001 = log_2.wrapping_mul(I256::from_dec_str("255738958999603826347141").unwrap());
+pub fn get_min_tick(spacing: u8) -> i32 {
+    let spacing = spacing as i32;
+    (MIN_TICK / spacing) * spacing
+}
 
-    let tick_low = ((log_sqrt10001
-        - I256::from_dec_str("3402992956809132418596140100660247210").unwrap())
-        >> 128_u8)
-        .low_i32();
-
-    let tick_high = ((log_sqrt10001
-        + I256::from_dec_str("291339464771989622907027621153398088495").unwrap())
-        >> 128_u8)
-        .low_i32();
-
-    let tick = if tick_low == tick_high {
-        tick_low
-    } else if get_sqrt_ratio_at_tick(tick_high)? <= sqrt_price_x_96 {
-        tick_high
-    } else {
-        tick_low
-    };
-
-    Ok(tick)
+pub fn get_max_tick(spacing: u8) -> i32 {
+    let spacing = spacing as i32;
+    (MAX_TICK / spacing) * spacing
 }
 
 #[cfg(test)]

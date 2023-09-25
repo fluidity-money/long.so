@@ -1,5 +1,5 @@
-use crate::{maths::bit_math, error::UniswapV3MathError};
-use crate::types::{TickBitmap, U256, U256Extension};
+use crate::types::{TickBitmap, U256Extension, U256};
+use crate::{error::UniswapV3MathError, maths::bit_math};
 
 //Returns next and initialized
 //current_word is the current word in the TickBitmap of the pool based on `tick`. TickBitmap[word_pos] = current_word
@@ -15,7 +15,8 @@ pub fn next_initialized_tick_within_one_word(
     let (word_pos, bit_pos) = position(compressed);
 
     if lte {
-        let mask = (U256::one().wrapping_shl(bit_pos.into())) - U256::one() + (U256::one().wrapping_shl(bit_pos.into()));
+        let mask = (U256::one().wrapping_shl(bit_pos.into())) - U256::one()
+            + (U256::one().wrapping_shl(bit_pos.into()));
 
         let masked = tick_bitmap.get(word_pos) & mask;
 
