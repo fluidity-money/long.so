@@ -30,15 +30,6 @@ pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
 
     abs_tick = abs_tick >> 1;
 
-    /*
-    let mut ratio = U256::ZERO;
-    unsafe {
-        std::ptr::write_volatile(ratio.as_limbs_mut().as_mut_ptr().offset(0), 1);
-        std::ptr::write_volatile(ratio.as_limbs_mut().as_mut_ptr().offset(1), 1);
-        std::ptr::write_volatile(ratio.as_limbs_mut().as_mut_ptr().offset(2), 1);
-        std::ptr::write_volatile(ratio.as_limbs_mut().as_mut_ptr().offset(3), 1);
-    }
-    */
     let mut ratio = uint!(0xfff97272373d413259a46990580e213a_U256); // 1/1.0001
 
     while abs_tick != 0 {

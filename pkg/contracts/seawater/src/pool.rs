@@ -210,7 +210,11 @@ impl StoragePool {
 
         // continue swapping while there's tokens left to swap
         // and we haven't reached the price limit
+        let mut iters = 0;
         while !state.amount_remaining.is_zero() && state.price != price_limit {
+            iters += 1;
+            debug_assert!(iters != 100, "swapping didn't resolve after 100 iters!");
+
             let step_initial_price = state.price;
             let (step_next_tick, step_next_tick_initialised) =
                 tick_bitmap::next_initialized_tick_within_one_word(
@@ -364,7 +368,7 @@ impl StoragePool {
         upper: i32,
         amount_0: u128,
         amount_1: u128,
-    ) -> Result<(u128, u128), Revert> {
+    ) -> (u128, u128) {
         let (owed_0, owed_1) = self.positions.collect_fees(
             position::StoragePositionKey {
                 address: owner,
@@ -375,9 +379,7 @@ impl StoragePool {
             amount_1,
         );
 
-        // TODO transfer tokens
-
-        Ok((owed_0, owed_1))
+        (owed_0, owed_1)
     }
 }
 
@@ -429,6 +431,7 @@ mod test {
 
     // this is probably unsound! we don't ensure a real lock on storage
     fn with_storage<T, F: FnOnce(&mut StoragePool) -> T>(f: F) -> T {
+        let _lock = test_shims::acquire_storage();
         let mut storage = unsafe { <StoragePool as StorageType>::new(U256::ZERO, 0) };
         let res = f(&mut storage);
         stylus_sdk::storage::StorageCache::flush();
