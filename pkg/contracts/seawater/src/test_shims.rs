@@ -29,6 +29,8 @@ mod storage {
     const WORD_BYTES: usize = 32;
     pub type Word = [u8; WORD_BYTES];
 
+    pub static STORAGE_EXTERNAL: Mutex<()> = Mutex::new(());
+
     pub static STORAGE: LazyLock<Mutex<HashMap<Word, Word>>> =
         LazyLock::new(|| Mutex::new(HashMap::new()));
 
@@ -78,4 +80,9 @@ pub fn log_storage() {
 #[cfg(test)]
 pub fn reset_storage() {
     storage::STORAGE.lock().unwrap().clear();
+}
+
+#[cfg(test)]
+pub fn acquire_storage() -> std::sync::MutexGuard<'static, ()> {
+    storage::STORAGE_EXTERNAL.lock().unwrap()
 }
