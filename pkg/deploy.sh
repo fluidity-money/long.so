@@ -12,6 +12,7 @@ STYLUS_PRIVATE_KEY="${STYLUS_PRIVATE_KEY:=0xb6b15c8cb491557369f3c7d2c287b053eb22
 
 [ ! -z "$PROXY_ADMIN_ADDR" ] || die "PROXY_ADMIN_ADDR not set!"
 [ ! -z "$SEAWATER_ADMIN_ADDR" ] || die "SEAWATER_ADMIN_ADDR not set!"
+[ ! -z "$FUSDC_TOKEN_ADDR" ] || die "FUSDC_TOKEN_ADDR not set!"
 
 deploy_feature() {
     >&2 echo "deploying $1..."
@@ -29,7 +30,9 @@ if [ -z "$swaps_addr" ]; then swaps_addr=$(deploy_feature "swaps"); fi
 if [ -z "$positions_addr" ]; then positions_addr=$(deploy_feature "positions"); fi
 if [ -z "$admin_addr" ]; then admin_addr=$(deploy_feature "admin"); fi
 
-echo "swaps: $swaps_addr positions: $positions_addr admin: $admin_addr"
+>&2 echo "executors deployed..."
+>&2 echo "to resume from this point, set"
+>&2 echo "swaps_addr=$swaps_addr positions_addr=$positions_addr admin_addr=$admin_addr"
 
 >&2 echo "deploying diamond contract..."
 
@@ -40,6 +43,6 @@ forge create "SeawaterAMM" --rpc-url $STYLUS_ENDPOINT --private-key $STYLUS_PRIV
         $swaps_addr \
         $positions_addr \
         $admin_addr \
-        $(cast --address-zero) #fallback
-
+        $(cast --address-zero) \
+        $FUSDC_TOKEN_ADDR
 

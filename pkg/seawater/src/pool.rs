@@ -56,13 +56,24 @@ impl StoragePool {
         Ok(())
     }
 
+    pub fn create_position(
+        &mut self,
+        id: U256,
+        low: i32,
+        up: i32,
+    ) {
+        self.positions.new(id, low, up)
+    }
+
     pub fn update_position(
         &mut self,
-        owner: Address,
-        lower: i32,
-        upper: i32,
+        id: U256,
         delta: i128,
     ) -> Result<(I256, I256), Revert> {
+        let position = self.positions.positions.get(id);
+        let lower = position.lower.get().unwrap();
+        let upper = position.upper.get().unwrap();
+
         // update the ticks
         let flip_lower = self.ticks.update(
             lower,
@@ -75,7 +86,7 @@ impl StoragePool {
         )?;
 
         let flip_upper = self.ticks.update(
-            lower,
+            upper,
             self.cur_tick.get().unwrap(),
             delta,
             &self.fee_growth_global_0.get(),
@@ -94,11 +105,7 @@ impl StoragePool {
         )?;
 
         self.positions.update(
-            position::StoragePositionKey {
-                address: owner,
-                lower,
-                upper,
-            },
+            id,
             delta,
             fee_growth_inside_0,
             fee_growth_inside_1,
@@ -368,23 +375,15 @@ impl StoragePool {
 
     pub fn collect(
         &mut self,
-        owner: Address,
-        lower: i32,
-        upper: i32,
+        id: U256,
         amount_0: u128,
         amount_1: u128,
     ) -> (u128, u128) {
-        let (owed_0, owed_1) = self.positions.collect_fees(
-            position::StoragePositionKey {
-                address: owner,
-                lower,
-                upper,
-            },
+        self.positions.collect_fees(
+            id,
             amount_0,
             amount_1,
-        );
-
-        (owed_0, owed_1)
+        )
     }
 }
 
@@ -393,8 +392,8 @@ mod test {
     use super::*;
     use crate::test_shims;
     use crate::types::*;
+    use ruint_macro::uint;
     use sqrt_price_math::Q96;
-    use stylus_sdk::alloy_primitives::address;
 
     // encodes a a/b price as a sqrt.q96 price
     fn encode_sqrt_price(num: u64, denom: u64) -> U256 {
@@ -453,11 +452,17 @@ mod test {
                 .init(encode_sqrt_price(1, 10), 0, 1, u128::MAX)
                 .unwrap();
 
+            let id = uint!(2_U256);
+
+            storage.create_position(
+                id,
+                tick_math::get_min_tick(1),
+                tick_math::get_max_tick(1),
+            );
+
             assert_eq!(
                 storage.update_position(
-                    address!("737B7865f84bDc86B5c8ca718a5B7a6d905776F6"),
-                    tick_math::get_min_tick(1),
-                    tick_math::get_max_tick(1),
+                    id,
                     3161,
                 ),
                 Ok((I256::unchecked_from(9996), I256::unchecked_from(1000))),
@@ -470,17 +475,25 @@ mod test {
         with_storage(|storage| {
             storage.init(encode_sqrt_price(100, 1), 0, 1, u128::MAX)?;
 
-            storage.update_position(
-                address!("737B7865f84bDc86B5c8ca718a5B7a6d905776F6"),
+            let id = uint!(2_U256);
+            storage.create_position(
+                id,
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(50, 1))?,
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
+            );
+            storage.update_position(
+                id,
                 100,
             )?;
 
-            storage.update_position(
-                address!("737B7865f84bDc86B5c8ca718a5B7a6d905776F6"),
+            let id = uint!(3_U256);
+            storage.create_position(
+                id,
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(80, 1))?,
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
+            );
+            storage.update_position(
+                id,
                 100,
             )?;
 
