@@ -42,6 +42,14 @@ pub enum UniswapV3MathError {
 
     #[error("Fee growth sub overflow")]
     FeeGrowthSub,
+
+    #[error("ERC20 call reverted")]
+    Erc20Revert(Vec<u8>),
+
+    #[error("Pool is already initialised")]
+    PoolAlreadyInitialised,
+    #[error("Contract is already initialised")]
+    ContractAlreadyInitialised,
 }
 
 impl From<UniswapV3MathError> for Vec<u8> {

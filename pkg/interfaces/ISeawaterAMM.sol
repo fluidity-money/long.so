@@ -37,13 +37,13 @@ interface ISeawaterAMM {
     /// @param _tokenB the output token
     /// @param _amount input amount (tokenA)
     /// @param _minOut the minimum output amount (tokenB), reverting if the actual output is lower
-    /// @return amount of token B out
+    /// @return amount of token A in, amount of token B out
     function swap2(
         address _tokenA,
         address _tokenB,
         uint256 _amount,
         uint256 _minOut
-    ) external returns (uint256);
+    ) external returns (uint256, uint256);
 
     //function burn(uint8 poolId) external returns (uint112 burned);
     //function mint(uint8 poolId) external returns (uint112 minted);

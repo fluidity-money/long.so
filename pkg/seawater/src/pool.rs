@@ -1,3 +1,4 @@
+use crate::error::UniswapV3MathError;
 use crate::maths::{full_math, liquidity_math, sqrt_price_math, swap_math, tick_bitmap, tick_math};
 use crate::position;
 use crate::tick;
@@ -39,6 +40,10 @@ impl StoragePool {
         tick_spacing: u8,
         max_liquidity_per_tick: u128,
     ) -> Result<(), Revert> {
+        if self.sqrt_price.get() != U256::ZERO {
+            Err(UniswapV3MathError::PoolAlreadyInitialised)?
+        }
+
         self.sqrt_price.set(price);
         self.cur_tick
             .set(I32::wrap(&tick_math::get_tick_at_sqrt_ratio(price)?));
@@ -431,13 +436,13 @@ mod test {
 
     // this is probably unsound! we don't ensure a real lock on storage
     fn with_storage<T, F: FnOnce(&mut StoragePool) -> T>(f: F) -> T {
-        let _lock = test_shims::acquire_storage();
+        let lock = test_shims::acquire_storage();
         let mut storage = unsafe { <StoragePool as StorageType>::new(U256::ZERO, 0) };
         let res = f(&mut storage);
-        stylus_sdk::storage::StorageCache::flush();
+        stylus_sdk::storage::StorageCache::clear();
         test_shims::log_storage();
         test_shims::reset_storage();
-
+        drop(lock);
         res
     }
 
@@ -447,6 +452,7 @@ mod test {
             storage
                 .init(encode_sqrt_price(1, 10), 0, 1, u128::MAX)
                 .unwrap();
+
             assert_eq!(
                 storage.update_position(
                     address!("737B7865f84bDc86B5c8ca718a5B7a6d905776F6"),

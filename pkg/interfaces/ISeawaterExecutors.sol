@@ -14,14 +14,14 @@ interface ISeawaterExecutorSwap {
         address to,
         uint256 amount,
         uint256 minOut
-    ) external returns (uint256);
+    ) external returns (uint256, uint256);
 
     function swap2ExactOut(
         address from,
         address to,
         uint256 amount,
         uint256 maxIn
-    ) external returns (uint256);
+    ) external returns (uint256, uint256);
 }
 
 interface ISeawaterExecutorPosition {
@@ -38,17 +38,20 @@ interface ISeawaterExecutorPosition {
         address owner,
         int32 lower,
         int32 upper,
-        uint256 amount0,
-        uint256 u128
+        uint128 amount0,
+        uint128 u128
     ) external returns (uint128, uint128);
 }
 
 interface ISeawaterExecutorAdmin {
+    function ctor(address usdc) external;
+
     function init(
         address pool,
         uint256 sqrtPriceX96,
         uint32 fee,
-        uint8 tickSpacing
+        uint8 tickSpacing,
+        uint128 maxLiquidityPerTick
     ) external;
 
     function collectProtocol(

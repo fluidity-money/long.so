@@ -865,6 +865,7 @@ dependencies = [
 name = "seawater"
 version = "0.1.0"
 dependencies = [
+ "keccak-const",
  "rand",
  "ruint",
  "ruint-macro",
