@@ -9,8 +9,9 @@ bytes32 constant EXECUTOR_POSITION_SLOT = bytes32(uint256(keccak256("seawater.im
 bytes32 constant EXECUTOR_ADMIN_SLOT = bytes32(uint256(keccak256("seawater.impl.admin")) - 1);
 bytes32 constant EXECUTOR_FALLBACK_SLOT = bytes32(uint256(keccak256("seawater.impl.fallback")) - 1);
 
-bytes32 constant PROXY_ADMIN_SLOT = bytes32(uint256(keccak256("seawater.role.proxyadmin")) - 1);
-bytes32 constant SEAWATER_ADMIN_SLOT = bytes32(uint256(keccak256("seawater.role.seawateradmin")) - 1);
+bytes32 constant PROXY_ADMIN_SLOT = bytes32(uint256(keccak256("seawater.role.proxy.admin")) - 1);
+
+// seawater admin / nft admin are stored in normal storage slots
 
 library StorageSlot {
     struct AddressSlot {
@@ -33,41 +34,31 @@ contract SeawaterAMM is ISeawaterAMM {
         _;
     }
 
-    modifier onlySeawaterAdmin {
-        require(
-            msg.sender == StorageSlot.getAddressSlot(SEAWATER_ADMIN_SLOT).value,
-            "only seawater admin"
-       );
-        _;
-
-    }
-
     constructor(
         address proxyAdmin,
         address seawaterAdmin,
+        address nftManager,
         ISeawaterExecutorSwap executorSwap,
         ISeawaterExecutorPosition executorPosition,
         ISeawaterExecutorAdmin executorAdmin,
-        ISeawaterExecutorFallback executorFallback
+        ISeawaterExecutorFallback executorFallback,
+        address fusdc
     ) {
         _setProxyAdmin(proxyAdmin);
-        _setSeawaterAdmin(seawaterAdmin);
         _setProxies(
             executorSwap,
             executorPosition,
             executorAdmin,
             executorFallback
         );
+
+        executorAdmin.ctor(fusdc, seawaterAdmin, nftManager);
     }
 
     // proxy functions
 
     function updateProxyAdmin(address newAdmin) public onlyProxyAdmin {
         _setProxyAdmin(newAdmin);
-    }
-
-    function updateSeawaterAdmin(address newAdmin) public onlySeawaterAdmin {
-        _setSeawaterAdmin(newAdmin);
     }
 
     function updateExecutors(
@@ -127,6 +118,29 @@ contract SeawaterAMM is ISeawaterAMM {
         );
     }
 
+    // position functions
+
+    function mint(address token, int32 lower, int32 upper) external returns (uint256 id) {
+        return _getExecutorPosition().mint(token, lower, upper);
+    }
+
+    function burn(uint256 id) external {
+        _getExecutorPosition().burn(id);
+    }
+
+    function ownerOf(uint256 id) external {
+        return _getExecutorPosition().positionOwner(id);
+    }
+
+    // called by the position manager contract!!
+    function transfer(uint256 tokenId, address from, address to) external {
+        _getExecutorPosition().transferPosition(id, from, to);
+    }
+
+    function balanceOf(address user) external view returns (uint256) {
+        return _getExecutorPosition().positionBalance(user);
+    }
+
     // internal functions
 
     // proxy storage manipulators
@@ -146,10 +160,6 @@ contract SeawaterAMM is ISeawaterAMM {
 
     function _setProxyAdmin(address newAdmin) internal {
         StorageSlot.getAddressSlot(PROXY_ADMIN_SLOT).value = newAdmin;
-    }
-
-    function _setSeawaterAdmin(address newAdmin) internal {
-        StorageSlot.getAddressSlot(SEAWATER_ADMIN_SLOT).value = newAdmin;
     }
 
     function _setProxies(
