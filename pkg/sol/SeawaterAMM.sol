@@ -17,7 +17,7 @@ library StorageSlot {
         address value;
     }
     // borrowed from openzeppelin
-    function getAddressSlot(bytes32 slot) internal view returns (AddressSlot storage r) {
+    function getAddressSlot(bytes32 slot) internal pure returns (AddressSlot storage r) {
         assembly {
             r.slot := slot
         }
@@ -118,7 +118,7 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterAMM
-    function swap2(address tokenA, address tokenB, uint256 amountIn, uint256 minAmountOut) external returns (uint256) {
+    function swap2(address tokenA, address tokenB, uint256 amountIn, uint256 minAmountOut) external returns (uint256, uint256) {
         return _getExecutorSwap().swap2ExactIn(
             tokenA,
             tokenB,
