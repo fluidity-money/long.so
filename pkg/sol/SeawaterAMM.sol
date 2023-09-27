@@ -52,7 +52,11 @@ contract SeawaterAMM is ISeawaterAMM {
             executorFallback
         );
 
-        executorAdmin.ctor(fusdc, seawaterAdmin, nftManager);
+        (bool success, bytes memory data) = _getExecutorAdmin().delegatecall(abi.encodeCall(
+            ISeawaterExecutorAdmin.ctor,
+            (fusdc, seawaterAdmin, nftManager)
+        ));
+        require(success, string(data));
     }
 
     // proxy functions
@@ -72,90 +76,138 @@ contract SeawaterAMM is ISeawaterAMM {
 
     // seawater delegates
 
+    // ends execution!
+    function directDelegate(address to) internal {
+        assembly {
+            // Copy msg.data. We take full control of memory in this inline assembly
+            // block because it will not return to Solidity code. We overwrite the
+            // Solidity scratch pad at memory position 0.
+            calldatacopy(0, 0, calldatasize())
+
+            // Call the implementation.
+            // out and outsize are 0 because we don't know the size yet.
+            let result := delegatecall(gas(), to, 0, calldatasize(), 0, 0)
+
+            // Copy the returned data.
+            returndatacopy(0, 0, returndatasize())
+
+            switch result
+            // delegatecall returns 0 on error.
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
+        }
+    }
+
+    // admin functions
+
+    function init(
+        address token,
+        uint256 sqrtPriceX96,
+        uint32 fee,
+        uint8 tickSpacing,
+        uint128 maxLiquidityPerTick
+    ) external {
+        directDelegate(_getExecutorAdmin());
+    }
+
+    function collectProtocol(
+        address pool,
+        uint128 amount0,
+        uint128 amount1
+    ) external returns (uint128, uint128) {
+        directDelegate(_getExecutorAdmin());
+    }
+
     // swap functions
 
     /// @inheritdoc ISeawaterAMM
     function swapIn(address token, uint256 amountIn, uint256 minOut) external returns (int256, int256) {
-        (int256 swapAmountIn, int256 swapAmountOut) = _getExecutorSwap().swap(
-            token,
-            true, // zero for one
-            int256(amountIn),
-            type(uint256).max
-        );
+        (bool success, bytes memory data) = _getExecutorSwap().delegatecall(abi.encodeCall(
+            ISeawaterExecutorSwap.swap,
+            (
+                token,
+                true,
+                int256(amountIn),
+                type(uint256).max
+            )
+        ));
+        require(success, string(data));
+
+        (int256 swapAmountIn, int256 swapAmountOut) = abi.decode(data, (int256, int256));
         require(swapAmountOut >= int256(minOut), "min out not reached!");
         return (swapAmountIn, swapAmountOut);
     }
 
     /// @inheritdoc ISeawaterAMM
     function swapOut(address token, uint256 amountIn, uint256 minOut) external returns (int256, int256) {
-        (int256 swapAmountIn, int256 swapAmountOut) = _getExecutorSwap().swap(
-            token,
-            false, // one for zero
-            int256(amountIn),
-            type(uint256).max
-        );
+        (bool success, bytes memory data) = _getExecutorSwap().delegatecall(abi.encodeCall(
+            ISeawaterExecutorSwap.swap,
+            (
+                token,
+                false,
+                int256(amountIn),
+                type(uint256).max
+            )
+        ));
+        require(success, string(data));
+
+        (int256 swapAmountIn, int256 swapAmountOut) = abi.decode(data, (int256, int256));
         require(swapAmountOut >= int256(minOut), "min out not reached!");
         return (swapAmountIn, swapAmountOut);
     }
 
     /// @inheritdoc ISeawaterAMM
     function swap(address pool, bool zeroForOne, int256 amount, uint256 priceLimit) external returns (int256, int256) {
-        return _getExecutorSwap().swap(
-            pool,
-            zeroForOne,
-            amount,
-            priceLimit
-        );
+        directDelegate(_getExecutorSwap());
     }
 
     /// @inheritdoc ISeawaterAMM
-    function swap2(address tokenA, address tokenB, uint256 amountIn, uint256 minAmountOut) external returns (uint256, uint256) {
-        return _getExecutorSwap().swap2ExactIn(
-            tokenA,
-            tokenB,
-            amountIn,
-            minAmountOut
-        );
+    function swap2ExactIn(address tokenA, address tokenB, uint256 amountIn, uint256 minAmountOut) external returns (uint256, uint256) {
+        directDelegate(_getExecutorSwap());
     }
 
     // position functions
 
-    function mint(address token, int32 lower, int32 upper) external returns (uint256 id) {
-        return _getExecutorPosition().mint(token, lower, upper);
+    function mintPosition(address token, int32 lower, int32 upper) external returns (uint256 id) {
+        directDelegate(_getExecutorPosition());
     }
 
-    function burn(uint256 id) external {
-        _getExecutorPosition().burn(id);
+    function burnPosition(uint256 id) external {
+        directDelegate(_getExecutorPosition());
     }
 
-    function ownerOf(uint256 id) external {
-        return _getExecutorPosition().positionOwner(id);
+    function positionOwner(uint256 id) external returns (address) {
+        directDelegate(_getExecutorPosition());
     }
 
     // called by the position manager contract!!
-    function transfer(uint256 tokenId, address from, address to) external {
-        _getExecutorPosition().transferPosition(id, from, to);
+    function transferPosition(uint256 id, address from, address to) external {
+        directDelegate(_getExecutorPosition());
     }
 
-    function balanceOf(address user) external view returns (uint256) {
-        return _getExecutorPosition().positionBalance(user);
+    function positionBalance(address user) external returns (uint256) {
+        directDelegate(_getExecutorPosition());
     }
 
     // internal functions
 
     // proxy storage manipulators
 
-    function _getExecutorSwap() internal view returns (ISeawaterExecutorSwap) {
-        return ISeawaterExecutorSwap(StorageSlot.getAddressSlot(EXECUTOR_SWAP_SLOT).value);
+    function _getExecutorSwap() internal view returns (address) {
+        return StorageSlot.getAddressSlot(EXECUTOR_SWAP_SLOT).value;
     }
-    function _getExecutorPosition() internal view returns (ISeawaterExecutorPosition) {
-        return ISeawaterExecutorPosition(StorageSlot.getAddressSlot(EXECUTOR_POSITION_SLOT).value);
+    function _getExecutorPosition() internal view returns (address) {
+        return StorageSlot.getAddressSlot(EXECUTOR_POSITION_SLOT).value;
     }
-    function _getExecutorAdmin() internal view returns (ISeawaterExecutorAdmin) {
-        return ISeawaterExecutorAdmin(StorageSlot.getAddressSlot(EXECUTOR_ADMIN_SLOT).value);
+    function _getExecutorAdmin() internal view returns (address) {
+        return StorageSlot.getAddressSlot(EXECUTOR_ADMIN_SLOT).value;
     }
-    function _getExecutorFallback() internal view returns (ISeawaterExecutorFallback) {
-        return ISeawaterExecutorFallback(StorageSlot.getAddressSlot(EXECUTOR_FALLBACK_SLOT).value);
+    function _getExecutorFallback() internal view returns (address) {
+        return StorageSlot.getAddressSlot(EXECUTOR_FALLBACK_SLOT).value;
     }
 
     function _setProxyAdmin(address newAdmin) internal {

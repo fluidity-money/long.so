@@ -35,9 +35,9 @@ interface ISeawaterExecutorPosition {
 
     function transferPosition(uint256 id, address from, address to) external;
 
-    function positionOwner(uint256 id) external returns (address);
+    function positionOwner(uint256 id) external view returns (address);
 
-    function positionBalance(address user) external returns (uint256);
+    function positionBalance(address user) external view returns (uint256);
 
     function updatePosition(
         address pool,
