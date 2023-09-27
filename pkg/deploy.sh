@@ -12,12 +12,13 @@ STYLUS_PRIVATE_KEY="${STYLUS_PRIVATE_KEY:=0xb6b15c8cb491557369f3c7d2c287b053eb22
 
 [ ! -z "$PROXY_ADMIN_ADDR" ] || die "PROXY_ADMIN_ADDR not set!"
 [ ! -z "$SEAWATER_ADMIN_ADDR" ] || die "SEAWATER_ADMIN_ADDR not set!"
+[ ! -z "$NFT_MANAGER_ADDR" ] || die "NFT_MANAGER_ADDR not set!"
 [ ! -z "$FUSDC_TOKEN_ADDR" ] || die "FUSDC_TOKEN_ADDR not set!"
 
 deploy_feature() {
     >&2 echo "deploying $1..."
 
-    cargo +nightly build -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort --release --target wasm32-unknown-unknown --features $1
+    cargo +nightly build --package seawater -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort --release --target wasm32-unknown-unknown --features $1
     res=$(cargo stylus deploy --endpoint $STYLUS_ENDPOINT --wasm-file-path target/wasm32-unknown-unknown/release/seawater.wasm --private-key $STYLUS_PRIVATE_KEY \
         | tee /dev/stderr \
         | sed -nr "s/Deploying program to address (.+)/\1/p" \
@@ -40,6 +41,7 @@ forge create "SeawaterAMM" --rpc-url $STYLUS_ENDPOINT --private-key $STYLUS_PRIV
     --constructor-args \
         $PROXY_ADMIN_ADDR \
         $SEAWATER_ADMIN_ADDR \
+        $NFT_MANAGER_ADDR \
         $swaps_addr \
         $positions_addr \
         $admin_addr \

@@ -38,7 +38,7 @@ interface ISeawaterAMM {
     /// @param _amount input amount (tokenA)
     /// @param _minOut the minimum output amount (tokenB), reverting if the actual output is lower
     /// @return amount of token A in, amount of token B out
-    function swap2(
+    function swap2ExactIn(
         address _tokenA,
         address _tokenB,
         uint256 _amount,
