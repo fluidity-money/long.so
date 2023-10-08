@@ -5,10 +5,10 @@ use std::cmp::min;
 
 use rand::prelude::*;
 mod reference;
-use ruint::aliases::U256;
-use ruint::uint;
 use libseawater::maths::full_math;
 use libseawater::maths::tick_math;
+use ruint::aliases::U256;
+use ruint::uint;
 
 fn rand_u256<R: Rng + ?Sized>(rng: &mut R) -> U256 {
     U256::from_limbs([rng.gen(), rng.gen(), rng.gen(), rng.gen()])
