@@ -31,7 +31,6 @@ impl StorageTickBitmap {
 
 #[solidity_storage]
 #[derive(Erase)]
-#[allow(unused)]
 pub struct StorageTickInfo {
     liquidity_gross: StorageU128,
     liquidity_net: StorageI128,
@@ -44,7 +43,6 @@ pub struct StorageTickInfo {
 }
 
 impl StorageTicks {
-    #[allow(unused)]
     pub fn update(
         &mut self,
         tick: i32,

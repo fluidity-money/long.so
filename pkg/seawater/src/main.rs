@@ -1,5 +1,6 @@
-#![cfg_attr(test, feature(lazy_cell, const_trait_impl))]
+#![cfg_attr(not(feature = "export-abi"), no_main, no_std)]
 
+use libseawater::*;
 use libseawater::user_entrypoint as stylus_entrypoint;
 
 pub extern "C" fn user_entrypoint(len: usize) -> usize {

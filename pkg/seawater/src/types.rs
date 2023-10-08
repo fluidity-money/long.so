@@ -4,7 +4,7 @@
 pub use stylus_sdk;
 
 pub type TickBitmap = stylus_sdk::storage::StorageMap<i16, stylus_sdk::storage::StorageU256>;
-use ruint_macro::uint;
+
 
 pub type U256 = stylus_sdk::alloy_primitives::U256;
 pub trait U256Extension: Sized {
@@ -49,6 +49,7 @@ pub type I256 = stylus_sdk::alloy_primitives::I256;
 pub trait I256Extension: Sized {
     fn zero() -> Self;
     fn one() -> Self;
+    fn abs_neg(self) -> U256;
 }
 
 impl I256Extension for I256 {
@@ -59,6 +60,14 @@ impl I256Extension for I256 {
     fn one() -> Self {
         Self::ONE
     }
+
+    fn abs_neg(self) -> U256 {
+        assert!(self.is_negative());
+        self
+            .checked_abs().unwrap()
+            .into_raw()
+    }
+
 }
 
 pub type U128 = stylus_sdk::alloy_primitives::U128;

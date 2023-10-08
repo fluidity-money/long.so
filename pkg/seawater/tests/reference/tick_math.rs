@@ -1,7 +1,7 @@
-use ruint_macro::uint;
 use libseawater::error::UniswapV3MathError;
 use libseawater::maths::tick_math::*;
 use libseawater::types::{U256Extension, I256, U256};
+use ruint_macro::uint;
 use std::ops::{BitOr, Neg, Shl, Shr};
 
 pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, UniswapV3MathError> {

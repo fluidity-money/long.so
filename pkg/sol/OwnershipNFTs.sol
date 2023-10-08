@@ -88,7 +88,7 @@ contract OwnershipNFTs is IERC721Metadata {
         uint256 _tokenId
     ) internal {
         _requireAuthorised(_from, _tokenId);
-        SEAWATER.transfer(_tokenId, _to);
+        SEAWATER.transfer(_from, _tokenId, _to);
     }
 
     function transferFrom(

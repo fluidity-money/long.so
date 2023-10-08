@@ -2,7 +2,7 @@ use crate::error::*;
 use crate::maths::full_math;
 use crate::maths::liquidity_math;
 use crate::types::Wrap;
-use crate::types::{Address, U256Extension, U128, U256};
+use crate::types::{Address, U256Extension, U128, U256, I32};
 use stylus_sdk::alloy_primitives::aliases::B256;
 use stylus_sdk::crypto;
 use stylus_sdk::prelude::*;
@@ -10,17 +10,28 @@ use stylus_sdk::storage::*;
 
 #[solidity_storage]
 pub struct StoragePositions {
-    pub positions: StorageMap<StoragePositionKey, StoragePositionInfo>,
+    pub positions: StorageMap<U256, StoragePositionInfo>,
 }
 impl StoragePositions {
+    pub fn new(
+        &mut self,
+        id: U256,
+        low: i32,
+        up: i32,
+    ) {
+        let mut info = self.positions.setter(id);
+        info.lower.set(I32::wrap(&low));
+        info.upper.set(I32::wrap(&up));
+    }
+
     pub fn update(
         &mut self,
-        position: StoragePositionKey,
+        id: U256,
         delta: i128,
         fee_growth_inside_0: U256,
         fee_growth_inside_1: U256,
     ) -> Result<(), UniswapV3MathError> {
-        let mut info = self.positions.setter(position);
+        let mut info = self.positions.setter(id);
 
         let liquidity_next = liquidity_math::add_delta(info.liquidity.get().unwrap(), delta)?;
 
@@ -65,11 +76,11 @@ impl StoragePositions {
     }
     pub fn collect_fees(
         &mut self,
-        key: StoragePositionKey,
+        id: U256,
         amount_0: u128,
         amount_1: u128,
     ) -> (u128, u128) {
-        let mut position = self.positions.setter(key);
+        let mut position = self.positions.setter(id);
 
         let owed_0 = position.token_owed_0.get().unwrap();
         let owed_1 = position.token_owed_1.get().unwrap();
@@ -90,6 +101,8 @@ impl StoragePositions {
 
 #[solidity_storage]
 pub struct StoragePositionInfo {
+    pub lower: StorageI32,
+    pub upper: StorageI32,
     pub liquidity: StorageU128,
     pub fee_growth_inside_0: StorageU256,
     pub fee_growth_inside_1: StorageU256,
@@ -97,85 +110,3 @@ pub struct StoragePositionInfo {
     pub token_owed_1: StorageU128,
 }
 
-pub struct StoragePositionKey {
-    pub address: Address,
-    pub lower: i32,
-    pub upper: i32,
-}
-
-impl StorageKey for StoragePositionKey {
-    // should generate solidity equivalent slots
-    fn to_slot(&self, root: B256) -> U256 {
-        let mut data = [0_u8; 32 * 4];
-        data[12..32].copy_from_slice(&self.address.0 .0);
-        data[32 + 28..64].copy_from_slice(&self.lower.to_be_bytes());
-        data[64 + 28..96].copy_from_slice(&self.upper.to_be_bytes());
-        data[96..128].copy_from_slice(&root.0);
-
-        crypto::keccak(data).into()
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    use crate::types::U256Extension;
-    use stylus_sdk::alloy_primitives::address;
-
-    #[test]
-    fn storage_position_key_hash() {
-        // test storage keys against ones generated with
-        // `cast index "(address, int32, int32)" "(0x737B7865f84bDc86B5c8ca718a5B7a6d905776F6,0,1)" "0"`
-        let mut key = StoragePositionKey {
-            address: address!("737B7865f84bDc86B5c8ca718a5B7a6d905776F6"),
-            lower: 1,
-            upper: 10,
-        };
-        let slot = key.to_slot(B256::from(U256::from(0)));
-        assert_eq!(
-            slot,
-            U256::from_hex_str(
-                "0x085c3b7a49ffe2725aa23060fd5a1a3ac6088e9d9781b3ea02d168a2a10e8824"
-            )
-        );
-
-        // change the slot
-        let slot = key.to_slot(B256::from(U256::from(10)));
-        assert_eq!(
-            slot,
-            U256::from_hex_str(
-                "0xeddfe5d613799dbe4c56f99198e52ed01a307037c723268672b373ab605306c7"
-            )
-        );
-
-        // change the address
-        key.address = address!("6221A9c005F6e47EB398fD867784CacfDcFFF4E7");
-        let slot = key.to_slot(B256::from(U256::from(10)));
-        assert_eq!(
-            slot,
-            U256::from_hex_str(
-                "0xe84b454c06c2aa0ad8d4c0801ad566add33157ce6aebe043c87dc2cb065029c5"
-            )
-        );
-
-        // change the lower bound
-        key.lower = 2;
-        let slot = key.to_slot(B256::from(U256::from(10)));
-        assert_eq!(
-            slot,
-            U256::from_hex_str(
-                "0xa0a30deb6fc8be4d5e15cc056bf420704da614b0fa624cbcac35eb01ed7b18ad"
-            )
-        );
-
-        // change the upper bound
-        key.upper = 9;
-        let slot = key.to_slot(B256::from(U256::from(10)));
-        assert_eq!(
-            slot,
-            U256::from_hex_str(
-                "0xf1f9e9a68fcb0cf1c28493ec5092166077b22351ac389fe41736610268780127"
-            )
-        );
-    }
-}

@@ -1,7 +1,10 @@
 [workspace]
 
+resolver = "2"
+
 members = [
     "seawater",
+    "seawater-tests",
 ]
 
 [profile.release]
@@ -23,3 +26,4 @@ tiny-keccak = "2.0.2"
 wee_alloc = "*"
 ruint = "*"
 ruint-macro = "1.1.0"
+keccak-const = "0.2.0"
