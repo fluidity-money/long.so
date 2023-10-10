@@ -1,0 +1,11 @@
+{
+  "name": "seawater-tests",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "ethers": "^6.7.1",
+    "tsx": "^3.13.0",
+    "typescript": "^5.2.2"
+  }
+}
