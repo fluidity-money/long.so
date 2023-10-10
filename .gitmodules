@@ -6,3 +6,6 @@
 [submodule "pkg/lib/forge-std"]
 	path = pkg/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "automation/nitro-testnode"]
+	path = automation/nitro-testnode
+	url = https://github.com/OffchainLabs/nitro-testnode

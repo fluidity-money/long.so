@@ -1,6 +1,5 @@
 #![cfg_attr(not(feature = "export-abi"), no_main, no_std)]
 
-use libseawater::*;
 use libseawater::user_entrypoint as stylus_entrypoint;
 
 pub extern "C" fn user_entrypoint(len: usize) -> usize {
@@ -10,4 +9,5 @@ pub extern "C" fn user_entrypoint(len: usize) -> usize {
 // for whatever reason, even with `#![no_main]` or `#[cfg(test)] fn main(){}` this crate fails to
 // build for tests without this
 //#[cfg(not(target_arch = "wasm32"))]
+#[allow(dead_code)]
 fn main() {}
