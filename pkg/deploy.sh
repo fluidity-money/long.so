@@ -21,10 +21,11 @@ deploy_feature() {
     cargo +nightly build --package seawater -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort --release --target wasm32-unknown-unknown --features $1
     res=$(cargo stylus deploy --endpoint $STYLUS_ENDPOINT --wasm-file-path target/wasm32-unknown-unknown/release/seawater.wasm --private-key $STYLUS_PRIVATE_KEY \
         | tee /dev/stderr \
-        | sed -nr "s/Deploying program to address (.+)/\1/p" \
+        | sed -nr "s/Deploying program to address (.+)(0x.{40})/\2/p" \
     )
     [ ! -z $res ] || die "deployment failed for feature $1"
-    echo $res | sed -r "s/\x1b\[[^@-~]*[@-~]//g" # strip colour characters
+    # echo $res | sed -r "s/\x1b\[[^@-~]*[@-~]//g" # strip colour characters
+    echo $res
 }
 
 if [ -z "$swaps_addr" ]; then swaps_addr=$(deploy_feature "swaps"); fi
