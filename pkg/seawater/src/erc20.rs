@@ -44,10 +44,7 @@ const fn selector(name: &[u8], expected: [u8; 4]) -> [u8; 4] {
     result
 }
 
-const TRANSFER_SELECTOR: [u8; 4] = selector(
-    b"transfer(address,uint256)",
-    [0xa9, 0x05, 0x9c, 0xbb],
-);
+const TRANSFER_SELECTOR: [u8; 4] = selector(b"transfer(address,uint256)", [0xa9, 0x05, 0x9c, 0xbb]);
 const TRANSFER_FROM_SELECTOR: [u8; 4] = selector(
     b"transferFrom(address,address,uint256)",
     [0x23, 0xb8, 0x72, 0xdd],

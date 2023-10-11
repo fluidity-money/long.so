@@ -61,4 +61,3 @@ sol! {
         uint256 amountOut,
     );
 }
-
