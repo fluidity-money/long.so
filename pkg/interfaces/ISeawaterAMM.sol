@@ -1,7 +1,9 @@
 // SPDX-Identifier: MIT
 pragma solidity 0.8.16;
 
-interface ISeawaterAMM {
+import "./ISeawaterEvents.sol";
+
+interface ISeawaterAMM is ISeawaterEvents {
     /// @notice swaps _token for USDC
     /// @param _token the token to swap
     /// @param _amount input amount (token)
