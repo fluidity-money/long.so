@@ -10,13 +10,15 @@ pub mod position;
 pub mod test_shims;
 pub mod tick;
 pub mod types;
+pub mod events;
+
 
 extern crate alloc;
 
 use crate::types::{Address, I256Extension, I256, U256};
 use error::UniswapV3MathError;
 use maths::tick_math;
-use stylus_sdk::{prelude::*, storage::*, msg};
+use stylus_sdk::{prelude::*, storage::*, msg, evm};
 use types::U256Extension;
 
 type Revert = Vec<u8>;
@@ -69,6 +71,22 @@ impl Pools {
         erc20::exchange(pool, amount_0)?;
         erc20::exchange(self.usdc.get(), amount_1)?;
 
+        match zero_for_one {
+            true => evm::log(events::Swap{
+                user: msg::sender(),
+                from: pool,
+                to: self.usdc.get(),
+                amountIn: amount_0.checked_abs().unwrap().into_raw(),
+                amountOut: amount_1.checked_abs().unwrap().into_raw(),
+            }),
+            false => evm::log(events::Swap{
+                user: msg::sender(),
+                from: self.usdc.get(),
+                to: pool,
+                amountIn: amount_1.checked_abs().unwrap().into_raw(),
+                amountOut: amount_0.checked_abs().unwrap().into_raw(),
+            }),
+        }
         Ok((amount_0, amount_1))
     }
 
@@ -101,6 +119,14 @@ impl Pools {
 
         erc20::take(from, amount_in)?;
         erc20::send(to, amount_out)?;
+
+        evm::log(events::Swap{
+            user: msg::sender(),
+            from,
+            to,
+            amountIn: amount_in,
+            amountOut: amount_out,
+        });
 
         // return amount - amount_in to the user
         // send amount_out to the user
@@ -142,7 +168,11 @@ impl Pools {
 
         self.next_position_id.set(id + U256::one());
 
-        self.grant_position(msg::sender(), id);
+        let owner = msg::sender();
+
+        self.grant_position(owner, id);
+
+        evm::log(events::MintPosition{ owner, id, pool, lower, upper });
 
         Ok(())
     }
@@ -151,9 +181,12 @@ impl Pools {
         &mut self,
         id: U256,
     ) -> Result<(), Revert> {
-        assert_eq!(self.position_owners.get(id), msg::sender());
+        let owner = msg::sender();
+        assert_eq!(self.position_owners.get(id), owner);
 
-        self.remove_position(msg::sender(), id);
+        self.remove_position(owner, id);
+
+        evm::log(events::BurnPosition{ owner, id });
 
         Ok(())
     }
@@ -169,6 +202,8 @@ impl Pools {
 
         self.remove_position(from, id);
         self.grant_position(to, id);
+
+        evm::log(events::TransferPosition{ from, to, id });
 
         Ok(())
     }
@@ -203,6 +238,8 @@ impl Pools {
         erc20::exchange(pool, token_0)?;
         erc20::exchange(self.usdc.get(), token_1)?;
 
+        evm::log(events::UpdatePositionLiquidity{ id, delta });
+
         Ok((token_0, token_1))
     }
 
@@ -213,7 +250,8 @@ impl Pools {
         amount_0: u128,
         amount_1: u128,
     ) -> Result<(u128, u128), Revert> {
-        // TODO permissions?
+        assert!(msg::sender() == self.position_owners.get(id));
+
         let (token_0, token_1) = self
             .pools
             .setter(pool)
@@ -222,6 +260,7 @@ impl Pools {
         erc20::send(pool, U256::from(token_0))?;
         erc20::send(self.usdc.get(), U256::from(token_1))?;
 
+        evm::log(events::CollectFees{ id, pool, to: msg::sender(), amount0: token_0, amount1: token_1 });
         Ok((token_0, token_1))
     }
 }
@@ -259,6 +298,8 @@ impl Pools {
             .setter(pool)
             .init(price, fee, tick_spacing, max_liquidity_per_tick)?;
 
+        evm::log(events::NewPool{ token: pool, fee, price });
+
         Ok(())
     }
 
@@ -273,6 +314,8 @@ impl Pools {
 
         erc20::send(pool, U256::from(token_0))?;
         erc20::send(self.usdc.get(), U256::from(token_1))?;
+
+        evm::log(events::CollectProtocolFees{ pool, to: msg::sender(), amount0: token_0, amount1: token_1 });
 
         // transfer tokens
         Ok((token_0, token_1))
