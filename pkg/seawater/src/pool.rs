@@ -56,20 +56,11 @@ impl StoragePool {
         Ok(())
     }
 
-    pub fn create_position(
-        &mut self,
-        id: U256,
-        low: i32,
-        up: i32,
-    ) {
+    pub fn create_position(&mut self, id: U256, low: i32, up: i32) {
         self.positions.new(id, low, up)
     }
 
-    pub fn update_position(
-        &mut self,
-        id: U256,
-        delta: i128,
-    ) -> Result<(I256, I256), Revert> {
+    pub fn update_position(&mut self, id: U256, delta: i128) -> Result<(I256, I256), Revert> {
         let position = self.positions.positions.get(id);
         let lower = position.lower.get().unwrap();
         let upper = position.upper.get().unwrap();
@@ -104,12 +95,8 @@ impl StoragePool {
             &self.fee_growth_global_1.get(),
         )?;
 
-        self.positions.update(
-            id,
-            delta,
-            fee_growth_inside_0,
-            fee_growth_inside_1,
-        )?;
+        self.positions
+            .update(id, delta, fee_growth_inside_0, fee_growth_inside_1)?;
 
         // clear unneeded storage
         if flip_lower {
@@ -373,17 +360,8 @@ impl StoragePool {
         (amount_0, amount_1)
     }
 
-    pub fn collect(
-        &mut self,
-        id: U256,
-        amount_0: u128,
-        amount_1: u128,
-    ) -> (u128, u128) {
-        self.positions.collect_fees(
-            id,
-            amount_0,
-            amount_1,
-        )
+    pub fn collect(&mut self, id: U256, amount_0: u128, amount_1: u128) -> (u128, u128) {
+        self.positions.collect_fees(id, amount_0, amount_1)
     }
 }
 
@@ -454,17 +432,10 @@ mod test {
 
             let id = uint!(2_U256);
 
-            storage.create_position(
-                id,
-                tick_math::get_min_tick(1),
-                tick_math::get_max_tick(1),
-            );
+            storage.create_position(id, tick_math::get_min_tick(1), tick_math::get_max_tick(1));
 
             assert_eq!(
-                storage.update_position(
-                    id,
-                    3161,
-                ),
+                storage.update_position(id, 3161,),
                 Ok((I256::unchecked_from(9996), I256::unchecked_from(1000))),
             );
         });
@@ -481,10 +452,7 @@ mod test {
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(50, 1))?,
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
             );
-            storage.update_position(
-                id,
-                100,
-            )?;
+            storage.update_position(id, 100)?;
 
             let id = uint!(3_U256);
             storage.create_position(
@@ -492,10 +460,7 @@ mod test {
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(80, 1))?,
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
             );
-            storage.update_position(
-                id,
-                100,
-            )?;
+            storage.update_position(id, 100)?;
 
             storage.swap(true, I256::unchecked_from(-10), encode_sqrt_price(60, 1))?;
 
