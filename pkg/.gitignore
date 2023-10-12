@@ -15,3 +15,5 @@ Cargo.lock
 
 out/
 cache/
+
+node_modules/
