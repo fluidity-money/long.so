@@ -1,3 +1,16 @@
-@mixin rounded {
-  border-radius: 8px;
+@use './variables' as *;
+
+@mixin box($size) {
+  border-radius: $size;
+  padding: $size;
+}
+
+@mixin light {
+  background-color: $light;
+  color: $dark;
+}
+
+@mixin dark {
+  background-color: $dark;
+  color: $light;
 }

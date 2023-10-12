@@ -1,11 +1,20 @@
+import styles from './Text.module.scss'
+
 interface IText {
   children: React.ReactNode
+  weight?: 'medium' | 'semibold'
 }
 
 const Text: React.FC<IText> = (props) => {
-  const { children } = props
+  const { children, weight = 'medium' } = props
+
+  const classes = `
+    ${styles.Text}
+    ${styles[weight]}
+  `
+
   return (
-    <span>{children}</span>
+    <span className={classes}>{children}</span>
   )
 }
 
