@@ -1,4 +1,5 @@
 const path = require('path')
+const { version } = require('./package.json');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
