@@ -2,7 +2,7 @@ use crate::error::UniswapV3MathError;
 use crate::maths::{full_math, liquidity_math, sqrt_price_math, swap_math, tick_bitmap, tick_math};
 use crate::position;
 use crate::tick;
-use crate::types::{Address, I256Extension, Wrap, I256, I32, U128, U256, U32, U8};
+use crate::types::{Address, I256Extension, Wrap, I256, I32, U128, U256, U256Extension, U32, U8};
 use alloc::vec::Vec;
 use stylus_sdk::{prelude::*, storage::*};
 
@@ -163,18 +163,27 @@ impl StoragePool {
         &mut self,
         zero_for_one: bool,
         amount: I256,
-        price_limit: U256,
+        mut price_limit: U256,
     ) -> Result<(I256, I256), Revert> {
         // ensure the price limit is within bounds
         match zero_for_one {
-            true => assert!(
-                price_limit < self.sqrt_price.get() && price_limit > tick_math::MIN_SQRT_RATIO
-            ),
-            false => assert!(
-                price_limit > self.sqrt_price.get() && price_limit < tick_math::MAX_SQRT_RATIO
-            ),
+            true => {
+                if price_limit == U256::MAX {
+                    price_limit = tick_math::MIN_SQRT_RATIO + U256::one();
+                }
+                if price_limit >= self.sqrt_price.get() || price_limit <= tick_math::MIN_SQRT_RATIO {
+                    Err(UniswapV3MathError::PriceLimitTooLow)?;
+                }
+            },
+            false => {
+                if price_limit == U256::MAX {
+                    price_limit = tick_math::MAX_SQRT_RATIO - U256::one();
+                }
+                if price_limit <= self.sqrt_price.get() || price_limit >= tick_math::MAX_SQRT_RATIO {
+                    Err(UniswapV3MathError::PriceLimitTooHigh)?;
+                }
+            },
         };
-
         // is the swap exact in or exact out
         let exact_in = amount > I256::zero();
 
