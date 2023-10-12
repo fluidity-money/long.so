@@ -1,3 +1,6 @@
 .Button {
+  @include box(0.5em);
+  @include dark;
 
+  cursor: pointer;
 }

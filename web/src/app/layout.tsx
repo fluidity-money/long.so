@@ -3,7 +3,10 @@
 import '@/styles/globals.scss'
 import { Inter } from 'next/font/google'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+})
 
 export default function RootLayout({
   children,

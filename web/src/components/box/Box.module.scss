@@ -1,9 +1,8 @@
 .Box {
-  @include rounded;
+  @include box(0.5rem);
 
+  width: max-content;
+  height: auto;
 
-  background-color: $dark;
-  color: $light;
-  padding: 1em;
-
+  @include dark;
 }

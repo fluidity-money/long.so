@@ -3,14 +3,15 @@ import styles from './Box.module.scss'
 
 interface IBox {
   children: React.ReactNode
+  layoutId?: string
 }
 
-const Box: React.FC<IBox> = ({ children }) => {
+const Box: React.FC<IBox> = (props) => {
+  const { children, layoutId } = props
   return (
     <motion.div
-      layoutId="box"
+      layoutId={layoutId}
       className={styles.Box}
-
     >
       {children}
     </motion.div>
