@@ -1,1 +1,4 @@
-@use '@/styles/variables' as *;
+body {
+  all: unset;
+  background-color: $light;
+}
