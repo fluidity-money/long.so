@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import styles from './Box.module.scss'
 
 interface IBox {
   children: React.ReactNode
@@ -6,10 +7,14 @@ interface IBox {
 
 const Box: React.FC<IBox> = ({ children }) => {
   return (
-    <motion.div>
+    <motion.div
+      layoutId="box"
+      className={styles.Box}
+
+    >
       {children}
     </motion.div>
   )
 }
 
-export default Box
+export { Box }

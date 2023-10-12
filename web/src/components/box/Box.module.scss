@@ -1,0 +1,9 @@
+.Box {
+  @include rounded;
+
+
+  background-color: $dark;
+  color: $light;
+  padding: 1em;
+
+}
