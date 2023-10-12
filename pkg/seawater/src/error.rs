@@ -3,6 +3,7 @@ use thiserror::Error;
 
 // TODO: make these errors better, some errors in univ3 libs are just require(condition) without a message.
 #[derive(Error, Debug)]
+#[repr(u8)]
 pub enum UniswapV3MathError {
     #[error("Denominator is 0")]
     DenominatorIsZero,
@@ -50,18 +51,30 @@ pub enum UniswapV3MathError {
     PoolAlreadyInitialised,
     #[error("Contract is already initialised")]
     ContractAlreadyInitialised,
+    #[error("Price limit too high")]
+    PriceLimitTooHigh,
+    #[error("Price limit too high")]
+    PriceLimitTooLow,
 }
 
 impl From<UniswapV3MathError> for Vec<u8> {
     // tests panic with the message - this is a hack to get debuginfo
-    #[cfg(test)]
-    fn from(val: UniswapV3MathError) -> Self {
-        panic!("{}", val);
-    }
+    // #[cfg(no)]
+    // fn from(val: UniswapV3MathError) -> Self {
+    //     panic!("{}", val);
+    // }
 
     // runtime panics with no message - this lets us optimise the strings away
-    #[cfg(not(test))]
-    fn from(_val: UniswapV3MathError) -> Self {
-        panic!()
+    //#[cfg(not(test))]
+    fn from(val: UniswapV3MathError) -> Self {
+        if let UniswapV3MathError::Erc20Revert(mut err) = val {
+           let mut e = vec![err.len() as u8];
+           e.append(&mut err);
+           e
+        } else {
+            let id = unsafe { *<*const _>::from(&val).cast::<u8>() };
+
+            vec![id]
+        }
     }
 }

@@ -2,7 +2,9 @@ use crate::error::*;
 use crate::maths::full_math;
 use crate::maths::liquidity_math;
 use crate::types::Wrap;
-use crate::types::{U256Extension, U128, U256, I32};
+use crate::types::{Address, U256Extension, I32, U128, U256};
+use stylus_sdk::alloy_primitives::aliases::B256;
+use stylus_sdk::crypto;
 use stylus_sdk::prelude::*;
 use stylus_sdk::storage::*;
 
@@ -11,12 +13,7 @@ pub struct StoragePositions {
     pub positions: StorageMap<U256, StoragePositionInfo>,
 }
 impl StoragePositions {
-    pub fn new(
-        &mut self,
-        id: U256,
-        low: i32,
-        up: i32,
-    ) {
+    pub fn new(&mut self, id: U256, low: i32, up: i32) {
         let mut info = self.positions.setter(id);
         info.lower.set(I32::wrap(&low));
         info.upper.set(I32::wrap(&up));
@@ -72,12 +69,7 @@ impl StoragePositions {
 
         Ok(())
     }
-    pub fn collect_fees(
-        &mut self,
-        id: U256,
-        amount_0: u128,
-        amount_1: u128,
-    ) -> (u128, u128) {
+    pub fn collect_fees(&mut self, id: U256, amount_0: u128, amount_1: u128) -> (u128, u128) {
         let mut position = self.positions.setter(id);
 
         let owed_0 = position.token_owed_0.get().unwrap();
@@ -107,4 +99,3 @@ pub struct StoragePositionInfo {
     pub token_owed_0: StorageU128,
     pub token_owed_1: StorageU128,
 }
-
