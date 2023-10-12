@@ -26,6 +26,9 @@
       "@/*": [
         "./src/*"
       ],
+      "@/config/*": [
+        "./*"
+      ],
       "@/components/*": [
         "./src/components/*"
       ],
