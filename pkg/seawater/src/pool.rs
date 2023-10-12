@@ -2,7 +2,7 @@ use crate::error::UniswapV3MathError;
 use crate::maths::{full_math, liquidity_math, sqrt_price_math, swap_math, tick_bitmap, tick_math};
 use crate::position;
 use crate::tick;
-use crate::types::{I256Extension, Wrap, I256, I32, U128, U256, U32, U8};
+use crate::types::{Address, I256Extension, Wrap, I256, I32, U128, U256, U256Extension, U32, U8};
 use alloc::vec::Vec;
 use stylus_sdk::{prelude::*, storage::*};
 
@@ -56,20 +56,11 @@ impl StoragePool {
         Ok(())
     }
 
-    pub fn create_position(
-        &mut self,
-        id: U256,
-        low: i32,
-        up: i32,
-    ) {
+    pub fn create_position(&mut self, id: U256, low: i32, up: i32) {
         self.positions.new(id, low, up)
     }
 
-    pub fn update_position(
-        &mut self,
-        id: U256,
-        delta: i128,
-    ) -> Result<(I256, I256), Revert> {
+    pub fn update_position(&mut self, id: U256, delta: i128) -> Result<(I256, I256), Revert> {
         let position = self.positions.positions.get(id);
         let lower = position.lower.get().unwrap();
         let upper = position.upper.get().unwrap();
@@ -104,12 +95,8 @@ impl StoragePool {
             &self.fee_growth_global_1.get(),
         )?;
 
-        self.positions.update(
-            id,
-            delta,
-            fee_growth_inside_0,
-            fee_growth_inside_1,
-        )?;
+        self.positions
+            .update(id, delta, fee_growth_inside_0, fee_growth_inside_1)?;
 
         // clear unneeded storage
         if flip_lower {
@@ -176,18 +163,27 @@ impl StoragePool {
         &mut self,
         zero_for_one: bool,
         amount: I256,
-        price_limit: U256,
+        mut price_limit: U256,
     ) -> Result<(I256, I256), Revert> {
         // ensure the price limit is within bounds
         match zero_for_one {
-            true => assert!(
-                price_limit < self.sqrt_price.get() && price_limit > tick_math::MIN_SQRT_RATIO
-            ),
-            false => assert!(
-                price_limit > self.sqrt_price.get() && price_limit < tick_math::MAX_SQRT_RATIO
-            ),
+            true => {
+                if price_limit == U256::MAX {
+                    price_limit = tick_math::MIN_SQRT_RATIO + U256::one();
+                }
+                if price_limit >= self.sqrt_price.get() || price_limit <= tick_math::MIN_SQRT_RATIO {
+                    Err(UniswapV3MathError::PriceLimitTooLow)?;
+                }
+            },
+            false => {
+                if price_limit == U256::MAX {
+                    price_limit = tick_math::MAX_SQRT_RATIO - U256::one();
+                }
+                if price_limit <= self.sqrt_price.get() || price_limit >= tick_math::MAX_SQRT_RATIO {
+                    Err(UniswapV3MathError::PriceLimitTooHigh)?;
+                }
+            },
         };
-
         // is the swap exact in or exact out
         let exact_in = amount > I256::zero();
 
@@ -373,17 +369,8 @@ impl StoragePool {
         (amount_0, amount_1)
     }
 
-    pub fn collect(
-        &mut self,
-        id: U256,
-        amount_0: u128,
-        amount_1: u128,
-    ) -> (u128, u128) {
-        self.positions.collect_fees(
-            id,
-            amount_0,
-            amount_1,
-        )
+    pub fn collect(&mut self, id: U256, amount_0: u128, amount_1: u128) -> (u128, u128) {
+        self.positions.collect_fees(id, amount_0, amount_1)
     }
 }
 
@@ -454,17 +441,10 @@ mod test {
 
             let id = uint!(2_U256);
 
-            storage.create_position(
-                id,
-                tick_math::get_min_tick(1),
-                tick_math::get_max_tick(1),
-            );
+            storage.create_position(id, tick_math::get_min_tick(1), tick_math::get_max_tick(1));
 
             assert_eq!(
-                storage.update_position(
-                    id,
-                    3161,
-                ),
+                storage.update_position(id, 3161,),
                 Ok((I256::unchecked_from(9996), I256::unchecked_from(1000))),
             );
         });
@@ -481,10 +461,7 @@ mod test {
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(50, 1))?,
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
             );
-            storage.update_position(
-                id,
-                100,
-            )?;
+            storage.update_position(id, 100)?;
 
             let id = uint!(3_U256);
             storage.create_position(
@@ -492,10 +469,7 @@ mod test {
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(80, 1))?,
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
             );
-            storage.update_position(
-                id,
-                100,
-            )?;
+            storage.update_position(id, 100)?;
 
             storage.swap(true, I256::unchecked_from(-10), encode_sqrt_price(60, 1))?;
 

@@ -1,6 +1,7 @@
 #![cfg_attr(not(feature = "export-abi"), no_main, no_std)]
 
 use libseawater::user_entrypoint as stylus_entrypoint;
+use libseawater::*;
 
 pub extern "C" fn user_entrypoint(len: usize) -> usize {
     stylus_entrypoint(len)
