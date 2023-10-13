@@ -28,7 +28,7 @@ const Dev = () => {
         Bar (Longer Text)
       </Menu.Item>
     </Menu>
-    <Menu style="primary" id="b">
+    <Menu style="secondary" id="b">
       <Menu.Item selected={menuB === 'foo'} onClick={() => {
         setMenuB('foo')
       }}>
