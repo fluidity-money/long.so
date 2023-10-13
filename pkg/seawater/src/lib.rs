@@ -1,6 +1,4 @@
-//#![cfg_attr(test, feature(lazy_cell, const_trait_impl))]
-#![feature(const_trait_impl)]
-#![feature(slice_as_chunks)]
+#![cfg_attr(test, feature(lazy_cell, const_trait_impl))]
 
 pub mod erc20;
 pub mod error;
