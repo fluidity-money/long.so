@@ -86,10 +86,10 @@ fn safe_transfer_from(
 pub fn exchange(token: Address, amount: I256) -> Result<(), UniswapV3MathError> {
     if amount.is_negative() {
         // send tokens to the user
-        send(token, amount.into_raw())
+        send(token, amount.checked_abs().unwrap().into_raw())
     } else if amount.is_positive() {
         // take tokens from the user
-        take(token, amount.checked_abs().unwrap().into_raw())
+        take(token, amount.into_raw())
     } else {
         // no amount, do nothing
         Ok(())
