@@ -2,7 +2,7 @@
 
 @mixin box($size) {
   border-radius: $size;
-  padding: $size;
+  padding: $size calc($size * 1.5);
 }
 
 @mixin light {

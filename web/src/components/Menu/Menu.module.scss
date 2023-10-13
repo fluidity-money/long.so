@@ -1,0 +1,44 @@
+.Menu {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+  padding: 1em;
+  @include dark;
+  border-radius: 8px;
+  width: max-content;
+
+  &.light {
+    border: 1px;
+  }
+
+  &.dark {
+    border: 1px;
+  }
+
+  &.primary {
+    border: 1px;
+  }
+
+  &.secondary {
+    border: 1px;
+  }
+}
+
+.Item {
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+
+  &.selected {
+    color: $dark;
+    transition: color 0.2s ease-in-out;
+  }
+  transition: color 0.2s ease-in-out;
+
+  .virtualBox {
+    position: absolute;
+    z-index: -1;
+    inset: -4px -6px;
+    width: calc(100%);
+  }
+}
