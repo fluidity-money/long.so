@@ -1,6 +1,4 @@
-//#![cfg_attr(test, feature(lazy_cell, const_trait_impl))]
-#![feature(const_trait_impl)]
-#![feature(slice_as_chunks)]
+#![cfg_attr(test, feature(lazy_cell, const_trait_impl))]
 
 pub mod erc20;
 pub mod error;
@@ -43,7 +41,7 @@ pub struct Pools {
     // the nft manager is a privileged account that can transfer NFTs!
     nft_manager: StorageAddress,
 
-    usdc: StorageAddress,
+    fusdc: StorageAddress,
     pools: StorageMap<Address, pool::StoragePool>,
     // position NFTs
     next_position_id: StorageU256,
@@ -69,19 +67,19 @@ impl Pools {
                 .swap(zero_for_one, amount, price_limit)?;
 
         erc20::exchange(pool, amount_0)?;
-        erc20::exchange(self.usdc.get(), amount_1)?;
+        erc20::exchange(self.fusdc.get(), amount_1)?;
 
         match zero_for_one {
             true => evm::log(events::Swap {
                 user: msg::sender(),
                 from: pool,
-                to: self.usdc.get(),
+                to: self.fusdc.get(),
                 amountIn: amount_0.checked_abs().unwrap().into_raw(),
                 amountOut: amount_1.checked_abs().unwrap().into_raw(),
             }),
             false => evm::log(events::Swap {
                 user: msg::sender(),
-                from: self.usdc.get(),
+                from: self.fusdc.get(),
                 to: pool,
                 amountIn: amount_1.checked_abs().unwrap().into_raw(),
                 amountOut: amount_0.checked_abs().unwrap().into_raw(),
@@ -228,7 +226,7 @@ impl Pools {
         let (token_0, token_1) = self.pools.setter(pool).update_position(id, delta)?;
 
         erc20::exchange(pool, token_0)?;
-        erc20::exchange(self.usdc.get(), token_1)?;
+        erc20::exchange(self.fusdc.get(), token_1)?;
 
         evm::log(events::UpdatePositionLiquidity { id, delta });
 
@@ -247,7 +245,7 @@ impl Pools {
         let (token_0, token_1) = self.pools.setter(pool).collect(id, amount_0, amount_1);
 
         erc20::send(pool, U256::from(token_0))?;
-        erc20::send(self.usdc.get(), U256::from(token_1))?;
+        erc20::send(self.fusdc.get(), U256::from(token_1))?;
 
         evm::log(events::CollectFees {
             id,
@@ -268,11 +266,11 @@ impl Pools {
         seawater_admin: Address,
         nft_manager: Address,
     ) -> Result<(), Revert> {
-        if self.usdc.get() != Address::ZERO {
+        if self.fusdc.get() != Address::ZERO {
             Err(UniswapV3MathError::ContractAlreadyInitialised)?
         }
 
-        self.usdc.set(usdc);
+        self.fusdc.set(usdc);
         self.seawater_admin.set(seawater_admin);
         self.nft_manager.set(nft_manager);
 
@@ -312,7 +310,7 @@ impl Pools {
         let (token_0, token_1) = self.pools.setter(pool).collect_protocol(amount_0, amount_1);
 
         erc20::send(pool, U256::from(token_0))?;
-        erc20::send(self.usdc.get(), U256::from(token_1))?;
+        erc20::send(self.fusdc.get(), U256::from(token_1))?;
 
         evm::log(events::CollectProtocolFees {
             pool,
