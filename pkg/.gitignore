@@ -15,3 +15,7 @@ Cargo.lock
 
 out/
 cache/
+
+seawater-admin.wasm
+seawater-positions.wasm
+seawater-swaps.wasm
