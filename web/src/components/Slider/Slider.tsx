@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useDragControls, useMotionValue, useTransform } from 'framer-motion'
+import { motion, useMotionValue, useTransform } from 'framer-motion'
 import styles from './Slider.module.scss'
 import { useEffect, useRef, useState } from 'react'
 import { Box } from '..'
@@ -11,15 +11,15 @@ interface ISlider {
   disabled?: boolean
 }
 
-const Slider: React.FC<ISlider> = ({
-  children,
-  onSlideComplete,
-  disabled = false,
-  ...props
-}) => {
+const Slider: React.FC<ISlider> = (props) => {
+  const {
+    children,
+    onSlideComplete,
+    disabled = false,
+  } = props
+
   const containerRef = useRef<HTMLDivElement>(null)
   const x = useMotionValue(0)
-  const dragControls = useDragControls()
 
   const [dragComplete, setDragComplete] = useState(false)
   const [width, setWidth] = useState<number | undefined>(undefined)
@@ -58,10 +58,7 @@ const Slider: React.FC<ISlider> = ({
             }
           }}
         >
-          <div
-            className={styles.track}
-
-          />
+          <div className={styles.track} />
           {
             !dragComplete &&
             <div className={styles.thumb}>
