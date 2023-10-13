@@ -21,6 +21,9 @@ async function deployToken(factory: ContractFactory, name: string, sym: string, 
     return address;
 }
 
+// force mutable logs to allow parseLog (which doesn't mutate anyway)
+type MutableLog = Omit<Log, 'topics'> & {topics: Array<string>}
+
 test("amm", async t => {
     console.log(execSync("forge b").toString());
     const RPC_URL = process.env.RPC_URL ?? "http://127.0.0.1:8547"
@@ -82,19 +85,17 @@ test("amm", async t => {
     ]
 
     // has an issue with readonly typing
-    // @ts-ignore
-    const {args}  = amm.interface.parseLog(mintLog) || {}
-    const [id, _, pool, low, high] = args as unknown as mintEventArgs
+    const {args}  = amm.interface.parseLog(mintLog as MutableLog) || {}
+    const logArgs = args?.toArray()
+    const [id, _, pool, low, high] = logArgs as mintEventArgs || []
+    
+    console.log("pool",pool,"id",id,"delta",high.valueOf() - low.valueOf())
 
-    // @ts-ignore
-    console.log("pool",pool,"id",id,"delta",high - low)
-
-    const updatePositionResult = await amm.updatePosition(tusdcAddress, id, 200)
+    const updatePositionResult = await amm.updatePosition(tusdcAddress, id, 20000)
     await updatePositionResult.wait()
     const receipt = await provider.getTransactionReceipt(updatePositionResult.hash)
-    console.log("updatePosition logs",receipt?.logs)
 
-    await t.test("swap in amounts correct", async _ => {
+    await t.test("raw swap in amounts correct", async _ => {
         const fusdcBeforeBalance = await fusdcContract.balanceOf(defaultAccount)
         const tusdcBeforeBalance = await tusdcContract.balanceOf(defaultAccount)
 
@@ -103,19 +104,31 @@ test("amm", async t => {
         // bool _zeroForOne,
         // int256 _amount,
         // uint256 _priceLimitX96
-        response = await amm.swap(tusdcAddress, true, 1000, encodeSqrtPrice(80))
+ 
+        // swap 10 tUSDC -> fUSDC without hitting the price limit
+        response = await amm.swap(tusdcAddress, true, 10, encodeSqrtPrice(30))
         await response.wait();
 
-        console.log("swap logs",(await provider.getTransactionReceipt(response.hash))?.logs)
 
-        return;
-        const fusdcAfterBalance = await fusdcContract.balanceOf(defaultAccount)
-        const tusdcAfterBalance = await tusdcContract.balanceOf(defaultAccount)
-        const expectedFusdcAfterBalance = fusdcBeforeBalance - BigInt(1000);
-        const expectedTusdcAfterBalance = tusdcBeforeBalance - BigInt(1000);
+        let fusdcAfterBalance = await fusdcContract.balanceOf(defaultAccount)
+        let tusdcAfterBalance = await tusdcContract.balanceOf(defaultAccount)
+        let expectedFusdcAfterBalance = fusdcBeforeBalance + BigInt(995);
+        let expectedTusdcAfterBalance = tusdcBeforeBalance - BigInt(10);
 
-        console.log("fusdc after",fusdcAfterBalance)
-        console.log("tusdc after",tusdcAfterBalance)
+
+        assert(fusdcAfterBalance === expectedFusdcAfterBalance, `expected balances to match! got: ${fusdcAfterBalance}, expected ${expectedFusdcAfterBalance}`)
+        assert(tusdcAfterBalance === expectedTusdcAfterBalance, `expected balances to match! got: ${tusdcAfterBalance}, expected ${expectedTusdcAfterBalance}`)
+
+
+        // swap 1000 fUSDC back to 10 tUSDC
+        response = await amm.swap(tusdcAddress, false, 1000, encodeSqrtPrice(500))
+        await response.wait();
+
+
+        fusdcAfterBalance = await fusdcContract.balanceOf(defaultAccount)
+        tusdcAfterBalance = await tusdcContract.balanceOf(defaultAccount)
+        expectedFusdcAfterBalance -= BigInt(1000);
+        expectedTusdcAfterBalance += BigInt(10);
 
         assert(fusdcAfterBalance === expectedFusdcAfterBalance, `expected balances to match! got: ${fusdcAfterBalance}, expected ${expectedFusdcAfterBalance}`)
         assert(tusdcAfterBalance === expectedTusdcAfterBalance, `expected balances to match! got: ${tusdcAfterBalance}, expected ${expectedTusdcAfterBalance}`)
@@ -143,6 +156,9 @@ test("amm", async t => {
         t.todo();
     })
     await t.test("admin functions", async t => {
+        t.todo();
+    })
+    await t.test("price limits", async t => {
         t.todo();
     })
 })
