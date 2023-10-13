@@ -7,6 +7,7 @@ interface IItem {
   selected?: boolean
   onClick?: () => void
   groupId?: string
+  background?: 'light' | 'dark'
 }
 
 interface IMenu {
@@ -17,11 +18,12 @@ interface IMenu {
 }
 
 const Item: React.FC<IItem> = (props) => {
-  const { children, selected, onClick, groupId } = props
+  const { children, selected, onClick, groupId, background = 'light' } = props
 
   const classes = `
     ${styles.Item}
     ${selected ? styles.selected : ''}
+    ${styles[background]}
   `
 
   return <motion.div
@@ -46,7 +48,7 @@ const Item: React.FC<IItem> = (props) => {
     {
       selected && <Box
         layoutId={groupId}
-        background={'dark'}
+        background={background}
         className={styles.virtualBox}
       />
     }
@@ -62,14 +64,12 @@ const Menu: React.FC<IMenu> = (props) => {
     ${styles[background]}
     ${styles[style]}
   `
-
-  const frameIsDark = (background === 'dark' && style === 'secondary') || (background === 'light' && style === 'primary')
+  const frameColor = (background === 'light' && style === 'primary') || (background === 'dark' && style === 'secondary') ? 'dark' : 'light'
 
   return <div className={classes}>
     <LayoutGroup id={id}>
-
       {children.map((item, i) => {
-        return <Item {...item.props} groupId={id} key={`${id}-${i}`} />
+        return <Item {...item.props} groupId={id} key={`${id}-${i}`} background={frameColor} />
       })}
     </LayoutGroup>
   </div>
