@@ -193,6 +193,23 @@ contract SeawaterAMM is ISeawaterAMM {
         directDelegate(_getExecutorPosition());
     }
 
+    function updatePosition(
+        address pool,
+        uint256 id,
+        int128 delta
+    ) external returns (int256, int256) {
+        directDelegate(_getExecutorPosition());
+    }
+
+    function collect(
+        address pool,
+        uint256 id,
+        uint128 amount0,
+        uint128 amount1
+    ) external returns (uint128, uint128) {
+        directDelegate(_getExecutorPosition());
+    }
+
     // internal functions
 
     // proxy storage manipulators

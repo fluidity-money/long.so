@@ -1,11 +1,9 @@
-//#![cfg_attr(test, feature(lazy_cell, const_trait_impl))]
-#![feature(const_trait_impl)]
-#![feature(slice_as_chunks)]
-#![feature(lazy_cell)]
-#![allow(incomplete_features)]
+#![cfg_attr(test, feature(lazy_cell, const_trait_impl))]
 
 pub mod erc20;
 pub mod error;
+pub mod events;
+
 pub mod maths;
 pub mod pool;
 pub mod position;
@@ -18,8 +16,10 @@ extern crate alloc;
 use crate::types::{Address, I256Extension, I256, U256};
 use error::UniswapV3MathError;
 use maths::tick_math;
-use stylus_sdk::{msg, prelude::*, storage::*};
+
 use types::U256Extension;
+
+use stylus_sdk::{evm, msg, prelude::*, storage::*};
 
 type Revert = Vec<u8>;
 
@@ -44,7 +44,7 @@ pub struct Pools {
     // the nft manager is a privileged account that can transfer NFTs!
     nft_manager: StorageAddress,
 
-    usdc: StorageAddress,
+    fusdc: StorageAddress,
     pools: StorageMap<Address, pool::StoragePool>,
     // position NFTs
     next_position_id: StorageU256,
@@ -70,8 +70,24 @@ impl Pools {
                 .swap(zero_for_one, amount, price_limit)?;
 
         erc20::exchange(pool, amount_0)?;
-        erc20::exchange(self.usdc.get(), amount_1)?;
+        erc20::exchange(self.fusdc.get(), amount_1)?;
 
+        match zero_for_one {
+            true => evm::log(events::Swap {
+                user: msg::sender(),
+                from: pool,
+                to: self.fusdc.get(),
+                amountIn: amount_0.checked_abs().unwrap().into_raw(),
+                amountOut: amount_1.checked_abs().unwrap().into_raw(),
+            }),
+            false => evm::log(events::Swap {
+                user: msg::sender(),
+                from: self.fusdc.get(),
+                to: pool,
+                amountIn: amount_1.checked_abs().unwrap().into_raw(),
+                amountOut: amount_0.checked_abs().unwrap().into_raw(),
+            }),
+        }
         Ok((amount_0, amount_1))
     }
 
@@ -104,6 +120,14 @@ impl Pools {
 
         erc20::take(from, amount_in)?;
         erc20::send(to, amount_out)?;
+
+        evm::log(events::Swap {
+            user: msg::sender(),
+            from,
+            to,
+            amountIn: amount_in,
+            amountOut: amount_out,
+        });
 
         // return amount - amount_in to the user
         // send amount_out to the user
@@ -143,15 +167,28 @@ impl Pools {
 
         self.next_position_id.set(id + U256::one());
 
-        self.grant_position(msg::sender(), id);
+        let owner = msg::sender();
+
+        self.grant_position(owner, id);
+
+        evm::log(events::MintPosition {
+            owner,
+            id,
+            pool,
+            lower,
+            upper,
+        });
 
         Ok(())
     }
 
     pub fn burn_position(&mut self, id: U256) -> Result<(), Revert> {
-        assert_eq!(self.position_owners.get(id), msg::sender());
+        let owner = msg::sender();
+        assert_eq!(self.position_owners.get(id), owner);
 
-        self.remove_position(msg::sender(), id);
+        self.remove_position(owner, id);
+
+        evm::log(events::BurnPosition { owner, id });
 
         Ok(())
     }
@@ -167,6 +204,8 @@ impl Pools {
 
         self.remove_position(from, id);
         self.grant_position(to, id);
+
+        evm::log(events::TransferPosition { from, to, id });
 
         Ok(())
     }
@@ -190,7 +229,9 @@ impl Pools {
         let (token_0, token_1) = self.pools.setter(pool).update_position(id, delta)?;
 
         erc20::exchange(pool, token_0)?;
-        erc20::exchange(self.usdc.get(), token_1)?;
+        erc20::exchange(self.fusdc.get(), token_1)?;
+
+        evm::log(events::UpdatePositionLiquidity { id, delta });
 
         Ok((token_0, token_1))
     }
@@ -202,12 +243,20 @@ impl Pools {
         amount_0: u128,
         amount_1: u128,
     ) -> Result<(u128, u128), Revert> {
-        // TODO permissions?
+        assert!(msg::sender() == self.position_owners.get(id));
+
         let (token_0, token_1) = self.pools.setter(pool).collect(id, amount_0, amount_1);
 
         erc20::send(pool, U256::from(token_0))?;
-        erc20::send(self.usdc.get(), U256::from(token_1))?;
+        erc20::send(self.fusdc.get(), U256::from(token_1))?;
 
+        evm::log(events::CollectFees {
+            id,
+            pool,
+            to: msg::sender(),
+            amount0: token_0,
+            amount1: token_1,
+        });
         Ok((token_0, token_1))
     }
 }
@@ -220,11 +269,11 @@ impl Pools {
         seawater_admin: Address,
         nft_manager: Address,
     ) -> Result<(), Revert> {
-        if self.usdc.get() != Address::ZERO {
+        if self.fusdc.get() != Address::ZERO {
             Err(UniswapV3MathError::ContractAlreadyInitialised)?
         }
 
-        self.usdc.set(usdc);
+        self.fusdc.set(usdc);
         self.seawater_admin.set(seawater_admin);
         self.nft_manager.set(nft_manager);
 
@@ -245,6 +294,12 @@ impl Pools {
             .setter(pool)
             .init(price, fee, tick_spacing, max_liquidity_per_tick)?;
 
+        evm::log(events::NewPool {
+            token: pool,
+            fee,
+            price,
+        });
+
         Ok(())
     }
 
@@ -258,7 +313,14 @@ impl Pools {
         let (token_0, token_1) = self.pools.setter(pool).collect_protocol(amount_0, amount_1);
 
         erc20::send(pool, U256::from(token_0))?;
-        erc20::send(self.usdc.get(), U256::from(token_1))?;
+        erc20::send(self.fusdc.get(), U256::from(token_1))?;
+
+        evm::log(events::CollectProtocolFees {
+            pool,
+            to: msg::sender(),
+            amount0: token_0,
+            amount1: token_1,
+        });
 
         // transfer tokens
         Ok((token_0, token_1))
