@@ -2,10 +2,9 @@
 
 import { useState } from 'react'
 import styles from './page.module.scss'
-import { Box, Button, Chip, Menu, Text } from "@/components"
+import { Box, Button, Chip, Menu, Text, Link, Slider } from "@/components"
 
 const Dev = () => {
-
   const [menu, setMenu] = useState('foo')
   const [menuB, setMenuB] = useState('foo')
 
@@ -14,6 +13,7 @@ const Dev = () => {
     <Box>This is a box</Box>
     <Button>This is a button</Button>
     <Chip>This is a chip</Chip>
+    <Chip rounded>This is a rounded chip</Chip>
     <Chip><Text weight="semibold">This is a chip</Text><Text weight="semibold">with multiple children</Text></Chip>
     <div><Text>This is some </Text><Text weight="semibold">variable weight text.</Text></div>
     <Menu style="primary" id="a">
@@ -40,6 +40,8 @@ const Dev = () => {
         Bar (Longer Text)
       </Menu.Item>
     </Menu>
+    <Link>Link Button -&gt;</Link>
+    <Slider onSlideComplete={() => { console.log('hi') }}>Test</Slider>
   </div>
 }
 
