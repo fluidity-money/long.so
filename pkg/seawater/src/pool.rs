@@ -2,7 +2,7 @@ use crate::error::UniswapV3MathError;
 use crate::maths::{full_math, liquidity_math, sqrt_price_math, swap_math, tick_bitmap, tick_math};
 use crate::position;
 use crate::tick;
-use crate::types::{Address, I256Extension, Wrap, I256, I32, U128, U256, U256Extension, U32, U8};
+use crate::types::{I256Extension, Wrap, I256, I32, U128, U256, U256Extension, U32, U8};
 use alloc::vec::Vec;
 use stylus_sdk::{prelude::*, storage::*};
 
