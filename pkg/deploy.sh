@@ -47,4 +47,3 @@ forge create "SeawaterAMM" --rpc-url $STYLUS_ENDPOINT --private-key $STYLUS_PRIV
         $admin_addr \
         $(cast --address-zero) \
         $FUSDC_TOKEN_ADDR
-

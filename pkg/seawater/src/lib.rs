@@ -1,9 +1,11 @@
 //#![cfg_attr(test, feature(lazy_cell, const_trait_impl))]
 #![feature(const_trait_impl)]
 #![feature(slice_as_chunks)]
+#![feature(lazy_cell)]
+#![allow(incomplete_features)]
 
-pub mod error;
 pub mod erc20;
+pub mod error;
 pub mod maths;
 pub mod pool;
 pub mod position;
@@ -16,7 +18,7 @@ extern crate alloc;
 use crate::types::{Address, I256Extension, I256, U256};
 use error::UniswapV3MathError;
 use maths::tick_math;
-use stylus_sdk::{prelude::*, storage::*, msg};
+use stylus_sdk::{msg, prelude::*, storage::*};
 use types::U256Extension;
 
 type Revert = Vec<u8>;
@@ -62,9 +64,10 @@ impl Pools {
         amount: I256,
         price_limit: U256,
     ) -> Result<(I256, I256), Revert> {
-        let (amount_0, amount_1) = self.pools
-            .setter(pool)
-            .swap(zero_for_one, amount, price_limit)?;
+        let (amount_0, amount_1) =
+            self.pools
+                .setter(pool)
+                .swap(zero_for_one, amount, price_limit)?;
 
         erc20::exchange(pool, amount_0)?;
         erc20::exchange(self.usdc.get(), amount_1)?;
@@ -115,7 +118,9 @@ impl Pools {
 
         // increment count
         let owned_positions_count = self.owned_positions.get(owner) + U256::one();
-        self.owned_positions.setter(owner).set(owned_positions_count);
+        self.owned_positions
+            .setter(owner)
+            .set(owned_positions_count);
     }
 
     pub fn remove_position(&mut self, owner: Address, id: U256) {
@@ -124,21 +129,17 @@ impl Pools {
 
         // decrement count
         let owned_positions_count = self.owned_positions.get(owner) - U256::one();
-        self.owned_positions.setter(owner).set(owned_positions_count);
+        self.owned_positions
+            .setter(owner)
+            .set(owned_positions_count);
     }
 }
 
 #[cfg_attr(feature = "positions", external)]
 impl Pools {
-    pub fn mint_position(
-        &mut self,
-        pool: Address,
-        lower: i32,
-        upper: i32,
-    ) -> Result<(), Revert> {
+    pub fn mint_position(&mut self, pool: Address, lower: i32, upper: i32) -> Result<(), Revert> {
         let id = self.next_position_id.get();
-        self.pools.setter(pool)
-            .create_position(id, lower, upper);
+        self.pools.setter(pool).create_position(id, lower, upper);
 
         self.next_position_id.set(id + U256::one());
 
@@ -147,10 +148,7 @@ impl Pools {
         Ok(())
     }
 
-    pub fn burn_position(
-        &mut self,
-        id: U256,
-    ) -> Result<(), Revert> {
+    pub fn burn_position(&mut self, id: U256) -> Result<(), Revert> {
         assert_eq!(self.position_owners.get(id), msg::sender());
 
         self.remove_position(msg::sender(), id);
@@ -173,17 +171,11 @@ impl Pools {
         Ok(())
     }
 
-    pub fn position_owner(
-        &mut self,
-        id: U256,
-    ) -> Result<Address, Revert> {
+    pub fn position_owner(&mut self, id: U256) -> Result<Address, Revert> {
         Ok(self.position_owners.get(id))
     }
 
-    pub fn position_balance(
-        &self,
-        user: Address,
-    ) -> Result<U256, Revert> {
+    pub fn position_balance(&self, user: Address) -> Result<U256, Revert> {
         Ok(self.owned_positions.get(user))
     }
 
@@ -195,10 +187,7 @@ impl Pools {
     ) -> Result<(I256, I256), Revert> {
         assert_eq!(msg::sender(), self.position_owners.get(id));
 
-        let (token_0, token_1) = self
-            .pools
-            .setter(pool)
-            .update_position(id, delta)?;
+        let (token_0, token_1) = self.pools.setter(pool).update_position(id, delta)?;
 
         erc20::exchange(pool, token_0)?;
         erc20::exchange(self.usdc.get(), token_1)?;
@@ -214,10 +203,7 @@ impl Pools {
         amount_1: u128,
     ) -> Result<(u128, u128), Revert> {
         // TODO permissions?
-        let (token_0, token_1) = self
-            .pools
-            .setter(pool)
-            .collect(id, amount_0, amount_1);
+        let (token_0, token_1) = self.pools.setter(pool).collect(id, amount_0, amount_1);
 
         erc20::send(pool, U256::from(token_0))?;
         erc20::send(self.usdc.get(), U256::from(token_1))?;
