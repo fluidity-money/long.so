@@ -22,6 +22,7 @@ const Box: React.FC<IBox> = (props) => {
       layoutId={layoutId}
       className={classes}
       transition={{ duration: 0.2, ease: 'easeInOut' }}
+      style={{borderRadius: 4}}
     >
       {children}
     </motion.div>
