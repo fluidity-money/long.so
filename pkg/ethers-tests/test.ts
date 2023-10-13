@@ -103,7 +103,7 @@ test("amm", async t => {
         // bool _zeroForOne,
         // int256 _amount,
         // uint256 _priceLimitX96
-        response = await amm.swap(tusdcAddress, true, 1000, encodeSqrtPrice(80, 1))
+        response = await amm.swap(tusdcAddress, true, 1000, encodeSqrtPrice(80))
         await response.wait();
 
         console.log("swap logs",(await provider.getTransactionReceipt(response.hash))?.logs)
