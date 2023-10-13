@@ -3,6 +3,7 @@
 import { motion, useDragControls, useMotionValue, useTransform } from 'framer-motion'
 import styles from './Slider.module.scss'
 import { useEffect, useRef, useState } from 'react'
+import { Box } from '..'
 
 interface ISlider {
   onSlideComplete: () => void
@@ -28,47 +29,55 @@ const Slider: React.FC<ISlider> = ({
     setWidth(containerRef.current.offsetWidth)
   }, [containerRef])
 
-  const arrowOpacity = useTransform(x, [0, (width || 0) - 64], [1, 0])
+  const arrowOpacity = useTransform(x, [0, (width || 0) - 32], [1, 0])
+
+  const classes = `
+    ${styles.SliderButton}
+    ${disabled ? styles.disabled : ''}
+    ${dragComplete ? styles.complete : ''}
+  `
 
   return (
-    <motion.div className={`${styles.SliderButton} ${disabled ? styles.disabled : ''}`} ref={containerRef} style={dragComplete ? { background: 'white' } : {}}>
-      <motion.div
-        className={styles.draggable}
-        drag="x"
-        style={{ x, cursor: 'grab' }}
-        dragElastic={0.1}
-        dragSnapToOrigin
-        dragMomentum={false}
-        dragConstraints={
-          containerRef
-        }
-        onDragEnd={(event, info) => {
-          if (!width) return
-          if (info.offset.x >= width - 64) {
-            setDragComplete(true)
-            onSlideComplete()
+    <Box className={styles.Box}>
+      <motion.div className={classes} ref={containerRef}>
+        <motion.div
+          className={styles.draggable}
+          drag="x"
+          style={{ x, cursor: 'grab' }}
+          dragElastic={0.1}
+          dragSnapToOrigin
+          dragMomentum={false}
+          dragConstraints={
+            containerRef
           }
-        }}
-      >
-        <div
-          className={styles.track}
+          onDragEnd={(event, info) => {
+            if (!width) return
+            if (info.offset.x >= width - 32) {
+              setDragComplete(true)
+              onSlideComplete()
+            }
+          }}
+        >
+          <div
+            className={styles.track}
 
-        />
-        {
-          !dragComplete &&
-          <div className={styles.thumb}>
-            <motion.div
-              style={{ opacity: arrowOpacity }}
-            >
-              -&gt;
-            </motion.div>
-          </div>
-        }
+          />
+          {
+            !dragComplete &&
+            <div className={styles.thumb}>
+              <motion.div
+                style={{ opacity: arrowOpacity }}
+              >
+                -&gt;
+              </motion.div>
+            </div>
+          }
+        </motion.div>
+        <motion.div className={styles.content}>
+          {children}
+        </motion.div>
       </motion.div>
-      <motion.div className={styles.content}>
-        {children}
-      </motion.div>
-    </motion.div>
+    </Box>
   )
 }
 
