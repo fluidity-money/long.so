@@ -8,11 +8,11 @@ use stylus_sdk::{contract, msg};
 // the function reverts
 // or there's calldata and the calldata is falsey
 fn call_optional_return(contract: Address, data: &[u8]) -> Result<(), UniswapV3MathError> {
-    match RawCall::new().limit_return_data(0, 1).call(contract, data) {
+    match RawCall::new().call(contract, data) {
         // reverting calls revert
         Err(revert) => Err(UniswapV3MathError::Erc20Revert(revert)),
         Ok(data) => {
-            match data.get(0) {
+            match data.get(32) {
                 // nonreverting with no return data is okay
                 None => Ok(()),
                 // nonreverting with falsey return data reverts
@@ -44,10 +44,7 @@ const fn selector(name: &[u8], expected: [u8; 4]) -> [u8; 4] {
     result
 }
 
-const TRANSFER_SELECTOR: [u8; 4] = selector(
-    b"transfer(address,uint256)",
-    [0xa9, 0x05, 0x9c, 0xbb],
-);
+const TRANSFER_SELECTOR: [u8; 4] = selector(b"transfer(address,uint256)", [0xa9, 0x05, 0x9c, 0xbb]);
 const TRANSFER_FROM_SELECTOR: [u8; 4] = selector(
     b"transferFrom(address,address,uint256)",
     [0x23, 0xb8, 0x72, 0xdd],
@@ -85,14 +82,14 @@ fn safe_transfer_from(
     call_optional_return(token, &encode_transfer_from(from, to, amount))
 }
 
-// sends a token delta - if `amount` is positive, sends to the user, otherwise takes from the user
+// sends a token delta - if `amount` is positive, takes from the user
 pub fn exchange(token: Address, amount: I256) -> Result<(), UniswapV3MathError> {
-    if amount.is_positive() {
+    if amount.is_negative() {
         // send tokens to the user
-        send(token, amount.into_raw())
-    } else if amount.is_negative() {
+        send(token, amount.checked_abs().unwrap().into_raw())
+    } else if amount.is_positive() {
         // take tokens from the user
-        take(token, amount.checked_abs().unwrap().into_raw())
+        take(token, amount.into_raw())
     } else {
         // no amount, do nothing
         Ok(())

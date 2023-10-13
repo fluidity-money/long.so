@@ -5,7 +5,6 @@ pub use stylus_sdk;
 
 pub type TickBitmap = stylus_sdk::storage::StorageMap<i16, stylus_sdk::storage::StorageU256>;
 
-
 pub type U256 = stylus_sdk::alloy_primitives::U256;
 pub trait U256Extension: Sized {
     #[cfg(test)]
@@ -63,11 +62,8 @@ impl I256Extension for I256 {
 
     fn abs_neg(self) -> U256 {
         assert!(self.is_negative());
-        self
-            .checked_abs().unwrap()
-            .into_raw()
+        self.checked_abs().unwrap().into_raw()
     }
-
 }
 
 pub type U128 = stylus_sdk::alloy_primitives::U128;

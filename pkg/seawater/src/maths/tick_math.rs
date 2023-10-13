@@ -1,5 +1,3 @@
-
-
 use crate::types::{U256Extension, U256};
 
 use crate::error::UniswapV3MathError;
@@ -28,7 +26,7 @@ pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
         U256::one() << 128 // 1
     };
 
-    abs_tick = abs_tick >> 1;
+    abs_tick >>= 1;
 
     let mut ratio = uint!(0xfff97272373d413259a46990580e213a_U256); // 1/1.0001
 
@@ -37,7 +35,7 @@ pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
             result = (result * ratio) >> 128;
         }
         ratio = (ratio * ratio) >> 128;
-        abs_tick = abs_tick >> 1;
+        abs_tick >>= 1;
     }
 
     // invert back from 1/1.0001^i to 1.0001^i
