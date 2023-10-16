@@ -105,19 +105,19 @@ contract SeawaterAMM is ISeawaterAMM {
     // admin functions
 
     function init(
-        address token,
-        uint256 sqrtPriceX96,
-        uint32 fee,
-        uint8 tickSpacing,
-        uint128 maxLiquidityPerTick
+        address /* token */,
+        uint256 /* sqrtPriceX96 */,
+        uint32 /* fee */,
+        uint8 /* tickSpacing */,
+        uint128 /* maxLiquidityPerTick */
     ) external {
         directDelegate(_getExecutorAdmin());
     }
 
     function collectProtocol(
-        address pool,
-        uint128 amount0,
-        uint128 amount1
+        address /* pool */,
+        uint128 /* amount0 */,
+        uint128 /* amount1 */
     ) external returns (uint128, uint128) {
         directDelegate(_getExecutorAdmin());
     }
@@ -161,35 +161,35 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterAMM
-    function swap(address pool, bool zeroForOne, int256 amount, uint256 priceLimit) external returns (int256, int256) {
+    function swap(address /* pool */, bool /* zeroForOne */, int256 /* amount */, uint256 /* priceLimit */) external returns (int256, int256) {
         directDelegate(_getExecutorSwap());
     }
 
     /// @inheritdoc ISeawaterAMM
-    function swap2ExactIn(address tokenA, address tokenB, uint256 amountIn, uint256 minAmountOut) external returns (uint256, uint256) {
+    function swap2ExactIn(address /* tokenA */, address /* tokenB */, uint256 /* amountIn */, uint256 /* minAmountOut */) external returns (uint256, uint256) {
         directDelegate(_getExecutorSwap());
     }
 
     // position functions
 
-    function mintPosition(address token, int32 lower, int32 upper) external returns (uint256 id) {
+    function mintPosition(address /* token */, int32 /* lower */, int32 /* upper */) external returns (uint256 /* id */) {
         directDelegate(_getExecutorPosition());
     }
 
-    function burnPosition(uint256 id) external {
+    function burnPosition(uint256 /* id */) external {
         directDelegate(_getExecutorPosition());
     }
 
-    function positionOwner(uint256 id) external returns (address) {
+    function positionOwner(uint256 /* id */) external returns (address) {
         directDelegate(_getExecutorPosition());
     }
 
     // called by the position manager contract!!
-    function transferPosition(uint256 id, address from, address to) external {
+    function transferPosition(uint256 /* id */, address /* from */, address /* to */) external {
         directDelegate(_getExecutorPosition());
     }
 
-    function positionBalance(address user) external returns (uint256) {
+    function positionBalance(address /* user */) external returns (uint256) {
         directDelegate(_getExecutorPosition());
     }
 
