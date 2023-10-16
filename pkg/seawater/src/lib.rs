@@ -3,6 +3,7 @@
 pub mod erc20;
 pub mod error;
 pub mod events;
+
 pub mod maths;
 pub mod pool;
 pub mod position;
@@ -15,8 +16,10 @@ extern crate alloc;
 use crate::types::{Address, I256Extension, I256, U256};
 use error::UniswapV3MathError;
 use maths::tick_math;
-use stylus_sdk::{evm, msg, prelude::*, storage::*};
+
 use types::U256Extension;
+
+use stylus_sdk::{evm, msg, prelude::*, storage::*};
 
 type Revert = Vec<u8>;
 
