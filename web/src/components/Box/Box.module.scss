@@ -1,0 +1,14 @@
+.Box {
+  @include box(4px);
+
+  width: max-content;
+  height: auto;
+
+  &.light {
+    @include dark;
+  }
+
+  &.dark {
+    @include light;
+  }
+}
