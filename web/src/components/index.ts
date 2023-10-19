@@ -5,6 +5,7 @@ import { Chip } from './Chip'
 import { Menu } from './Menu'
 import { Link } from './Link'
 import { Slider } from './Slider'
+import { Supicon } from './Supicon'
 
 export {
   Box,
@@ -13,5 +14,6 @@ export {
   Chip,
   Menu,
   Link,
-  Slider
+  Slider,
+  Supicon
 }
