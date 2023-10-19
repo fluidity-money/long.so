@@ -2,12 +2,11 @@
 
 import { useState } from 'react'
 import styles from './page.module.scss'
-import { Box, Button, Chip, Menu, Text, Link, Slider } from "@/components"
+import { Box, Button, Chip, Menu, Text, Link, Slider, Supicon } from "@/components"
 
 const Dev = () => {
   const [menu, setMenu] = useState('foo')
   const [menuB, setMenuB] = useState('foo')
-
 
   return <div className={styles.dev}>Components
     <Box>This is a box</Box>
@@ -42,6 +41,7 @@ const Dev = () => {
     </Menu>
     <Link>Link Button -&gt;</Link>
     <Slider onSlideComplete={() => { console.log('hi') }}>Test</Slider>
+    <Supicon seed="balls" />
   </div>
 }
 
