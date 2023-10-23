@@ -1,12 +1,12 @@
-use libseawater::error::UniswapV3MathError;
+use libseawater::error::Error;
 use libseawater::maths::tick_math::*;
 use libseawater::types::{U256Extension, I256, U256};
 use ruint_macro::uint;
 use std::ops::{BitOr, Neg, Shl, Shr};
 
-pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, UniswapV3MathError> {
+pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, Error> {
     if !(sqrt_price_x_96 >= MIN_SQRT_RATIO && sqrt_price_x_96 < MAX_SQRT_RATIO) {
-        return Err(UniswapV3MathError::R);
+        return Err(Error::R);
     }
 
     let ratio = sqrt_price_x_96.shl(32);
@@ -120,7 +120,7 @@ pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, UniswapV3Mat
     Ok(tick)
 }
 
-pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
+pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, Error> {
     let abs_tick = if tick < 0 {
         U256::from(tick.neg())
     } else {
@@ -128,7 +128,7 @@ pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
     };
 
     if abs_tick > U256::from(MAX_TICK) {
-        return Err(UniswapV3MathError::T);
+        return Err(Error::T);
     }
 
     let mut ratio = if abs_tick & (U256::from(0x1)) != U256::zero() {

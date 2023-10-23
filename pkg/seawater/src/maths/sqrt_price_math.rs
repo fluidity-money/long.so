@@ -1,6 +1,6 @@
 use crate::types::{U256Extension, I256, U256};
 use crate::{
-    error::UniswapV3MathError,
+    error::Error,
     maths::{
         full_math::{mul_div, mul_div_rounding_up},
         unsafe_math::div_rounding_up,
@@ -21,11 +21,11 @@ pub fn get_next_sqrt_price_from_input(
     liquidity: u128,
     amount_in: U256,
     zero_for_one: bool,
-) -> Result<U256, UniswapV3MathError> {
+) -> Result<U256, Error> {
     if sqrt_price.is_zero() {
-        return Err(UniswapV3MathError::SqrtPriceIsZero);
+        return Err(Error::SqrtPriceIsZero);
     } else if liquidity == 0 {
-        return Err(UniswapV3MathError::LiquidityIsZero);
+        return Err(Error::LiquidityIsZero);
     }
 
     if zero_for_one {
@@ -41,11 +41,11 @@ pub fn get_next_sqrt_price_from_output(
     liquidity: u128,
     amount_out: U256,
     zero_for_one: bool,
-) -> Result<U256, UniswapV3MathError> {
+) -> Result<U256, Error> {
     if sqrt_price.is_zero() {
-        return Err(UniswapV3MathError::SqrtPriceIsZero);
+        return Err(Error::SqrtPriceIsZero);
     } else if liquidity == 0 {
-        return Err(UniswapV3MathError::LiquidityIsZero);
+        return Err(Error::LiquidityIsZero);
     }
 
     if zero_for_one {
@@ -61,7 +61,7 @@ pub fn get_next_sqrt_price_from_amount_0_rounding_up(
     liquidity: u128,
     amount: U256,
     add: bool,
-) -> Result<U256, UniswapV3MathError> {
+) -> Result<U256, Error> {
     if amount.is_zero() {
         return Ok(sqrt_price_x_96);
     }
@@ -100,7 +100,7 @@ pub fn get_next_sqrt_price_from_amount_0_rounding_up(
                 ruint_to_u256(denominator),
             )
         } else {
-            Err(UniswapV3MathError::ProductDivAmount)
+            Err(Error::ProductDivAmount)
         }
     }
 }
@@ -111,7 +111,7 @@ pub fn get_next_sqrt_price_from_amount_1_rounding_down(
     liquidity: u128,
     amount: U256,
     add: bool,
-) -> Result<U256, UniswapV3MathError> {
+) -> Result<U256, Error> {
     if add {
         let quotient = if amount <= MAX_U160 {
             (amount.wrapping_shl(FIXED_POINT_96_RESOLUTION_USIZE)) / U256::from(liquidity)
@@ -122,7 +122,7 @@ pub fn get_next_sqrt_price_from_amount_1_rounding_down(
         let next_sqrt_price = sqrt_price_x_96 + quotient;
 
         if next_sqrt_price > MAX_U160 {
-            Err(UniswapV3MathError::SafeCastToU160Overflow)
+            Err(Error::SafeCastToU160Overflow)
         } else {
             Ok(next_sqrt_price)
         }
@@ -138,7 +138,7 @@ pub fn get_next_sqrt_price_from_amount_1_rounding_down(
 
         //require(sqrtPX96 > quotient);
         if sqrt_price_x_96 <= quotient {
-            return Err(UniswapV3MathError::SqrtPriceIsLteQuotient);
+            return Err(Error::SqrtPriceIsLteQuotient);
         }
 
         Ok(sqrt_price_x_96.overflowing_sub(quotient).0)
@@ -151,7 +151,7 @@ pub fn _get_amount_0_delta(
     mut sqrt_ratio_b_x_96: U256,
     liquidity: u128,
     round_up: bool,
-) -> Result<U256, UniswapV3MathError> {
+) -> Result<U256, Error> {
     if sqrt_ratio_a_x_96 > sqrt_ratio_b_x_96 {
         (sqrt_ratio_a_x_96, sqrt_ratio_b_x_96) = (sqrt_ratio_b_x_96, sqrt_ratio_a_x_96)
     };
@@ -160,7 +160,7 @@ pub fn _get_amount_0_delta(
     let numerator_2 = sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96;
 
     if sqrt_ratio_a_x_96.is_zero() {
-        return Err(UniswapV3MathError::SqrtPriceIsZero);
+        return Err(Error::SqrtPriceIsZero);
     }
 
     if round_up {
@@ -177,7 +177,7 @@ pub fn _get_amount_1_delta(
     mut sqrt_ratio_b_x_96: U256,
     liquidity: u128,
     round_up: bool,
-) -> Result<U256, UniswapV3MathError> {
+) -> Result<U256, Error> {
     if sqrt_ratio_a_x_96 > sqrt_ratio_b_x_96 {
         (sqrt_ratio_a_x_96, sqrt_ratio_b_x_96) = (sqrt_ratio_b_x_96, sqrt_ratio_a_x_96)
     };
@@ -201,7 +201,7 @@ pub fn get_amount_0_delta(
     sqrt_ratio_a_x_96: U256,
     sqrt_ratio_b_x_96: U256,
     liquidity: i128,
-) -> Result<I256, UniswapV3MathError> {
+) -> Result<I256, Error> {
     if liquidity < 0 {
         Ok(-I256::from_raw(_get_amount_0_delta(
             sqrt_ratio_a_x_96,
@@ -223,7 +223,7 @@ pub fn get_amount_1_delta(
     sqrt_ratio_a_x_96: U256,
     sqrt_ratio_b_x_96: U256,
     liquidity: i128,
-) -> Result<I256, UniswapV3MathError> {
+) -> Result<I256, Error> {
     if liquidity < 0 {
         Ok(-I256::from_raw(_get_amount_1_delta(
             sqrt_ratio_a_x_96,
