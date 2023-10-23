@@ -3,12 +3,12 @@ use std::ops::{Add, BitAnd, BitOrAssign, BitXor, Div, Mul, MulAssign};
 
 use libseawater::maths::full_math::*;
 use libseawater::{
-    error::UniswapV3MathError,
+    error::Error,
     maths::utils::{u256_to_ruint, RUINT_ONE, RUINT_THREE, RUINT_TWO, RUINT_ZERO},
 };
 
 // returns (uint256 result)
-pub fn mul_div(a: U256, b: U256, mut denominator: U256) -> Result<U256, UniswapV3MathError> {
+pub fn mul_div(a: U256, b: U256, mut denominator: U256) -> Result<U256, Error> {
     // 512-bit multiply [prod1 prod0] = a * b
     // Compute the product mod 2**256 and mod 2**256 - 1
     // then use the Chinese Remainder Theorem to reconstruct
@@ -26,7 +26,7 @@ pub fn mul_div(a: U256, b: U256, mut denominator: U256) -> Result<U256, UniswapV
     // Handle non-overflow cases, 256 by 256 division
     if prod_1 == RUINT_ZERO {
         if denominator == RUINT_ZERO {
-            return Err(UniswapV3MathError::DenominatorIsZero);
+            return Err(Error::DenominatorIsZero);
         }
         return Ok(prod_0.div(denominator));
     }
@@ -34,7 +34,7 @@ pub fn mul_div(a: U256, b: U256, mut denominator: U256) -> Result<U256, UniswapV
     // Make sure the result is less than 2**256.
     // Also prevents denominator == 0
     if denominator <= prod_1 {
-        return Err(UniswapV3MathError::DenominatorIsLteProdOne);
+        return Err(Error::DenominatorIsLteProdOne);
     }
 
     ///////////////////////////////////////////////
@@ -109,7 +109,7 @@ pub fn mul_div_rounding_up(
     a: U256,
     b: U256,
     denominator: U256,
-) -> Result<U256, UniswapV3MathError> {
+) -> Result<U256, Error> {
     let result = mul_div(a, b, denominator)?;
 
     let a = u256_to_ruint(a);
@@ -118,7 +118,7 @@ pub fn mul_div_rounding_up(
 
     if a.mul_mod(b, denominator) > RUINT_ZERO {
         if result == U256::MAX {
-            Err(UniswapV3MathError::ResultIsU256MAX)
+            Err(Error::ResultIsU256MAX)
         } else {
             Ok(result + U256::one())
         }

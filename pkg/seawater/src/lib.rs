@@ -1,6 +1,8 @@
-#![cfg_attr(test, feature(lazy_cell, const_trait_impl))]
+#![cfg_attr(not(target_arch = "wasm32"), feature(lazy_cell, const_trait_impl))]
+#![deny(clippy::unwrap_used)]
 
 pub mod erc20;
+#[macro_use]
 pub mod error;
 pub mod events;
 
@@ -14,7 +16,7 @@ pub mod types;
 extern crate alloc;
 
 use crate::types::{Address, I256Extension, I256, U256};
-use error::UniswapV3MathError;
+use error::Error;
 use maths::tick_math;
 
 use types::U256Extension;
@@ -77,15 +79,15 @@ impl Pools {
                 user: msg::sender(),
                 from: pool,
                 to: self.fusdc.get(),
-                amountIn: amount_0.checked_abs().unwrap().into_raw(),
-                amountOut: amount_1.checked_abs().unwrap().into_raw(),
+                amountIn: amount_0.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw(),
+                amountOut: amount_1.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw(),
             }),
             false => evm::log(events::Swap {
                 user: msg::sender(),
                 from: self.fusdc.get(),
                 to: pool,
-                amountIn: amount_1.checked_abs().unwrap().into_raw(),
-                amountOut: amount_0.checked_abs().unwrap().into_raw(),
+                amountIn: amount_1.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw(),
+                amountOut: amount_0.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw(),
             }),
         }
         Ok((amount_0, amount_1))
@@ -105,18 +107,26 @@ impl Pools {
                 .setter(from)
                 .swap(true, amount, tick_math::MIN_SQRT_RATIO + U256::one())?;
 
+
+        // make this positive for exact in
+        let interim_usdc_out = interim_usdc_out.checked_neg().ok_or(Error::InterimSwapPositive)?;
+
         // swap usdc -> out
-        let (interim_usdc_in, amount_out) = self.pools.setter(to).swap(
+        let (amount_out, interim_usdc_in) = self.pools.setter(to).swap(
             false,
             interim_usdc_out,
             tick_math::MAX_SQRT_RATIO - U256::one(),
         )?;
 
-        let amount_in = amount_in.abs_neg();
-        let amount_out = amount_out.abs_neg();
+        let amount_in = amount_in.abs_pos()?;
+        let amount_out = amount_out.abs_neg()?;
 
-        assert_eq!(interim_usdc_out, interim_usdc_in);
-        assert!(amount_out >= min_out);
+        if interim_usdc_out != interim_usdc_in {
+            Err(Error::InterimSwapNotEq)?;
+        }
+        if amount_out < min_out {
+            Err(Error::MinOutNotReached)?;
+        }
 
         erc20::take(from, amount_in)?;
         erc20::send(to, amount_out)?;
@@ -184,7 +194,7 @@ impl Pools {
 
     pub fn burn_position(&mut self, id: U256) -> Result<(), Revert> {
         let owner = msg::sender();
-        assert_eq!(self.position_owners.get(id), owner);
+        assert_eq_or!(self.position_owners.get(id), owner, Error::PositionOwnerOnly);
 
         self.remove_position(owner, id);
 
@@ -200,7 +210,7 @@ impl Pools {
         from: Address,
         to: Address,
     ) -> Result<(), Revert> {
-        assert_eq!(msg::sender(), self.nft_manager.get());
+        assert_eq_or!(msg::sender(), self.nft_manager.get(), Error::NftManagerOnly);
 
         self.remove_position(from, id);
         self.grant_position(to, id);
@@ -224,7 +234,7 @@ impl Pools {
         id: U256,
         delta: i128,
     ) -> Result<(I256, I256), Revert> {
-        assert_eq!(msg::sender(), self.position_owners.get(id));
+        assert_eq_or!(msg::sender(), self.position_owners.get(id), Error::PositionOwnerOnly);
 
         let (token_0, token_1) = self.pools.setter(pool).update_position(id, delta)?;
 
@@ -243,7 +253,7 @@ impl Pools {
         amount_0: u128,
         amount_1: u128,
     ) -> Result<(u128, u128), Revert> {
-        assert!(msg::sender() == self.position_owners.get(id));
+        assert_eq_or!(msg::sender(), self.position_owners.get(id), Error::PositionOwnerOnly);
 
         let (token_0, token_1) = self.pools.setter(pool).collect(id, amount_0, amount_1);
 
@@ -269,9 +279,7 @@ impl Pools {
         seawater_admin: Address,
         nft_manager: Address,
     ) -> Result<(), Revert> {
-        if self.fusdc.get() != Address::ZERO {
-            Err(UniswapV3MathError::ContractAlreadyInitialised)?
-        }
+        assert_eq_or!(self.fusdc.get(), Address::ZERO, Error::ContractAlreadyInitialised);
 
         self.fusdc.set(usdc);
         self.seawater_admin.set(seawater_admin);
@@ -288,7 +296,7 @@ impl Pools {
         tick_spacing: u8,
         max_liquidity_per_tick: u128,
     ) -> Result<(), Revert> {
-        assert_eq!(msg::sender(), self.seawater_admin.get());
+        assert_eq_or!(msg::sender(), self.seawater_admin.get(), Error::SeawaterAdminOnly);
 
         self.pools
             .setter(pool)
@@ -309,7 +317,7 @@ impl Pools {
         amount_0: u128,
         amount_1: u128,
     ) -> Result<(u128, u128), Revert> {
-        assert_eq!(msg::sender(), self.seawater_admin.get());
+        assert_eq_or!(msg::sender(), self.seawater_admin.get(), Error::SeawaterAdminOnly);
         let (token_0, token_1) = self.pools.setter(pool).collect_protocol(amount_0, amount_1);
 
         erc20::send(pool, U256::from(token_0))?;

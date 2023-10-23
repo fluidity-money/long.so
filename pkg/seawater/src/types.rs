@@ -3,6 +3,8 @@
 // reexport so we can keep the types the same
 pub use stylus_sdk;
 
+use crate::error::Error;
+
 pub type TickBitmap = stylus_sdk::storage::StorageMap<i16, stylus_sdk::storage::StorageU256>;
 
 pub type U256 = stylus_sdk::alloy_primitives::U256;
@@ -48,7 +50,8 @@ pub type I256 = stylus_sdk::alloy_primitives::I256;
 pub trait I256Extension: Sized {
     fn zero() -> Self;
     fn one() -> Self;
-    fn abs_neg(self) -> U256;
+    fn abs_neg(self) -> Result<U256, Error>;
+    fn abs_pos(self) -> Result<U256, Error>;
 }
 
 impl I256Extension for I256 {
@@ -60,9 +63,17 @@ impl I256Extension for I256 {
         Self::ONE
     }
 
-    fn abs_neg(self) -> U256 {
-        assert!(self.is_negative());
-        self.checked_abs().unwrap().into_raw()
+    fn abs_neg(self) -> Result<U256, Error> {
+        if self.is_positive() {
+            return Err(Error::CheckedAbsIsNegative);
+        }
+        Ok(self.checked_abs().ok_or(Error::AbsTooLow)?.into_raw())
+    }
+    fn abs_pos(self) -> Result<U256, Error> {
+        if self.is_negative() {
+            return Err(Error::CheckedAbsIsPositive);
+        }
+        Ok(self.checked_abs().ok_or(Error::AbsTooLow)?.into_raw())
     }
 }
 
@@ -73,54 +84,56 @@ pub type U8 = stylus_sdk::alloy_primitives::U8;
 
 // ersatz From and Into
 // wraps into W
-pub trait Wrap<W> {
-    fn unwrap(&self) -> W;
-    fn wrap(arg: &W) -> Self;
+pub trait WrappedNative<W> {
+    // system type
+    fn sys(&self) -> W;
+    // library type
+    fn lib(arg: &W) -> Self;
 }
 
-impl Wrap<i128> for I128 {
-    fn unwrap(&self) -> i128 {
+impl WrappedNative<i128> for I128 {
+    fn sys(&self) -> i128 {
         i128::from_le_bytes(self.to_le_bytes())
     }
 
-    fn wrap(arg: &i128) -> Self {
+    fn lib(arg: &i128) -> Self {
         I128::from_le_bytes(arg.to_le_bytes())
     }
 }
-impl Wrap<u128> for U128 {
-    fn unwrap(&self) -> u128 {
+impl WrappedNative<u128> for U128 {
+    fn sys(&self) -> u128 {
         u128::from_le_bytes(self.to_le_bytes())
     }
 
-    fn wrap(arg: &u128) -> Self {
+    fn lib(arg: &u128) -> Self {
         U128::from_le_bytes(arg.to_le_bytes())
     }
 }
-impl Wrap<i32> for I32 {
-    fn unwrap(&self) -> i32 {
+impl WrappedNative<i32> for I32 {
+    fn sys(&self) -> i32 {
         self.as_i32()
     }
 
-    fn wrap(arg: &i32) -> Self {
+    fn lib(arg: &i32) -> Self {
         I32::unchecked_from(*arg)
     }
 }
-impl Wrap<u8> for U8 {
-    fn unwrap(&self) -> u8 {
+impl WrappedNative<u8> for U8 {
+    fn sys(&self) -> u8 {
         self.as_limbs()[0] as u8
     }
 
-    fn wrap(arg: &u8) -> Self {
+    fn lib(arg: &u8) -> Self {
         Self::from_limbs([*arg as u64])
     }
 }
 
-impl Wrap<u32> for U32 {
-    fn unwrap(&self) -> u32 {
+impl WrappedNative<u32> for U32 {
+    fn sys(&self) -> u32 {
         self.as_limbs()[0] as u32
     }
 
-    fn wrap(arg: &u32) -> Self {
+    fn lib(arg: &u32) -> Self {
         Self::from_limbs([*arg as u64])
     }
 }
