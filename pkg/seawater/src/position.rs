@@ -1,7 +1,7 @@
 use crate::error::*;
 use crate::maths::full_math;
 use crate::maths::liquidity_math;
-use crate::types::Wrap;
+use crate::types::WrappedNative;
 use crate::types::{U256Extension, I32, U128, U256};
 
 
@@ -15,8 +15,8 @@ pub struct StoragePositions {
 impl StoragePositions {
     pub fn new(&mut self, id: U256, low: i32, up: i32) {
         let mut info = self.positions.setter(id);
-        info.lower.set(I32::wrap(&low));
-        info.upper.set(I32::wrap(&up));
+        info.lower.set(I32::lib(&low));
+        info.upper.set(I32::lib(&up));
     }
 
     pub fn update(
@@ -25,15 +25,15 @@ impl StoragePositions {
         delta: i128,
         fee_growth_inside_0: U256,
         fee_growth_inside_1: U256,
-    ) -> Result<(), UniswapV3MathError> {
+    ) -> Result<(), Error> {
         let mut info = self.positions.setter(id);
 
-        let liquidity_next = liquidity_math::add_delta(info.liquidity.get().unwrap(), delta)?;
+        let liquidity_next = liquidity_math::add_delta(info.liquidity.get().sys(), delta)?;
 
         let owed_fees_0 = full_math::mul_div(
             fee_growth_inside_0
                 .checked_sub(info.fee_growth_inside_0.get())
-                .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+                .ok_or(Error::FeeGrowthSub)?,
             U256::from(info.liquidity.get()),
             full_math::Q128,
         )?;
@@ -41,14 +41,14 @@ impl StoragePositions {
         let owed_fees_1 = full_math::mul_div(
             fee_growth_inside_1
                 .checked_sub(info.fee_growth_inside_1.get())
-                .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+                .ok_or(Error::FeeGrowthSub)?,
             U256::from(info.liquidity.get()),
             full_math::Q128,
         )?;
 
         // update storage
         if delta != 0 {
-            info.liquidity.set(U128::wrap(&liquidity_next));
+            info.liquidity.set(U128::lib(&liquidity_next));
         }
         info.fee_growth_inside_0.set(fee_growth_inside_0);
         info.fee_growth_inside_1.set(fee_growth_inside_1);
@@ -72,17 +72,17 @@ impl StoragePositions {
     pub fn collect_fees(&mut self, id: U256, amount_0: u128, amount_1: u128) -> (u128, u128) {
         let mut position = self.positions.setter(id);
 
-        let owed_0 = position.token_owed_0.get().unwrap();
-        let owed_1 = position.token_owed_1.get().unwrap();
+        let owed_0 = position.token_owed_0.get().sys();
+        let owed_1 = position.token_owed_1.get().sys();
 
         let amount_0 = u128::min(amount_0, owed_0);
         let amount_1 = u128::min(amount_1, owed_1);
 
         if amount_0 > 0 {
-            position.token_owed_0.set(U128::wrap(&(owed_0 - amount_0)));
+            position.token_owed_0.set(U128::lib(&(owed_0 - amount_0)));
         }
         if amount_1 > 0 {
-            position.token_owed_1.set(U128::wrap(&(owed_1 - amount_1)));
+            position.token_owed_1.set(U128::lib(&(owed_1 - amount_1)));
         }
 
         (amount_0, amount_1)
