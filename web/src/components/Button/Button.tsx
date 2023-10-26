@@ -1,13 +1,13 @@
-import { motion } from 'framer-motion'
+import { ForwardRefComponent, HTMLMotionProps, motion } from 'framer-motion'
 import styles from './Button.module.scss'
 
-interface IButton {
-  children: React.ReactNode
-
+interface IButton extends ForwardRefComponent<HTMLButtonElement, HTMLMotionProps<"button">> {
+    children: React.ReactNode
 }
 
+
 const Button: React.FC<IButton> = (props) => {
-  const { children } = props
+  const { children, ...p } = props
   return <motion.button
     className={styles.Button}
     style={{
@@ -25,6 +25,7 @@ const Button: React.FC<IButton> = (props) => {
     whileTap={{
       scale: 0.95,
     }}
+    {...p}
   >
     {children}
   </motion.button>
