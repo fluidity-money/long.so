@@ -47,11 +47,22 @@ interface ISeawaterEvents {
     );
 
     // amm
-    event Swap(
+    event Swap2(
         address indexed user,
         address indexed from,
         address indexed to,
         uint256 amountIn,
-        uint256 amountOut
+        uint256 amountOut,
+        int32 finalTick0,
+        int32 finalTick1
+    );
+
+    event Swap1(
+        address indexed user,
+        address indexed pool,
+        bool zeroForOne,
+        uint256 amount0,
+        uint256 amount1,
+        int32 finalTick
     );
 }

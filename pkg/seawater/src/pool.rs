@@ -162,7 +162,7 @@ impl StoragePool {
         zero_for_one: bool,
         amount: I256,
         mut price_limit: U256,
-    ) -> Result<(I256, I256), Revert> {
+    ) -> Result<(I256, I256, i32), Revert> {
         // ensure the price limit is within bounds
         match zero_for_one {
             true => {
@@ -347,7 +347,7 @@ impl StoragePool {
             false => (state.amount_calculated, amount - state.amount_remaining),
         };
 
-        Ok((amount_0, amount_1))
+        Ok((amount_0, amount_1, state.tick))
     }
 
     pub fn collect_protocol(&mut self, amount_0: u128, amount_1: u128) -> (u128, u128) {
