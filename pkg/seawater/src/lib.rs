@@ -66,7 +66,7 @@ impl Pools {
         amount: I256,
         price_limit: U256,
     ) -> Result<(I256, I256), Revert> {
-        let (amount_0, amount_1) =
+        let (amount_0, amount_1, ending_tick) =
             self.pools
                 .setter(pool)
                 .swap(zero_for_one, amount, price_limit)?;
@@ -74,22 +74,20 @@ impl Pools {
         erc20::exchange(pool, amount_0)?;
         erc20::exchange(self.fusdc.get(), amount_1)?;
 
-        match zero_for_one {
-            true => evm::log(events::Swap {
-                user: msg::sender(),
-                from: pool,
-                to: self.fusdc.get(),
-                amountIn: amount_0.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw(),
-                amountOut: amount_1.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw(),
-            }),
-            false => evm::log(events::Swap {
-                user: msg::sender(),
-                from: self.fusdc.get(),
-                to: pool,
-                amountIn: amount_1.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw(),
-                amountOut: amount_0.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw(),
-            }),
-        }
+        let amount_0_abs = amount_0.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw();
+        let amount_1_abs = amount_1.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw();
+
+        let user = msg::sender();
+
+        evm::log(events::Swap1 {
+            user,
+            pool,
+            zeroForOne: zero_for_one,
+            amount0: amount_0_abs,
+            amount1: amount_1_abs,
+            finalTick: ending_tick,
+        });
+
         Ok((amount_0, amount_1))
     }
 
@@ -102,17 +100,16 @@ impl Pools {
     ) -> Result<(U256, U256), Revert> {
         let amount = I256::unchecked_from(amount);
         // swap in -> usdc
-        let (amount_in, interim_usdc_out) =
+        let (amount_in, interim_usdc_out, final_tick_in) =
             self.pools
                 .setter(from)
                 .swap(true, amount, tick_math::MIN_SQRT_RATIO + U256::one())?;
-
 
         // make this positive for exact in
         let interim_usdc_out = interim_usdc_out.checked_neg().ok_or(Error::InterimSwapPositive)?;
 
         // swap usdc -> out
-        let (amount_out, interim_usdc_in) = self.pools.setter(to).swap(
+        let (amount_out, interim_usdc_in, final_tick_out) = self.pools.setter(to).swap(
             false,
             interim_usdc_out,
             tick_math::MAX_SQRT_RATIO - U256::one(),
@@ -131,12 +128,14 @@ impl Pools {
         erc20::take(from, amount_in)?;
         erc20::send(to, amount_out)?;
 
-        evm::log(events::Swap {
+        evm::log(events::Swap2 {
             user: msg::sender(),
             from,
             to,
             amountIn: amount_in,
             amountOut: amount_out,
+            finalTick0: final_tick_in,
+            finalTick1: final_tick_out,
         });
 
         // return amount - amount_in to the user
