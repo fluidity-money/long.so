@@ -1,5 +1,15 @@
 import { useEffect, useRef } from 'react'
 import styles from './Supicon.module.scss'
+import { Md5 } from 'ts-md5'
+
+// TODO: Get color variables from scss export.
+
+// Constant declarations
+const SQUARE = 20
+const GRID = 7
+const PADDING = SQUARE / 2
+const SIZE = SQUARE * GRID + PADDING * 2
+const N = (GRID * Math.ceil(GRID / 2))
 
 interface ISupicon {
   seed: string
@@ -7,24 +17,40 @@ interface ISupicon {
 
 const Supicon: React.FC<ISupicon> = (props) => {
 
-  const canvasRef = useRef(null)
+  const { seed } = props
+
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+
+    if (!canvas) return
+
+    const context = canvas.getContext('2d')
+
+    if (!context) return
+  }, [canvasRef])
+
+  const identifier = Md5.hashStr(seed)
+
+  const hexToDecimal = (hex: string) => parseInt(hex, 16)
+
+  const map: boolean[] = []
+
+  for (var i = 0; i < N; i++) {
+    map.push(hexToDecimal(identifier[i]) % 2 === 0)
+  }
 
   useEffect(() => {
     if (!canvasRef.current) return
 
-    buildSupicon(canvasRef.current)
-  }, [canvasRef])
-  return <div ref={canvasRef} className={styles.Supicon} />
+    buildSupicon(canvasRef.current, map)
+  }, [canvasRef, map])
+
+  return <canvas ref={canvasRef} className={styles.Supicon} />
 }
 
 export { Supicon }
-
-// Constant declarations
-const SQUARE = 20
-const GRID = 7
-const PADDING = SQUARE / 2
-const FILL_CHANCE = 0.5
-var SIZE = SQUARE * GRID + PADDING * 2
 
 const setupCanvas = (c: HTMLCanvasElement) => {
   var ctx = c.getContext('2d')
@@ -49,7 +75,7 @@ const fillBlock = (x: number, y: number, color: string, ctx: CanvasRenderingCont
 // canvas: HTMLCanvasElement;
 // context: CanvasRenderingContext2D;
 
-const generateIdenticon = (ctx: CanvasRenderingContext2D) => {
+const generateIdenticon = (ctx: CanvasRenderingContext2D, map: boolean[]) => {
   // Fill canvas bg
   ctx.beginPath()
   ctx.rect(0, 0, SIZE, SIZE)
@@ -57,12 +83,12 @@ const generateIdenticon = (ctx: CanvasRenderingContext2D) => {
   ctx.fill()
 
   // Generate color
-  var color = 'rgb(0,0,0)'
+  var color = '#1e1e1e'
 
   // FILL THE SQUARES
   for (var x = 0; x < Math.ceil(GRID / 2); x++) {
     for (var y = 0; y < GRID; y++) {
-      if (Math.random() < FILL_CHANCE) {
+      if (map[x * GRID + y]) {
         fillBlock(x, y, color, ctx);
 
         // Fill rhs symmetrically
@@ -74,7 +100,7 @@ const generateIdenticon = (ctx: CanvasRenderingContext2D) => {
   }
 }
 
-const buildSupicon = (ref: HTMLElement) => {
+const buildSupicon = (ref: HTMLElement, map: boolean[]) => {
   const canvas = document.createElement('canvas')
   const _canvas = setupCanvas(canvas)
 
@@ -82,5 +108,5 @@ const buildSupicon = (ref: HTMLElement) => {
 
   ref.appendChild(canvas)
 
-  generateIdenticon(_canvas);
+  generateIdenticon(_canvas, map);
 }
