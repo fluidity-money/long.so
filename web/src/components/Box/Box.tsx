@@ -6,14 +6,16 @@ interface IBox {
   layoutId?: string;
   background?: 'light' | 'dark';
   className?: string;
+  pill?: boolean;
 }
 
 const Box: React.FC<IBox> = (props) => {
-  const { children, layoutId, background = 'light', className = '' } = props
+  const { children, layoutId, background = 'light', className = '', pill=false } = props
 
   const classes = `
     ${styles.Box}
     ${styles[background]}
+    ${pill ? styles.pill : ''}
     ${className}
   `
 
@@ -22,7 +24,6 @@ const Box: React.FC<IBox> = (props) => {
       layoutId={layoutId}
       className={classes}
       transition={{ duration: 0.2, ease: 'easeInOut' }}
-      style={{ borderRadius: 4 }}
     >
       {children}
     </motion.div>

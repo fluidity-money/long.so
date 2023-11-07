@@ -3,8 +3,8 @@
   height: 32px;
   background-color: $light;
   border-radius: 100px;
-  	position: relative;
-    -webkit-transform-style: preserve-3d;
+ 	position: relative;
+  -webkit-transform-style: preserve-3d;
 
 	&:before{
 		background-color: $light;
@@ -40,7 +40,6 @@
   }
 
   .heads {
-
   	background-color: $light;
   	position: absolute;
   	border-radius: 50%;
@@ -48,15 +47,23 @@
   	height: 32px;
   	width: 32px;
   	-webkit-transform: translateZ(calc(-4.1px)) scaleX(-1);
-
-    img {
-      z-index: -1;
-    }
-
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .heads, .tails {
   img {
     transform: scale(0.7);
+    pointer-events: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     }
     }
+}
+.TokenContainer {
+  width: 32px;
+  height: 32px;
 }

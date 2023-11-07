@@ -1,6 +1,6 @@
 .Box {
   @include box(4px);
-
+  display: flex;
   width: max-content;
   height: auto;
 
@@ -10,5 +10,11 @@
 
   &.dark {
     @include light;
+  }
+
+  &.pill {
+    border-radius: 100px;
+    padding: 4px;
+    flex-direction: row;
   }
 }
