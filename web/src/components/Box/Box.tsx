@@ -2,10 +2,10 @@ import { motion } from 'framer-motion'
 import styles from './Box.module.scss'
 
 interface IBox {
-  children?: React.ReactNode
-  layoutId?: string
-  background?: 'light' | 'dark'
-  className?: string
+  children?: React.ReactNode;
+  layoutId?: string;
+  background?: 'light' | 'dark';
+  className?: string;
 }
 
 const Box: React.FC<IBox> = (props) => {
@@ -22,7 +22,7 @@ const Box: React.FC<IBox> = (props) => {
       layoutId={layoutId}
       className={classes}
       transition={{ duration: 0.2, ease: 'easeInOut' }}
-      style={{borderRadius: 4}}
+      style={{ borderRadius: 4 }}
     >
       {children}
     </motion.div>

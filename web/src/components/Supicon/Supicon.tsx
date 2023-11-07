@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import styles from './Supicon.module.scss'
 import { Md5 } from 'ts-md5'
 
@@ -35,11 +35,13 @@ const Supicon: React.FC<ISupicon> = (props) => {
 
   const hexToDecimal = (hex: string) => parseInt(hex, 16)
 
-  const map: boolean[] = []
-
-  for (var i = 0; i < N; i++) {
-    map.push(hexToDecimal(identifier[i]) % 2 === 0)
-  }
+  const map: boolean[] = useMemo(() => {
+    const map = []
+    for (var i = 0; i < N; i++) {
+      map.push(hexToDecimal(identifier[i]) % 2 === 0)
+    }
+    return map
+  }, [identifier])
 
   useEffect(() => {
     if (!canvasRef.current) return
@@ -67,7 +69,7 @@ const fillBlock = (x: number, y: number, color: string, ctx: CanvasRenderingCont
     PADDING + y * SQUARE,
     SQUARE,
     SQUARE
-  );
+  )
   ctx.fillStyle = color
   ctx.fill()
 }
@@ -89,7 +91,7 @@ const generateIdenticon = (ctx: CanvasRenderingContext2D, map: boolean[]) => {
   for (var x = 0; x < Math.ceil(GRID / 2); x++) {
     for (var y = 0; y < GRID; y++) {
       if (map[x * GRID + y]) {
-        fillBlock(x, y, color, ctx);
+        fillBlock(x, y, color, ctx)
 
         // Fill rhs symmetrically
         if (x < Math.floor(GRID / 2)) {
@@ -108,5 +110,5 @@ const buildSupicon = (ref: HTMLElement, map: boolean[]) => {
 
   ref.appendChild(canvas)
 
-  generateIdenticon(_canvas, map);
+  generateIdenticon(_canvas, map)
 }

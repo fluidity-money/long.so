@@ -6,14 +6,6 @@ import { Menu } from './Menu'
 import { Link } from './Link'
 import { Slider } from './Slider'
 import { Supicon } from './Supicon'
+import { Token } from './Token'
 
-export {
-  Box,
-  Text,
-  Button,
-  Chip,
-  Menu,
-  Link,
-  Slider,
-  Supicon
-}
+export { Box, Text, Button, Chip, Menu, Link, Slider, Supicon, Token }
