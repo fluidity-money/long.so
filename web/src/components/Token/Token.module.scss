@@ -1,0 +1,62 @@
+.Token {
+  width: 32px;
+  height: 32px;
+  background-color: $light;
+  border-radius: 100px;
+  	position: relative;
+    -webkit-transform-style: preserve-3d;
+
+	&:before{
+		background-color: $light;
+		content: '';
+		position: absolute;
+		border-radius: 50%;
+		height: 32px;
+		width: 32px;
+  	-webkit-transform: translateZ(-4px);
+	}
+
+	&:after{
+		background-color: $light;
+		content: '';
+		left: calc(16px - 4px);
+		position: absolute;
+		height: 32px;
+		width: 4px;
+		z-index: -10;
+		-webkit-transform: rotateY(-90deg);
+		-webkit-transform-origin: 100% 50%;
+	}
+
+
+  .tails {
+  	background-color: $light;
+  	position: absolute;
+  	border-radius: 50%;
+  	content: '';
+  	height: 32px;
+  	width: 32px;
+  	-webkit-transform: translateZ(0.1px);
+  }
+
+  .heads {
+
+  	background-color: $light;
+  	position: absolute;
+  	border-radius: 50%;
+  	content: '';
+  	height: 32px;
+  	width: 32px;
+  	-webkit-transform: translateZ(calc(-4.1px)) scaleX(-1);
+
+    img {
+      z-index: -1;
+    }
+
+  }
+  .heads, .tails {
+  img {
+    transform: scale(0.7);
+    }
+    }
+}
