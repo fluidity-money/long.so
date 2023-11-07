@@ -78,9 +78,11 @@ const Dev = () => {
         >
           Test
         </Slider>
-        <Box>
+        <Box pill>
         <Token />
         </Box>
+        <Token />
+
         <Supicon seed="foo" />
         <Supicon seed="bar" />
       </div>
