@@ -210,6 +210,11 @@ contract SeawaterAMM is ISeawaterAMM {
         directDelegate(_getExecutorPosition());
     }
 
+    // fallback!
+    fallback() external {
+        revert("fallback function!");
+    }
+
     // internal functions
 
     // proxy storage manipulators
