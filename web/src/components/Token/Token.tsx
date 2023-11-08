@@ -15,7 +15,7 @@ const tokenVariants = {
   },
   hover: (size: number) => ({
     rotateY: [0, 360],
-    x: [0,0+(size*2),0,0-(size*2),0],
+    x: [0,(size+1)*2,0,(size+1)*-2,0],
     transition: {
       duration: (0.5 * size) + 1.5,
       ease: 'linear',
@@ -24,7 +24,7 @@ const tokenVariants = {
   })
 }
 
-interface IToken {
+export interface IToken {
   size?: 'small' | 'medium' | 'large'
 }
 
@@ -52,11 +52,11 @@ const Token: React.FC<IToken> = (props) => {
     }, 200+(sz*100))
 
     animate(scope.current, {
-      y: [null, -(2*sz + 8), 0]
+      y: [null, -(4*sz + 6), 0]
     },
     {
       duration: 0.3 + (sz*0.1),
-      ease: 'easeInOut',
+      ease: 'easeOut',
     })
   }
 
