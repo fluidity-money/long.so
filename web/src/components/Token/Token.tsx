@@ -1,16 +1,21 @@
 import USDC from '@/assets/icons/USDC.svg'
+import ETH from '@/assets/icons/ETH.svg'
 import Image from 'next/image'
 import styles from './Token.module.scss'
-import { motion } from 'framer-motion'
+import { motion, useMotionValue } from 'framer-motion'
 import { useState } from 'react'
 
 const tokenVariants = {
   idle: {
-    rotateY: 180,
+    rotateY: 0,
+    transition: {
+      duration: 0.5,
+      ease: 'easeInOut',
+    }
   },
   hover: {
     rotateY: [0, 360],
-    x: [0,2,0,-2,0],
+    x: [0,4,0,-4,0],
     transition: {
       duration: 2,
       ease: 'linear',
@@ -26,11 +31,22 @@ const tokenVariants = {
   }
 }
 
-const Token = () => {
+interface IToken {
+  size?: 'small' | 'medium' | 'large'
+}
+
+const Token: React.FC<IToken> = (props) => {
+  const { size = 'medium' } = props
   const [hovered, setHovered] = useState(false)
+
+  const classNames = `
+    ${styles.TokenContainer}
+    ${styles[size]}
+  `
+
   return (
     <motion.div
-      className={styles.TokenContainer}
+      className={classNames}
       variants={tokenVariants}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -46,8 +62,7 @@ const Token = () => {
       <Image src={USDC} alt="USDC" />
     </div>
     <div className={styles.heads}>
-    <Image src={USDC} alt="USDC" />
-
+      <Image src={ETH} alt="USDC" />
     </div>
 
     </motion.div>
