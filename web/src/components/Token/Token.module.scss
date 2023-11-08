@@ -98,4 +98,38 @@
       }
     }
   }
+
+  &.small {
+    width: 16px;
+    height: 16px;
+
+    .Token {
+      width: 16px;
+      height: 16px;
+
+      &:before{
+        height: 16px;
+        width: 16px;
+     	  -webkit-transform: translateZ(-2px);
+      }
+
+      &:after{
+        height: 16px;
+        width: 2px;
+        left: calc(8px - 2px);
+      }
+
+      .tails, .heads {
+        height: 16px;
+        width: 16px;
+
+        img {
+          transform: scale(0.4);
+        }
+      }
+      .heads {
+       	-webkit-transform: translateZ(calc(-2.1px)) scaleX(-1);
+      }
+    }
+  }
 }
