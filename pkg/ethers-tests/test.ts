@@ -9,23 +9,56 @@ function encodeSqrtPrice(price: number): BigInt {
     return BigInt(Math.sqrt(price) * 2**96);
 }
 
+function sixDecimals(amount: number): BigInt {
+    return BigInt(amount) * BigInt(1_000_000);
+}
+
 function encodeTick(price: number): number {
     // log_1.0001(num/denom)
     return Math.floor(Math.log(price) / Math.log(1.0001));
 }
 
-async function deployToken(factory: ContractFactory, name: string, sym: string, decimals: number, amount: number, account: string) {
+async function deployToken(factory: ContractFactory, name: string, sym: string, decimals: number, amount: BigInt, account: string) {
     const contract = await factory.deploy(name, sym, decimals, amount, account);
     const address = await contract.getAddress();
     await contract.waitForDeployment();
     return address;
 }
 
+
 // force mutable logs to allow parseLog (which doesn't mutate anyway)
 type MutableLog = Omit<Log, 'topics'> & {topics: Array<string>}
 
+async function createPosition(
+    amm: Contract,
+    address: string,
+    lower: number,
+    upper: number,
+    delta: BigInt,
+) {
+    const mintResult = await amm.mintPosition(address, lower, upper);
+    const [mintLog]: [mintLog: Log] = await mintResult.wait()
+    type mintEventArgs = [
+        BigInt,
+        string,
+        string,
+        BigInt,
+        BigInt,
+    ]
+
+    // has an issue with readonly typing
+    // @ts-ignore
+    const {args}  = amm.interface.parseLog(mintLog) || {}
+    const [id, /*user*/, /*pool*/, /*low*/, /*high*/] = args as unknown as mintEventArgs
+
+    const updatePositionResult = await amm.updatePosition(address, id, delta)
+    await updatePositionResult.wait()
+
+    return id;
+}
+
+
 test("amm", async t => {
-    console.log(execSync("forge b").toString());
     const RPC_URL = process.env.RPC_URL ?? "http://127.0.0.1:8547"
     const provider = new JsonRpcProvider(RPC_URL)
     const signer = new Wallet("0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659", provider)
@@ -33,11 +66,14 @@ test("amm", async t => {
 
     const erc20Factory = new ContractFactory(LightweightERC20.abi, LightweightERC20.bytecode, signer)
 
-    const fusdcAddress = await deployToken(erc20Factory, "Fluid USDC", "FUSDC", 6, 1_000_000*1_000_000, defaultAccount);
+    const fusdcAddress = await deployToken(erc20Factory, "Fluid USDC", "FUSDC", 6, sixDecimals(1_000_000), defaultAccount);
     console.log("fusdc",fusdcAddress)
 
-    const tusdcAddress = await deployToken(erc20Factory, "Test USDC", "TUSDC", 6, 1_000_000*1_000_000, defaultAccount);
+    const tusdcAddress = await deployToken(erc20Factory, "Test USDC", "TUSDC", 6, sixDecimals(1_000_000), defaultAccount);
     console.log("tusdc",tusdcAddress)
+
+    const tusdc2Address = await deployToken(erc20Factory, "Test USDC 2.0", "TUSDC2", 6, sixDecimals(1_000_000), defaultAccount);
+    console.log("tusdc2",tusdc2Address)
 
     let stdout = execSync(
         "./deploy.sh",
@@ -58,42 +94,26 @@ test("amm", async t => {
 
     const fusdcContract = new Contract(fusdcAddress, LightweightERC20.abi, signer)
     const tusdcContract = new Contract(tusdcAddress, LightweightERC20.abi, signer)
+    const tusdc2Contract = new Contract(tusdc2Address, LightweightERC20.abi, signer)
 
     // address token,
     // uint256 sqrtPriceX96,
     // uint32 fee,
     // uint8 tickSpacing,
     // uint128 maxLiquidityPerTick
-    let response = await amm.init(tusdcAddress, encodeSqrtPrice(100), 0, 1, 100000000000);
+    await (await amm.init(tusdcAddress, encodeSqrtPrice(100), 0, 1, 100000000000)).wait();
+    await (await amm.init(tusdc2Address, encodeSqrtPrice(100), 0, 1, 100000000000)).wait();
 
-    await response.wait();
     // approve amm for both contracts
     // initialise an empty position
     // update the position with liquidity
     // then make a swap
     await (await fusdcContract.approve(ammAddress, MaxUint256)).wait()
     await (await tusdcContract.approve(ammAddress, MaxUint256)).wait()
+    await (await tusdc2Contract.approve(ammAddress, MaxUint256)).wait()
 
-    const mintResult = await amm.mintPosition(tusdcAddress, encodeTick(50), encodeTick(150))
-    const [mintLog]: [mintLog: Log] = await mintResult.wait()
-    type mintEventArgs = [
-        BigInt,
-        string,
-        string,
-        BigInt,
-        BigInt,
-    ]
-
-    // has an issue with readonly typing
-    const {args}  = amm.interface.parseLog(mintLog as MutableLog) || {}
-    const logArgs = args?.toArray()
-    const [id, _, pool, low, high] = logArgs as mintEventArgs || []
-    
-    console.log("pool",pool,"id",id,"delta",high.valueOf() - low.valueOf())
-
-    const updatePositionResult = await amm.updatePosition(tusdcAddress, id, 20000)
-    await updatePositionResult.wait()
-    const receipt = await provider.getTransactionReceipt(updatePositionResult.hash)
+    await createPosition(amm, tusdcAddress, encodeTick(50), encodeTick(150), BigInt(20000));
+    await createPosition(amm, tusdc2Address, encodeTick(50), encodeTick(150), BigInt(20000));
 
     await t.test("raw swap in amounts correct", async _ => {
         const fusdcBeforeBalance = await fusdcContract.balanceOf(defaultAccount)
@@ -104,11 +124,10 @@ test("amm", async t => {
         // bool _zeroForOne,
         // int256 _amount,
         // uint256 _priceLimitX96
- 
-        // swap 10 tUSDC -> fUSDC without hitting the price limit
-        response = await amm.swap(tusdcAddress, true, 10, encodeSqrtPrice(30))
-        await response.wait();
 
+        // swap 10 tUSDC -> fUSDC without hitting the price limit
+        let response = await amm.swap(tusdcAddress, true, 10, encodeSqrtPrice(30))
+        await response.wait();
 
         let fusdcAfterBalance = await fusdcContract.balanceOf(defaultAccount)
         let tusdcAfterBalance = await tusdcContract.balanceOf(defaultAccount)
