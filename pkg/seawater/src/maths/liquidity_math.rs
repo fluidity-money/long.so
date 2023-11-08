@@ -1,19 +1,19 @@
-use crate::error::UniswapV3MathError;
+use crate::error::Error;
 
 // returns (uint128 z)
-pub fn add_delta(x: u128, y: i128) -> Result<u128, UniswapV3MathError> {
+pub fn add_delta(x: u128, y: i128) -> Result<u128, Error> {
     if y < 0 {
         let z = x.overflowing_sub(-y as u128);
 
         if z.1 {
-            Err(UniswapV3MathError::LiquiditySub)
+            Err(Error::LiquiditySub)
         } else {
             Ok(z.0)
         }
     } else {
         let z = x.overflowing_add(y as u128);
         if z.0 < x {
-            Err(UniswapV3MathError::LiquidityAdd)
+            Err(Error::LiquidityAdd)
         } else {
             Ok(z.0)
         }

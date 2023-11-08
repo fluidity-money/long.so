@@ -38,6 +38,8 @@ if [ -z "$admin_addr" ]; then admin_addr=$(deploy_feature "admin"); fi
 
 >&2 echo "deploying diamond contract..."
 
+forge build --revert-strings debug
+
 forge create "SeawaterAMM" --rpc-url $STYLUS_ENDPOINT --private-key $STYLUS_PRIVATE_KEY \
     --constructor-args \
         $PROXY_ADMIN_ADDR \
