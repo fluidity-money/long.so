@@ -2,7 +2,7 @@ import USDC from '@/assets/icons/USDC.svg'
 import ETH from '@/assets/icons/ETH.svg'
 import Image from 'next/image'
 import styles from './Token.module.scss'
-import { motion } from 'framer-motion'
+import { motion, useAnimate, useAnimationControls } from 'framer-motion'
 import { useState } from 'react'
 
 const tokenVariants = {
@@ -20,13 +20,6 @@ const tokenVariants = {
       duration: (0.5 * size) + 1.5,
       ease: 'linear',
       repeat: Infinity,
-    }
-  }),
-  bounce: (size: number) => ({
-    y: [0, -(2*size + 8), 0],
-    transition: {
-      duration: 0.3 + (size*0.2),
-      ease: 'easeInOut',
     }
   })
 }
@@ -46,6 +39,27 @@ const Token: React.FC<IToken> = (props) => {
 
   const sz = size === 'small' ? 0 : size === 'medium' ? 1 : 2
 
+  const [scope, animate] = useAnimate()
+  const [clickable, setClickable] = useState(true)
+
+  const handleClick = async () => {
+    if (!scope.current) return
+    if (!clickable) return
+
+    setClickable(false)
+    setTimeout(() => {
+      setClickable(true)
+    }, 200+(sz*100))
+
+    animate(scope.current, {
+      y: [null, -(2*sz + 8), 0]
+    },
+    {
+      duration: 0.3 + (sz*0.1),
+      ease: 'easeInOut',
+    })
+  }
+
   return (
     <motion.div
       custom={sz}
@@ -53,14 +67,14 @@ const Token: React.FC<IToken> = (props) => {
       variants={tokenVariants}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      whileTap={'bounce'}
+      onClick={handleClick}
     >
-
     <motion.div className={styles.Token}
       custom={sz}
       variants={tokenVariants}
       initial={'idle'}
       animate={hovered ? 'hover' : 'idle'}
+      ref={scope}
     >
     <div className={styles.tails}>
       <Image src={USDC} alt="USDC" />
