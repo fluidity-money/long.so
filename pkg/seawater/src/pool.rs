@@ -107,7 +107,9 @@ impl StoragePool {
         if flip_upper {
             self.tick_bitmap
                 .flip(upper, self.tick_spacing.get().sys());
-            self.ticks.clear(upper);
+            if delta < 0 {
+                self.ticks.clear(upper);
+            }
         }
 
         // calculate liquidity change and the amount of each token we need
