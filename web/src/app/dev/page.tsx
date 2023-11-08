@@ -78,10 +78,12 @@ const Dev = () => {
         >
           Test
         </Slider>
-        <Box pill>
+          <Box pill>
         <Token />
         </Box>
-        <Token />
+        <Box pill>
+          <Token size="large" />
+        </Box>
 
         <Supicon seed="foo" />
         <Supicon seed="bar" />
