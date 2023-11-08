@@ -79,7 +79,11 @@ const Dev = () => {
           Test
         </Slider>
           <Box pill>
-        <Token />
+        <Token size="small" />
+        </Box>
+        <Box pill>
+          <Token />
+          <Text>USDC</Text>
         </Box>
         <Box pill>
           <Token size="large" />
