@@ -52,15 +52,15 @@ impl StorageTicks {
         fee_growth_global_1: &U256,
         upper: bool,
         max_liquidity: u128,
-    ) -> Result<bool, UniswapV3MathError> {
+    ) -> Result<bool, Error> {
         let mut info = self.ticks.setter(tick);
 
-        let liquidity_gross_before = info.liquidity_gross.get().unwrap();
+        let liquidity_gross_before = info.liquidity_gross.get().sys();
         let liquidity_gross_after =
             liquidity_math::add_delta(liquidity_gross_before, liquidity_delta)?;
 
         if liquidity_gross_after > max_liquidity {
-            return Err(UniswapV3MathError::LiquidityTooHigh);
+            return Err(Error::LiquidityTooHigh);
         }
 
         // if we moved to or from 0 liquidity, flip the tick
@@ -76,19 +76,19 @@ impl StorageTicks {
             info.initialised.set(true);
         }
 
-        info.liquidity_gross.set(U128::wrap(&liquidity_gross_after));
+        info.liquidity_gross.set(U128::lib(&liquidity_gross_after));
 
         let new_liquidity_net = match upper {
             true => info
                 .liquidity_net
                 .get()
-                .checked_sub(I128::wrap(&liquidity_delta))
-                .ok_or(UniswapV3MathError::LiquiditySub),
+                .checked_sub(I128::lib(&liquidity_delta))
+                .ok_or(Error::LiquiditySub),
             false => info
                 .liquidity_net
                 .get()
-                .checked_add(I128::wrap(&liquidity_delta))
-                .ok_or(UniswapV3MathError::LiquidityAdd),
+                .checked_add(I128::lib(&liquidity_delta))
+                .ok_or(Error::LiquidityAdd),
         }?;
 
         info.liquidity_net.set(new_liquidity_net);
@@ -105,7 +105,7 @@ impl StorageTicks {
         cur_tick: i32,
         fee_growth_global_0: &U256,
         fee_growth_global_1: &U256,
-    ) -> Result<(U256, U256), UniswapV3MathError> {
+    ) -> Result<(U256, U256), Error> {
         let lower = self.ticks.get(lower_tick);
         let upper = self.ticks.get(upper_tick);
 
@@ -118,10 +118,10 @@ impl StorageTicks {
             (
                 fee_growth_global_0
                     .checked_sub(lower.fee_growth_outside_0.get())
-                    .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSub)?,
                 fee_growth_global_1
                     .checked_sub(lower.fee_growth_outside_1.get())
-                    .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSub)?,
             )
         };
 
@@ -134,10 +134,10 @@ impl StorageTicks {
             (
                 fee_growth_global_0
                     .checked_sub(upper.fee_growth_outside_0.get())
-                    .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSub)?,
                 fee_growth_global_1
                     .checked_sub(upper.fee_growth_outside_1.get())
-                    .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSub)?,
             )
         };
 
@@ -145,11 +145,11 @@ impl StorageTicks {
             fee_growth_global_0
                 .checked_sub(fee_growth_below_0)
                 .and_then(|x| x.checked_sub(fee_growth_above_0))
-                .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+                .ok_or(Error::FeeGrowthSub)?,
             fee_growth_global_1
                 .checked_sub(fee_growth_below_1)
                 .and_then(|x| x.checked_sub(fee_growth_above_1))
-                .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+                .ok_or(Error::FeeGrowthSub)?,
         ))
     }
 
@@ -167,7 +167,7 @@ impl StorageTicks {
         let new_fee_growth_outside_1 = fee_growth_global_1 - info.fee_growth_outside_1.get();
         info.fee_growth_outside_1.set(new_fee_growth_outside_1);
 
-        info.liquidity_net.unwrap()
+        info.liquidity_net.sys()
     }
 
     pub fn clear(&mut self, tick: i32) {

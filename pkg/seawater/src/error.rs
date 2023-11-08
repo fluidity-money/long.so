@@ -1,10 +1,40 @@
 use alloc::vec::Vec;
 use thiserror::Error;
 
+// asserts that return an error instead of panicking, since panics don't give us good error
+// messages
+#[macro_export]
+macro_rules! assert_or {
+    ($cond:expr, $err:expr) => {
+        if !($cond) {
+            Err($err)?; // question mark forces coercion
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! assert_eq_or {
+    ($a:expr, $b:expr, $err:expr) => {
+        if !($a == $b) {
+            Err($err)?;
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! assert_neq_or {
+    ($a:expr, $b:expr, $err:expr) => {
+        if !($a != $b) {
+            Err($err)?;
+        }
+    };
+}
+
 // TODO: make these errors better, some errors in univ3 libs are just require(condition) without a message.
 #[derive(Error, Debug)]
 #[repr(u8)]
-pub enum UniswapV3MathError {
+pub enum Error {
+    // 0
     #[error("Denominator is 0")]
     DenominatorIsZero,
     #[error("Result is U256::MAX")]
@@ -28,6 +58,8 @@ pub enum UniswapV3MathError {
     LiquiditySub,
     #[error("Liquidity Add")]
     LiquidityAdd,
+
+    // 10
     #[error("The given tick must be less than, or equal to, the maximum tick")]
     T,
     #[error(
@@ -46,6 +78,8 @@ pub enum UniswapV3MathError {
 
     #[error("ERC20 call reverted")]
     Erc20Revert(Vec<u8>),
+    #[error("ERC20 call reverted with no data")]
+    Erc20RevertNoData,
 
     #[error("Pool is already initialised")]
     PoolAlreadyInitialised,
@@ -53,28 +87,60 @@ pub enum UniswapV3MathError {
     ContractAlreadyInitialised,
     #[error("Price limit too high")]
     PriceLimitTooHigh,
+    // 20
     #[error("Price limit too high")]
     PriceLimitTooLow,
+
+    #[error("Checked abs called on an unexpected positive number")]
+    CheckedAbsIsNegative,
+    #[error("Checked abs called on an unexpected negative number")]
+    CheckedAbsIsPositive,
+    #[error("Checked abs called on uint.min")]
+    AbsTooLow,
+
+    #[error("Fee result too high")]
+    FeeTooHigh,
+
+    #[error("Swap result too high")]
+    SwapResultTooHigh,
+
+    #[error("Internal swap amounts not matched")]
+    InterimSwapNotEq,
+
+    #[error("Internal swap result was positive")]
+    InterimSwapPositive,
+
+    #[error("Minimum out not reached")]
+    MinOutNotReached,
+
+    #[error("Only the position owner can use this")]
+    PositionOwnerOnly,
+    #[error("Only the NFT manager can use this")]
+    NftManagerOnly,
+    #[error("Only the Seawater admin can use this")]
+    SeawaterAdminOnly,
 }
 
-impl From<UniswapV3MathError> for Vec<u8> {
-    // tests panic with the message - this is a hack to get debuginfo
-    // #[cfg(no)]
-    // fn from(val: UniswapV3MathError) -> Self {
-    //     panic!("{}", val);
-    // }
+impl From<Error> for Vec<u8> {
+    // tests return the message
+    #[cfg(not(target_arch = "wasm32"))]
+     fn from(val: Error) -> Self {
+         val.to_string().into()
+     }
 
-    // runtime panics with no message - this lets us optimise the strings away
-    //#[cfg(not(test))]
-    fn from(val: UniswapV3MathError) -> Self {
-        if let UniswapV3MathError::Erc20Revert(mut err) = val {
-           let mut e = vec![err.len() as u8];
+    // runtime returns the message code to save binary size
+    // TODO - once errors are mostly finalised we should find a way to return actual solidity
+    // errors
+    #[cfg(target_arch = "wasm32")]
+    fn from(val: Error) -> Self {
+        let id = unsafe { *<*const _>::from(&val).cast::<u8>() };
+
+        let mut e = vec![id];
+
+        if let Error::Erc20Revert(mut err) = val {
            e.append(&mut err);
-           e
-        } else {
-            let id = unsafe { *<*const _>::from(&val).cast::<u8>() };
-
-            vec![id]
         }
+
+        e
     }
 }

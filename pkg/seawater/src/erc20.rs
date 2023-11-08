@@ -1,5 +1,5 @@
-use crate::error::UniswapV3MathError;
-use crate::types::I256;
+use crate::error::Error;
+use crate::types::{I256, I256Extension};
 use stylus_sdk::alloy_primitives::{Address, U256};
 use stylus_sdk::call::RawCall;
 use stylus_sdk::{contract, msg};
@@ -7,18 +7,16 @@ use stylus_sdk::{contract, msg};
 // call a function on a possibly noncomplient erc20 token, reverting iff
 // the function reverts
 // or there's calldata and the calldata is falsey
-fn call_optional_return(contract: Address, data: &[u8]) -> Result<(), UniswapV3MathError> {
+fn call_optional_return(contract: Address, data: &[u8]) -> Result<(), Error> {
     match RawCall::new().call(contract, data) {
         // reverting calls revert
-        Err(revert) => Err(UniswapV3MathError::Erc20Revert(revert)),
+        Err(revert) => Err(Error::Erc20Revert(revert)),
         Ok(data) => {
-            match data.get(32) {
+            match data.get(32) { // first byte of a 32 byte word
                 // nonreverting with no return data is okay
                 None => Ok(()),
                 // nonreverting with falsey return data reverts
-                Some(0) => Err(UniswapV3MathError::Erc20Revert(
-                    "[ERC20 call had nonzero return value]".into(),
-                )),
+                Some(0) => Err(Error::Erc20RevertNoData),
                 // nonreverting with truthy return data is okay
                 Some(_) => Ok(()),
             }
@@ -69,7 +67,7 @@ fn encode_transfer_from(from: Address, to: Address, amount: U256) -> [u8; 4 + 32
     data
 }
 
-fn safe_transfer(token: Address, to: Address, amount: U256) -> Result<(), UniswapV3MathError> {
+fn safe_transfer(token: Address, to: Address, amount: U256) -> Result<(), Error> {
     call_optional_return(token, &encode_transfer(to, amount))
 }
 
@@ -78,29 +76,29 @@ fn safe_transfer_from(
     from: Address,
     to: Address,
     amount: U256,
-) -> Result<(), UniswapV3MathError> {
+) -> Result<(), Error> {
     call_optional_return(token, &encode_transfer_from(from, to, amount))
 }
 
 // sends a token delta - if `amount` is positive, takes from the user
-pub fn exchange(token: Address, amount: I256) -> Result<(), UniswapV3MathError> {
+pub fn exchange(token: Address, amount: I256) -> Result<(), Error> {
     if amount.is_negative() {
         // send tokens to the user
-        send(token, amount.checked_abs().unwrap().into_raw())
+        send(token, amount.abs_neg()?)
     } else if amount.is_positive() {
         // take tokens from the user
-        take(token, amount.into_raw())
+        take(token, amount.abs_pos()?)
     } else {
         // no amount, do nothing
         Ok(())
     }
 }
 
-pub fn send(token: Address, amount: U256) -> Result<(), UniswapV3MathError> {
+pub fn send(token: Address, amount: U256) -> Result<(), Error> {
     safe_transfer(token, msg::sender(), amount)
 }
 
-pub fn take(token: Address, amount: U256) -> Result<(), UniswapV3MathError> {
+pub fn take(token: Address, amount: U256) -> Result<(), Error> {
     safe_transfer_from(token, msg::sender(), contract::address(), amount)
 }
 

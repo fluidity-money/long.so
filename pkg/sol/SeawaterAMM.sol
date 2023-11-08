@@ -138,7 +138,7 @@ contract SeawaterAMM is ISeawaterAMM {
         require(success, string(data));
 
         (int256 swapAmountIn, int256 swapAmountOut) = abi.decode(data, (int256, int256));
-        require(swapAmountOut >= int256(minOut), "min out not reached!");
+        require(-swapAmountOut >= int256(minOut), "min out not reached!");
         return (swapAmountIn, swapAmountOut);
     }
 
@@ -208,6 +208,11 @@ contract SeawaterAMM is ISeawaterAMM {
         uint128 amount1
     ) external returns (uint128, uint128) {
         directDelegate(_getExecutorPosition());
+    }
+
+    // fallback!
+    fallback() external {
+        revert("fallback function!");
     }
 
     // internal functions
