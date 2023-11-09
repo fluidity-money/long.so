@@ -277,25 +277,6 @@
       "type": "event"
     },
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "int256",
-          "name": "m",
-          "type": "int256"
-        },
-        {
-          "indexed": false,
-          "internalType": "int256",
-          "name": "o",
-          "type": "int256"
-        }
-      ],
-      "name": "abc",
-      "type": "event"
-    },
-    {
       "inputs": [
         {
           "internalType": "uint256",
