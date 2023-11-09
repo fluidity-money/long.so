@@ -5,8 +5,6 @@ import "../interfaces/IERC721Metadata.sol";
 import "../interfaces/IERC721TokenReceiver.sol";
 import "../interfaces/ISeawaterOwnership.sol";
 
-import "./utils/Errors.sol";
-
 contract OwnershipNFTs is IERC721Metadata {
     ISeawaterOwnership immutable public SEAWATER;
 
@@ -48,11 +46,16 @@ contract OwnershipNFTs is IERC721Metadata {
     }
 
     /**
-     * @notice _onTransferReceived by calling the callback in the
-     *         recipient if they have codesize > 0
+     * @notice _onTransferReceived by calling the callback `onERC721Received`
+     *         in the recipient if they have codesize > 0. if the callback
+     *         doesn't return the selector, revert!
+     * @param _sender that did the transfer
+     * @param _from owner of the NFT that the sender is transferring
+     * @param _to recipient of the NFT that we're calling the function on
+     * @param _tokenId that we're transferring from our internal storage
      */
     function _onTransferReceived(
-        address _operator,
+        address _sender,
         address _from,
         address _to,
         uint256 _tokenId
@@ -60,14 +63,16 @@ contract OwnershipNFTs is IERC721Metadata {
         if (_to.code.length == 0) return;
 
         bytes4 data = IERC721TokenReceiver(_to).onERC721Received(
-            _operator,
+            _sender,
             _from,
             _tokenId,
             ""
         );
 
-        if (data != IERC721TokenReceiver.onERC721Received.selector)
-            revert ErrBadERC721Received();
+        require(
+            data != IERC721TokenReceiver.onERC721Received.selector,
+            "bad nft transfer received data"
+        );
     }
 
     function _requireAuthorised(address _from, uint256 _tokenId) internal view {
@@ -77,12 +82,8 @@ contract OwnershipNFTs is IERC721Metadata {
             isApprovedForAll[_from][msg.sender] ||
             msg.sender == getApproved[_tokenId];
 
-        if (isAllowed) {
-            // revert if _from is not the owner
-            if (ownerOf(_tokenId) != _from) revert ErrNotAuthorised();
-        } else {
-            revert ErrNotAuthorised();
-        }
+        require(isAllowed, "not allowed");
+        require(ownerOf(_tokenId) == _from, "_from is not the owner!");
     }
 
     function _transfer(
@@ -103,6 +104,7 @@ contract OwnershipNFTs is IERC721Metadata {
         _transfer(_from, _to, _tokenId);
     }
 
+    /// @inheritdoc IERC721Metadata
     function transferFrom(
         address _from,
         address _to,
@@ -111,6 +113,7 @@ contract OwnershipNFTs is IERC721Metadata {
         _transfer(_from, _to, _tokenId);
     }
 
+    /// @inheritdoc IERC721Metadata
     function safeTransferFrom(
         address _from,
         address _to,
@@ -120,6 +123,7 @@ contract OwnershipNFTs is IERC721Metadata {
         _onTransferReceived(msg.sender, _from, _to, _tokenId);
     }
 
+    /// @inheritdoc IERC721Metadata
     function safeTransferFrom(
         address _from,
         address _to,
@@ -130,19 +134,23 @@ contract OwnershipNFTs is IERC721Metadata {
         _onTransferReceived(msg.sender, _from, _to, _tokenId);
     }
 
+    /// @inheritdoc IERC721Metadata
     function approve(address _approved, uint256 _tokenId) external payable {
         _requireAuthorised(msg.sender, _tokenId);
         getApproved[_tokenId] = _approved;
     }
 
+    /// @inheritdoc IERC721Metadata
     function setApprovalForAll(address _operator, bool _approved) external {
         isApprovedForAll[msg.sender][_operator] = _approved;
     }
 
+    /// @inheritdoc IERC721Metadata
     function balanceOf(address _spender) external view returns (uint256) {
         return SEAWATER.balanceOf(_spender);
     }
 
+    /// @inheritdoc IERC721Metadata
     function tokenURI(uint256 /* _tokenId */) external view returns (string memory) {
         return TOKEN_URI;
     }
