@@ -5,6 +5,10 @@ import "../interfaces/IERC721Metadata.sol";
 import "../interfaces/IERC721TokenReceiver.sol";
 import "../interfaces/ISeawaterOwnership.sol";
 
+/*
+ * OwnershipNFTs is a simple interface for tracking ownership of
+ * positions in the Seawater Stylus contract.
+ */
 contract OwnershipNFTs is IERC721Metadata {
     ISeawaterOwnership immutable public SEAWATER;
 
@@ -20,7 +24,11 @@ contract OwnershipNFTs is IERC721Metadata {
     /// @notice symbol of the NFT, set during the constructor
     string public symbol;
 
-    /// @notice getApproved that can spend the id of the tokens given
+    /**
+     * @notice getApproved that can spend the id of the tokens given
+     * @dev required in the NFT spec and we simplify the use here by
+     *      naming the storage slot as such
+     */
     mapping(uint256 => address) public getApproved;
 
     mapping(address => mapping(address => bool)) public isApprovedForAll;
@@ -66,6 +74,9 @@ contract OwnershipNFTs is IERC721Metadata {
             _sender,
             _from,
             _tokenId,
+
+            // this is empty byte data that can be optionally passed to
+            // the contract we're confirming is able to receive NFTs
             ""
         );
 
@@ -101,6 +112,7 @@ contract OwnershipNFTs is IERC721Metadata {
         uint256 _tokenId,
         bytes calldata /* _data */
     ) external payable {
+        // checks that the user is authorised
         _transfer(_from, _to, _tokenId);
     }
 
@@ -110,6 +122,7 @@ contract OwnershipNFTs is IERC721Metadata {
         address _to,
         uint256 _tokenId
     ) external payable {
+        // checks that the user is authorised
         _transfer(_from, _to, _tokenId);
     }
 
