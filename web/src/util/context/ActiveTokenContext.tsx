@@ -1,22 +1,23 @@
 import {Hash} from "viem"
 import {createContext, useState} from "react"
-
-const IsHash = (hash: string): hash is Hash => hash.startsWith('0x')
+import {IsHash, ZeroAddress} from "../chainUtils"
 
 type ActiveTokenContextType = {
-    activeToken: Hash
-    setActiveToken: (token: string) => void
+    token0: Hash
+    token1?: Hash
+    setToken0: (token: string) => void
+    setToken1: (token: string) => void
     tokenList: Array<Hash>
     ammAddress: Hash
 }
 
 const initContext = () => ({
-    activeToken: '0x0000000000000000000000000000000000000000' as Hash,
-    setActiveToken: () => {
-        return
-    },
+    token0: ZeroAddress,
+    token1: ZeroAddress,
+    setToken0: () => {},
+    setToken1: () => {},
     tokenList: [],
-    ammAddress: '0x0000000000000000000000000000000000000000' as Hash,
+    ammAddress: ZeroAddress,
 })
 
 const ActiveTokenContext = createContext<ActiveTokenContextType>(initContext())
@@ -31,11 +32,16 @@ const ActiveTokenContextProvider = ({
     tokenList,
     ammAddress
 }: IActiveTokenContextProvider) => {
-    const [activeToken, setActiveToken] = useState<Hash>(tokenList?.[0])
-    const updateToken = (token: string): void => IsHash(token) ? setActiveToken(token) : undefined; 
+    const [defaultToken0, defaultToken1] = tokenList || [];
+    const [activeToken, setActiveTokens] = useState<[Hash, Hash]>([defaultToken0, defaultToken1])
+    const [token0, setToken0] = useState<Hash>(defaultToken0);
+    const [token1, setToken1] = useState<Hash>(defaultToken1);
+
+    const updateToken0 = (token: string) => IsHash(token) && setToken0(token)
+    const updateToken1 = (token: string) => IsHash(token) && setToken1(token)
 
     return (
-        <ActiveTokenContext.Provider value={{activeToken, setActiveToken: updateToken, tokenList, ammAddress}}>
+        <ActiveTokenContext.Provider value={{token0, token1, setToken0: updateToken0, setToken1: updateToken1, tokenList, ammAddress}}>
             {children}
         </ActiveTokenContext.Provider>
     )
