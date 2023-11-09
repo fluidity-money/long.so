@@ -1,4 +1,5 @@
-use crate::types::{TickBitmap, U256Extension, U256};
+use crate::tick::TickBitmap;
+use crate::types::{U256Extension, U256};
 use crate::{error::Error, maths::bit_math};
 
 //Returns next and initialized

@@ -11,10 +11,3 @@ pub const RUINT_MAX_U256: U256 = U256::from_limbs([
     18446744073709551615,
 ]);
 
-pub fn u256_to_ruint(u: U256) -> U256 {
-    u
-}
-
-pub fn ruint_to_u256(r: U256) -> U256 {
-    r
-}
