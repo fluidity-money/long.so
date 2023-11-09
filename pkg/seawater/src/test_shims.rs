@@ -17,7 +17,6 @@ pub extern "C" fn native_keccak256(bytes: *const u8, len: usize, output: *mut u8
     hasher.finalize(output);
 }
 
-// TODO this api is bad, just construct a map inline
 #[cfg(test)]
 mod storage {
     use std::collections::HashMap;

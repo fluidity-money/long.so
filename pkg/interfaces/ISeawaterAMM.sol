@@ -3,6 +3,7 @@ pragma solidity 0.8.16;
 
 import "./ISeawaterEvents.sol";
 
+// ISeawaterAMM is the public facing interface for the SeawaterAMM
 interface ISeawaterAMM is ISeawaterEvents {
     /// @notice swaps _token for USDC
     /// @param _token the token to swap

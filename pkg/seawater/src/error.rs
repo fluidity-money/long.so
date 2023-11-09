@@ -133,6 +133,8 @@ impl From<Error> for Vec<u8> {
     // errors
     #[cfg(target_arch = "wasm32")]
     fn from(val: Error) -> Self {
+        // cast the enum to its descriminant
+        // https://doc.rust-lang.org/std/mem/fn.discriminant.html
         let id = unsafe { *<*const _>::from(&val).cast::<u8>() };
 
         let mut e = vec![id];
