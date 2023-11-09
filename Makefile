@@ -1,7 +1,9 @@
 
-.PHONY: contract docker
+.PHONY: build contract docker
 
-all: contract
+all: build
+
+build: contract
 
 contract:
 	@cd pkg && make
