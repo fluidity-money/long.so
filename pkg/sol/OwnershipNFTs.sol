@@ -10,7 +10,10 @@ import "./utils/Errors.sol";
 contract OwnershipNFTs is IERC721Metadata {
     ISeawaterOwnership immutable public SEAWATER;
 
-    /// @notice TOKEN_URI to set as the default token URI for every NFT
+    /**
+     * @notice TOKEN_URI to set as the default token URI for every NFT
+     * @dev immutable in practice (not set anywhere)
+     */
     string public TOKEN_URI;
 
     /// @notice name of the NFT, set by the constructor
