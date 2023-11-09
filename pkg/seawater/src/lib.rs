@@ -13,6 +13,7 @@ pub mod test_shims;
 pub mod tick;
 pub mod types;
 
+// stylus requires this, since it accesses alloc::vec etc directly
 extern crate alloc;
 
 use crate::types::{Address, I256Extension, I256, U256};
@@ -23,11 +24,15 @@ use types::U256Extension;
 
 use stylus_sdk::{evm, msg, prelude::*, storage::*};
 
+// aliased for simplicity
 type Revert = Vec<u8>;
 
 /// Initializes a custom, global allocator for Rust programs compiled to WASM.
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+// we split our entrypoint functions into three sets, and call them via diamond proxies, to
+// save on binary size
 
 #[cfg(not(any(feature = "swaps", feature = "positions", feature = "admin",)))]
 mod shim {
@@ -71,16 +76,16 @@ impl Pools {
                 .setter(pool)
                 .swap(zero_for_one, amount, price_limit)?;
 
+        // entirely reentrant safe because stylus
+        // denies all reentrancy unless explicity allowed (which we don't)
         erc20::exchange(pool, amount_0)?;
         erc20::exchange(self.fusdc.get(), amount_1)?;
 
         let amount_0_abs = amount_0.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw();
         let amount_1_abs = amount_1.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw();
 
-        let user = msg::sender();
-
         evm::log(events::Swap1 {
-            user,
+            user: msg::sender(),
             pool,
             zeroForOne: zero_for_one,
             amount0: amount_0_abs,
@@ -98,12 +103,17 @@ impl Pools {
         amount: U256,
         min_out: U256,
     ) -> Result<(U256, U256), Revert> {
-        let amount = I256::unchecked_from(amount);
+        let amount = I256::try_from(amount).unwrap();
         // swap in -> usdc
         let (amount_in, interim_usdc_out, final_tick_in) =
             self.pools
                 .setter(from)
-                .swap(true, amount, tick_math::MIN_SQRT_RATIO + U256::one())?;
+                .swap(
+                    true,
+                    amount,
+                    // swap with no price limit, since we use min_out instead
+                    tick_math::MIN_SQRT_RATIO + U256::one(),
+                )?;
 
         // make this positive for exact in
         let interim_usdc_out = interim_usdc_out.checked_neg().ok_or(Error::InterimSwapPositive)?;
@@ -118,13 +128,10 @@ impl Pools {
         let amount_in = amount_in.abs_pos()?;
         let amount_out = amount_out.abs_neg()?;
 
-        if interim_usdc_out != interim_usdc_in {
-            Err(Error::InterimSwapNotEq)?;
-        }
-        if amount_out < min_out {
-            Err(Error::MinOutNotReached)?;
-        }
+        assert_eq_or!(interim_usdc_out, interim_usdc_in, Error::InterimSwapNotEq);
+        assert_or!(amount_out >= min_out, Error::MinOutNotReached);
 
+        // transfer tokens
         erc20::take(from, amount_in)?;
         erc20::send(to, amount_out)?;
 
@@ -219,7 +226,7 @@ impl Pools {
         Ok(())
     }
 
-    pub fn position_owner(&mut self, id: U256) -> Result<Address, Revert> {
+    pub fn position_owner(&self, id: U256) -> Result<Address, Revert> {
         Ok(self.position_owners.get(id))
     }
 
@@ -287,7 +294,7 @@ impl Pools {
         Ok(())
     }
 
-    pub fn init(
+    pub fn create_pool(
         &mut self,
         pool: Address,
         price: U256,

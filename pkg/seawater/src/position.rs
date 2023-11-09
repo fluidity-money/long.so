@@ -9,6 +9,17 @@ use stylus_sdk::prelude::*;
 use stylus_sdk::storage::*;
 
 #[solidity_storage]
+pub struct StoragePositionInfo {
+    pub lower: StorageI32,
+    pub upper: StorageI32,
+    pub liquidity: StorageU128,
+    pub fee_growth_inside_0: StorageU256,
+    pub fee_growth_inside_1: StorageU256,
+    pub token_owed_0: StorageU128,
+    pub token_owed_1: StorageU128,
+}
+
+#[solidity_storage]
 pub struct StoragePositions {
     pub positions: StorageMap<U256, StoragePositionInfo>,
 }
@@ -28,8 +39,6 @@ impl StoragePositions {
     ) -> Result<(), Error> {
         let mut info = self.positions.setter(id);
 
-        let liquidity_next = liquidity_math::add_delta(info.liquidity.get().sys(), delta)?;
-
         let owed_fees_0 = full_math::mul_div(
             fee_growth_inside_0
                 .checked_sub(info.fee_growth_inside_0.get())
@@ -46,20 +55,23 @@ impl StoragePositions {
             full_math::Q128,
         )?;
 
-        // update storage
+        let liquidity_next = liquidity_math::add_delta(info.liquidity.get().sys(), delta)?;
+
         if delta != 0 {
             info.liquidity.set(U128::lib(&liquidity_next));
         }
+
         info.fee_growth_inside_0.set(fee_growth_inside_0);
         info.fee_growth_inside_1.set(fee_growth_inside_1);
-        if !owed_fees_0.is_zero() || !owed_fees_1.is_zero() {
+        if !owed_fees_0.is_zero() {
             // overflow is the user's problem, they should withdraw earlier
             let new_fees_0 = info
                 .token_owed_0
                 .get()
                 .wrapping_add(U128::wrapping_from(owed_fees_0));
             info.token_owed_0.set(new_fees_0);
-
+        }
+        if !owed_fees_1.is_zero() {
             let new_fees_1 = info
                 .token_owed_1
                 .get()
@@ -89,13 +101,3 @@ impl StoragePositions {
     }
 }
 
-#[solidity_storage]
-pub struct StoragePositionInfo {
-    pub lower: StorageI32,
-    pub upper: StorageI32,
-    pub liquidity: StorageU128,
-    pub fee_growth_inside_0: StorageU256,
-    pub fee_growth_inside_1: StorageU256,
-    pub token_owed_0: StorageU128,
-    pub token_owed_1: StorageU128,
-}

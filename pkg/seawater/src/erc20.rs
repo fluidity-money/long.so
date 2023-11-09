@@ -24,7 +24,8 @@ fn call_optional_return(contract: Address, data: &[u8]) -> Result<(), Error> {
     }
 }
 
-// stylus doesn't seem to give us a good way to access these
+// calculates a function's selector, and validates against passed bytes
+// (stylus doesn't seem to give us a good way to access selectors)
 const fn selector(name: &[u8], expected: [u8; 4]) -> [u8; 4] {
     let hash = keccak_const::Keccak256::new().update(name).finalize();
     let mut result = [0_u8; 4];
@@ -47,6 +48,8 @@ const TRANSFER_FROM_SELECTOR: [u8; 4] = selector(
     b"transferFrom(address,address,uint256)",
     [0x23, 0xb8, 0x72, 0xdd],
 );
+
+// erc20 calldata encoding functions
 
 fn encode_transfer(to: Address, amount: U256) -> [u8; 4 + 32 + 32] {
     let mut data = [0_u8; 4 + 32 + 32];
