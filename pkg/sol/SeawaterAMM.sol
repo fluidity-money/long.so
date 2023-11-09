@@ -104,7 +104,7 @@ contract SeawaterAMM is ISeawaterAMM {
 
     // admin functions
 
-    function init(
+    function createPool(
         address /* token */,
         uint256 /* sqrtPriceX96 */,
         uint32 /* fee */,

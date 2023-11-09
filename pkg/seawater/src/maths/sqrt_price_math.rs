@@ -4,7 +4,6 @@ use crate::{
     maths::{
         full_math::{mul_div, mul_div_rounding_up},
         unsafe_math::div_rounding_up,
-        utils::{ruint_to_u256, u256_to_ruint},
     },
 };
 use ruint_macro::uint;
@@ -66,9 +65,9 @@ pub fn get_next_sqrt_price_from_amount_0_rounding_up(
         return Ok(sqrt_price_x_96);
     }
 
-    let numerator_1 = u256_to_ruint(U256::from(liquidity) << 96);
-    let amount = u256_to_ruint(amount);
-    let sqrt_price_x_96 = u256_to_ruint(sqrt_price_x_96);
+    let numerator_1 = U256::from(liquidity) << 96;
+    let amount = amount;
+    let sqrt_price_x_96 = sqrt_price_x_96;
 
     if add {
         let product = amount.wrapping_mul(sqrt_price_x_96);
@@ -78,16 +77,16 @@ pub fn get_next_sqrt_price_from_amount_0_rounding_up(
 
             if denominator >= numerator_1 {
                 return mul_div_rounding_up(
-                    ruint_to_u256(numerator_1),
-                    ruint_to_u256(sqrt_price_x_96),
-                    ruint_to_u256(denominator),
+                    numerator_1,
+                    sqrt_price_x_96,
+                    denominator,
                 );
             }
         }
 
         Ok(div_rounding_up(
-            ruint_to_u256(numerator_1),
-            ruint_to_u256((numerator_1.wrapping_div(sqrt_price_x_96)).wrapping_add(amount)),
+            numerator_1,
+            (numerator_1.wrapping_div(sqrt_price_x_96)).wrapping_add(amount),
         ))
     } else {
         let product = amount.wrapping_mul(sqrt_price_x_96);
@@ -95,9 +94,9 @@ pub fn get_next_sqrt_price_from_amount_0_rounding_up(
             let denominator = numerator_1.wrapping_sub(product);
 
             mul_div_rounding_up(
-                ruint_to_u256(numerator_1),
-                ruint_to_u256(sqrt_price_x_96),
-                ruint_to_u256(denominator),
+                numerator_1,
+                sqrt_price_x_96,
+                denominator,
             )
         } else {
             Err(Error::ProductDivAmount)

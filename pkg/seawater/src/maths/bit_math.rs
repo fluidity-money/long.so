@@ -61,8 +61,6 @@ pub fn least_significant_bit(mut x: U256) -> Result<u8, Error> {
 
     let mut r = 255;
 
-    //TODO: update this to use constants for each U256 comparison
-
     if x & U256::from(u128::MAX) > U256::zero() {
         r -= 128;
     } else {

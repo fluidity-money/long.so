@@ -4,14 +4,11 @@ use crate::types::*;
 use stylus_sdk::prelude::*;
 use stylus_sdk::storage::*;
 
-#[solidity_storage]
-pub struct StorageTicks {
-    pub ticks: StorageMap<i32, StorageTickInfo>,
-}
+pub type TickBitmap = stylus_sdk::storage::StorageMap<i16, stylus_sdk::storage::StorageU256>;
 
 #[solidity_storage]
 pub struct StorageTickBitmap {
-    pub bitmap: StorageMap<i16, StorageU256>,
+    pub bitmap: TickBitmap,
 }
 
 impl StorageTickBitmap {
@@ -40,6 +37,11 @@ pub struct StorageTickInfo {
     seconds_per_liquidity_outside: StorageU160,
     seconds_outside: StorageU32,
     initialised: StorageBool,
+}
+
+#[solidity_storage]
+pub struct StorageTicks {
+    pub ticks: StorageMap<i32, StorageTickInfo>,
 }
 
 impl StorageTicks {
