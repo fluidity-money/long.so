@@ -18,6 +18,11 @@ fee-negative experience.
 
 It is currently unaudited, use it at your own risk!
 
+## Architecture
+
+AMM architecture can be found in a Graph file in
+[docs/amm.dot](docs/amm.dot).
+
 ## Building
 
 	make build
