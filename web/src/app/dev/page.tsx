@@ -12,7 +12,10 @@ import {
   Slider,
   Supicon,
   Token,
+  Hoverable,
 } from '@/components'
+import { Stack } from '@/components/Stack/Stack'
+import { Tooltip } from '@/components/Tooltip/Tooltip'
 
 const Dev = () => {
   const [menu, setMenu] = useState('foo')
@@ -78,8 +81,8 @@ const Dev = () => {
         >
           Test
         </Slider>
-          <Box pill>
-        <Token size="small" />
+        <Box pill>
+          <Token size="small" />
         </Box>
         <Box pill>
           <Token />
@@ -88,11 +91,45 @@ const Dev = () => {
         <Box pill>
           <Token size="large" />
         </Box>
-
+        <Box pill>
+          <Stack>
+            <Token />
+            <Token />
+            <Token />
+          </Stack>
+        </Box>
+        <Chip rounded>
+          <Stack size="small">
+            <Token />
+            <Token />
+            <Token />
+          </Stack>
+          Lorem ipsum
+        </Chip>
+        <Tooltip background="light">Hello world</Tooltip>
+        <Hoverable
+          tooltip={<Tooltip>Tooltip content</Tooltip>}
+        >
+          <Link>Link Button wrapped in a Hoverable</Link>
+        </Hoverable>
         <Supicon seed="foo" />
         <Supicon seed="bar" />
       </div>
-      <div className={styles.box} style={{ backgroundColor: '#1e1e1e' }}></div>
+      <Box>
+        <Token size="large" />
+        <Token />
+        <Token />
+        <Box background="dark">
+          Lorem ipsum dolor sit amet.
+          <Menu id="3">
+            <Menu.Item selected>Foo</Menu.Item>
+            <Menu.Item>Foo</Menu.Item>
+          </Menu>
+        </Box>
+        <Text>Foo</Text>
+        <Link>Link Button -&gt;</Link>
+        <Chip>This is a chip</Chip>
+      </Box>
     </div>
   )
 }

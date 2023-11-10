@@ -23,7 +23,7 @@ const Box: React.FC<IBox> = (props) => {
     <motion.div
       layoutId={layoutId}
       className={classes}
-      transition={{ duration: 0.4, type: 'spring', bounce: 0.3 }}
+      transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
     >
       {children}
     </motion.div>
