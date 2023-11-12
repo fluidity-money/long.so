@@ -32,7 +32,7 @@ interface ISeawaterExecutorSwap {
     /// @param from the input token
     /// @param to the output token
     /// @param amount the amount of the output token to return
-    /// @param minOut the maximum valid amount of the input token, reverts if too high
+    /// @param maxIn the maximum amount to receive of the token on the
     /// @return (amount in, amount out)
     function swap2ExactOut(
         address from,
@@ -61,7 +61,7 @@ interface ISeawaterExecutorPosition {
     /// @notice transferPosition transfers a position. usable only by the NFT manager
     /// @param id the id of the position to transfer
     /// @param from the user to transfer the position from
-    /// @param the user to transfer the position to
+    /// @param to the user to transfer the position to
     function transferPosition(uint256 id, address from, address to) external;
 
     /// @notice gets the owner of a position
@@ -78,7 +78,7 @@ interface ISeawaterExecutorPosition {
     /// @param pool the pool the position belongs to
     /// @param id the id of the position
     /// @param delta the amount of liquidity to add or remove
-    /// @returns the deltas for token0 and token1 for the user
+    /// @return the deltas for token0 and token1 for the user
     function updatePosition(
         address pool,
         uint256 id,
@@ -108,7 +108,7 @@ interface ISeawaterExecutorAdmin {
 
     /// @notice initialises a new pool. only usable by the seawater admin
     /// @param pool the token to create the pool with
-    /// @param sqrtPriceQ96 the starting price for the pool
+    /// @param sqrtPriceX96 the starting price for the pool
     /// @param fee the fee to use
     /// @param tickSpacing the spacing for valid liquidity ticks
     /// @param maxLiquidityPerTick the maximum amount of liquidity allowed in a single tick

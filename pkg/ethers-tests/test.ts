@@ -5,8 +5,6 @@ import test from "node:test"
 import assert from "node:assert"
 import {execSync} from "node:child_process";
 
-// stylus testnode rpc
-const DEFAULT_RPC = "http://127.0.0.1:8547";
 // stylus testnode wallet
 const DEFAULT_WALLET = "0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659";
 
@@ -66,7 +64,7 @@ async function createPosition(
 
 test("amm", async t => {
     // setup and deploy contracts
-    const RPC_URL = process.env.RPC_URL ?? DEFAULT_RPC
+    const RPC_URL = process.env.RPC_URL
     const provider = new JsonRpcProvider(RPC_URL)
     const signer = new Wallet(DEFAULT_WALLET, provider)
     const defaultAccount = await signer.getAddress();
