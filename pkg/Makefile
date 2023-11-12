@@ -2,6 +2,7 @@
 include config.mk
 
 .PHONY: \
+	build \
 	stylus \
 	admin \
 	positions \
@@ -11,7 +12,9 @@ include config.mk
 	ownership-nfts \
 	clean
 
-all: stylus solidity
+all: build
+
+build: stylus solidity
 
 admin: ${OUT_SEAWATER_ADMIN}
 positions: ${OUT_SEAWATER_POSITIONS}
@@ -35,6 +38,7 @@ CARGO_BUILD_STYLUS := \
 		--out-dir .
 
 FORGE_BUILD := forge build
+DOCKER_BUILD := docker build
 
 ### SEAWATER
 
@@ -61,6 +65,10 @@ ${OUT_SEAWATER_AMM}: ${FILES_SOLIDITY}
 ${OUT_OWNERSHIP_NFTS}: ${FILES_SOLIDITY}
 	@${FORGE_BUILD}
 
+docker: Dockerfile ${FILES_RUST} ${FILES_SOLIDITY}
+	@${DOCKER_BUILD} -t fluidity/${REPO} .
+	@touch docker
+
 clean:
 	@rm -rf \
 		${OUT_SEAWATER_ADMIN} \
@@ -68,4 +76,5 @@ clean:
 		${OUT_SEAWATER_SWAPS} \
 		cache \
 		target \
-		out
+		out \
+		docker

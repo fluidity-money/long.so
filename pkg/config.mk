@@ -1,4 +1,6 @@
 
+REPO := app.superposition.so-contracts
+
 FILES_RUST := \
 	$(shell find \
 		-path ./target -prune \
