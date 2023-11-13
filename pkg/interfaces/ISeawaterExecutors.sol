@@ -61,6 +61,12 @@ interface ISeawaterExecutorPosition {
     /// @return the number of positions owned by the user
     function positionBalance(address user) external returns (uint256);
 
+    /// @notice gets the amount of liquidity in a position
+    /// @param pool the pool the position belongs to
+    /// @param id the id of the position
+    /// @return the amount of liquidity contained in the position
+    function positionLiquidity(address pool, uint256 id) external returns (uint128);
+
     /// @notice refreshes a position's fees, and adds or removes liquidity
     /// @param pool the pool the position belongs to
     /// @param id the id of the position

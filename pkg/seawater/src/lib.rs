@@ -21,7 +21,7 @@ use crate::types::{Address, I256Extension, I256, U256};
 use error::Error;
 use maths::tick_math;
 
-use types::U256Extension;
+use types::{U256Extension, WrappedNative};
 
 use stylus_sdk::{evm, msg, prelude::*, storage::*};
 
@@ -274,6 +274,13 @@ impl Pools {
     /// Returns the number of positions owned by an account.
     pub fn position_balance(&self, user: Address) -> Result<U256, Revert> {
         Ok(self.owned_positions.get(user))
+    }
+
+    /// Returns the amount of liquidity in a position.
+    pub fn position_liquidity(&self, pool: Address, id: U256) -> Result<u128, Revert> {
+        let liquidity = self.pools.getter(pool).get_position_liquidity(id);
+
+        Ok(liquidity.sys())
     }
 
     /// Refreshes the amount of liquidity in a position, and adds or removes liquidity. Only usable

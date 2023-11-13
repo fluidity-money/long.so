@@ -223,6 +223,11 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorPosition
+    function positionLiquidity(address /* pool */, uint256 /* id */) external returns (uint128) {
+        directDelegate(_getExecutorPosition());
+    }
+
+    /// @inheritdoc ISeawaterExecutorPosition
     function updatePosition(
         address /* pool */,
         uint256 /* id */,
