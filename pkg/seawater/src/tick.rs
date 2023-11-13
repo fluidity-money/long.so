@@ -48,7 +48,7 @@ impl StorageTicks {
     pub fn update(
         &mut self,
         tick: i32,
-        cur_tick: i32,
+        cur_amm_tick: i32,
         liquidity_delta: i128,
         fee_growth_global_0: &U256,
         fee_growth_global_1: &U256,
@@ -71,7 +71,8 @@ impl StorageTicks {
         if liquidity_gross_before == 0 {
             // initialise ourself
 
-            if tick <= cur_tick {
+            // if we're below the current tick then set fee growth outside
+            if tick <= cur_amm_tick {
                 info.fee_growth_outside_0.set(*fee_growth_global_0);
                 info.fee_growth_outside_1.set(*fee_growth_global_1);
             }

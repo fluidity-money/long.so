@@ -27,14 +27,6 @@ interface ISeawaterAMM is ISeawaterEvents {
         uint256 _minOut
     ) external returns (int256, int256);
 
-    /// @notice raw swap function, implements the uniswap v3 interface
-    function swap(
-        address _token,
-        bool _zeroForOne,
-        int256 _amount,
-        uint256 _priceLimitX96
-    ) external returns (int256, int256);
-
     /// @notice swaps tokenA for tokenB
     /// @param _tokenA the input token
     /// @param _tokenB the output token

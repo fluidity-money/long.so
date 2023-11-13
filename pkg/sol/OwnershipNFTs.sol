@@ -31,6 +31,7 @@ contract OwnershipNFTs is IERC721Metadata {
      */
     mapping(uint256 => address) public getApproved;
 
+    /// @notice isApprovedForAll[owner][spender] == true if `spender` can spend any of `owner`'s NFTs
     mapping(address => mapping(address => bool)) public isApprovedForAll;
 
     constructor(
@@ -68,6 +69,7 @@ contract OwnershipNFTs is IERC721Metadata {
         address _to,
         uint256 _tokenId
     ) internal {
+        // only call the callback if the receiver is a contract
         if (_to.code.length == 0) return;
 
         bytes4 data = IERC721TokenReceiver(_to).onERC721Received(
