@@ -1,3 +1,5 @@
+//! The [StoragePool] struct, containing most of the core AMM functions.
+
 use crate::error::Error;
 use crate::maths::{full_math, liquidity_math, sqrt_price_math, swap_math, tick_bitmap, tick_math};
 use crate::position;
@@ -8,6 +10,7 @@ use stylus_sdk::{prelude::*, storage::*};
 
 type Revert = Vec<u8>;
 
+/// The storage type for an AMM pool.
 #[solidity_storage]
 pub struct StoragePool {
     // immutables
@@ -33,6 +36,7 @@ pub struct StoragePool {
 }
 
 impl StoragePool {
+    /// Creates and initialises a new pool.
     pub fn init(
         &mut self,
         price: U256,
@@ -54,10 +58,12 @@ impl StoragePool {
         Ok(())
     }
 
+    /// Creates a new position in this pool.
     pub fn create_position(&mut self, id: U256, low: i32, up: i32) {
         self.positions.new(id, low, up)
     }
 
+    /// Updates a position in this pool, refreshing fees earned and updating liquidity.
     pub fn update_position(&mut self, id: U256, delta: i128) -> Result<(I256, I256), Revert> {
         let position = self.positions.positions.get(id);
         let lower = position.lower.get().sys();
@@ -165,6 +171,7 @@ impl StoragePool {
         }
     }
 
+    /// Performs a swap on this pool.
     pub fn swap(
         &mut self,
         zero_for_one: bool,
@@ -370,6 +377,7 @@ impl StoragePool {
         Ok((amount_0, amount_1, state.tick))
     }
 
+    /// Collects protocol (admin) fees.
     pub fn collect_protocol(&mut self, amount_0: u128, amount_1: u128) -> (u128, u128) {
         let owed_0 = self.protocol_fee_0.get().sys();
         let owed_1 = self.protocol_fee_1.get().sys();
@@ -387,6 +395,7 @@ impl StoragePool {
         (amount_0, amount_1)
     }
 
+    /// Collects fees earned by a liquidity provider.
     pub fn collect(&mut self, id: U256, amount_0: u128, amount_1: u128) -> (u128, u128) {
         self.positions.collect_fees(id, amount_0, amount_1)
     }

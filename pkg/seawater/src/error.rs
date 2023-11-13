@@ -1,8 +1,32 @@
+//! The [enum@Error] enum.
+
 use alloc::vec::Vec;
 use thiserror::Error;
 
-// asserts that return an error instead of panicking, since panics don't give us good error
-// messages
+/// Asserts that a boolean value is true at runtime, returning an Err if not.
+///
+/// # Uses
+/// This must be used in a function that returns an appropriate [Result], since it uses `?` to
+/// coerce the return value.
+///
+/// This should be used over [assert] in general, since panics don't give us good error messages in
+/// stylus.
+///
+/// # Examples
+///
+/// ```
+/// use libseawater::assert_or;
+/// fn normal() -> Result<(), i32> {
+///     assert_or!(true, 123);
+///     Ok(())
+/// }
+/// fn fail() -> Result<(), i32> {
+///     assert_or!(false, 123);
+///     Ok(())
+/// }
+/// assert_eq!(normal(), Ok(()));
+/// assert_eq!(fail(), Err(123));
+/// ```
 #[macro_export]
 macro_rules! assert_or {
     ($cond:expr, $err:expr) => {
@@ -12,6 +36,8 @@ macro_rules! assert_or {
     };
 }
 
+/// Asserts that two values are equal at runtime, returning an Err if not.
+/// See [assert_or].
 #[macro_export]
 macro_rules! assert_eq_or {
     ($a:expr, $b:expr, $err:expr) => {
@@ -21,6 +47,8 @@ macro_rules! assert_eq_or {
     };
 }
 
+/// Asserts that two values are not equal at runtime, returning an Err if not.
+/// See [assert_or].
 #[macro_export]
 macro_rules! assert_neq_or {
     ($a:expr, $b:expr, $err:expr) => {
@@ -31,6 +59,7 @@ macro_rules! assert_neq_or {
 }
 
 // TODO: make these errors better, some errors in univ3 libs are just require(condition) without a message.
+/// The list of possible errors the contract can return.
 #[derive(Error, Debug)]
 #[repr(u8)]
 pub enum Error {

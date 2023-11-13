@@ -1,3 +1,5 @@
+//! Operations on the tick bitmap.
+
 use crate::tick::TickBitmap;
 use crate::types::{U256Extension, U256};
 use crate::{error::Error, maths::bit_math};
@@ -5,6 +7,10 @@ use crate::{error::Error, maths::bit_math};
 //Returns next and initialized
 //current_word is the current word in the TickBitmap of the pool based on `tick`. TickBitmap[word_pos] = current_word
 //Where word_pos is the 256 bit offset of the ticks word_pos.. word_pos := tick >> 8
+
+/// Finds the next initialised tick within the same word as the current tick.
+///
+/// Returns the tick index and if it was initialised.
 pub fn next_initialized_tick_within_one_word(
     tick_bitmap: &TickBitmap,
     tick: i32,
@@ -57,6 +63,7 @@ pub fn next_initialized_tick_within_one_word(
 }
 
 // returns (int16 wordPos, uint8 bitPos)
+/// Splits a tick into the word it lives in, and the index within that word it lives in.
 pub fn position(tick: i32) -> (i16, u8) {
     ((tick >> 8) as i16, (tick % 256) as u8)
 }

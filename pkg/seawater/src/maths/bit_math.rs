@@ -1,3 +1,5 @@
+//! Operations on an integer's bit pattern
+
 use std::ops::ShrAssign;
 
 use crate::types::{U256Extension, U256};
@@ -6,6 +8,7 @@ use crate::error::Error;
 
 use ruint_macro::uint;
 
+/// Returns the index of the most significant bit of the number passed.
 pub fn most_significant_bit(mut x: U256) -> Result<u8, Error> {
     let mut r = 0;
 
@@ -54,6 +57,7 @@ pub fn most_significant_bit(mut x: U256) -> Result<u8, Error> {
     Ok(r)
 }
 
+/// Returns the index of the least significant bit of the number passed.
 pub fn least_significant_bit(mut x: U256) -> Result<u8, Error> {
     if x.is_zero() {
         return Err(Error::ZeroValue);

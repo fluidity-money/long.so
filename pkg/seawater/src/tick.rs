@@ -1,17 +1,22 @@
+//! Structures and functions to track and update details on a pool's ticks.
+
 use crate::error::*;
 use crate::maths::liquidity_math;
 use crate::types::*;
 use stylus_sdk::prelude::*;
 use stylus_sdk::storage::*;
 
+/// Storage map type for a tick bitmap distributed over several words.
 pub type TickBitmap = stylus_sdk::storage::StorageMap<i16, stylus_sdk::storage::StorageU256>;
 
+/// Container type for a [TickBitmap].
 #[solidity_storage]
 pub struct StorageTickBitmap {
     pub bitmap: TickBitmap,
 }
 
 impl StorageTickBitmap {
+    /// Toggles a tick on the bitmap.
     pub fn flip(&mut self, tick: i32, spacing: u8) {
         let spacing = spacing as i32;
         assert!(tick % spacing == 0); // ensure the tick lies on a valid space
@@ -26,6 +31,7 @@ impl StorageTickBitmap {
     }
 }
 
+/// Storage type for details on a tick.
 #[solidity_storage]
 #[derive(Erase)]
 pub struct StorageTickInfo {
@@ -39,12 +45,15 @@ pub struct StorageTickInfo {
     initialised: StorageBool,
 }
 
+/// Container type for the map of tick indexes to ticks.
 #[solidity_storage]
 pub struct StorageTicks {
     pub ticks: StorageMap<i32, StorageTickInfo>,
 }
 
 impl StorageTicks {
+    /// Updates a tick with liquidity and fee data, initialising it if it was not before. Returns
+    /// if the tick changed activation state.
     pub fn update(
         &mut self,
         tick: i32,
@@ -99,8 +108,7 @@ impl StorageTicks {
         Ok(tick_flipped)
     }
 
-    // the fee growth inside this tick is the total fee
-    // growth, minus the fee growth outside this tick
+    /// Gets the fee growth inside a tick range.
     pub fn get_fee_growth_inside(
         &mut self,
         lower_tick: i32,
@@ -109,6 +117,8 @@ impl StorageTicks {
         fee_growth_global_0: &U256,
         fee_growth_global_1: &U256,
     ) -> Result<(U256, U256), Error> {
+        // the fee growth inside this tick is the total fee
+        // growth, minus the fee growth outside this tick
         let lower = self.ticks.get(lower_tick);
         let upper = self.ticks.get(upper_tick);
 
@@ -156,6 +166,7 @@ impl StorageTicks {
         ))
     }
 
+    /// Updates a tick's fee information when the tick is crossed.
     pub fn cross(
         &mut self,
         tick: i32,
@@ -173,6 +184,7 @@ impl StorageTicks {
         info.liquidity_net.sys()
     }
 
+    /// Deletes a tick from the map, freeing storage slots.
     pub fn clear(&mut self, tick: i32) {
         // delete a tick
         self.ticks.delete(tick);

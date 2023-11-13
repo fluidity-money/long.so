@@ -1,3 +1,5 @@
+//! Functions that operate on X96 encoded square root prices.
+
 use crate::types::{U256Extension, I256, U256};
 use crate::{
     error::Error,
@@ -8,13 +10,17 @@ use crate::{
 };
 use ruint_macro::uint;
 
+/// The maximum value storable in a 160-bit unsigned integer.
 pub const MAX_U160: U256 =
     U256::from_limbs([18446744073709551615, 18446744073709551615, 4294967295, 0]);
+/// 2^96, used for normalising 96-bit fixed point numbers.
 pub const Q96: U256 = U256::from_limbs([0, 4294967296, 0, 0]);
+/// 96, used to encode the resolution of 96-bit fixed point numbers.
 pub const FIXED_POINT_96_RESOLUTION: U256 = U256::from_limbs([96, 0, 0, 0]);
+/// 96, used to encode the resolution of 96-bit fixed point numbers, as a [usize].
 pub const FIXED_POINT_96_RESOLUTION_USIZE: usize = 96;
 
-// returns (sqrtQX96)
+/// Calculates the next square root price from a starting price, a token delta, and a direction.
 pub fn get_next_sqrt_price_from_input(
     sqrt_price: U256,
     liquidity: u128,
@@ -34,7 +40,7 @@ pub fn get_next_sqrt_price_from_input(
     }
 }
 
-// returns (sqrtQX96)
+/// Calculates the next square root price from a starting price and an output token amount.
 pub fn get_next_sqrt_price_from_output(
     sqrt_price: U256,
     liquidity: u128,
@@ -54,7 +60,7 @@ pub fn get_next_sqrt_price_from_output(
     }
 }
 
-// returns (uint160 sqrtQX96)
+/// Calculates the next square root price from a starting price and an input amount of token0.
 pub fn get_next_sqrt_price_from_amount_0_rounding_up(
     sqrt_price_x_96: U256,
     liquidity: u128,
@@ -104,7 +110,7 @@ pub fn get_next_sqrt_price_from_amount_0_rounding_up(
     }
 }
 
-// returns (uint160 sqrtQX96)
+/// Calculates the next square root price from a starting price and an input amount of token1.
 pub fn get_next_sqrt_price_from_amount_1_rounding_down(
     sqrt_price_x_96: U256,
     liquidity: u128,
@@ -144,7 +150,7 @@ pub fn get_next_sqrt_price_from_amount_1_rounding_down(
     }
 }
 
-// returns (uint256 amount0)
+/// Calculates the delta of token 0 between two prices.
 pub fn _get_amount_0_delta(
     mut sqrt_ratio_a_x_96: U256,
     mut sqrt_ratio_b_x_96: U256,
@@ -170,7 +176,7 @@ pub fn _get_amount_0_delta(
     }
 }
 
-// returns (uint256 amount1)
+/// Calculates the delta of token 1 between two prices.
 pub fn _get_amount_1_delta(
     mut sqrt_ratio_a_x_96: U256,
     mut sqrt_ratio_b_x_96: U256,
@@ -196,6 +202,8 @@ pub fn _get_amount_1_delta(
     }
 }
 
+/// Calculates the delta of token 0 between two prices, automatically rounding in the correct
+/// direction.
 pub fn get_amount_0_delta(
     sqrt_ratio_a_x_96: U256,
     sqrt_ratio_b_x_96: U256,
@@ -218,6 +226,8 @@ pub fn get_amount_0_delta(
     }
 }
 
+/// Calculates the delta of token 1 between two prices, automatically rounding in the correct
+/// direction.
 pub fn get_amount_1_delta(
     sqrt_ratio_a_x_96: U256,
     sqrt_ratio_b_x_96: U256,

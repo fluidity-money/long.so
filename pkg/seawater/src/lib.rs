@@ -1,3 +1,7 @@
+//! Implementation of the seawater AMM
+//!
+//! Seawater is an AMM designed for arbitrum's stylus environment based on uniswap v3.
+
 #![cfg_attr(not(target_arch = "wasm32"), feature(lazy_cell, const_trait_impl))]
 #![deny(clippy::unwrap_used)]
 
@@ -44,6 +48,8 @@ mod shim {
     impl crate::Pools {}
 }
 
+/// The root of seawater's storage. Stores variables needed globally, as well as the map of AMM
+/// pools.
 #[solidity_storage]
 #[entrypoint]
 pub struct Pools {
@@ -61,20 +67,34 @@ pub struct Pools {
     owned_positions: StorageMap<Address, StorageU256>,
 }
 
+/// Swap functions. Only enabled when the `swaps` feature is set.
 #[cfg_attr(feature = "swaps", external)]
 impl Pools {
-    // raw swap function
+    /// Raw swap function, implementing the uniswap v3 interface.
+    ///
+    /// # Arguments
+    /// * `pool` - The pool to swap for. Pools are accessed as the address of their first token,
+    /// where every pool has the fluid token as token 1.
+    /// * `zero_for_one` - The swap direction. This is `true` if swapping to the fluid token, or
+    /// `false` if swapping from the fluid token.
+    /// * `amount` - The amount of token to swap. Follows the uniswap convention, where a positive
+    /// amount will perform an exact in swap and a negative amount will perform an exact out swap.
+    /// * `price_limit_x96` - The price limit, specified as an X96 encoded square root price.
+    /// # Side effects
+    /// This function transfers ERC20 tokens from and to the caller as per the swap. It takes
+    /// tokens using ERC20's `transferFrom` method, and therefore must have approvals set before
+    /// use.
     pub fn swap(
         &mut self,
         pool: Address,
         zero_for_one: bool,
         amount: I256,
-        price_limit: U256,
+        price_limit_x96: U256,
     ) -> Result<(I256, I256), Revert> {
         let (amount_0, amount_1, ending_tick) =
             self.pools
                 .setter(pool)
-                .swap(zero_for_one, amount, price_limit)?;
+                .swap(zero_for_one, amount, price_limit_x96)?;
 
         // entirely reentrant safe because stylus
         // denies all reentrancy unless explicity allowed (which we don't)
@@ -96,6 +116,9 @@ impl Pools {
         Ok((amount_0, amount_1))
     }
 
+    /// Performs a two step swap, swapping from a non-fluid token to a non-fluid token.
+    ///
+    /// See [Self::swap] for more details on how this operates.
     pub fn swap_2_exact_in(
         &mut self,
         from: Address,
@@ -151,8 +174,10 @@ impl Pools {
     }
 }
 
+/// Internal functions for position management.
 impl Pools {
-    pub fn grant_position(&mut self, owner: Address, id: U256) {
+    /// Makes the user the owner of a position. The position must not have an owner.
+    fn grant_position(&mut self, owner: Address, id: U256) {
         // set owner
         self.position_owners.setter(id).set(owner);
 
@@ -163,7 +188,8 @@ impl Pools {
             .set(owned_positions_count);
     }
 
-    pub fn remove_position(&mut self, owner: Address, id: U256) {
+    /// Removes the user as the owner of a position. The position must have an owner.
+    fn remove_position(&mut self, owner: Address, id: U256) {
         // remove owner
         self.position_owners.setter(id).erase();
 
@@ -175,8 +201,10 @@ impl Pools {
     }
 }
 
+/// Position management functions. Only enabled when the `positions` feature is set.
 #[cfg_attr(feature = "positions", external)]
 impl Pools {
+    /// Creates a new, empty position, owned by a user.
     pub fn mint_position(&mut self, pool: Address, lower: i32, upper: i32) -> Result<(), Revert> {
         let id = self.next_position_id.get();
         self.pools.setter(pool).create_position(id, lower, upper);
@@ -198,6 +226,9 @@ impl Pools {
         Ok(())
     }
 
+    /// Burns a position. Only usable by the position owner.
+    ///
+    /// Calling this function leaves any liquidity or fees left in the position inaccessible.
     pub fn burn_position(&mut self, id: U256) -> Result<(), Revert> {
         let owner = msg::sender();
         assert_eq_or!(self.position_owners.get(id), owner, Error::PositionOwnerOnly);
@@ -209,7 +240,11 @@ impl Pools {
         Ok(())
     }
 
-    // this is a privileged method!!
+    /// Transfers a position's ownership from one address to another. Only usable by the NFT
+    /// manager account.
+    ///
+    /// # Calling requirements
+    /// Requires that the `from` address is the current owner of the position.
     pub fn transfer_position(
         &mut self,
         id: U256,
@@ -226,14 +261,27 @@ impl Pools {
         Ok(())
     }
 
+    /// Returns the current owner of a position.
     pub fn position_owner(&self, id: U256) -> Result<Address, Revert> {
         Ok(self.position_owners.get(id))
     }
 
+    /// Returns the number of positions owned by an account.
     pub fn position_balance(&self, user: Address) -> Result<U256, Revert> {
         Ok(self.owned_positions.get(user))
     }
 
+    /// Refreshes the amount of liquidity in a position, and adds or removes liquidity. Only usable
+    /// by the position's owner.
+    ///
+    /// # Arguments
+    /// * `pool` - The pool the position belongs to.
+    /// * `id` - The ID of the position.
+    /// * `delta` - The change to apply to the liquidity in the position.
+    ///
+    /// # Side effects
+    /// Adding or removing liquidity will transfer tokens from or to the caller. Tokens are
+    /// transfered with ERC20's `transferFrom`, so approvals must be set before calling.
     pub fn update_position(
         &mut self,
         pool: Address,
@@ -252,6 +300,17 @@ impl Pools {
         Ok((token_0, token_1))
     }
 
+    /// Collects AMM fees from a position, and triggers a release of fluid LP rewards.
+    /// Only usable by the position's owner.
+    ///
+    /// # Arguments
+    /// * `pool` - The pool the position belongs to.
+    /// * `id` - The ID of the position.
+    /// * `amount_0` - The maximum amount of token 0 (the pool token) to collect.
+    /// * `amount_1` - The maximum amount of token 1 (the fluid token) to collect.
+    ///
+    /// # Side effects
+    /// Transfers tokens to the caller, and triggers a release of fluid LP rewards.
     pub fn collect(
         &mut self,
         pool: Address,
@@ -277,8 +336,11 @@ impl Pools {
     }
 }
 
+/// Admin functions. Only enabled when the `admin` feature is set.
 #[cfg_attr(feature = "admin", external)]
 impl Pools {
+    /// The initialiser function for the seawater contract. Should be called in the proxy's
+    /// constructor.
     pub fn ctor(
         &mut self,
         usdc: Address,
@@ -294,6 +356,14 @@ impl Pools {
         Ok(())
     }
 
+    /// Creates a new pool. Only usable by the seawater admin.
+    ///
+    /// # Arguments
+    /// * `pool` - The address of the non-fluid token to construct the pool around.
+    /// * `price` - The initial price for the pool, as an X96 encoded square root price.
+    /// * `fee` - The fee for the pool.
+    /// * `tick_spacing` - The tick spacing for the pool.
+    /// * `max_liquidity_per_tick` - The maximum amount of liquidity allowed in a single tick.
     pub fn create_pool(
         &mut self,
         pool: Address,
@@ -317,6 +387,7 @@ impl Pools {
         Ok(())
     }
 
+    /// Collects protocol fees from the AMM. Only usable by the seawater admin.
     pub fn collect_protocol(
         &mut self,
         pool: Address,

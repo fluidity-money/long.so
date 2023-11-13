@@ -1,3 +1,5 @@
+//! Functions for calculating swap results
+
 use crate::types::{I256Extension, U256Extension, I256, U256};
 
 use crate::{
@@ -17,6 +19,7 @@ use crate::{
 //         uint256 amountOut,
 //         uint256 feeAmount
 //     )
+/// Calculates a swap step within a tick.
 pub fn compute_swap_step(
     sqrt_ratio_current_x_96: U256,
     sqrt_ratio_target_x_96: U256,
