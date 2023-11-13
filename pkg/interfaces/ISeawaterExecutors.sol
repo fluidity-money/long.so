@@ -27,19 +27,6 @@ interface ISeawaterExecutorSwap {
         uint256 amount,
         uint256 minOut
     ) external returns (uint256, uint256);
-
-    /// @notice performs a two stage swap across two pools
-    /// @param from the input token
-    /// @param to the output token
-    /// @param amount the amount of the output token to return
-    /// @param maxIn the maximum amount to receive of the token on the
-    /// @return (amount in, amount out)
-    function swap2ExactOut(
-        address from,
-        address to,
-        uint256 amount,
-        uint256 maxIn
-    ) external returns (uint256, uint256);
 }
 
 interface ISeawaterExecutorPosition {
@@ -67,12 +54,12 @@ interface ISeawaterExecutorPosition {
     /// @notice gets the owner of a position
     /// @param id the id of the position
     /// @return the owner of the position
-    function positionOwner(uint256 id) external view returns (address);
+    function positionOwner(uint256 id) external returns (address);
 
     /// @notice gets the number of positions owned by a user
     /// @param user the user to get position balance for
     /// @return the number of positions owned by the user
-    function positionBalance(address user) external view returns (uint256);
+    function positionBalance(address user) external returns (uint256);
 
     /// @notice refreshes a position's fees, and adds or removes liquidity
     /// @param pool the pool the position belongs to
@@ -99,13 +86,8 @@ interface ISeawaterExecutorPosition {
     ) external returns (uint128, uint128);
 }
 
-interface ISeawaterExecutorAdmin {
-    /// @notice constructor function
-    /// @param usdc the address of the counterparty token
-    /// @param seawaterAdmin the account with administrative power on the amm
-    /// @param nftManager the account with control over NFT ownership
-    function ctor(address usdc, address seawaterAdmin, address nftManager) external;
-
+/// @dev contains just the admin functions that are exposed directly
+interface ISeawaterExecutorAdminExposed {
     /// @notice initialises a new pool. only usable by the seawater admin
     /// @param pool the token to create the pool with
     /// @param sqrtPriceX96 the starting price for the pool
@@ -130,6 +112,14 @@ interface ISeawaterExecutorAdmin {
         uint128 amount0,
         uint128 amount1
     ) external returns (uint128, uint128);
+}
+
+interface ISeawaterExecutorAdmin  is ISeawaterExecutorAdminExposed {
+    /// @notice constructor function
+    /// @param usdc the address of the counterparty token
+    /// @param seawaterAdmin the account with administrative power on the amm
+    /// @param nftManager the account with control over NFT ownership
+    function ctor(address usdc, address seawaterAdmin, address nftManager) external;
 }
 
 interface ISeawaterExecutorFallback {
