@@ -399,6 +399,10 @@ impl StoragePool {
     pub fn collect(&mut self, id: U256, amount_0: u128, amount_1: u128) -> (u128, u128) {
         self.positions.collect_fees(id, amount_0, amount_1)
     }
+
+    pub fn get_position_liquidity(&self, id: U256) -> U128 {
+        self.positions.positions.getter(id).liquidity.get()
+    }
 }
 
 #[cfg(test)]
