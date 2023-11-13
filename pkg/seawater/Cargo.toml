@@ -19,7 +19,7 @@ ruint.workspace = true
 ruint-macro.workspace = true
 thiserror.workspace = true
 tiny-keccak.workspace = true
-wee_alloc.workspace = true
+lol_alloc.workspace = true
 keccak-const.workspace = true
 
 [dev-dependencies]
