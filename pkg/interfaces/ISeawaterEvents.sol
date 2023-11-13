@@ -90,6 +90,7 @@ interface ISeawaterEvents {
     /// @param to the output token
     /// @param amountIn the amount of `from` the user is paying
     /// @param amountOut the amount of `to` the user is receiving
+    /// @param fluidVolume the volume of the internal transfer
     /// @param finalTick0 the tick that the first token's pool ended on
     /// @param finalTick1 the tick that the second token's pool ended on
     event Swap2(
@@ -98,6 +99,7 @@ interface ISeawaterEvents {
         address indexed to,
         uint256 amountIn,
         uint256 amountOut,
+        uint256 fluidVolume,
         int32 finalTick0,
         int32 finalTick1
     );
