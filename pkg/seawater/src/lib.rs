@@ -168,6 +168,7 @@ impl Pools {
             to,
             amountIn: amount_in,
             amountOut: amount_out,
+            fluidVolume: interim_usdc_out.abs().into_raw(),
             finalTick0: final_tick_in,
             finalTick1: final_tick_out,
         });
