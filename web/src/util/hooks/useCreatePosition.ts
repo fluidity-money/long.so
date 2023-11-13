@@ -25,8 +25,6 @@ const useCreatePosition = (): UseCreatePosition => {
             address: ammAddress,
             abi: SeawaterABI,
             functionName: 'mintPosition',
-            // TODO convert to floats
-            // args: [debouncedToken, encodeTick(debouncedLowerRange), encodeTick(debouncedUpperRange)]
             args: [token0, encodeTick(lowerRange), encodeTick(upperRange)]
         })
 
