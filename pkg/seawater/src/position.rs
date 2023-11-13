@@ -1,3 +1,5 @@
+//! Structures and functions to track and update details on owned positions.
+
 use crate::error::*;
 use crate::maths::full_math;
 use crate::maths::liquidity_math;
@@ -8,6 +10,7 @@ use crate::types::{U256Extension, I32, U128, U256};
 use stylus_sdk::prelude::*;
 use stylus_sdk::storage::*;
 
+/// Storage type for the details on a position.
 #[solidity_storage]
 pub struct StoragePositionInfo {
     pub lower: StorageI32,
@@ -19,17 +22,25 @@ pub struct StoragePositionInfo {
     pub token_owed_1: StorageU128,
 }
 
+/// Container type for the map of position ID to position details.
 #[solidity_storage]
 pub struct StoragePositions {
     pub positions: StorageMap<U256, StoragePositionInfo>,
 }
 impl StoragePositions {
+    /// Initialises a new position with the position's bounds.
+    ///
+    /// # Calling requirements
+    /// Requires that `id` has not been initialised before, and that `low` and `up` are in the
+    /// correct order.
     pub fn new(&mut self, id: U256, low: i32, up: i32) {
         let mut info = self.positions.setter(id);
         info.lower.set(I32::lib(&low));
         info.upper.set(I32::lib(&up));
     }
 
+    /// Updates a position, refreshing the amount of fees the position has earned and updating its
+    /// liquidity.
     pub fn update(
         &mut self,
         id: U256,
@@ -81,6 +92,13 @@ impl StoragePositions {
 
         Ok(())
     }
+
+    /// Collects fees from a position, returning the amount of each token collected.
+    ///
+    /// # Arguments
+    /// * `id` - The position ID of the position to collect fees for.
+    /// * `amount_0` - The maximum amount of token 0 (the pool token) to withdraw.
+    /// * `amount_1` - The maximum amount of token 1 (the fluid token) to withdraw.
     pub fn collect_fees(&mut self, id: U256, amount_0: u128, amount_1: u128) -> (u128, u128) {
         let mut position = self.positions.setter(id);
 

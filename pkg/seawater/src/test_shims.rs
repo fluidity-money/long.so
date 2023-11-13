@@ -1,4 +1,8 @@
-// provide the native_keccak256 function for alloy to link to
+//! Shim module to provide normally stylus-provided functions to link to in an unhosted
+//! environment.
+//!
+//! Functions here are gated on tests, since normal contract execution should have the hosted
+//! stylus environment.
 
 #[cfg(test)]
 #[no_mangle]
