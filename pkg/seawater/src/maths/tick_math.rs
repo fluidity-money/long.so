@@ -51,7 +51,7 @@ pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, Error> {
     }
 
     Ok((result >> 32)
-        + if (result % (U256::one() << 32)).is_zero() {
+        + if (result % (U256::one() << 32) as U256).is_zero() {
             U256::zero()
         } else {
             U256::one()

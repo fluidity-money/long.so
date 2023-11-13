@@ -17,9 +17,6 @@ pub mod test_shims;
 pub mod tick;
 pub mod types;
 
-// stylus requires this, since it accesses alloc::vec etc directly
-extern crate alloc;
-
 use crate::types::{Address, I256Extension, I256, U256};
 use error::Error;
 use maths::tick_math;
@@ -31,9 +28,16 @@ use stylus_sdk::{evm, msg, prelude::*, storage::*};
 // aliased for simplicity
 type Revert = Vec<u8>;
 
-/// Initializes a custom, global allocator for Rust programs compiled to WASM.
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+extern crate alloc;
+// only set a custom allocator if we're deploying on wasm
+#[cfg(target_arch = "wasm32")]
+mod allocator {
+    use lol_alloc::{AssumeSingleThreaded, FreeListAllocator};
+    // SAFETY: This application is single threaded, so using AssumeSingleThreaded is allowed.
+    #[global_allocator]
+    static ALLOCATOR: AssumeSingleThreaded<FreeListAllocator> =
+        unsafe { AssumeSingleThreaded::new(FreeListAllocator::new()) };
+}
 
 // we split our entrypoint functions into three sets, and call them via diamond proxies, to
 // save on binary size
