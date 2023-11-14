@@ -210,6 +210,9 @@ impl Pools {
 #[cfg_attr(feature = "positions", external)]
 impl Pools {
     /// Creates a new, empty position, owned by a user.
+    ///
+    /// # Errors
+    /// Requires the pool to exist and be enabled.
     pub fn mint_position(&mut self, pool: Address, lower: i32, upper: i32) -> Result<(), Revert> {
         let id = self.next_position_id.get();
         self.pools.setter(pool).create_position(id, lower, upper)?;
@@ -234,6 +237,9 @@ impl Pools {
     /// Burns a position. Only usable by the position owner.
     ///
     /// Calling this function leaves any liquidity or fees left in the position inaccessible.
+    ///
+    /// # Errors
+    /// Requires the position be owned by the caller. Requires the pool to be enabled.
     pub fn burn_position(&mut self, id: U256) -> Result<(), Revert> {
         let owner = msg::sender();
         assert_eq_or!(self.position_owners.get(id), owner, Error::PositionOwnerOnly);
@@ -250,6 +256,9 @@ impl Pools {
     ///
     /// # Calling requirements
     /// Requires that the `from` address is the current owner of the position.
+    ///
+    /// # Errors
+    /// Requires the caller be the NFT manager.
     pub fn transfer_position(
         &mut self,
         id: U256,
@@ -294,6 +303,10 @@ impl Pools {
     /// # Side effects
     /// Adding or removing liquidity will transfer tokens from or to the caller. Tokens are
     /// transfered with ERC20's `transferFrom`, so approvals must be set before calling.
+    ///
+    /// # Errors
+    /// Requires token approvals to be set if adding liquidity. Requires the caller to be the
+    /// position owner. Requires the pool to be enabled unless removing liquidity.
     pub fn update_position(
         &mut self,
         pool: Address,
@@ -323,6 +336,9 @@ impl Pools {
     ///
     /// # Side effects
     /// Transfers tokens to the caller, and triggers a release of fluid LP rewards.
+    ///
+    /// # Errors
+    /// Requires the caller to be the position owner. Requires the pool to be enabled.
     pub fn collect(
         &mut self,
         pool: Address,
@@ -353,6 +369,9 @@ impl Pools {
 impl Pools {
     /// The initialiser function for the seawater contract. Should be called in the proxy's
     /// constructor.
+    ///
+    ///  # Errors
+    ///  Requires the contract to not be initialised.
     pub fn ctor(
         &mut self,
         usdc: Address,
@@ -376,6 +395,9 @@ impl Pools {
     /// * `fee` - The fee for the pool.
     /// * `tick_spacing` - The tick spacing for the pool.
     /// * `max_liquidity_per_tick` - The maximum amount of liquidity allowed in a single tick.
+    ///
+    /// # Errors
+    /// Requires the caller to be the seawater admin. Requires the pool to not exist.
     pub fn create_pool(
         &mut self,
         pool: Address,
@@ -400,6 +422,9 @@ impl Pools {
     }
 
     /// Collects protocol fees from the AMM. Only usable by the seawater admin.
+    ///
+    /// # Errors
+    /// Requires the user to be the seawater admin. Requires the pool to be enabled.
     pub fn collect_protocol(
         &mut self,
         pool: Address,
@@ -424,6 +449,9 @@ impl Pools {
     }
 
     /// Changes if a pool is enabled. Only usable by the seawater admin.
+    ///
+    /// # Errors
+    /// Requires the user to be the seawater admin.
     pub fn enable_pool(&mut self, pool: Address, enabled: bool) -> Result<(), Revert> {
         assert_eq_or!(msg::sender(), self.seawater_admin.get(), Error::SeawaterAdminOnly);
 
