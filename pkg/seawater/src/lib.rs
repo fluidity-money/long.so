@@ -212,7 +212,7 @@ impl Pools {
     /// Creates a new, empty position, owned by a user.
     pub fn mint_position(&mut self, pool: Address, lower: i32, upper: i32) -> Result<(), Revert> {
         let id = self.next_position_id.get();
-        self.pools.setter(pool).create_position(id, lower, upper);
+        self.pools.setter(pool).create_position(id, lower, upper)?;
 
         self.next_position_id.set(id + U256::one());
 
@@ -332,7 +332,7 @@ impl Pools {
     ) -> Result<(u128, u128), Revert> {
         assert_eq_or!(msg::sender(), self.position_owners.get(id), Error::PositionOwnerOnly);
 
-        let (token_0, token_1) = self.pools.setter(pool).collect(id, amount_0, amount_1);
+        let (token_0, token_1) = self.pools.setter(pool).collect(id, amount_0, amount_1)?;
 
         erc20::send(pool, U256::from(token_0))?;
         erc20::send(self.fusdc.get(), U256::from(token_1))?;
@@ -407,7 +407,7 @@ impl Pools {
         amount_1: u128,
     ) -> Result<(u128, u128), Revert> {
         assert_eq_or!(msg::sender(), self.seawater_admin.get(), Error::SeawaterAdminOnly);
-        let (token_0, token_1) = self.pools.setter(pool).collect_protocol(amount_0, amount_1);
+        let (token_0, token_1) = self.pools.setter(pool).collect_protocol(amount_0, amount_1)?;
 
         erc20::send(pool, U256::from(token_0))?;
         erc20::send(self.fusdc.get(), U256::from(token_1))?;
@@ -421,5 +421,12 @@ impl Pools {
 
         // transfer tokens
         Ok((token_0, token_1))
+    }
+
+    /// Changes if a pool is enabled. Only usable by the seawater admin.
+    pub fn enable_pool(&mut self, pool: Address, enabled: bool) -> Result<(), Revert> {
+        assert_eq_or!(msg::sender(), self.seawater_admin.get(), Error::SeawaterAdminOnly);
+
+        Ok(self.pools.setter(pool).set_enabled(enabled))
     }
 }

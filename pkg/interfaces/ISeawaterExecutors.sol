@@ -118,6 +118,11 @@ interface ISeawaterExecutorAdminExposed {
         uint128 amount0,
         uint128 amount1
     ) external returns (uint128, uint128);
+
+    /// @notice enables or disables a pool
+    /// @param pool the pool to enable or disable
+    /// @param enabled true to enable to pool, false to disable it
+    function setPoolEnabled(address pool, bool enabled) external;
 }
 
 interface ISeawaterExecutorAdmin  is ISeawaterExecutorAdminExposed {

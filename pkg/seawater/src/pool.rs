@@ -13,6 +13,7 @@ type Revert = Vec<u8>;
 /// The storage type for an AMM pool.
 #[solidity_storage]
 pub struct StoragePool {
+    enabled: StorageBool,
     // immutables
     fee: StorageU32,
     tick_spacing: StorageU8,
@@ -46,6 +47,7 @@ impl StoragePool {
     ) -> Result<(), Revert> {
         assert_eq_or!(self.sqrt_price.get(), U256::ZERO, Error::PoolAlreadyInitialised);
 
+        self.enabled.set(true);
         self.sqrt_price.set(price);
         self.cur_tick
             .set(I32::lib(&tick_math::get_tick_at_sqrt_ratio(price)?));
@@ -59,12 +61,16 @@ impl StoragePool {
     }
 
     /// Creates a new position in this pool.
-    pub fn create_position(&mut self, id: U256, low: i32, up: i32) {
-        self.positions.new(id, low, up)
+    pub fn create_position(&mut self, id: U256, low: i32, up: i32) -> Result<(), Revert> {
+        assert_or!(self.enabled.get(), Error::PoolDisabled);
+        Ok(self.positions.new(id, low, up))
     }
 
     /// Updates a position in this pool, refreshing fees earned and updating liquidity.
     pub fn update_position(&mut self, id: U256, delta: i128) -> Result<(I256, I256), Revert> {
+        // either the pool must be enabled or we must be removing liquidity
+        assert_or!(delta < 0 || self.enabled.get(), Error::PoolDisabled);
+
         let position = self.positions.positions.get(id);
         let lower = position.lower.get().sys();
         let upper = position.upper.get().sys();
@@ -178,6 +184,8 @@ impl StoragePool {
         amount: I256,
         mut price_limit: U256,
     ) -> Result<(I256, I256, i32), Revert> {
+        assert_or!(self.enabled.get(), Error::PoolDisabled);
+
         // ensure the price limit is within bounds
         match zero_for_one {
             true => {
@@ -378,7 +386,9 @@ impl StoragePool {
     }
 
     /// Collects protocol (admin) fees.
-    pub fn collect_protocol(&mut self, amount_0: u128, amount_1: u128) -> (u128, u128) {
+    pub fn collect_protocol(&mut self, amount_0: u128, amount_1: u128) -> Result<(u128, u128), Revert> {
+        assert_or!(self.enabled.get(), Error::PoolDisabled);
+
         let owed_0 = self.protocol_fee_0.get().sys();
         let owed_1 = self.protocol_fee_1.get().sys();
 
@@ -392,16 +402,24 @@ impl StoragePool {
             self.protocol_fee_1.set(U128::lib(&(owed_1 - amount_1)));
         }
 
-        (amount_0, amount_1)
+        Ok((amount_0, amount_1))
     }
 
     /// Collects fees earned by a liquidity provider.
-    pub fn collect(&mut self, id: U256, amount_0: u128, amount_1: u128) -> (u128, u128) {
-        self.positions.collect_fees(id, amount_0, amount_1)
+    pub fn collect(&mut self, id: U256, amount_0: u128, amount_1: u128) -> Result<(u128, u128), Revert> {
+        assert_or!(self.enabled.get(), Error::PoolDisabled);
+
+        Ok(self.positions.collect_fees(id, amount_0, amount_1))
     }
 
+    /// Returns the amount of liquidity in a position.
     pub fn get_position_liquidity(&self, id: U256) -> U128 {
         self.positions.positions.getter(id).liquidity.get()
+    }
+
+    /// Enables or disables the pool.
+    pub fn set_enabled(&mut self, enabled: bool) {
+        self.enabled.set(enabled)
     }
 }
 
@@ -472,7 +490,7 @@ mod test {
 
             let id = uint!(2_U256);
 
-            storage.create_position(id, tick_math::get_min_tick(1), tick_math::get_max_tick(1));
+            storage.create_position(id, tick_math::get_min_tick(1), tick_math::get_max_tick(1)).unwrap();
 
             assert_eq!(
                 storage.update_position(id, 3161,),
@@ -491,7 +509,7 @@ mod test {
                 id,
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(50, 1))?,
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
-            );
+            ).unwrap();
             storage.update_position(id, 100)?;
 
             let id = uint!(3_U256);
@@ -499,7 +517,7 @@ mod test {
                 id,
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(80, 1))?,
                 tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
-            );
+            ).unwrap();
             storage.update_position(id, 100)?;
 
             storage.swap(true, I256::unchecked_from(-10), encode_sqrt_price(60, 1))?;

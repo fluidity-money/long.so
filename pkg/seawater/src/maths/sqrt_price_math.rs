@@ -1,6 +1,6 @@
 //! Functions that operate on X96 encoded square root prices.
 
-use crate::types::{U256Extension, I256, U256};
+use crate::types::{I256, U256};
 use crate::{
     error::Error,
     maths::{

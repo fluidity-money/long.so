@@ -4,7 +4,7 @@ use crate::error::*;
 use crate::maths::full_math;
 use crate::maths::liquidity_math;
 use crate::types::WrappedNative;
-use crate::types::{U256Extension, I32, U128, U256};
+use crate::types::{I32, U128, U256};
 
 
 use stylus_sdk::prelude::*;

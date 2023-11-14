@@ -148,6 +148,9 @@ pub enum Error {
     NftManagerOnly,
     #[error("Only the Seawater admin can use this")]
     SeawaterAdminOnly,
+
+    #[error("Operation unavailable when the pool is disabled")]
+    PoolDisabled,
 }
 
 impl From<Error> for Vec<u8> {
