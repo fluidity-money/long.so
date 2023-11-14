@@ -145,6 +145,14 @@ contract SeawaterAMM is ISeawaterAMM {
         directDelegate(_getExecutorAdmin());
     }
 
+    /// @inheritdoc ISeawaterExecutorAdminExposed
+    function setPoolEnabled(
+        address /* pool */,
+        bool /* enabled */
+    ) external {
+        directDelegate(_getExecutorAdmin());
+    }
+
     // swap functions
 
     /// @inheritdoc ISeawaterExecutorSwap
