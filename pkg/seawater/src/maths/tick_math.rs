@@ -1,15 +1,22 @@
+//! Functions for operating on ticks.
+
 use crate::types::{U256Extension, U256};
 
 use crate::error::Error;
 use ruint_macro::uint;
 
+/// The lowest tick still representible.
 pub const MIN_TICK: i32 = -887272;
+/// The highest tick still representible.
 pub const MAX_TICK: i32 = -MIN_TICK;
 
+// The lowest X96 encoded square root price still representable.
 pub const MIN_SQRT_RATIO: U256 = U256::from_limbs([4295128739, 0, 0, 0]);
+// The highest X96 encoded square root price still representable.
 pub const MAX_SQRT_RATIO: U256 =
     U256::from_limbs([6743328256752651558, 17280870778742802505, 4294805859, 0]);
 
+/// Calculates the X96 encoded square root price for a given tick index.
 pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, Error> {
     let mut abs_tick = tick.abs();
 
@@ -44,13 +51,14 @@ pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, Error> {
     }
 
     Ok((result >> 32)
-        + if (result % (U256::one() << 32)).is_zero() {
+        + if (result % (U256::one() << 32) as U256).is_zero() {
             U256::zero()
         } else {
             U256::one()
         })
 }
 
+/// Calculates tick index for a given X96 encoded square root price.
 pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, Error> {
     if !(sqrt_price_x_96 >= MIN_SQRT_RATIO && sqrt_price_x_96 < MAX_SQRT_RATIO) {
         return Err(Error::R);
@@ -80,11 +88,13 @@ pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, Error> {
     Ok(closest)
 }
 
+/// Calculates the smallest tick index given a tick spacing.
 pub fn get_min_tick(spacing: u8) -> i32 {
     let spacing = spacing as i32;
     (MIN_TICK / spacing) * spacing
 }
 
+/// Calculates the greatest tick index given a tick spacing.
 pub fn get_max_tick(spacing: u8) -> i32 {
     let spacing = spacing as i32;
     (MAX_TICK / spacing) * spacing

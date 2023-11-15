@@ -1,10 +1,16 @@
+//! 512-bit maths operations.
+
 use crate::types::{U256Extension, U256};
 
 use crate::error::Error;
 
+/// 2^128, for normalising 128-bit fixed point numbers.
 pub const Q128: U256 = U256::from_limbs([0, 0, 1, 0]);
 
-// mul_mod, but specialised for U256 to not use an allocation
+/// Returns `a * b % c` without losing precision.
+///
+/// This function is modified from 0xKitsune's implementation, since we can simply allocate a
+/// 512 bit int and do the maths directly on it.
 pub fn mul_mod(a: U256, b: U256, mut modulus: U256) -> U256 {
     if modulus == U256::ZERO {
         return U256::ZERO;
@@ -22,6 +28,7 @@ pub fn mul_mod(a: U256, b: U256, mut modulus: U256) -> U256 {
     modulus
 }
 
+/// Returns `a * b / c` and if the result had carry.
 pub fn _mul_div(
     a: U256,
     b: U256,
@@ -47,10 +54,12 @@ pub fn _mul_div(
     Ok((U256::from_limbs_slice(&limbs[0..4]), has_carry))
 }
 
+/// Returns `a * b / c`, rounding down.
 pub fn mul_div(a: U256, b: U256, denom: U256) -> Result<U256, Error> {
     Ok(_mul_div(a, b, denom)?.0)
 }
 
+/// Returns `a * b / c`, rounding up.
 pub fn mul_div_rounding_up(
     a: U256,
     b: U256,
