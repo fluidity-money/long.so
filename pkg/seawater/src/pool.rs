@@ -8,7 +8,8 @@ use crate::types::{I256Extension, WrappedNative, I256, I32, U128, U256, U256Exte
 use alloc::vec::Vec;
 use stylus_sdk::{prelude::*, storage::*};
 
-type Revert = Vec<u8>;
+//type Revert = Vec<u8>;
+type Revert = !;
 
 /// The storage type for an AMM pool.
 #[solidity_storage]

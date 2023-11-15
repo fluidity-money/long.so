@@ -178,3 +178,8 @@ impl From<Error> for Vec<u8> {
         e
     }
 }
+ impl From<Error> for ! {
+    fn from(value: Error) -> Self {
+        panic!()
+    }
+}

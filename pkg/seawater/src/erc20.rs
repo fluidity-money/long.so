@@ -8,6 +8,9 @@ use crate::types::{I256, I256Extension};
 use stylus_sdk::alloy_primitives::{Address, U256};
 use stylus_sdk::call::RawCall;
 use stylus_sdk::{contract, msg};
+use crate::eth_serde::selector;
+
+//pub trait Exchange = FnOnce(I256) -> Result<(), Error>;
 
 /// Call a function on a possibly noncomplient erc20 token
 /// (tokens that may return a boolean success value), classifying reverts correctly.
@@ -29,33 +32,10 @@ fn call_optional_return(contract: Address, data: &[u8]) -> Result<(), Error> {
     }
 }
 
-/// Calculates a function's selector, and validates against passed bytes, since stylus doesn't give
-/// us a great way to access these.
-const fn selector(name: &[u8], expected: [u8; 4]) -> [u8; 4] {
-    let hash = keccak_const::Keccak256::new().update(name).finalize();
-    let mut result = [0_u8; 4];
-
-    result[0] = hash[0];
-    result[1] = hash[1];
-    result[2] = hash[2];
-    result[3] = hash[3];
-
-    assert!(result[0] == expected[0]);
-    assert!(result[1] == expected[1]);
-    assert!(result[2] == expected[2]);
-    assert!(result[3] == expected[3]);
-
-    result
-}
-
 /// The selector for `transfer(address,uint256)`
-const TRANSFER_SELECTOR: [u8; 4] = selector(b"transfer(address,uint256)", [0xa9, 0x05, 0x9c, 0xbb]);
+const TRANSFER_SELECTOR: [u8; 4] = selector(b"transfer(address,uint256)");
 /// The selector for `transferFrom(address,address,uint256)`
-const TRANSFER_FROM_SELECTOR: [u8; 4] = selector(
-    b"transferFrom(address,address,uint256)",
-    [0x23, 0xb8, 0x72, 0xdd],
-);
-
+const TRANSFER_FROM_SELECTOR: [u8; 4] = selector(b"transferFrom(address,address,uint256)");
 // erc20 calldata encoding functions
 
 /// Encodes a call to `transfer(address to, uint256 amount)`
@@ -116,6 +96,19 @@ pub fn exchange(token: Address, amount: I256) -> Result<(), Error> {
     }
 }
 
+pub fn exchange_permit2(token: Address, amount: I256, signature: Vec<u8>) -> Result<(), Error> {
+    if amount.is_negative() {
+        // send tokens to the user
+        send(token, amount.abs_neg()?)
+    } else if amount.is_positive() {
+        // take tokens from the user
+        take_permit2(token, amount.abs_pos()?, signature)
+    } else {
+        // no amount, do nothing
+        Ok(())
+    }
+}
+
 /// Sends ERC20 tokens to the transaction sender.
 ///
 /// # Side effects
@@ -131,6 +124,11 @@ pub fn send(token: Address, amount: U256) -> Result<(), Error> {
 /// correctly.
 pub fn take(token: Address, amount: U256) -> Result<(), Error> {
     safe_transfer_from(token, msg::sender(), contract::address(), amount)
+}
+
+pub fn take_permit2(token: Address, amount: U256, signature: Vec<u8>) -> Result<(), Error> {
+
+    todo!()
 }
 
 #[cfg(test)]
