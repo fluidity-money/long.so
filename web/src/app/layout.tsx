@@ -11,6 +11,7 @@ import {MetaMaskConnector} from '@/config/node_modules/wagmi/dist/connectors/met
 import {encodeTick} from '@/util/math'
 import univ3prices from '@/config/node_modules/@thanpolas/univ3prices'
 import {ActiveTokenContextProvider} from '@/util/context/ActiveTokenContext'
+import {TokenList} from '@/util/tokens'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -53,7 +54,7 @@ export default function RootLayout({
   return (
     <WagmiConfig config={config}>
       {/* TODO source from env or config file */}
-      <ActiveTokenContextProvider tokenList={[]} ammAddress={'0x5f9f988cE4d2DcDcf57790548682728BaAeA8943'}>
+      <ActiveTokenContextProvider tokenList={TokenList} ammAddress={'0xed8cbA865E62b8B15703AE0897df8dD93609a025'}>
         <html lang="en">
           <body className={inter.className}>{children}</body>
         </html>
