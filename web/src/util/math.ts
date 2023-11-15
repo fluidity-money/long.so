@@ -3,6 +3,9 @@ const encodeTick = (price: number): number => {
     return Math.floor(Math.log(price) / Math.log(1.0001));
 }
 
+const bigAbs = (n: bigint) => (n < BigInt(0)) ? -n : n;
+
 export {
     encodeTick,
+    bigAbs,
 }
