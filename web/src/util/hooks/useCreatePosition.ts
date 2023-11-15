@@ -1,5 +1,5 @@
 import {useContext} from "react";
-import {abi as SeawaterABI} from "../abi/SeawaterAMM.json"
+import SeawaterABI from "../abi/SeawaterAMM"
 import {encodeTick} from "../math";
 import {prepareWriteContract, waitForTransaction, writeContract} from "wagmi/actions";
 import {ActiveTokenContext} from "../context/ActiveTokenContext";
@@ -14,6 +14,7 @@ interface UseCreatePosition {
     updatePosition: (id: number, delta: bigint) => void
 }
 
+// TODO simulate for create/update position
 const useCreatePosition = (): UseCreatePosition => {
     const {token0, ammAddress} = useContext(ActiveTokenContext);
     // TODO add approve step
@@ -21,6 +22,7 @@ const useCreatePosition = (): UseCreatePosition => {
     // write the mintPosition action, then updatePosition using the pool ID
     // operates on the active token
     const createPosition = async (lowerRange: number, upperRange: number, delta: bigint) => {
+        
         const {request: mintPositionRequest} = await prepareWriteContract({
             address: ammAddress,
             abi: SeawaterABI,
