@@ -2,11 +2,9 @@
 //!
 //! Seawater is an AMM designed for arbitrum's stylus environment based on uniswap v3.
 
-#![feature(split_array, new_uninit, never_type, core_panic)]
 #![cfg_attr(not(target_arch = "wasm32"), feature(lazy_cell, const_trait_impl))]
 #![deny(clippy::unwrap_used)]
 
-pub mod eth_serde;
 pub mod erc20;
 #[macro_use]
 pub mod error;
@@ -28,7 +26,7 @@ use types::{U256Extension, WrappedNative};
 use stylus_sdk::{evm, msg, prelude::*, storage::*};
 
 // aliased for simplicity
-type Revert = !;
+type Revert = Vec<u8>;
 
 extern crate alloc;
 // only set a custom allocator if we're deploying on wasm
@@ -44,7 +42,6 @@ mod allocator {
 // we split our entrypoint functions into three sets, and call them via diamond proxies, to
 // save on binary size
 
-/*
 #[cfg(not(any(feature = "swaps", feature = "positions", feature = "admin",)))]
 mod shim {
     #[cfg(target_arch = "wasm32")]
@@ -54,11 +51,11 @@ mod shim {
     #[stylus_sdk::prelude::external]
     impl crate::Pools {}
 }
-*/
 
 /// The root of seawater's storage. Stores variables needed globally, as well as the map of AMM
 /// pools.
 #[solidity_storage]
+#[entrypoint]
 pub struct Pools {
     seawater_admin: StorageAddress,
     // the nft manager is a privileged account that can transfer NFTs!
@@ -74,170 +71,111 @@ pub struct Pools {
     owned_positions: StorageMap<Address, StorageU256>,
 }
 
-/// SAFETY - we promise
-unsafe impl stylus_sdk::storage::TopLevelStorage for Pools {}
+/// Swap functions. Only enabled when the `swaps` feature is set.
+#[cfg_attr(feature = "swaps", external)]
+impl Pools {
+    /// Raw swap function, implementing the uniswap v3 interface.
+    ///
+    /// # Arguments
+    /// * `pool` - The pool to swap for. Pools are accessed as the address of their first token,
+    /// where every pool has the fluid token as token 1.
+    /// * `zero_for_one` - The swap direction. This is `true` if swapping to the fluid token, or
+    /// `false` if swapping from the fluid token.
+    /// * `amount` - The amount of token to swap. Follows the uniswap convention, where a positive
+    /// amount will perform an exact in swap and a negative amount will perform an exact out swap.
+    /// * `price_limit_x96` - The price limit, specified as an X96 encoded square root price.
+    /// # Side effects
+    /// This function transfers ERC20 tokens from and to the caller as per the swap. It takes
+    /// tokens using ERC20's `transferFrom` method, and therefore must have approvals set before
+    /// use.
+    pub fn swap(
+        &mut self,
+        pool: Address,
+        zero_for_one: bool,
+        amount: I256,
+        price_limit_x96: U256,
+    ) -> Result<(I256, I256), Revert> {
+        let (amount_0, amount_1, ending_tick) =
+            self.pools
+                .setter(pool)
+                .swap(zero_for_one, amount, price_limit_x96)?;
 
-#[no_mangle]
-pub unsafe fn mark_used() {
-    stylus_sdk::evm::memory_grow(0);
-    ::core::panicking::panic("explicit panic");
-}
+        // entirely reentrant safe because stylus
+        // denies all reentrancy unless explicity allowed (which we don't)
+        erc20::exchange(pool, amount_0)?;
+        erc20::exchange(self.fusdc.get(), amount_1)?;
 
-// mostly inlined from the #entrypoint attr
-#[no_mangle]
-pub extern "C" fn user_entrypoint(len: usize) -> usize {
-    if stylus_sdk::msg::reentrant() {
-        return 1;
+        let amount_0_abs = amount_0.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw();
+        let amount_1_abs = amount_1.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw();
+
+        evm::log(events::Swap1 {
+            user: msg::sender(),
+            pool,
+            zeroForOne: zero_for_one,
+            amount0: amount_0_abs,
+            amount1: amount_1_abs,
+            finalTick: ending_tick,
+        });
+
+        Ok((amount_0, amount_1))
     }
-    let input = {
-        unsafe {
-            let mut input = Box::<[u8]>::new_uninit_slice(len);
-            stylus_sdk::hostio::read_args(input.as_mut_ptr() as *mut u8);
-            input.assume_init()
-        }
-    };
-    entrypoint(&input);
-    stylus_sdk::storage::StorageCache::flush();
-    0
-}
 
-fn take_word(data: &[u8]) -> (&[u8; 32], &[u8]) {
-    data.split_array_ref::<32>()
-}
-macro_rules! gen_parse {
-    ($parsename:ident, $typename:ident, $type:ty, $bytes:expr, $ctor:expr) => {
-        fn $parsename(data: &[u8]) -> ($type, &[u8]) {
-            let ($typename, data) = take_word(data);
-            let (_, $typename) = $typename.rsplit_array_ref::<$bytes>();
-            ($ctor, data)
-        }
-    }
-}
+    /// Performs a two step swap, swapping from a non-fluid token to a non-fluid token.
+    ///
+    /// See [Self::swap] for more details on how this operates.
+    pub fn swap_2_exact_in(
+        &mut self,
+        from: Address,
+        to: Address,
+        amount: U256,
+        min_out: U256,
+    ) -> Result<(U256, U256), Revert> {
+        let amount = I256::try_from(amount).unwrap();
+        // swap in -> usdc
+        let (amount_in, interim_usdc_out, final_tick_in) =
+            self.pools
+                .setter(from)
+                .swap(
+                    true,
+                    amount,
+                    // swap with no price limit, since we use min_out instead
+                    tick_math::MIN_SQRT_RATIO + U256::one(),
+                )?;
 
-macro_rules! gen_parse_int {
-    ($parsename:ident, $int:ty) => {
-        gen_parse!($parsename, num, $int, {<$int>::BITS as usize / 8}, {<$int>::from_be_bytes(*num)});
-    }
-}
+        // make this positive for exact in
+        let interim_usdc_out = interim_usdc_out.checked_neg().ok_or(Error::InterimSwapPositive)?;
 
-gen_parse!(parse_addr, address, Address, 20, Address{0: address.into()});
-gen_parse_int!(parse_i32, i32);
-gen_parse_int!(parse_i128, i128);
-gen_parse!(parse_u256, u256, U256, 32, U256::from_be_bytes::<32>(*u256));
-fn parse_selector(data: &[u8]) -> (u32, &[u8]) {
-    let (selector, data) = data.split_array_ref::<4>();
-    (u32::from_be_bytes(*selector), data)
-}
-fn parse_bytes(data: &[u8]) -> (&[u8], &[u8]) {
-    let (len, data) = parse_u256(data);
-    let len: usize = len.try_into().unwrap();
-    // padded_len is the total length
-    let padded_len = len.next_multiple_of(32);
+        // swap usdc -> out
+        let (amount_out, interim_usdc_in, final_tick_out) = self.pools.setter(to).swap(
+            false,
+            interim_usdc_out,
+            tick_math::MAX_SQRT_RATIO - U256::one(),
+        )?;
 
-    let (padded_bytes, data) = data.split_at(padded_len);
-    let bytes = &padded_bytes[0..len];
+        let amount_in = amount_in.abs_pos()?;
+        let amount_out = amount_out.abs_neg()?;
 
-    (bytes, data)
-}
+        assert_eq_or!(interim_usdc_out, interim_usdc_in, Error::InterimSwapNotEq);
+        assert_or!(amount_out >= min_out, Error::MinOutNotReached);
 
-fn entrypoint(data: &[u8]) {
-    let (selector, data) = parse_selector(data);
-    let mut storage = &mut unsafe { <Pools as StorageType>::new(U256::ZERO, 0) };
+        // transfer tokens
+        erc20::take(from, amount_in)?;
+        erc20::send(to, amount_out)?;
 
-    const MINT_POSITION: u32 = u32::from_be_bytes(eth_serde::selector(b"mintPosition(address,int32,int32)"));
-    const BURN_POSITION: u32 = u32::from_be_bytes(eth_serde::selector(b"burnPosition(int32)"));
-    const TRANSFER_POSITION: u32 = u32::from_be_bytes(eth_serde::selector(b"transferPosition(uint256,address,address)"));
-    const POSITION_OWNER: u32 = u32::from_be_bytes(eth_serde::selector(b"positionOwner(uint256)"));
-    const POSITION_BALANCE: u32 = u32::from_be_bytes(eth_serde::selector(b"positionBalance(address)"));
-    const POSITION_LIQUIDITY: u32 = u32::from_be_bytes(eth_serde::selector(b"positionLiquidity(address,uint256)"));
-    const UPDATE_POSITION_PERMIT2: u32 = u32::from_be_bytes(eth_serde::selector(b"updatePositionPermite2(address,uint256,int128,bytes,bytes)"));
+        evm::log(events::Swap2 {
+            user: msg::sender(),
+            from,
+            to,
+            amountIn: amount_in,
+            amountOut: amount_out,
+            fluidVolume: interim_usdc_out.abs().into_raw(),
+            finalTick0: final_tick_in,
+            finalTick1: final_tick_out,
+        });
 
-    match selector {
-        MINT_POSITION => {
-            let (pool, data) = parse_addr(data);
-            let (lower, data) = parse_i32(data);
-            let (upper, _) = parse_i32(data);
-            let _res = Pools::mint_position(
-                core::borrow::BorrowMut::borrow_mut(storage),
-                pool,
-                lower,
-                upper,
-                ).unwrap();
-            stylus_sdk::contract::output(&[0; 0]);
-        },
-        BURN_POSITION => {
-            let (id, _) = parse_u256(data);
-            let _res = Pools::burn_position(
-                core::borrow::BorrowMut::borrow_mut(storage),
-                id,
-                ).unwrap();
-            stylus_sdk::contract::output(&[0; 0]);
-        },
-        TRANSFER_POSITION => {
-            let (id, data) = parse_u256(data);
-            let (from, data) = parse_addr(data);
-            let (to, _) = parse_addr(data);
-            let _res = Pools::transfer_position(
-                core::borrow::BorrowMut::borrow_mut(storage),
-                id,
-                from,
-                to,
-                ).unwrap();
-            stylus_sdk::contract::output(&[0; 0]);
-        },
-        POSITION_OWNER => {
-            let (id, _) = parse_u256(data);
-            let res = Pools::position_owner(
-                core::borrow::Borrow::borrow(storage),
-                id,
-                ).unwrap();
-            let mut rtn = [0; 32];
-            rtn[12..32].copy_from_slice(&res.0.0);
-            stylus_sdk::contract::output(&rtn);
-        },
-        POSITION_BALANCE => {
-            let (addr, _) = parse_addr(data);
-            let res = Pools::position_balance(
-                core::borrow::Borrow::borrow(storage),
-                addr,
-                ).unwrap();
-            let rtn = &res.to_be_bytes::<32>();
-            stylus_sdk::contract::output(rtn);
-        },
-        POSITION_LIQUIDITY => {
-            let (addr, data) = parse_addr(data);
-            let (id, _) = parse_u256(data);
-            let res = Pools::position_liquidity(
-                core::borrow::Borrow::borrow(storage),
-                addr,
-                id,
-                ).unwrap();
-            let mut rtn = [0; 32];
-            rtn[17..32].copy_from_slice(&res.to_be_bytes());
-            stylus_sdk::contract::output(&rtn);
-        },
-        UPDATE_POSITION_PERMIT2 => {
-            let (pool, data) = parse_addr(data);
-            let (id, data) = parse_u256(data);
-            let (delta, data) = parse_i128(data);
-            let (token0_sig, data) = parse_bytes(data);
-            let (token1_sig, _) = parse_bytes(data);
-            let res = Pools::update_position_permit2(
-                core::borrow::BorrowMut::borrow_mut(storage),
-                pool,
-                id,
-                delta,
-                token0_sig,
-                token1_sig,
-                ).unwrap();
-            let mut rtn = [0; 64];
-            rtn[0..32].copy_from_slice(&res.0.to_be_bytes::<32>());
-            rtn[33..64].copy_from_slice(&res.1.to_be_bytes::<32>());
-            stylus_sdk::contract::output(&rtn);
-        },
-        _ => {
-            panic!()
-        }
+        // return amount - amount_in to the user
+        // send amount_out to the user
+        Ok((amount_in, amount_out))
     }
 }
 
@@ -268,29 +206,13 @@ impl Pools {
     }
 }
 
-impl Pools {
-    pub fn update_position_raw(
-        &mut self,
-        pool: Address,
-        id: U256,
-        delta: i128,
-    ) -> Result<(I256, I256), Revert> {
-        assert_eq_or!(msg::sender(), self.position_owners.get(id), Error::PositionOwnerOnly);
-
-        let (token_0, token_1) = self.pools.setter(pool).update_position(id, delta)?;
-
-        evm::log(events::UpdatePositionLiquidity { id, delta });
-
-        Ok((token_0, token_1))
-    }
-}
-
+/// Position management functions. Only enabled when the `positions` feature is set.
+#[cfg_attr(feature = "positions", external)]
 impl Pools {
     /// Creates a new, empty position, owned by a user.
     ///
     /// # Errors
     /// Requires the pool to exist and be enabled.
-    #[inline(never)]
     pub fn mint_position(&mut self, pool: Address, lower: i32, upper: i32) -> Result<(), Revert> {
         let id = self.next_position_id.get();
         self.pools.setter(pool).create_position(id, lower, upper)?;
@@ -385,36 +307,22 @@ impl Pools {
     /// # Errors
     /// Requires token approvals to be set if adding liquidity. Requires the caller to be the
     /// position owner. Requires the pool to be enabled unless removing liquidity.
-    /*
     pub fn update_position(
         &mut self,
         pool: Address,
         id: U256,
         delta: i128,
     ) -> Result<(I256, I256), Revert> {
-        let (amount0, amount1) = self.update_position_raw(pool, id, delta)?;
+        assert_eq_or!(msg::sender(), self.position_owners.get(id), Error::PositionOwnerOnly);
 
-        erc20::exchange(pool, amount0)?;
-        erc20::exchange(self.fusdc.get(), amount1)?;
+        let (token_0, token_1) = self.pools.setter(pool).update_position(id, delta)?;
 
-        Ok((amount0, amount1))
-    }
-    */
+        erc20::exchange(pool, token_0)?;
+        erc20::exchange(self.fusdc.get(), token_1)?;
 
-    #[inline(never)]
-    pub fn update_position_permit2(
-        &mut self,
-        pool: Address,
-        id: U256,
-        delta: i128,
-        token0_signature: &[u8],
-        token1_signature: &[u8],
-    ) -> Result<(I256, I256), Revert> {
-        let (amount0, amount1) = self.update_position_raw(pool, id, delta)?;
-        //erc20::exchange_permit2(pool, amount0, token0_signature)?;
-        //erc20::exchange_permit2(self.fusdc.get(), amount1, token1_signature)?;
+        evm::log(events::UpdatePositionLiquidity { id, delta });
 
-        Ok((amount0, amount1))
+        Ok((token_0, token_1))
     }
 
     /// Collects AMM fees from a position, and triggers a release of fluid LP rewards.
@@ -456,3 +364,97 @@ impl Pools {
     }
 }
 
+/// Admin functions. Only enabled when the `admin` feature is set.
+#[cfg_attr(feature = "admin", external)]
+impl Pools {
+    /// The initialiser function for the seawater contract. Should be called in the proxy's
+    /// constructor.
+    ///
+    ///  # Errors
+    ///  Requires the contract to not be initialised.
+    pub fn ctor(
+        &mut self,
+        usdc: Address,
+        seawater_admin: Address,
+        nft_manager: Address,
+    ) -> Result<(), Revert> {
+        assert_eq_or!(self.fusdc.get(), Address::ZERO, Error::ContractAlreadyInitialised);
+
+        self.fusdc.set(usdc);
+        self.seawater_admin.set(seawater_admin);
+        self.nft_manager.set(nft_manager);
+
+        Ok(())
+    }
+
+    /// Creates a new pool. Only usable by the seawater admin.
+    ///
+    /// # Arguments
+    /// * `pool` - The address of the non-fluid token to construct the pool around.
+    /// * `price` - The initial price for the pool, as an X96 encoded square root price.
+    /// * `fee` - The fee for the pool.
+    /// * `tick_spacing` - The tick spacing for the pool.
+    /// * `max_liquidity_per_tick` - The maximum amount of liquidity allowed in a single tick.
+    ///
+    /// # Errors
+    /// Requires the caller to be the seawater admin. Requires the pool to not exist.
+    pub fn create_pool(
+        &mut self,
+        pool: Address,
+        price: U256,
+        fee: u32,
+        tick_spacing: u8,
+        max_liquidity_per_tick: u128,
+    ) -> Result<(), Revert> {
+        assert_eq_or!(msg::sender(), self.seawater_admin.get(), Error::SeawaterAdminOnly);
+
+        self.pools
+            .setter(pool)
+            .init(price, fee, tick_spacing, max_liquidity_per_tick)?;
+
+        evm::log(events::NewPool {
+            token: pool,
+            fee,
+            price,
+        });
+
+        Ok(())
+    }
+
+    /// Collects protocol fees from the AMM. Only usable by the seawater admin.
+    ///
+    /// # Errors
+    /// Requires the user to be the seawater admin. Requires the pool to be enabled.
+    pub fn collect_protocol(
+        &mut self,
+        pool: Address,
+        amount_0: u128,
+        amount_1: u128,
+    ) -> Result<(u128, u128), Revert> {
+        assert_eq_or!(msg::sender(), self.seawater_admin.get(), Error::SeawaterAdminOnly);
+        let (token_0, token_1) = self.pools.setter(pool).collect_protocol(amount_0, amount_1)?;
+
+        erc20::send(pool, U256::from(token_0))?;
+        erc20::send(self.fusdc.get(), U256::from(token_1))?;
+
+        evm::log(events::CollectProtocolFees {
+            pool,
+            to: msg::sender(),
+            amount0: token_0,
+            amount1: token_1,
+        });
+
+        // transfer tokens
+        Ok((token_0, token_1))
+    }
+
+    /// Changes if a pool is enabled. Only usable by the seawater admin.
+    ///
+    /// # Errors
+    /// Requires the user to be the seawater admin.
+    pub fn enable_pool(&mut self, pool: Address, enabled: bool) -> Result<(), Revert> {
+        assert_eq_or!(msg::sender(), self.seawater_admin.get(), Error::SeawaterAdminOnly);
+
+        Ok(self.pools.setter(pool).set_enabled(enabled))
+    }
+}
