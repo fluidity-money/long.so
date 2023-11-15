@@ -1,13 +1,15 @@
 import {Hash} from "viem"
 import {createContext, useState} from "react"
 import {IsHash, ZeroAddress} from "../chainUtils"
+import {TokenList} from "../tokens"
 
 type ActiveTokenContextType = {
     token0: Hash
-    token1?: Hash
+    token1: Hash
     setToken0: (token: string) => void
     setToken1: (token: string) => void
-    tokenList: Array<Hash>
+    flipTokens: () => void
+    tokenList: typeof TokenList
     ammAddress: Hash
 }
 
@@ -16,6 +18,7 @@ const initContext = () => ({
     token1: ZeroAddress,
     setToken0: () => {},
     setToken1: () => {},
+    flipTokens: () => {},
     tokenList: [],
     ammAddress: ZeroAddress,
 })
@@ -23,7 +26,7 @@ const initContext = () => ({
 const ActiveTokenContext = createContext<ActiveTokenContextType>(initContext())
 
 type IActiveTokenContextProvider = React.PropsWithChildren<{
-    tokenList: Array<Hash>
+    tokenList: typeof TokenList
     ammAddress: Hash
 }>
 
@@ -32,16 +35,22 @@ const ActiveTokenContextProvider = ({
     tokenList,
     ammAddress
 }: IActiveTokenContextProvider) => {
-    const [defaultToken0, defaultToken1] = tokenList || [];
-    const [activeToken, setActiveTokens] = useState<[Hash, Hash]>([defaultToken0, defaultToken1])
+    const [defaultToken0, defaultToken1] = tokenList.map(({address}) => address)
+    // const [activeToken, setActiveTokens] = useState<[Hash, Hash]>([defaultToken0, defaultToken1])
     const [token0, setToken0] = useState<Hash>(defaultToken0);
     const [token1, setToken1] = useState<Hash>(defaultToken1);
 
     const updateToken0 = (token: string) => IsHash(token) && setToken0(token)
     const updateToken1 = (token: string) => IsHash(token) && setToken1(token)
 
+    const flipTokens = () => {
+        const token0_ = token0
+        setToken0(token1)
+        setToken1(token0_)
+    }
+
     return (
-        <ActiveTokenContext.Provider value={{token0, token1, setToken0: updateToken0, setToken1: updateToken1, tokenList, ammAddress}}>
+        <ActiveTokenContext.Provider value={{token0, token1, setToken0: updateToken0, setToken1: updateToken1, tokenList, ammAddress, flipTokens}}>
             {children}
         </ActiveTokenContext.Provider>
     )
