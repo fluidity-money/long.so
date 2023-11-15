@@ -21,3 +21,5 @@ seawater-positions.wasm
 seawater-swaps.wasm
 
 node_modules/
+
+docker

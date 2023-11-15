@@ -1,6 +1,9 @@
+//! Functions that operate on liquidity.
+
 use crate::error::Error;
 
-// returns (uint128 z)
+/// Returns `x + y`, where `x` is unsigned and `y` may be negative, with overflow and underflow
+/// checking.
 pub fn add_delta(x: u128, y: i128) -> Result<u128, Error> {
     if y < 0 {
         let z = x.overflowing_sub(-y as u128);

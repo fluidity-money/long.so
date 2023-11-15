@@ -9,7 +9,7 @@ pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, Error> {
         return Err(Error::R);
     }
 
-    let ratio = sqrt_price_x_96.shl(32);
+    let ratio: U256 = sqrt_price_x_96.shl(32);
     let mut r = ratio;
     let mut msb = U256::zero();
 
@@ -87,14 +87,14 @@ pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, Error> {
 
     for i in (51..=63).rev() {
         r = r.overflowing_mul(r).0.shr(127);
-        let f = r.shr(128);
+        let f: U256 = r.shr(128);
         log_2 = log_2.bitor(I256::from_raw(f.shl(i)));
 
         r = r.shr(usize::try_from(f).unwrap());
     }
 
     r = r.overflowing_mul(r).0.shr(127);
-    let f = r.shr(128);
+    let f: U256 = r.shr(128);
     log_2 = log_2.bitor(I256::from_raw(f.shl(50)));
 
     let log_sqrt10001 = log_2.wrapping_mul(I256::from_raw(uint!(255738958999603826347141_U256)));
@@ -200,7 +200,7 @@ pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, Error> {
     }
 
     Ok((ratio >> 32)
-        + if (ratio % (U256::one() << 32)).is_zero() {
+        + if (ratio % (U256::one() << 32) as U256).is_zero() {
             U256::zero()
         } else {
             U256::one()

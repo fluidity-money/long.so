@@ -2,8 +2,10 @@
 pragma solidity 0.8.16;
 
 import "./ISeawaterEvents.sol";
+import "./ISeawaterExecutors.sol";
 
-interface ISeawaterAMM is ISeawaterEvents {
+// ISeawaterAMM is the public facing interface for the SeawaterAMM
+interface ISeawaterAMM is ISeawaterEvents, ISeawaterExecutorSwap, ISeawaterExecutorPosition, ISeawaterExecutorAdminExposed {
     /// @notice swaps _token for USDC
     /// @param _token the token to swap
     /// @param _amount input amount (token)
@@ -24,14 +26,6 @@ interface ISeawaterAMM is ISeawaterEvents {
         address _token,
         uint256 _amount,
         uint256 _minOut
-    ) external returns (int256, int256);
-
-    /// @notice raw swap function, implements the uniswap v3 interface
-    function swap(
-        address _token,
-        bool _zeroForOne,
-        int256 _amount,
-        uint256 _priceLimitX96
     ) external returns (int256, int256);
 
     /// @notice swaps tokenA for tokenB

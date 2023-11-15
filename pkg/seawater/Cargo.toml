@@ -5,7 +5,6 @@ edition = "2021"
 
 [lib]
 name = "libseawater"
-version = "0.1.0"
 edition = "2021"
 
 [[bin]]
@@ -20,7 +19,7 @@ ruint.workspace = true
 ruint-macro.workspace = true
 thiserror.workspace = true
 tiny-keccak.workspace = true
-wee_alloc.workspace = true
+lol_alloc.workspace = true
 keccak-const.workspace = true
 
 [dev-dependencies]
