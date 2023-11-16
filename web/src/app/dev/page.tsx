@@ -12,7 +12,6 @@ import {
   useDisconnect,
 } from 'wagmi'
 import {ActiveTokenContext} from '@/util/context/ActiveTokenContext'
-import {tryApprove} from '@/util/chainUtils'
 import {addressToSymbol, FluidTokenAddress, Token, TokenList, TokenMap} from '@/util/tokens'
 import {Hash} from 'viem'
  
