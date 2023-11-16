@@ -3,42 +3,42 @@ const SeawaterABI = [
     "inputs": [
       {
         "internalType": "address",
-        "name": "proxyAdmin",
+        "name": "_proxyAdmin",
         "type": "address"
       },
       {
         "internalType": "address",
-        "name": "seawaterAdmin",
+        "name": "_seawaterAdmin",
         "type": "address"
       },
       {
         "internalType": "address",
-        "name": "nftManager",
+        "name": "_nftManager",
         "type": "address"
       },
       {
         "internalType": "contract ISeawaterExecutorSwap",
-        "name": "executorSwap",
+        "name": "_executorSwap",
         "type": "address"
       },
       {
         "internalType": "contract ISeawaterExecutorPosition",
-        "name": "executorPosition",
+        "name": "_executorPosition",
         "type": "address"
       },
       {
         "internalType": "contract ISeawaterExecutorAdmin",
-        "name": "executorAdmin",
+        "name": "_executorAdmin",
         "type": "address"
       },
       {
         "internalType": "contract ISeawaterExecutorFallback",
-        "name": "executorFallback",
+        "name": "_executorFallback",
         "type": "address"
       },
       {
         "internalType": "address",
-        "name": "fusdc",
+        "name": "_fusdc",
         "type": "address"
       }
     ],
@@ -206,6 +206,49 @@ const SeawaterABI = [
       {
         "indexed": true,
         "internalType": "address",
+        "name": "pool",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "zeroForOne",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount0",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount1",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "int32",
+        "name": "finalTick",
+        "type": "int32"
+      }
+    ],
+    "name": "Swap1",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "from",
         "type": "address"
       },
@@ -226,9 +269,27 @@ const SeawaterABI = [
         "internalType": "uint256",
         "name": "amountOut",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fluidVolume",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "int32",
+        "name": "finalTick0",
+        "type": "int32"
+      },
+      {
+        "indexed": false,
+        "internalType": "int32",
+        "name": "finalTick1",
+        "type": "int32"
       }
     ],
-    "name": "Swap",
+    "name": "Swap2",
     "type": "event"
   },
   {
@@ -276,6 +337,10 @@ const SeawaterABI = [
     "type": "event"
   },
   {
+    "stateMutability": "nonpayable",
+    "type": "fallback"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -292,22 +357,22 @@ const SeawaterABI = [
     "inputs": [
       {
         "internalType": "address",
-        "name": "pool",
+        "name": "",
         "type": "address"
       },
       {
         "internalType": "uint256",
-        "name": "id",
+        "name": "",
         "type": "uint256"
       },
       {
         "internalType": "uint128",
-        "name": "amount0",
+        "name": "",
         "type": "uint128"
       },
       {
         "internalType": "uint128",
-        "name": "amount1",
+        "name": "",
         "type": "uint128"
       }
     ],
@@ -389,7 +454,7 @@ const SeawaterABI = [
         "type": "uint128"
       }
     ],
-    "name": "init",
+    "name": "createPool",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -413,7 +478,13 @@ const SeawaterABI = [
       }
     ],
     "name": "mintPosition",
-    "outputs": [],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -439,6 +510,30 @@ const SeawaterABI = [
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "positionLiquidity",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
@@ -452,6 +547,24 @@ const SeawaterABI = [
         "type": "address"
       }
     ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "name": "setPoolEnabled",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -656,17 +769,17 @@ const SeawaterABI = [
     "inputs": [
       {
         "internalType": "address",
-        "name": "pool",
+        "name": "",
         "type": "address"
       },
       {
         "internalType": "uint256",
-        "name": "id",
+        "name": "",
         "type": "uint256"
       },
       {
         "internalType": "int128",
-        "name": "delta",
+        "name": "",
         "type": "int128"
       }
     ],
@@ -699,6 +812,6 @@ const SeawaterABI = [
     "stateMutability": "nonpayable",
     "type": "function"
   }
-] as const;
+] as const
 
-export default SeawaterABI;
+export default SeawaterABI
