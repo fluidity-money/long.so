@@ -5,6 +5,7 @@ import {ActiveTokenContext} from "../context/ActiveTokenContext"
 import {usePrepareContractWrite} from "wagmi"
 import {FluidTokenAddress} from "../tokens"
 import {bigAbs} from "../math"
+import {useDebounce} from "./useDebounce"
 
 // the strongly typed return value of the Seawater contract function `T`
 type SeawaterResult<T extends string> =
@@ -46,9 +47,13 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
     // TODO add approve step
     const {token0, token1, ammAddress} = useContext(ActiveTokenContext)
     const [functionName, setFunctionName] = useState<'swapIn' | 'swapOut' | 'swap2ExactIn'>('swapIn')
-    const [args, setArgs] = useState<any>([])
+    // TODO type this
+    const [args, setArgs] = useState<unknown>([])
 
-    // TODO debounce
+    // debounce params passed to Wagmi hook to avoid RPC spam
+    const debouncedFunctionName = useDebounce(functionName, 500)
+    const debouncedArgs = useDebounce(args, 500)
+
     // on update, set function name and arguments to trigger `usePrepareContractWrite`
     useEffect(() => {
         try {
@@ -70,8 +75,8 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
     const {config, error} = usePrepareContractWrite({
         address: ammAddress,
         abi: SeawaterABI,
-        functionName,
-        args,
+        functionName: debouncedFunctionName,
+        args: debouncedArgs,
     })
 
     const result = useMemo(() =>
