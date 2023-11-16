@@ -43,6 +43,7 @@ type UseSwap = ({amountIn, minOut}: UseSwapProps) => {
 }
 
 const useSwap: UseSwap = ({amountIn, minOut}) => {
+    // TODO add approve step
     const {token0, token1, ammAddress} = useContext(ActiveTokenContext)
     const [functionName, setFunctionName] = useState<'swapIn' | 'swapOut' | 'swap2ExactIn'>('swapIn')
     const [args, setArgs] = useState<any>([])

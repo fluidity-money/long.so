@@ -54,7 +54,7 @@ export default function RootLayout({
   return (
     <WagmiConfig config={config}>
       {/* TODO source from env or config file */}
-      <ActiveTokenContextProvider tokenList={TokenList} ammAddress={'0xed8cbA865E62b8B15703AE0897df8dD93609a025'}>
+      <ActiveTokenContextProvider tokenList={TokenList} ammAddress={'0x6BfEc96c9637556ADA9999cD0307C4953A817f0A'}>
         <html lang="en">
           <body className={inter.className}>{children}</body>
         </html>
