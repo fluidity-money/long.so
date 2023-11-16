@@ -1,4 +1,5 @@
-const SeawaterABI = [
+const SeawaterABI = 
+[
   {
     "inputs": [
       {
@@ -478,13 +479,7 @@ const SeawaterABI = [
       }
     ],
     "name": "mintPosition",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
