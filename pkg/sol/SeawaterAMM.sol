@@ -205,7 +205,7 @@ contract SeawaterAMM is ISeawaterAMM {
     // position functions
 
     /// @inheritdoc ISeawaterExecutorPosition
-    function mintPosition(address /* token */, int32 /* lower */, int32 /* upper */) external returns (uint256 /* id */) {
+    function mintPosition(address /* token */, int32 /* lower */, int32 /* upper */) external {
         directDelegate(_getExecutorPosition());
     }
 
