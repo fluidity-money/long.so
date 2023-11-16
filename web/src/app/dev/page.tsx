@@ -69,7 +69,7 @@ const Dev = () => {
   const [menuB, setMenuB] = useState('foo')
 
   const {token0, token1, setToken0, setToken1, flipTokens, ammAddress} = useContext(ActiveTokenContext);
-  const {createPosition, updatePosition, removePosition} = useCreatePosition();
+  const {createPosition, updatePosition, removePosition, collectFees} = useCreatePosition();
 
   const [amountIn, setAmountIn] = useState('');
   const [minOut, setMinOut] = useState('');
@@ -120,6 +120,7 @@ const Dev = () => {
     <Button onClick={() => {createPosition(lowerRange, upperRange, delta).then(setPositionId)}}>{'Create new position'}</Button>
     <Button onClick={() => {updatePosition(positionId, delta)}}>{`Update position ${positionId}`}</Button>
     <Button onClick={() => {removePosition(positionId)}}>{`Remove position with id ${positionId}`}</Button>
+    <Button onClick={() => {collectFees(positionId)}}>{`Collect fees for position with id ${positionId}`}</Button>
     {/*
     <Button onClick={() => {tryApprove(token0, ammAddress)}}>try approve {token0}</Button>
     */}
