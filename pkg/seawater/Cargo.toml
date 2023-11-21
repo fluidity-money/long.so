@@ -1,0 +1,32 @@
+[package]
+name = "seawater"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "libseawater"
+edition = "2021"
+
+[[bin]]
+name = "seawater"
+path = "src/main.rs"
+
+[dependencies]
+#stylus-sdk = { workspace = true, default-features = false, features = [] }
+stylus-sdk = { workspace = true }
+alloy-sol-types.workspace = true
+ruint.workspace = true
+ruint-macro.workspace = true
+thiserror.workspace = true
+tiny-keccak.workspace = true
+lol_alloc.workspace = true
+keccak-const.workspace = true
+
+[dev-dependencies]
+rand = "0.8.5"
+
+[features]
+export-abi = ["stylus-sdk/export-abi"]
+swaps = []
+positions = []
+admin = []

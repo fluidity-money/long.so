@@ -1,0 +1,8 @@
+[profile.default]
+src = 'sol'
+out = 'out'
+libs = ['lib']
+
+revert-strings = "debug"
+
+remappings = ["@opensezppling/=lib/openzeppelin-contracts/"]

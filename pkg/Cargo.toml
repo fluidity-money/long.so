@@ -1,0 +1,28 @@
+[workspace]
+
+resolver = "2"
+
+members = [
+    "seawater",
+]
+
+[profile.release]
+codegen-units = 1
+panic = "abort"
+opt-level = "z"
+strip = true
+lto = true
+debug = false
+rpath = false
+debug-assertions = false
+incremental = false
+
+[workspace.dependencies]
+stylus-sdk = "0.4.1"
+thiserror = "1.0.48"
+tiny-keccak = "2.0.2"
+ruint = "1.11.0"
+alloy-sol-types = "0.3.1"
+ruint-macro = "1.1.0"
+keccak-const = "0.2.0"
+lol_alloc = "0.4.0"
