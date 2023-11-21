@@ -1,4 +1,5 @@
 import {Hash} from "viem"
+import {mustEnv} from "./env"
 
 export interface Token {
   symbol: string
@@ -11,9 +12,7 @@ export interface Token {
   isFluidToken: boolean
 }
 
-const tokenListString = process.env.NEXT_PUBLIC_TOKEN_LIST
-if (!tokenListString)
-  throw new Error("Token List was undefined! (NEXT_PUBLIC_TOKEN_LIST)")
+const tokenListString = mustEnv('NEXT_PUBLIC_TOKEN_LIST')
 
 const TokenList: Array<Token> = JSON.parse(tokenListString)
 const TokenMap: {[address: Hash]: Token} = TokenList.reduce((prev, current) => ({
