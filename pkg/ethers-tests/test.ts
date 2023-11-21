@@ -5,6 +5,9 @@ import test from "node:test"
 import assert from "node:assert"
 import {execSync} from "node:child_process";
 
+// stylus testnode wallet
+const DEFAULT_WALLET = "0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659";
+
 function encodeSqrtPrice(price: number): BigInt {
     return BigInt(Math.sqrt(price) * 2**96);
 }
@@ -29,6 +32,7 @@ async function deployToken(factory: ContractFactory, name: string, sym: string, 
 // force mutable logs to allow parseLog (which doesn't mutate anyway)
 type MutableLog = Omit<Log, 'topics'> & {topics: Array<string>}
 
+// mints a position and updates it with liquidity
 async function createPosition(
     amm: Contract,
     address: string,
@@ -59,9 +63,10 @@ async function createPosition(
 
 
 test("amm", async t => {
-    const RPC_URL = process.env.RPC_URL ?? "http://127.0.0.1:8547"
+    // setup and deploy contracts
+    const RPC_URL = process.env.RPC_URL
     const provider = new JsonRpcProvider(RPC_URL)
-    const signer = new Wallet("0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659", provider)
+    const signer = new Wallet(DEFAULT_WALLET, provider)
     const defaultAccount = await signer.getAddress();
 
     const erc20Factory = new ContractFactory(LightweightERC20.abi, LightweightERC20.bytecode, signer)
@@ -112,8 +117,11 @@ test("amm", async t => {
     await (await tusdcContract.approve(ammAddress, MaxUint256)).wait()
     await (await tusdc2Contract.approve(ammAddress, MaxUint256)).wait()
 
-    await createPosition(amm, tusdcAddress, encodeTick(50), encodeTick(150), BigInt(20000));
-    await createPosition(amm, tusdc2Address, encodeTick(50), encodeTick(150), BigInt(20000));
+    const lowerTick = encodeTick(50);
+    const upperTick = encodeTick(150);
+    const liquidityDelta = BigInt(20000);
+    await createPosition(amm, tusdcAddress, lowerTick, upperTick, liquidityDelta);
+    await createPosition(amm, tusdc2Address, lowerTick, upperTick, liquidityDelta);
 
     await t.test("raw swap in amounts correct", async _ => {
         const fusdcBeforeBalance = await fusdcContract.balanceOf(defaultAccount)
@@ -131,6 +139,8 @@ test("amm", async t => {
 
         let fusdcAfterBalance = await fusdcContract.balanceOf(defaultAccount)
         let tusdcAfterBalance = await tusdcContract.balanceOf(defaultAccount)
+
+        // after the swap we expect to pay 10 tokens and get ~1000
         let expectedFusdcAfterBalance = fusdcBeforeBalance + BigInt(995);
         let expectedTusdcAfterBalance = tusdcBeforeBalance - BigInt(10);
 

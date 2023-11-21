@@ -4,7 +4,7 @@ use std::ops::{Add, BitAnd, BitOrAssign, BitXor, Div, Mul, MulAssign};
 use libseawater::maths::full_math::*;
 use libseawater::{
     error::Error,
-    maths::utils::{u256_to_ruint, RUINT_ONE, RUINT_THREE, RUINT_TWO, RUINT_ZERO},
+    maths::utils::{RUINT_ONE, RUINT_THREE, RUINT_TWO, RUINT_ZERO},
 };
 
 // returns (uint256 result)
@@ -112,9 +112,9 @@ pub fn mul_div_rounding_up(
 ) -> Result<U256, Error> {
     let result = mul_div(a, b, denominator)?;
 
-    let a = u256_to_ruint(a);
-    let b = u256_to_ruint(b);
-    let denominator = u256_to_ruint(denominator);
+    let a = a;
+    let b = b;
+    let denominator = denominator;
 
     if a.mul_mod(b, denominator) > RUINT_ZERO {
         if result == U256::MAX {
