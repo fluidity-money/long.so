@@ -1,13 +1,9 @@
 
-.PHONY: contract docker
+.PHONY: build contract docker
 
-all: contract
+all: build
+
+build: contract
 
 contract:
 	@cd pkg && make
-
-docker:
-	@docker build \
-		-t superposition/app.superposition.so-testing \
-		-f Dockerfile.contracts \
-		.

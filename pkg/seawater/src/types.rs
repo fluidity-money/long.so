@@ -1,36 +1,32 @@
-// reexports and extension traits
+//! Reexports and extension traits for stylus' bigint types.
 
 // reexport so we can keep the types the same
 pub use stylus_sdk;
 
 use crate::error::Error;
 
-pub type TickBitmap = stylus_sdk::storage::StorageMap<i16, stylus_sdk::storage::StorageU256>;
-
+/// 256 bit unsigned integer.
 pub type U256 = stylus_sdk::alloy_primitives::U256;
+
+/// Extension trait to add methods to the [U256] type.
 pub trait U256Extension: Sized {
+    /// Returns if the integer is zero.
+    fn is_zero(&self) -> bool;
+    /// Returns 0 as a [U256].
+    fn zero() -> Self;
+    /// Returns 1 as a [U256].
+    fn one() -> Self;
+
+    /// Converts an 0x prefixed hex string to a [U256]. Only allowed in tests.
     #[cfg(test)]
     fn from_hex_str(value: &str) -> Self;
+    /// Converts a decimal string to a [U256]. Only allowed in tests.
     #[cfg(test)]
     fn from_dec_str(value: &str) -> Option<Self>;
-    fn is_zero(&self) -> bool;
-    fn zero() -> Self;
-    fn one() -> Self;
 }
 
+/// [U256] should be the only implementor of this trait.
 impl U256Extension for U256 {
-    #[cfg(test)]
-    fn from_hex_str(value: &str) -> Self {
-        debug_assert!(value.starts_with("0x"));
-        value.parse().unwrap()
-    }
-
-    #[cfg(test)]
-    fn from_dec_str(value: &str) -> Option<Self> {
-        debug_assert!(!value.starts_with("0x"));
-        value.parse().ok()
-    }
-
     fn is_zero(&self) -> bool {
         self == &Self::zero()
     }
@@ -43,17 +39,36 @@ impl U256Extension for U256 {
         // little endian
         Self::from_limbs([1, 0, 0, 0])
     }
+
+    #[cfg(test)]
+    fn from_hex_str(value: &str) -> Self {
+        debug_assert!(value.starts_with("0x"));
+        value.parse().unwrap()
+    }
+
+    #[cfg(test)]
+    fn from_dec_str(value: &str) -> Option<Self> {
+        debug_assert!(!value.starts_with("0x"));
+        value.parse().ok()
+    }
 }
 
+/// 256 bit signed integer.
 pub type I256 = stylus_sdk::alloy_primitives::I256;
 
+/// Extension trait to add methods to the [I256] type.
 pub trait I256Extension: Sized {
+    /// Returns 0 as an [I256].
     fn zero() -> Self;
+    /// Returns 1 as an [I256].
     fn one() -> Self;
+    /// Asserts that the number is negative, and returns the absolute value as a [U256].
     fn abs_neg(self) -> Result<U256, Error>;
+    /// Asserts that the number is positive, and returns the absolute value as a [U256].
     fn abs_pos(self) -> Result<U256, Error>;
 }
 
+/// [I256] should be the only implementor of this trait.
 impl I256Extension for I256 {
     fn zero() -> Self {
         Self::ZERO
@@ -77,17 +92,32 @@ impl I256Extension for I256 {
     }
 }
 
+/// Re-export of the U160 type.
+pub type U160 = stylus_sdk::alloy_primitives::U160;
+/// Re-export of the U128 type.
 pub type U128 = stylus_sdk::alloy_primitives::U128;
-pub type I128 = stylus_sdk::alloy_primitives::I128;
-pub type I32 = stylus_sdk::alloy_primitives::I32;
+/// Re-export of the U32 type.
+pub type U32 = stylus_sdk::alloy_primitives::U32;
+/// Re-export of the U8 type.
 pub type U8 = stylus_sdk::alloy_primitives::U8;
 
-// ersatz From and Into
-// wraps into W
+/// Re-export of the I128 type.
+pub type I128 = stylus_sdk::alloy_primitives::I128;
+/// Re-export of the I64 type.
+pub type I64 = stylus_sdk::alloy_primitives::I64;
+/// Re-export of the I32 type.
+pub type I32 = stylus_sdk::alloy_primitives::I32;
+
+/// Re-export of the Address type.
+pub type Address = stylus_sdk::alloy_primitives::Address;
+
+/// Ersatz [From] and [Into]. Converts a type between a primitive and a wrapped library type.
+///
+/// (These exist because we can't implement a foreign trait on a foreign type.)
 pub trait WrappedNative<W> {
-    // system type
+    /// Converts a wrapped type to a primitive type.
     fn sys(&self) -> W;
-    // library type
+    /// Converts a primitive type to a wrapped (library) type.
     fn lib(arg: &W) -> Self;
 }
 
@@ -138,9 +168,3 @@ impl WrappedNative<u32> for U32 {
     }
 }
 
-pub type U160 = stylus_sdk::alloy_primitives::U160;
-
-pub type U32 = stylus_sdk::alloy_primitives::U32;
-pub type I64 = stylus_sdk::alloy_primitives::I64;
-
-pub type Address = stylus_sdk::alloy_primitives::Address;

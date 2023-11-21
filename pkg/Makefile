@@ -1,19 +1,31 @@
 
-.PHONY: admin positions swaps deploy-admin deploy-positions deploy-swaps
+include config.mk
 
-all: admin positions swaps
+.PHONY: \
+	build \
+	stylus \
+	admin \
+	positions \
+	swaps \
+	solidity \
+	amm-entrypoint \
+	ownership-nfts \
+	clean
 
-admin: seawater-admin.wasm
-positions: seawater-positions.wasm
-swaps: seawater-swaps.wasm
+all: build
 
-CONTRACT_PKG := target/wasm32-unknown-unknown/release/seawater.wasm
+build: stylus solidity
 
-RUST_FILES := \
-	$(shell find \
-		-path target -prune \
-		-or -type f -name '*.rs' -print \
-		-or -name '*.toml' -print)
+admin: ${OUT_SEAWATER_ADMIN}
+positions: ${OUT_SEAWATER_POSITIONS}
+swaps: ${OUT_SEAWATER_SWAPS}
+
+stylus: admin positions swaps
+
+amm-entrypoint: ${OUT_SEAWATER_AMM}
+ownership-nfts: ${OUT_OWNERSHIP_NFTS}
+
+solidity: amm-entrypoint ownership-nfts
 
 CARGO_BUILD_STYLUS := \
 	cargo +nightly build \
@@ -25,17 +37,44 @@ CARGO_BUILD_STYLUS := \
 		--package seawater \
 		--out-dir .
 
-seawater-admin.wasm: ${RUST_FILES}
+FORGE_BUILD := forge build
+DOCKER_BUILD := docker build
+
+### SEAWATER
+
+${OUT_SEAWATER_ADMIN}: ${FILES_RUST}
 	@${CARGO_BUILD_STYLUS} --features admin
 	@mv seawater.wasm seawater-admin.wasm
 	@rm -f liblibseawater.rlib
 
-seawater-positions.wasm: ${RUST_FILES}
+${OUT_SEAWATER_POSITIONS}: ${FILES_RUST}
 	@${CARGO_BUILD_STYLUS} --features positions
 	@mv seawater.wasm seawater-positions.wasm
 	@rm -f liblibseawater.rlib
 
-seawater-swaps.wasm: ${RUST_FILES}
+${OUT_SEAWATER_SWAPS}: ${FILES_RUST}
 	@${CARGO_BUILD_STYLUS} --features swaps
 	@mv seawater.wasm seawater-swaps.wasm
 	@rm -f liblibseawater.rlib
+
+### SOLIDITY
+
+${OUT_SEAWATER_AMM}: ${FILES_SOLIDITY}
+	@${FORGE_BUILD}
+
+${OUT_OWNERSHIP_NFTS}: ${FILES_SOLIDITY}
+	@${FORGE_BUILD}
+
+docker: Dockerfile ${FILES_RUST} ${FILES_SOLIDITY}
+	@${DOCKER_BUILD} -t fluidity/${REPO} .
+	@touch docker
+
+clean:
+	@rm -rf \
+		${OUT_SEAWATER_ADMIN} \
+		${OUT_SEAWATER_POSITIONS} \
+		${OUT_SEAWATER_SWAPS} \
+		cache \
+		target \
+		out \
+		docker
