@@ -1,0 +1,54 @@
+.Menu {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+  padding: 1em;
+  border-radius: 8px;
+  width: max-content;
+
+  &.light {
+      &.primary {
+        @include dark;
+      }
+
+      &.secondary {
+        @include light;
+      }
+  }
+
+  &.dark {
+      &.primary {
+        @include light;
+      }
+
+      &.secondary {
+        @include dark;
+      }
+  }
+}
+
+.Item {
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+
+  &.selected {
+    &.light {
+      color: $light;
+    }
+
+    &.dark {
+      color: $dark;
+    }
+
+    transition: color 0.2s ease-in-out;
+  }
+  transition: color 0.2s ease-in-out;
+
+  .virtualBox {
+    position: absolute;
+    z-index: -1;
+    inset: -4px -6px;
+    width: calc(100%);
+  }
+}
