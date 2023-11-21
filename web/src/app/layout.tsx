@@ -12,6 +12,8 @@ import {encodeTick} from '@/util/math'
 import univ3prices from '@/config/node_modules/@thanpolas/univ3prices'
 import {ActiveTokenContextProvider} from '@/util/context/ActiveTokenContext'
 import {TokenList} from '@/util/tokens'
+import {mustEnv} from '@/util/env'
+import {isHash} from 'viem'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -46,6 +48,11 @@ const config = createConfig({
   webSocketPublicClient,
 })
 
+const ammAddressString = mustEnv('NEXT_PUBLIC_AMM_ADDRESS')
+if (!isHash(ammAddressString))
+  throw new Error(`AMM address from env was not a valid address! Was ${ammAddressString}`)
+const ammAddress = ammAddressString
+
 export default function RootLayout({
   children,
 }: {
@@ -54,7 +61,7 @@ export default function RootLayout({
   return (
     <WagmiConfig config={config}>
       {/* TODO source from env or config file */}
-      <ActiveTokenContextProvider tokenList={TokenList} ammAddress={'0x6BfEc96c9637556ADA9999cD0307C4953A817f0A'}>
+      <ActiveTokenContextProvider tokenList={TokenList} ammAddress={ammAddress}>
         <html lang="en">
           <body className={inter.className}>{children}</body>
         </html>
