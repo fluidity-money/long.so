@@ -105,11 +105,7 @@ pub fn mul_div(a: U256, b: U256, mut denominator: U256) -> Result<U256, Error> {
     Ok(prod_0 * inv)
 }
 
-pub fn mul_div_rounding_up(
-    a: U256,
-    b: U256,
-    denominator: U256,
-) -> Result<U256, Error> {
+pub fn mul_div_rounding_up(a: U256, b: U256, denominator: U256) -> Result<U256, Error> {
     let result = mul_div(a, b, denominator)?;
 
     let a = a;

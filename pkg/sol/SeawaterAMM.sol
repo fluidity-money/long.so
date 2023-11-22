@@ -53,7 +53,8 @@ contract SeawaterAMM is ISeawaterAMM {
         ISeawaterExecutorPosition _executorPosition,
         ISeawaterExecutorAdmin _executorAdmin,
         ISeawaterExecutorFallback _executorFallback,
-        address _fusdc
+        address _fusdc,
+        address _permit2
     ) {
         _setProxyAdmin(_proxyAdmin);
         _setProxies(
@@ -65,7 +66,7 @@ contract SeawaterAMM is ISeawaterAMM {
 
         (bool success, bytes memory data) = _getExecutorAdmin().delegatecall(abi.encodeCall(
             ISeawaterExecutorAdmin.ctor,
-            (_fusdc, _seawaterAdmin, _nftManager)
+            (_fusdc, _seawaterAdmin, _nftManager, _permit2)
         ));
         // the string() cast here is just for typechecking, `data` is essentially arbitrary
         require(success, string(data));
@@ -157,6 +158,10 @@ contract SeawaterAMM is ISeawaterAMM {
 
     /// @inheritdoc ISeawaterExecutorSwap
     function swap(address /* pool */, bool /* zeroForOne */, int256 /* amount */, uint256 /* priceLimit */) external returns (int256, int256) {
+        directDelegate(_getExecutorSwap());
+    }
+
+    function swap(address, bool, int256, uint256, uint256, uint256, uint256, bytes memory) external returns (int256, int256) {
         directDelegate(_getExecutorSwap());
     }
 
