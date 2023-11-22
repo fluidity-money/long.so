@@ -82,11 +82,7 @@ pub fn get_next_sqrt_price_from_amount_0_rounding_up(
             let denominator = numerator_1.wrapping_add(product);
 
             if denominator >= numerator_1 {
-                return mul_div_rounding_up(
-                    numerator_1,
-                    sqrt_price_x_96,
-                    denominator,
-                );
+                return mul_div_rounding_up(numerator_1, sqrt_price_x_96, denominator);
             }
         }
 
@@ -99,11 +95,7 @@ pub fn get_next_sqrt_price_from_amount_0_rounding_up(
         if product.wrapping_div(amount) == sqrt_price_x_96 && numerator_1 > product {
             let denominator = numerator_1.wrapping_sub(product);
 
-            mul_div_rounding_up(
-                numerator_1,
-                sqrt_price_x_96,
-                denominator,
-            )
+            mul_div_rounding_up(numerator_1, sqrt_price_x_96, denominator)
         } else {
             Err(Error::ProductDivAmount)
         }

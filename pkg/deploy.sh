@@ -14,6 +14,7 @@ STYLUS_PRIVATE_KEY="${STYLUS_PRIVATE_KEY:=0xb6b15c8cb491557369f3c7d2c287b053eb22
 [ ! -z "$SEAWATER_ADMIN_ADDR" ] || die "SEAWATER_ADMIN_ADDR not set!"
 [ ! -z "$NFT_MANAGER_ADDR" ] || die "NFT_MANAGER_ADDR not set!"
 [ ! -z "$FUSDC_TOKEN_ADDR" ] || die "FUSDC_TOKEN_ADDR not set!"
+[ ! -z "$PERMIT2_ADDR" ] || die "PERMIT2_ADDR not set!"
 
 deploy_feature() {
     >&2 echo "deploying $1..."
@@ -49,4 +50,5 @@ forge create "SeawaterAMM" --rpc-url $STYLUS_ENDPOINT --private-key $STYLUS_PRIV
         $positions_addr \
         $admin_addr \
         $(cast --address-zero) \
-        $FUSDC_TOKEN_ADDR
+        $FUSDC_TOKEN_ADDR \
+        $PERMIT2_ADDR

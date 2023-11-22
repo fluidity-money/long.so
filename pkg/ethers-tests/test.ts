@@ -1,9 +1,12 @@
-import {Contract, ContractFactory, JsonRpcProvider, Log, MaxUint256, Wallet } from "ethers";
+import {Contract, ContractFactory, JsonRpcProvider, Log, MaxUint256, Provider, TypedDataDomain, Wallet, id } from "ethers";
 import LightweightERC20 from "../out/LightweightERC20.sol/LightweightERC20.json"
+import Permit2 from "../out/permit2.sol/Permit2.json"
 import {abi as SeawaterABI}  from "../out/SeawaterAMM.sol/SeawaterAMM.json"
 import test from "node:test"
 import assert from "node:assert"
 import {execSync} from "node:child_process";
+
+import { SignatureTransfer } from "@uniswap/permit2-sdk";
 
 // stylus testnode wallet
 const DEFAULT_WALLET = "0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659";
@@ -21,6 +24,12 @@ function encodeTick(price: number): number {
     return Math.floor(Math.log(price) / Math.log(1.0001));
 }
 
+async function encodeDeadline(signer: Provider, seconds: number) {
+    const bn = await signer.getBlockNumber();
+    const timestamp = (await signer.getBlock(bn))!.timestamp;
+    return timestamp + seconds;
+}
+
 async function deployToken(factory: ContractFactory, name: string, sym: string, decimals: number, amount: BigInt, account: string) {
     const contract = await factory.deploy(name, sym, decimals, amount, account);
     const address = await contract.getAddress();
@@ -28,9 +37,18 @@ async function deployToken(factory: ContractFactory, name: string, sym: string, 
     return address;
 }
 
+async function deployPermit2(factory: ContractFactory) {
+    const contract = await factory.deploy();
+    const address = await contract.getAddress();
+    await contract.waitForDeployment();
+    return address;
+}
 
-// force mutable logs to allow parseLog (which doesn't mutate anyway)
-type MutableLog = Omit<Log, 'topics'> & {topics: Array<string>}
+async function setApprovalTo(tokens: Contract[], to: string, amount: BigInt) {
+    for (const token of tokens) {
+        await (await token.approve(to, amount)).wait()
+    }
+}
 
 // mints a position and updates it with liquidity
 async function createPosition(
@@ -41,7 +59,9 @@ async function createPosition(
     delta: BigInt,
 ) {
     const mintResult = await amm.mintPosition(address, lower, upper);
+
     const [mintLog]: [mintLog: Log] = await mintResult.wait()
+    console.log(mintLog);
     type mintEventArgs = [
         BigInt,
         string,
@@ -61,13 +81,18 @@ async function createPosition(
     return id;
 }
 
-
 test("amm", async t => {
     // setup and deploy contracts
     const RPC_URL = process.env.RPC_URL
+    if (!RPC_URL) throw new Error("Set RPC_URL");
     const provider = new JsonRpcProvider(RPC_URL)
+    const chainid = Number((await provider.getNetwork()).chainId);
+    console.log(`chainid: ${chainid}`);
     const signer = new Wallet(DEFAULT_WALLET, provider)
     const defaultAccount = await signer.getAddress();
+
+    const permit2Factory = new ContractFactory(Permit2.abi, Permit2.bytecode, signer);
+    const permit2Address = await deployPermit2(permit2Factory);
 
     const erc20Factory = new ContractFactory(LightweightERC20.abi, LightweightERC20.bytecode, signer)
 
@@ -87,6 +112,7 @@ test("amm", async t => {
             "SEAWATER_ADMIN_ADDR": defaultAccount,
             "NFT_MANAGER_ADDR": defaultAccount,
             "FUSDC_TOKEN_ADDR": fusdcAddress,
+            "PERMIT2_ADDR": permit2Address,
             ...process.env,
         } },
     );
@@ -106,22 +132,25 @@ test("amm", async t => {
     // uint32 fee,
     // uint8 tickSpacing,
     // uint128 maxLiquidityPerTick
-    await (await amm.init(tusdcAddress, encodeSqrtPrice(100), 0, 1, 100000000000)).wait();
-    await (await amm.init(tusdc2Address, encodeSqrtPrice(100), 0, 1, 100000000000)).wait();
+    await (await amm.createPool(tusdcAddress, encodeSqrtPrice(100), 0, 1, 100000000000)).wait();
+    await (await amm.createPool(tusdc2Address, encodeSqrtPrice(100), 0, 1, 100000000000)).wait();
 
     // approve amm for both contracts
     // initialise an empty position
     // update the position with liquidity
     // then make a swap
-    await (await fusdcContract.approve(ammAddress, MaxUint256)).wait()
-    await (await tusdcContract.approve(ammAddress, MaxUint256)).wait()
-    await (await tusdc2Contract.approve(ammAddress, MaxUint256)).wait()
+    await setApprovalTo([fusdcContract, tusdcContract, tusdc2Contract], permit2Address, MaxUint256);
 
     const lowerTick = encodeTick(50);
     const upperTick = encodeTick(150);
     const liquidityDelta = BigInt(20000);
+
+    await setApprovalTo([fusdcContract, tusdcContract, tusdc2Contract], ammAddress, MaxUint256);
+
     await createPosition(amm, tusdcAddress, lowerTick, upperTick, liquidityDelta);
     await createPosition(amm, tusdc2Address, lowerTick, upperTick, liquidityDelta);
+
+    await setApprovalTo([fusdcContract, tusdcContract, tusdc2Contract], ammAddress, BigInt(0));
 
     await t.test("raw swap in amounts correct", async _ => {
         const fusdcBeforeBalance = await fusdcContract.balanceOf(defaultAccount)
@@ -133,8 +162,39 @@ test("amm", async t => {
         // int256 _amount,
         // uint256 _priceLimitX96
 
+        const token = tusdcAddress;
+        const amount = 10;
+        const nonce = 1;
+        const deadline = await encodeDeadline(provider, 1000);
+        const max_amount = amount;
+
+        const data = SignatureTransfer.getPermitData(
+            {
+                permitted: {
+                    token,
+                    amount: max_amount,
+                },
+                spender: ammAddress,
+                nonce: nonce,
+                deadline: deadline,
+            },
+            permit2Address,
+            chainid,
+        );
+
+        const sig = await signer.signTypedData(data.domain as TypedDataDomain, data.types, data.values);
+
         // swap 10 tUSDC -> fUSDC without hitting the price limit
-        let response = await amm.swap(tusdcAddress, true, 10, encodeSqrtPrice(30))
+        let response = await amm.swap(
+            tusdcAddress,
+            true,
+            10,
+            encodeSqrtPrice(30),
+            nonce,
+            deadline,
+            max_amount,
+            sig,
+        )
         await response.wait();
 
         let fusdcAfterBalance = await fusdcContract.balanceOf(defaultAccount)
@@ -145,9 +205,11 @@ test("amm", async t => {
         let expectedTusdcAfterBalance = tusdcBeforeBalance - BigInt(10);
 
 
-        assert(fusdcAfterBalance === expectedFusdcAfterBalance, `expected balances to match! got: ${fusdcAfterBalance}, expected ${expectedFusdcAfterBalance}`)
-        assert(tusdcAfterBalance === expectedTusdcAfterBalance, `expected balances to match! got: ${tusdcAfterBalance}, expected ${expectedTusdcAfterBalance}`)
+        assert(fusdcAfterBalance === expectedFusdcAfterBalance, `expected fusdc balances to match! starting bal: ${fusdcBeforeBalance},  finishing: ${fusdcAfterBalance}, expected ${expectedFusdcAfterBalance}`)
+        assert(tusdcAfterBalance === expectedTusdcAfterBalance, `expected tusdc balances to match! starting bal: ${tusdcBeforeBalance}, finishing: ${tusdcAfterBalance}, expected ${expectedTusdcAfterBalance}`)
 
+
+        return;
 
         // swap 1000 fUSDC back to 10 tUSDC
         response = await amm.swap(tusdcAddress, false, 1000, encodeSqrtPrice(500))

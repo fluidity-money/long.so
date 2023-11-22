@@ -130,7 +130,8 @@ interface ISeawaterExecutorAdmin  is ISeawaterExecutorAdminExposed {
     /// @param usdc the address of the counterparty token
     /// @param seawaterAdmin the account with administrative power on the amm
     /// @param nftManager the account with control over NFT ownership
-    function ctor(address usdc, address seawaterAdmin, address nftManager) external;
+    /// @param permit2 the address of the permit2 contract
+    function ctor(address usdc, address seawaterAdmin, address nftManager, address permit2) external;
 }
 
 interface ISeawaterExecutorFallback {

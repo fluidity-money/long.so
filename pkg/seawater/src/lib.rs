@@ -2,10 +2,12 @@
 //!
 //! Seawater is an AMM designed for arbitrum's stylus environment based on uniswap v3.
 
+#![feature(split_array)]
 #![cfg_attr(not(target_arch = "wasm32"), feature(lazy_cell, const_trait_impl))]
 #![deny(clippy::unwrap_used)]
 
 pub mod erc20;
+pub mod eth_serde;
 #[macro_use]
 pub mod error;
 pub mod events;
@@ -18,6 +20,7 @@ pub mod tick;
 pub mod types;
 
 use crate::types::{Address, I256Extension, I256, U256};
+use erc20::Permit2Args;
 use error::Error;
 use maths::tick_math;
 
@@ -25,6 +28,7 @@ use types::{U256Extension, WrappedNative};
 
 use stylus_sdk::{evm, msg, prelude::*, storage::*};
 
+type RawArbResult = Option<Result<Vec<u8>, Vec<u8>>>;
 // aliased for simplicity
 type Revert = Vec<u8>;
 
@@ -48,7 +52,7 @@ mod shim {
     compile_error!(
         "Either `swaps` or `positions` or `admin` must be enabled when building for wasm."
     );
-    #[stylus_sdk::prelude::external]
+    //#[stylus_sdk::prelude::external]
     impl crate::Pools {}
 }
 
@@ -61,6 +65,8 @@ pub struct Pools {
     // the nft manager is a privileged account that can transfer NFTs!
     nft_manager: StorageAddress,
 
+    permit2: StorageAddress,
+
     fusdc: StorageAddress,
     pools: StorageMap<Address, pool::StoragePool>,
     // position NFTs
@@ -71,42 +77,47 @@ pub struct Pools {
     owned_positions: StorageMap<Address, StorageU256>,
 }
 
-/// Swap functions. Only enabled when the `swaps` feature is set.
-#[cfg_attr(feature = "swaps", external)]
+
 impl Pools {
-    /// Raw swap function, implementing the uniswap v3 interface.
-    ///
-    /// # Arguments
-    /// * `pool` - The pool to swap for. Pools are accessed as the address of their first token,
-    /// where every pool has the fluid token as token 1.
-    /// * `zero_for_one` - The swap direction. This is `true` if swapping to the fluid token, or
-    /// `false` if swapping from the fluid token.
-    /// * `amount` - The amount of token to swap. Follows the uniswap convention, where a positive
-    /// amount will perform an exact in swap and a negative amount will perform an exact out swap.
-    /// * `price_limit_x96` - The price limit, specified as an X96 encoded square root price.
-    /// # Side effects
-    /// This function transfers ERC20 tokens from and to the caller as per the swap. It takes
-    /// tokens using ERC20's `transferFrom` method, and therefore must have approvals set before
-    /// use.
-    pub fn swap(
-        &mut self,
+    fn swap_internal(
+        pools: &mut Pools,
         pool: Address,
         zero_for_one: bool,
         amount: I256,
         price_limit_x96: U256,
+        permit2: Option<Permit2Args>,
     ) -> Result<(I256, I256), Revert> {
         let (amount_0, amount_1, ending_tick) =
-            self.pools
+            pools
+                .pools
                 .setter(pool)
                 .swap(zero_for_one, amount, price_limit_x96)?;
 
         // entirely reentrant safe because stylus
         // denies all reentrancy unless explicity allowed (which we don't)
-        erc20::exchange(pool, amount_0)?;
-        erc20::exchange(self.fusdc.get(), amount_1)?;
 
-        let amount_0_abs = amount_0.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw();
-        let amount_1_abs = amount_1.checked_abs().ok_or(Error::SwapResultTooHigh)?.into_raw();
+        // if zero_for_one, send them token1 and take token0
+        let (take_token, take_amount, give_token, give_amount) = match zero_for_one {
+            true => (pool, amount_0, pools.fusdc.get(), amount_1),
+            false => (pools.fusdc.get(), amount_1, pool, amount_0),
+        };
+
+        erc20::take(
+            pools.permit2.get(),
+            take_token,
+            take_amount.abs_pos()?,
+            permit2,
+        )?;
+        erc20::give(give_token, give_amount.abs_neg()?)?;
+
+        let amount_0_abs = amount_0
+            .checked_abs()
+            .ok_or(Error::SwapResultTooHigh)?
+            .into_raw();
+        let amount_1_abs = amount_1
+            .checked_abs()
+            .ok_or(Error::SwapResultTooHigh)?
+            .into_raw();
 
         evm::log(events::Swap1 {
             user: msg::sender(),
@@ -120,33 +131,33 @@ impl Pools {
         Ok((amount_0, amount_1))
     }
 
-    /// Performs a two step swap, swapping from a non-fluid token to a non-fluid token.
-    ///
-    /// See [Self::swap] for more details on how this operates.
-    pub fn swap_2_exact_in(
-        &mut self,
+    fn swap_2_internal(
+        pools: &mut Pools,
         from: Address,
         to: Address,
         amount: U256,
         min_out: U256,
+        permit2: Option<Permit2Args>,
     ) -> Result<(U256, U256), Revert> {
+        let original_amount = amount;
+
         let amount = I256::try_from(amount).unwrap();
+
         // swap in -> usdc
-        let (amount_in, interim_usdc_out, final_tick_in) =
-            self.pools
-                .setter(from)
-                .swap(
-                    true,
-                    amount,
-                    // swap with no price limit, since we use min_out instead
-                    tick_math::MIN_SQRT_RATIO + U256::one(),
-                )?;
+        let (amount_in, interim_usdc_out, final_tick_in) = pools.pools.setter(from).swap(
+            true,
+            amount,
+            // swap with no price limit, since we use min_out instead
+            tick_math::MIN_SQRT_RATIO + U256::one(),
+        )?;
 
         // make this positive for exact in
-        let interim_usdc_out = interim_usdc_out.checked_neg().ok_or(Error::InterimSwapPositive)?;
+        let interim_usdc_out = interim_usdc_out
+            .checked_neg()
+            .ok_or(Error::InterimSwapPositive)?;
 
         // swap usdc -> out
-        let (amount_out, interim_usdc_in, final_tick_out) = self.pools.setter(to).swap(
+        let (amount_out, interim_usdc_in, final_tick_out) = pools.pools.setter(to).swap(
             false,
             interim_usdc_out,
             tick_math::MAX_SQRT_RATIO - U256::one(),
@@ -159,8 +170,13 @@ impl Pools {
         assert_or!(amount_out >= min_out, Error::MinOutNotReached);
 
         // transfer tokens
-        erc20::take(from, amount_in)?;
-        erc20::send(to, amount_out)?;
+        erc20::take(
+            pools.permit2.get(),
+            from,
+            original_amount,
+            permit2,
+        )?;
+        erc20::give(to, amount_out)?;
 
         evm::log(events::Swap2 {
             user: msg::sender(),
@@ -176,6 +192,90 @@ impl Pools {
         // return amount - amount_in to the user
         // send amount_out to the user
         Ok((amount_in, amount_out))
+    }
+}
+
+/// Swap functions. Only enabled when the `swaps` feature is set.
+//#[cfg(feature = "swaps")]
+#[external]
+impl Pools {
+    /// Raw swap function, implementing the uniswap v3 interface.
+    ///
+    /// # Arguments
+    /// * `pool` - The pool to swap for. Pools are accessed as the address of their first token,
+    /// where every pool has the fluid token as token 1.
+    /// * `zero_for_one` - The swap direction. This is `true` if swapping to the fluid token, or
+    /// `false` if swapping from the fluid token.
+    /// * `amount` - The amount of token to swap. Follows the uniswap convention, where a positive
+    /// amount will perform an exact in swap and a negative amount will perform an exact out swap.
+    /// * `price_limit_x96` - The price limit, specified as an X96 encoded square root price.
+    /// # Side effects
+    /// This function transfers ERC20 tokens from and to the caller as per the swap. It takes
+    /// tokens using ERC20's `transferFrom` method, and therefore must have approvals set before
+    /// use.
+    #[selector(id = "swapPermit2(address,bool,int256,uint256,uint256,uint256,uint256,bytes)")]
+    #[raw]
+    pub fn swap_permit2(&mut self, data: &[u8]) -> RawArbResult {
+        let (pool, data) = eth_serde::parse_addr(data);
+        let (zero_for_one, data) = eth_serde::parse_bool(data);
+        let (amount, data) = eth_serde::parse_i256(data);
+        let (price_limit_x96, data) = eth_serde::parse_u256(data);
+        let (nonce, data) = eth_serde::parse_u256(data);
+        let (deadline, data) = eth_serde::parse_u256(data);
+        let (max_amount, data) = eth_serde::parse_u256(data);
+        let (_, data) = eth_serde::take_word(data); // placeholder
+        let (sig, data) = eth_serde::parse_bytes(data);
+
+        let permit2_args = Permit2Args { max_amount, nonce, deadline, sig };
+
+        match Pools::swap_internal(
+            self,
+            pool,
+            zero_for_one,
+            amount,
+            price_limit_x96,
+            Some(permit2_args),
+        ) {
+            Ok((a, b)) => Some(Ok([a.to_be_bytes::<32>(), b.to_be_bytes::<32>()].concat())),
+            Err(e) => Some(Err(e)),
+        }
+    }
+
+    pub fn swap(&mut self, pool: Address, zero_for_one: bool, amount: I256, price_limit_x96: U256) -> Result<(I256, I256), Revert> {
+        Pools::swap_internal(
+            self,
+            pool,
+            zero_for_one,
+            amount,
+            price_limit_x96,
+            None,
+        )
+    }
+    /// Performs a two step swap, swapping from a non-fluid token to a non-fluid token.
+    ///
+    /// See [Self::swap] for more details on how this operates.
+    #[selector(id = "swap2Permit2(address,address,uint256,uint256,uint256,uint256,bytes)")]
+    #[raw]
+    pub fn swap_2_exact_in(&mut self, data: &[u8]) -> RawArbResult {
+        let (from, data) = eth_serde::parse_addr(data);
+        let (to, data) = eth_serde::parse_addr(data);
+        let (amount, data) = eth_serde::parse_u256(data);
+        let (min_out, data) = eth_serde::parse_u256(data);
+        let (nonce, data) = eth_serde::parse_u256(data);
+        let (deadline, data) = eth_serde::parse_u256(data);
+        let (_, data) = eth_serde::take_word(data);
+        let (sig, _) = eth_serde::parse_bytes(data);
+
+        let permit2_args = Permit2Args { max_amount: amount, nonce, deadline, sig };
+
+        match Pools::swap_2_internal(self, from, to, amount, min_out, Some(permit2_args)) {
+            Ok((a, b)) => Some(Ok([a.to_be_bytes::<32>(), b.to_be_bytes::<32>()].concat())),
+            Err(e) => Some(Err(e)),
+        }
+    }
+
+    pub fn swap_2(&mut self, from: Address, to: Address, amount: U256, min_out: U256) -> Result<(U256, U256), Revert> {
+        Pools::swap_2_internal(self, from, to, amount, min_out, None)
     }
 }
 
@@ -242,7 +342,11 @@ impl Pools {
     /// Requires the position be owned by the caller. Requires the pool to be enabled.
     pub fn burn_position(&mut self, id: U256) -> Result<(), Revert> {
         let owner = msg::sender();
-        assert_eq_or!(self.position_owners.get(id), owner, Error::PositionOwnerOnly);
+        assert_eq_or!(
+            self.position_owners.get(id),
+            owner,
+            Error::PositionOwnerOnly
+        );
 
         self.remove_position(owner, id);
 
@@ -313,7 +417,11 @@ impl Pools {
         id: U256,
         delta: i128,
     ) -> Result<(I256, I256), Revert> {
-        assert_eq_or!(msg::sender(), self.position_owners.get(id), Error::PositionOwnerOnly);
+        assert_eq_or!(
+            msg::sender(),
+            self.position_owners.get(id),
+            Error::PositionOwnerOnly
+        );
 
         let (token_0, token_1) = self.pools.setter(pool).update_position(id, delta)?;
 
@@ -346,12 +454,16 @@ impl Pools {
         amount_0: u128,
         amount_1: u128,
     ) -> Result<(u128, u128), Revert> {
-        assert_eq_or!(msg::sender(), self.position_owners.get(id), Error::PositionOwnerOnly);
+        assert_eq_or!(
+            msg::sender(),
+            self.position_owners.get(id),
+            Error::PositionOwnerOnly
+        );
 
         let (token_0, token_1) = self.pools.setter(pool).collect(id, amount_0, amount_1)?;
 
-        erc20::send(pool, U256::from(token_0))?;
-        erc20::send(self.fusdc.get(), U256::from(token_1))?;
+        erc20::give(pool, U256::from(token_0))?;
+        erc20::give(self.fusdc.get(), U256::from(token_1))?;
 
         evm::log(events::CollectFees {
             id,
@@ -377,12 +489,18 @@ impl Pools {
         usdc: Address,
         seawater_admin: Address,
         nft_manager: Address,
+        permit2: Address,
     ) -> Result<(), Revert> {
-        assert_eq_or!(self.fusdc.get(), Address::ZERO, Error::ContractAlreadyInitialised);
+        assert_eq_or!(
+            self.fusdc.get(),
+            Address::ZERO,
+            Error::ContractAlreadyInitialised
+        );
 
         self.fusdc.set(usdc);
         self.seawater_admin.set(seawater_admin);
         self.nft_manager.set(nft_manager);
+        self.permit2.set(permit2);
 
         Ok(())
     }
@@ -406,7 +524,11 @@ impl Pools {
         tick_spacing: u8,
         max_liquidity_per_tick: u128,
     ) -> Result<(), Revert> {
-        assert_eq_or!(msg::sender(), self.seawater_admin.get(), Error::SeawaterAdminOnly);
+        assert_eq_or!(
+            msg::sender(),
+            self.seawater_admin.get(),
+            Error::SeawaterAdminOnly
+        );
 
         self.pools
             .setter(pool)
@@ -431,11 +553,18 @@ impl Pools {
         amount_0: u128,
         amount_1: u128,
     ) -> Result<(u128, u128), Revert> {
-        assert_eq_or!(msg::sender(), self.seawater_admin.get(), Error::SeawaterAdminOnly);
-        let (token_0, token_1) = self.pools.setter(pool).collect_protocol(amount_0, amount_1)?;
+        assert_eq_or!(
+            msg::sender(),
+            self.seawater_admin.get(),
+            Error::SeawaterAdminOnly
+        );
+        let (token_0, token_1) = self
+            .pools
+            .setter(pool)
+            .collect_protocol(amount_0, amount_1)?;
 
-        erc20::send(pool, U256::from(token_0))?;
-        erc20::send(self.fusdc.get(), U256::from(token_1))?;
+        erc20::give(pool, U256::from(token_0))?;
+        erc20::give(self.fusdc.get(), U256::from(token_1))?;
 
         evm::log(events::CollectProtocolFees {
             pool,
@@ -453,8 +582,60 @@ impl Pools {
     /// # Errors
     /// Requires the user to be the seawater admin.
     pub fn enable_pool(&mut self, pool: Address, enabled: bool) -> Result<(), Revert> {
-        assert_eq_or!(msg::sender(), self.seawater_admin.get(), Error::SeawaterAdminOnly);
+        assert_eq_or!(
+            msg::sender(),
+            self.seawater_admin.get(),
+            Error::SeawaterAdminOnly
+        );
 
         Ok(self.pools.setter(pool).set_enabled(enabled))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{eth_serde, types::I256Extension};
+    use ruint_macro::uint;
+    use stylus_sdk::alloy_primitives::{address, bytes};
+
+    #[test]
+    fn test_decode_swap() {
+        // taken from an ethers generated blob
+        let data = bytes!(
+            "baef4bf9"
+            "00000000000000000000000028f99e094fc846d4f5c8ad91e2ffd6ff92b0e7ca"
+            "0000000000000000000000000000000000000000000000000000000000000001"
+            "000000000000000000000000000000000000000000000000000000000000000a"
+            "00000000000000000000000000000000000000057a2b748da963c00000000000"
+            "0000000000000000000000000000000000000000000000000000000000000001"
+            "00000000000000000000000000000000000000000000000000000000655d6b6d"
+            "000000000000000000000000000000000000000000000000000000000000000a"
+            "0000000000000000000000000000000000000000000000000000000000000100"
+            "0000000000000000000000000000000000000000000000000000000000000041"
+            "749af269b6860d64e97485e6be28448028f0e5e306b723fec3967bd489d667c8"
+            "3c679180bc36f3d6ea751198b01e4b082e83ed853265a504d1f56f6712ee7380"
+            "1b00000000000000000000000000000000000000000000000000000000000000"
+        )
+        .0;
+
+        let data = &data;
+
+        let (_, data) = eth_serde::parse_selector(data);
+        let (pool, data) = eth_serde::parse_addr(data);
+        let (zero_for_one, data) = eth_serde::parse_bool(data);
+        let (amount, data) = eth_serde::parse_i256(data);
+        let (_price_limit_x96, data) = eth_serde::parse_u256(data);
+        let (nonce, data) = eth_serde::parse_u256(data);
+        let (_deadline, data) = eth_serde::parse_u256(data);
+        let (max_amount, data) = eth_serde::parse_u256(data);
+        let (_, data) = eth_serde::take_word(data); // placeholder
+        let (_sig, data) = eth_serde::parse_bytes(data);
+
+        assert_eq!(pool, address!("28f99e094fc846d4f5c8ad91e2ffd6ff92b0e7ca"));
+        assert_eq!(zero_for_one, true);
+        assert_eq!(amount.abs_pos().unwrap(), uint!(10_U256));
+        assert_eq!(nonce, uint!(1_U256));
+        assert_eq!(max_amount, uint!(10_U256));
+        assert_eq!(data.len(), 0);
     }
 }
