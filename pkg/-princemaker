@@ -1,0 +1,45 @@
+% cd pkg
+% ls
+cache		    ethers-tests  package-lock.json	   target
+Cargo.lock	    foundry.toml  README.md		   test
+Cargo.toml	    interfaces	  rust-toolchain.toml	   tests.sh
+config.mk	    lib		  seawater		   tsconfig.json
+deploy-seawater.sh  Makefile	  seawater-admin.wasm	   yarn.lock
+deploy.sh	    node_modules  seawater-positions.wasm
+deploy-solidity.sh  out		  seawater-swaps.wasm
+Dockerfile	    package.json  sol
+%
+
+[⠃] Compiling...
+[⠊] Compiling...
+No files changed, compilation skipped
+Error:
+Invalid provider url:
+
+Context:
+- Error #0: builder error: relative URL without a base
+- Error #1: relative URL without a base
+%
+%
+% ./deploy.sh
++ ownership_nfts_name=Superposition AMM NFTs
++ ownership_nfts_symbol=SAN
++ [ -z  ]
++ err STYLUS_ENDPOINT unset
++ echo STYLUS_ENDPOINT unset
+STYLUS_ENDPOINT unset
++ exit 1
+% STYLUS_ENDPOINT=http://localhost:8547
+% STYLUS_PRIVATE_KEY=`{QuestionEthPrivateKey}
+% sh deploy-solidity.sh SeawaterAMM --constructor-args  0xe818e33533b8D0E70dCb03583963be0E9810095c 0x0000000000000000000000000000000000000000 0xa80d87Fc46Fe29B75D96c75DA87b0deB68c8F308 0x03fBcAc8470e8a8b6996853200092DA63E1936E1 0xe818e33533b8D0E70dCb03583963be0E9810095c 0x0000000000000000000000000000000000000000 0x6e7964Ca98C5F81afCa9C56dfb661833bA2050E
+
+[⠃] Compiling...
+[⠊] Compiling...
+No files changed, compilation skipped
+Error:
+Failed to parse `0x6e7964Ca98C5F81afCa9C56dfb661833bA2050E`, expected value of type: address
+
+Context:
+- Error #0: Hex parsing error: Odd number of digits
+- Error #1: Odd number of digits
+% ./de
