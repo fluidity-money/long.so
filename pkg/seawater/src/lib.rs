@@ -46,13 +46,13 @@ mod allocator {
 // we split our entrypoint functions into three sets, and call them via diamond proxies, to
 // save on binary size
 
-#[cfg(not(any(feature = "swaps", feature = "positions", feature = "admin",)))]
+#[cfg(not(any(feature = "swaps", feature = "positions", feature = "update_positions", feature = "admin",)))]
 mod shim {
     #[cfg(target_arch = "wasm32")]
     compile_error!(
-        "Either `swaps` or `positions` or `admin` must be enabled when building for wasm."
+        "Either `swaps` or `positions` or `update_positions` or `admin` must be enabled when building for wasm."
     );
-    //#[stylus_sdk::prelude::external]
+    #[stylus_sdk::prelude::external]
     impl crate::Pools {}
 }
 
@@ -196,8 +196,7 @@ impl Pools {
 }
 
 /// Swap functions. Only enabled when the `swaps` feature is set.
-//#[cfg(feature = "swaps")]
-#[external]
+#[cfg_attr(feature = "swaps", external)]
 impl Pools {
     /// Raw swap function, implementing the uniswap v3 interface.
     ///
@@ -213,6 +212,9 @@ impl Pools {
     /// This function transfers ERC20 tokens from and to the caller as per the swap. It takes
     /// tokens using ERC20's `transferFrom` method, and therefore must have approvals set before
     /// use.
+    // slight hack - we cfg out the whole function, since the `selector` and `raw` attributes don't
+    // actually exist, so we can't `cfg_attr` them in
+    #[cfg(feature = "swaps")]
     #[selector(id = "swapPermit2(address,bool,int256,uint256,uint256,uint256,uint256,bytes)")]
     #[raw]
     pub fn swap_permit2(&mut self, data: &[u8]) -> RawArbResult {
@@ -254,7 +256,8 @@ impl Pools {
     /// Performs a two step swap, swapping from a non-fluid token to a non-fluid token.
     ///
     /// See [Self::swap] for more details on how this operates.
-    #[selector(id = "swap2Permit2(address,address,uint256,uint256,uint256,uint256,bytes)")]
+    #[cfg(feature = "swaps")]
+    #[selector(id = "swap2ExactInPermit2(address,address,uint256,uint256,uint256,uint256,bytes)")]
     #[raw]
     pub fn swap_2_exact_in(&mut self, data: &[u8]) -> RawArbResult {
         let (from, data) = eth_serde::parse_addr(data);
@@ -396,43 +399,6 @@ impl Pools {
         Ok(liquidity.sys())
     }
 
-    /// Refreshes the amount of liquidity in a position, and adds or removes liquidity. Only usable
-    /// by the position's owner.
-    ///
-    /// # Arguments
-    /// * `pool` - The pool the position belongs to.
-    /// * `id` - The ID of the position.
-    /// * `delta` - The change to apply to the liquidity in the position.
-    ///
-    /// # Side effects
-    /// Adding or removing liquidity will transfer tokens from or to the caller. Tokens are
-    /// transfered with ERC20's `transferFrom`, so approvals must be set before calling.
-    ///
-    /// # Errors
-    /// Requires token approvals to be set if adding liquidity. Requires the caller to be the
-    /// position owner. Requires the pool to be enabled unless removing liquidity.
-    pub fn update_position(
-        &mut self,
-        pool: Address,
-        id: U256,
-        delta: i128,
-    ) -> Result<(I256, I256), Revert> {
-        assert_eq_or!(
-            msg::sender(),
-            self.position_owners.get(id),
-            Error::PositionOwnerOnly
-        );
-
-        let (token_0, token_1) = self.pools.setter(pool).update_position(id, delta)?;
-
-        erc20::exchange(pool, token_0)?;
-        erc20::exchange(self.fusdc.get(), token_1)?;
-
-        evm::log(events::UpdatePositionLiquidity { id, delta });
-
-        Ok((token_0, token_1))
-    }
-
     /// Collects AMM fees from a position, and triggers a release of fluid LP rewards.
     /// Only usable by the position's owner.
     ///
@@ -473,6 +439,122 @@ impl Pools {
             amount1: token_1,
         });
         Ok((token_0, token_1))
+    }
+}
+
+impl Pools {
+    pub fn update_position_internal(
+        &mut self,
+        pool: Address,
+        id: U256,
+        delta: i128,
+        permit2: Option<(Permit2Args, Permit2Args)>,
+    ) -> Result<(I256, I256), Revert> {
+        assert_eq_or!(
+            msg::sender(),
+            self.position_owners.get(id),
+            Error::PositionOwnerOnly
+        );
+
+        let (token_0, token_1) = self.pools.setter(pool).update_position(id, delta)?;
+
+        if delta < 0 {
+            erc20::give(pool, token_0.abs_neg()?)?;
+            erc20::give(self.fusdc.get(), token_1.abs_neg()?)?;
+        } else {
+            let permit2_contract = self.permit2.get();
+            let (permit_0, permit_1) = match permit2 {
+                Some((permit_0, permit_1)) => (Some(permit_0), Some(permit_1)),
+                None => (None, None),
+            };
+
+            erc20::take(permit2_contract, pool, token_0.abs_pos()?, permit_0)?;
+            erc20::take(permit2_contract, self.fusdc.get(), token_1.abs_pos()?, permit_1)?;
+        }
+
+        evm::log(events::UpdatePositionLiquidity { id, delta });
+
+        Ok((token_0, token_1))
+    }
+}
+
+#[cfg_attr(feature = "update_positions", external)]
+impl Pools {
+
+    /// Refreshes the amount of liquidity in a position, and adds or removes liquidity. Only usable
+    /// by the position's owner.
+    ///
+    /// # Arguments
+    /// * `pool` - The pool the position belongs to.
+    /// * `id` - The ID of the position.
+    /// * `delta` - The change to apply to the liquidity in the position.
+    ///
+    /// # Side effects
+    /// Adding or removing liquidity will transfer tokens from or to the caller. Tokens are
+    /// transfered with ERC20's `transferFrom`, so approvals must be set before calling.
+    ///
+    /// # Errors
+    /// Requires token approvals to be set if adding liquidity. Requires the caller to be the
+    /// position owner. Requires the pool to be enabled unless removing liquidity.
+    pub fn update_position(
+        &mut self,
+        pool: Address,
+        id: U256,
+        delta: i128,
+    ) -> Result<(I256, I256), Revert> {
+        self.update_position_internal(pool, id, delta, None)
+    }
+
+    #[cfg(feature = "update_positions")]
+    #[raw]
+    #[selector(id = "updatePositionPermit2(address,uint256,int128,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)")]
+    pub fn update_position_permit2(
+        &mut self,
+        data: &[u8],
+    ) -> RawArbResult {
+        let (pool, data) = eth_serde::parse_addr(data);
+        let (id, data) = eth_serde::parse_u256(data);
+        let (delta, data) = eth_serde::parse_i128(data);
+
+        fn parse_permit2(data: &[u8]) -> (U256, U256, U256, &[u8]) {
+            let (nonce, data) = eth_serde::parse_u256(data);
+            let (deadline, data) = eth_serde::parse_u256(data);
+            let (max_amount, data) = eth_serde::parse_u256(data);
+            let (_, data) = eth_serde::take_word(data);
+
+            (nonce, deadline, max_amount, data)
+        }
+
+        let (nonce_0, deadline_0, max_amount_0, data) = parse_permit2(data);
+        let (nonce_1, deadline_1, max_amount_1, data) = parse_permit2(data);
+
+        let (sig_0, data) = eth_serde::parse_bytes(data);
+        let (sig_1, data) = eth_serde::parse_bytes(data);
+
+        let permit2_token_0 = Permit2Args {
+            max_amount: max_amount_0,
+            nonce: nonce_0,
+            deadline: deadline_0,
+            sig: sig_0,
+        };
+
+        let permit2_token_1 = Permit2Args {
+            max_amount: max_amount_1,
+            nonce: nonce_1,
+            deadline: deadline_1,
+            sig: sig_1,
+        };
+
+        match Pools::update_position_internal(
+            self,
+            pool,
+            id,
+            delta,
+            Some((permit2_token_0, permit2_token_1)),
+        ) {
+            Ok((token_0, token_1)) => Some(Ok(vec![])),
+            Err(e) => Some(Err(e)),
+        }
     }
 }
 
