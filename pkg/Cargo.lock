@@ -1061,6 +1061,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stylus-proc"
 version = "0.4.1"
+source = "git+https://github.com/fluidity-money/stylus-sdk-rs#18bc2c147fe923c598ffa285cd83ef08bf0ef8c2"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -1078,6 +1079,7 @@ dependencies = [
 [[package]]
 name = "stylus-sdk"
 version = "0.4.1"
+source = "git+https://github.com/fluidity-money/stylus-sdk-rs#18bc2c147fe923c598ffa285cd83ef08bf0ef8c2"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",

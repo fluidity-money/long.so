@@ -8,6 +8,7 @@ import "../interfaces/ISeawaterAMM.sol";
 // these are calculated as keccak()-1 to avoid collisions
 bytes32 constant EXECUTOR_SWAP_SLOT = bytes32(uint256(keccak256("seawater.impl.swap")) - 1);
 bytes32 constant EXECUTOR_POSITION_SLOT = bytes32(uint256(keccak256("seawater.impl.position")) - 1);
+bytes32 constant EXECUTOR_UPDATE_POSITION_SLOT = bytes32(uint256(keccak256("seawater.impl.update_position")) - 1);
 bytes32 constant EXECUTOR_ADMIN_SLOT = bytes32(uint256(keccak256("seawater.impl.admin")) - 1);
 bytes32 constant EXECUTOR_FALLBACK_SLOT = bytes32(uint256(keccak256("seawater.impl.fallback")) - 1);
 
@@ -51,6 +52,7 @@ contract SeawaterAMM is ISeawaterAMM {
         address _nftManager,
         ISeawaterExecutorSwap _executorSwap,
         ISeawaterExecutorPosition _executorPosition,
+        ISeawaterExecutorUpdatePosition _executorUpdatePosition,
         ISeawaterExecutorAdmin _executorAdmin,
         ISeawaterExecutorFallback _executorFallback,
         address _fusdc,
@@ -60,6 +62,7 @@ contract SeawaterAMM is ISeawaterAMM {
         _setProxies(
             _executorSwap,
             _executorPosition,
+            _executorUpdatePosition,
             _executorAdmin,
             _executorFallback
         );
@@ -88,10 +91,11 @@ contract SeawaterAMM is ISeawaterAMM {
     function updateExecutors(
         ISeawaterExecutorSwap executorSwap,
         ISeawaterExecutorPosition executorPosition,
+        ISeawaterExecutorUpdatePosition executorUpdatePosition,
         ISeawaterExecutorAdmin executorAdmin,
         ISeawaterExecutorFallback executorFallback
     ) public onlyProxyAdmin {
-        _setProxies(executorSwap, executorPosition, executorAdmin, executorFallback);
+        _setProxies(executorSwap, executorPosition, executorUpdatePosition, executorAdmin, executorFallback);
     }
 
     // seawater delegates
@@ -165,8 +169,33 @@ contract SeawaterAMM is ISeawaterAMM {
         directDelegate(_getExecutorSwap());
     }
 
+    function swapPermit2(
+        address /* pool */,
+        bool /* zeroForOne */,
+        int256 /* amount */,
+        uint256 /* priceLimit */,
+        uint256 /* nonce */,
+        uint256 /* deadline */,
+        uint256 /* maxAmount */,
+        bytes memory /* sig */
+    ) external returns (int256, int256) {
+        directDelegate(_getExecutorSwap());
+    }
+
     /// @inheritdoc ISeawaterExecutorSwap
     function swap2ExactIn(address /* tokenA */, address /* tokenB */, uint256 /* amountIn */, uint256 /* minAmountOut */) external returns (uint256, uint256) {
+        directDelegate(_getExecutorSwap());
+    }
+
+    function swap2ExactInPermit2(
+        address /* from */,
+        address /* to */,
+        uint256 /* amount */,
+        uint256 /* minOut */,
+        uint256 /* nonce */,
+        uint256 /* deadline */,
+        bytes memory /* sig */
+    ) external returns (uint256, uint256) {
         directDelegate(_getExecutorSwap());
     }
 
@@ -241,15 +270,6 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorPosition
-    function updatePosition(
-        address /* pool */,
-        uint256 /* id */,
-        int128 /* delta */
-    ) external returns (int256, int256) {
-        directDelegate(_getExecutorPosition());
-    }
-
-    /// @inheritdoc ISeawaterExecutorPosition
     function collect(
         address /* pool */,
         uint256 /* id */,
@@ -257,6 +277,32 @@ contract SeawaterAMM is ISeawaterAMM {
         uint128 /* amount1 */
     ) external returns (uint128, uint128) {
         directDelegate(_getExecutorPosition());
+    }
+
+    /// @inheritdoc ISeawaterExecutorUpdatePosition
+    function updatePosition(
+        address /* pool */,
+        uint256 /* id */,
+        int128 /* delta */
+    ) external returns (int256, int256) {
+        directDelegate(_getExecutorUpdatePosition());
+    }
+
+    /// @inheritdoc ISeawaterExecutorUpdatePosition
+    function updatePositionPermit2(
+        address /* pool */,
+        uint256 /* id */,
+        int128 /* delta */,
+        uint256 /* nonce0 */,
+        uint256 /* deadline0 */,
+        uint256 /* maxAmount0 */,
+        bytes memory /* sig0 */,
+        uint256 /* nonce1 */,
+        uint256 /* deadline1 */,
+        uint256 /* maxAmount1 */,
+        bytes memory /* sig1 */
+    ) external returns (int256, int256) {
+        directDelegate(_getExecutorUpdatePosition());
     }
 
     // fallback!
@@ -275,6 +321,9 @@ contract SeawaterAMM is ISeawaterAMM {
     function _getExecutorPosition() internal view returns (address) {
         return StorageSlot.getAddressSlot(EXECUTOR_POSITION_SLOT).value;
     }
+    function _getExecutorUpdatePosition() internal view returns (address) {
+        return StorageSlot.getAddressSlot(EXECUTOR_UPDATE_POSITION_SLOT).value;
+    }
     function _getExecutorAdmin() internal view returns (address) {
         return StorageSlot.getAddressSlot(EXECUTOR_ADMIN_SLOT).value;
     }
@@ -289,11 +338,13 @@ contract SeawaterAMM is ISeawaterAMM {
     function _setProxies(
         ISeawaterExecutorSwap executorSwap,
         ISeawaterExecutorPosition executorPosition,
+        ISeawaterExecutorUpdatePosition executorUpdatePosition,
         ISeawaterExecutorAdmin executorAdmin,
         ISeawaterExecutorFallback executorFallback
     ) internal {
         StorageSlot.getAddressSlot(EXECUTOR_SWAP_SLOT).value = address(executorSwap);
         StorageSlot.getAddressSlot(EXECUTOR_POSITION_SLOT).value = address(executorPosition);
+        StorageSlot.getAddressSlot(EXECUTOR_UPDATE_POSITION_SLOT).value = address(executorUpdatePosition);
         StorageSlot.getAddressSlot(EXECUTOR_ADMIN_SLOT).value = address(executorAdmin);
         StorageSlot.getAddressSlot(EXECUTOR_FALLBACK_SLOT).value = address(executorFallback);
     }
