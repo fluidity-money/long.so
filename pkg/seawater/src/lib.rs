@@ -46,7 +46,12 @@ mod allocator {
 // we split our entrypoint functions into three sets, and call them via diamond proxies, to
 // save on binary size
 
-#[cfg(not(any(feature = "swaps", feature = "positions", feature = "update_positions", feature = "admin",)))]
+#[cfg(not(any(
+    feature = "swaps",
+    feature = "positions",
+    feature = "update_positions",
+    feature = "admin",
+)))]
 mod shim {
     #[cfg(target_arch = "wasm32")]
     compile_error!(
@@ -76,7 +81,6 @@ pub struct Pools {
     // owner => count
     owned_positions: StorageMap<Address, StorageU256>,
 }
-
 
 impl Pools {
     fn swap_internal(
@@ -170,12 +174,7 @@ impl Pools {
         assert_or!(amount_out >= min_out, Error::MinOutNotReached);
 
         // transfer tokens
-        erc20::take(
-            pools.permit2.get(),
-            from,
-            original_amount,
-            permit2,
-        )?;
+        erc20::take(pools.permit2.get(), from, original_amount, permit2)?;
         erc20::give(to, amount_out)?;
 
         evm::log(events::Swap2 {
@@ -228,7 +227,12 @@ impl Pools {
         let (_, data) = eth_serde::take_word(data); // placeholder
         let (sig, data) = eth_serde::parse_bytes(data);
 
-        let permit2_args = Permit2Args { max_amount, nonce, deadline, sig };
+        let permit2_args = Permit2Args {
+            max_amount,
+            nonce,
+            deadline,
+            sig,
+        };
 
         match Pools::swap_internal(
             self,
@@ -243,15 +247,14 @@ impl Pools {
         }
     }
 
-    pub fn swap(&mut self, pool: Address, zero_for_one: bool, amount: I256, price_limit_x96: U256) -> Result<(I256, I256), Revert> {
-        Pools::swap_internal(
-            self,
-            pool,
-            zero_for_one,
-            amount,
-            price_limit_x96,
-            None,
-        )
+    pub fn swap(
+        &mut self,
+        pool: Address,
+        zero_for_one: bool,
+        amount: I256,
+        price_limit_x96: U256,
+    ) -> Result<(I256, I256), Revert> {
+        Pools::swap_internal(self, pool, zero_for_one, amount, price_limit_x96, None)
     }
     /// Performs a two step swap, swapping from a non-fluid token to a non-fluid token.
     ///
@@ -269,7 +272,12 @@ impl Pools {
         let (_, data) = eth_serde::take_word(data);
         let (sig, _) = eth_serde::parse_bytes(data);
 
-        let permit2_args = Permit2Args { max_amount: amount, nonce, deadline, sig };
+        let permit2_args = Permit2Args {
+            max_amount: amount,
+            nonce,
+            deadline,
+            sig,
+        };
 
         match Pools::swap_2_internal(self, from, to, amount, min_out, Some(permit2_args)) {
             Ok((a, b)) => Some(Ok([a.to_be_bytes::<32>(), b.to_be_bytes::<32>()].concat())),
@@ -277,7 +285,13 @@ impl Pools {
         }
     }
 
-    pub fn swap_2(&mut self, from: Address, to: Address, amount: U256, min_out: U256) -> Result<(U256, U256), Revert> {
+    pub fn swap_2(
+        &mut self,
+        from: Address,
+        to: Address,
+        amount: U256,
+        min_out: U256,
+    ) -> Result<(U256, U256), Revert> {
         Pools::swap_2_internal(self, from, to, amount, min_out, None)
     }
 }
@@ -469,7 +483,12 @@ impl Pools {
             };
 
             erc20::take(permit2_contract, pool, token_0.abs_pos()?, permit_0)?;
-            erc20::take(permit2_contract, self.fusdc.get(), token_1.abs_pos()?, permit_1)?;
+            erc20::take(
+                permit2_contract,
+                self.fusdc.get(),
+                token_1.abs_pos()?,
+                permit_1,
+            )?;
         }
 
         evm::log(events::UpdatePositionLiquidity { id, delta });
@@ -480,7 +499,6 @@ impl Pools {
 
 #[cfg_attr(feature = "update_positions", external)]
 impl Pools {
-
     /// Refreshes the amount of liquidity in a position, and adds or removes liquidity. Only usable
     /// by the position's owner.
     ///
@@ -507,11 +525,10 @@ impl Pools {
 
     #[cfg(feature = "update_positions")]
     #[raw]
-    #[selector(id = "updatePositionPermit2(address,uint256,int128,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)")]
-    pub fn update_position_permit2(
-        &mut self,
-        data: &[u8],
-    ) -> RawArbResult {
+    #[selector(
+        id = "updatePositionPermit2(address,uint256,int128,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)"
+    )]
+    pub fn update_position_permit2(&mut self, data: &[u8]) -> RawArbResult {
         let (pool, data) = eth_serde::parse_addr(data);
         let (id, data) = eth_serde::parse_u256(data);
         let (delta, data) = eth_serde::parse_i128(data);
