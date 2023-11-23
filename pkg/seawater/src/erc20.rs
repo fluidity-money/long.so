@@ -179,19 +179,15 @@ pub fn take_permit2(
     }
 }
 
-pub fn take(permit2: Address, token: Address, amount: U256, permit2_details: Option<Permit2Args>) -> Result<(), Error> {
+pub fn take(
+    permit2: Address,
+    token: Address,
+    amount: U256,
+    permit2_details: Option<Permit2Args>,
+) -> Result<(), Error> {
     match permit2_details {
-        Some(details) => {
-            take_permit2(
-                permit2,
-                token,
-                amount,
-                details,
-            )
-        }
-        None => {
-            take_transfer_from(token, amount)
-        }
+        Some(details) => take_permit2(permit2, token, amount, details),
+        None => take_transfer_from(token, amount),
     }
 }
 
