@@ -4,6 +4,7 @@
 //! with noncompliant boolean returns.
 
 use crate::error::Error;
+use crate::immutables::PERMIT2_ADDR;
 use crate::types::{I256Extension, I256};
 use stylus_sdk::alloy_primitives::{Address, U256};
 use stylus_sdk::call::RawCall;
@@ -157,7 +158,6 @@ pub fn take_transfer_from(token: Address, amount: U256) -> Result<(), Error> {
 }
 
 pub fn take_permit2(
-    permit2: Address,
     token: Address,
     transfer_amount: U256,
     details: Permit2Args,
@@ -173,20 +173,19 @@ pub fn take_permit2(
         details.sig,
     );
 
-    match RawCall::new().call(permit2, &data) {
+    match RawCall::new().call(PERMIT2_ADDR, &data) {
         Ok(_) => Ok(()),
         Err(v) => Err(Error::Erc20Revert(v)),
     }
 }
 
 pub fn take(
-    permit2: Address,
     token: Address,
     amount: U256,
     permit2_details: Option<Permit2Args>,
 ) -> Result<(), Error> {
     match permit2_details {
-        Some(details) => take_permit2(permit2, token, amount, details),
+        Some(details) => take_permit2(token, amount, details),
         None => take_transfer_from(token, amount),
     }
 }

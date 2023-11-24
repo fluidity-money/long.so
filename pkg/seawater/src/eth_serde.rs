@@ -1,3 +1,5 @@
+//! Various utilities for encoding and decoding ethereum calldata.
+
 /// Calculates a function's selector.
 pub const fn selector(name: &[u8]) -> [u8; 4] {
     let hash = keccak_const::Keccak256::new().update(name).finalize();
@@ -11,12 +13,16 @@ pub const fn selector(name: &[u8]) -> [u8; 4] {
     result
 }
 
+/// Extracts a 256 bit word from a data stream, returning the word and the remaining data.
 pub fn take_word(data: &[u8]) -> (&[u8; 32], &[u8]) {
     data.split_array_ref::<32>()
 }
 
 macro_rules! gen_parse {
     ($parsename:ident, $typename:ident, $type:ty, $bytes:expr, $ctor:expr) => {
+        #[doc = "Parses a "]
+        #[doc = concat!("[", stringify!($type), "]")]
+        #[doc = " from a data stream, returning the parsed value and the remaining data."]
         pub fn $parsename(data: &[u8]) -> ($type, &[u8]) {
             let ($typename, data) = take_word(data);
             let (_, $typename) = $typename.rsplit_array_ref::<$bytes>();
@@ -59,11 +65,54 @@ gen_parse!(parse_bool, val, bool, 1, val[0] != 0);
 gen_parse_int!(parse_i32, i32);
 gen_parse_int!(parse_i128, i128);
 
+/// Extracts a 32 bit selector from a data stream, returning the selector and the remaining data.
 pub fn parse_selector(data: &[u8]) -> (u32, &[u8]) {
     let (selector, data) = data.split_array_ref::<4>();
     (u32::from_be_bytes(*selector), data)
 }
 
+/// Parses a series of bytes in ethereum encoding from a data stream, returning the bytes and the
+/// remaining data.
+///
+/// # Encoding
+/// Bytes are encoded in three parts - a placeholder, specifying the word offset of the bytes, and
+/// then the length followed by the data encoded at the end of the blob.'
+/// This function parses the second part - you should use [take_word] to remove the word offset
+/// when you encounter it.
+///
+/// # Examples
+///
+/// ```
+/// // test parsing calldata with a bytes[] param
+/// // cast cd "fn(uint,bytes,uint256)" 0x1234 0x74657374206D657373616765 0x5678
+/// use libseawater::eth_serde::*;
+/// use stylus_sdk::alloy_primitives::{uint, address, bytes};
+/// # let encoded = bytes!(
+/// #    "d9828c45"
+/// #    "0000000000000000000000000000000000000000000000000000000000001234"
+/// #    "0000000000000000000000000000000000000000000000000000000000000080"
+/// #    "0000000000000000000000000000000000000000000000000000000000005678"
+/// #    "000000000000000000000000000000000000000000000000000000000000000c"
+/// #    "74657374206d6573736167650000000000000000000000000000000000000000"
+/// # )
+/// # .0;
+///
+/// let data = &encoded;
+/// let (sel, data) = parse_selector(data);
+/// let (amount, data) = parse_u256(data);
+/// let (_, data) = take_word(data); // byte offset
+/// let (amount2, data) = parse_u256(data);
+/// let (encoded_bytes, data) = parse_bytes(data); // actual data lives at the end
+///
+/// assert_eq!(
+///     sel,
+///     u32::from_be_bytes(selector(b"fn(uint256,bytes,uint256)"))
+/// );
+/// assert_eq!(amount, uint!(0x1234_U256));
+/// assert_eq!(amount2, uint!(0x5678_U256));
+/// assert_eq!(encoded_bytes, "test message".as_bytes());
+/// assert_eq!(data.len(), 0);
+/// ```
 pub fn parse_bytes(data: &[u8]) -> (&[u8], &[u8]) {
     let (len, data) = parse_u256(data);
     let len: usize = len.try_into().unwrap();
@@ -111,7 +160,7 @@ mod test {
     #[test]
     fn parse_calldata_bytes() {
         // test parsing calldata with a bytes[] param
-        // cast cd "fn(address,uint,bytes, uint256)" 0x737B7865f84bDc86B5c8ca718a5B7a6d905776F6 0x1234 0x74657374206D657373616765 0x5678
+        // cast cd "fn(address,uint,bytes,uint256)" 0x737B7865f84bDc86B5c8ca718a5B7a6d905776F6 0x1234 0x74657374206D657373616765 0x5678
         let encoded = bytes!(
             "b107950b"
             "000000000000000000000000737b7865f84bdc86b5c8ca718a5b7a6d905776f6"
