@@ -185,7 +185,7 @@ test("amm", async t => {
         const sig = await signer.signTypedData(data.domain as TypedDataDomain, data.types, data.values);
 
         // swap 10 tUSDC -> fUSDC without hitting the price limit
-        let response = await amm.swap(
+        let response = await amm.swapPermit2(
             tusdcAddress,
             true,
             10,

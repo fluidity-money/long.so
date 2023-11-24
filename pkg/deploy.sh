@@ -29,17 +29,35 @@ deploy_feature() {
     echo $res
 }
 
+mv seawater/src/immutables.rs seawater/src/immutables2.rs
+
+# strip the 0x
+permit2=$(echo "$PERMIT2_ADDR" | cut -c 3-)
+fusdc=$(echo "$FUSDC_TOKEN_ADDR" | cut -c 3-)
+
+# FIXME lol.
+cat <<EOF > seawater/src/immutables.rs
+use stylus_sdk::alloy_primitives::address;
+use crate::types::Address;
+pub const PERMIT2_ADDR: Address = address!("$permit2");
+pub const FUSDC_ADDR: Address = address!("$fusdc");
+EOF
+
 if [ -z "$swaps_addr" ]; then swaps_addr=$(deploy_feature "swaps"); fi
 if [ -z "$positions_addr" ]; then positions_addr=$(deploy_feature "positions"); fi
+if [ -z "$update_positions_addr" ]; then update_positions_addr=$(deploy_feature "update_positions"); fi
 if [ -z "$admin_addr" ]; then admin_addr=$(deploy_feature "admin"); fi
+
+mv seawater/src/immutables2.rs seawater/src/immutables.rs
 
 >&2 echo "executors deployed..."
 >&2 echo "to resume from this point, set"
->&2 echo "swaps_addr=$swaps_addr positions_addr=$positions_addr admin_addr=$admin_addr"
+>&2 echo "swaps_addr=$swaps_addr positions_addr=$positions_addr update_positions_addr=$update_positions_addr admin_addr=$admin_addr"
 
 >&2 echo "deploying diamond contract..."
 
 forge build --revert-strings debug
+
 
 forge create "SeawaterAMM" --rpc-url $STYLUS_ENDPOINT --private-key $STYLUS_PRIVATE_KEY \
     --constructor-args \
@@ -48,7 +66,6 @@ forge create "SeawaterAMM" --rpc-url $STYLUS_ENDPOINT --private-key $STYLUS_PRIV
         $NFT_MANAGER_ADDR \
         $swaps_addr \
         $positions_addr \
+        $update_positions_addr \
         $admin_addr \
         $(cast --address-zero) \
-        $FUSDC_TOKEN_ADDR \
-        $PERMIT2_ADDR
