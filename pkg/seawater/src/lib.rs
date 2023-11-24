@@ -6,9 +6,9 @@
 #![cfg_attr(not(target_arch = "wasm32"), feature(lazy_cell, const_trait_impl))]
 #![deny(clippy::unwrap_used)]
 
-pub mod immutables;
 pub mod erc20;
 pub mod eth_serde;
+pub mod immutables;
 #[macro_use]
 pub mod error;
 pub mod events;
@@ -28,7 +28,7 @@ use maths::tick_math;
 
 use types::{U256Extension, WrappedNative};
 
-use stylus_sdk::{evm, msg, prelude::*, storage::*, alloy_primitives::address};
+use stylus_sdk::{alloy_primitives::address, evm, msg, prelude::*, storage::*};
 
 type RawArbResult = Option<Result<Vec<u8>, Vec<u8>>>;
 // aliased for simplicity
@@ -44,7 +44,6 @@ mod allocator {
     static ALLOCATOR: AssumeSingleThreaded<FreeListAllocator> =
         unsafe { AssumeSingleThreaded::new(FreeListAllocator::new()) };
 }
-
 
 // we split our entrypoint functions into three sets, and call them via diamond proxies, to
 // save on binary size
@@ -124,11 +123,7 @@ impl Pools {
             false => (FUSDC_ADDR, amount_1, pool, amount_0),
         };
 
-        erc20::take(
-            take_token,
-            take_amount.abs_pos()?,
-            permit2,
-        )?;
+        erc20::take(take_token, take_amount.abs_pos()?, permit2)?;
         erc20::give(give_token, give_amount.abs_neg()?)?;
 
         let amount_0_abs = amount_0
@@ -507,11 +502,7 @@ impl Pools {
             };
 
             erc20::take(pool, token_0.abs_pos()?, permit_0)?;
-            erc20::take(
-                FUSDC_ADDR,
-                token_1.abs_pos()?,
-                permit_1,
-            )?;
+            erc20::take(FUSDC_ADDR, token_1.abs_pos()?, permit_1)?;
         }
 
         evm::log(events::UpdatePositionLiquidity { id, delta });
@@ -581,9 +572,11 @@ impl Pools {
             delta,
             Some((permit2_token_0, permit2_token_1)),
         ) {
-            Ok((token_0, token_1)) => Some(Ok(
-                [token_0.to_be_bytes::<32>(), token_1.to_be_bytes::<32>()].concat()
-            )),
+            Ok((token_0, token_1)) => Some(Ok([
+                token_0.to_be_bytes::<32>(),
+                token_1.to_be_bytes::<32>(),
+            ]
+            .concat())),
             Err(e) => Some(Err(e)),
         }
     }
@@ -597,17 +590,12 @@ impl Pools {
     ///
     ///  # Errors
     ///  Requires the contract to not be initialised.
-    pub fn ctor(
-        &mut self,
-        seawater_admin: Address,
-        nft_manager: Address,
-    ) -> Result<(), Revert> {
+    pub fn ctor(&mut self, seawater_admin: Address, nft_manager: Address) -> Result<(), Revert> {
         assert_eq_or!(
             self.seawater_admin.get(),
             Address::ZERO,
             Error::ContractAlreadyInitialised
         );
-
 
         self.seawater_admin.set(seawater_admin);
         self.nft_manager.set(nft_manager);
