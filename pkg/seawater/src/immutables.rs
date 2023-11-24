@@ -25,4 +25,3 @@ pub const PERMIT2_ADDR: Address = addr!("000000000000000000000000000000000000000
 
 /// The address of the fluid token, to be used as token 1 for every pool.
 pub const FUSDC_ADDR: Address = addr!("0000000000000000000000000000000000000001");
-
