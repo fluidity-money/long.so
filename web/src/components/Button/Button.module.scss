@@ -1,6 +1,31 @@
 .Button {
-  @include box(0.5em);
   @include dark;
 
+  &.small {
+    @include box(2px);
+  }
+
+  &.medium {
+    @include box(4px);
+  }
+
+  &.large {
+    @include box(8px);
+  }
+
   cursor: pointer;
+
+  &.light {
+    background: $light;
+    color: $dark;
+  }
+
+  &.dark {
+    background: $dark;
+    color: $light;
+  }
+
+  &.inline {
+    padding: 0;
+  }
 }
