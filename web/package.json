@@ -16,6 +16,7 @@
     "@types/react-dom": "18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.9.1",
     "@typescript-eslint/parser": "^6.9.1",
+    "@visx/mock-data": "^3.3.0",
     "eslint": "8.49.0",
     "eslint-config-next": "13.4.19",
     "framer-motion": "^10.16.4",
@@ -28,5 +29,8 @@
     "typescript": "5.2.2",
     "viem": "^1.10.12",
     "wagmi": "^1.4.1"
+  },
+  "devDependencies": {
+    "@svgr/webpack": "^8.1.0"
   }
 }
