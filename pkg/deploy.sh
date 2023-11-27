@@ -1,55 +1,54 @@
 #!/bin/sh -e
 
-die() {
-    >&2 echo "died: $1"
-    exit 1
+ownership_nfts_name="Superposition-AMM-NFTs"
+ownership_nfts_symbol="SAN"
+ownership_nfts_token_uri="https://superposition.so/"
+
+err() {
+	>&2 echo $@
+	exit 1
 }
 
-STYLUS_ENDPOINT="${STYLUS_ENDPOINT:=http://localhost:8547}"
+[ -z "$STYLUS_ENDPOINT" ] && err "STYLUS_ENDPOINT unset"
+[ -z "$STYLUS_PRIVATE_KEY" ] && err "STYLUS_PRIVATE_KEY unset"
+[ -z "SEAWATER_PROXY_ADMIN" ] && err "SEAWATER_PROXY_ADMIN unset"
+[ -z "$FLU_FUSDC_ADDR" ] && err "FLU_FUSDC_ADDR unset"
 
-# this is the default stylus devnode prikey
-STYLUS_PRIVATE_KEY="${STYLUS_PRIVATE_KEY:=0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659}"
+seawater_swaps="$(sh deploy-seawater.sh seawater-swaps.wasm)"
+seawater_positions="$(sh deploy-seawater.sh seawater-positions.wasm)"
+seawater_update_positions="$(sh deploy-seawater.sh seawater-positions.wasm)"
+seawater_admin="$(sh deploy-seawater.sh seawater-admin.wasm)"
 
-[ ! -z "$PROXY_ADMIN_ADDR" ] || die "PROXY_ADMIN_ADDR not set!"
-[ ! -z "$SEAWATER_ADMIN_ADDR" ] || die "SEAWATER_ADMIN_ADDR not set!"
-[ ! -z "$NFT_MANAGER_ADDR" ] || die "NFT_MANAGER_ADDR not set!"
-[ ! -z "$FLU_SEAWATER_FUSDC_ADDR" ] || die "FLU_SEAWATER_FUSDC_ADDR not set!"
-[ ! -z "$FLU_SEAWATER_PERMIT2_ADDR" ] || die "FLU_SEAWATER_PERMIT2_ADDRnot set!"
+seawater_proxy="$(\
+	sh deploy-solidity.sh "SeawaterAMM" --constructor-args \
+		"$seawater_admin" \
+		"$seawater_admin" \
+		"$(cast --address-zero)" \
+		"$seawater_swaps" \
+    "$seawater_update_positions" \
+		"$seawater_positions" \
+		"$seawater_admin" \
+		"$(cast --address-zero)" \
+		"$FLU_FUSDC_ADDR")"
 
-deploy_feature() {
-    >&2 echo "deploying $1..."
+seawater_nft_manager="$(\
+	sh deploy-solidity.sh "OwnershipNFTs" --constructor-args \
+		"$ownership_nfts_name" \
+		"$ownership_nfts_symbol" \
+		"$ownership_nfts_token_uri" \
+		"$seawater_proxy")"
 
-    cargo +nightly build --package seawater -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort --release --target wasm32-unknown-unknown --features $1
-    res=$(cargo stylus deploy --endpoint $STYLUS_ENDPOINT --wasm-file-path target/wasm32-unknown-unknown/release/seawater.wasm --private-key $STYLUS_PRIVATE_KEY \
-        | tee /dev/stderr \
-        | sed -nr "s/Deploying program to address (.+)(0x.{40}).*/\2/p" \
-    )
-    [ ! -z $res ] || die "deployment failed for feature $1"
-    # echo $res | sed -r "s/\x1b\[[^@-~]*[@-~]//g" # strip colour characters
-    echo $res
+cat <<EOF
+{
+	"seawater_proxy": "$seawater_proxy",
+	"seawater_nft_manager": "$seawater_nft_manager",
+	"seawater_swaps_impl": "$seawater_swaps",
+	"seawater_positions_impl": "$seawater_positions",
+  "seawater_update_positions_impl": "$seawater_update_positions",
+	"seawater_admin_impl": "$seawater_admin",
+	"seawater_proxy_admin": "$SEAWATER_PROXY_ADMIN",
+	"ownership_nfts_name": "$ownership_nfts_name",
+	"ownership_nfts_symbol": "$ownership_nfts_symbol",
+	"ownership_nfts_token_uri": "$ownership_nfts_token_uri",
+	"seawater_fusdc_addr": "$FLU_FUSDC_ADDR"
 }
-
-if [ -z "$swaps_addr" ]; then swaps_addr=$(deploy_feature "swaps"); fi
-if [ -z "$positions_addr" ]; then positions_addr=$(deploy_feature "positions"); fi
-if [ -z "$update_positions_addr" ]; then update_positions_addr=$(deploy_feature "update_positions"); fi
-if [ -z "$admin_addr" ]; then admin_addr=$(deploy_feature "admin"); fi
-
->&2 echo "executors deployed..."
->&2 echo "to resume from this point, set"
->&2 echo "swaps_addr=$swaps_addr positions_addr=$positions_addr update_positions_addr=$update_positions_addr admin_addr=$admin_addr"
-
->&2 echo "deploying diamond contract..."
-
-forge build --revert-strings debug
-
-
-forge create "SeawaterAMM" --rpc-url $STYLUS_ENDPOINT --private-key $STYLUS_PRIVATE_KEY \
-    --constructor-args \
-        $PROXY_ADMIN_ADDR \
-        $SEAWATER_ADMIN_ADDR \
-        $NFT_MANAGER_ADDR \
-        $swaps_addr \
-        $positions_addr \
-        $update_positions_addr \
-        $admin_addr \
-        $(cast --address-zero) \
