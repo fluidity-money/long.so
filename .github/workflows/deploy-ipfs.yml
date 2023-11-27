@@ -40,10 +40,8 @@ jobs:
       - name: Update DNSLink
         env:
           CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
-          # update
-          RECORD_DOMAIN: example.org
-          # update
-          RECORD_NAME: "_dnslink.subdomainname"
+          RECORD_DOMAIN: superposition.so
+          RECORD_NAME: "_dnslink.amm"
           CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
         id: dnslink
         uses: textileio/cloudflare-update-dnslink@master
