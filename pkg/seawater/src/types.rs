@@ -167,4 +167,3 @@ impl WrappedNative<u32> for U32 {
         Self::from_limbs([*arg as u64])
     }
 }
-

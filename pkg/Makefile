@@ -6,6 +6,7 @@ include config.mk
 	stylus \
 	admin \
 	positions \
+	update_positions \
 	swaps \
 	solidity \
 	amm-entrypoint \
@@ -18,6 +19,7 @@ build: stylus solidity
 
 admin: ${OUT_SEAWATER_ADMIN}
 positions: ${OUT_SEAWATER_POSITIONS}
+update_positions: ${OUT_SEAWATER_UPDATE_POSITIONS}
 swaps: ${OUT_SEAWATER_SWAPS}
 
 stylus: admin positions swaps
@@ -52,6 +54,11 @@ ${OUT_SEAWATER_POSITIONS}: ${FILES_RUST}
 	@mv seawater.wasm seawater-positions.wasm
 	@rm -f liblibseawater.rlib
 
+${OUT_SEAWATER_UPDATE_POSITIONS}: ${FILES_RUST}
+	@${CARGO_BUILD_STYLUS} --features update_positions
+	@mv seawater.wasm seawater-update-positions.wasm
+	@rm -f liblibseawater.rlib
+
 ${OUT_SEAWATER_SWAPS}: ${FILES_RUST}
 	@${CARGO_BUILD_STYLUS} --features swaps
 	@mv seawater.wasm seawater-swaps.wasm
@@ -73,6 +80,7 @@ clean:
 	@rm -rf \
 		${OUT_SEAWATER_ADMIN} \
 		${OUT_SEAWATER_POSITIONS} \
+		${OUT_SEAWATER_UPDATE_POSITIONS} \
 		${OUT_SEAWATER_SWAPS} \
 		cache \
 		target \

@@ -15,6 +15,27 @@ interface ISeawaterExecutorSwap {
         uint256 priceLimit
     ) external returns (int256, int256);
 
+    /// @notice swaps within a pool using permit2 for token transfers
+    /// @param pool the pool to swap on
+    /// @param zeroForOne true if swapping token->fluid token
+    /// @param amount the amount of token to swap, positive if exactIn, negative if exactOut
+    /// @param priceLimit the price limit for swaps, encoded as a sqrtX96 price
+    /// @param nonce the permit2 nonce
+    /// @param deadline the permit2 deadline
+    /// @param maxAmount the permit2 maxAmount
+    /// @param sig the permit2 signature
+    /// @return (token0, token1) delta
+    function swapPermit2(
+        address pool,
+        bool zeroForOne,
+        int256 amount,
+        uint256 priceLimit,
+        uint256 nonce,
+        uint256 deadline,
+        uint256 maxAmount,
+        bytes memory sig
+    ) external returns (int256, int256);
+
     /// @notice performs a two stage swap across two pools
     /// @param from the input token
     /// @param to the output token
@@ -26,6 +47,26 @@ interface ISeawaterExecutorSwap {
         address to,
         uint256 amount,
         uint256 minOut
+    ) external returns (uint256, uint256);
+
+    /// @notice performs a two stage swap across two pools using permit2 for token transfers
+    /// @param from the input token
+    /// @param to the output token
+    /// @param amount the amount of the input token to use
+    /// @param minOut the minimum valid amount of the output token, reverts if not reached
+    /// @param nonce the permit2 nonce
+    /// @param deadline the permit2 deadline
+    /// @param sig the permit2 signature
+    /// @notice permit2's max amount must be set to `amount`
+    /// @return (amount in, amount out)
+    function swap2ExactInPermit2(
+        address from,
+        address to,
+        uint256 amount,
+        uint256 minOut,
+        uint256 nonce,
+        uint256 deadline,
+        bytes memory sig
     ) external returns (uint256, uint256);
 }
 
@@ -67,17 +108,6 @@ interface ISeawaterExecutorPosition {
     /// @return the amount of liquidity contained in the position
     function positionLiquidity(address pool, uint256 id) external returns (uint128);
 
-    /// @notice refreshes a position's fees, and adds or removes liquidity
-    /// @param pool the pool the position belongs to
-    /// @param id the id of the position
-    /// @param delta the amount of liquidity to add or remove
-    /// @return the deltas for token0 and token1 for the user
-    function updatePosition(
-        address pool,
-        uint256 id,
-        int128 delta
-    ) external returns (int256, int256);
-
     /// @notice collects fees from a position
     /// @param pool the pool the position belongs to
     /// @param id the id of the position
@@ -90,6 +120,46 @@ interface ISeawaterExecutorPosition {
         uint128 amount0,
         uint128 amount1
     ) external returns (uint128, uint128);
+}
+
+interface ISeawaterExecutorUpdatePosition {
+    /// @notice refreshes a position's fees, and adds or removes liquidity
+    /// @param pool the pool the position belongs to
+    /// @param id the id of the position
+    /// @param delta the amount of liquidity to add or remove
+    /// @return the deltas for token0 and token1 for the user
+    function updatePosition(
+        address pool,
+        uint256 id,
+        int128 delta
+    ) external returns (int256, int256);
+
+    /// @notice refreshes a position's fees, and adds or removes liquidity using permit2 for token transfers
+    /// @param pool the pool the position belongs to
+    /// @param id the id of the position
+    /// @param delta the amount of liquidity to add or remove
+    /// @param nonce0 the nonce for token 0
+    /// @param deadline0 the deadline for token 0
+    /// @param maxAmount0 the max amount for token 0
+    /// @param sig0 the signature for token 0
+    /// @param nonce1 the nonce for token 1
+    /// @param deadline1 the deadline for token 1
+    /// @param maxAmount1 the max amount for token 1
+    /// @param sig1 the signature for token 1
+    /// @return the deltas for token0 and token1 for the user
+    function updatePositionPermit2(
+        address pool,
+        uint256 id,
+        int128 delta,
+        uint256 nonce0,
+        uint256 deadline0,
+        uint256 maxAmount0,
+        bytes memory sig0,
+        uint256 nonce1,
+        uint256 deadline1,
+        uint256 maxAmount1,
+        bytes memory sig1
+    ) external returns (int256, int256);
 }
 
 /// @dev contains just the admin functions that are exposed directly
@@ -127,10 +197,9 @@ interface ISeawaterExecutorAdminExposed {
 
 interface ISeawaterExecutorAdmin  is ISeawaterExecutorAdminExposed {
     /// @notice constructor function
-    /// @param usdc the address of the counterparty token
     /// @param seawaterAdmin the account with administrative power on the amm
     /// @param nftManager the account with control over NFT ownership
-    function ctor(address usdc, address seawaterAdmin, address nftManager) external;
+    function ctor(address seawaterAdmin, address nftManager) external;
 }
 
 interface ISeawaterExecutorFallback {
