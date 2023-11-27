@@ -6,7 +6,6 @@ use crate::maths::liquidity_math;
 use crate::types::WrappedNative;
 use crate::types::{I32, U128, U256};
 
-
 use stylus_sdk::prelude::*;
 use stylus_sdk::storage::*;
 
@@ -118,4 +117,3 @@ impl StoragePositions {
         (amount_0, amount_1)
     }
 }
-

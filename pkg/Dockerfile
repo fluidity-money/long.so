@@ -34,6 +34,7 @@ WORKDIR /usr/local/superposition
 
 COPY --from=build-2 /usr/local/src/superposition/app.superposition.so/seawater-admin.wasm .
 COPY --from=build-2 /usr/local/src/superposition/app.superposition.so/seawater-positions.wasm .
+COPY --from=build-2 /usr/local/src/superposition/app.superposition.so/seawater-update-positions.wasm .
 COPY --from=build-2 /usr/local/src/superposition/app.superposition.so/seawater-swaps.wasm .
 
 COPY --from=build-2 /usr/local/src/superposition/app.superposition.so/out solidity-out/

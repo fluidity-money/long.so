@@ -156,9 +156,9 @@ pub enum Error {
 impl From<Error> for Vec<u8> {
     // tests return the message
     #[cfg(not(target_arch = "wasm32"))]
-     fn from(val: Error) -> Self {
-         val.to_string().into()
-     }
+    fn from(val: Error) -> Self {
+        val.to_string().into()
+    }
 
     // runtime returns the message code to save binary size
     // TODO - once errors are mostly finalised we should find a way to return actual solidity
@@ -172,7 +172,7 @@ impl From<Error> for Vec<u8> {
         let mut e = vec![id];
 
         if let Error::Erc20Revert(mut err) = val {
-           e.append(&mut err);
+            e.append(&mut err);
         }
 
         e

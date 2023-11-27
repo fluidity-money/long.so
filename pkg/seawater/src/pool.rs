@@ -4,7 +4,7 @@ use crate::error::Error;
 use crate::maths::{full_math, liquidity_math, sqrt_price_math, swap_math, tick_bitmap, tick_math};
 use crate::position;
 use crate::tick;
-use crate::types::{I256Extension, WrappedNative, I256, I32, U128, U256, U256Extension, U32, U8};
+use crate::types::{I256Extension, U256Extension, WrappedNative, I256, I32, U128, U256, U32, U8};
 use alloc::vec::Vec;
 use stylus_sdk::{prelude::*, storage::*};
 
@@ -45,7 +45,11 @@ impl StoragePool {
         tick_spacing: u8,
         max_liquidity_per_tick: u128,
     ) -> Result<(), Revert> {
-        assert_eq_or!(self.sqrt_price.get(), U256::ZERO, Error::PoolAlreadyInitialised);
+        assert_eq_or!(
+            self.sqrt_price.get(),
+            U256::ZERO,
+            Error::PoolAlreadyInitialised
+        );
 
         self.enabled.set(true);
         self.sqrt_price.set(price);
@@ -115,15 +119,13 @@ impl StoragePool {
 
         // clear unneeded storage
         if flip_lower {
-            self.tick_bitmap
-                .flip(lower, self.tick_spacing.get().sys());
+            self.tick_bitmap.flip(lower, self.tick_spacing.get().sys());
             if delta < 0 {
                 self.ticks.clear(lower);
             }
         }
         if flip_upper {
-            self.tick_bitmap
-                .flip(upper, self.tick_spacing.get().sys());
+            self.tick_bitmap.flip(upper, self.tick_spacing.get().sys());
             if delta < 0 {
                 self.ticks.clear(upper);
             }
@@ -145,8 +147,7 @@ impl StoragePool {
                 )
             } else if self.cur_tick.get().sys() < upper {
                 // we're inside the range, the liquidity is active and we need both tokens
-                let new_liquidity =
-                    liquidity_math::add_delta(self.liquidity.get().sys(), delta)?;
+                let new_liquidity = liquidity_math::add_delta(self.liquidity.get().sys(), delta)?;
                 self.liquidity.set(U128::lib(&new_liquidity));
 
                 (
@@ -192,18 +193,20 @@ impl StoragePool {
                 if price_limit == U256::MAX {
                     price_limit = tick_math::MIN_SQRT_RATIO + U256::one();
                 }
-                if price_limit >= self.sqrt_price.get() || price_limit <= tick_math::MIN_SQRT_RATIO {
+                if price_limit >= self.sqrt_price.get() || price_limit <= tick_math::MIN_SQRT_RATIO
+                {
                     Err(Error::PriceLimitTooLow)?;
                 }
-            },
+            }
             false => {
                 if price_limit == U256::MAX {
                     price_limit = tick_math::MAX_SQRT_RATIO - U256::one();
                 }
-                if price_limit <= self.sqrt_price.get() || price_limit >= tick_math::MAX_SQRT_RATIO {
+                if price_limit <= self.sqrt_price.get() || price_limit >= tick_math::MAX_SQRT_RATIO
+                {
                     Err(Error::PriceLimitTooHigh)?;
                 }
-            },
+            }
         };
         // is the swap exact in or exact out
         let exact_in = amount > I256::zero();
@@ -362,14 +365,16 @@ impl StoragePool {
                 true => {
                     self.fee_growth_global_0.set(state.fee_growth_global);
                     if state.protocol_fee > 0 {
-                        let new_protocol_fee = self.protocol_fee_0.get() + U128::lib(&state.protocol_fee);
+                        let new_protocol_fee =
+                            self.protocol_fee_0.get() + U128::lib(&state.protocol_fee);
                         self.protocol_fee_0.set(new_protocol_fee);
                     }
                 }
                 false => {
                     self.fee_growth_global_1.set(state.fee_growth_global);
                     if state.protocol_fee > 0 {
-                        let new_protocol_fee = self.protocol_fee_1.get() + U128::lib(&state.protocol_fee);
+                        let new_protocol_fee =
+                            self.protocol_fee_1.get() + U128::lib(&state.protocol_fee);
                         self.protocol_fee_1.set(new_protocol_fee);
                     }
                 }
@@ -386,7 +391,11 @@ impl StoragePool {
     }
 
     /// Collects protocol (admin) fees.
-    pub fn collect_protocol(&mut self, amount_0: u128, amount_1: u128) -> Result<(u128, u128), Revert> {
+    pub fn collect_protocol(
+        &mut self,
+        amount_0: u128,
+        amount_1: u128,
+    ) -> Result<(u128, u128), Revert> {
         assert_or!(self.enabled.get(), Error::PoolDisabled);
 
         let owed_0 = self.protocol_fee_0.get().sys();
@@ -406,7 +415,12 @@ impl StoragePool {
     }
 
     /// Collects fees earned by a liquidity provider.
-    pub fn collect(&mut self, id: U256, amount_0: u128, amount_1: u128) -> Result<(u128, u128), Revert> {
+    pub fn collect(
+        &mut self,
+        id: U256,
+        amount_0: u128,
+        amount_1: u128,
+    ) -> Result<(u128, u128), Revert> {
         assert_or!(self.enabled.get(), Error::PoolDisabled);
 
         Ok(self.positions.collect_fees(id, amount_0, amount_1))
@@ -490,7 +504,9 @@ mod test {
 
             let id = uint!(2_U256);
 
-            storage.create_position(id, tick_math::get_min_tick(1), tick_math::get_max_tick(1)).unwrap();
+            storage
+                .create_position(id, tick_math::get_min_tick(1), tick_math::get_max_tick(1))
+                .unwrap();
 
             assert_eq!(
                 storage.update_position(id, 3161,),
@@ -505,19 +521,23 @@ mod test {
             storage.init(encode_sqrt_price(100, 1), 0, 1, u128::MAX)?;
 
             let id = uint!(2_U256);
-            storage.create_position(
-                id,
-                tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(50, 1))?,
-                tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
-            ).unwrap();
+            storage
+                .create_position(
+                    id,
+                    tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(50, 1))?,
+                    tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
+                )
+                .unwrap();
             storage.update_position(id, 100)?;
 
             let id = uint!(3_U256);
-            storage.create_position(
-                id,
-                tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(80, 1))?,
-                tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
-            ).unwrap();
+            storage
+                .create_position(
+                    id,
+                    tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(80, 1))?,
+                    tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
+                )
+                .unwrap();
             storage.update_position(id, 100)?;
 
             storage.swap(true, I256::unchecked_from(-10), encode_sqrt_price(60, 1))?;

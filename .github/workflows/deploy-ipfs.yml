@@ -1,0 +1,65 @@
+---
+
+name: Deploy IPFS
+on:
+  pull_request:
+    branches:
+      - 'deployment'
+    types:
+      - closed
+
+jobs:
+  deploy-to-ipfs:
+    runs-on: ubuntu-latest
+    environment: mainnet
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: |
+            - recursive: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - run: |
+          cd web
+          pnpm build
+
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_TOKEN }}
+          # update
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # update
+          projectName: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
+          directory: out
+          # to enable Github Deployments
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+          workingDirectory: web
+
+      - name: Pin to IPFS
+        id: pinata
+        uses: aquiladev/ipfs-action@v0.3.1
+        with:
+          pinName: Superposition ${{ github.sha }}
+          path: ./web/out
+          service: pinata
+          pinataKey: ${{ secrets.PINATA_API_KEY }}
+          pinataSecret: ${{ secrets.PINATA_API_SECRET_KEY }}
+
+      - name: Update DNSLink
+        env:
+          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
+          RECORD_DOMAIN: superposition.so
+          RECORD_NAME: "_dnslink.amm"
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+        id: dnslink
+        uses: textileio/cloudflare-update-dnslink@master
+        with:
+          cid: ${{ steps.pinata.outputs.hash }}

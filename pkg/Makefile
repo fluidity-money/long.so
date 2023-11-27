@@ -6,6 +6,7 @@ include config.mk
 	stylus \
 	admin \
 	positions \
+	update-positions \
 	swaps \
 	solidity \
 	amm-entrypoint \
@@ -18,9 +19,10 @@ build: stylus solidity
 
 admin: ${OUT_SEAWATER_ADMIN}
 positions: ${OUT_SEAWATER_POSITIONS}
+update-positions: ${OUT_SEAWATER_UPDATE_POSITIONS}
 swaps: ${OUT_SEAWATER_SWAPS}
 
-stylus: admin positions swaps
+stylus: admin positions update-positions swaps
 
 amm-entrypoint: ${OUT_SEAWATER_AMM}
 ownership-nfts: ${OUT_OWNERSHIP_NFTS}
@@ -43,16 +45,25 @@ DOCKER_BUILD := docker build
 ### SEAWATER
 
 ${OUT_SEAWATER_ADMIN}: ${FILES_RUST}
+	@rm -f ${OUT_SEAWATER_ADMIN}
 	@${CARGO_BUILD_STYLUS} --features admin
 	@mv seawater.wasm seawater-admin.wasm
 	@rm -f liblibseawater.rlib
 
 ${OUT_SEAWATER_POSITIONS}: ${FILES_RUST}
+	@rm -f ${OUT_SEAWATER_POSITIONS}
 	@${CARGO_BUILD_STYLUS} --features positions
 	@mv seawater.wasm seawater-positions.wasm
 	@rm -f liblibseawater.rlib
 
+${OUT_SEAWATER_UPDATE_POSITIONS}: ${FILES_RUST}
+	@rm -f ${OUT_SEAWATER_UPDATE_POSITIONS}
+	@${CARGO_BUILD_STYLUS} --features update_positions
+	@mv seawater.wasm seawater-update-positions.wasm
+	@rm -f liblibseawater.rlib
+
 ${OUT_SEAWATER_SWAPS}: ${FILES_RUST}
+	@rm -f ${OUT_SEAWATER_SWAPS}
 	@${CARGO_BUILD_STYLUS} --features swaps
 	@mv seawater.wasm seawater-swaps.wasm
 	@rm -f liblibseawater.rlib
@@ -73,6 +84,7 @@ clean:
 	@rm -rf \
 		${OUT_SEAWATER_ADMIN} \
 		${OUT_SEAWATER_POSITIONS} \
+		${OUT_SEAWATER_UPDATE_POSITIONS} \
 		${OUT_SEAWATER_SWAPS} \
 		cache \
 		target \

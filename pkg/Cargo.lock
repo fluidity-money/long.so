@@ -290,13 +290,14 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "const-hex"
-version = "1.9.1"
+version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c37be52ef5e3b394db27a2341010685ad5103c72ac15ce2e9420a7e8f93f342c"
+checksum = "a5104de16b218eddf8e34ffe2f86f74bfa4e61e95a1b89732fccf6325efd0557"
 dependencies = [
  "cfg-if",
  "cpufeatures",
  "hex",
+ "proptest",
  "serde",
 ]
 
@@ -970,6 +971,7 @@ name = "seawater"
 version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
+ "const-hex",
  "keccak-const",
  "lol_alloc",
  "rand",
@@ -1061,8 +1063,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stylus-proc"
 version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87a941ef748a746cd7b7075975073962d561934ffe91c056e22e20c8e89b64af"
+source = "git+https://github.com/fluidity-money/stylus-sdk-rs?branch=feat-raw-fn#3dac509575fb568f123d340ab6d61506aed77d50"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -1080,8 +1081,7 @@ dependencies = [
 [[package]]
 name = "stylus-sdk"
 version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02b0e971622a7a27722c2e3f2658ac4795f00b12a528874c5d08863a2e91eb6e"
+source = "git+https://github.com/fluidity-money/stylus-sdk-rs?branch=feat-raw-fn#3dac509575fb568f123d340ab6d61506aed77d50"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
