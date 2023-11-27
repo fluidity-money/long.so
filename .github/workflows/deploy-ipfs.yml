@@ -48,7 +48,7 @@ jobs:
         uses: aquiladev/ipfs-action@v0.3.1
         with:
           pinName: Superposition ${{ github.sha }}
-          path: ./out
+          path: ./web/out
           service: pinata
           pinataKey: ${{ secrets.PINATA_API_KEY }}
           pinataSecret: ${{ secrets.PINATA_API_SECRET_KEY }}
