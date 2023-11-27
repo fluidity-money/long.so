@@ -28,9 +28,11 @@ use maths::tick_math;
 
 use types::{U256Extension, WrappedNative};
 
-use stylus_sdk::{alloy_primitives::address, evm, msg, prelude::*, storage::*};
+use stylus_sdk::{evm, msg, prelude::*, storage::*};
 
+#[allow(dead_code)]
 type RawArbResult = Option<Result<Vec<u8>, Vec<u8>>>;
+
 // aliased for simplicity
 type Revert = Vec<u8>;
 
