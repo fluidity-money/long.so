@@ -1,3 +1,10 @@
 .Dropdown {
+  display: flex;
+  gap: 4px;
+  align-items: center;
 
+  .selected {
+    @include box(4px);
+    @include dark;
+  }
 }
