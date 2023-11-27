@@ -9,5 +9,8 @@ import { Supicon } from './Supicon'
 import { Token } from './Token'
 import { Tooltip } from './Tooltip'
 import { Hoverable } from './Hoverable'
+import { Stack } from './Stack'
+import { Dropdown } from './Dropdown'
+import { Input } from './Input'
 
-export { Box, Text, Button, Chip, Menu, Link, Slider, Supicon, Token, Tooltip, Hoverable }
+export { Box, Text, Button, Chip, Menu, Link, Slider, Supicon, Token, Tooltip, Hoverable, Dropdown, Stack, Input }
