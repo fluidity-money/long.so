@@ -1,15 +1,15 @@
-use libseawater::error::UniswapV3MathError;
+use libseawater::error::Error;
 use libseawater::maths::tick_math::*;
 use libseawater::types::{U256Extension, I256, U256};
 use ruint_macro::uint;
 use std::ops::{BitOr, Neg, Shl, Shr};
 
-pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, UniswapV3MathError> {
+pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, Error> {
     if !(sqrt_price_x_96 >= MIN_SQRT_RATIO && sqrt_price_x_96 < MAX_SQRT_RATIO) {
-        return Err(UniswapV3MathError::R);
+        return Err(Error::R);
     }
 
-    let ratio = sqrt_price_x_96.shl(32);
+    let ratio: U256 = sqrt_price_x_96.shl(32);
     let mut r = ratio;
     let mut msb = U256::zero();
 
@@ -87,14 +87,14 @@ pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, UniswapV3Mat
 
     for i in (51..=63).rev() {
         r = r.overflowing_mul(r).0.shr(127);
-        let f = r.shr(128);
+        let f: U256 = r.shr(128);
         log_2 = log_2.bitor(I256::from_raw(f.shl(i)));
 
         r = r.shr(usize::try_from(f).unwrap());
     }
 
     r = r.overflowing_mul(r).0.shr(127);
-    let f = r.shr(128);
+    let f: U256 = r.shr(128);
     log_2 = log_2.bitor(I256::from_raw(f.shl(50)));
 
     let log_sqrt10001 = log_2.wrapping_mul(I256::from_raw(uint!(255738958999603826347141_U256)));
@@ -120,7 +120,7 @@ pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, UniswapV3Mat
     Ok(tick)
 }
 
-pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
+pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, Error> {
     let abs_tick = if tick < 0 {
         U256::from(tick.neg())
     } else {
@@ -128,7 +128,7 @@ pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
     };
 
     if abs_tick > U256::from(MAX_TICK) {
-        return Err(UniswapV3MathError::T);
+        return Err(Error::T);
     }
 
     let mut ratio = if abs_tick & (U256::from(0x1)) != U256::zero() {
@@ -200,7 +200,7 @@ pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
     }
 
     Ok((ratio >> 32)
-        + if (ratio % (U256::one() << 32)).is_zero() {
+        + if (ratio % (U256::one() << 32) as U256).is_zero() {
             U256::zero()
         } else {
             U256::one()

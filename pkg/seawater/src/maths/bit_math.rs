@@ -1,16 +1,19 @@
+//! Operations on an integer's bit pattern
+
 use std::ops::ShrAssign;
 
 use crate::types::{U256Extension, U256};
 
-use crate::error::UniswapV3MathError;
+use crate::error::Error;
 
 use ruint_macro::uint;
 
-pub fn most_significant_bit(mut x: U256) -> Result<u8, UniswapV3MathError> {
+/// Returns the index of the most significant bit of the number passed.
+pub fn most_significant_bit(mut x: U256) -> Result<u8, Error> {
     let mut r = 0;
 
     if x == U256::ZERO {
-        return Err(UniswapV3MathError::ZeroValue);
+        return Err(Error::ZeroValue);
     }
 
     if x >= uint!(0x100000000000000000000000000000000_U256) {
@@ -54,14 +57,13 @@ pub fn most_significant_bit(mut x: U256) -> Result<u8, UniswapV3MathError> {
     Ok(r)
 }
 
-pub fn least_significant_bit(mut x: U256) -> Result<u8, UniswapV3MathError> {
+/// Returns the index of the least significant bit of the number passed.
+pub fn least_significant_bit(mut x: U256) -> Result<u8, Error> {
     if x.is_zero() {
-        return Err(UniswapV3MathError::ZeroValue);
+        return Err(Error::ZeroValue);
     }
 
     let mut r = 255;
-
-    //TODO: update this to use constants for each U256 comparison
 
     if x & U256::from(u128::MAX) > U256::zero() {
         r -= 128;

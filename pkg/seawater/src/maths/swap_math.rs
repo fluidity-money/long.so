@@ -1,7 +1,9 @@
+//! Functions for calculating swap results
+
 use crate::types::{I256Extension, U256Extension, I256, U256};
 
 use crate::{
-    error::UniswapV3MathError,
+    error::Error,
     maths::{
         full_math::{mul_div, mul_div_rounding_up},
         sqrt_price_math::{
@@ -17,13 +19,14 @@ use crate::{
 //         uint256 amountOut,
 //         uint256 feeAmount
 //     )
+/// Calculates a swap step within a tick.
 pub fn compute_swap_step(
     sqrt_ratio_current_x_96: U256,
     sqrt_ratio_target_x_96: U256,
     liquidity: u128,
     amount_remaining: I256,
     fee_pips: u32,
-) -> Result<(U256, U256, U256, U256), UniswapV3MathError> {
+) -> Result<(U256, U256, U256, U256), Error> {
     let zero_for_one = sqrt_ratio_current_x_96 >= sqrt_ratio_target_x_96;
     let exact_in = amount_remaining >= I256::zero();
 

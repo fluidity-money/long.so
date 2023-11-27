@@ -1,7 +1,17 @@
 // SPDX-Identifier: MIT
 pragma solidity 0.8.16;
 
-interface ISeawaterAMM {
+import "./ISeawaterEvents.sol";
+import "./ISeawaterExecutors.sol";
+
+// ISeawaterAMM is the public facing interface for the SeawaterAMM
+interface ISeawaterAMM is
+    ISeawaterEvents,
+    ISeawaterExecutorSwap,
+    ISeawaterExecutorPosition,
+    ISeawaterExecutorUpdatePosition,
+    ISeawaterExecutorAdminExposed
+    {
     /// @notice swaps _token for USDC
     /// @param _token the token to swap
     /// @param _amount input amount (token)
@@ -22,14 +32,6 @@ interface ISeawaterAMM {
         address _token,
         uint256 _amount,
         uint256 _minOut
-    ) external returns (int256, int256);
-
-    /// @notice raw swap function, implements the uniswap v3 interface
-    function swap(
-        address _token,
-        bool _zeroForOne,
-        int256 _amount,
-        uint256 _priceLimitX96
     ) external returns (int256, int256);
 
     /// @notice swaps tokenA for tokenB

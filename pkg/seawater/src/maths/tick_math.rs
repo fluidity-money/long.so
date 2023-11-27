@@ -1,22 +1,27 @@
-
+//! Functions for operating on ticks.
 
 use crate::types::{U256Extension, U256};
 
-use crate::error::UniswapV3MathError;
+use crate::error::Error;
 use ruint_macro::uint;
 
+/// The lowest tick still representible.
 pub const MIN_TICK: i32 = -887272;
+/// The highest tick still representible.
 pub const MAX_TICK: i32 = -MIN_TICK;
 
+// The lowest X96 encoded square root price still representable.
 pub const MIN_SQRT_RATIO: U256 = U256::from_limbs([4295128739, 0, 0, 0]);
+// The highest X96 encoded square root price still representable.
 pub const MAX_SQRT_RATIO: U256 =
     U256::from_limbs([6743328256752651558, 17280870778742802505, 4294805859, 0]);
 
-pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
+/// Calculates the X96 encoded square root price for a given tick index.
+pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, Error> {
     let mut abs_tick = tick.abs();
 
     if abs_tick > MAX_TICK {
-        return Err(UniswapV3MathError::T);
+        return Err(Error::T);
     }
 
     // calculate (1/1.0001)^(i/2)
@@ -28,7 +33,7 @@ pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
         U256::one() << 128 // 1
     };
 
-    abs_tick = abs_tick >> 1;
+    abs_tick >>= 1;
 
     let mut ratio = uint!(0xfff97272373d413259a46990580e213a_U256); // 1/1.0001
 
@@ -37,7 +42,7 @@ pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
             result = (result * ratio) >> 128;
         }
         ratio = (ratio * ratio) >> 128;
-        abs_tick = abs_tick >> 1;
+        abs_tick >>= 1;
     }
 
     // invert back from 1/1.0001^i to 1.0001^i
@@ -46,16 +51,17 @@ pub fn get_sqrt_ratio_at_tick(tick: i32) -> Result<U256, UniswapV3MathError> {
     }
 
     Ok((result >> 32)
-        + if (result % (U256::one() << 32)).is_zero() {
+        + if (result % (U256::one() << 32) as U256).is_zero() {
             U256::zero()
         } else {
             U256::one()
         })
 }
 
-pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, UniswapV3MathError> {
+/// Calculates tick index for a given X96 encoded square root price.
+pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, Error> {
     if !(sqrt_price_x_96 >= MIN_SQRT_RATIO && sqrt_price_x_96 < MAX_SQRT_RATIO) {
-        return Err(UniswapV3MathError::R);
+        return Err(Error::R);
     }
 
     // binary search
@@ -82,11 +88,13 @@ pub fn get_tick_at_sqrt_ratio(sqrt_price_x_96: U256) -> Result<i32, UniswapV3Mat
     Ok(closest)
 }
 
+/// Calculates the smallest tick index given a tick spacing.
 pub fn get_min_tick(spacing: u8) -> i32 {
     let spacing = spacing as i32;
     (MIN_TICK / spacing) * spacing
 }
 
+/// Calculates the greatest tick index given a tick spacing.
 pub fn get_max_tick(spacing: u8) -> i32 {
     let spacing = spacing as i32;
     (MAX_TICK / spacing) * spacing
@@ -102,12 +110,12 @@ mod test {
     fn get_sqrt_ratio_at_tick_bounds() {
         // the function should return an error if the tick is out of bounds
         if let Err(err) = get_sqrt_ratio_at_tick(MIN_TICK - 1) {
-            assert!(matches!(err, UniswapV3MathError::T));
+            assert!(matches!(err, Error::T));
         } else {
             panic!("get_qrt_ratio_at_tick did not respect lower tick bound")
         }
         if let Err(err) = get_sqrt_ratio_at_tick(MAX_TICK + 1) {
-            assert!(matches!(err, UniswapV3MathError::T));
+            assert!(matches!(err, Error::T));
         } else {
             panic!("get_qrt_ratio_at_tick did not respect upper tick bound")
         }
