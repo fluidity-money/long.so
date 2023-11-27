@@ -13,9 +13,10 @@ import {
   Supicon,
   Token,
   Hoverable,
+  Dropdown,
+  Tooltip,
+  Stack
 } from '@/components'
-import { Stack } from '@/components/Stack/Stack'
-import { Tooltip } from '@/components/Tooltip/Tooltip'
 
 const Dev = () => {
   const [menu, setMenu] = useState('foo')
@@ -106,12 +107,16 @@ const Dev = () => {
           </Stack>
           Lorem ipsum
         </Chip>
-        <Tooltip background="light">Hello world</Tooltip>
         <Hoverable
           tooltip={<Tooltip>Tooltip content</Tooltip>}
         >
           <Link>Link Button wrapped in a Hoverable</Link>
         </Hoverable>
+        <Dropdown id="test" label={'Volume'} initial="test">
+          <Dropdown.Item id="test">Test</Dropdown.Item>
+          <Dropdown.Item id="test">Test</Dropdown.Item>
+
+        </Dropdown>
         <Supicon seed="foo" />
         <Supicon seed="bar" />
       </div>
