@@ -53,7 +53,7 @@
      	height: 32px;
      	width: 32px;
 
-      img {
+      svg {
         transform: scale(0.8);
         pointer-events: none;
         -webkit-touch-callout: none;
@@ -89,7 +89,7 @@
         height: 64px;
         width: 64px;
 
-        img {
+        svg {
           transform: scale(1.6);
         }
       }
@@ -123,8 +123,9 @@
         height: 16px;
         width: 16px;
 
-        img {
+        svg {
           transform: scale(0.4);
+          overflow: visible;
         }
       }
       .heads {
