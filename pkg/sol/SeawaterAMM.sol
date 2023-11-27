@@ -162,6 +162,7 @@ contract SeawaterAMM is ISeawaterAMM {
         directDelegate(_getExecutorSwap());
     }
 
+    /// @inheritdoc ISeawaterExecutorSwap
     function swapPermit2(
         address /* pool */,
         bool /* zeroForOne */,
@@ -180,6 +181,7 @@ contract SeawaterAMM is ISeawaterAMM {
         directDelegate(_getExecutorSwap());
     }
 
+    /// @inheritdoc ISeawaterExecutorSwap
     function swap2ExactInPermit2(
         address /* from */,
         address /* to */,
