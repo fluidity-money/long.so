@@ -288,7 +288,7 @@ impl Pools {
     }
 
     /// Performs a two stage swap, using approvals to transfer tokens. See [Self::swap_2_internal].
-    pub fn swap_2(
+    pub fn swap_2_exact_in(
         &mut self,
         from: Address,
         to: Address,

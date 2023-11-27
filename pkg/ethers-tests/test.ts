@@ -111,8 +111,8 @@ test("amm", async t => {
             "PROXY_ADMIN_ADDR": defaultAccount,
             "SEAWATER_ADMIN_ADDR": defaultAccount,
             "NFT_MANAGER_ADDR": defaultAccount,
-            "FUSDC_TOKEN_ADDR": fusdcAddress,
-            "PERMIT2_ADDR": permit2Address,
+            "FLU_SEAWATER_FUSDC_ADDR": fusdcAddress,
+            "FLU_SEAWATER_PERMIT2_ADDR": permit2Address,
             ...process.env,
         } },
     );
@@ -147,12 +147,90 @@ test("amm", async t => {
 
     await setApprovalTo([fusdcContract, tusdcContract, tusdc2Contract], ammAddress, MaxUint256);
 
-    await createPosition(amm, tusdcAddress, lowerTick, upperTick, liquidityDelta);
-    await createPosition(amm, tusdc2Address, lowerTick, upperTick, liquidityDelta);
+    const tusdcPositionId = await createPosition(amm, tusdcAddress, lowerTick, upperTick, liquidityDelta);
+    const tusdc2PositionId = await createPosition(amm, tusdc2Address, lowerTick, upperTick, liquidityDelta);
 
-    await setApprovalTo([fusdcContract, tusdcContract, tusdc2Contract], ammAddress, BigInt(0));
+    //await setApprovalTo([fusdcContract, tusdcContract, tusdc2Contract], ammAddress, BigInt(0));
 
-    await t.test("raw swap in amounts correct", async _ => {
+    let curNonce = 1;
+    const getPermit2Data = async ({
+        token,
+        maxAmount,
+        nonce,
+        deadline,
+    }: {token: string, maxAmount: number, nonce: number, deadline: number}) => {
+        let data = SignatureTransfer.getPermitData(
+            {
+                permitted: {
+                    token,
+                    amount: maxAmount,
+                },
+                spender: ammAddress,
+                nonce,
+                deadline,
+            },
+            permit2Address,
+            chainid,
+        );
+
+        let sig = await signer.signTypedData(data.domain as TypedDataDomain, data.types, data.values);
+
+        return sig;
+    }
+
+    await t.test("position modification with permit2 blobs", async t => {
+        let maxAmount = 10000000;
+        let nonce0 = curNonce++;
+        let nonce1 = curNonce++;
+        let deadline = await encodeDeadline(provider, 1000);
+
+        let sig0 = await getPermit2Data({token: tusdcAddress, maxAmount, nonce: nonce0, deadline});
+        let sig1 = await getPermit2Data({token: fusdcAddress, maxAmount, nonce: nonce1, deadline});
+
+        const fusdcBeforeBalance = await fusdcContract.balanceOf(defaultAccount)
+        const tusdcBeforeBalance = await tusdcContract.balanceOf(defaultAccount)
+
+        let response = await amm.updatePositionPermit2(
+            tusdcAddress, // pool
+            tusdcPositionId,
+            100, // delta
+            nonce0,
+            deadline,
+            maxAmount,
+            sig0,
+            nonce1,
+            deadline,
+            maxAmount,
+            sig1,
+        );
+        await response.wait();
+
+        const fusdcAfterBalance = await fusdcContract.balanceOf(defaultAccount)
+        const tusdcAfterBalance = await tusdcContract.balanceOf(defaultAccount)
+
+        assert(fusdcAfterBalance < fusdcBeforeBalance, "expected fusdc balance to decrease");
+        assert(tusdcAfterBalance < tusdcBeforeBalance, "expected tusdc balance to decrease");
+
+        await t.test("withdrawing a position shouldn't lose money", async _ => {
+            let response = await amm.updatePosition(
+                tusdcAddress, // pool
+                tusdcPositionId,
+                -100, // delta
+            );
+            await response.wait();
+
+            const fusdcFinalBalance = await fusdcContract.balanceOf(defaultAccount)
+            const tusdcFinalBalance = await tusdcContract.balanceOf(defaultAccount)
+
+            console.log(`FUSDC BALANCES ${fusdcFinalBalance} ${fusdcBeforeBalance}`);
+
+            // allow for some dust
+            assert((fusdcBeforeBalance - fusdcFinalBalance) < 5, "final fusdc balance should equal initial balance");
+            assert((tusdcBeforeBalance - tusdcFinalBalance) < 5, "final tusdc balance should equal initial balance");
+        });
+    });
+
+    await t.test("swapping with permit2 blobs", async _ => {
         const fusdcBeforeBalance = await fusdcContract.balanceOf(defaultAccount)
         const tusdcBeforeBalance = await tusdcContract.balanceOf(defaultAccount)
 
@@ -161,28 +239,13 @@ test("amm", async t => {
         // bool _zeroForOne,
         // int256 _amount,
         // uint256 _priceLimitX96
+        let token = tusdcAddress;
+        let amount = 10;
+        let maxAmount = amount;
+        let nonce = curNonce++;
+        let deadline = await encodeDeadline(provider, 1000);
 
-        const token = tusdcAddress;
-        const amount = 10;
-        const nonce = 1;
-        const deadline = await encodeDeadline(provider, 1000);
-        const max_amount = amount;
-
-        const data = SignatureTransfer.getPermitData(
-            {
-                permitted: {
-                    token,
-                    amount: max_amount,
-                },
-                spender: ammAddress,
-                nonce: nonce,
-                deadline: deadline,
-            },
-            permit2Address,
-            chainid,
-        );
-
-        const sig = await signer.signTypedData(data.domain as TypedDataDomain, data.types, data.values);
+        let sig = await getPermit2Data({token, maxAmount, nonce, deadline});
 
         // swap 10 tUSDC -> fUSDC without hitting the price limit
         let response = await amm.swapPermit2(
@@ -192,7 +255,7 @@ test("amm", async t => {
             encodeSqrtPrice(30),
             nonce,
             deadline,
-            max_amount,
+            maxAmount,
             sig,
         )
         await response.wait();
@@ -209,12 +272,26 @@ test("amm", async t => {
         assert(tusdcAfterBalance === expectedTusdcAfterBalance, `expected tusdc balances to match! starting bal: ${tusdcBeforeBalance}, finishing: ${tusdcAfterBalance}, expected ${expectedTusdcAfterBalance}`)
 
 
-        return;
-
         // swap 1000 fUSDC back to 10 tUSDC
-        response = await amm.swap(tusdcAddress, false, 1000, encodeSqrtPrice(500))
-        await response.wait();
+        token = fusdcAddress;
+        amount = 1000;
+        nonce = curNonce++;
+        deadline = await encodeDeadline(provider, 1000);
+        maxAmount = amount;
 
+        sig = await getPermit2Data({token, maxAmount, nonce, deadline});
+
+        response = await amm.swapPermit2(
+            tusdcAddress,
+            false,
+            amount,
+            encodeSqrtPrice(500),
+            nonce,
+            deadline,
+            maxAmount,
+            sig,
+        )
+        await response.wait();
 
         fusdcAfterBalance = await fusdcContract.balanceOf(defaultAccount)
         tusdcAfterBalance = await tusdcContract.balanceOf(defaultAccount)
@@ -223,8 +300,35 @@ test("amm", async t => {
 
         assert(fusdcAfterBalance === expectedFusdcAfterBalance, `expected balances to match! got: ${fusdcAfterBalance}, expected ${expectedFusdcAfterBalance}`)
         assert(tusdcAfterBalance === expectedTusdcAfterBalance, `expected balances to match! got: ${tusdcAfterBalance}, expected ${expectedTusdcAfterBalance}`)
+    });
 
-    })
+    await t.test("swap2 with permit2 blobs", async _ => {
+        let maxAmount = 100;
+        let nonce = curNonce++;
+        let deadline = await encodeDeadline(provider, 1000);
+        let sig = await getPermit2Data({token: tusdcAddress, maxAmount, nonce, deadline});
+
+        const tusdcBeforeBalance = await tusdcContract.balanceOf(defaultAccount)
+        const tusdc2BeforeBalance = await tusdc2Contract.balanceOf(defaultAccount)
+
+        let response = await amm.swap2ExactInPermit2(
+            tusdcAddress,
+            tusdc2Address,
+            maxAmount,
+            0, // minOut
+            nonce,
+            deadline,
+            sig,
+        );
+        console.log(await response.wait());
+
+        const tusdcAfterBalance = await tusdcContract.balanceOf(defaultAccount)
+        const tusdc2AfterBalance = await tusdc2Contract.balanceOf(defaultAccount)
+
+        assert(tusdcAfterBalance < tusdcBeforeBalance, "tusdc balance should decrease");
+        assert(tusdc2AfterBalance > tusdc2BeforeBalance, "tusdc2 balance should increase");
+    });
+
     // await t.test("swap out amounts correct", async _ => {
     //     const fusdcBeforeBalance = await fusdcContract.balanceOf(defaultAccount)
     //     const tusdcBeforeBalance = await tusdcContract.balanceOf(defaultAccount)

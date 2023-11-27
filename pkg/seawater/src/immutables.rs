@@ -4,24 +4,29 @@
 //! (These should probably be implemented through the [std::env!] macro, but it's annoyingly
 //! difficult to do hex decoding in a const context, so for now they're implemented here.)
 
-use stylus_sdk::alloy_primitives::address;
-
 use crate::types::Address;
 
+#[cfg(target_arch = "wasm32")]
 macro_rules! addr {
-    ("0000000000000000000000000000000000000000") => {
-        if cfg!(target_arch = "wasm32") {
-            panic!("Addresses must be set in `immutables.rs`!")
-        } else {
-            address!("0000000000000000000000000000000000000000")
-        }
-    };
-    ($addr:literal) => {
-        address!($addr)
+    ($input:literal) => {
+        Address::new(
+            match const_hex::const_decode_to_array::<20>(env!($input).as_bytes()) {
+                Ok(res) => res,
+                Err(_) => panic!(),
+            }
+        )
     };
 }
+
+#[cfg(not(target_arch = "wasm32"))]
+macro_rules! addr {
+    ($_input:literal) => { Address::ZERO };
+}
+
+
 /// The address of the permit2 contract.
-pub const PERMIT2_ADDR: Address = addr!("0000000000000000000000000000000000000001");
+pub const PERMIT2_ADDR: Address = addr!("FLU_SEAWATER_PERMIT2_ADDR");
 
 /// The address of the fluid token, to be used as token 1 for every pool.
-pub const FUSDC_ADDR: Address = addr!("0000000000000000000000000000000000000001");
+pub const FUSDC_ADDR: Address = addr!("FLU_SEAWATER_FUSDC_ADDR");
+
