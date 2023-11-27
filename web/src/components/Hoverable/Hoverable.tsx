@@ -19,10 +19,12 @@ const Hoverable: React.FC<IHoverable> = (props) => {
   const [isHovered, setIsHovered] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
 
+  // TODO: Set Tooltip x position to cursor position
+
   const classProps = `
     ${styles.Hoverable}
     ${className}
-  `;
+  `
 
   useEffect(() => {
     if (isHovered || isFocused) {
