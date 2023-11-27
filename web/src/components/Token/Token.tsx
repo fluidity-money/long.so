@@ -77,10 +77,10 @@ const Token: React.FC<IToken> = (props) => {
       ref={scope}
     >
     <div className={styles.tails}>
-      <Image src={USDC} alt="USDC" />
+      <USDC />
     </div>
     <div className={styles.heads}>
-      <Image src={ETH} alt="USDC" />
+      <ETH />
     </div>
 
     </motion.div>
