@@ -19,9 +19,9 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_TOKEN }}
           # update 
-          accountId: ACCOUNT_ID
+          accountId: ${{ secrets.ACCOUNT_ID }}
           # update 
-          projectName: PROJECT_NAME
+          projectName: ${{ secrets.PROJECT_NAME }}
           directory: out
           # to enable Github Deployments
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
