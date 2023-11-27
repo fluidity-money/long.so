@@ -5,7 +5,13 @@ import "./ISeawaterEvents.sol";
 import "./ISeawaterExecutors.sol";
 
 // ISeawaterAMM is the public facing interface for the SeawaterAMM
-interface ISeawaterAMM is ISeawaterEvents, ISeawaterExecutorSwap, ISeawaterExecutorPosition, ISeawaterExecutorAdminExposed {
+interface ISeawaterAMM is
+    ISeawaterEvents,
+    ISeawaterExecutorSwap,
+    ISeawaterExecutorPosition,
+    ISeawaterExecutorUpdatePosition,
+    ISeawaterExecutorAdminExposed
+    {
     /// @notice swaps _token for USDC
     /// @param _token the token to swap
     /// @param _amount input amount (token)

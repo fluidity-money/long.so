@@ -14,6 +14,7 @@ FILES_SOLIDITY := \
 
 OUT_SEAWATER_ADMIN := seawater-admin.wasm
 OUT_SEAWATER_POSITIONS := seawater-positions.wasm
+OUT_SEAWATER_UPDATE_POSITIONS := seawater-update-positions.wasm
 OUT_SEAWATER_SWAPS := seawater-swaps.wasm
 
 OUT_SEAWATER_AMM := out/SeawaterAMM.sol/SeawaterAMM.json

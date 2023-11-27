@@ -29,11 +29,7 @@ pub fn mul_mod(a: U256, b: U256, mut modulus: U256) -> U256 {
 }
 
 /// Returns `a * b / c` and if the result had carry.
-pub fn _mul_div(
-    a: U256,
-    b: U256,
-    mut denom_and_rem: U256,
-) -> Result<(U256, bool), Error> {
+pub fn _mul_div(a: U256, b: U256, mut denom_and_rem: U256) -> Result<(U256, bool), Error> {
     if denom_and_rem == U256::ZERO {
         return Err(Error::DenominatorIsZero);
     }
@@ -60,11 +56,7 @@ pub fn mul_div(a: U256, b: U256, denom: U256) -> Result<U256, Error> {
 }
 
 /// Returns `a * b / c`, rounding up.
-pub fn mul_div_rounding_up(
-    a: U256,
-    b: U256,
-    denominator: U256,
-) -> Result<U256, Error> {
+pub fn mul_div_rounding_up(a: U256, b: U256, denominator: U256) -> Result<U256, Error> {
     let (result, rem) = _mul_div(a, b, denominator)?;
 
     if rem {
