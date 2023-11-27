@@ -45,7 +45,7 @@ jobs:
 
       - name: Pin to IPFS
         id: pinata
-        uses: anantaramdas/ipfs-pinata-deploy-action@39bbda1ce1fe24c69c6f57861b8038278d53688d
+        uses: anantaramdas/ipfs-pinata-deploy-action@1.6.4
         with:
           pin-name: Superposition ${{ github.sha }}
           path: './out'
