@@ -26,8 +26,8 @@ jobs:
           node-version: 18
 
       - run: |
-        cd web
-        pnpm build
+          cd web
+          pnpm build
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
