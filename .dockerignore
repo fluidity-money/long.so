@@ -1,8 +1,5 @@
-# misc
-.zed/
-
-# pkg
 pkg/target
 pkg/*.wasm
 pkg/out
 pkg/*.rlib
+Dockerfile.*

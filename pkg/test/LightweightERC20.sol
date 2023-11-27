@@ -8,8 +8,8 @@ pragma solidity >=0.8.0;
 /// @notice Modified to support proxy initialisation and to support some extra functions, as well as mint from the initial amount
 /// @dev Do not manually set balances without updating totalSupply, as the sum of all user balances must not exceed it.
 contract LightweightERC20 {
-    event Transfer(address, address, uint256);
-    event Approval(address, address, uint256);
+    event Transfer(address indexed, address indexed, uint256 indexed);
+    event Approval(address indexed, address indexed, uint256 indexed);
 
     /*//////////////////////////////////////////////////////////////
                             METADATA STORAGE

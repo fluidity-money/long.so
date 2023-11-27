@@ -1,20 +1,22 @@
+//! Structures and functions to track and update details on a pool's ticks.
+
 use crate::error::*;
 use crate::maths::liquidity_math;
 use crate::types::*;
 use stylus_sdk::prelude::*;
 use stylus_sdk::storage::*;
 
-#[solidity_storage]
-pub struct StorageTicks {
-    pub ticks: StorageMap<i32, StorageTickInfo>,
-}
+/// Storage map type for a tick bitmap distributed over several words.
+pub type TickBitmap = stylus_sdk::storage::StorageMap<i16, stylus_sdk::storage::StorageU256>;
 
+/// Container type for a [TickBitmap].
 #[solidity_storage]
 pub struct StorageTickBitmap {
-    pub bitmap: StorageMap<i16, StorageU256>,
+    pub bitmap: TickBitmap,
 }
 
 impl StorageTickBitmap {
+    /// Toggles a tick on the bitmap.
     pub fn flip(&mut self, tick: i32, spacing: u8) {
         let spacing = spacing as i32;
         assert!(tick % spacing == 0); // ensure the tick lies on a valid space
@@ -29,6 +31,7 @@ impl StorageTickBitmap {
     }
 }
 
+/// Storage type for details on a tick.
 #[solidity_storage]
 #[derive(Erase)]
 pub struct StorageTickInfo {
@@ -42,25 +45,33 @@ pub struct StorageTickInfo {
     initialised: StorageBool,
 }
 
+/// Container type for the map of tick indexes to ticks.
+#[solidity_storage]
+pub struct StorageTicks {
+    pub ticks: StorageMap<i32, StorageTickInfo>,
+}
+
 impl StorageTicks {
+    /// Updates a tick with liquidity and fee data, initialising it if it was not before. Returns
+    /// if the tick changed activation state.
     pub fn update(
         &mut self,
         tick: i32,
-        cur_tick: i32,
+        cur_amm_tick: i32,
         liquidity_delta: i128,
         fee_growth_global_0: &U256,
         fee_growth_global_1: &U256,
         upper: bool,
         max_liquidity: u128,
-    ) -> Result<bool, UniswapV3MathError> {
+    ) -> Result<bool, Error> {
         let mut info = self.ticks.setter(tick);
 
-        let liquidity_gross_before = info.liquidity_gross.get().unwrap();
+        let liquidity_gross_before = info.liquidity_gross.get().sys();
         let liquidity_gross_after =
             liquidity_math::add_delta(liquidity_gross_before, liquidity_delta)?;
 
         if liquidity_gross_after > max_liquidity {
-            return Err(UniswapV3MathError::LiquidityTooHigh);
+            return Err(Error::LiquidityTooHigh);
         }
 
         // if we moved to or from 0 liquidity, flip the tick
@@ -69,26 +80,27 @@ impl StorageTicks {
         if liquidity_gross_before == 0 {
             // initialise ourself
 
-            if tick <= cur_tick {
+            // if we're below the current tick then set fee growth outside
+            if tick <= cur_amm_tick {
                 info.fee_growth_outside_0.set(*fee_growth_global_0);
                 info.fee_growth_outside_1.set(*fee_growth_global_1);
             }
             info.initialised.set(true);
         }
 
-        info.liquidity_gross.set(U128::wrap(&liquidity_gross_after));
+        info.liquidity_gross.set(U128::lib(&liquidity_gross_after));
 
         let new_liquidity_net = match upper {
             true => info
                 .liquidity_net
                 .get()
-                .checked_sub(I128::wrap(&liquidity_delta))
-                .ok_or(UniswapV3MathError::LiquiditySub),
+                .checked_sub(I128::lib(&liquidity_delta))
+                .ok_or(Error::LiquiditySub),
             false => info
                 .liquidity_net
                 .get()
-                .checked_add(I128::wrap(&liquidity_delta))
-                .ok_or(UniswapV3MathError::LiquidityAdd),
+                .checked_add(I128::lib(&liquidity_delta))
+                .ok_or(Error::LiquidityAdd),
         }?;
 
         info.liquidity_net.set(new_liquidity_net);
@@ -96,8 +108,7 @@ impl StorageTicks {
         Ok(tick_flipped)
     }
 
-    // the fee growth inside this tick is the total fee
-    // growth, minus the fee growth outside this tick
+    /// Gets the fee growth inside a tick range.
     pub fn get_fee_growth_inside(
         &mut self,
         lower_tick: i32,
@@ -105,7 +116,9 @@ impl StorageTicks {
         cur_tick: i32,
         fee_growth_global_0: &U256,
         fee_growth_global_1: &U256,
-    ) -> Result<(U256, U256), UniswapV3MathError> {
+    ) -> Result<(U256, U256), Error> {
+        // the fee growth inside this tick is the total fee
+        // growth, minus the fee growth outside this tick
         let lower = self.ticks.get(lower_tick);
         let upper = self.ticks.get(upper_tick);
 
@@ -118,10 +131,10 @@ impl StorageTicks {
             (
                 fee_growth_global_0
                     .checked_sub(lower.fee_growth_outside_0.get())
-                    .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSub)?,
                 fee_growth_global_1
                     .checked_sub(lower.fee_growth_outside_1.get())
-                    .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSub)?,
             )
         };
 
@@ -134,10 +147,10 @@ impl StorageTicks {
             (
                 fee_growth_global_0
                     .checked_sub(upper.fee_growth_outside_0.get())
-                    .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSub)?,
                 fee_growth_global_1
                     .checked_sub(upper.fee_growth_outside_1.get())
-                    .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSub)?,
             )
         };
 
@@ -145,14 +158,15 @@ impl StorageTicks {
             fee_growth_global_0
                 .checked_sub(fee_growth_below_0)
                 .and_then(|x| x.checked_sub(fee_growth_above_0))
-                .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+                .ok_or(Error::FeeGrowthSub)?,
             fee_growth_global_1
                 .checked_sub(fee_growth_below_1)
                 .and_then(|x| x.checked_sub(fee_growth_above_1))
-                .ok_or(UniswapV3MathError::FeeGrowthSub)?,
+                .ok_or(Error::FeeGrowthSub)?,
         ))
     }
 
+    /// Updates a tick's fee information when the tick is crossed.
     pub fn cross(
         &mut self,
         tick: i32,
@@ -167,9 +181,10 @@ impl StorageTicks {
         let new_fee_growth_outside_1 = fee_growth_global_1 - info.fee_growth_outside_1.get();
         info.fee_growth_outside_1.set(new_fee_growth_outside_1);
 
-        info.liquidity_net.unwrap()
+        info.liquidity_net.sys()
     }
 
+    /// Deletes a tick from the map, freeing storage slots.
     pub fn clear(&mut self, tick: i32) {
         // delete a tick
         self.ticks.delete(tick);

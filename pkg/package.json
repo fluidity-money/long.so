@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@uniswap/permit2-sdk": "^1.2.0",
     "ethers": "^6.7.1",
     "tsx": "^3.13.0",
     "typescript": "^5.2.2"
