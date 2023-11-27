@@ -40,36 +40,40 @@ const Slider: React.FC<ISlider> = (props) => {
   return (
     <Box className={styles.Box}>
       <motion.div className={classes} ref={containerRef}>
-        <motion.div
-          className={styles.draggable}
-          drag="x"
-          style={{ x, cursor: 'grab' }}
-          dragElastic={0.1}
-          dragSnapToOrigin
-          dragMomentum={false}
-          dragConstraints={
-            containerRef
-          }
-          onDragEnd={(event, info) => {
-            if (!width) return
-            if (info.offset.x >= width - 32) {
-              setDragComplete(true)
-              onSlideComplete()
+        {
+          !dragComplete && (
+          <motion.div
+            className={styles.draggable}
+            drag="x"
+            style={{ x, cursor: 'grab' }}
+            dragElastic={0.1}
+            dragSnapToOrigin
+            dragMomentum={false}
+            dragConstraints={
+              containerRef
             }
-          }}
-        >
-          <div className={styles.track} />
-          {
-            !dragComplete &&
-            <div className={styles.thumb}>
-              <motion.div
-                style={{ opacity: arrowOpacity }}
-              >
-                -&gt;
-              </motion.div>
-            </div>
-          }
-        </motion.div>
+            onDragEnd={(event, info) => {
+              if (!width) return
+              if (info.offset.x >= width - 32) {
+                setDragComplete(true)
+                onSlideComplete()
+              }
+            }}
+          >
+            <div className={styles.track} />
+            {
+              !dragComplete &&
+              <div className={styles.thumb}>
+                <motion.div
+                  style={{ opacity: arrowOpacity }}
+                >
+                  -&gt;
+                </motion.div>
+              </div>
+            }
+          </motion.div>
+          )
+        }
         <motion.div className={styles.content}>
           {children}
         </motion.div>
