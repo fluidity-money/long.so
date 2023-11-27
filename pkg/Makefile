@@ -22,7 +22,7 @@ positions: ${OUT_SEAWATER_POSITIONS}
 update-positions: ${OUT_SEAWATER_UPDATE_POSITIONS}
 swaps: ${OUT_SEAWATER_SWAPS}
 
-stylus: admin positions swaps
+stylus: admin positions update-positions swaps
 
 amm-entrypoint: ${OUT_SEAWATER_AMM}
 ownership-nfts: ${OUT_OWNERSHIP_NFTS}
