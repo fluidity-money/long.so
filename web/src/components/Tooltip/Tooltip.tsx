@@ -1,7 +1,9 @@
+import {ReactNode} from 'react'
 import styles from './Tooltip.module.scss'
 
-interface ITooltip {
-
+export interface ITooltip {
+  children: ReactNode
+  layoutId?: string
 }
 
 const Tooltip: React.FC<ITooltip> = (props) => {
@@ -9,4 +11,6 @@ const Tooltip: React.FC<ITooltip> = (props) => {
   </div>
 }
 
-export { Tooltip }
+export { 
+  Tooltip,
+}
