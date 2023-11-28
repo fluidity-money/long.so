@@ -1,6 +1,6 @@
 import styles from './Input.module.scss'
 
-export interface ControlledInput extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
+export interface ControlledInput extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
   value: string
   onChange: (s: string) => void
   className?: string
