@@ -1,4 +1,5 @@
-import { TargetAndTransition, VariantLabels, motion } from 'framer-motion'
+import {motion, AnimationProps, TargetAndTransition, VariantLabels} from 'framer-motion'
+import {CSSProperties, SVGAttributes} from 'react'
 import styles from './Box.module.scss'
 
 interface IBox {
@@ -11,7 +12,7 @@ interface IBox {
   outline?: boolean
   whileHover?: VariantLabels | TargetAndTransition
   animate?: VariantLabels | TargetAndTransition
-  initial?: VariantLabels | boolean | TargetAndTransition
+  initial?: AnimationProps['initial']
   whileTap?: VariantLabels | TargetAndTransition
   style?: React.CSSProperties
   onClick?: () => void
