@@ -46,15 +46,15 @@ const Dropdown: React.FC<IDropdown> = (props) => {
       >
         <motion.div className={styles.selected} layoutId={id}>
         {
-          children.find((child) => child.props.id === selectedItem) || 'test'
+          children.find((child) => child.props.id === selectedItem)
         }
         </motion.div>
       </Hoverable>
-      {/* take a list of ReactElement<IItem> to render inside a tooltip */}
+      {/* TODO: take a list of ReactElement<IItem> to render inside a tooltip */}
       {/* show tooltip conditionally based on dropdown element state */}
       {/* keep selected state uncontrolled in dropdown element */}
       {/* run a find (memo?) and render selected <Item> inline
-        {/* use Hoverable? with shared layoutId and custom positioning */}
+      {/* use Hoverable? with shared layoutId and custom positioning */}
     </div>
   )
 }

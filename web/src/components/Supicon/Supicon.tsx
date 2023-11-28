@@ -1,3 +1,6 @@
+// WIP: Supicon is a custom identicon for SPN
+// Takes the user's address and renders a symmetrical pattern
+
 import { useEffect, useMemo, useRef } from 'react'
 import styles from './Supicon.module.scss'
 import { Md5 } from 'ts-md5'
@@ -85,7 +88,7 @@ const generateIdenticon = (ctx: CanvasRenderingContext2D, map: boolean[]) => {
   ctx.fill()
 
   // Generate color
-  var color = '#1e1e1e'
+  const color = '#1e1e1e'
 
   // FILL THE SQUARES
   for (var x = 0; x < Math.ceil(GRID / 2); x++) {

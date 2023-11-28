@@ -1,8 +1,7 @@
 import USDC from '@/assets/icons/USDC.svg'
 import ETH from '@/assets/icons/ETH.svg'
-import Image from 'next/image'
 import styles from './Token.module.scss'
-import { motion, useAnimate, useAnimationControls } from 'framer-motion'
+import { motion, useAnimate } from 'framer-motion'
 import { useState } from 'react'
 
 const tokenVariants = {
@@ -69,20 +68,21 @@ const Token: React.FC<IToken> = (props) => {
       onMouseLeave={() => setHovered(false)}
       onClick={handleClick}
     >
-    <motion.div className={styles.Token}
-      custom={sz}
-      variants={tokenVariants}
-      initial={'idle'}
-      animate={hovered ? 'hover' : 'idle'}
-      ref={scope}
-    >
-    <div className={styles.tails}>
-      <USDC />
-    </div>
-    <div className={styles.heads}>
-      <ETH />
-    </div>
-
+      <motion.div className={styles.Token}
+        custom={sz}
+        variants={tokenVariants}
+        initial={'idle'}
+        animate={hovered ? 'hover' : 'idle'}
+        ref={scope}
+      >
+      <div className={styles.tails}>
+        {/* Placeholder */}
+        <USDC />
+      </div>
+      <div className={styles.heads}>
+        {/* Placeholder */}
+        <ETH />
+      </div>
     </motion.div>
   </motion.div>
   )
