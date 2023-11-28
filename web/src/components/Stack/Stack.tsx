@@ -15,16 +15,18 @@ const Stack: React.FC<IStack> = (props) => {
     ${styles[size]}
   `
 
-  const sz = size === 'small' ? 16 : size === 'medium' ? 32 : 64
-  const length = ((children.length-1) * (sz - (sz/3))) + sz
+  const tokenDiameter = size === 'small' ? 16 : size === 'medium' ? 32 : 64
+  const offset = tokenDiameter - (tokenDiameter/3)
+  // To find the total width of the container, n-1 tokens are overlapped, + 1 full width token
+  const containerLength = ((children.length-1) * offset) + tokenDiameter
 
-  return <motion.div className={stackClasses} style={{width: length, height: sz}}>
+  return <motion.div className={stackClasses} style={{width: containerLength, height: tokenDiameter}}>
     {children.map((child, i) => {
       return (
         <motion.div
           key={i}
           className={styles.item}
-          initial={{x: (sz - (sz/3))*i}}
+          initial={{x: offset*i}}
           style={{zIndex: i}}
         >
           <Token {...child} size={size} />

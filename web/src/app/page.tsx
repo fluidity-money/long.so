@@ -3,18 +3,12 @@
 import pkg from '@/config/package.json'
 import { Box, Slider, Token, Text, Link, Input, Stack, Button } from '@/components'
 const version = pkg.version
-import Image from 'next/image'
 import Swap from '@/assets/icons/Swap.svg'
 import Caret from '@/assets/icons/Caret.svg'
 import Search from '@/assets/icons/Search.svg'
 import styles from './page.module.scss'
 import { useState } from 'react'
-
-enum Breakdown {
-  Fees=0,
-  Rewards=1,
-  Route=2
-}
+import { Breakdown } from '@/util/types'
 
 export default function Home() {
   const [inputSwap, setInputSwap] = useState('')
@@ -27,6 +21,7 @@ export default function Home() {
       {
         showTokenModal && (
           <Box size="large" layoutId='main' className={styles.TokenModal}>
+            {/* TODO: Lift this all out */}
             <div className={styles.header}>
             <Text>Select Token</Text>
             <Button size="medium" color="light" onClick={() => {setShowTokenModal(false)}}>
@@ -42,6 +37,7 @@ export default function Home() {
               />
               <Search />
             </Text>
+            {/* Placeholders */}
             <Text>Highest Rewarders</Text>
             <div className={styles.rewarders}>
               <Box outline pill background="light">
@@ -64,13 +60,16 @@ export default function Home() {
         !showTokenModal &&
           (<><div className={styles.banner}>
             <Token />
+            {/* Placeholder */}
             <Text >$29,123 in USDC Rewards available</Text>
+            {/* Placeholder */}
             <Box className={styles.ticker}><Text size="tiny" weight="semibold">2d:3h:58m</Text></Box>
           </div>
           <div className={styles.container}>
             <Box className={styles.inputBox}>
               <div className={styles.rowTop}>
                 <Text size="small">Swap</Text>
+                {/* Placeholder */}
                 <Text size="small">US Dollar Coin</Text>
               </div>
               <div className={styles.rowMiddle}>
@@ -83,12 +82,15 @@ export default function Home() {
                 </Text>
                 <Box whileTap={{scale: 0.98}} outline pill background="light" className={styles.tokenDropdown} onClick={() => {setShowTokenModal(true)}}>
                   <Token />
+                  {/* Placeholder */}
                   <Text weight='semibold'>USDC</Text>
                   <Caret />
                 </Box>
               </div>
               <div className={styles.rowBottom}>
+                {/* Placeholder */}
                 <Text size="small">0.00</Text>
+                {/* Placeholder */}
                 <Text size="small">Balance: 0.00 <Link>Max</Link></Text>
               </div>
             </Box>
@@ -96,6 +98,7 @@ export default function Home() {
             <Box className={styles.inputBox} layoutId='main'>
               <div className={styles.rowTop}>
                 <Text size="small">Receive</Text>
+                {/* Placeholder */}
                 <Text size="small">US Dollar Coin</Text>
               </div>
               <div className={styles.rowMiddle}>
@@ -108,18 +111,22 @@ export default function Home() {
                 </Text>
                 <Box whileTap={{scale: 0.98}} outline pill background="light" className={styles.tokenDropdown}>
                   <Token />
+                  {/* Placeholder */}
                   <Text weight='semibold'>USDC</Text>
                   <Caret />
                 </Box>
               </div>
               <div className={styles.rowBottom}>
+                {/* Placeholder */}
                 <Text size="small">0.00</Text>
+                {/* Placeholder */}
                 <Text size="small">Balance: 0.00</Text>
               </div>
             </Box>
           </div>
           <div className={styles.details}>
             <div className={styles.preview}>
+              {/* Placeholder */}
               <Text size="small">$3.28</Text>
               <Button
                 inline
@@ -138,12 +145,14 @@ export default function Home() {
                 <Token />
                 <Token />
               </Stack>
+              {/* Placeholder */}
               <Text size="tiny" weight='semibold'>Earn up to $38.21 for making this trade!</Text>
             </Box>)
             }
             {
               showBreakdown && <>
               <div className={styles.grid}>
+                {/* Placeholders */}
                 <Text>Fees</Text>
                 <Text className={styles.value}>$3.28</Text>
                 <Text >Rewards</Text>
