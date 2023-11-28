@@ -1,7 +1,6 @@
 .Box {
-  @include box(4px);
-
   width: max-content;
+  box-sizing: border-box;
   height: auto;
 
   &.light {
@@ -10,5 +9,39 @@
 
   &.dark {
     @include light;
+  }
+
+  &.small {
+    @include box(2px);
+  }
+
+  &.medium {
+    @include box(4px);
+  }
+
+  &.large {
+    @include box(8px);
+  }
+
+  &.pill {
+    border-radius: 100px;
+    padding: 4px;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    align-items: center;
+  }
+
+  &.outline {
+    border-width: 2px;
+    border-style: solid;
+
+    &.light {
+      border-color: $light;
+    }
+
+    &.dark {
+      border-color: $dark;
+    }
   }
 }
