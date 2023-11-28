@@ -1,0 +1,10 @@
+.Stack {
+  display: flex;
+  flex-direction: row;
+  gap: -12px;
+  position: relative;
+
+  .item {
+    position: absolute;
+  }
+}

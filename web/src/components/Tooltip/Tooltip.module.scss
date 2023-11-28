@@ -1,0 +1,12 @@
+.Tooltip {
+  @include box(4px);
+  width: max-content;
+
+  &.light {
+    @include dark;
+  }
+
+  &.dark {
+    @include light;
+  }
+}
