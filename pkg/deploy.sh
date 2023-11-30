@@ -9,6 +9,7 @@ err() {
 	exit 1
 }
 
+[ -z "$SEAWATER_PROXY_ADMIN" ] && exit 1
 [ -z "$STYLUS_ENDPOINT" ] && err "STYLUS_ENDPOINT unset"
 [ -z "$STYLUS_PRIVATE_KEY" ] && err "STYLUS_PRIVATE_KEY unset"
 [ -z "SEAWATER_PROXY_ADMIN" ] && err "SEAWATER_PROXY_ADMIN unset"
@@ -16,16 +17,16 @@ err() {
 
 seawater_swaps="$(sh deploy-seawater.sh seawater-swaps.wasm)"
 seawater_positions="$(sh deploy-seawater.sh seawater-positions.wasm)"
-seawater_update_positions="$(sh deploy-seawater.sh seawater-positions.wasm)"
+seawater_update_positions="$(sh deploy-seawater.sh seawater-update-positions.wasm)"
 seawater_admin="$(sh deploy-seawater.sh seawater-admin.wasm)"
 
 seawater_proxy="$(\
 	sh deploy-solidity.sh "SeawaterAMM" --constructor-args \
-		"$seawater_admin" \
-		"$seawater_admin" \
+		"$SEAWATER_PROXY_ADMIN" \
+		"$SEAWATER_PROXY_ADMIN" \
 		"$(cast --address-zero)" \
 		"$seawater_swaps" \
-    "$seawater_update_positions" \
+		"$seawater_update_positions" \
 		"$seawater_positions" \
 		"$seawater_admin" \
 		"$(cast --address-zero)" \
@@ -44,7 +45,7 @@ cat <<EOF
 	"seawater_nft_manager": "$seawater_nft_manager",
 	"seawater_swaps_impl": "$seawater_swaps",
 	"seawater_positions_impl": "$seawater_positions",
-  "seawater_update_positions_impl": "$seawater_update_positions",
+	"seawater_update_positions_impl": "$seawater_update_positions",
 	"seawater_admin_impl": "$seawater_admin",
 	"seawater_proxy_admin": "$SEAWATER_PROXY_ADMIN",
 	"ownership_nfts_name": "$ownership_nfts_name",
