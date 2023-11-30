@@ -105,27 +105,29 @@ test("amm", async t => {
     const tusdc2Address = await deployToken(erc20Factory, "Test USDC 2.0", "TUSDC2", 6, sixDecimals(1_000_000), defaultAccount);
     console.log("tusdc2",tusdc2Address)
 
-    let stdout = execSync(
+    // assuming this went correctly!
+    let { seawater_proxy: ammAddress } = JSON.parse(execSync(
         "./deploy.sh",
         { env: {
-            "PROXY_ADMIN_ADDR": defaultAccount,
-            "SEAWATER_ADMIN_ADDR": defaultAccount,
-            "NFT_MANAGER_ADDR": defaultAccount,
-            "FLU_SEAWATER_FUSDC_ADDR": fusdcAddress,
+            "SEAWATER_PROXY_ADMIN": defaultAccount,
+            "FLU_FUSDC_ADDR": fusdcAddress,
+            "STYLUS_ENDPOINT": RPC_URL,
+            "STYLUS_PRIVATE_KEY": DEFAULT_WALLET,
             "FLU_SEAWATER_PERMIT2_ADDR": permit2Address,
+            "NFT_MANAGER_ADDR": defaultAccount,
             ...process.env,
         } },
+    )
+      .toString()
     );
-    let ammAddressMatch = stdout.toString().split("\n").find(line => line.startsWith("Deployed to: "))?.match(/(0x.{40})/);
-
-    if (!ammAddressMatch) throw new Error("Amm address not found in deploy.sh output!");
-    const ammAddress = ammAddressMatch[1]
 
     const amm = new Contract(ammAddress, SeawaterABI, signer);
 
     const fusdcContract = new Contract(fusdcAddress, LightweightERC20.abi, signer)
     const tusdcContract = new Contract(tusdcAddress, LightweightERC20.abi, signer)
     const tusdc2Contract = new Contract(tusdc2Address, LightweightERC20.abi, signer)
+
+    console.log("seawater proxy admin", ammAddress);
 
     // address token,
     // uint256 sqrtPriceX96,
@@ -134,6 +136,8 @@ test("amm", async t => {
     // uint128 maxLiquidityPerTick
     await (await amm.createPool(tusdcAddress, encodeSqrtPrice(100), 0, 1, 100000000000)).wait();
     await (await amm.createPool(tusdc2Address, encodeSqrtPrice(100), 0, 1, 100000000000)).wait();
+
+    console.log("done creating pools");
 
     // approve amm for both contracts
     // initialise an empty position
@@ -147,8 +151,12 @@ test("amm", async t => {
 
     await setApprovalTo([fusdcContract, tusdcContract, tusdc2Contract], ammAddress, MaxUint256);
 
+    console.log("about to create position")
+
     const tusdcPositionId = await createPosition(amm, tusdcAddress, lowerTick, upperTick, liquidityDelta);
     const tusdc2PositionId = await createPosition(amm, tusdc2Address, lowerTick, upperTick, liquidityDelta);
+
+    console.log("done creating position")
 
     //await setApprovalTo([fusdcContract, tusdcContract, tusdc2Contract], ammAddress, BigInt(0));
 
@@ -190,6 +198,8 @@ test("amm", async t => {
         const fusdcBeforeBalance = await fusdcContract.balanceOf(defaultAccount)
         const tusdcBeforeBalance = await tusdcContract.balanceOf(defaultAccount)
 
+        console.log("about to update position permit2")
+
         let response = await amm.updatePositionPermit2(
             tusdcAddress, // pool
             tusdcPositionId,
@@ -204,6 +214,8 @@ test("amm", async t => {
             sig1,
         );
         await response.wait();
+
+        console.log("done updating position2")
 
         const fusdcAfterBalance = await fusdcContract.balanceOf(defaultAccount)
         const tusdcAfterBalance = await tusdcContract.balanceOf(defaultAccount)
