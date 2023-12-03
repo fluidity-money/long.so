@@ -61,7 +61,6 @@ async function createPosition(
     const mintResult = await amm.mintPosition(address, lower, upper);
 
     const [mintLog]: [mintLog: Log] = await mintResult.wait()
-    console.log(mintLog);
     type mintEventArgs = [
         BigInt,
         string,
@@ -73,7 +72,7 @@ async function createPosition(
     // has an issue with readonly typing
     // @ts-ignore
     const {args}  = amm.interface.parseLog(mintLog) || {}
-    const [id, /*user*/, /*pool*/, /*low*/, /*high*/] = args as unknown as mintEventArgs
+    const [id, /*user*/, /*pool*/, /*low*/, /*high*/] = args as unknown as mintEventArgs;
 
     const updatePositionResult = await amm.updatePosition(address, id, delta)
     await updatePositionResult.wait()
@@ -105,8 +104,20 @@ test("amm", async t => {
     const tusdc2Address = await deployToken(erc20Factory, "Test USDC 2.0", "TUSDC2", 6, sixDecimals(1_000_000), defaultAccount);
     console.log("tusdc2",tusdc2Address)
 
+    execSync(
+      "make -B build",
+      { env: {
+          "FLU_SEAWATER_FUSDC_ADDR": fusdcAddress,
+          "FLU_SEAWATER_PERMIT2_ADDR": permit2Address,
+          ...process.env,
+      } }
+    );
+
     // assuming this went correctly!
-    let { seawater_proxy: ammAddress } = JSON.parse(execSync(
+    const {
+      seawater_proxy: ammAddress,
+      seawater_positions_impl: seawaterPositionsImplAddr
+    } = JSON.parse(execSync(
         "./deploy.sh",
         { env: {
             "SEAWATER_PROXY_ADMIN": defaultAccount,
@@ -120,6 +131,9 @@ test("amm", async t => {
     )
       .toString()
     );
+
+    console.log("seawater positions impl", seawaterPositionsImplAddr);
+    console.log("amm address", ammAddress);
 
     const amm = new Contract(ammAddress, SeawaterABI, signer);
 
@@ -137,13 +151,13 @@ test("amm", async t => {
     await (await amm.createPool(tusdcAddress, encodeSqrtPrice(100), 0, 1, 100000000000)).wait();
     await (await amm.createPool(tusdc2Address, encodeSqrtPrice(100), 0, 1, 100000000000)).wait();
 
-    console.log("done creating pools");
-
     // approve amm for both contracts
     // initialise an empty position
     // update the position with liquidity
     // then make a swap
     await setApprovalTo([fusdcContract, tusdcContract, tusdc2Contract], permit2Address, MaxUint256);
+
+    console.log("balance of the tusdc signer", await tusdcContract.balanceOf(signer.address));
 
     const lowerTick = encodeTick(50);
     const upperTick = encodeTick(150);

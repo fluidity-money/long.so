@@ -26,8 +26,8 @@ seawater_proxy="$(\
 		"$SEAWATER_PROXY_ADMIN" \
 		"$(cast --address-zero)" \
 		"$seawater_swaps" \
-		"$seawater_update_positions" \
 		"$seawater_positions" \
+		"$seawater_update_positions" \
 		"$seawater_admin" \
 		"$(cast --address-zero)" \
 		"$FLU_FUSDC_ADDR")"
