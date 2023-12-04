@@ -3,9 +3,9 @@
 //! enabled.
 
 #[cfg(target_arch = "wasm32")]
-pub use crate::erc20_wasm::*;
+pub use crate::wasm_erc20::*;
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
-pub use crate::erc20_host::*;
+pub use crate::host_erc20::*;
 
 pub use crate::permit2_types::*;
