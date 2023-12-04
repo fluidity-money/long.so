@@ -36,10 +36,10 @@ pub mod permit2_types;
 // We only want to have testing on the host environment and mocking stuff
 // out in a testing context
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
-pub mod erc20_host;
+pub mod host_erc20;
 
 #[cfg(target_arch = "wasm32")]
-pub mod erc20_wasm;
+pub mod wasm_erc20;
 
 pub mod erc20;
 
@@ -718,6 +718,7 @@ impl Pools {
     }
 }
 
+#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 impl test_utils::StorageNew for Pools {
     fn new(i: U256, v: u8) -> Self {
       unsafe { <Self as stylus_sdk::storage::StorageType>::new(i, v) }
