@@ -8,6 +8,9 @@ use crate::types::{I256Extension, U256Extension, WrappedNative, I256, I32, U128,
 use alloc::vec::Vec;
 use stylus_sdk::{prelude::*, storage::*};
 
+#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
+use crate::test_utils;
+
 type Revert = Vec<u8>;
 
 /// The storage type for an AMM pool.
@@ -437,69 +440,24 @@ impl StoragePool {
     }
 }
 
+#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
+impl test_utils::StorageNew for StoragePool {
+    fn new(i: U256, v: u8) -> Self {
+      unsafe { <Self as stylus_sdk::storage::StorageType>::new(i, v) }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::test_shims;
-    use crate::types::*;
+    use crate::{test_utils};
     use ruint_macro::uint;
-    use sqrt_price_math::Q96;
-
-    // encodes a a/b price as a sqrt.q96 price
-    fn encode_sqrt_price(num: u64, denom: u64) -> U256 {
-        let num = U256::from(num);
-        let denom = U256::from(denom);
-
-        let ratio = num * Q96 / denom;
-
-        // newton's method
-        let mut g = U256::one() * Q96;
-        let two = U256::from(2);
-        for _ in 0..1000000 {
-            let g_new = (g + (ratio * Q96 / g)) / two;
-            if g_new == g {
-                return g;
-            }
-            g = g_new;
-        }
-
-        panic!("encode_sqrt_price did not converge after 1000000 iters")
-    }
-
-    // splits a q96 fixed point into whole and fractional components
-    fn split_q96(val: U256) -> (U256, U256) {
-        (val >> 96, val % Q96)
-    }
-
-    #[test]
-    fn test_encode_sqrt_price() {
-        let price = encode_sqrt_price(16, 1);
-        assert_eq!(split_q96(price), (U256::from(4), U256::from(0)));
-
-        let price = encode_sqrt_price(4, 1);
-        assert_eq!(split_q96(price), (U256::from(2), U256::from(0)));
-
-        let price = encode_sqrt_price(10, 1);
-        assert_eq!(split_q96(price).0, U256::from(3));
-    }
-
-    // run a closure with a clean copy of storage
-    fn with_storage<T, F: FnOnce(&mut StoragePool) -> T>(f: F) -> T {
-        let lock = test_shims::acquire_storage();
-        let mut storage = unsafe { <StoragePool as StorageType>::new(U256::ZERO, 0) };
-        let res = f(&mut storage);
-        stylus_sdk::storage::StorageCache::clear();
-        test_shims::log_storage();
-        test_shims::reset_storage();
-        drop(lock);
-        res
-    }
 
     #[test]
     fn test_update_position() {
-        with_storage(|storage| {
+        test_utils::with_storage::<_, StoragePool, _>(|storage| {
             storage
-                .init(encode_sqrt_price(1, 10), 0, 1, u128::MAX)
+                .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
                 .unwrap();
 
             let id = uint!(2_U256);
@@ -509,7 +467,7 @@ mod test {
                 .unwrap();
 
             assert_eq!(
-                storage.update_position(id, 3161,),
+                storage.update_position(id, 3161),
                 Ok((I256::unchecked_from(9996), I256::unchecked_from(1000))),
             );
         });
@@ -517,15 +475,20 @@ mod test {
 
     #[test]
     fn test_swap() -> Result<(), Revert> {
-        with_storage(|storage| {
-            storage.init(encode_sqrt_price(100, 1), 0, 1, u128::MAX)?;
+        test_utils::with_storage::<_, StoragePool, _>(|storage| {
+            storage.init(
+                test_utils::encode_sqrt_price(100, 1), // price
+                0,
+                1,
+                u128::MAX,
+            )?;
 
             let id = uint!(2_U256);
             storage
                 .create_position(
                     id,
-                    tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(50, 1))?,
-                    tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
+                    tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(50, 1))?,
+                    tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(150, 1))?,
                 )
                 .unwrap();
             storage.update_position(id, 100)?;
@@ -534,22 +497,34 @@ mod test {
             storage
                 .create_position(
                     id,
-                    tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(80, 1))?,
-                    tick_math::get_tick_at_sqrt_ratio(encode_sqrt_price(150, 1))?,
+                    tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(80, 1))?,
+                    tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(150, 1))?,
                 )
                 .unwrap();
             storage.update_position(id, 100)?;
 
-            storage.swap(true, I256::unchecked_from(-10), encode_sqrt_price(60, 1))?;
+            storage.swap(
+                true,
+                I256::unchecked_from(-10),
+                test_utils::encode_sqrt_price(60, 1),
+            )?;
 
-            storage.swap(true, I256::unchecked_from(10), encode_sqrt_price(50, 1))?;
+            storage.swap(
+                true,
+                I256::unchecked_from(10),
+                test_utils::encode_sqrt_price(50, 1),
+            )?;
 
-            storage.swap(false, I256::unchecked_from(10), encode_sqrt_price(120, 1))?;
+            storage.swap(
+                false,
+                I256::unchecked_from(10),
+                test_utils::encode_sqrt_price(120, 1),
+            )?;
 
             storage.swap(
                 false,
                 I256::unchecked_from(-10000),
-                encode_sqrt_price(120, 1),
+                test_utils::encode_sqrt_price(120, 1),
             )?;
 
             Ok(())

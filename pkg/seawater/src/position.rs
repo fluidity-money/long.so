@@ -1,13 +1,12 @@
 //! Structures and functions to track and update details on owned positions.
 
-use crate::error::*;
-use crate::maths::full_math;
-use crate::maths::liquidity_math;
-use crate::types::WrappedNative;
-use crate::types::{I32, U128, U256};
+use crate::{
+	error::*,
+	maths::{full_math, liquidity_math},
+	types::{WrappedNative, I32, U128, U256}
+};
 
-use stylus_sdk::prelude::*;
-use stylus_sdk::storage::*;
+use stylus_sdk::{prelude::*, storage::*};
 
 /// Storage type for the details on a position.
 #[solidity_storage]

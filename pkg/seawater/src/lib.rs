@@ -6,7 +6,6 @@
 #![cfg_attr(not(target_arch = "wasm32"), feature(lazy_cell, const_trait_impl))]
 #![deny(clippy::unwrap_used)]
 
-pub mod erc20;
 pub mod eth_serde;
 pub mod immutables;
 #[macro_use]
@@ -16,12 +15,39 @@ pub mod events;
 pub mod maths;
 pub mod pool;
 pub mod position;
-pub mod test_shims;
 pub mod tick;
 pub mod types;
 
-use crate::types::{Address, I256Extension, I256, U256};
-use erc20::Permit2Args;
+#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
+pub mod host_test_shims;
+
+#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
+pub mod host_test_utils;
+
+#[cfg(feature = "testing")]
+pub mod test_shims;
+
+#[cfg(feature = "testing")]
+pub mod test_utils;
+
+// Permit2 types exposed by the erc20 file.
+pub mod permit2_types;
+
+// We only want to have testing on the host environment and mocking stuff
+// out in a testing context
+#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
+pub mod host_erc20;
+
+#[cfg(target_arch = "wasm32")]
+pub mod wasm_erc20;
+
+pub mod erc20;
+
+use crate::{
+    erc20::Permit2Args,
+    types::{Address, I256Extension, I256, U256},
+};
+
 use error::Error;
 use immutables::FUSDC_ADDR;
 use maths::tick_math;
@@ -692,11 +718,21 @@ impl Pools {
     }
 }
 
+#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
+impl test_utils::StorageNew for Pools {
+    fn new(i: U256, v: u8) -> Self {
+      unsafe { <Self as stylus_sdk::storage::StorageType>::new(i, v) }
+    }
+}
+
 #[cfg(test)]
 mod test {
-    use crate::{eth_serde, types::I256Extension};
+    use crate::{eth_serde, test_utils, types::I256Extension, types::*, Pools};
     use ruint_macro::uint;
-    use stylus_sdk::alloy_primitives::{address, bytes};
+    use stylus_sdk::{
+        alloy_primitives::{address, bytes},
+        msg,
+    };
 
     #[test]
     fn test_decode_swap() {
@@ -737,5 +773,40 @@ mod test {
         assert_eq!(nonce, uint!(1_U256));
         assert_eq!(max_amount, uint!(10_U256));
         assert_eq!(data.len(), 0);
+    }
+
+    #[test]
+    fn test_similar_to_ethers() -> Result<(), Vec<u8>> {
+        test_utils::with_storage::<_, Pools, _>(|contract| {
+            // Create the storage
+            contract.seawater_admin.set(msg::sender());
+            let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
+
+            // First, we set up the pool.
+            contract.create_pool(
+                token_addr,
+                test_utils::encode_sqrt_price(50, 1), // the price
+                0,
+                1,
+                100000000000,
+            )?;
+
+            let lower_tick = test_utils::encode_tick(50);
+            let upper_tick = test_utils::encode_tick(150);
+            let liquidity_delta = 20000;
+
+            // Begin to create the position, following the same path as
+            // in `createPosition` in ethers-tests/tests.ts
+            contract.mint_position(token_addr, lower_tick, upper_tick)?;
+            let position_id = contract
+                .next_position_id
+                .clone()
+                .checked_sub(U256::one())
+                .unwrap();
+
+            contract.update_position(token_addr, position_id, liquidity_delta)?;
+
+            Ok(())
+        })
     }
 }
