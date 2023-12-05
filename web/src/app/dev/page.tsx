@@ -2,7 +2,7 @@
 
 import { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react'
 import styles from './page.module.scss'
-import { Box, Button, Chip as Chip, Menu, Text, Link, Slider } from "@/components"
+import { Box, Button, Chip as Chip, Menu, Text, Link, Slider } from '@/components'
 import {useSwap} from '@/util/hooks/useSwap'
 import {useCreatePosition} from '@/util/hooks/useCreatePosition'
 
@@ -67,18 +67,18 @@ const Dev = () => {
   const [menu, setMenu] = useState('foo')
   const [menuB, setMenuB] = useState('foo')
 
-  const {token0, token1, setToken0, setToken1, flipTokens, ammAddress} = useContext(ActiveTokenContext);
-  const {createPosition, updatePosition, removePosition, collectFees} = useCreatePosition();
+  const {token0, token1, setToken0, setToken1, flipTokens, ammAddress} = useContext(ActiveTokenContext)
+  const {createPosition, updatePosition, removePosition, collectFees} = useCreatePosition()
 
-  const [amountIn, setAmountIn] = useState('');
-  const [minOut, setMinOut] = useState('');
+  const [amountIn, setAmountIn] = useState('')
+  const [minOut, setMinOut] = useState('')
 
-  const {swap, result, error} = useSwap({amountIn, minOut});
+  const {swap, result, error} = useSwap({amountIn, minOut})
 
   const [delta, setDelta] = useState(BigInt(20000))
   const [lowerRange, setLowerRange] = useState(50)
   const [upperRange, setUpperRange] = useState(150)
-  const [positionId, setPositionId] = useState(BigInt(0));
+  const [positionId, setPositionId] = useState(BigInt(0))
 
   return <div className={styles.dev}>
     <Profile/>
@@ -109,9 +109,9 @@ const Dev = () => {
     <br/>
     <h1>Modify positions for {addressToSymbol(token0)}</h1>
     <Chip>Set Position</Chip>
-    <input value={positionId}  onChange={e => setPositionId(e.target.value)}/>
+    <input value={positionId.toString()}  onChange={e => setPositionId(BigInt(e.target.value))}/>
     <Chip>Set Delta</Chip>
-    <input value={delta}  onChange={e => setDelta(e.target.value)}/>
+    <input value={delta.toString()}  onChange={e => setDelta(BigInt(e.target.value))}/>
     <Chip>Set Lower Range</Chip>
     <input value={lowerRange}  onChange={e => setLowerRange(e.target.value)}/>
     <Chip>Set Upper Range</Chip>
