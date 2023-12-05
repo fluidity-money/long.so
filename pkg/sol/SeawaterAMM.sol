@@ -214,6 +214,29 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterAMM
+    function swapInPermit2(address token, uint256 amountIn, uint256 minOut, uint256 nonce, uint256 deadline, uint256 maxAmount, bytes memory sig) external returns (int256, int256) {
+        (bool success, bytes memory data) = _getExecutorSwap().delegatecall(abi.encodeCall(
+            ISeawaterExecutorSwap.swapPermit2,
+            (
+                token,
+                true,
+                int256(amountIn),
+                type(uint256).max,
+                nonce,
+                deadline,
+                maxAmount,
+                sig
+            )
+        ));
+        require(success, string(data));
+
+        (int256 swapAmountIn, int256 swapAmountOut) = abi.decode(data, (int256, int256));
+        // this contract uses checked arithmetic, this negate can revert
+        require(-swapAmountOut >= int256(minOut), "min out not reached!");
+        return (swapAmountIn, swapAmountOut);
+    }
+
+    /// @inheritdoc ISeawaterAMM
     function swapOut(address token, uint256 amountIn, uint256 minOut) external returns (int256, int256) {
         (bool success, bytes memory data) = _getExecutorSwap().delegatecall(abi.encodeCall(
             ISeawaterExecutorSwap.swap,
@@ -222,6 +245,28 @@ contract SeawaterAMM is ISeawaterAMM {
                 false,
                 int256(amountIn),
                 type(uint256).max
+            )
+        ));
+        require(success, string(data));
+
+        (int256 swapAmountIn, int256 swapAmountOut) = abi.decode(data, (int256, int256));
+        require(swapAmountOut >= int256(minOut), "min out not reached!");
+        return (swapAmountIn, swapAmountOut);
+    }
+
+    /// @inheritdoc ISeawaterAMM
+    function swapOutPermit2(address token, uint256 amountIn, uint256 minOut, uint256 nonce, uint256 deadline, uint256 maxAmount, bytes memory sig) external returns (int256, int256) {
+        (bool success, bytes memory data) = _getExecutorSwap().delegatecall(abi.encodeCall(
+            ISeawaterExecutorSwap.swapPermit2,
+            (
+                token,
+                false,
+                int256(amountIn),
+                type(uint256).max,
+                nonce,
+                deadline,
+                maxAmount,
+                sig
             )
         ));
         require(success, string(data));
