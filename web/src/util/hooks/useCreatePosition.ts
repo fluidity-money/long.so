@@ -127,6 +127,9 @@ const useCreatePosition = (): UseCreatePosition => {
         const positionLiquidity = await readContract({
             address: ammAddress,
             abi: SeawaterABI,
+            // this function is not marked as a view, since it contains a delegate call
+            // however it can be read using call, so ignore Wagmi's type error
+            // @ts-expect-error
             functionName: 'positionLiquidity',
             args: [token0, id]
         })

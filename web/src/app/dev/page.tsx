@@ -13,7 +13,7 @@ import {
 } from 'wagmi'
 import {ActiveTokenContext} from '@/util/context/ActiveTokenContext'
 import {addressToSymbol, FluidTokenAddress, Token, TokenList, TokenMap} from '@/util/tokens'
-import {Hash} from 'viem'
+import {Hash, hexToBigInt} from 'viem'
  
 // wagmi example boilerplate
 const Profile = () => {
@@ -113,10 +113,10 @@ const Dev = () => {
     <Chip>Set Delta</Chip>
     <input value={delta.toString()}  onChange={e => setDelta(BigInt(e.target.value))}/>
     <Chip>Set Lower Range</Chip>
-    <input value={lowerRange}  onChange={e => setLowerRange(e.target.value)}/>
+    <input value={lowerRange}  onChange={e => setLowerRange(Number(e.target.value))}/>
     <Chip>Set Upper Range</Chip>
-    <input value={upperRange}  onChange={e => setUpperRange(e.target.value)}/>
-    <Button onClick={() => {createPosition(lowerRange, upperRange, delta).then(setPositionId)}}>{'Create new position'}</Button>
+    <input value={upperRange}  onChange={e => setUpperRange(Number(e.target.value))}/>
+    <Button onClick={() => {createPosition(lowerRange, upperRange, delta).then(id => setPositionId(hexToBigInt(id || '0x')))}}>{'Create new position'}</Button>
     <Button onClick={() => {updatePosition(positionId, delta)}}>{`Update position ${positionId}`}</Button>
     <Button onClick={() => {removePosition(positionId)}}>{`Remove position with id ${positionId}`}</Button>
     <Button onClick={() => {collectFees(positionId)}}>{`Collect fees for position with id ${positionId}`}</Button>
