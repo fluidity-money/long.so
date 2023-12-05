@@ -23,13 +23,13 @@ const inter = Inter({
   weight: ['400', '500'],
 })
 
-const {chains, publicClient, webSocketPublicClient} = process.env.NODE_ENV === "development" ?
+const {chains, publicClient, webSocketPublicClient} = process.env.NODE_ENV === 'development' ?
   configureChains(
     [{...localhost, id: 412346}],
     [
       jsonRpcProvider({
         rpc: () => ({
-          http: "http://localhost:8547"
+          http: 'http://localhost:8547'
         }),
       })
     ],
@@ -37,7 +37,7 @@ const {chains, publicClient, webSocketPublicClient} = process.env.NODE_ENV === "
   configureChains(
     [arbitrumNova],
     [
-      infuraProvider({apiKey: process.env.FLU_INFURA_KEY || ""})
+      infuraProvider({apiKey: process.env.FLU_INFURA_KEY || ''})
     ],
   )
  

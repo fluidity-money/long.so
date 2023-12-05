@@ -1,13 +1,13 @@
-import {prepareWriteContract, signTypedData, writeContract} from "wagmi/actions"
-import {useContext, useEffect, useMemo, useState} from "react"
-import SeawaterABI from "../abi/SeawaterAMM"
-import {ActiveTokenContext} from "../context/ActiveTokenContext"
-import {usePrepareContractWrite} from "wagmi"
-import {FluidTokenAddress} from "../tokens"
-import {bigAbs} from "../math"
-import {useDebounce} from "./useDebounce"
-import {hexToBigInt} from "viem"
-import {usePermit2} from "../usePermit2"
+import {prepareWriteContract, signTypedData, writeContract} from 'wagmi/actions'
+import {useContext, useEffect, useMemo, useState} from 'react'
+import SeawaterABI from '../abi/SeawaterAMM'
+import {ActiveTokenContext} from '../context/ActiveTokenContext'
+import {usePrepareContractWrite} from 'wagmi'
+import {FluidTokenAddress} from '../tokens'
+import {bigAbs} from '../math'
+import {useDebounce} from './useDebounce'
+import {hexToBigInt} from 'viem'
+import {usePermit2} from '../usePermit2'
 
 // the strongly typed return value of the Seawater contract function `T`
 type SeawaterResult<T extends string> =
@@ -126,13 +126,13 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
 
     const result = useMemo(() =>
         config.result?.map(n => bigAbs(n)) as [bigint, bigint] // assert type due to map's type erasure
-    , [config]);
+    , [config])
 
     // initiate a swap as described in the hook's interface
     const swap = async() => {
         // simulation failed, so return early
         if (error) {
-            console.log("Error!",error)
+            console.log('Error!',error)
             return
         }
 
@@ -146,7 +146,7 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
         const maxAmount = BigInt(100000000)
 
         // use the permit2 variant of the function
-        const functionName = debouncedState?.functionName + "Permit2" as permit2Function
+        const functionName = debouncedState?.functionName + 'Permit2' as permit2Function
 
         // append permit2-specific arguments
         const args = [
@@ -154,7 +154,7 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
             nonce, 
             encodedDeadline, 
             // only swapIn and swapOut need maxAmount 
-            ...(debouncedState?.functionName === "swap2ExactIn" ? [] : [maxAmount]),
+            ...(debouncedState?.functionName === 'swap2ExactIn' ? [] : [maxAmount]),
             sig,
         ]
 
@@ -169,7 +169,7 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
         })
         try {
             await writeContract(request)
-        } catch(e) {console.log("failed to write swap!",e)}
+        } catch(e) {console.log('failed to write swap!',e)}
     }
 
     return {

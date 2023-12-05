@@ -1,18 +1,18 @@
-import {SignatureTransfer} from "@uniswap/permit2-sdk"
-import {signTypedData, readContract, prepareWriteContract, writeContract} from "wagmi/actions"
-import {usePublicClient, useAccount} from "wagmi"
-import {Hash, maxUint256, PublicClient, toHex, TypedDataDomain} from "viem"
-import {getBlock, getBlockNumber} from "viem/actions"
-import {useContext} from "react"
-import {ActiveTokenContext} from "./context/ActiveTokenContext"
-import {permit2Address} from "./tokens"
-import LightweightERC20 from "./abi/LightweightERC20"
+import {SignatureTransfer} from '@uniswap/permit2-sdk'
+import {signTypedData, readContract, prepareWriteContract, writeContract} from 'wagmi/actions'
+import {usePublicClient, useAccount} from 'wagmi'
+import {Hash, maxUint256, PublicClient, toHex, TypedDataDomain} from 'viem'
+import {getBlock, getBlockNumber} from 'viem/actions'
+import {useContext} from 'react'
+import {ActiveTokenContext} from './context/ActiveTokenContext'
+import {permit2Address} from './tokens'
+import LightweightERC20 from './abi/LightweightERC20'
 
 const encodeDeadline = async (client: PublicClient, seconds: bigint) => {
   const blockNumber = await getBlockNumber(client)
   const block = await getBlock(client, {blockNumber: blockNumber})
-  const timestamp = block.timestamp;
-  return timestamp + seconds;
+  const timestamp = block.timestamp
+  return timestamp + seconds
 }
 
 interface getPermit2DataProps {
@@ -41,7 +41,7 @@ const usePermit2: UsePermit2 = () => {
     const allowance = await readContract({
       address: token,
       abi: LightweightERC20,
-      functionName: "allowance",
+      functionName: 'allowance',
       args: [address, spender]
     })
 
@@ -53,7 +53,7 @@ const usePermit2: UsePermit2 = () => {
         args: [spender, maxUint256]
       })
 
-      await writeContract(request);
+      await writeContract(request)
     }
   }
 
@@ -68,10 +68,10 @@ const usePermit2: UsePermit2 = () => {
         // fetch the current nonce if not passed one
         if (!nonce) {
           const blockNumber = await getBlockNumber(client)
-          console.log("tohexing bloc num",blockNumber)
+          console.log('tohexing bloc num',blockNumber)
           const txCount = await client.request({method: 'eth_getTransactionCount', params: [address, toHex(blockNumber)]})
           nonce = txCount
-      };
+      }
 
       // encode the deadline
       const encodedDeadline = await encodeDeadline(client, deadline)
@@ -90,7 +90,7 @@ const usePermit2: UsePermit2 = () => {
         permit2Address,
         chainId,
       )
-          console.log("hhh")
+          console.log('hhh')
 
         // TODO type message correctly
         // sign data
@@ -100,7 +100,7 @@ const usePermit2: UsePermit2 = () => {
         message: data.values,
         primaryType: 'PermitTransferFrom'
       })
-          console.log("hhha22")
+          console.log('hhha22')
 
       return {nonce, sig, encodedDeadline}
     }
