@@ -32,3 +32,24 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+## Environment variables
+
+```typescript
+interface Token {
+  symbol: string
+  name: string
+  logo: string
+  address: Hash
+  colour: string
+  decimals: number
+  // there is one fluid token per AMM
+  isFluidToken: boolean
+}
+```
+
+|         Name                  |                              Description
+|-------------------------------|--------------------------------------------------------------------------------------|
+| `NEXT_PUBLIC_TOKEN_LIST`      | A JSON-stringified list of AMM-supported tokens as described in the interface above. |
+| `NEXT_PUBLIC_AMM_ADDRESS`     | The address of the Seawater AMM.                                                     |
+| `NEXT_PUBLIC_PERMIT2_ADDRESS` | The address of the Permit2 contract.                                                 |

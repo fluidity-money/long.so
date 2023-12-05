@@ -75,12 +75,11 @@ interface ISeawaterExecutorPosition {
     /// @param pool the pool to create the position on
     /// @param lower the lower tick of the position (for concentrated liquidity)
     /// @param upper the upper tick of the position
-    /// @return the id of the position
     function mintPosition(
         address pool,
         int32 lower,
         int32 upper
-    ) external returns (uint256);
+    ) external;
 
     /// @notice burns a position, leaving the liquidity in it inaccessible
     /// @notice id the id of the position to burn
