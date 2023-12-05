@@ -68,7 +68,6 @@ const usePermit2: UsePermit2 = () => {
         // fetch the current nonce if not passed one
         if (!nonce) {
           const blockNumber = await getBlockNumber(client)
-          console.log('tohexing bloc num',blockNumber)
           const txCount = await client.request({method: 'eth_getTransactionCount', params: [address, toHex(blockNumber)]})
           nonce = txCount
       }
@@ -90,7 +89,6 @@ const usePermit2: UsePermit2 = () => {
         permit2Address,
         chainId,
       )
-          console.log('hhh')
 
         // TODO type message correctly
         // sign data
@@ -100,7 +98,6 @@ const usePermit2: UsePermit2 = () => {
         message: data.values,
         primaryType: 'PermitTransferFrom'
       })
-          console.log('hhha22')
 
       return {nonce, sig, encodedDeadline}
     }
