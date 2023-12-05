@@ -1,7 +1,7 @@
-import {Hash, isHash, isHex} from "viem"
-import {createContext, useState} from "react"
-import {ZeroAddress} from "../chainUtils"
-import {TokenList} from "../tokens"
+import {Hash, isHash, isHex} from 'viem'
+import {createContext, useState} from 'react'
+import {ZeroAddress} from '../chainUtils'
+import {TokenList} from '../tokens'
 
 type ActiveTokenContextType = {
     token0: Hash
@@ -37,8 +37,8 @@ const ActiveTokenContextProvider = ({
 }: IActiveTokenContextProvider) => {
     const [defaultToken0, defaultToken1] = tokenList.map(({address}) => address)
     // const [activeToken, setActiveTokens] = useState<[Hash, Hash]>([defaultToken0, defaultToken1])
-    const [token0, setToken0] = useState<Hash>(defaultToken0);
-    const [token1, setToken1] = useState<Hash>(defaultToken1);
+    const [token0, setToken0] = useState<Hash>(defaultToken0)
+    const [token1, setToken1] = useState<Hash>(defaultToken1)
 
     const updateToken0 = (token: string) => isHex(token) && setToken0(token)
     const updateToken1 = (token: string) => isHex(token) && setToken1(token)

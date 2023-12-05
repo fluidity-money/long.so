@@ -1,12 +1,12 @@
-import {useContext} from "react";
-import SeawaterABI from "../abi/SeawaterAMM"
-import {encodeTick} from "../math";
-import {prepareWriteContract, waitForTransaction, writeContract, readContract} from "wagmi/actions";
-import {useAccount, usePublicClient} from "wagmi"
-import {ActiveTokenContext} from "../context/ActiveTokenContext";
-import {Hash, hexToBigInt, maxUint128, toHex} from "viem";
-import {usePermit2} from "../usePermit2";
-import {FluidTokenAddress} from "../tokens";
+import {useContext} from 'react'
+import SeawaterABI from '../abi/SeawaterAMM'
+import {encodeTick} from '../math'
+import {prepareWriteContract, waitForTransaction, writeContract, readContract} from 'wagmi/actions'
+import {useAccount, usePublicClient} from 'wagmi'
+import {ActiveTokenContext} from '../context/ActiveTokenContext'
+import {Hash, hexToBigInt, maxUint128, toHex} from 'viem'
+import {usePermit2} from '../usePermit2'
+import {FluidTokenAddress} from '../tokens'
 
 interface UseCreatePosition {
     // returns id of new position
@@ -22,7 +22,7 @@ interface UseCreatePosition {
 
 // TODO simulate for create/update position
 const useCreatePosition = (): UseCreatePosition => {
-    const {token0, ammAddress} = useContext(ActiveTokenContext);
+    const {token0, ammAddress} = useContext(ActiveTokenContext)
     const {address} = useAccount()
     const client = usePublicClient()
 
@@ -39,12 +39,12 @@ const useCreatePosition = (): UseCreatePosition => {
             args: [token0, encodeTick(lowerRange), encodeTick(upperRange)]
         })
 
-        const {hash: mintPositionHash} = await writeContract(mintPositionRequest);
-        const receipt = await waitForTransaction({hash: mintPositionHash});
-        const mintPositionId = receipt.logs[0].topics[1];
+        const {hash: mintPositionHash} = await writeContract(mintPositionRequest)
+        const receipt = await waitForTransaction({hash: mintPositionHash})
+        const mintPositionId = receipt.logs[0].topics[1]
 
         if (!mintPositionId) {
-            throw new Error("Failed to fetch ID of new mint position!")
+            throw new Error('Failed to fetch ID of new mint position!')
         }
 
         if (!address)
@@ -52,7 +52,7 @@ const useCreatePosition = (): UseCreatePosition => {
 
         await updatePosition(hexToBigInt(mintPositionId), delta)
 
-        return mintPositionId;
+        return mintPositionId
     }
 
     /**
@@ -111,7 +111,7 @@ const useCreatePosition = (): UseCreatePosition => {
                 ]
             })
 
-            await writeContract(updatePositionPermit2Request);
+            await writeContract(updatePositionPermit2Request)
         } else {
             // write the precomputed request
             await writeContract(updatePositionRequest)
@@ -132,7 +132,7 @@ const useCreatePosition = (): UseCreatePosition => {
         })
 
         // remove all liquidity
-        await updatePosition(id, -positionLiquidity);
+        await updatePosition(id, -positionLiquidity)
 
         // burn position
         const {request: burnPositionRequest} = await prepareWriteContract({
@@ -142,7 +142,7 @@ const useCreatePosition = (): UseCreatePosition => {
             args: [id]
         })
 
-        await writeContract(burnPositionRequest);
+        await writeContract(burnPositionRequest)
     }
 
     /**
