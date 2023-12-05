@@ -1,3 +1,131 @@
-main.main {
-  background-color: $light;
+.TokenModal {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .search {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid $light;
+    padding-bottom: 8px;
+  }
+
+  .rewarders {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+  }
+}
+
+.banner {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 4px;
+  flex-direction: column;
+  width: 100%;
+
+  .swapBtn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: $light;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    cursor: pointer;
+
+    .swapIcon {
+      position: absolute;
+      width: 10px;
+    }
+  }
+
+  .inputBox {
+    padding: 16px;
+    border-radius: 8px;
+    width:100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .rowTop, .rowMiddle, .rowBottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tokenDropdown {
+      cursor: pointer;
+      padding-right: 8px;
+      color: $light;
+    }
+  }
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+
+  .preview {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+
+    .caret {
+      width: 12px;
+      margin-left: 4px;
+    }
+  }
+
+  .cta {
+    gap: 8px;
+    padding-right: 8px;
+    align-self: center;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 8px;
+    box-sizing: border-box;
+    width: 100%;
+
+    .value {
+      justify-self: end;
+    }
+  }
+
+  .detailsBox {
+    width: 100%;
+    border-radius: 8px;
+  }
+}
+
+.ticker {
+  padding-top: 1px !important;
+  padding-bottom: 2px;
 }
