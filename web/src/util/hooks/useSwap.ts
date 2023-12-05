@@ -142,8 +142,7 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
             return
 
         const nonce = hexToBigInt(nonceHex)
-        // TODO
-        const maxAmount = BigInt(100000000)
+        const maxAmount = amountIn
 
         // use the permit2 variant of the function
         const functionName = debouncedState?.functionName + 'Permit2' as permit2Function
