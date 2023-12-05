@@ -1,4 +1,4 @@
-import {SignatureTransfer} from '@uniswap/permit2-sdk'
+import {PermitTransferFrom, SignatureTransfer} from '@uniswap/permit2-sdk'
 import {signTypedData, readContract, prepareWriteContract, writeContract} from 'wagmi/actions'
 import {usePublicClient, useAccount} from 'wagmi'
 import {Hash, maxUint256, PublicClient, toHex, TypedDataDomain} from 'viem'
@@ -20,6 +20,11 @@ interface getPermit2DataProps {
   amount: bigint, 
   deadline?: bigint, 
   nonce?: Hash,
+}
+
+// extend PermitTransferFrom to allow Wagmi to consider it indexable as we cannot use a const assertion for dynamic data
+interface PermitTransforFromIndexable extends PermitTransferFrom {
+  [key: string]: unknown
 }
 
 type UsePermit2 = () => {
@@ -76,7 +81,7 @@ const usePermit2: UsePermit2 = () => {
       const encodedDeadline = await encodeDeadline(client, deadline)
 
         // create data to sign
-      const data = SignatureTransfer.getPermitData(
+      const {domain, types, values}= SignatureTransfer.getPermitData(
         {
           permitted: {
             token,
@@ -90,12 +95,11 @@ const usePermit2: UsePermit2 = () => {
         chainId,
       )
 
-        // TODO type message correctly
-        // sign data
+      // sign data
       const sig = await signTypedData({
-        domain: data.domain as TypedDataDomain,
-        types: data.types,
-        message: data.values,
+        domain: domain as TypedDataDomain,
+        message: values as PermitTransforFromIndexable,
+        types,
         primaryType: 'PermitTransferFrom'
       })
 
