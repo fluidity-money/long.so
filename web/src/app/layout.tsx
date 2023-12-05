@@ -11,11 +11,9 @@ import {MetaMaskConnector} from '@/config/node_modules/wagmi/dist/connectors/met
 import {encodeTick} from '@/util/math'
 import {ActiveTokenContextProvider} from '@/util/context/ActiveTokenContext'
 import {TokenList} from '@/util/tokens'
-import {mustEnv} from '@/util/env'
-import {isHash} from 'viem'
+import {isHex} from 'viem'
 import Image from 'next/image'
 import Superposition from '@/assets/icons/Superposition.svg'
-
 import '@/styles/globals.scss'
 import styles from './layout.module.scss'
 import { usePathname, useRouter } from 'next/navigation'
@@ -27,12 +25,12 @@ const inter = Inter({
 
 const {chains, publicClient, webSocketPublicClient} = process.env.NODE_ENV === "development" ?
   configureChains(
-    [localhost],
+    [{...localhost, id: 412346}],
     [
       jsonRpcProvider({
         rpc: () => ({
           http: "http://localhost:8547"
-        })
+        }),
       })
     ],
   ) :
@@ -53,8 +51,8 @@ const config = createConfig({
   webSocketPublicClient,
 })
 
-const ammAddressString = mustEnv('NEXT_PUBLIC_AMM_ADDRESS')
-if (!isHash(ammAddressString))
+const ammAddressString = process.env.NEXT_PUBLIC_AMM_ADDRESS
+if (!ammAddressString || !isHex(ammAddressString))
   throw new Error(`AMM address from env was not a valid address! Was ${ammAddressString}`)
 const ammAddress = ammAddressString
 

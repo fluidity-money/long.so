@@ -48,7 +48,8 @@ interface Token {
 }
 ```
 
-|         Name              |                              Description
-|-------------------------- |--------------------------------------------------------------------------------------|
-| `NEXT_PUBLIC_TOKEN_LIST`  | A JSON-stringified list of AMM-supported tokens as described in the interface above. |
-| `NEXT_PUBLIC_AMM_ADDRESS` | The address of the Seawater AMM.                                                     |
+|         Name                  |                              Description
+|-------------------------------|--------------------------------------------------------------------------------------|
+| `NEXT_PUBLIC_TOKEN_LIST`      | A JSON-stringified list of AMM-supported tokens as described in the interface above. |
+| `NEXT_PUBLIC_AMM_ADDRESS`     | The address of the Seawater AMM.                                                     |
+| `NEXT_PUBLIC_PERMIT2_ADDRESS` | The address of the Permit2 contract.                                                 |
