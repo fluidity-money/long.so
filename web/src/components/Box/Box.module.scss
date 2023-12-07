@@ -44,4 +44,10 @@
       border-color: $dark;
     }
   }
+
+  &.hover {
+    :hover {
+      cursor: pointer;
+    }
+  }
 }
