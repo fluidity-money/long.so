@@ -9,7 +9,7 @@ err() {
 	exit 1
 }
 
-[ -z "$SEAWATER_PROXY_ADMIN" ] && exit 1
+[ -z "$SEAWATER_PROXY_ADMIN" ] && err "SEAWATER_PROXY_ADMIN unset"
 [ -z "$STYLUS_ENDPOINT" ] && err "STYLUS_ENDPOINT unset"
 [ -z "$STYLUS_PRIVATE_KEY" ] && err "STYLUS_PRIVATE_KEY unset"
 [ -z "SEAWATER_PROXY_ADMIN" ] && err "SEAWATER_PROXY_ADMIN unset"

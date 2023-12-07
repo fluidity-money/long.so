@@ -92,6 +92,7 @@ test("amm", async t => {
 
     const permit2Factory = new ContractFactory(Permit2.abi, Permit2.bytecode, signer);
     const permit2Address = await deployPermit2(permit2Factory);
+    console.log("permit2",permit2Address)
 
     const erc20Factory = new ContractFactory(LightweightERC20.abi, LightweightERC20.bytecode, signer)
 
