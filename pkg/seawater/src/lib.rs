@@ -77,6 +77,7 @@ mod allocator {
 // save on binary size
 #[cfg(not(any(
     feature = "swaps",
+    feature = "swap_permit2",
     feature = "positions",
     feature = "update_positions",
     feature = "admin",
@@ -84,7 +85,7 @@ mod allocator {
 mod shim {
     #[cfg(target_arch = "wasm32")]
     compile_error!(
-        "Either `swaps` or `positions` or `update_positions` or `admin` must be enabled when building for wasm."
+        "Either `swaps` or `swap_permit2` or `positions` or `update_positions` or `admin` must be enabled when building for wasm."
     );
     #[stylus_sdk::prelude::external]
     impl crate::Pools {}
@@ -242,9 +243,34 @@ impl Pools {
 /// Swap functions. Only enabled when the `swaps` feature is set.
 #[cfg_attr(feature = "swaps", external)]
 impl Pools {
+    pub fn swap(
+        &mut self,
+        pool: Address,
+        zero_for_one: bool,
+        amount: I256,
+        price_limit_x96: U256,
+    ) -> Result<(I256, I256), Revert> {
+        Pools::swap_internal(self, pool, zero_for_one, amount, price_limit_x96, None)
+    }
+
+    /// Performs a two stage swap, using approvals to transfer tokens. See [Self::swap_2_internal].
+    pub fn swap_2_exact_in(
+        &mut self,
+        from: Address,
+        to: Address,
+        amount: U256,
+        min_out: U256,
+    ) -> Result<(U256, U256), Revert> {
+        Pools::swap_2_internal(self, from, to, amount, min_out, None)
+    }
+}
+
+/// Swap functions using Permit2. Only enabled when the `swap_permit2` feature is set.
+#[cfg_attr(feature = "swap_permit2", external)]
+impl Pools {
     // slight hack - we cfg out the whole function, since the `selector` and `raw` attributes don't
     // actually exist, so we can't `cfg_attr` them in
-    #[cfg(feature = "swaps")]
+    #[cfg(feature = "swap_permit2")]
     #[selector(id = "swapPermit2(address,bool,int256,uint256,uint256,uint256,uint256,bytes)")]
     #[raw]
     pub fn swap_permit2(&mut self, data: &[u8]) -> RawArbResult {
@@ -278,18 +304,8 @@ impl Pools {
         }
     }
 
-    pub fn swap(
-        &mut self,
-        pool: Address,
-        zero_for_one: bool,
-        amount: I256,
-        price_limit_x96: U256,
-    ) -> Result<(I256, I256), Revert> {
-        Pools::swap_internal(self, pool, zero_for_one, amount, price_limit_x96, None)
-    }
-
     /// Performs a two stage swap, using permit2 to transfer tokens. See [Self::swap_2_internal].
-    #[cfg(feature = "swaps")]
+    #[cfg(feature = "swap_permit2")]
     #[selector(id = "swap2ExactInPermit2(address,address,uint256,uint256,uint256,uint256,bytes)")]
     #[raw]
     pub fn swap_2_permit2(&mut self, data: &[u8]) -> RawArbResult {
@@ -313,17 +329,6 @@ impl Pools {
             Ok((a, b)) => Some(Ok([a.to_be_bytes::<32>(), b.to_be_bytes::<32>()].concat())),
             Err(e) => Some(Err(e)),
         }
-    }
-
-    /// Performs a two stage swap, using approvals to transfer tokens. See [Self::swap_2_internal].
-    pub fn swap_2_exact_in(
-        &mut self,
-        from: Address,
-        to: Address,
-        amount: U256,
-        min_out: U256,
-    ) -> Result<(U256, U256), Revert> {
-        Pools::swap_2_internal(self, from, to, amount, min_out, None)
     }
 }
 
