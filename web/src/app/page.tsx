@@ -13,6 +13,8 @@ import {ActiveTokenContext} from '@/util/context/ActiveTokenContext'
 import {addressToSymbol, TokenList} from '@/util/tokens'
 import {Hash} from 'viem'
 import {useSwap} from '@/util/hooks/useSwap'
+import {Profile} from "./dev/page"
+import {useBalance, useAccount} from 'wagmi'
 
 export default function Home() {
   const [inputSwap, setInputSwap] = useState('')
@@ -25,7 +27,25 @@ export default function Home() {
   const [minOut, setMinOut] = useState('')
 
   const {token0, token1, setToken0, setToken1, flipTokens, ammAddress} = useContext(ActiveTokenContext)
+  const {address} = useAccount()
+
+  const {data: token0Balance} = useBalance({
+    cacheTime: 2000,
+    address,
+    token: token0,
+  })
+
+  const {data: token1Balance} = useBalance({
+    cacheTime: 2000,
+    address,
+    token: token1,
+  })
+
   const {swap, result, error} = useSwap({amountIn, minOut})
+  
+  useEffect(() => {
+    result && setInputReceive(result[1].toString())
+  }, [result])
 
   return (
     <>
@@ -70,9 +90,9 @@ export default function Home() {
             </div>
             <div className={styles.rowBottom}>
               {/* Placeholder */}
-              <Text size="small">0.00</Text>
+              <Text size="small">{amountIn}</Text>
               {/* Placeholder */}
-              <Text size="small">Balance: 0.00 <Link>Max</Link></Text>
+              <Text size="small">Balance: {token0Balance?.formatted} <Link>Max</Link></Text>
             </div>
           </Box>
           <SwapButton onClick={flipTokens}/>
@@ -87,6 +107,7 @@ export default function Home() {
                 <Input
                   placeholder="0.00"
                   value={inputReceive}
+                  disabled={true}
                   onChange={(s) => setInputReceive(s)}
                 />
               </Text>
@@ -101,7 +122,7 @@ export default function Home() {
               {/* Placeholder */}
               <Text size="small">0.00</Text>
               {/* Placeholder */}
-              <Text size="small">Balance: 0.00</Text>
+              <Text size="small">Balance: {token1Balance?.formatted} </Text>
             </div>
           </Box>
         </div>
