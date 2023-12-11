@@ -15,6 +15,7 @@ const Input: React.FC<IInput> = ({
   placeholder = '',
   value = '',
   onChange,
+  ...props
 }) => {
 
   const presentationStyles = `
@@ -29,6 +30,7 @@ const Input: React.FC<IInput> = ({
       value={value}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
+      {...props}
     />
   </>
 }
