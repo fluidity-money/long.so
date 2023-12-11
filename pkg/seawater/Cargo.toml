@@ -29,6 +29,7 @@ rand = "0.8.5"
 [features]
 export-abi = ["stylus-sdk/export-abi"]
 swaps = []
+swap_permit2 = []
 positions = []
 update_positions = []
 admin = []
