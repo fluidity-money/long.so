@@ -7,14 +7,15 @@ import Swap from '@/assets/icons/Swap.svg'
 import Caret from '@/assets/icons/Caret.svg'
 import Search from '@/assets/icons/Search.svg'
 import styles from './page.module.scss'
-import { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { ActiveModalToken, Breakdown } from '@/util/types'
 import {ActiveTokenContext} from '@/util/context/ActiveTokenContext'
-import {addressToSymbol, TokenList} from '@/util/tokens'
+import {addressToSymbol, decimalsFromAddress, TokenList} from '@/util/tokens'
 import {Hash} from 'viem'
 import {useSwap} from '@/util/hooks/useSwap'
 import {Profile} from "./dev/page"
 import {useBalance, useAccount} from 'wagmi'
+import {getFormattedStringFromTokenAmount, getTokenAmountFromFormattedString} from '@/util/converters'
 
 export default function Home() {
   const [inputSwap, setInputSwap] = useState('')
@@ -23,10 +24,14 @@ export default function Home() {
   const [breakdownSection, setBreakdownSection] = useState<Breakdown>(Breakdown.Fees)
   const [activeModalToken, setActiveModalToken] = useState<ActiveModalToken>()
 
-  const [amountIn, setAmountIn] = useState('')
+  const [amountIn, setAmountIn] = useState(BigInt(0))
+  const [amountInDisplay, setAmountInDisplay] = useState('')
   const [minOut, setMinOut] = useState('')
 
-  const {token0, token1, setToken0, setToken1, flipTokens, ammAddress} = useContext(ActiveTokenContext)
+  const {token0, token1, setToken0, setToken1, flipTokens} = useContext(ActiveTokenContext)
+  const decimals0 = useMemo(() => decimalsFromAddress(token0), [token0])
+  const decimals1 = useMemo(() => decimalsFromAddress(token1), [token1])
+
   const {address} = useAccount()
 
   const {data: token0Balance} = useBalance({
@@ -43,12 +48,25 @@ export default function Home() {
 
   const {swap, result, error} = useSwap({amountIn, minOut})
   
+  // update output using simulated swap result
   useEffect(() => {
-    result && setInputReceive(result[1].toString())
+    if (result) {
+      const [, outAmount] = result 
+      const formattedOutAmount = getFormattedStringFromTokenAmount(outAmount.toString(), decimals1)
+      setInputReceive(formattedOutAmount)
+    }
   }, [result])
+
+  // update amountIn when input amount changes
+  useEffect(() => {
+    try {
+      setAmountIn(getTokenAmountFromFormattedString(amountInDisplay, decimals0))
+    } catch {}
+  }, [amountInDisplay])
 
   return (
     <>
+    <Profile/>
     <TokenModal 
       enabled={!!activeModalToken} 
       disable={() => setActiveModalToken(undefined)}
@@ -77,8 +95,8 @@ export default function Home() {
               <Text size="large">
                 <Input
                   placeholder="0.00"
-                  value={amountIn}
-                  onChange={(s) => setAmountIn(s)}
+                  value={amountInDisplay}
+                  onChange={(s) => setAmountInDisplay(s)}
                 />
               </Text>
               <Box whileTap={{scale: 0.98}} outline pill background="light" className={styles.tokenDropdown} onClick={() => {setActiveModalToken('token0')}}>
@@ -90,7 +108,7 @@ export default function Home() {
             </div>
             <div className={styles.rowBottom}>
               {/* Placeholder */}
-              <Text size="small">{amountIn}</Text>
+              <Text size="small">{amountInDisplay}</Text>
               {/* Placeholder */}
               <Text size="small">Balance: {token0Balance?.formatted} <Link>Max</Link></Text>
             </div>
