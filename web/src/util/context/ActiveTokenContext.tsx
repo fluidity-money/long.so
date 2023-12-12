@@ -1,4 +1,4 @@
-import {Hash, isHash, isHex} from 'viem'
+import {Hash, isHex} from 'viem'
 import {createContext, useState} from 'react'
 import {ZeroAddress} from '../chainUtils'
 import {TokenList} from '../tokens'
