@@ -6,10 +6,11 @@ interface ILink {
   children: React.ReactNode
   style?: 'solid' | 'dashed'
   size?: 'small' | 'medium' | 'large'
+  onClick?: () => void
 }
 
 const Link: React.FC<ILink> = (props) => {
-  const { children, style = 'solid', size } = props
+  const { children, style = 'solid', size, onClick } = props
 
   const classes = `
     ${styles.Link}
@@ -19,6 +20,7 @@ const Link: React.FC<ILink> = (props) => {
     className={classes}
     whileHover={{ scale: 1.02 }}
     whileTap={{ scale: 0.98 }}
+    onClick={onClick}
   >
     <Text size={size}>
       {children}
