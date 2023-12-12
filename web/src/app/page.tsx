@@ -107,10 +107,9 @@ export default function Home() {
               </Box>
             </div>
             <div className={styles.rowBottom}>
-              {/* Placeholder */}
-              <Text size="small">{amountInDisplay}</Text>
-              {/* Placeholder */}
-              <Text size="small">Balance: {token0Balance?.formatted} <Link>Max</Link></Text>
+              {/* Use the actaul amountIn so invalid inputs are visible*/}
+              <Text size="small">{getFormattedStringFromTokenAmount(amountIn.toString(), decimals0)}</Text>
+              <Text size="small">Balance: {token0Balance?.formatted} <Link onClick={() => {setMax()}}>Max</Link></Text>
             </div>
           </Box>
           <SwapButton onClick={flipTokens}/>
@@ -138,7 +137,7 @@ export default function Home() {
             </div>
             <div className={styles.rowBottom}>
               {/* Placeholder */}
-              <Text size="small">0.00</Text>
+              <Text size="small">{inputReceive}</Text>
               {/* Placeholder */}
               <Text size="small">Balance: {token1Balance?.formatted} </Text>
             </div>
