@@ -60,9 +60,15 @@ export default function Home() {
   // update amountIn when input amount changes
   useEffect(() => {
     try {
-      setAmountIn(getTokenAmountFromFormattedString(amountInDisplay, decimals0))
+      if (!token0Balance?.value)
+        return
+      const amount = getTokenAmountFromFormattedString(amountInDisplay, decimals0)
+      if (amount <= token0Balance.value)
+        setAmountIn(amount)
     } catch {}
   }, [amountInDisplay])
+
+  const setMax = () => setAmountInDisplay(token0Balance?.formatted ?? amountInDisplay)
 
   return (
     <>
