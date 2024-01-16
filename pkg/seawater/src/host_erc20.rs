@@ -37,3 +37,9 @@ pub fn take(
 ) -> Result<(), Error> {
     Ok(())
 }
+
+/// Pretends to construct a revert string from a message, only happening if the underlying
+/// environment is not WASM. Only useful for testing.
+pub fn revert_from_msg(_msg: &str) -> Vec<u8> {
+    Vec::new()
+}
