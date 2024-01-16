@@ -174,11 +174,13 @@ contract SeawaterAMM is ISeawaterAMM {
         directDelegate(_getExecutorSwap());
     }
 
+    /// @inheritdoc ISeawaterExecutorQuote
     function quote(address /* pool */, bool /* zeroForOne */, int256 /* amount */, uint256 /* priceLimit */) external {
         directDelegate(_getExecutorQuote());
     }
 
 
+    /// @inheritdoc ISeawaterExecutorQuote
     function quote2(address /* to */, address /* from */, uint256 /* amount */, uint256 /* minOut*/) external {
         directDelegate(_getExecutorQuote());
     }
