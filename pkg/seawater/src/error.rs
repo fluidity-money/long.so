@@ -117,7 +117,7 @@ pub enum Error {
     #[error("Price limit too high")]
     PriceLimitTooHigh,
     // 20
-    #[error("Price limit too high")]
+    #[error("Price limit too low")]
     PriceLimitTooLow,
 
     #[error("Checked abs called on an unexpected positive number")]
