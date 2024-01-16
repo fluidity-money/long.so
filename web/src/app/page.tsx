@@ -18,7 +18,6 @@ import {useBalance, useAccount} from 'wagmi'
 import {getFormattedStringFromTokenAmount, getTokenAmountFromFormattedString} from '@/util/converters'
 
 export default function Home() {
-  const [inputSwap, setInputSwap] = useState('')
   const [inputReceive, setInputReceive] = useState('')
   const [showBreakdown, setShowBreakdown] = useState(false)
   const [breakdownSection, setBreakdownSection] = useState<Breakdown>(Breakdown.Fees)
@@ -118,7 +117,13 @@ export default function Home() {
               <Text size="small">Balance: {token0Balance?.formatted} <Link onClick={() => {setMax()}}>Max</Link></Text>
             </div>
           </Box>
-          <SwapButton onClick={flipTokens}/>
+          <SwapButton onClick={() => {
+              // swap amounts and trigger a quote update
+              const amount1 = result?.[1].toString()
+              setInputReceive(amountInDisplay);
+              setAmountInDisplay(getFormattedStringFromTokenAmount(amount1 || '0', decimals1));
+              flipTokens();
+            }}/>
           <Box className={styles.inputBox} layoutId='main'>
             <div className={styles.rowTop}>
               <Text size="small">Receive</Text>
