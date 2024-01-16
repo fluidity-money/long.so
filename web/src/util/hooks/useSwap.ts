@@ -90,7 +90,7 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
                 if (token0 === FluidTokenAddress) {
                     setPrepareContractState({
                         functionName: 'quote',
-                        args: [token0, false, BigInt(amountIn), maxUint256]
+                        args: [token1, false, BigInt(amountIn), maxUint256]
                     })
                 } else if (token1 === FluidTokenAddress) {
                     setPrepareContractState({
