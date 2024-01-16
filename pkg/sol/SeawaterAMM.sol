@@ -8,6 +8,7 @@ import "../interfaces/ISeawaterAMM.sol";
 // these are calculated as keccak()-1 to avoid collisions
 bytes32 constant EXECUTOR_SWAP_SLOT = bytes32(uint256(keccak256("seawater.impl.swap")) - 1);
 bytes32 constant EXECUTOR_SWAP_PERMIT2_SLOT = bytes32(uint256(keccak256("seawater.impl.swap_permit2")) - 1);
+bytes32 constant EXECUTOR_QUOTE_SLOT = bytes32(uint256(keccak256("seawater.impl.quote")) - 1);
 bytes32 constant EXECUTOR_POSITION_SLOT = bytes32(uint256(keccak256("seawater.impl.position")) - 1);
 bytes32 constant EXECUTOR_UPDATE_POSITION_SLOT = bytes32(uint256(keccak256("seawater.impl.update_position")) - 1);
 bytes32 constant EXECUTOR_ADMIN_SLOT = bytes32(uint256(keccak256("seawater.impl.admin")) - 1);
@@ -43,6 +44,8 @@ contract SeawaterAMM is ISeawaterAMM {
     /// @param _seawaterAdmin the admin of the AMM
     /// @param _nftManager the account that can transfer position NFTs
     /// @param _executorSwap the deployed code for the swap executor
+    /// @param _executorSwapPermit2 the deployed code for the swap_permit2 executor
+    /// @param _executorQuote the deployed code for the quote executor
     /// @param _executorPosition the deployed code for the positions executor
     /// @param _executorAdmin the deployed code for the admin executor
     /// @param _executorFallback an address that functions not matching a specific executor get set to
@@ -52,6 +55,7 @@ contract SeawaterAMM is ISeawaterAMM {
         address _nftManager,
         ISeawaterExecutorSwap _executorSwap,
         ISeawaterExecutorSwapPermit2 _executorSwapPermit2,
+        ISeawaterExecutorQuote _executorQuote,
         ISeawaterExecutorPosition _executorPosition,
         ISeawaterExecutorUpdatePosition _executorUpdatePosition,
         ISeawaterExecutorAdmin _executorAdmin,
@@ -61,6 +65,7 @@ contract SeawaterAMM is ISeawaterAMM {
         _setProxies(
             _executorSwap,
             _executorSwapPermit2,
+            _executorQuote,
             _executorPosition,
             _executorUpdatePosition,
             _executorAdmin,
@@ -85,18 +90,21 @@ contract SeawaterAMM is ISeawaterAMM {
 
     /// @notice updates the addresses of the executors. only usable by the proxy admin
     /// @param executorSwap the address of the swap executor
+    /// @param executorSwapPermit2 the deployed code for the swap_permit2 executor
+    /// @param executorQuote the deployed code for the quote executor
     /// @param executorPosition the address of the position executor
     /// @param executorAdmin the address of the admin executor
     /// @param executorFallback the address of the fallback executor
     function updateExecutors(
         ISeawaterExecutorSwap executorSwap,
         ISeawaterExecutorSwapPermit2 executorSwapPermit2,
+        ISeawaterExecutorQuote executorQuote,
         ISeawaterExecutorPosition executorPosition,
         ISeawaterExecutorUpdatePosition executorUpdatePosition,
         ISeawaterExecutorAdmin executorAdmin,
         ISeawaterExecutorFallback executorFallback
     ) public onlyProxyAdmin {
-        _setProxies(executorSwap, executorSwapPermit2, executorPosition, executorUpdatePosition, executorAdmin, executorFallback);
+        _setProxies(executorSwap, executorSwapPermit2, executorQuote, executorPosition, executorUpdatePosition, executorAdmin, executorFallback);
     }
 
     // seawater delegates
@@ -164,6 +172,15 @@ contract SeawaterAMM is ISeawaterAMM {
     /// @inheritdoc ISeawaterExecutorSwap
     function swap(address /* pool */, bool /* zeroForOne */, int256 /* amount */, uint256 /* priceLimit */) external returns (int256, int256) {
         directDelegate(_getExecutorSwap());
+    }
+
+    function quote(address /* pool */, bool /* zeroForOne */, int256 /* amount */, uint256 /* priceLimit */) external {
+        directDelegate(_getExecutorQuote());
+    }
+
+
+    function quote2(address /* to */, address /* from */, uint256 /* amount */, uint256 /* minOut*/) external {
+        directDelegate(_getExecutorQuote());
     }
 
     /// @inheritdoc ISeawaterExecutorSwapPermit2
@@ -365,6 +382,9 @@ contract SeawaterAMM is ISeawaterAMM {
     function _getExecutorSwapPermit2() internal view returns (address) {
         return StorageSlot.getAddressSlot(EXECUTOR_SWAP_PERMIT2_SLOT).value;
     }
+    function _getExecutorQuote() internal view returns (address) {
+        return StorageSlot.getAddressSlot(EXECUTOR_QUOTE_SLOT).value;
+    }
     function _getExecutorPosition() internal view returns (address) {
         return StorageSlot.getAddressSlot(EXECUTOR_POSITION_SLOT).value;
     }
@@ -385,6 +405,7 @@ contract SeawaterAMM is ISeawaterAMM {
     function _setProxies(
         ISeawaterExecutorSwap executorSwap,
         ISeawaterExecutorSwapPermit2 executorSwapPermit2,
+        ISeawaterExecutorQuote executorQuote,
         ISeawaterExecutorPosition executorPosition,
         ISeawaterExecutorUpdatePosition executorUpdatePosition,
         ISeawaterExecutorAdmin executorAdmin,
@@ -392,6 +413,7 @@ contract SeawaterAMM is ISeawaterAMM {
     ) internal {
         StorageSlot.getAddressSlot(EXECUTOR_SWAP_SLOT).value = address(executorSwap);
         StorageSlot.getAddressSlot(EXECUTOR_SWAP_PERMIT2_SLOT).value = address(executorSwapPermit2);
+        StorageSlot.getAddressSlot(EXECUTOR_QUOTE_SLOT).value = address(executorQuote);
         StorageSlot.getAddressSlot(EXECUTOR_POSITION_SLOT).value = address(executorPosition);
         StorageSlot.getAddressSlot(EXECUTOR_UPDATE_POSITION_SLOT).value = address(executorUpdatePosition);
         StorageSlot.getAddressSlot(EXECUTOR_ADMIN_SLOT).value = address(executorAdmin);

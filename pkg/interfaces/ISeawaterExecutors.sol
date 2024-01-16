@@ -72,7 +72,36 @@ interface ISeawaterExecutorSwapPermit2 {
     ) external returns (uint256, uint256);
 }
 
+interface ISeawaterExecutorQuote {
+    /// @notice reverts with the expected amount of fUSDC or pool token for a swap with the given parameters
+    /// @param pool the pool to swap on
+    /// @param zeroForOne true if swapping token->fluid token
+    /// @param amount the amount of token to swap, positive if exactIn, negative if exactOut
+    /// @param priceLimit the price limit for swaps, encoded as a sqrtX96 price
+    /// @notice always revert with Error(string(amountOut))
+    function quote(
+        address pool,
+        bool zeroForOne,
+        int256 amount,
+        uint256 priceLimit
+    ) external;
+
+    /// @notice reverts with the expected amount of tokenOut for a 2-token swap with the given parameters
+    /// @param from the input token
+    /// @param to the output token
+    /// @param amount the amount of the input token to use
+    /// @param minOut the minimum valid amount of the output token, reverts if not reached
+    /// @notice always revert with Error(string(amountOut))
+    function quote2(
+        address from,
+        address to,
+        uint256 amount,
+        uint256 minOut
+    ) external;
+}
+
 interface ISeawaterExecutorPosition {
+
     /// @notice creates a new position
     /// @param pool the pool to create the position on
     /// @param lower the lower tick of the position (for concentrated liquidity)
