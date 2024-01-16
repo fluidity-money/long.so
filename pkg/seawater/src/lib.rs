@@ -410,7 +410,7 @@ impl Pools {
             sig,
         };
 
-        match Pools::swap_2_internal(self, from, to, amount, min_out, Some(permit2_args)) {
+        match Pools::swap_2_internal_erc20(self, from, to, amount, min_out, Some(permit2_args)) {
             Ok((a, b)) => Some(Ok([a.to_be_bytes::<32>(), b.to_be_bytes::<32>()].concat())),
             Err(e) => Some(Err(e)),
         }
