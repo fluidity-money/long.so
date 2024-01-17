@@ -16,7 +16,7 @@ import {addressToSymbol, FluidTokenAddress, Token, TokenList, TokenMap} from '@/
 import {Hash, hexToBigInt} from 'viem'
  
 // wagmi example boilerplate
-const Profile = () => {
+export const Profile = () => {
   const { address, connector, isConnected } = useAccount()
   const { connect, connectors, error, isLoading, pendingConnector } =
     useConnect()
