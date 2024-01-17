@@ -7,13 +7,12 @@ import Swap from '@/assets/icons/Swap.svg'
 import Caret from '@/assets/icons/Caret.svg'
 import Search from '@/assets/icons/Search.svg'
 import styles from './page.module.scss'
-import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { ActiveModalToken, Breakdown } from '@/util/types'
 import {ActiveTokenContext} from '@/util/context/ActiveTokenContext'
-import {addressToSymbol, decimalsFromAddress, TokenList} from '@/util/tokens'
-import {Hash} from 'viem'
+import {addressToSymbol, TokenList} from '@/util/tokens'
 import {useSwap} from '@/util/hooks/useSwap'
-import {Profile} from "./dev/page"
+import {Profile} from './dev/page'
 import {useBalance, useAccount} from 'wagmi'
 import {getFormattedStringFromTokenAmount, getTokenAmountFromFormattedString} from '@/util/converters'
 
@@ -27,9 +26,9 @@ export default function Home() {
   const [amountInDisplay, setAmountInDisplay] = useState('')
   const [minOut, setMinOut] = useState('')
 
-  const {token0, token1, setToken0, setToken1, flipTokens} = useContext(ActiveTokenContext)
-  const decimals0 = useMemo(() => decimalsFromAddress(token0), [token0])
-  const decimals1 = useMemo(() => decimalsFromAddress(token1), [token1])
+  const [resetSlider, setResetSlider] = useState(false)
+
+  const {token0, token1, decimals0, decimals1, setToken0, setToken1, flipTokens} = useContext(ActiveTokenContext)
 
   const {address} = useAccount()
 
@@ -45,16 +44,12 @@ export default function Home() {
     token: token1,
   })
 
-  const {swap, result, error} = useSwap({amountIn, minOut})
-  
-  // update output using simulated swap result
+  const {swap, result, resultUsd, error, isLoading} = useSwap({amountIn, minOut})
+
+  // update output using quoted swap result
   useEffect(() => {
-    if (result) {
-      const [, outAmount] = result 
-      const formattedOutAmount = getFormattedStringFromTokenAmount(outAmount.toString(), decimals1)
-      setInputReceive(formattedOutAmount)
-    }
-  }, [result])
+    setInputReceive(resultUsd?.[1] ?? "0.00")
+  }, [resultUsd])
 
   // update amountIn when input amount changes
   useEffect(() => {
@@ -71,6 +66,7 @@ export default function Home() {
 
   return (
     <>
+    { /* TODO temp login solution */ }
     <Profile/>
     <TokenModal 
       enabled={!!activeModalToken} 
@@ -112,7 +108,7 @@ export default function Home() {
               </Box>
             </div>
             <div className={styles.rowBottom}>
-              {/* Use the actaul amountIn so invalid inputs are visible*/}
+              {/* Use the actaul amountIn so invalid inputs are visible */}
               <Text size="small">{getFormattedStringFromTokenAmount(amountIn.toString(), decimals0)}</Text>
               <Text size="small">Balance: {token0Balance?.formatted} <Link onClick={() => {setMax()}}>Max</Link></Text>
             </div>
@@ -120,9 +116,9 @@ export default function Home() {
           <SwapButton onClick={() => {
               // swap amounts and trigger a quote update
               const amount1 = result?.[1].toString()
-              setInputReceive(amountInDisplay);
-              setAmountInDisplay(getFormattedStringFromTokenAmount(amount1 || '0', decimals1));
-              flipTokens();
+              setInputReceive(amountInDisplay)
+              setAmountInDisplay(getFormattedStringFromTokenAmount(amount1 || '0', decimals1))
+              flipTokens()
             }}/>
           <Box className={styles.inputBox} layoutId='main'>
             <div className={styles.rowTop}>
@@ -132,12 +128,12 @@ export default function Home() {
             </div>
             <div className={styles.rowMiddle}>
               <Text size="large">
-                <Input
-                  placeholder="0.00"
-                  value={inputReceive}
-                  disabled={true}
-                  onChange={(s) => setInputReceive(s)}
-                />
+                    <Input
+                      placeholder="0.00"
+                      value={isLoading ? '...' : inputReceive}
+                      disabled={true}
+                      onChange={(s) => setInputReceive(s)}
+                    />
               </Text>
               <Box whileTap={{scale: 0.98}} outline pill background="light" className={styles.tokenDropdown} onClick={() => {setActiveModalToken('token1')}}>
                 <Token />
