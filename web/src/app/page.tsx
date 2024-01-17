@@ -48,7 +48,7 @@ export default function Home() {
 
   // update output using quoted swap result
   useEffect(() => {
-    setInputReceive(resultUsd?.[1] ?? "0.00")
+    setInputReceive(resultUsd?.[1] ?? '0.00')
   }, [resultUsd])
 
   // update amountIn when input amount changes
@@ -60,7 +60,7 @@ export default function Home() {
       if (amount <= token0Balance.value)
         setAmountIn(amount)
     } catch {}
-  }, [amountInDisplay])
+  }, [amountInDisplay, token0Balance?.value, decimals0])
 
   const setMax = () => setAmountInDisplay(token0Balance?.formatted ?? amountInDisplay)
 
@@ -259,8 +259,8 @@ const TokenModal = ({enabled, disable, setToken}: TokenModalProps) =>
       {/* Placeholders */}
       <Text>Highest Rewarders</Text>
       <div className={styles.rewarders}>
-        {TokenList.map(token => (
-          <Box outline pill background="light" onClick={() => {setToken(token.address); disable()}}>
+        {TokenList.map((token, i) => (
+          <Box key={i} outline pill background="light" onClick={() => {setToken(token.address); disable()}}>
             <Token />
             <Text weight='semibold'>{token.symbol}</Text>
           </Box>

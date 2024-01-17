@@ -151,7 +151,7 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
         ] as const)
 
         return result
-    }, [error?.message])
+    }, [error?.message, amountIn, decimals0, decimals1])
 
     useEffect(() => {
         resultUsd && setIsLoading(false)
