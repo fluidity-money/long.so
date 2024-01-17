@@ -8,7 +8,7 @@
  * @returns raw token amount
  */
 const getTokenAmountFromFormatted = (amount: bigint, decimals: number) =>
-  amount * BigInt(10 ** decimals);
+  amount * BigInt(10 ** decimals)
 
 /**
  * @description convert a token amount to a formatted amount string
@@ -18,8 +18,8 @@ const getTokenAmountFromFormatted = (amount: bigint, decimals: number) =>
  */
 const getFormattedStringFromTokenAmount = (amount: string, decimals: number) => {
   // slice around potential decimal place
-  const a = amount.slice(0, -decimals);
-  let b = amount.slice(-decimals);
+  const a = amount.slice(0, -decimals)
+  let b = amount.slice(-decimals)
  
   // if b is only 0s, amount is either 0 or a
   // if 0, a is '' => 0
@@ -35,7 +35,7 @@ const getFormattedStringFromTokenAmount = (amount: string, decimals: number) => 
     return a + '.' + b
 
   // number is a decimal, pad with zeros
-  return "0." + "0".repeat(decimals - amount.length) + b
+  return '0.' + '0'.repeat(decimals - amount.length) + b
 }
 
 /**
@@ -45,13 +45,13 @@ const getFormattedStringFromTokenAmount = (amount: string, decimals: number) => 
  * @returns the raw token amount
  */
 const getTokenAmountFromFormattedString = (amount: string, decimals: number): bigint => {
-  const [whole, dec] = amount.split(".");
+  const [whole, dec] = amount.split('.')
 
   // covert the whole portion to a token amount
   const wholeBig = getTokenAmountFromFormatted(BigInt(whole || 0), decimals)
 
   if (dec === undefined) {
-    return wholeBig;
+    return wholeBig
   }
 
   // convert the decimal portion to a token amount
