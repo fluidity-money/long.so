@@ -7,6 +7,8 @@ import {FluidTokenAddress} from '../tokens'
 import {useDebounce} from './useDebounce'
 import {Hash, hexToBigInt, maxUint256} from 'viem'
 import {usePermit2} from '../usePermit2'
+import {setTimeout} from 'timers/promises'
+import {getFormattedStringFromTokenAmount} from '../converters'
 
 // the strongly typed return value of the Seawater contract function `T`
 type SeawaterResult<T extends string> =
@@ -63,20 +65,32 @@ type UseSwap = ({amountIn, minOut}: UseSwapProps) => {
 
     /**
      * @description - result of the simulated contract call with the current swap function and arguments. `result` is [bigint, bigint] if the function returns normally, otherwise undefined.
-     **/
+     */
     result: SeawaterResult<'swap' | 'swap2ExactIn'> | undefined
-    
+
+    /**
+     * @description - result of the simulated contract call, adjusted for token decimals
+     */
+    resultUsd: readonly [string, string] | undefined
+
     /**
      * @description - the simulated function's error, as returned by Wagmi
      */
     error: Error | null
+
+    /**
+     * @description - whether the quote simulation or swap transaction is currently in progress
+     */
+    isLoading: boolean
 }
 
 const useSwap: UseSwap = ({amountIn, minOut}) => {
-    const {token0, token1, ammAddress} = useContext(ActiveTokenContext)
+    const {token0, token1, decimals0, decimals1, ammAddress} = useContext(ActiveTokenContext)
     const {getPermit2Data} = usePermit2()
 
     const [prepareContractState, setPrepareContractState] = useState<PrepareContractState | undefined>()
+    const [isLoading, setIsLoading] = useState(false)
+    const [resultUsd, setResultUsd] = useState<readonly [string, string] | undefined>()
 
     // debounce params passed to Wagmi hook to avoid RPC spam
     const debouncedState = useDebounce(prepareContractState, 500)
@@ -87,6 +101,7 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
     useEffect(() => {
         (async () => {
             try {
+                setIsLoading(true)
                 if (token0 === FluidTokenAddress) {
                     setPrepareContractState({
                         functionName: 'quote',
@@ -103,13 +118,15 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
                         args: [token0, token1, BigInt(amountIn), BigInt(minOut)]
                     })
                 }
-                // ignore string -> BigInt conversion errors
-            } catch (e) {}
+            // ignore string -> BigInt conversion errors
+            } catch (e) {
+                setIsLoading(false)
+            }
         })()
     }, [token0, token1, amountIn, minOut])
 
     // simulate contract call and prepare payload
-    const {config, error} = usePrepareContractWrite({
+    const {error} = usePrepareContractWrite({
         address: ammAddress,
         abi: SeawaterABI,
         functionName: debouncedState?.functionName,
@@ -122,19 +139,34 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
     const result = useMemo(() => {
         // parse the standard revert message to find the quote amount as a decimal number
         const [, quoteAmountString] = error?.message.match(/reverted with the following reason:\n(.+)\n/) || []
-        return [
-            BigInt(amountIn ?? 0), 
+
+        const result = [
+            BigInt(amountIn), 
             BigInt(quoteAmountString ?? 0)
         ] as const
-    }, [error])
+
+        setResultUsd([
+            getFormattedStringFromTokenAmount(result[0].toString(), decimals0),
+            getFormattedStringFromTokenAmount(result[1].toString(), decimals1),
+        ] as const)
+
+        return result
+    }, [error?.message])
+
+    useEffect(() => {
+        resultUsd && setIsLoading(false)
+    }, [resultUsd])
 
     // initiate a swap as described in the hook's interface
     const swap = async() => {
+    try {
         // simulation failed, so return early
         if (error && result.every(r => r === BigInt(0))) {
-            console.log('Error!',error)
+            console.log('Error!', error)
             return
         }
+
+        setIsLoading(true)
 
         // fetch permit2 data
         const {nonce: nonceHex, sig, encodedDeadline} = await getPermit2Data({token: token0, amount: BigInt(amountIn)}) || {}
@@ -154,9 +186,9 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
 
         // append permit2-specific arguments
         const args = [
-            ...debouncedState.args, 
-            nonce, 
-            encodedDeadline, 
+            ...debouncedState.args,
+            nonce,
+            encodedDeadline,
             // only swap needs maxAmount 
             ...(swapFunction === 'swap2ExactIn' ? [] : [maxAmount]),
             sig,
@@ -173,13 +205,18 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
         })
         try {
             await writeContract(request)
-        } catch(e) {console.log('failed to write swap!',e)}
+        } catch (e) {console.log('failed to write swap!', e)}
+    } finally {
+            setIsLoading(false)
+        }
     }
 
     return {
         swap,
         result,
+        resultUsd,
         error,
+        isLoading,
     }
 }
 
