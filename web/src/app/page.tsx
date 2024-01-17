@@ -13,7 +13,7 @@ import {ActiveTokenContext} from '@/util/context/ActiveTokenContext'
 import {addressToSymbol, decimalsFromAddress, TokenList} from '@/util/tokens'
 import {Hash} from 'viem'
 import {useSwap} from '@/util/hooks/useSwap'
-import {Profile} from "./dev/page"
+import {Profile} from './dev/page'
 import {useBalance, useAccount} from 'wagmi'
 import {getFormattedStringFromTokenAmount, getTokenAmountFromFormattedString} from '@/util/converters'
 
@@ -54,7 +54,7 @@ export default function Home() {
       const formattedOutAmount = getFormattedStringFromTokenAmount(outAmount.toString(), decimals1)
       setInputReceive(formattedOutAmount)
     }
-  }, [result])
+  }, [result, decimals1])
 
   // update amountIn when input amount changes
   useEffect(() => {
@@ -65,7 +65,7 @@ export default function Home() {
       if (amount <= token0Balance.value)
         setAmountIn(amount)
     } catch {}
-  }, [amountInDisplay])
+  }, [amountInDisplay, token0Balance?.value, decimals0])
 
   const setMax = () => setAmountInDisplay(token0Balance?.formatted ?? amountInDisplay)
 
@@ -120,9 +120,9 @@ export default function Home() {
           <SwapButton onClick={() => {
               // swap amounts and trigger a quote update
               const amount1 = result?.[1].toString()
-              setInputReceive(amountInDisplay);
-              setAmountInDisplay(getFormattedStringFromTokenAmount(amount1 || '0', decimals1));
-              flipTokens();
+              setInputReceive(amountInDisplay)
+              setAmountInDisplay(getFormattedStringFromTokenAmount(amount1 || '0', decimals1))
+              flipTokens()
             }}/>
           <Box className={styles.inputBox} layoutId='main'>
             <div className={styles.rowTop}>
@@ -263,8 +263,8 @@ const TokenModal = ({enabled, disable, setToken}: TokenModalProps) =>
       {/* Placeholders */}
       <Text>Highest Rewarders</Text>
       <div className={styles.rewarders}>
-        {TokenList.map(token => (
-          <Box outline pill background="light" onClick={() => {setToken(token.address); disable()}}>
+        {TokenList.map((token, i) => (
+          <Box key={i} outline pill background="light" onClick={() => {setToken(token.address); disable()}}>
             <Token />
             <Text weight='semibold'>{token.symbol}</Text>
           </Box>

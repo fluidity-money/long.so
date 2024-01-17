@@ -126,7 +126,7 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
             BigInt(amountIn ?? 0), 
             BigInt(quoteAmountString ?? 0)
         ] as const
-    }, [error])
+    }, [error, amountIn])
 
     // initiate a swap as described in the hook's interface
     const swap = async() => {
