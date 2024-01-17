@@ -13,9 +13,9 @@ import {ActiveTokenContext} from '@/util/context/ActiveTokenContext'
 import {addressToSymbol, decimalsFromAddress, TokenList} from '@/util/tokens'
 import {Hash} from 'viem'
 import {useSwap} from '@/util/hooks/useSwap'
-import {Profile} from './dev/page'
 import {useBalance, useAccount} from 'wagmi'
 import {getFormattedStringFromTokenAmount, getTokenAmountFromFormattedString} from '@/util/converters'
+import {Profile} from '@/components/Profile'
 
 export default function Home() {
   const [inputReceive, setInputReceive] = useState('')
