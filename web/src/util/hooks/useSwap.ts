@@ -79,9 +79,14 @@ type UseSwap = ({amountIn, minOut}: UseSwapProps) => {
     error: Error | null
 
     /**
-     * @description - whether the quote simulation or swap transaction is currently in progress
+     * @description - whether the quote simulation is currently in progress
      */
     isLoading: boolean
+
+    /**
+     * @description - whether the swap is currently in progress
+     */
+    isSwapping: boolean
 }
 
 const useSwap: UseSwap = ({amountIn, minOut}) => {
@@ -90,6 +95,7 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
 
     const [prepareContractState, setPrepareContractState] = useState<PrepareContractState | undefined>()
     const [isLoading, setIsLoading] = useState(false)
+    const [isSwapping, setIsSwapping] = useState(false)
     const [resultUsd, setResultUsd] = useState<readonly [string, string] | undefined>()
 
     // debounce params passed to Wagmi hook to avoid RPC spam
@@ -166,7 +172,7 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
             return
         }
 
-        setIsLoading(true)
+        setIsSwapping(true)
 
         // fetch permit2 data
         const {nonce: nonceHex, sig, encodedDeadline} = await getPermit2Data({token: token0, amount: BigInt(amountIn)}) || {}
@@ -207,7 +213,7 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
             await writeContract(request)
         } catch (e) {console.log('failed to write swap!', e)}
     } finally {
-            setIsLoading(false)
+            setIsSwapping(false)
         }
     }
 
@@ -217,6 +223,7 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
         resultUsd,
         error,
         isLoading,
+        isSwapping,
     }
 }
 
