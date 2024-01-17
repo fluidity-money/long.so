@@ -14,6 +14,7 @@ import {
 import {ActiveTokenContext} from '@/util/context/ActiveTokenContext'
 import {addressToSymbol, FluidTokenAddress, Token, TokenList, TokenMap} from '@/util/tokens'
 import {Hash, hexToBigInt} from 'viem'
+import {Profile} from '@/components/Profile'
  
 
 const TokenSelector = ({tokenList, token, setToken}: {tokenList: Array<Token>, token: Hash, setToken: (token: string) => void}) => {
