@@ -26,8 +26,6 @@ export default function Home() {
   const [amountInDisplay, setAmountInDisplay] = useState('')
   const [minOut, setMinOut] = useState('')
 
-  const [resetSlider, setResetSlider] = useState(false)
-
   const {token0, token1, decimals0, decimals1, setToken0, setToken1, flipTokens} = useContext(ActiveTokenContext)
 
   const {address} = useAccount()
@@ -44,7 +42,8 @@ export default function Home() {
     token: token1,
   })
 
-  const {swap, result, resultUsd, error, isLoading} = useSwap({amountIn, minOut})
+  const {isConnected} = useAccount()
+  const {swap, result, resultUsd, error, isLoading, isSwapping} = useSwap({amountIn, minOut})
 
   // update output using quoted swap result
   useEffect(() => {
@@ -193,6 +192,7 @@ export default function Home() {
           }
         </div>
         <Slider
+          disabled={!isConnected || isSwapping || isLoading}
           onSlideComplete={() => { swap() }}
         >
           Swap
