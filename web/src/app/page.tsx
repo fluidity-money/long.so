@@ -47,8 +47,12 @@ export default function Home() {
 
   // update output using quoted swap result
   useEffect(() => {
-    setInputReceive(resultUsd?.[1] ?? '0.00')
-  }, [resultUsd])
+    if (result) {
+      const [, outAmount] = result 
+      const formattedOutAmount = getFormattedStringFromTokenAmount(outAmount.toString(), decimals1)
+      setInputReceive(formattedOutAmount)
+    }
+  }, [result, decimals1])
 
   // update amountIn when input amount changes
   useEffect(() => {
