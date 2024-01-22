@@ -15,6 +15,21 @@ interface ISeawaterExecutorSwap {
         uint256 priceLimit
     ) external returns (int256, int256);
 
+    /// @notice performs a two stage swap across two pools
+    /// @param from the input token
+    /// @param to the output token
+    /// @param amount the amount of the input token to use
+    /// @param minOut the minimum valid amount of the output token, reverts if not reached
+    /// @return (amount in, amount out)
+    function swap2ExactIn(
+        address from,
+        address to,
+        uint256 amount,
+        uint256 minOut
+    ) external returns (uint256, uint256);
+}
+
+interface ISeawaterExecutorSwapPermit2 {
     /// @notice swaps within a pool using permit2 for token transfers
     /// @param pool the pool to swap on
     /// @param zeroForOne true if swapping token->fluid token
@@ -35,19 +50,6 @@ interface ISeawaterExecutorSwap {
         uint256 maxAmount,
         bytes memory sig
     ) external returns (int256, int256);
-
-    /// @notice performs a two stage swap across two pools
-    /// @param from the input token
-    /// @param to the output token
-    /// @param amount the amount of the input token to use
-    /// @param minOut the minimum valid amount of the output token, reverts if not reached
-    /// @return (amount in, amount out)
-    function swap2ExactIn(
-        address from,
-        address to,
-        uint256 amount,
-        uint256 minOut
-    ) external returns (uint256, uint256);
 
     /// @notice performs a two stage swap across two pools using permit2 for token transfers
     /// @param from the input token
@@ -70,7 +72,36 @@ interface ISeawaterExecutorSwap {
     ) external returns (uint256, uint256);
 }
 
+interface ISeawaterExecutorQuote {
+    /// @notice reverts with the expected amount of fUSDC or pool token for a swap with the given parameters
+    /// @param pool the pool to swap on
+    /// @param zeroForOne true if swapping token->fluid token
+    /// @param amount the amount of token to swap, positive if exactIn, negative if exactOut
+    /// @param priceLimit the price limit for swaps, encoded as a sqrtX96 price
+    /// @notice always revert with Error(string(amountOut))
+    function quote(
+        address pool,
+        bool zeroForOne,
+        int256 amount,
+        uint256 priceLimit
+    ) external;
+
+    /// @notice reverts with the expected amount of tokenOut for a 2-token swap with the given parameters
+    /// @param from the input token
+    /// @param to the output token
+    /// @param amount the amount of the input token to use
+    /// @param minOut the minimum valid amount of the output token, reverts if not reached
+    /// @notice always revert with Error(string(amountOut))
+    function quote2(
+        address from,
+        address to,
+        uint256 amount,
+        uint256 minOut
+    ) external;
+}
+
 interface ISeawaterExecutorPosition {
+
     /// @notice creates a new position
     /// @param pool the pool to create the position on
     /// @param lower the lower tick of the position (for concentrated liquidity)

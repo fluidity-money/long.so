@@ -32,7 +32,7 @@ const Box: React.FC<IBox> = (props) => {
     initial,
     whileTap,
     style = {},
-    onClick = () => {},
+    onClick,
   } = props
 
   const classes = `
@@ -41,6 +41,7 @@ const Box: React.FC<IBox> = (props) => {
     ${styles[size]}
     ${pill ? styles.pill : ''}
     ${outline ? styles.outline : ''}
+    ${onClick ? styles.hover : ''}
     ${className}
   `
 

@@ -36,5 +36,6 @@ COPY --from=build-2 /usr/local/src/superposition/app.superposition.so/seawater-a
 COPY --from=build-2 /usr/local/src/superposition/app.superposition.so/seawater-positions.wasm .
 COPY --from=build-2 /usr/local/src/superposition/app.superposition.so/seawater-update-positions.wasm .
 COPY --from=build-2 /usr/local/src/superposition/app.superposition.so/seawater-swaps.wasm .
+COPY --from=build-2 /usr/local/src/superposition/app.superposition.so/seawater-swap-permit2.wasm .
 
 COPY --from=build-2 /usr/local/src/superposition/app.superposition.so/out solidity-out/

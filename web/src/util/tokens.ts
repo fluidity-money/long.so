@@ -29,6 +29,8 @@ const TokenMap: {[address: Hash]: Token} = TokenList.reduce((prev, current) => (
 }), {})
 
 const addressToSymbol = (address: Hash) => TokenMap[address].symbol
+const tokenFromAddress = (address: Hash) => TokenMap[address]
+const decimalsFromAddress = (address: Hash) => TokenMap[address].decimals
 
 const FluidTokenAddress = (() => {
   const FluidTokenAddress = TokenList.find(({symbol}) => symbol === 'fUSDC')?.address
@@ -42,5 +44,7 @@ export {
   TokenMap,
   FluidTokenAddress,
   permit2Address,
-  addressToSymbol
+  addressToSymbol,
+  tokenFromAddress,
+  decimalsFromAddress,
 }

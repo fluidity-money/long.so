@@ -23,6 +23,11 @@ const SeawaterABI =
         'type': 'address'
       },
       {
+        'internalType': 'contract ISeawaterExecutorSwapPermit2',
+        'name': '_executorSwapPermit2',
+        'type': 'address'
+      },
+      {
         'internalType': 'contract ISeawaterExecutorPosition',
         'name': '_executorPosition',
         'type': 'address'
@@ -556,6 +561,62 @@ const SeawaterABI =
         'internalType': 'bool',
         'name': '',
         'type': 'bool'
+      },
+      {
+        'internalType': 'int256',
+        'name': '',
+        'type': 'int256'
+      },
+      {
+        'internalType': 'uint256',
+        'name': '',
+        'type': 'uint256'
+      }
+    ],
+    'name': 'quote',
+    'outputs': [],
+    'stateMutability': 'nonpayable',
+    'type': 'function'
+  },
+  {
+    'inputs': [
+      {
+        'internalType': 'address',
+        'name': '',
+        'type': 'address'
+      },
+      {
+        'internalType': 'address',
+        'name': '',
+        'type': 'address'
+      },
+      {
+        'internalType': 'uint256',
+        'name': '',
+        'type': 'uint256'
+      },
+      {
+        'internalType': 'uint256',
+        'name': '',
+        'type': 'uint256'
+      }
+    ],
+    'name': 'quote2',
+    'outputs': [],
+    'stateMutability': 'nonpayable',
+    'type': 'function'
+  },
+  {
+    'inputs': [
+      {
+        'internalType': 'address',
+        'name': '',
+        'type': 'address'
+      },
+      {
+        'internalType': 'bool',
+        'name': '',
+        'type': 'bool'
       }
     ],
     'name': 'setPoolEnabled',
@@ -961,6 +1022,11 @@ const SeawaterABI =
         'type': 'address'
       },
       {
+        'internalType': 'contract ISeawaterExecutorSwapPermit2',
+        'name': 'executorSwapPermit2',
+        'type': 'address'
+      },
+      {
         'internalType': 'contract ISeawaterExecutorPosition',
         'name': 'executorPosition',
         'type': 'address'
@@ -1108,5 +1174,4 @@ const SeawaterABI =
     'type': 'function'
   }
 ] as const
-
 export default SeawaterABI

@@ -77,6 +77,8 @@ mod allocator {
 // save on binary size
 #[cfg(not(any(
     feature = "swaps",
+    feature = "swap_permit2",
+    feature = "quotes",
     feature = "positions",
     feature = "update_positions",
     feature = "admin",
@@ -84,7 +86,7 @@ mod allocator {
 mod shim {
     #[cfg(target_arch = "wasm32")]
     compile_error!(
-        "Either `swaps` or `positions` or `update_positions` or `admin` must be enabled when building for wasm."
+        "Either `swaps` or `swap_permit2` or `quotes` or `positions` or `update_positions` or `admin` must be enabled when building for wasm."
     );
     #[stylus_sdk::prelude::external]
     impl crate::Pools {}
@@ -175,19 +177,14 @@ impl Pools {
         Ok((amount_0, amount_1))
     }
 
-    /// Performs a two step swap, taking a permit2 blob for transfers.
-    ///
-    /// This function is called by [Self::swap_2] and `swap_2_permit2`, which do
-    /// argument decoding.
-    /// See [Self::swap] for more details on how this operates.
-    pub fn swap_2_internal(
+    /// Performs a two step swap internally, without performing any ERC20 transfers.
+    fn swap_2_internal(
         pools: &mut Pools,
         from: Address,
         to: Address,
         amount: U256,
         min_out: U256,
-        permit2: Option<Permit2Args>,
-    ) -> Result<(U256, U256), Revert> {
+    ) -> Result<(U256, U256, U256, I256, i32, i32), Revert> {
         let original_amount = amount;
 
         let amount = I256::try_from(amount).unwrap();
@@ -217,6 +214,36 @@ impl Pools {
 
         assert_eq_or!(interim_usdc_out, interim_usdc_in, Error::InterimSwapNotEq);
         assert_or!(amount_out >= min_out, Error::MinOutNotReached);
+        Ok((original_amount, amount_in, amount_out, interim_usdc_out, final_tick_in, final_tick_out))
+    }
+
+    /// Performs a two step swap, taking a permit2 blob for transfers.
+    ///
+    /// This function is called by [Self::swap_2] and `swap_2_permit2`, which do
+    /// argument decoding.
+    /// See [Self::swap] for more details on how this operates.
+    pub fn swap_2_internal_erc20(
+        pools: &mut Pools,
+        from: Address,
+        to: Address,
+        amount: U256,
+        min_out: U256,
+        permit2: Option<Permit2Args>,
+    ) -> Result<(U256, U256), Revert> {
+        let (
+            original_amount,
+            amount_in,
+            amount_out,
+            interim_usdc_out,
+            final_tick_in,
+            final_tick_out
+        ) = Self::swap_2_internal(
+            pools,
+            from,
+            to,
+            amount,
+            min_out,
+        )?;
 
         // transfer tokens
         erc20::take(from, original_amount, permit2)?;
@@ -242,9 +269,93 @@ impl Pools {
 /// Swap functions. Only enabled when the `swaps` feature is set.
 #[cfg_attr(feature = "swaps", external)]
 impl Pools {
+    pub fn swap(
+        &mut self,
+        pool: Address,
+        zero_for_one: bool,
+        amount: I256,
+        price_limit_x96: U256,
+    ) -> Result<(I256, I256), Revert> {
+        Pools::swap_internal(self, pool, zero_for_one, amount, price_limit_x96, None)
+    }
+
+    /// Performs a two stage swap, using approvals to transfer tokens. See [Self::swap_2_internal].
+    pub fn swap_2_exact_in(
+        &mut self,
+        from: Address,
+        to: Address,
+        amount: U256,
+        min_out: U256,
+    ) -> Result<(U256, U256), Revert> {
+        Pools::swap_2_internal_erc20(self, from, to, amount, min_out, None)
+    }
+}
+
+/// Quote functions. Only enabled when the `quotes` feature is set.
+#[cfg_attr(feature = "quotes", external)]
+impl Pools {
+
+    /// Quote a [Self::swap]. Will revert with the result of the swap
+    /// as a decimal number as the message of an `Error(string)`. 
+    /// Returns a `Result` as Stylus expects but will always only fill the `Revert`.
+    pub fn quote(
+        &mut self,
+        pool: Address,
+        zero_for_one: bool,
+        amount: I256,
+        price_limit_x96: U256,
+    ) -> Result<(), Revert> {
+        let swapped =
+            self
+                .pools
+                .setter(pool)
+                .swap(zero_for_one, amount, price_limit_x96);
+
+        match swapped {
+            Ok((amount_0, amount_1, _)) => {
+                // we always want the token that was taken from the pool, so it's always negative
+                let quote_amount = if zero_for_one {-amount_1} else {-amount_0};
+                let revert = erc20::revert_from_msg(&quote_amount.to_dec_string());
+                Err(revert)
+            }
+            // actual error, return it as normal
+            Err(e) => {
+                Err(e)
+            } 
+        }
+    }
+
+    /// Quote a [Self::swap_2_exact_in]. Will revert with the result of the swap
+    /// as a decimal number as the message of an `Error(string)`. 
+    /// Returns a `Result` as Stylus expects but will always only fill the `Revert`.
+    pub fn quote2(
+        &mut self,
+        from: Address,
+        to: Address,
+        amount: U256,
+        min_out: U256,
+    ) -> Result<(), Revert> {
+        let swapped = Pools::swap_2_internal(self, from, to, amount, min_out);
+
+        match swapped {
+            Ok((_,_,amount_out,_,_,_)) => {
+                let revert = erc20::revert_from_msg(&amount_out.to_string()); 
+                Err(revert)
+            }
+            // actual error, return it as normal
+            Err(e) => {
+                Err(e)
+            } 
+        }
+    }
+}
+
+/// Swap functions using Permit2. Only enabled when the `swap_permit2` feature is set.
+#[cfg_attr(feature = "swap_permit2", external)]
+impl Pools {
     // slight hack - we cfg out the whole function, since the `selector` and `raw` attributes don't
     // actually exist, so we can't `cfg_attr` them in
-    #[cfg(feature = "swaps")]
+    #[cfg(feature = "swap_permit2")]
     #[selector(id = "swapPermit2(address,bool,int256,uint256,uint256,uint256,uint256,bytes)")]
     #[raw]
     pub fn swap_permit2(&mut self, data: &[u8]) -> RawArbResult {
@@ -278,18 +389,8 @@ impl Pools {
         }
     }
 
-    pub fn swap(
-        &mut self,
-        pool: Address,
-        zero_for_one: bool,
-        amount: I256,
-        price_limit_x96: U256,
-    ) -> Result<(I256, I256), Revert> {
-        Pools::swap_internal(self, pool, zero_for_one, amount, price_limit_x96, None)
-    }
-
     /// Performs a two stage swap, using permit2 to transfer tokens. See [Self::swap_2_internal].
-    #[cfg(feature = "swaps")]
+    #[cfg(feature = "swap_permit2")]
     #[selector(id = "swap2ExactInPermit2(address,address,uint256,uint256,uint256,uint256,bytes)")]
     #[raw]
     pub fn swap_2_permit2(&mut self, data: &[u8]) -> RawArbResult {
@@ -309,21 +410,10 @@ impl Pools {
             sig,
         };
 
-        match Pools::swap_2_internal(self, from, to, amount, min_out, Some(permit2_args)) {
+        match Pools::swap_2_internal_erc20(self, from, to, amount, min_out, Some(permit2_args)) {
             Ok((a, b)) => Some(Ok([a.to_be_bytes::<32>(), b.to_be_bytes::<32>()].concat())),
             Err(e) => Some(Err(e)),
         }
-    }
-
-    /// Performs a two stage swap, using approvals to transfer tokens. See [Self::swap_2_internal].
-    pub fn swap_2_exact_in(
-        &mut self,
-        from: Address,
-        to: Address,
-        amount: U256,
-        min_out: U256,
-    ) -> Result<(U256, U256), Revert> {
-        Pools::swap_2_internal(self, from, to, amount, min_out, None)
     }
 }
 
