@@ -8,6 +8,8 @@ include config.mk
 	positions \
 	update-positions \
 	swaps \
+	swap-permit2 \
+	quotes \
 	solidity \
 	amm-entrypoint \
 	ownership-nfts \
@@ -20,9 +22,11 @@ build: stylus solidity
 admin: ${OUT_SEAWATER_ADMIN}
 positions: ${OUT_SEAWATER_POSITIONS}
 update-positions: ${OUT_SEAWATER_UPDATE_POSITIONS}
+swap-permit2: ${OUT_SEAWATER_SWAP_PERMIT2}
 swaps: ${OUT_SEAWATER_SWAPS}
+quotes: ${OUT_SEAWATER_QUOTES}
 
-stylus: admin positions update-positions swaps
+stylus: admin positions update-positions swaps swap-permit2 quotes
 
 amm-entrypoint: ${OUT_SEAWATER_AMM}
 ownership-nfts: ${OUT_OWNERSHIP_NFTS}
@@ -68,6 +72,18 @@ ${OUT_SEAWATER_SWAPS}: ${FILES_RUST}
 	@mv seawater.wasm seawater-swaps.wasm
 	@rm -f liblibseawater.rlib
 
+${OUT_SEAWATER_SWAP_PERMIT2}: ${FILES_RUST}
+	@rm -f ${OUT_SEAWATER_SWAP_PERMIT2}
+	@${CARGO_BUILD_STYLUS} --features swap_permit2
+	@mv seawater.wasm seawater-swap-permit2.wasm
+	@rm -f liblibseawater.rlib
+
+${OUT_SEAWATER_QUOTES}: ${FILES_RUST}
+	@rm -f ${OUT_SEAWATER_QUOTES}
+	@${CARGO_BUILD_STYLUS} --features quotes
+	@mv seawater.wasm seawater-quotes.wasm
+	@rm -f liblibseawater.rlib
+
 ### SOLIDITY
 
 ${OUT_SEAWATER_AMM}: ${FILES_SOLIDITY}
@@ -86,6 +102,8 @@ clean:
 		${OUT_SEAWATER_POSITIONS} \
 		${OUT_SEAWATER_UPDATE_POSITIONS} \
 		${OUT_SEAWATER_SWAPS} \
+		${OUT_SEAWATER_SWAP_PERMIT2} \
+		${OUT_SEAWATER_QUOTES} \
 		cache \
 		target \
 		out \

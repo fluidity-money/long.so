@@ -3,3 +3,6 @@ export enum Breakdown {
   Rewards = 1,
   Route = 2,
 }
+
+export type ActiveModalToken = undefined | 'token0' | 'token1'
+

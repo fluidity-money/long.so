@@ -8,6 +8,8 @@ import "./ISeawaterExecutors.sol";
 interface ISeawaterAMM is
     ISeawaterEvents,
     ISeawaterExecutorSwap,
+    ISeawaterExecutorSwapPermit2,
+    ISeawaterExecutorQuote,
     ISeawaterExecutorPosition,
     ISeawaterExecutorUpdatePosition,
     ISeawaterExecutorAdminExposed
