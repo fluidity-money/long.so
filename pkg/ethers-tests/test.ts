@@ -175,7 +175,7 @@ test("amm", async t => {
 
     //await setApprovalTo([fusdcContract, tusdcContract, tusdc2Contract], ammAddress, BigInt(0));
 
-    let curNonce = 1;
+    let curNonce = await signer.getNonce() + 1;
     const getPermit2Data = async ({
         token,
         maxAmount,
