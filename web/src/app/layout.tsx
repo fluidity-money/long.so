@@ -38,7 +38,7 @@ const {publicClient, webSocketPublicClient} = process.env.NODE_ENV === 'developm
   configureChains(
     [{
       // Stylus Testnet is based off of Arbitrum Sepolia
-      ...arbitrumSepolia, name: "Stylus Testnet", id: 23011913,
+      ...arbitrumSepolia, name: 'Stylus Testnet', id: 23011913,
       // use a self-deployed multicall3 for Stylus Testnet as it doesn't support the standard address
       contracts: {multicall3: {address: multicall3Address}},
       rpcUrls: {
