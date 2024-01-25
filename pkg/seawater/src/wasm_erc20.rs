@@ -236,7 +236,7 @@ pub fn revert_from_msg(msg: &str) -> Vec<u8> {
     let msg_bytes = msg.as_bytes();
 
     // pad to the nearest multiple of 32
-    let reason_len = msg_bytes.len() + (32 - msg_bytes.len() % 32) % 32;
+    let reason_len = msg_bytes.len().next_multiple_of(32);
     let mut reason = vec!(0; reason_len);
 
     // encode reason and right pad with zeroes for alignment to a U256
