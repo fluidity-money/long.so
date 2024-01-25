@@ -48,8 +48,9 @@ interface Token {
 }
 ```
 
-|         Name                  |                              Description
-|-------------------------------|--------------------------------------------------------------------------------------|
-| `NEXT_PUBLIC_TOKEN_LIST`      | A JSON-stringified list of AMM-supported tokens as described in the interface above. |
-| `NEXT_PUBLIC_AMM_ADDRESS`     | The address of the Seawater AMM.                                                     |
-| `NEXT_PUBLIC_PERMIT2_ADDRESS` | The address of the Permit2 contract.                                                 |
+|         Name                     |                              Description
+|----------------------------------|--------------------------------------------------------------------------------------|
+| `NEXT_PUBLIC_TOKEN_LIST`         | A JSON-stringified list of AMM-supported tokens as described in the interface above. |
+| `NEXT_PUBLIC_AMM_ADDRESS`        | The address of the Seawater AMM.                                                     |
+| `NEXT_PUBLIC_PERMIT2_ADDRESS`    | The address of the Permit2 contract.                                                 |
+| `NEXT_PUBLIC_MULTICALL3_ADDRESS` | The address of the multicall3 contract, for overriding on Stylus Testnet.            |
