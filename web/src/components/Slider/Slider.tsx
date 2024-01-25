@@ -36,6 +36,10 @@ const Slider: React.FC<ISlider> = (props) => {
     ${disabled ? styles.disabled : ''}
     ${dragComplete ? styles.complete : ''}
   `
+  useEffect(() => {
+    if (dragComplete && !disabled)
+      setDragComplete(false)
+  }, [dragComplete, disabled])
 
   return (
     <Box className={styles.Box}>
