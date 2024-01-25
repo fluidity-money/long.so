@@ -1,13 +1,12 @@
-import {prepareWriteContract, writeContract} from 'wagmi/actions'
+import {prepareWriteContract, writeContract, waitForTransaction} from 'wagmi/actions'
 import {useContext, useEffect, useMemo, useState} from 'react'
 import SeawaterABI from '../abi/SeawaterAMM'
 import {ActiveTokenContext} from '../context/ActiveTokenContext'
 import {usePrepareContractWrite} from 'wagmi'
 import {FluidTokenAddress} from '../tokens'
 import {useDebounce} from './useDebounce'
-import {Hash, hexToBigInt, maxUint256} from 'viem'
+import {hexToBigInt, maxUint256} from 'viem'
 import {usePermit2} from '../usePermit2'
-import {setTimeout} from 'timers/promises'
 import {getFormattedStringFromTokenAmount} from '../converters'
 
 // the strongly typed return value of the Seawater contract function `T`
@@ -42,8 +41,6 @@ type PrepareContractState =
     functionName: 'quote2',
     args: SeawaterRequestArgs<'quote2'>
 }
-
-type permit2Function = `${'swap' | 'swap2ExactIn'}Permit2`
 
 interface UseSwapProps {
     amountIn: bigint | string
@@ -183,12 +180,10 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
         const maxAmount = amountIn
 
         // determine which swap function to call
-        const swapFunction = debouncedState?.functionName === 'quote'
-            ? 'swap' // quote
-            : 'swap2ExactIn' // quote2
-
         // use the permit2 variant of the function
-        const functionName = swapFunction + 'Permit2' as permit2Function
+        const functionName = debouncedState?.functionName === 'quote'
+            ? 'swapPermit2' // quote
+            : 'swap2ExactInPermit2' // quote2
 
         // append permit2-specific arguments
         const args = [
@@ -196,7 +191,7 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
             nonce,
             encodedDeadline,
             // only swap needs maxAmount 
-            ...(swapFunction === 'swap2ExactIn' ? [] : [maxAmount]),
+            ...(functionName === 'swap2ExactInPermit2' ? [] : [maxAmount]),
             sig,
         ]
 
@@ -209,8 +204,10 @@ const useSwap: UseSwap = ({amountIn, minOut}) => {
             // @ts-expect-error
             args,
         })
+
         try {
-            await writeContract(request)
+            const {hash} = await writeContract(request)
+            await waitForTransaction({hash})
         } catch (e) {console.log('failed to write swap!', e)}
     } finally {
             setIsSwapping(false)
