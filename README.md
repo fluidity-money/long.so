@@ -1,20 +1,14 @@
 
 # Superposition
 
-Superposition is an AMM and DEX.
+Superposition AMM is a fee negative AMM on Arbitrum Stylus.
 
-The AMM ("Seawater AMM") is currently exclusively deployed on the
-Stylus Testnet at the addresses in [DEPLOYMENT](DEPLOYMENT.md). It
-leverages [Fluid Assets](https://docs.fluidity.money/docs/learning-and-getting-started/what-are-fluid-assets)
-by [Fluidity Money](https://fluidity.money/) and [Arbitrum Stylus](https://arbitrum.io/stylus).
-
-The DEX ("Superposition DEX") is currently in development. It will be
-included in this repository upon completion, and deployed on an
-(Arbitrum Orbit)[https://arbitrum.io/orbit] chain. Like the AMM it will
-heavily leverage Stylus and Fluid Assets. For the DEX, these concepts
-are expanded on and leveraged for a "fee negative" experience, while
-leveraging Account Abstraction and Intents for a cross-chain
-fee-negative experience.
+The AMM ("Seawater AMM internally") is currently exclusively deployed
+on the Stylus Testnet at the addresses in [DEPLOYMENT](DEPLOYMENT.md).
+It leverages [Fluid
+Assets](https://docs.fluidity.money/docs/learning-and-getting-started/what-are-fluid-assets)
+by [Fluidity Money](https://fluidity.money/) and [Arbitrum
+Stylus](https://arbitrum.io/stylus).
 
 It is currently unaudited, use it at your own risk!
 
