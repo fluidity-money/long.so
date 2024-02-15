@@ -17,7 +17,7 @@ include config.mk
 
 all: build
 
-build: stylus solidity
+build: solidity stylus
 
 admin: ${OUT_SEAWATER_ADMIN}
 positions: ${OUT_SEAWATER_POSITIONS}
