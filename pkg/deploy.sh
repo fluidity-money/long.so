@@ -12,7 +12,6 @@ err() {
 [ -z "$SEAWATER_PROXY_ADMIN" ] && err "SEAWATER_PROXY_ADMIN unset"
 [ -z "$STYLUS_ENDPOINT" ] && err "STYLUS_ENDPOINT unset"
 [ -z "$STYLUS_PRIVATE_KEY" ] && err "STYLUS_PRIVATE_KEY unset"
-[ -z "SEAWATER_PROXY_ADMIN" ] && err "SEAWATER_PROXY_ADMIN unset"
 [ -z "$FLU_FUSDC_ADDR" ] && err "FLU_FUSDC_ADDR unset"
 
 seawater_swaps="$(sh deploy-seawater.sh seawater-swaps.wasm)"
