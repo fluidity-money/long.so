@@ -474,6 +474,26 @@ mod test {
     }
 
     #[test]
+    fn test_update_position_2() {
+        test_utils::with_storage::<_, StoragePool, _>(|storage| {
+            storage
+                .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
+                .unwrap();
+
+            let id = uint!(2_U256);
+
+            storage
+                .create_position(id, -874753, -662914)
+                .unwrap();
+
+            assert_eq!(
+                storage.update_position(id, 24703680000000000000000),
+                Ok((I256::unchecked_from(0), I256::unchecked_from(99649663))),
+            );
+        });
+    }
+
+    #[test]
     fn test_swap() -> Result<(), Revert> {
         test_utils::with_storage::<_, StoragePool, _>(|storage| {
             storage.init(
