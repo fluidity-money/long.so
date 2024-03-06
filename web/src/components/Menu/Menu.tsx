@@ -28,7 +28,7 @@ const Item: React.FC<IItem> = (props) => {
 
   return (
     <motion.div
-      className={classes}
+      className={`${classes} px-8 py-1 cursor-pointer rounded-md text-sm font-medium`}
       whileHover={{
         scale: !selected ? 1.05 : 1,
         transition: {
