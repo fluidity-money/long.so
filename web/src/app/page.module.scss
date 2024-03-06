@@ -28,13 +28,6 @@
 }
 
 .container {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  gap: 4px;
-  flex-direction: column;
-  width: 100%;
-
   .swapBtn {
     position: absolute;
     top: 50%;
