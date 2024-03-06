@@ -16,9 +16,7 @@ import { MetaMaskConnector } from '@/config/node_modules/wagmi/dist/connectors/m
 import { ActiveTokenContextProvider } from '@/util/context/ActiveTokenContext'
 import { TokenList } from '@/util/tokens'
 import { isHex } from 'viem'
-import '@/styles/globals.scss'
 import './globals.css'
-import styles from './layout.module.scss'
 import { usePathname, useRouter } from 'next/navigation'
 
 import Superposition from '@/assets/icons/superposition.svg'
@@ -108,9 +106,9 @@ export default function RootLayout({
           tokenList={TokenList}
           ammAddress={ammAddress}
         >
-          <body className={`${inter.className} ${styles.layout}`}>
-            <div className={styles.container}>
-              <header>
+          <body className={inter.className}>
+            <div className="">
+              <header className="p-8">
                 <div className="flex flex-col w-full gap-8">
                   <div className="flex flex-row justify-between items-center">
                     <Superposition />
@@ -118,7 +116,7 @@ export default function RootLayout({
                       Connect Wallet
                     </Button>
                   </div>
-                  <div>
+                  <div className="flex flex-col w-full items-center">
                     <Menu id="nav">
                       <Menu.Item
                         onClick={() => {
