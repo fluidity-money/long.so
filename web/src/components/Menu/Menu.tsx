@@ -28,7 +28,7 @@ const Item: React.FC<IItem> = (props) => {
 
   return (
     <motion.div
-      className={`${classes} px-8 py-1 cursor-pointer rounded-md text-sm font-medium`}
+      className={`${classes} cursor-pointer rounded-md px-8 py-1 text-sm font-medium`}
       whileHover={{
         scale: !selected ? 1.05 : 1,
         transition: {
@@ -61,11 +61,6 @@ const Item: React.FC<IItem> = (props) => {
 const Menu: React.FC<IMenu> = (props) => {
   const { children, background = 'light', style = 'secondary', id } = props
 
-  const classes = `
-    ${styles.Menu}
-    ${styles[background]}
-    ${styles[style]}
-  `
   const frameColor =
     (background === 'light' && style === 'primary') ||
     (background === 'dark' && style === 'secondary')
@@ -73,7 +68,7 @@ const Menu: React.FC<IMenu> = (props) => {
       : 'light'
 
   return (
-    <div className={classes}>
+    <div className="flex flex-row gap-1 rounded p-1">
       <LayoutGroup id={id}>
         {children.map((item, i) => {
           return (

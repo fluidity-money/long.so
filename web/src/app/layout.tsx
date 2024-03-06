@@ -13,8 +13,6 @@ import {
 } from '@/config/node_modules/wagmi/dist/chains'
 import { jsonRpcProvider } from '@/config/node_modules/wagmi/dist/providers/jsonRpc'
 import { MetaMaskConnector } from '@/config/node_modules/wagmi/dist/connectors/metaMask'
-import { ActiveTokenContextProvider } from '@/util/context/ActiveTokenContext'
-import { TokenList } from '@/util/tokens'
 import { isHex } from 'viem'
 import './globals.css'
 import { usePathname, useRouter } from 'next/navigation'
@@ -103,75 +101,70 @@ export default function RootLayout({
   return (
     <html lang="en">
       <WagmiConfig config={config}>
-        <ActiveTokenContextProvider
-          tokenList={TokenList}
-          ammAddress={ammAddress}
-        >
-          <body className={inter.className}>
-            <div className="h-screen bg-white">
-              <header className="p-8">
-                <div className="flex w-full flex-col gap-8">
-                  <div className="flex flex-row items-center justify-between">
-                    <div className="flex flex-row items-center gap-4">
-                      <Superposition height={23} />
-                      <Badge
-                        variant="invert"
-                        className="border-primary-foreground px-0 pr-2 invert md:hidden"
-                      >
-                        <div className="mr-2">
-                          <SPN height={20} />
-                        </div>
-                        <div>v</div>
-                      </Badge>
-                    </div>
+        <body className={inter.className}>
+          <div className="h-screen bg-white">
+            <header className="p-8">
+              <div className="flex w-full flex-col gap-8">
+                <div className="flex flex-row items-center justify-between">
+                  <div className="flex flex-row items-center gap-4">
+                    <Superposition height={23} />
+                    <Badge
+                      variant="invert"
+                      className="border-primary-foreground px-0 pr-2 invert md:hidden"
+                    >
+                      <div className="mr-2">
+                        <SPN height={20} />
+                      </div>
+                      <div>v</div>
+                    </Badge>
+                  </div>
 
-                    <div className="flex flex-row gap-4">
-                      <Badge
-                        variant="invert"
-                        className="hidden px-0.5 pr-2 md:inline-flex"
-                      >
-                        <div className="mr-2">
-                          <SPN height={22} />
-                        </div>
-                        <div>SPN-Test</div>
-                      </Badge>
-                      <Button size="sm" color="light">
-                        Connect Wallet
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="flex w-full flex-col items-start md:items-center">
-                    <Menu id="nav">
-                      <Menu.Item
-                        onClick={() => {
-                          router.push('/')
-                        }}
-                        selected={pathname === '/'}
-                      >
-                        <Text>Swap</Text>
-                      </Menu.Item>
-                      <Menu.Item
-                        onClick={() => {
-                          router.push('/stake')
-                        }}
-                        selected={pathname.startsWith('/stake')}
-                      >
-                        <Text>Stake</Text>
-                      </Menu.Item>
-                    </Menu>
+                  <div className="flex flex-row gap-4">
+                    <Badge
+                      variant="invert"
+                      className="hidden px-0.5 pr-2 md:inline-flex"
+                    >
+                      <div className="mr-2">
+                        <SPN height={22} />
+                      </div>
+                      <div>SPN-Test</div>
+                    </Badge>
+                    <Button size="sm" color="light">
+                      Connect Wallet
+                    </Button>
                   </div>
                 </div>
-              </header>
-              {children}
-              <footer className="z-100 absolute bottom-0 w-full p-8">
-                <div className="flex flex-row justify-between">
-                  <div>1002130192</div>
-                  <div>Version 0.0.1</div>
+                <div className="flex w-full flex-col items-start md:items-center">
+                  <Menu id="nav">
+                    <Menu.Item
+                      onClick={() => {
+                        router.push('/')
+                      }}
+                      selected={pathname === '/'}
+                    >
+                      <Text>Swap</Text>
+                    </Menu.Item>
+                    <Menu.Item
+                      onClick={() => {
+                        router.push('/stake')
+                      }}
+                      selected={pathname.startsWith('/stake')}
+                    >
+                      <Text>Stake</Text>
+                    </Menu.Item>
+                  </Menu>
                 </div>
-              </footer>
-            </div>
-          </body>
-        </ActiveTokenContextProvider>
+              </div>
+            </header>
+            {children}
+            <footer className="z-100 absolute bottom-0 w-full p-8">
+              <div className="flex flex-row justify-between">
+                <div>1002130192</div>
+                <div>Version 0.0.1</div>
+              </div>
+            </footer>
+          </div>
+        </body>
       </WagmiConfig>
     </html>
   )
