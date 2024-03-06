@@ -107,16 +107,16 @@ export default function RootLayout({
           ammAddress={ammAddress}
         >
           <body className={inter.className}>
-            <div className="">
+            <div className="h-screen bg-white">
               <header className="p-8">
-                <div className="flex flex-col w-full gap-8">
-                  <div className="flex flex-row justify-between items-center">
+                <div className="flex w-full flex-col gap-8">
+                  <div className="flex flex-row items-center justify-between">
                     <Superposition />
                     <Button size="sm" color="light">
                       Connect Wallet
                     </Button>
                   </div>
-                  <div className="flex flex-col w-full items-center">
+                  <div className="flex w-full flex-col items-start md:items-center">
                     <Menu id="nav">
                       <Menu.Item
                         onClick={() => {
