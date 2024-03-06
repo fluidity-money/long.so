@@ -8,50 +8,50 @@
     height: 32px;
     background-color: $light;
     border-radius: 100px;
-   	position: relative;
+    position: relative;
     -webkit-transform-style: preserve-3d;
 
-  	&:before{
-  		background-color: $light;
-  		content: '';
-  		position: absolute;
-  		border-radius: 50%;
-  		height: 32px;
-  		width: 32px;
-   	  -webkit-transform: translateZ(-4px);
-  	}
+    &:before {
+      background-color: $light;
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      height: 32px;
+      width: 32px;
+      -webkit-transform: translateZ(-4px);
+    }
 
-  	&:after{
-  		background-color: $light;
-  		content: '';
-  		left: calc(16px - 4px);
-  		position: absolute;
-  		height: 32px;
-  		width: 4px;
-  		z-index: -10;
-  		-webkit-transform: rotateY(-90deg);
-  		-webkit-transform-origin: 100% 50%;
-  	}
+    &:after {
+      background-color: $light;
+      content: '';
+      left: calc(16px - 4px);
+      position: absolute;
+      height: 32px;
+      width: 4px;
+      z-index: -10;
+      -webkit-transform: rotateY(-90deg);
+      -webkit-transform-origin: 100% 50%;
+    }
 
 
     .tails {
-     	-webkit-transform: translateZ(0.1px);
+      -webkit-transform: translateZ(0.1px);
     }
 
     .heads {
-     	-webkit-transform: translateZ(calc(-4.1px)) scaleX(-1);
+      -webkit-transform: translateZ(calc(-4.1px)) scaleX(-1);
     }
 
     .heads, .tails {
       display: flex;
       justify-content: center;
       align-items: center;
-     	background-color: $light;
-     	position: absolute;
-     	border-radius: 50%;
-     	content: '';
-     	height: 32px;
-     	width: 32px;
+      background-color: $light;
+      position: absolute;
+      border-radius: 50%;
+      content: '';
+      height: 32px;
+      width: 32px;
 
       svg {
         transform: scale(0.8);
@@ -73,13 +73,13 @@
       width: 64px;
       height: 64px;
 
-      &:before{
+      &:before {
         height: 64px;
         width: 64px;
-     	  -webkit-transform: translateZ(-8px);
+        -webkit-transform: translateZ(-8px);
       }
 
-      &:after{
+      &:after {
         height: 64px;
         width: 8px;
         left: calc(32px - 8px);
@@ -93,8 +93,9 @@
           transform: scale(1.6);
         }
       }
+
       .heads {
-       	-webkit-transform: translateZ(calc(-8.1px)) scaleX(-1);
+        -webkit-transform: translateZ(calc(-8.1px)) scaleX(-1);
       }
     }
   }
@@ -107,13 +108,13 @@
       width: 16px;
       height: 16px;
 
-      &:before{
+      &:before {
         height: 16px;
         width: 16px;
-     	  -webkit-transform: translateZ(-2px);
+        -webkit-transform: translateZ(-2px);
       }
 
-      &:after{
+      &:after {
         height: 16px;
         width: 2px;
         left: calc(8px - 2px);
@@ -128,8 +129,9 @@
           overflow: visible;
         }
       }
+
       .heads {
-       	-webkit-transform: translateZ(calc(-2.1px)) scaleX(-1);
+        -webkit-transform: translateZ(calc(-2.1px)) scaleX(-1);
       }
     }
   }

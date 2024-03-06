@@ -5,30 +5,9 @@
   padding: 1em;
   border-radius: 8px;
   width: max-content;
-
-  &.light {
-      &.primary {
-        @include dark;
-      }
-
-      &.secondary {
-        @include light;
-      }
-  }
-
-  &.dark {
-      &.primary {
-        @include light;
-      }
-
-      &.secondary {
-        @include dark;
-      }
-  }
 }
 
 .Item {
-  cursor: pointer;
   position: relative;
   z-index: 1;
 
@@ -47,6 +26,7 @@
 
     transition: color 0.2s ease-in-out;
   }
+
   transition: color 0.2s ease-in-out;
 
   .virtualBox {

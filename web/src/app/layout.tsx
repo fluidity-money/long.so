@@ -20,8 +20,9 @@ import '@/styles/globals.scss'
 import './globals.css'
 import styles from './layout.module.scss'
 import { usePathname, useRouter } from 'next/navigation'
-import { Menu } from '@/components/Menu'
-import { Text } from '@/components/Text'
+
+import Superposition from '@/assets/icons/superposition.svg'
+import { Menu, Text } from '@/components'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -108,13 +109,14 @@ export default function RootLayout({
           ammAddress={ammAddress}
         >
           <body className={`${inter.className} ${styles.layout}`}>
-            {/* TODO source from env or config file */}
             <div className={styles.container}>
               <header>
-                <div className="flex flex-col w-full">
-                  <div className="flex flex-row justify-between">
-                    <div>Logo</div>
-                    <Button color="light">Connect Wallet</Button>
+                <div className="flex flex-col w-full gap-8">
+                  <div className="flex flex-row justify-between items-center">
+                    <Superposition />
+                    <Button size="sm" color="light">
+                      Connect Wallet
+                    </Button>
                   </div>
                   <div>
                     <Menu id="nav">

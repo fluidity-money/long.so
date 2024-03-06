@@ -1,55 +1,77 @@
 'use client'
 
 import pkg from '@/config/package.json'
-import { Box, Slider, Token, Text, Link, Input, Stack, Button } from '@/components'
-const version = pkg.version
+import { Button } from '@/components/ui/button'
+import { Box, Input, Link, Slider, Stack, Text, Token } from '@/components'
 import Swap from '@/assets/icons/Swap.svg'
 import Caret from '@/assets/icons/Caret.svg'
 import Search from '@/assets/icons/Search.svg'
 import styles from './page.module.scss'
 import { useContext, useEffect, useState } from 'react'
 import { ActiveModalToken, Breakdown } from '@/util/types'
-import {ActiveTokenContext} from '@/util/context/ActiveTokenContext'
-import {addressToSymbol, TokenList} from '@/util/tokens'
-import {useSwap} from '@/util/hooks/useSwap'
-import {useBalance, useAccount} from 'wagmi'
-import {getFormattedStringFromTokenAmount, getTokenAmountFromFormattedString} from '@/util/converters'
-import {Profile} from '@/components/Profile'
+import { ActiveTokenContext } from '@/util/context/ActiveTokenContext'
+import { addressToSymbol, TokenList } from '@/util/tokens'
+import { useSwap } from '@/util/hooks/useSwap'
+import { useAccount, useBalance } from 'wagmi'
+import {
+  getFormattedStringFromTokenAmount,
+  getTokenAmountFromFormattedString,
+} from '@/util/converters'
+
+const version = pkg.version
 
 export default function Home() {
   const [inputReceive, setInputReceive] = useState('')
   const [showBreakdown, setShowBreakdown] = useState(false)
-  const [breakdownSection, setBreakdownSection] = useState<Breakdown>(Breakdown.Fees)
+  const [breakdownSection, setBreakdownSection] = useState<Breakdown>(
+    Breakdown.Fees,
+  )
   const [activeModalToken, setActiveModalToken] = useState<ActiveModalToken>()
 
   const [amountIn, setAmountIn] = useState(BigInt(0))
   const [amountInDisplay, setAmountInDisplay] = useState('')
   const [minOut, setMinOut] = useState('')
 
-  const {token0, token1, decimals0, decimals1, setToken0, setToken1, flipTokens} = useContext(ActiveTokenContext)
+  const [showWelcome, setShowWelcome] = useState(true)
 
-  const {address} = useAccount()
+  const {
+    token0,
+    token1,
+    decimals0,
+    decimals1,
+    setToken0,
+    setToken1,
+    flipTokens,
+  } = useContext(ActiveTokenContext)
 
-  const {data: token0Balance} = useBalance({
+  const { address } = useAccount()
+
+  const { data: token0Balance } = useBalance({
     cacheTime: 2000,
     address,
     token: token0,
   })
 
-  const {data: token1Balance} = useBalance({
+  const { data: token1Balance } = useBalance({
     cacheTime: 2000,
     address,
     token: token1,
   })
 
-  const {isConnected} = useAccount()
-  const {swap, result, resultUsd, error, isLoading, isSwapping} = useSwap({amountIn, minOut})
+  const { isConnected } = useAccount()
+  const { swap, result, resultUsd, error, isLoading, isSwapping } = useSwap({
+    amountIn,
+    minOut,
+  })
 
   // update output using quoted swap result
   useEffect(() => {
     if (result) {
-      const [, outAmount] = result 
-      const formattedOutAmount = getFormattedStringFromTokenAmount(outAmount.toString(), decimals1)
+      const [, outAmount] = result
+      const formattedOutAmount = getFormattedStringFromTokenAmount(
+        outAmount.toString(),
+        decimals1,
+      )
       setInputReceive(formattedOutAmount)
     }
   }, [result, decimals1])
@@ -57,181 +79,245 @@ export default function Home() {
   // update amountIn when input amount changes
   useEffect(() => {
     try {
-      if (!token0Balance?.value)
-        return
-      const amount = getTokenAmountFromFormattedString(amountInDisplay, decimals0)
-      if (amount <= token0Balance.value)
-        setAmountIn(amount)
+      if (!token0Balance?.value) return
+      const amount = getTokenAmountFromFormattedString(
+        amountInDisplay,
+        decimals0,
+      )
+      if (amount <= token0Balance.value) setAmountIn(amount)
     } catch {}
   }, [amountInDisplay, token0Balance?.value, decimals0])
 
-  const setMax = () => setAmountInDisplay(token0Balance?.formatted ?? amountInDisplay)
+  const setMax = () =>
+    setAmountInDisplay(token0Balance?.formatted ?? amountInDisplay)
 
   return (
     <>
-    { /* TODO temp login solution */ }
-    <Profile/>
-    <TokenModal 
-      enabled={!!activeModalToken} 
-      disable={() => setActiveModalToken(undefined)}
-      setToken={
-        activeModalToken === 'token0' ? 
-          setToken0 : 
-          setToken1
-    }/>
-    {
-      !activeModalToken &&
-        (<><div className={styles.banner}>
-          <Token />
-          {/* Placeholder */}
-          <Text >$29,123 in USDC Rewards available</Text>
-          {/* Placeholder */}
-          <Box className={styles.ticker}><Text size="tiny" weight="semibold">2d:3h:58m</Text></Box>
-        </div>
-        <div className={styles.container}>
-          <Box className={styles.inputBox}>
-            <div className={styles.rowTop}>
-              <Text size="small">Swap</Text>
-              {/* Placeholder */}
-              <Text size="small">${addressToSymbol(token0)}</Text>
-            </div>
-            <div className={styles.rowMiddle}>
-              <Text size="large">
-                <Input
-                  placeholder="0.00"
-                  value={amountInDisplay}
-                  onChange={(s) => setAmountInDisplay(s)}
-                />
-              </Text>
-              <Box whileTap={{scale: 0.98}} outline pill background="light" className={styles.tokenDropdown} onClick={() => {setActiveModalToken('token0')}}>
-                <Token />
+      <TokenModal
+        enabled={!!activeModalToken}
+        disable={() => setActiveModalToken(undefined)}
+        setToken={activeModalToken === 'token0' ? setToken0 : setToken1}
+      />
+      {!activeModalToken && (
+        <>
+          <div className={styles.container}>
+            <Box className={styles.inputBox}>
+              <div className={styles.rowTop}>
+                <Text size="small">Swap</Text>
                 {/* Placeholder */}
-                <Text weight='semibold'>{addressToSymbol(token0)}</Text>
-                <Caret />
-              </Box>
-            </div>
-            <div className={styles.rowBottom}>
-              {/* Use the actaul amountIn so invalid inputs are visible */}
-              <Text size="small">{getFormattedStringFromTokenAmount(amountIn.toString(), decimals0)}</Text>
-              <Text size="small">Balance: {token0Balance?.formatted} <Link onClick={() => {setMax()}}>Max</Link></Text>
-            </div>
-          </Box>
-          <SwapButton onClick={() => {
-              // swap amounts and trigger a quote update
-              const amount1 = result?.[1].toString()
-              setInputReceive(amountInDisplay)
-              setAmountInDisplay(getFormattedStringFromTokenAmount(amount1 || '0', decimals1))
-              flipTokens()
-            }}/>
-          <Box className={styles.inputBox} layoutId='main'>
-            <div className={styles.rowTop}>
-              <Text size="small">Receive</Text>
-              {/* Placeholder */}
-              <Text size="small">${addressToSymbol(token1)}</Text>
-            </div>
-            <div className={styles.rowMiddle}>
-              <Text size="large">
-                    <Input
-                      placeholder="0.00"
-                      value={isLoading ? '...' : inputReceive}
-                      disabled={true}
-                      onChange={(s) => setInputReceive(s)}
-                    />
-              </Text>
-              <Box whileTap={{scale: 0.98}} outline pill background="light" className={styles.tokenDropdown} onClick={() => {setActiveModalToken('token1')}}>
-                <Token />
-                {/* Placeholder */}
-                <Text weight='semibold'>{addressToSymbol(token1)}</Text>
-                <Caret />
-              </Box>
-            </div>
-            <div className={styles.rowBottom}>
-              {/* Placeholder */}
-              <Text size="small">{inputReceive}</Text>
-              {/* Placeholder */}
-              <Text size="small">Balance: {token1Balance?.formatted} </Text>
-            </div>
-          </Box>
-        </div>
-        <div className={styles.details}>
-          <div className={styles.preview}>
-            {/* Placeholder */}
-            <Text size="small">$3.28</Text>
-            <Button
-              inline
-              color="light"
-              onClick={() => setShowBreakdown(!showBreakdown)}
-            >
-              <Text size="small">See breakdown
-              <Caret className={styles.caret}/></Text>
-            </Button>
-          </div>
-          {
-            !showBreakdown && (
-          <Box pill className={styles.cta}>
-            <Stack size="small">
-              <Token />
-              <Token />
-              <Token />
-            </Stack>
-            {/* Placeholder */}
-            <Text size="tiny" weight='semibold'>Earn up to $38.21 for making this trade!</Text>
-          </Box>)
-          }
-          {
-            showBreakdown && <>
-            <div className={styles.grid}>
-              {/* Placeholders */}
-              <Text>Fees</Text>
-              <Text className={styles.value}>$3.28</Text>
-              <Text >Rewards</Text>
-              <Text className={styles.value}>$3.28</Text>
-              <Text>Route</Text>
-              <Text className={styles.value}>$3.28</Text>
-            </div>
-            <Box className={styles.detailsBox}>
-              <Text>Rewards Breakdown</Text>
+                <Text size="small">${addressToSymbol(token0)}</Text>
+              </div>
+              <div className={styles.rowMiddle}>
+                <Text size="large">
+                  <Input
+                    placeholder="0.00"
+                    value={amountInDisplay}
+                    onChange={(s) => setAmountInDisplay(s)}
+                  />
+                </Text>
+                <Box
+                  whileTap={{ scale: 0.98 }}
+                  outline
+                  pill
+                  background="light"
+                  className={styles.tokenDropdown}
+                  onClick={() => {
+                    setActiveModalToken('token0')
+                  }}
+                >
+                  <Token />
+                  {/* Placeholder */}
+                  <Text weight="semibold">{addressToSymbol(token0)}</Text>
+                  <Caret />
+                </Box>
+              </div>
+              <div className={styles.rowBottom}>
+                {/* Use the actaul amountIn so invalid inputs are visible */}
+                <Text size="small">
+                  {getFormattedStringFromTokenAmount(
+                    amountIn.toString(),
+                    decimals0,
+                  )}
+                </Text>
+                <Text size="small">
+                  Balance: {token0Balance?.formatted}{' '}
+                  <Link
+                    onClick={() => {
+                      setMax()
+                    }}
+                  >
+                    Max
+                  </Link>
+                </Text>
+              </div>
             </Box>
-          </>
-          }
-        </div>
-        <Slider
-          disabled={!isConnected || isSwapping || isLoading}
-          onSlideComplete={() => { swap() }}
-        >
-          Swap
-        </Slider></>)
-    }
-    {version}
+            <SwapButton
+              onClick={() => {
+                // swap amounts and trigger a quote update
+                const amount1 = result?.[1].toString()
+                setInputReceive(amountInDisplay)
+                setAmountInDisplay(
+                  getFormattedStringFromTokenAmount(amount1 || '0', decimals1),
+                )
+                flipTokens()
+              }}
+            />
+            <Box className={styles.inputBox} layoutId="main">
+              <div className={styles.rowTop}>
+                <Text size="small">Receive</Text>
+                {/* Placeholder */}
+                <Text size="small">${addressToSymbol(token1)}</Text>
+              </div>
+              <div className={styles.rowMiddle}>
+                <Text size="large">
+                  <Input
+                    placeholder="0.00"
+                    value={isLoading ? '...' : inputReceive}
+                    disabled={true}
+                    onChange={(s) => setInputReceive(s)}
+                  />
+                </Text>
+                <Box
+                  whileTap={{ scale: 0.98 }}
+                  outline
+                  pill
+                  background="light"
+                  className={styles.tokenDropdown}
+                  onClick={() => {
+                    setActiveModalToken('token1')
+                  }}
+                >
+                  <Token />
+                  {/* Placeholder */}
+                  <Text weight="semibold">{addressToSymbol(token1)}</Text>
+                  <Caret />
+                </Box>
+              </div>
+              <div className={styles.rowBottom}>
+                {/* Placeholder */}
+                <Text size="small">{inputReceive}</Text>
+                {/* Placeholder */}
+                <Text size="small">Balance: {token1Balance?.formatted} </Text>
+              </div>
+            </Box>
+
+            {showWelcome && (
+              <>
+                <div className="bg-gradient-to-t from-transparent to-white w-[101%] h-32 absolute -top-40 -left-1" />
+                <div className="absolute z-50 top-[50%] w-full">
+                  <div className="bg-gradient-to-b from-transparent to-white w-full  h-32" />
+                  <div className="bg-white h-80 flex flex-col items-center justify-around">
+                    <div className="flex flex-row gap-1 items-center text-xl mt-10">
+                      Think{' '}
+                      <div className="bg-black text-white font-medium p-1 px-2 rounded-md">
+                        inside
+                      </div>{' '}
+                      the box.
+                    </div>
+
+                    <div>
+                      Earn rewards on every trade on the first DeFi <br />
+                      Layer-3 focused on incentives and order flow.
+                    </div>
+
+                    <Button onClick={() => setShowWelcome(false)}>
+                      Get Started
+                    </Button>
+
+                    <Button variant="ghost">Learn more {'->'}</Button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className={styles.details}>
+            <div className={styles.preview}>
+              {/* Placeholder */}
+              <Text size="small">$3.28</Text>
+              <Button
+                color="light"
+                onClick={() => setShowBreakdown(!showBreakdown)}
+              >
+                <Text size="small">
+                  See breakdown
+                  <Caret className={styles.caret} />
+                </Text>
+              </Button>
+            </div>
+            {!showBreakdown && (
+              <Box pill className={styles.cta}>
+                <Stack size="small">
+                  <Token />
+                  <Token />
+                  <Token />
+                </Stack>
+                {/* Placeholder */}
+                <Text size="tiny" weight="semibold">
+                  Earn up to $38.21 for making this trade!
+                </Text>
+              </Box>
+            )}
+            {showBreakdown && (
+              <>
+                <div className={styles.grid}>
+                  {/* Placeholders */}
+                  <Text>Fees</Text>
+                  <Text className={styles.value}>$3.28</Text>
+                  <Text>Rewards</Text>
+                  <Text className={styles.value}>$3.28</Text>
+                  <Text>Route</Text>
+                  <Text className={styles.value}>$3.28</Text>
+                </div>
+                <Box className={styles.detailsBox}>
+                  <Text>Rewards Breakdown</Text>
+                </Box>
+              </>
+            )}
+          </div>
+          <Slider
+            disabled={!isConnected || isSwapping || isLoading}
+            onSlideComplete={() => {
+              swap()
+            }}
+          >
+            Swap
+          </Slider>
+        </>
+      )}
+      {version}
+      {/* welcome section */}
     </>
   )
 }
 
-const SwapButton = ({onClick}: {onClick?: () => void}) => <Box
-  whileHover={{
-    borderRadius: 32,
-    transition: {
-      duration: 0.6,
-    }
-  }}
-  initial={{
-    borderRadius: 4,
-    x: '-50%',
-    y: '-50%'
-  }}
-  animate={{
-    borderRadius: 4,
-    transition: {
-      duration: 0.6,
-    }
-  }}
-  whileTap={{ scale: 0.9 }}
-  background="dark"
-  className={styles.swapBtn}
-  onClick={onClick}
->
-  <Swap className={styles.swapIcon}/>
-</Box>
+const SwapButton = ({ onClick }: { onClick?: () => void }) => (
+  <Box
+    whileHover={{
+      borderRadius: 32,
+      transition: {
+        duration: 0.6,
+      },
+    }}
+    initial={{
+      borderRadius: 4,
+      x: '-50%',
+      y: '-50%',
+    }}
+    animate={{
+      borderRadius: 4,
+      transition: {
+        duration: 0.6,
+      },
+    }}
+    whileTap={{ scale: 0.9 }}
+    background="dark"
+    className={styles.swapBtn}
+    onClick={onClick}
+  >
+    <Swap className={styles.swapIcon} />
+  </Box>
+)
 
 interface TokenModalProps {
   // whether the modal is enabled
@@ -242,21 +328,25 @@ interface TokenModalProps {
   setToken: (token: string) => void
 }
 
-const TokenModal = ({enabled, disable, setToken}: TokenModalProps) =>
-  !enabled ? <></> : (
+const TokenModal = ({ enabled, disable, setToken }: TokenModalProps) =>
+  !enabled ? (
+    <></>
+  ) : (
     <Box size="large" className={styles.TokenModal}>
       <div className={styles.header}>
         <Text>Select Token</Text>
-        <Button size="medium" color="light" onClick={disable}>
+        <Button color="light" onClick={disable}>
           <Text>Esc</Text>
         </Button>
       </div>
       <Text>Filter</Text>
       <Text className={styles.search}>
         <Input
-          value=''
-          onChange={() => {return }}
-          placeholder='e.g. Ether, ARB, 0x0bafe8babf38bf3ba83fb80a82...'
+          value=""
+          onChange={() => {
+            return
+          }}
+          placeholder="e.g. Ether, ARB, 0x0bafe8babf38bf3ba83fb80a82..."
         />
         <Search />
       </Text>
@@ -264,12 +354,20 @@ const TokenModal = ({enabled, disable, setToken}: TokenModalProps) =>
       <Text>Highest Rewarders</Text>
       <div className={styles.rewarders}>
         {TokenList.map((token, i) => (
-          <Box key={i} outline pill background="light" onClick={() => {setToken(token.address); disable()}}>
+          <Box
+            key={i}
+            outline
+            pill
+            background="light"
+            onClick={() => {
+              setToken(token.address)
+              disable()
+            }}
+          >
             <Token />
-            <Text weight='semibold'>{token.symbol}</Text>
+            <Text weight="semibold">{token.symbol}</Text>
           </Box>
         ))}
       </div>
     </Box>
   )
-

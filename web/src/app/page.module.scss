@@ -27,13 +27,6 @@
   }
 }
 
-.banner {
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-  align-items: center;
-}
-
 .container {
   position: relative;
   z-index: 1;
@@ -64,7 +57,7 @@
   .inputBox {
     padding: 16px;
     border-radius: 8px;
-    width:100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -74,6 +67,7 @@
       justify-content: space-between;
       align-items: center;
     }
+
     .tokenDropdown {
       cursor: pointer;
       padding-right: 8px;
