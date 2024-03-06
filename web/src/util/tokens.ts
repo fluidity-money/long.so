@@ -1,4 +1,4 @@
-import {Hash, isHex} from 'viem'
+import { Hash, isHex } from 'viem'
 
 export interface Token {
   symbol: string
@@ -18,24 +18,33 @@ if (!tokenListString)
 
 const permit2AddressString = process.env.NEXT_PUBLIC_PERMIT2_ADDRESS
 if (!permit2AddressString || !isHex(permit2AddressString))
-  throw new Error(`PERMIT2 address from env was not a valid address! Was ${permit2AddressString}`)
+  throw new Error(
+    `PERMIT2 address from env was not a valid address! Was ${permit2AddressString}`,
+  )
 
-const permit2Address =  permit2AddressString
+const permit2Address = permit2AddressString
 
 const TokenList: Array<Token> = JSON.parse(tokenListString)
-const TokenMap: {[address: Hash]: Token} = TokenList.reduce((prev, current) => ({
-  ...prev,
-  [current.address]: current
-}), {})
+const TokenMap: { [address: Hash]: Token } = TokenList.reduce(
+  (prev, current) => ({
+    ...prev,
+    [current.address]: current,
+  }),
+  {},
+)
 
-const addressToSymbol = (address: Hash) => TokenMap[address].symbol
+const addressToSymbol = (address: Hash) => TokenMap[address]?.symbol
 const tokenFromAddress = (address: Hash) => TokenMap[address]
 const decimalsFromAddress = (address: Hash) => TokenMap[address].decimals
 
 const FluidTokenAddress = (() => {
-  const FluidTokenAddress = TokenList.find(({symbol}) => symbol === 'fUSDC')?.address
+  const FluidTokenAddress = TokenList.find(
+    ({ symbol }) => symbol === 'fUSDC',
+  )?.address
   // if (!FluidTokenAddress)
-  //   throw new Error('Fluid Token not found in token list! (NEXT_PUBLIC_TOKEN_LIST)')
+  //   throw new Error(
+  //     'Fluid Token not found in token list! (NEXT_PUBLIC_TOKEN_LIST)',
+  //   )
   return FluidTokenAddress
 })()
 
