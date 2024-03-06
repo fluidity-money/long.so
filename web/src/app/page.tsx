@@ -2,7 +2,7 @@
 
 import pkg from '@/config/package.json'
 import { Button } from '@/components/ui/button'
-import { Box, Input, Link, Slider, Stack, Text, Token } from '@/components'
+import { Box, Input, Link, Slider, Text, Token } from '@/components'
 import Swap from '@/assets/icons/Swap.svg'
 import Caret from '@/assets/icons/Caret.svg'
 import Search from '@/assets/icons/Search.svg'
@@ -100,9 +100,11 @@ export default function Home() {
       />
       {!activeModalToken && (
         <div className="flex flex-col items-center">
-          <div className="flex flex-col items-center max-w-screen-sm transition-transform hover:-translate-y-8 mt-8">
+          <div
+            className={`mt-8 flex max-w-screen-sm flex-col items-center gap-4  transition-transform ${showWelcome ? 'hover:-translate-y-8' : ''}`}
+          >
             <div
-              className={`${styles.container} relative z-10 flex gap-4 flex-col w-full `}
+              className={`${styles.container} relative z-10 flex w-full flex-col gap-4 `}
             >
               <Box className={styles.inputBox}>
                 <div className={styles.rowTop}>
@@ -154,6 +156,7 @@ export default function Home() {
                   </Text>
                 </div>
               </Box>
+
               <SwapButton
                 onClick={() => {
                   // swap amounts and trigger a quote update
@@ -168,6 +171,7 @@ export default function Home() {
                   flipTokens()
                 }}
               />
+
               <Box className={styles.inputBox} layoutId="main">
                 <div className={styles.rowTop}>
                   <Text size="small">Receive</Text>
@@ -208,50 +212,6 @@ export default function Home() {
               </Box>
             </div>
 
-            <div className={styles.details}>
-              <div className={styles.preview}>
-                {/* Placeholder */}
-                <Text size="small">$3.28</Text>
-                <Button
-                  color="light"
-                  onClick={() => setShowBreakdown(!showBreakdown)}
-                >
-                  <Text size="small">
-                    See breakdown
-                    <Caret className={styles.caret} />
-                  </Text>
-                </Button>
-              </div>
-              {!showBreakdown && (
-                <Box pill className={styles.cta}>
-                  <Stack size="small">
-                    <Token />
-                    <Token />
-                    <Token />
-                  </Stack>
-                  {/* Placeholder */}
-                  <Text size="tiny" weight="semibold">
-                    Earn up to $38.21 for making this trade!
-                  </Text>
-                </Box>
-              )}
-              {showBreakdown && (
-                <>
-                  <div className={styles.grid}>
-                    {/* Placeholders */}
-                    <Text>Fees</Text>
-                    <Text className={styles.value}>$3.28</Text>
-                    <Text>Rewards</Text>
-                    <Text className={styles.value}>$3.28</Text>
-                    <Text>Route</Text>
-                    <Text className={styles.value}>$3.28</Text>
-                  </div>
-                  <Box className={styles.detailsBox}>
-                    <Text>Rewards Breakdown</Text>
-                  </Box>
-                </>
-              )}
-            </div>
             <Slider
               disabled={!isConnected || isSwapping || isLoading}
               onSlideComplete={() => {
@@ -266,12 +226,12 @@ export default function Home() {
 
       {showWelcome && (
         <>
-          <div className="absolute z-50 top-[30%] w-full">
-            <div className="bg-gradient-to-b from-transparent to-white w-full  h-32" />
-            <div className="bg-white flex flex-col items-center justify-around gap-8">
-              <div className="flex flex-row gap-1 items-center text-xl mt-10">
+          <div className="absolute top-[30%] z-50 w-full">
+            <div className="h-32 w-full bg-gradient-to-b from-transparent to-white " />
+            <div className="flex flex-col items-center justify-around gap-10 bg-white">
+              <div className="mt-10 flex flex-row items-center gap-1 text-xl">
                 Think{' '}
-                <div className="bg-black text-white font-medium p-1 px-2 rounded-md">
+                <div className="rounded-md bg-black p-1 px-2 font-medium text-white">
                   inside
                 </div>{' '}
                 the box.
@@ -289,27 +249,27 @@ export default function Home() {
               </div>
 
               <div className="flex flex-col gap-4">
-                <div className="flex flex-row flex-wrap gap-4 justify-center items-center">
-                  <div className="group h-10 hover:h-14 rounded-full border-2 border-black p-1 px-3 text-sm hover:bg-black hover:text-white transition-[height] ">
-                    <div className="flex flex-col items-center h-full justify-center gap-1">
+                <div className="flex flex-row flex-wrap items-center justify-center gap-4">
+                  <div className="group h-10 rounded-full border-2 border-black p-1 px-3 text-sm transition-[height] hover:h-14 hover:bg-black hover:text-white ">
+                    <div className="group-hover:text-md flex h-full flex-col items-center justify-center gap-1">
                       <div>⛽️💰 Gas Rebates and Negative Fees for traders</div>
-                      <div className="group-hover:inline-flex hidden text-gray-1 text-xs">
+                      <div className="hidden text-xs text-gray-1 group-hover:inline-flex">
                         Less Gas, More Cash.{' '}
-                        <span className="cursor-pointer underline">
+                        <span className="hidden cursor-pointer underline md:inline-flex">
                           Learn More {'->'}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="group h-10 hover:h-14 rounded-full border-2 border-black p-1 px-3 text-sm hover:bg-black hover:text-white transition-[height] ">
-                    <div className="flex flex-col items-center h-full justify-center gap-1">
+                  <div className="group h-10 rounded-full border-2 border-black p-1 px-3 text-sm transition-[height] hover:h-14 hover:bg-black hover:text-white ">
+                    <div className="group-hover:text-md flex h-full flex-col items-center justify-center gap-1">
                       <div>
                         ⛽️💰 $29,123 Trader Rewards available on every swap
                       </div>
-                      <div className="group-hover:inline-flex hidden text-gray-1 text-xs">
+                      <div className="hidden text-xs text-gray-1 group-hover:inline-flex ">
                         Get rewarded for every transaction you make.{' '}
-                        <span className="cursor-pointer underline">
+                        <span className="hidden cursor-pointer underline md:inline-flex">
                           Learn More {'->'}
                         </span>
                       </div>
@@ -318,12 +278,12 @@ export default function Home() {
                 </div>
 
                 <div className="flex flex-row justify-center">
-                  <div className="group h-10 hover:h-14 rounded-full border-2 border-black p-1 px-3 text-sm hover:bg-black hover:text-white transition-[height] ">
-                    <div className="flex flex-col items-center h-full justify-center gap-1">
+                  <div className="group h-10 rounded-full border-2 border-black p-1 px-3 text-sm transition-[height] hover:h-14 hover:bg-black hover:text-white ">
+                    <div className="group-hover:text-md flex h-full flex-col items-center justify-center gap-1">
                       <div>🔺🚀️ Earn Higher Revenue with Utility Booster</div>
-                      <div className="group-hover:inline-flex hidden text-gray-1 text-xs">
+                      <div className="hidden text-xs text-gray-1 group-hover:inline-flex">
                         Earn easy and earn big.{' '}
-                        <span className="cursor-pointer underline">
+                        <span className="hidden cursor-pointer underline md:inline-flex">
                           Learn More {'->'}
                         </span>
                       </div>
@@ -332,8 +292,12 @@ export default function Home() {
                 </div>
               </div>
 
-              <Button onClick={() => setShowWelcome(false)}>Get Started</Button>
-              <Button variant="ghost">Learn more {'->'}</Button>
+              <div className="flex flex-col gap-4">
+                <Button onClick={() => setShowWelcome(false)}>
+                  <span className="iridescent-text">Get Started</span>
+                </Button>
+                <Button variant="ghost">Learn more {'->'}</Button>
+              </div>
             </div>
           </div>
         </>

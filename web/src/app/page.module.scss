@@ -69,49 +69,6 @@
   }
 }
 
-.details {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-
-  .preview {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    width: 100%;
-
-    .caret {
-      width: 12px;
-      margin-left: 4px;
-    }
-  }
-
-  .cta {
-    gap: 8px;
-    padding-right: 8px;
-    align-self: center;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    padding: 8px;
-    box-sizing: border-box;
-    width: 100%;
-
-    .value {
-      justify-self: end;
-    }
-  }
-
-  .detailsBox {
-    width: 100%;
-    border-radius: 8px;
-  }
-}
-
 .ticker {
   padding-top: 1px !important;
   padding-bottom: 2px;

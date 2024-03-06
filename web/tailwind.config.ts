@@ -58,6 +58,8 @@ const config = {
           1: '#AEAEAE',
           0: '#D8D8D8',
         },
+        black: '#1E1E1E',
+        white: '#EBEBEB',
       },
       borderRadius: {
         lg: 'var(--radius)',
