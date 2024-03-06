@@ -104,7 +104,7 @@ export default function Home() {
             className={`mt-8 flex max-w-screen-sm flex-col items-center gap-4  transition-transform ${showWelcome ? 'cursor-pointer hover:-translate-y-8' : ''}`}
           >
             <div
-              className={`${styles.container} relative z-10 flex w-full flex-col gap-4 `}
+              className={`${styles.container} relative z-10 flex w-full flex-col gap-2 `}
             >
               <Box className={styles.inputBox}>
                 <div className={styles.rowTop}>
