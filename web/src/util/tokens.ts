@@ -34,8 +34,8 @@ const decimalsFromAddress = (address: Hash) => TokenMap[address].decimals
 
 const FluidTokenAddress = (() => {
   const FluidTokenAddress = TokenList.find(({symbol}) => symbol === 'fUSDC')?.address
-  if (!FluidTokenAddress)
-    throw new Error('Fluid Token not found in token list! (NEXT_PUBLIC_TOKEN_LIST)')
+  // if (!FluidTokenAddress)
+  //   throw new Error('Fluid Token not found in token list! (NEXT_PUBLIC_TOKEN_LIST)')
   return FluidTokenAddress
 })()
 
