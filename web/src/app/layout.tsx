@@ -18,9 +18,10 @@ import { TokenList } from '@/util/tokens'
 import { isHex } from 'viem'
 import './globals.css'
 import { usePathname, useRouter } from 'next/navigation'
-
+import SPN from '@/assets/icons/SPN.svg'
 import Superposition from '@/assets/icons/superposition.svg'
 import { Menu, Text } from '@/components'
+import { Badge } from '@/components/ui/badge'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -111,10 +112,33 @@ export default function RootLayout({
               <header className="p-8">
                 <div className="flex w-full flex-col gap-8">
                   <div className="flex flex-row items-center justify-between">
-                    <Superposition />
-                    <Button size="sm" color="light">
-                      Connect Wallet
-                    </Button>
+                    <div className="flex flex-row items-center gap-4">
+                      <Superposition height={23} />
+                      <Badge
+                        variant="invert"
+                        className="border-primary-foreground px-0 pr-2 invert md:hidden"
+                      >
+                        <div className="mr-2">
+                          <SPN height={20} />
+                        </div>
+                        <div>v</div>
+                      </Badge>
+                    </div>
+
+                    <div className="flex flex-row gap-4">
+                      <Badge
+                        variant="invert"
+                        className="hidden px-0.5 pr-2 md:inline-flex"
+                      >
+                        <div className="mr-2">
+                          <SPN height={22} />
+                        </div>
+                        <div>SPN-Test</div>
+                      </Badge>
+                      <Button size="sm" color="light">
+                        Connect Wallet
+                      </Button>
+                    </div>
                   </div>
                   <div className="flex w-full flex-col items-start md:items-center">
                     <Menu id="nav">
@@ -139,6 +163,12 @@ export default function RootLayout({
                 </div>
               </header>
               {children}
+              <footer className="z-100 absolute bottom-0 w-full p-8">
+                <div className="flex flex-row justify-between">
+                  <div>1002130192</div>
+                  <div>Version 0.0.1</div>
+                </div>
+              </footer>
             </div>
           </body>
         </ActiveTokenContextProvider>

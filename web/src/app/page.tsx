@@ -101,7 +101,7 @@ export default function Home() {
       {!activeModalToken && (
         <div className="flex flex-col items-center">
           <div
-            className={`mt-8 flex max-w-screen-sm flex-col items-center gap-4  transition-transform ${showWelcome ? 'hover:-translate-y-8' : ''}`}
+            className={`mt-8 flex max-w-screen-sm flex-col items-center gap-4  transition-transform ${showWelcome ? 'cursor-pointer hover:-translate-y-8' : ''}`}
           >
             <div
               className={`${styles.container} relative z-10 flex w-full flex-col gap-4 `}
@@ -250,7 +250,7 @@ export default function Home() {
 
               <div className="flex flex-col gap-4">
                 <div className="flex flex-row flex-wrap items-center justify-center gap-4">
-                  <div className="group h-10 rounded-full border-2 border-black p-1 px-3 text-sm transition-[height] hover:h-14 hover:bg-black hover:text-white ">
+                  <div className="group h-10 rounded-full border border-black p-1 px-3 text-sm transition-[height] hover:h-14 hover:bg-black hover:text-white ">
                     <div className="group-hover:text-md flex h-full flex-col items-center justify-center gap-1">
                       <div>⛽️💰 Gas Rebates and Negative Fees for traders</div>
                       <div className="hidden text-xs text-gray-1 group-hover:inline-flex">
@@ -262,7 +262,7 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div className="group h-10 rounded-full border-2 border-black p-1 px-3 text-sm transition-[height] hover:h-14 hover:bg-black hover:text-white ">
+                  <div className="group h-10 rounded-full border border-black p-1 px-3 text-sm transition-[height] hover:h-14 hover:bg-black hover:text-white ">
                     <div className="group-hover:text-md flex h-full flex-col items-center justify-center gap-1">
                       <div>
                         ⛽️💰 $29,123 Trader Rewards available on every swap
@@ -278,7 +278,7 @@ export default function Home() {
                 </div>
 
                 <div className="flex flex-row justify-center">
-                  <div className="group h-10 rounded-full border-2 border-black p-1 px-3 text-sm transition-[height] hover:h-14 hover:bg-black hover:text-white ">
+                  <div className="group h-10 rounded-full border border-black p-1 px-3 text-sm transition-[height] hover:h-14 hover:bg-black hover:text-white ">
                     <div className="group-hover:text-md flex h-full flex-col items-center justify-center gap-1">
                       <div>🔺🚀️ Earn Higher Revenue with Utility Booster</div>
                       <div className="hidden text-xs text-gray-1 group-hover:inline-flex">
