@@ -22,6 +22,7 @@ import Superposition from '@/assets/icons/superposition.svg'
 import ArrowDown from '@/assets/icons/arrow-down.svg'
 import { Menu, Text } from '@/components'
 import { Badge } from '@/components/ui/badge'
+import { useState } from 'react'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -92,6 +93,43 @@ if (!ammAddressString || !isHex(ammAddressString))
   )
 const ammAddress = ammAddressString
 
+const NetworkSelection = () => {
+  const [clicked, setClicked] = useState(false)
+
+  return (
+    <Badge
+      variant="invert"
+      className={`group absolute right-44 hidden w-28 cursor-pointer px-0.5 transition-[width] hover:w-[120px] md:inline-flex ${
+        clicked ? 'w-[120px] rounded-2xl' : ''
+      }`}
+      onClick={() => setClicked(!clicked)}
+    >
+      <div className={'flex-col'}>
+        <div className="flex flex-row items-center">
+          <div className="mr-2">
+            <SPNTest height={30} width={30} />
+          </div>
+          <div className="text-nowrap">SPN-Test</div>
+          <div
+            className={`ml-2 transition-[width] group-hover:inline-flex group-hover:w-2 ${
+              clicked ? 'inline-flex w-2' : 'hidden w-0'
+            }`}
+          >
+            <ArrowDown width={10} height={6} />
+          </div>
+        </div>
+        {clicked && (
+          <div className="flex flex-col gap-1 p-2">
+            <div>Arbitrum</div>
+            <div>Ethereum</div>
+            <div>Solana</div>
+          </div>
+        )}
+      </div>
+    </Badge>
+  )
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -107,7 +145,7 @@ export default function RootLayout({
           <div className="h-screen bg-white">
             <header className="p-8">
               <div className="flex w-full flex-col gap-8">
-                <div className="flex flex-row items-center justify-between">
+                <div className="flex flex-row items-start justify-between">
                   <div className="flex flex-row items-center gap-4">
                     <Superposition height={34} width={34} />
                     <Badge
@@ -121,19 +159,8 @@ export default function RootLayout({
                     </Badge>
                   </div>
 
-                  <div className="flex flex-row items-center gap-4">
-                    <Badge
-                      variant="invert"
-                      className="group hidden w-28 cursor-pointer px-0.5 transition-[width] hover:w-[120px] md:inline-flex"
-                    >
-                      <div className="mr-2">
-                        <SPNTest height={30} width={30} />
-                      </div>
-                      <div className="text-nowrap">SPN-Test</div>
-                      <div className="ml-2 hidden w-0 transition-[width] group-hover:inline-flex group-hover:w-2">
-                        <ArrowDown width={10} height={6} />
-                      </div>
-                    </Badge>
+                  <div className="flex flex-row items-start gap-4">
+                    <NetworkSelection />
                     <Button size="sm" color="light">
                       Connect Wallet
                     </Button>
