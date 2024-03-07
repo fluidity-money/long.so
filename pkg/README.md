@@ -1,20 +1,83 @@
 
-# Superposition contracts
+# Long Tail contracts
 
-- `sol`
-	- Solidity contracts
-- `seawater`
-	- Seawater Rust contracts
+## Building
 
+Superposition AMM is a diamond-like contract, with the frontend to access
+the Stylus diamond facets implemented in Solidity. So, Stylus is needed
+with Rust for the implementation contracts, and Foundry is needed
+to compile the contract.
 
+To save on contract size, and to reduce gas overhead, this contract stores
+the addresses of the swap router, and the admin address, at compile-time.
 
-(only runs on linux)
-- ensure recent rust nightly toolchain installed/enabled (`rustup default nightly; rustup update nightly`) - version greater than 1.65
-- install cargo stylus `cargo install cargo-stylus`
-- ensure submodules initted `git submodule update --init --recursive`
-- run node (from github.com/OffchainLabs/nitro-testnode)
-- run deploy script with envs
-	- ensure envs contain swaps_addr etc
+So these variables must set at compile-time, like so:
 
-to run node tests, deploy above to the testnode then:
-`node --test --loader tsx ethers-tests/test.ts`
+### Build variables
+
+|           Name              |                   Description                 |
+|-----------------------------|---------------------------------------------- |
+| `FLU_SEAWATER_PERMIT2_ADDR` | Uniswap Permit2 router                        |
+| `FLU_SEAWATER_FUSDC_ADDR`   | USDC Super Asset to route every trade through |
+
+### Build dependencies
+
+|           Name          |                        Source                        |
+|-------------------------|------------------------------------------------------|
+| Rust (nightly version)  | [Installer](https://rustup.rs/)                      |
+| Cargo Stylus subcommand | [Repo](https://github.com/OffchainLabs/cargo-stylus) |
+| Foundry                 | [Installer](https://getfoundry.sh/)                  |
+| Make                    | `build-essentials` if you're on Linux                |
+
+### Build process
+
+	make build
+
+## Testing
+
+Testing is done either on-chain with the live Ethers-powered environment
+(at the time of writing, there is no native on-chain testing with a
+forking suite), or via a hosted test using cargo features with the
+testing flag.
+
+### Testing dependencies
+
+|          Name           |                         Source                         |
+|-------------------------|--------------------------------------------------------|
+| Node                    | [Website](https://nodejs.org/en)                       |
+| NPM                     | [Website](https://www.npmjs.com/)                      |
+| Nitro testnode          | [Repo](https://github.com/OffchainLabs/nitro-testnode) |
+
+Testing the local environment using Ethers is the process of:
+
+1. Deploying a local Stylus testnode.
+2. Running the ethers test suite.
+
+Running the Ethers test suite is as simple as running `./tests.sh`,
+which will also run tests on the host environment with stubbed out ERC20.
+
+### Running a local testnode
+
+1. Clone the [Nitro repo](https://github.com/OffchainLabs/nitro-testnode) with submodules on the `stylus` branch.
+2. Run the testing script `./test-node.bash --init`. This will run the Stylus suite using Docker Compose, and make it available locally.
+
+### Testing process
+
+	./tests.sh
+
+## Deployment
+
+You can deploy the contracts using the `deploy.sh` script.
+
+### Test deployments
+
+Deployments on a local node can be done with `./test-deploy.sh` for simplicity.
+
+### Deployment variables
+
+|           Name            |                                             Description                                             |
+|---------------------------|-----------------------------------------------------------------------------------------------------|
+| `SEAWATER_PROXY_ADMIN`    | Address that's permitted to administrate the code, including deploying updates, and creating pools. |
+| `STYLUS_ENDPOINT`         | URL to access the Stylus node.                                                                      |
+| `STYLUS_PRIVATE_KEY`      | Private key to use for deployment.                                                                  |
+| `FLU_SEAWATER_FUSDC_ADDR` | Super USDC address to use as the base asset for each pool.                                          |

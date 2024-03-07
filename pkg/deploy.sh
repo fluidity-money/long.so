@@ -12,7 +12,7 @@ err() {
 [ -z "$SEAWATER_PROXY_ADMIN" ] && err "SEAWATER_PROXY_ADMIN unset"
 [ -z "$STYLUS_ENDPOINT" ] && err "STYLUS_ENDPOINT unset"
 [ -z "$STYLUS_PRIVATE_KEY" ] && err "STYLUS_PRIVATE_KEY unset"
-[ -z "$FLU_FUSDC_ADDR" ] && err "FLU_FUSDC_ADDR unset"
+[ -z "$FLU_SEAWATER_FUSDC_ADDR" ] && err "FLU_SEAWATER_FUSDC_ADDR unset"
 
 seawater_swaps="$(sh deploy-seawater.sh seawater-swaps.wasm)"
 seawater_swap_permit2="$(sh deploy-seawater.sh seawater-swap-permit2.wasm)"
@@ -33,7 +33,7 @@ seawater_proxy="$(\
 		"$seawater_update_positions" \
 		"$seawater_admin" \
 		"$(cast --address-zero)" \
-		"$FLU_FUSDC_ADDR")"
+		"$FLU_SEAWATER_FUSDC_ADDR")"
 
 seawater_nft_manager="$(\
 	sh deploy-solidity.sh "OwnershipNFTs" --constructor-args \
@@ -56,5 +56,5 @@ cat <<EOF
 	"ownership_nfts_name": "$ownership_nfts_name",
 	"ownership_nfts_symbol": "$ownership_nfts_symbol",
 	"ownership_nfts_token_uri": "$ownership_nfts_token_uri",
-	"seawater_fusdc_addr": "$FLU_FUSDC_ADDR"
+	"seawater_fusdc_addr": "$FLU_SEAWATER_FUSDC_ADDR"
 }

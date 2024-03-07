@@ -122,7 +122,7 @@ test("amm", async t => {
         "./deploy.sh",
         { env: {
             "SEAWATER_PROXY_ADMIN": defaultAccount,
-            "FLU_FUSDC_ADDR": fusdcAddress,
+            "FLU_SEAWATER_FUSDC_ADDR": fusdcAddress,
             "STYLUS_ENDPOINT": RPC_URL,
             "STYLUS_PRIVATE_KEY": DEFAULT_WALLET,
             "FLU_SEAWATER_PERMIT2_ADDR": permit2Address,
