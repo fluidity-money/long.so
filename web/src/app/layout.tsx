@@ -16,7 +16,6 @@ import { MetaMaskConnector } from '@/config/node_modules/wagmi/dist/connectors/m
 import { isHex } from 'viem'
 import './globals.css'
 import { usePathname, useRouter } from 'next/navigation'
-import SPN from '@/assets/icons/SPN.svg'
 import SPNTest from '@/assets/icons/spn-test.svg'
 import Superposition from '@/assets/icons/superposition.svg'
 import ArrowDown from '@/assets/icons/arrow-down.svg'
@@ -130,6 +129,28 @@ const NetworkSelection = () => {
   )
 }
 
+const MobileNetworkSelection = () => {
+  return (
+    <Badge
+      variant="invert"
+      className={
+        'group w-14 cursor-pointer border-primary-foreground px-0 px-0.5 pr-2 invert transition-[width] md:hidden'
+      }
+    >
+      <div className={'flex-col'}>
+        <div className="flex flex-row items-center">
+          <div className="mr-2">
+            <SPNTest height={30} width={30} />
+          </div>
+          <div className={'w-2'}>
+            <ArrowDown width={10} height={6} />
+          </div>
+        </div>
+      </div>
+    </Badge>
+  )
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -154,15 +175,7 @@ export default function RootLayout({
                 <div className="flex flex-row items-start justify-between">
                   <div className="flex flex-row items-center gap-4">
                     <Superposition height={34} width={34} />
-                    <Badge
-                      variant="invert"
-                      className="border-primary-foreground px-0 pr-2 invert md:hidden"
-                    >
-                      <div className="mr-2">
-                        <SPN height={20} />
-                      </div>
-                      <div>v</div>
-                    </Badge>
+                    <MobileNetworkSelection />
                   </div>
 
                   <div className="flex flex-row items-start gap-4">
