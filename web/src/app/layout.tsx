@@ -142,8 +142,12 @@ export default function RootLayout({
     <html lang="en">
       <WagmiConfig config={config}>
         <body className={inter.className}>
-          <div className="h-screen bg-white">
-            <div className={'iridescent-blur'} />
+          <div className="h-screen w-screen overflow-hidden bg-white">
+            <div
+              className={
+                'iridescent-blur calc absolute left-1/2 top-[180px] h-full max-h-[305px] w-full max-w-[557px] -translate-x-1/2 transform'
+              }
+            />
 
             <header className="p-8">
               <div className="flex w-full flex-col gap-8">
