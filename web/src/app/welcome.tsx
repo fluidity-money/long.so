@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { useWelcomeStore } from '@/stores/useWelcomeStore'
+import { Token } from '@/components'
 
 /**
  * Overlay the welcome screen on top of the app
@@ -50,8 +51,14 @@ export const Welcome = () => {
 
               <div className="group h-10 rounded-full border border-black p-1 px-3 transition-[height] hover:h-14 hover:bg-black hover:text-white ">
                 <div className="flex h-full flex-col items-center justify-center gap-1">
-                  <div className="text-sm  group-hover:text-base">
-                    ⛽️💰 $29,123 Trader Rewards available on every swap
+                  <div className="flex flex-row items-center gap-1 text-sm group-hover:text-base">
+                    <div
+                      className="group-hover:invert
+                    "
+                    >
+                      <Token size={'medium'} />
+                    </div>
+                    $29,123 Trader Rewards available on every swap
                   </div>
                   <div className="hidden text-xs text-gray-1 group-hover:inline-flex ">
                     Get rewarded for every transaction you make.{' '}

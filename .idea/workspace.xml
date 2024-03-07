@@ -4,17 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="add tailwind and shadcn/ui">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/Menu/Menu.module.scss" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/Menu/Menu.module.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/Menu/Menu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/Menu/Menu.tsx" afterDir="false" />
+    <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="refactor: reorganize state">
+      <change beforePath="$PROJECT_DIR$/web/src/app/welcome.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/welcome.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="TypeScript File" />
+        <option value="TypeScript JSX File" />
+      </list>
+    </option>
   </component>
   <component name="FormatOnSaveOptions">
     <option name="myRunOnSave" value="true" />
@@ -34,7 +38,7 @@
   "keyToString": {
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "code.cleanup.on.save": "true",
-    "git-widget-placeholder": "development",
+    "git-widget-placeholder": "head",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.standard": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -42,7 +46,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "prettierjs.PrettierConfiguration.Package": "/Users/aidankinzett/Git/amm.superposition.so/web/node_modules/prettier",
     "rearrange.code.on.save": "true",
-    "settings.editor.selected.configurable": "actions.on.save",
+    "settings.editor.selected.configurable": "editor.preferences.appearance",
     "ts.external.directory.path": "/Users/aidankinzett/Git/amm.superposition.so/web/node_modules/typescript/lib"
   },
   "keyToStringList": {
@@ -51,6 +55,11 @@
     ]
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/web/src" />
+    </key>
+  </component>
   <component name="TaskManager">
     <task id="LOCAL-00001" summary="add tailwind and shadcn/ui">
       <option name="closed" value="true" />
@@ -60,7 +69,15 @@
       <option name="project" value="LOCAL" />
       <updated>1709692111352</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="refactor: reorganize state">
+      <option name="closed" value="true" />
+      <created>1709724517761</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1709724517761</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -70,9 +87,21 @@
       </list>
     </option>
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="add tailwind and shadcn/ui" />
-    <option name="LAST_COMMIT_MESSAGE" value="add tailwind and shadcn/ui" />
+    <MESSAGE value="refactor: reorganize state" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor: reorganize state" />
   </component>
 </project>
