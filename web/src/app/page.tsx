@@ -109,7 +109,7 @@ export default function Home() {
             />
           )}
           <div
-            className={`mt-8 flex max-w-screen-sm flex-col items-center gap-4  transition-transform ${welcome ? `cursor-pointer blur-sm  hover:-translate-y-8 hover:blur-0 ${hovering ? '-translate-y-8 blur-0' : ''}` : ''}`}
+            className={`mt-8 flex max-w-screen-sm flex-col items-center gap-4 transition-transform ${welcome ? `cursor-pointer hover:-translate-y-8 hover:blur-0 ${hovering ? '-translate-y-8 blur-0' : 'blur-sm'}` : ''}`}
             onClick={() => setWelcome(false)}
           >
             <div
