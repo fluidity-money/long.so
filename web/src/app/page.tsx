@@ -88,12 +88,10 @@ export default function Home() {
   const setMax = () =>
     setAmountInDisplay(token0Balance?.formatted ?? amountInDisplay)
 
-  const activeModalToken = useModalStore((s) => s.enabled)
-  const setActiveModalToken = useModalStore((s) => s.setActiveModalToken)
+  const { setActiveModalToken, enabled: activeModalToken } = useModalStore()
 
   const [hovering, setHovering] = useState(false)
 
-  console.log(hovering)
   return (
     <>
       <TokenModal />
