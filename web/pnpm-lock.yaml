@@ -89,6 +89,9 @@ dependencies:
   wagmi:
     specifier: ^1.4.1
     version: 1.4.4(@types/react@18.2.21)(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)(viem@1.16.6)
+  zustand:
+    specifier: ^4.5.2
+    version: 4.5.2(@types/react@18.2.21)(react@18.2.0)
 
 devDependencies:
   '@svgr/webpack':
@@ -2909,7 +2912,7 @@ packages:
       eventemitter3: 4.0.7
       typescript: 5.2.2
       viem: 1.16.6(typescript@5.2.2)
-      zustand: 4.4.3(@types/react@18.2.21)(react@18.2.0)
+      zustand: 4.5.2(@types/react@18.2.21)(react@18.2.0)
     transitivePeerDependencies:
       - '@react-native-async-storage/async-storage'
       - '@types/react'
@@ -2937,7 +2940,7 @@ packages:
       eventemitter3: 4.0.7
       typescript: 5.2.2
       viem: 1.16.6(typescript@5.2.2)
-      zustand: 4.4.3(@types/react@18.2.21)(react@18.2.0)
+      zustand: 4.5.2(@types/react@18.2.21)(react@18.2.0)
     transitivePeerDependencies:
       - '@react-native-async-storage/async-storage'
       - '@types/react'
@@ -7403,12 +7406,12 @@ packages:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
     dev: false
 
-  /zustand@4.4.3(@types/react@18.2.21)(react@18.2.0):
-    resolution: {integrity: sha512-oRy+X3ZazZvLfmv6viIaQmtLOMeij1noakIsK/Y47PWYhT8glfXzQ4j0YcP5i0P0qI1A4rIB//SGROGyZhx91A==}
+  /zustand@4.5.2(@types/react@18.2.21)(react@18.2.0):
+    resolution: {integrity: sha512-2cN1tPkDVkwCy5ickKrI7vijSjPksFRfqS6237NzT0vqSsztTNnQdHw9mmN7uBdk3gceVXU0a+21jFzFzAc9+g==}
     engines: {node: '>=12.7.0'}
     peerDependencies:
       '@types/react': '>=16.8'
-      immer: '>=9.0'
+      immer: '>=9.0.6'
       react: '>=16.8'
     peerDependenciesMeta:
       '@types/react':
