@@ -91,14 +91,25 @@ export default function Home() {
   const activeModalToken = useModalStore((s) => s.enabled)
   const setActiveModalToken = useModalStore((s) => s.setActiveModalToken)
 
+  const [hovering, setHovering] = useState(false)
+
+  console.log(hovering)
   return (
     <>
       <TokenModal />
 
       {!activeModalToken && (
-        <div className="flex flex-col items-center">
+        <div className="group flex flex-col items-center">
+          {welcome && (
+            <div
+              className="absolute top-[35%] z-[60] h-32 w-full cursor-pointer bg-gradient-to-b from-transparent to-white"
+              onMouseEnter={() => setHovering(true)}
+              onMouseLeave={() => setHovering(false)}
+              onClick={() => setWelcome(false)}
+            />
+          )}
           <div
-            className={`mt-8 flex max-w-screen-sm flex-col items-center gap-4  transition-transform ${welcome ? 'cursor-pointer blur-sm  hover:-translate-y-8 hover:blur-0' : ''}`}
+            className={`mt-8 flex max-w-screen-sm flex-col items-center gap-4  transition-transform ${welcome ? `cursor-pointer blur-sm  hover:-translate-y-8 hover:blur-0 ${hovering ? '-translate-y-8 blur-0' : ''}` : ''}`}
             onClick={() => setWelcome(false)}
           >
             <div
