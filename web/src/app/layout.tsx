@@ -143,6 +143,8 @@ export default function RootLayout({
       <WagmiConfig config={config}>
         <body className={inter.className}>
           <div className="h-screen bg-white">
+            <div className={'iridescent-blur'} />
+
             <header className="p-8">
               <div className="flex w-full flex-col gap-8">
                 <div className="flex flex-row items-start justify-between">
