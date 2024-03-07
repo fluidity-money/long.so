@@ -1,31 +1,23 @@
 
-# Superposition
+# Long Tail AMM (Superposition AMM)
 
-Superposition AMM is a fee negative AMM on Arbitrum Stylus.
+Long Tail AMM is Arbitrum's most rewarding AMM, made possible with
+Stylus. Long Tail AMM leverages Super Assets to reward every on-chain
+transaction with yield, whilst remaining the most affordable AMM with
+a low gas profile leveraging Stylus.
 
-The AMM ("Seawater AMM internally") is currently exclusively deployed
-on the Stylus Testnet at the addresses in [DEPLOYMENT](DEPLOYMENT.md).
-It leverages [Fluid
-Assets](https://docs.fluidity.money/docs/learning-and-getting-started/what-are-fluid-assets)
-by [Fluidity Money](https://fluidity.money/) and [Arbitrum
-Stylus](https://arbitrum.io/stylus).
+Stylus is a WASM frontend to the standard EVM stack made available
+exclusively on Arbitrum. The Stylus Rust toolchain leverages LLVM to
+produce WASM binaries with support for using the EVM once deployed
+on-chain.
 
-It is currently unaudited, use it at your own risk!
+Deployment addresses are available at [DEPLOYMENT.md](DEPLOYMENT.md).
 
-## Architecture
+## Contributing
 
-AMM architecture can be found in a Graph file in
-[docs/amm.dot](docs/amm.dot).
+(This is a TODO!)
 
-## Building
+## Security
 
-	make build
+[Security disclosure/report link](SECURITY)
 
-## Dependencies
-
-- Make
-- [Node](https://nodejs.org/en/)
-- [NPM](https://www.npmjs.com/)
-- [Foundry](https://github.com/foundry-rs/foundry)
-- [Rust Wasm backend](https://www.rust-lang.org/what/wasm)
-- [Arbitrum Stylus](https://docs.arbitrum.io/stylus/stylus-quickstart)
