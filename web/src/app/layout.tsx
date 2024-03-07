@@ -17,7 +17,9 @@ import { isHex } from 'viem'
 import './globals.css'
 import { usePathname, useRouter } from 'next/navigation'
 import SPN from '@/assets/icons/SPN.svg'
+import SPNTest from '@/assets/icons/spn-test.svg'
 import Superposition from '@/assets/icons/superposition.svg'
+import ArrowDown from '@/assets/icons/arrow-down.svg'
 import { Menu, Text } from '@/components'
 import { Badge } from '@/components/ui/badge'
 
@@ -107,7 +109,7 @@ export default function RootLayout({
               <div className="flex w-full flex-col gap-8">
                 <div className="flex flex-row items-center justify-between">
                   <div className="flex flex-row items-center gap-4">
-                    <Superposition height={23} />
+                    <Superposition height={34} width={34} />
                     <Badge
                       variant="invert"
                       className="border-primary-foreground px-0 pr-2 invert md:hidden"
@@ -119,15 +121,18 @@ export default function RootLayout({
                     </Badge>
                   </div>
 
-                  <div className="flex flex-row gap-4">
+                  <div className="flex flex-row items-center gap-4">
                     <Badge
                       variant="invert"
-                      className="hidden px-0.5 pr-2 md:inline-flex"
+                      className="group hidden w-28 cursor-pointer px-0.5 transition-[width] hover:w-[120px] md:inline-flex"
                     >
                       <div className="mr-2">
-                        <SPN height={22} />
+                        <SPNTest height={30} width={30} />
                       </div>
-                      <div>SPN-Test</div>
+                      <div className="text-nowrap">SPN-Test</div>
+                      <div className="ml-2 hidden w-0 transition-[width] group-hover:inline-flex group-hover:w-2">
+                        <ArrowDown width={10} height={6} />
+                      </div>
                     </Badge>
                     <Button size="sm" color="light">
                       Connect Wallet
