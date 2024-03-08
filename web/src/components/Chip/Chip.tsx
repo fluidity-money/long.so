@@ -1,18 +1,18 @@
-import styles from './Chip.module.scss'
+import styles from "./Chip.module.scss";
 
 interface IChip {
-  children: React.ReactNode
-  rounded?: boolean
+  children: React.ReactNode;
+  rounded?: boolean;
 }
 
 const Chip: React.FC<IChip> = (props) => {
-  const { children, rounded = false } = props
+  const { children, rounded = false } = props;
 
   const classes = `
     ${styles.Chip}
-    ${rounded ? styles.rounded : ''}
-  `
-  return <div className={classes}>{children}</div>
-}
+    ${rounded ? styles.rounded : ""}
+  `;
+  return <div className={classes}>{children}</div>;
+};
 
-export { Chip }
+export { Chip };

@@ -1,21 +1,21 @@
-import create from 'zustand'
-import { Hash, isHex } from 'viem'
-import { ZeroAddress } from '../util/chainUtils'
-import { decimalsFromAddress, TokenList } from '../util/tokens'
+import create from "zustand";
+import { Hash, isHex } from "viem";
+import { ZeroAddress } from "../util/chainUtils";
+import { decimalsFromAddress, TokenList } from "../util/tokens";
 
 /**
  * Manages the state for the active token pair.
  */
 export const useActiveTokenStore = create<{
-  token0: Hash
-  token1: Hash
-  decimals0: number
-  decimals1: number
-  setToken0: (token: Hash) => void
-  setToken1: (token: Hash) => void
-  flipTokens: () => void
-  tokenList: typeof TokenList
-  ammAddress: Hash
+  token0: Hash;
+  token1: Hash;
+  decimals0: number;
+  decimals1: number;
+  setToken0: (token: Hash) => void;
+  setToken1: (token: Hash) => void;
+  flipTokens: () => void;
+  tokenList: typeof TokenList;
+  ammAddress: Hash;
 }>((set, get) => ({
   token0: ZeroAddress,
   token1: ZeroAddress,
@@ -30,7 +30,7 @@ export const useActiveTokenStore = create<{
     isHex(token) &&
     set({ token1: token, decimals1: decimalsFromAddress(token) }),
   flipTokens: () => {
-    const { token0, token1 } = get()
-    set({ token0: token1, token1: token0 })
+    const { token0, token1 } = get();
+    set({ token0: token1, token1: token0 });
   },
-}))
+}));

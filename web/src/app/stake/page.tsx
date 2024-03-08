@@ -1,7 +1,5 @@
 const Stake = () => {
-  return <>
-    Hello world
-  </>
-}
+  return <>Hello world</>;
+};
 
-export default Stake
+export default Stake;

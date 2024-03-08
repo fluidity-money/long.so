@@ -1,16 +1,12 @@
-import {
-  useAccount,
-  useConnect,
-  useDisconnect,
-} from 'wagmi'
+import { useAccount, useConnect, useDisconnect } from "wagmi";
 
 // wagmi example boilerplate
 const Profile = () => {
-  const { address, connector, isConnected } = useAccount()
+  const { address, connector, isConnected } = useAccount();
   const { connect, connectors, error, isLoading, pendingConnector } =
-    useConnect()
-  const { disconnect } = useDisconnect()
- 
+    useConnect();
+  const { disconnect } = useDisconnect();
+
   if (isConnected) {
     return (
       <div>
@@ -18,9 +14,9 @@ const Profile = () => {
         <div>Connected to {connector?.name}</div>
         <button onClick={() => disconnect}>Disconnect</button>
       </div>
-    )
+    );
   }
- 
+
   return (
     <div>
       {connectors.map((connector) => (
@@ -30,16 +26,16 @@ const Profile = () => {
           onClick={() => connect({ connector })}
         >
           Click to connect with {connector.name}
-          {!connector.ready && ' (unsupported)'}
+          {!connector.ready && " (unsupported)"}
           {isLoading &&
             connector.id === pendingConnector?.id &&
-            ' (connecting)'}
+            " (connecting)"}
         </button>
       ))}
- 
+
       {error && <div>{error.message}</div>}
     </div>
-  )
-}
+  );
+};
 
-export default Profile
+export default Profile;

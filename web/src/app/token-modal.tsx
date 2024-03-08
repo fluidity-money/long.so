@@ -1,18 +1,18 @@
-import { Box, Input, Text, Token } from '@/components'
-import { Button } from '@/components/ui/button'
-import Search from '@/assets/icons/Search.svg'
-import { TokenList } from '@/util/tokens'
-import { ActiveModalToken } from '@/util/types'
-import { useActiveTokenStore } from '@/stores/useActiveTokenStore'
-import create from 'zustand'
+import { Box, Input, Text, Token } from "@/components";
+import { Button } from "@/components/ui/button";
+import Search from "@/assets/icons/Search.svg";
+import { TokenList } from "@/util/tokens";
+import { ActiveModalToken } from "@/util/types";
+import { useActiveTokenStore } from "@/stores/useActiveTokenStore";
+import create from "zustand";
 
 interface ModalStore {
   // whether the modal is enabled
-  enabled: boolean
+  enabled: boolean;
   // to disable the modal
-  disable: () => void
-  activeModalToken?: ActiveModalToken
-  setActiveModalToken: (activeModalToken?: ActiveModalToken) => void
+  disable: () => void;
+  activeModalToken?: ActiveModalToken;
+  setActiveModalToken: (activeModalToken?: ActiveModalToken) => void;
 }
 
 export const useModalStore = create<ModalStore>((set) => ({
@@ -21,17 +21,17 @@ export const useModalStore = create<ModalStore>((set) => ({
   activeModalToken: undefined,
   setActiveModalToken: (activeModalToken) =>
     set({ activeModalToken, enabled: true }),
-}))
+}));
 
 export const TokenModal = () => {
-  const { setToken0, setToken1 } = useActiveTokenStore()
+  const { setToken0, setToken1 } = useActiveTokenStore();
 
   const { enabled, disable, setActiveModalToken, activeModalToken } =
-    useModalStore()
+    useModalStore();
 
-  const setToken = activeModalToken === 'token0' ? setToken0 : setToken1
+  const setToken = activeModalToken === "token0" ? setToken0 : setToken1;
 
-  if (!enabled) return null
+  if (!enabled) return null;
 
   return (
     <div className="flex flex-col items-center">
@@ -47,7 +47,7 @@ export const TokenModal = () => {
           <Input
             value=""
             onChange={() => {
-              return
+              return;
             }}
             placeholder="e.g. Ether, ARB, 0x0bafe8babf38bf3ba83fb80a82..."
           />
@@ -63,8 +63,8 @@ export const TokenModal = () => {
               pill
               background="light"
               onClick={() => {
-                setToken(token.address)
-                disable()
+                setToken(token.address);
+                disable();
               }}
             >
               <Token />
@@ -74,5 +74,5 @@ export const TokenModal = () => {
         </div>
       </Box>
     </div>
-  )
-}
+  );
+};

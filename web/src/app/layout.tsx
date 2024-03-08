@@ -1,48 +1,48 @@
-'use client'
-import { Button } from '@/components/ui/button'
+"use client";
+import { Button } from "@/components/ui/button";
 
-import { Inter } from 'next/font/google'
+import { Inter } from "next/font/google";
 import {
   configureChains,
   createConfig,
   WagmiConfig,
-} from '@/config/node_modules/wagmi/dist/index'
+} from "@/config/node_modules/wagmi/dist/index";
 import {
   arbitrumSepolia,
   localhost,
-} from '@/config/node_modules/wagmi/dist/chains'
-import { jsonRpcProvider } from '@/config/node_modules/wagmi/dist/providers/jsonRpc'
-import { MetaMaskConnector } from '@/config/node_modules/wagmi/dist/connectors/metaMask'
-import { isHex } from 'viem'
-import './globals.css'
-import { usePathname, useRouter } from 'next/navigation'
-import SPNTest from '@/assets/icons/spn-test.svg'
-import Superposition from '@/assets/icons/superposition.svg'
-import ArrowDown from '@/assets/icons/arrow-down.svg'
-import { Menu, Text } from '@/components'
-import { Badge } from '@/components/ui/badge'
-import { useState } from 'react'
+} from "@/config/node_modules/wagmi/dist/chains";
+import { jsonRpcProvider } from "@/config/node_modules/wagmi/dist/providers/jsonRpc";
+import { MetaMaskConnector } from "@/config/node_modules/wagmi/dist/connectors/metaMask";
+import { isHex } from "viem";
+import "./globals.css";
+import { usePathname, useRouter } from "next/navigation";
+import SPNTest from "@/assets/icons/spn-test.svg";
+import Superposition from "@/assets/icons/superposition.svg";
+import ArrowDown from "@/assets/icons/arrow-down.svg";
+import { Menu, Text } from "@/components";
+import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 
 const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500'],
-})
+  subsets: ["latin"],
+  weight: ["400", "500"],
+});
 
-const multicall3AddressString = process.env.NEXT_PUBLIC_MULTICALL3_ADDRESS
+const multicall3AddressString = process.env.NEXT_PUBLIC_MULTICALL3_ADDRESS;
 if (!multicall3AddressString || !isHex(multicall3AddressString))
   throw new Error(
     `Multicall3 address from env was not a valid address! Was ${multicall3AddressString}`,
-  )
-const multicall3Address = multicall3AddressString
+  );
+const multicall3Address = multicall3AddressString;
 
 const { publicClient, webSocketPublicClient } =
-  process.env.NODE_ENV === 'development'
+  process.env.NODE_ENV === "development"
     ? configureChains(
         [{ ...localhost, id: 412346 }],
         [
           jsonRpcProvider({
             rpc: () => ({
-              http: 'http://localhost:8547',
+              http: "http://localhost:8547",
             }),
           }),
         ],
@@ -52,18 +52,18 @@ const { publicClient, webSocketPublicClient } =
           {
             // Stylus Testnet is based off of Arbitrum Sepolia
             ...arbitrumSepolia,
-            name: 'Stylus Testnet',
+            name: "Stylus Testnet",
             id: 23011913,
             // use a self-deployed multicall3 for Stylus Testnet as it doesn't support the standard address
             contracts: { multicall3: { address: multicall3Address } },
             rpcUrls: {
-              default: { http: ['https://stylus-testnet.arbitrum.io/rpc'] },
-              public: { http: ['https://stylus-testnet.arbitrum.io/rpc'] },
+              default: { http: ["https://stylus-testnet.arbitrum.io/rpc"] },
+              public: { http: ["https://stylus-testnet.arbitrum.io/rpc"] },
             },
             blockExplorers: {
               default: {
-                name: 'Arbiscan',
-                url: 'https://stylus-testnet-explorer.arbitrum.io/',
+                name: "Arbiscan",
+                url: "https://stylus-testnet-explorer.arbitrum.io/",
               },
             },
           },
@@ -71,11 +71,11 @@ const { publicClient, webSocketPublicClient } =
         [
           jsonRpcProvider({
             rpc: () => ({
-              http: 'https://stylus-testnet.arbitrum.io/rpc',
+              http: "https://stylus-testnet.arbitrum.io/rpc",
             }),
           }),
         ],
-      )
+      );
 
 // Set up wagmi config
 const config = createConfig({
@@ -83,27 +83,27 @@ const config = createConfig({
   connectors: [new MetaMaskConnector()],
   publicClient,
   webSocketPublicClient,
-})
+});
 
-const ammAddressString = process.env.NEXT_PUBLIC_AMM_ADDRESS
+const ammAddressString = process.env.NEXT_PUBLIC_AMM_ADDRESS;
 if (!ammAddressString || !isHex(ammAddressString))
   throw new Error(
     `AMM address from env was not a valid address! Was ${ammAddressString}`,
-  )
-const ammAddress = ammAddressString
+  );
+const ammAddress = ammAddressString;
 
 const NetworkSelection = () => {
-  const [clicked, setClicked] = useState(false)
+  const [clicked, setClicked] = useState(false);
 
   return (
     <Badge
       variant="invert"
       className={`group absolute right-44 hidden w-28 cursor-pointer px-0.5 transition-[width] hover:w-[120px] md:inline-flex ${
-        clicked ? 'w-[120px] rounded-2xl' : ''
+        clicked ? "w-[120px] rounded-2xl" : ""
       }`}
       onClick={() => setClicked(!clicked)}
     >
-      <div className={'flex-col'}>
+      <div className={"flex-col"}>
         <div className="flex flex-row items-center">
           <div className="mr-2">
             <SPNTest height={30} width={30} />
@@ -111,7 +111,7 @@ const NetworkSelection = () => {
           <div className="text-nowrap">SPN-Test</div>
           <div
             className={`ml-2 transition-[width] group-hover:inline-flex group-hover:w-2 ${
-              clicked ? 'inline-flex w-2' : 'hidden w-0'
+              clicked ? "inline-flex w-2" : "hidden w-0"
             }`}
           >
             <ArrowDown width={10} height={6} />
@@ -126,38 +126,38 @@ const NetworkSelection = () => {
         )}
       </div>
     </Badge>
-  )
-}
+  );
+};
 
 const MobileNetworkSelection = () => {
   return (
     <Badge
       variant="invert"
       className={
-        'group w-14 cursor-pointer border-primary-foreground px-0 px-0.5 pr-2 invert transition-[width] md:hidden'
+        "group w-14 cursor-pointer border-primary-foreground px-0 px-0.5 pr-2 invert transition-[width] md:hidden"
       }
     >
-      <div className={'flex-col'}>
+      <div className={"flex-col"}>
         <div className="flex flex-row items-center">
           <div className="mr-2">
             <SPNTest height={30} width={30} />
           </div>
-          <div className={'w-2'}>
+          <div className={"w-2"}>
             <ArrowDown width={10} height={6} />
           </div>
         </div>
       </div>
     </Badge>
-  )
-}
+  );
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const pathname = usePathname()
-  const router = useRouter()
+  const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <html lang="en">
@@ -166,7 +166,7 @@ export default function RootLayout({
           <div className="h-screen w-screen overflow-hidden bg-white">
             <div
               className={
-                'iridescent-blur calc absolute left-1/2 top-[180px] h-full max-h-[305px] w-full max-w-[557px] -translate-x-1/2 transform'
+                "iridescent-blur calc absolute left-1/2 top-[180px] h-full max-h-[305px] w-full max-w-[557px] -translate-x-1/2 transform"
               }
             />
 
@@ -189,18 +189,18 @@ export default function RootLayout({
                   <Menu id="nav">
                     <Menu.Item
                       onClick={() => {
-                        router.push('/')
+                        router.push("/");
                       }}
-                      selected={pathname === '/'}
+                      selected={pathname === "/"}
                       proToggle
                     >
                       <Text>Swap</Text>
                     </Menu.Item>
                     <Menu.Item
                       onClick={() => {
-                        router.push('/stake')
+                        router.push("/stake");
                       }}
-                      selected={pathname.startsWith('/stake')}
+                      selected={pathname.startsWith("/stake")}
                     >
                       <Text>Stake</Text>
                     </Menu.Item>
@@ -219,5 +219,5 @@ export default function RootLayout({
         </body>
       </WagmiConfig>
     </html>
-  )
+  );
 }

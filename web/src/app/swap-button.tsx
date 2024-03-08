@@ -1,6 +1,6 @@
-import { Box } from '@/components'
-import styles from '@/app/page.module.scss'
-import Swap from '@/assets/icons/Swap.svg'
+import { Box } from "@/components";
+import styles from "@/app/page.module.scss";
+import Swap from "@/assets/icons/Swap.svg";
 
 export const SwapButton = ({ onClick }: { onClick?: () => void }) => (
   <Box
@@ -12,8 +12,8 @@ export const SwapButton = ({ onClick }: { onClick?: () => void }) => (
     }}
     initial={{
       borderRadius: 4,
-      x: '-50%',
-      y: '-50%',
+      x: "-50%",
+      y: "-50%",
     }}
     animate={{
       borderRadius: 4,
@@ -28,4 +28,4 @@ export const SwapButton = ({ onClick }: { onClick?: () => void }) => (
   >
     <Swap className={styles.swapIcon} />
   </Box>
-)
+);
