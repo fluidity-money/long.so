@@ -192,6 +192,7 @@ export default function RootLayout({
                         router.push('/')
                       }}
                       selected={pathname === '/'}
+                      proToggle
                     >
                       <Text>Swap</Text>
                     </Menu.Item>

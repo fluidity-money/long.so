@@ -3,7 +3,7 @@ import { useWelcomeStore } from '@/stores/useWelcomeStore'
 import { Token } from '@/components'
 
 /**
- * Overlay the welcome screen on top of the app
+ * Overlays the welcome screen on top of the app
  */
 export const Welcome = () => {
   const { setWelcome, welcome } = useWelcomeStore()
