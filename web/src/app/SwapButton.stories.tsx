@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { CampaignBanner } from "./campaign-banner";
+import { SwapButton } from "@/app/SwapButton";
 
-const meta: Meta<typeof CampaignBanner> = {
-  component: CampaignBanner,
+const meta: Meta<typeof SwapButton> = {
+  component: SwapButton,
 };
 
 export default meta;
-type Story = StoryObj<typeof CampaignBanner>;
+type Story = StoryObj<typeof SwapButton>;
 
 /*
  *👇 Render functions are a framework specific feature to allow you control on how the component renders.
@@ -15,5 +15,5 @@ type Story = StoryObj<typeof CampaignBanner>;
  * to learn how to use render functions.
  */
 export const Primary: Story = {
-  render: () => <CampaignBanner />,
+  render: () => <SwapButton onClick={() => console.log("Clicked")} />,
 };
