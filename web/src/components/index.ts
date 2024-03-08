@@ -7,7 +7,6 @@ import { Link } from "./Link";
 import { Slider } from "./Slider";
 import { Supicon } from "./Supicon";
 import { Token } from "./Token";
-import { Tooltip } from "./Tooltip";
 import { Hoverable } from "./Hoverable";
 import { Stack } from "./Stack";
 import { Dropdown } from "./Dropdown";
@@ -23,7 +22,6 @@ export {
   Slider,
   Supicon,
   Token,
-  Tooltip,
   Hoverable,
   Dropdown,
   Stack,
