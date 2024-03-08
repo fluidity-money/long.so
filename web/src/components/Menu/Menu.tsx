@@ -1,24 +1,24 @@
-import { LayoutGroup, motion } from 'framer-motion'
-import styles from './Menu.module.scss'
-import { Box } from '../index'
-import ArrowDownWhite from '@/assets/icons/arrow-down-white.svg'
-import ArrowDown from '@/assets/icons/arrow-down.svg'
-import ProToggle from '@/assets/icons/pro-toggle.svg'
+import { LayoutGroup, motion } from "framer-motion";
+import styles from "./Menu.module.scss";
+import { Box } from "../index";
+import ArrowDownWhite from "@/assets/icons/arrow-down-white.svg";
+import ArrowDown from "@/assets/icons/arrow-down.svg";
+import ProToggle from "@/assets/icons/pro-toggle.svg";
 
 interface IItem {
-  children: React.ReactNode
-  selected?: boolean
-  onClick?: () => void
-  groupId?: string
-  background?: 'light' | 'dark'
-  proToggle?: boolean
+  children: React.ReactNode;
+  selected?: boolean;
+  onClick?: () => void;
+  groupId?: string;
+  background?: "light" | "dark";
+  proToggle?: boolean;
 }
 
 interface IMenu {
-  children: React.ReactElement<IItem>[]
-  background?: 'light' | 'dark'
-  style?: 'primary' | 'secondary'
-  id: string
+  children: React.ReactElement<IItem>[];
+  background?: "light" | "dark";
+  style?: "primary" | "secondary";
+  id: string;
 }
 
 const Item: React.FC<IItem> = (props) => {
@@ -27,24 +27,24 @@ const Item: React.FC<IItem> = (props) => {
     selected,
     onClick,
     groupId,
-    background = 'light',
+    background = "light",
     proToggle,
-  } = props
+  } = props;
 
   const classes = `
     ${styles.Item}
-    ${selected ? styles.selected : ''}
+    ${selected ? styles.selected : ""}
     ${styles[background]}
-  `
+  `;
 
   return (
     <motion.div
-      className={`${classes} group  cursor-pointer rounded-md px-8 py-1 text-sm font-medium  ${proToggle ? 'w-28 transition-[width] hover:w-32' : ''}`}
+      className={`${classes} group  cursor-pointer rounded-md px-8 py-1 text-sm font-medium  ${proToggle ? "w-28 transition-[width] hover:w-32" : ""}`}
       whileHover={{
         scale: !selected ? 1.05 : 1,
         transition: {
           duration: 0.4,
-          ease: 'easeInOut',
+          ease: "easeInOut",
         },
       }}
       whileTap={{
@@ -52,7 +52,7 @@ const Item: React.FC<IItem> = (props) => {
         y: 1,
         transition: {
           duration: 0.2,
-          ease: 'easeInOut',
+          ease: "easeInOut",
         },
       }}
       onClick={onClick}
@@ -64,7 +64,7 @@ const Item: React.FC<IItem> = (props) => {
           className={styles.virtualBox}
         />
       )}
-      <div className={'flex flex-row items-center gap-2'}>
+      <div className={"flex flex-row items-center gap-2"}>
         {children}
         {proToggle && (
           <>
@@ -76,7 +76,7 @@ const Item: React.FC<IItem> = (props) => {
               )}
             </div>
             <div
-              className={`hidden group-hover:inline-flex ${!selected ? 'invert' : ''}`}
+              className={`hidden group-hover:inline-flex ${!selected ? "invert" : ""}`}
             >
               <ProToggle height={20} width={35} />
             </div>
@@ -84,17 +84,17 @@ const Item: React.FC<IItem> = (props) => {
         )}
       </div>
     </motion.div>
-  )
-}
+  );
+};
 
 const Menu: React.FC<IMenu> = (props) => {
-  const { children, background = 'light', style = 'secondary', id } = props
+  const { children, background = "light", style = "secondary", id } = props;
 
   const frameColor =
-    (background === 'light' && style === 'primary') ||
-    (background === 'dark' && style === 'secondary')
-      ? 'dark'
-      : 'light'
+    (background === "light" && style === "primary") ||
+    (background === "dark" && style === "secondary")
+      ? "dark"
+      : "light";
 
   return (
     <div className="flex flex-row gap-1 rounded p-1">
@@ -107,13 +107,13 @@ const Menu: React.FC<IMenu> = (props) => {
               key={`${id}-${i}`}
               background={frameColor}
             />
-          )
+          );
         })}
       </LayoutGroup>
     </div>
-  )
-}
+  );
+};
 
 export default Object.assign(Menu, {
   Item,
-})
+});

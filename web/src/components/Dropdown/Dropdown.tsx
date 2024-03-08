@@ -1,53 +1,40 @@
-import { ReactElement, ReactNode, useState } from 'react'
-import styles from './Dropdown.module.scss'
-import { Hoverable, Tooltip } from '@/components'
-import { motion } from 'framer-motion'
+import { ReactElement, ReactNode, useState } from "react";
+import styles from "./Dropdown.module.scss";
+import { Hoverable, Tooltip } from "@/components";
+import { motion } from "framer-motion";
 
 interface IItem {
-  children: ReactNode
-  id: string
+  children: ReactNode;
+  id: string;
 }
 
 const Item: React.FC<IItem> = (props) => {
-  const { children } = props
-  return <div>
-    {children}
-  </div>
-}
+  const { children } = props;
+  return <div>{children}</div>;
+};
 
 interface IDropdown {
-  children: ReactElement<IItem>[]
-  id: string
-  label?: ReactNode
-  initial: string
+  children: ReactElement<IItem>[];
+  id: string;
+  label?: ReactNode;
+  initial: string;
 }
 
 const Dropdown: React.FC<IDropdown> = (props) => {
-
-  const { children, id, label, initial } = props
+  const { children, id, label, initial } = props;
 
   const dropdownClasses = `
     ${styles.Dropdown}
-  `
+  `;
 
-  const [selectedItem, setSelectedItem] = useState(initial)
+  const [selectedItem, setSelectedItem] = useState(initial);
 
   return (
     <div className={dropdownClasses}>
       {label}
-      <Hoverable
-        tooltip={
-          <Tooltip
-            layoutId={id}
-          >
-            {children}
-          </Tooltip>
-        }
-      >
+      <Hoverable tooltip={<Tooltip layoutId={id}>{children}</Tooltip>}>
         <motion.div className={styles.selected} layoutId={id}>
-        {
-          children.find((child) => child.props.id === selectedItem)
-        }
+          {children.find((child) => child.props.id === selectedItem)}
         </motion.div>
       </Hoverable>
       {/* TODO: take a list of ReactElement<IItem> to render inside a tooltip */}
@@ -56,9 +43,9 @@ const Dropdown: React.FC<IDropdown> = (props) => {
       {/* run a find (memo?) and render selected <Item> inline
       {/* use Hoverable? with shared layoutId and custom positioning */}
     </div>
-  )
-}
+  );
+};
 
 export default Object.assign(Dropdown, {
-  Item
-})
+  Item,
+});

@@ -4,5 +4,4 @@ export enum Breakdown {
   Route = 2,
 }
 
-export type ActiveModalToken = undefined | 'token0' | 'token1'
-
+export type ActiveModalToken = undefined | "token0" | "token1";

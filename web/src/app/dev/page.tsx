@@ -1,24 +1,24 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import styles from './page.module.scss'
-import { Chip } from '@/components'
-import { Button } from '@/components/ui/button'
-import { useSwap } from '@/hooks/useSwap'
-import { useCreatePosition } from '@/hooks/useCreatePosition'
-import { addressToSymbol, Token, TokenList } from '@/util/tokens'
-import { Hash, hexToBigInt } from 'viem'
-import { Profile } from '@/components/Profile'
-import { useActiveTokenStore } from '@/stores/useActiveTokenStore'
+import { useState } from "react";
+import styles from "./page.module.scss";
+import { Chip } from "@/components";
+import { Button } from "@/components/ui/button";
+import { useSwap } from "@/hooks/useSwap";
+import { useCreatePosition } from "@/hooks/useCreatePosition";
+import { addressToSymbol, Token, TokenList } from "@/util/tokens";
+import { Hash, hexToBigInt } from "viem";
+import { Profile } from "@/components/Profile";
+import { useActiveTokenStore } from "@/stores/useActiveTokenStore";
 
 const TokenSelector = ({
   tokenList,
   token,
   setToken,
 }: {
-  tokenList: Array<Token>
-  token: Hash
-  setToken: (token: Hash) => void
+  tokenList: Array<Token>;
+  token: Hash;
+  setToken: (token: Hash) => void;
 }) => {
   return (
     <div>
@@ -30,27 +30,27 @@ const TokenSelector = ({
         ))}
       </select>
     </div>
-  )
-}
+  );
+};
 
 const Dev = () => {
-  const [menu, setMenu] = useState('foo')
-  const [menuB, setMenuB] = useState('foo')
+  const [menu, setMenu] = useState("foo");
+  const [menuB, setMenuB] = useState("foo");
 
   const { token0, token1, setToken0, setToken1, flipTokens, ammAddress } =
-    useActiveTokenStore()
+    useActiveTokenStore();
   const { createPosition, updatePosition, removePosition, collectFees } =
-    useCreatePosition()
+    useCreatePosition();
 
-  const [amountIn, setAmountIn] = useState('')
-  const [minOut, setMinOut] = useState('')
+  const [amountIn, setAmountIn] = useState("");
+  const [minOut, setMinOut] = useState("");
 
-  const { swap, result, error } = useSwap({ amountIn, minOut })
+  const { swap, result, error } = useSwap({ amountIn, minOut });
 
-  const [delta, setDelta] = useState(BigInt(20000))
-  const [lowerRange, setLowerRange] = useState(50)
-  const [upperRange, setUpperRange] = useState(150)
-  const [positionId, setPositionId] = useState(BigInt(0))
+  const [delta, setDelta] = useState(BigInt(20000));
+  const [lowerRange, setLowerRange] = useState(50);
+  const [upperRange, setUpperRange] = useState(150);
+  const [positionId, setPositionId] = useState(BigInt(0));
 
   return (
     <div className={styles.dev}>
@@ -82,13 +82,13 @@ const Dev = () => {
 
       {!!result && (
         <Chip>
-          Simulated response: {result[0].toString()} {addressToSymbol(token0)}{' '}
+          Simulated response: {result[0].toString()} {addressToSymbol(token0)}{" "}
           -&gt; {result[1].toString()} {addressToSymbol(token1)}
         </Chip>
       )}
       <Button
         onClick={() => {
-          swap()
+          swap();
         }}
       >
         Make swap
@@ -122,25 +122,25 @@ const Dev = () => {
       <Button
         onClick={() => {
           createPosition(lowerRange, upperRange, delta).then((id) =>
-            setPositionId(hexToBigInt(id || '0x')),
-          )
+            setPositionId(hexToBigInt(id || "0x")),
+          );
         }}
       >
-        {'Create new position'}
+        {"Create new position"}
       </Button>
       <Button
         onClick={() => {
-          updatePosition(positionId, delta)
+          updatePosition(positionId, delta);
         }}
       >{`Update position ${positionId}`}</Button>
       <Button
         onClick={() => {
-          removePosition(positionId)
+          removePosition(positionId);
         }}
       >{`Remove position with id ${positionId}`}</Button>
       <Button
         onClick={() => {
-          collectFees(positionId)
+          collectFees(positionId);
         }}
       >{`Collect fees for position with id ${positionId}`}</Button>
       {/*
@@ -181,7 +181,7 @@ const Dev = () => {
     <Slider onSlideComplete={() => { console.log('hi') }}>Test</Slider>
     */}
     </div>
-  )
-}
+  );
+};
 
-export default Dev
+export default Dev;

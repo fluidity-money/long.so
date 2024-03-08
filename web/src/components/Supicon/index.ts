@@ -1,1 +1,1 @@
-export { Supicon } from './Supicon'
+export { Supicon } from "./Supicon";

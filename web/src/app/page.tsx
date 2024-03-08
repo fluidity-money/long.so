@@ -1,35 +1,35 @@
-'use client'
+"use client";
 
-import pkg from '@/config/package.json'
-import { Button } from '@/components/ui/button'
-import { Box, Input, Link, Slider, Text, Token } from '@/components'
-import Caret from '@/assets/icons/Caret.svg'
-import styles from './page.module.scss'
-import { useEffect, useState } from 'react'
-import { addressToSymbol } from '@/util/tokens'
-import { useSwap } from '@/hooks/useSwap'
-import { useAccount, useBalance } from 'wagmi'
+import pkg from "@/config/package.json";
+import { Button } from "@/components/ui/button";
+import { Box, Input, Link, Slider, Text, Token } from "@/components";
+import Caret from "@/assets/icons/Caret.svg";
+import styles from "./page.module.scss";
+import { useEffect, useState } from "react";
+import { addressToSymbol } from "@/util/tokens";
+import { useSwap } from "@/hooks/useSwap";
+import { useAccount, useBalance } from "wagmi";
 import {
   getFormattedStringFromTokenAmount,
   getTokenAmountFromFormattedString,
-} from '@/util/converters'
-import { useActiveTokenStore } from '@/stores/useActiveTokenStore'
-import { Welcome } from '@/app/welcome'
-import { SwapButton } from '@/app/swap-button'
-import { TokenModal, useModalStore } from '@/app/token-modal'
-import { useWelcomeStore } from '@/stores/useWelcomeStore'
-import Hourglass from '@/assets/icons/hourglass.svg'
+} from "@/util/converters";
+import { useActiveTokenStore } from "@/stores/useActiveTokenStore";
+import { Welcome } from "@/app/welcome";
+import { SwapButton } from "@/app/swap-button";
+import { TokenModal, useModalStore } from "@/app/token-modal";
+import { useWelcomeStore } from "@/stores/useWelcomeStore";
+import { CampaignBanner } from "@/app/campaign-banner";
 
-const version = pkg.version
+const version = pkg.version;
 
 export default function Home() {
-  const [inputReceive, setInputReceive] = useState('')
+  const [inputReceive, setInputReceive] = useState("");
 
-  const [amountIn, setAmountIn] = useState(BigInt(0))
-  const [amountInDisplay, setAmountInDisplay] = useState('')
-  const [minOut, setMinOut] = useState('')
+  const [amountIn, setAmountIn] = useState(BigInt(0));
+  const [amountInDisplay, setAmountInDisplay] = useState("");
+  const [minOut, setMinOut] = useState("");
 
-  const { setWelcome, welcome } = useWelcomeStore()
+  const { setWelcome, welcome } = useWelcomeStore();
 
   const {
     token0,
@@ -39,59 +39,59 @@ export default function Home() {
     setToken0,
     setToken1,
     flipTokens,
-  } = useActiveTokenStore()
+  } = useActiveTokenStore();
 
-  const { address } = useAccount()
+  const { address } = useAccount();
 
   const { data: token0Balance } = useBalance({
     cacheTime: 2000,
     address,
     token: token0,
-  })
+  });
 
   const { data: token1Balance } = useBalance({
     cacheTime: 2000,
     address,
     token: token1,
-  })
+  });
 
-  const { isConnected } = useAccount()
+  const { isConnected } = useAccount();
 
   const { swap, result, resultUsd, error, isLoading, isSwapping } = useSwap({
     amountIn,
     minOut,
-  })
+  });
 
   // update output using quoted swap result
   useEffect(() => {
     if (result) {
-      const [, outAmount] = result
+      const [, outAmount] = result;
       const formattedOutAmount = getFormattedStringFromTokenAmount(
         outAmount.toString(),
         decimals1,
-      )
-      setInputReceive(formattedOutAmount)
+      );
+      setInputReceive(formattedOutAmount);
     }
-  }, [result, decimals1])
+  }, [result, decimals1]);
 
   // update amountIn when input amount changes
   useEffect(() => {
     try {
-      if (!token0Balance?.value) return
+      if (!token0Balance?.value) return;
       const amount = getTokenAmountFromFormattedString(
         amountInDisplay,
         decimals0,
-      )
-      if (amount <= token0Balance.value) setAmountIn(amount)
+      );
+      if (amount <= token0Balance.value) setAmountIn(amount);
     } catch {}
-  }, [amountInDisplay, token0Balance?.value, decimals0])
+  }, [amountInDisplay, token0Balance?.value, decimals0]);
 
   const setMax = () =>
-    setAmountInDisplay(token0Balance?.formatted ?? amountInDisplay)
+    setAmountInDisplay(token0Balance?.formatted ?? amountInDisplay);
 
-  const { setActiveModalToken, enabled: activeModalToken } = useModalStore()
+  const { setActiveModalToken, enabled: activeModalToken } = useModalStore();
 
-  const [hovering, setHovering] = useState(false)
+  const [hovering, setHovering] = useState(false);
 
   return (
     <>
@@ -108,30 +108,10 @@ export default function Home() {
             />
           )}
           <div
-            className={`mt-8 flex w-full max-w-[400px] flex-col items-center gap-4 transition-transform ${welcome ? `cursor-pointer hover:-translate-y-8 hover:blur-0 ${hovering ? '-translate-y-8 blur-0' : 'blur-sm'}` : ''}`}
+            className={`mt-8 flex w-full max-w-[400px] flex-col items-center gap-4 transition-transform ${welcome ? `cursor-pointer hover:-translate-y-8 hover:blur-0 ${hovering ? "-translate-y-8 blur-0" : "blur-sm"}` : ""}`}
             onClick={() => setWelcome(false)}
           >
-            <div className="flex flex-row items-center gap-2">
-              <div className="flex flex-row">
-                <Token size="small" />
-                <div className="text-xs">
-                  $29,123 in <span className="font-medium">USDC Rewards</span>{' '}
-                  available.
-                </div>
-              </div>
-
-              <div className="cursor-pointer  text-xs">
-                <span className="underline">View all</span>
-                {' ->'}
-              </div>
-
-              <div className="flex flex-row items-center gap-1 rounded bg-black px-1 text-xs text-white">
-                <Hourglass width={15} height={20} />
-                <div className="hidden sm:inline-flex">2d : 1h : 2m</div>
-                <div className="inline-flex sm:hidden">2d:5h</div>
-              </div>
-            </div>
-
+            <CampaignBanner />
             <div
               className={`${styles.container} relative z-10 flex w-full flex-col gap-2 `}
             >
@@ -155,7 +135,7 @@ export default function Home() {
                     pill
                     background="light"
                     className={styles.tokenDropdown}
-                    onClick={() => setActiveModalToken('token0')}
+                    onClick={() => setActiveModalToken("token0")}
                   >
                     <Token />
                     {/* Placeholder */}
@@ -172,10 +152,10 @@ export default function Home() {
                     )}
                   </Text>
                   <Text size="small">
-                    Balance: {token0Balance?.formatted}{' '}
+                    Balance: {token0Balance?.formatted}{" "}
                     <Link
                       onClick={() => {
-                        setMax()
+                        setMax();
                       }}
                     >
                       Max
@@ -187,15 +167,15 @@ export default function Home() {
               <SwapButton
                 onClick={() => {
                   // swap amounts and trigger a quote update
-                  const amount1 = result?.[1].toString()
-                  setInputReceive(amountInDisplay)
+                  const amount1 = result?.[1].toString();
+                  setInputReceive(amountInDisplay);
                   setAmountInDisplay(
                     getFormattedStringFromTokenAmount(
-                      amount1 || '0',
+                      amount1 || "0",
                       decimals1,
                     ),
-                  )
-                  flipTokens()
+                  );
+                  flipTokens();
                 }}
               />
 
@@ -208,7 +188,7 @@ export default function Home() {
                   <Text size="large">
                     <Input
                       placeholder="0.00"
-                      value={isLoading ? '...' : inputReceive}
+                      value={isLoading ? "..." : inputReceive}
                       disabled={true}
                       onChange={(s) => setInputReceive(s)}
                     />
@@ -219,7 +199,7 @@ export default function Home() {
                     pill
                     background="light"
                     className={styles.tokenDropdown}
-                    onClick={() => setActiveModalToken('token1')}
+                    onClick={() => setActiveModalToken("token1")}
                   >
                     <Token />
                     <Text weight="semibold">{addressToSymbol(token1)}</Text>
@@ -238,7 +218,7 @@ export default function Home() {
               <Slider
                 disabled={!isConnected || isSwapping || isLoading}
                 onSlideComplete={() => {
-                  swap()
+                  swap();
                 }}
               >
                 Swap
@@ -257,5 +237,5 @@ export default function Home() {
 
       <Welcome />
     </>
-  )
+  );
 }

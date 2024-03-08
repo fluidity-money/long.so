@@ -1,89 +1,73 @@
-'use client'
+"use client";
 
-import { motion, useMotionValue, useTransform } from 'framer-motion'
-import styles from './Slider.module.scss'
-import { useEffect, useRef, useState } from 'react'
-import { Box } from '..'
+import { motion, useMotionValue, useTransform } from "framer-motion";
+import styles from "./Slider.module.scss";
+import { useEffect, useRef, useState } from "react";
+import { Box } from "..";
 
 interface ISlider {
-  onSlideComplete: () => void
-  children: React.ReactNode
-  disabled?: boolean
+  onSlideComplete: () => void;
+  children: React.ReactNode;
+  disabled?: boolean;
 }
 
 const Slider: React.FC<ISlider> = (props) => {
-  const {
-    children,
-    onSlideComplete,
-    disabled = false,
-  } = props
+  const { children, onSlideComplete, disabled = false } = props;
 
-  const containerRef = useRef<HTMLDivElement>(null)
-  const x = useMotionValue(0)
+  const containerRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
 
-  const [dragComplete, setDragComplete] = useState(false)
-  const [width, setWidth] = useState<number | undefined>(undefined)
+  const [dragComplete, setDragComplete] = useState(false);
+  const [width, setWidth] = useState<number | undefined>(undefined);
 
   useEffect(() => {
-    if (!containerRef.current) return
-    setWidth(containerRef.current.offsetWidth)
-  }, [containerRef])
+    if (!containerRef.current) return;
+    setWidth(containerRef.current.offsetWidth);
+  }, [containerRef]);
 
-  const arrowOpacity = useTransform(x, [0, (width || 0) - 32], [1, 0])
+  const arrowOpacity = useTransform(x, [0, (width || 0) - 32], [1, 0]);
 
   const classes = `
     ${styles.SliderButton}
-    ${disabled ? styles.disabled : ''}
-    ${dragComplete ? styles.complete : ''}
-  `
+    ${disabled ? styles.disabled : ""}
+    ${dragComplete ? styles.complete : ""}
+  `;
   useEffect(() => {
-    if (dragComplete && !disabled)
-      setDragComplete(false)
-  }, [dragComplete, disabled])
+    if (dragComplete && !disabled) setDragComplete(false);
+  }, [dragComplete, disabled]);
 
   return (
     <Box className={styles.Box}>
       <motion.div className={classes} ref={containerRef}>
-        {
-          !dragComplete && (
+        {!dragComplete && (
           <motion.div
             className={styles.draggable}
             drag="x"
-            style={{ x, cursor: 'grab' }}
+            style={{ x, cursor: "grab" }}
             dragElastic={0.1}
             dragSnapToOrigin
             dragMomentum={false}
-            dragConstraints={
-              containerRef
-            }
+            dragConstraints={containerRef}
             onDragEnd={(event, info) => {
-              if (!width) return
+              if (!width) return;
               if (info.offset.x >= width - 32) {
-                setDragComplete(true)
-                onSlideComplete()
+                setDragComplete(true);
+                onSlideComplete();
               }
             }}
           >
             <div className={styles.track} />
-            {
-              !dragComplete &&
+            {!dragComplete && (
               <div className={styles.thumb}>
-                <motion.div
-                  style={{ opacity: arrowOpacity }}
-                >
-                  -&gt;
-                </motion.div>
+                <motion.div style={{ opacity: arrowOpacity }}>-&gt;</motion.div>
               </div>
-            }
+            )}
           </motion.div>
-          )
-        }
-        <motion.div className={styles.content}>
-          {children}
-        </motion.div>
+        )}
+        <motion.div className={styles.content}>{children}</motion.div>
       </motion.div>
     </Box>
-  )
-}
+  );
+};
 
-export { Slider }
+export { Slider };

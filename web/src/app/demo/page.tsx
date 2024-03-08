@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import styles from './page.module.scss'
+import { useState } from "react";
+import styles from "./page.module.scss";
 import {
   Box,
   Button,
@@ -15,12 +15,12 @@ import {
   Hoverable,
   Dropdown,
   Tooltip,
-  Stack
-} from '@/components'
+  Stack,
+} from "@/components";
 
 const Dev = () => {
-  const [menu, setMenu] = useState('foo')
-  const [menuB, setMenuB] = useState('foo')
+  const [menu, setMenu] = useState("foo");
+  const [menuB, setMenuB] = useState("foo");
 
   return (
     <div className={styles.dev}>
@@ -40,17 +40,17 @@ const Dev = () => {
         </div>
         <Menu style="primary" id="a">
           <Menu.Item
-            selected={menu === 'foo'}
+            selected={menu === "foo"}
             onClick={() => {
-              setMenu('foo')
+              setMenu("foo");
             }}
           >
             Foo
           </Menu.Item>
           <Menu.Item
-            selected={menu === 'bar'}
+            selected={menu === "bar"}
             onClick={() => {
-              setMenu('bar')
+              setMenu("bar");
             }}
           >
             Bar (Longer Text)
@@ -58,17 +58,17 @@ const Dev = () => {
         </Menu>
         <Menu style="secondary" id="b">
           <Menu.Item
-            selected={menuB === 'foo'}
+            selected={menuB === "foo"}
             onClick={() => {
-              setMenuB('foo')
+              setMenuB("foo");
             }}
           >
             Foo
           </Menu.Item>
           <Menu.Item
-            selected={menuB === 'bar'}
+            selected={menuB === "bar"}
             onClick={() => {
-              setMenuB('bar')
+              setMenuB("bar");
             }}
           >
             Bar (Longer Text)
@@ -77,7 +77,7 @@ const Dev = () => {
         <Link>Link Button -&gt;</Link>
         <Slider
           onSlideComplete={() => {
-            console.log('hi')
+            console.log("hi");
           }}
         >
           Test
@@ -107,12 +107,10 @@ const Dev = () => {
           </Stack>
           Lorem ipsum
         </Chip>
-        <Hoverable
-          tooltip={<Tooltip>Tooltip content</Tooltip>}
-        >
+        <Hoverable tooltip={<Tooltip>Tooltip content</Tooltip>}>
           <Link>Link Button wrapped in a Hoverable</Link>
         </Hoverable>
-        <Dropdown id="test" label={'Volume'} initial="test">
+        <Dropdown id="test" label={"Volume"} initial="test">
           <Dropdown.Item id="test">Test</Dropdown.Item>
           <Dropdown.Item id="test">Test</Dropdown.Item>
         </Dropdown>
@@ -135,7 +133,7 @@ const Dev = () => {
         <Chip>This is a chip</Chip>
       </Box>
     </div>
-  )
-}
+  );
+};
 
-export default Dev
+export default Dev;

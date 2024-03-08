@@ -1,29 +1,31 @@
-import { motion } from 'framer-motion'
-import styles from './Button.module.scss'
+import { motion } from "framer-motion";
+import styles from "./Button.module.scss";
 
 interface IButton {
   children: React.ReactNode;
-  color?: 'light' | 'dark'
-  size?: 'small' | 'medium' | 'large'
-  inline?: boolean
-  onClick?: () => void
+  color?: "light" | "dark";
+  size?: "small" | "medium" | "large";
+  inline?: boolean;
+  onClick?: () => void;
 }
 
 const Button: React.FC<IButton> = (props) => {
   const {
     children,
-    color = 'dark',
-    size = 'medium',
+    color = "dark",
+    size = "medium",
     inline = false,
-    onClick = () => { return }
-  } = props
+    onClick = () => {
+      return;
+    },
+  } = props;
 
   const classes = `
     ${styles.Button}
     ${styles[color]}
     ${styles[size]}
-    ${inline ? styles.inline : ''}
-  `
+    ${inline ? styles.inline : ""}
+  `;
 
   return (
     <motion.button
@@ -35,7 +37,7 @@ const Button: React.FC<IButton> = (props) => {
       whileHover={{
         scale: 1.02,
         transition: {
-          type: 'spring',
+          type: "spring",
           stiffness: 400,
           damping: 10,
         },
@@ -47,7 +49,7 @@ const Button: React.FC<IButton> = (props) => {
     >
       {children}
     </motion.button>
-  )
-}
+  );
+};
 
-export { Button }
+export { Button };
