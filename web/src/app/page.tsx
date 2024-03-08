@@ -18,6 +18,7 @@ import { Welcome } from '@/app/welcome'
 import { SwapButton } from '@/app/swap-button'
 import { TokenModal, useModalStore } from '@/app/token-modal'
 import { useWelcomeStore } from '@/stores/useWelcomeStore'
+import Hourglass from '@/assets/icons/hourglass.svg'
 
 const version = pkg.version
 
@@ -107,9 +108,30 @@ export default function Home() {
             />
           )}
           <div
-            className={`mt-8 flex max-w-screen-sm flex-col items-center gap-4 transition-transform ${welcome ? `cursor-pointer hover:-translate-y-8 hover:blur-0 ${hovering ? '-translate-y-8 blur-0' : 'blur-sm'}` : ''}`}
+            className={`mt-8 flex w-full max-w-[400px] flex-col items-center gap-4 transition-transform ${welcome ? `cursor-pointer hover:-translate-y-8 hover:blur-0 ${hovering ? '-translate-y-8 blur-0' : 'blur-sm'}` : ''}`}
             onClick={() => setWelcome(false)}
           >
+            <div className="flex flex-row items-center gap-2">
+              <div className="flex flex-row">
+                <Token size="small" />
+                <div className="text-xs">
+                  $29,123 in <span className="font-medium">USDC Rewards</span>{' '}
+                  available.
+                </div>
+              </div>
+
+              <div className="cursor-pointer  text-xs">
+                <span className="underline">View all</span>
+                {' ->'}
+              </div>
+
+              <div className="flex flex-row items-center gap-1 rounded bg-black px-1 text-xs text-white">
+                <Hourglass width={15} height={20} />
+                <div className="hidden sm:inline-flex">2d : 1h : 2m</div>
+                <div className="inline-flex sm:hidden">2d:5h</div>
+              </div>
+            </div>
+
             <div
               className={`${styles.container} relative z-10 flex w-full flex-col gap-2 `}
             >
