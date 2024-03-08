@@ -4,19 +4,19 @@ import { useState } from "react";
 import styles from "./page.module.scss";
 import {
   Box,
-  Button,
   Chip,
-  Menu,
-  Text,
-  Link,
-  Slider,
-  Supicon,
-  Token,
-  Hoverable,
   Dropdown,
-  Tooltip,
+  Hoverable,
+  Link,
+  Menu,
+  Slider,
   Stack,
+  Supicon,
+  Text,
+  Token,
+  Tooltip,
 } from "@/components";
+import { Button } from "@/components/ui/button";
 
 const Dev = () => {
   const [menu, setMenu] = useState("foo");
