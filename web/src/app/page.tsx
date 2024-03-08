@@ -14,11 +14,11 @@ import {
   getTokenAmountFromFormattedString,
 } from "@/util/converters";
 import { useActiveTokenStore } from "@/stores/useActiveTokenStore";
-import { Welcome } from "@/app/welcome";
-import { SwapButton } from "@/app/swap-button";
-import { TokenModal, useModalStore } from "@/app/token-modal";
+import { Welcome } from "@/app/Welcome";
+import { SwapButton } from "@/app/SwapButton";
+import { TokenModal, useModalStore } from "@/app/TokenModal";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
-import { CampaignBanner } from "@/app/campaign-banner";
+import { CampaignBanner } from "@/app/CampaignBanner";
 
 const version = pkg.version;
 
