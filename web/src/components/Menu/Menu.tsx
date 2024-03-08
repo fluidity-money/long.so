@@ -1,6 +1,9 @@
 import { LayoutGroup, motion } from 'framer-motion'
 import styles from './Menu.module.scss'
 import { Box } from '../index'
+import ArrowDownWhite from '@/assets/icons/arrow-down-white.svg'
+import ArrowDown from '@/assets/icons/arrow-down.svg'
+import ProToggle from '@/assets/icons/pro-toggle.svg'
 
 interface IItem {
   children: React.ReactNode
@@ -8,6 +11,7 @@ interface IItem {
   onClick?: () => void
   groupId?: string
   background?: 'light' | 'dark'
+  proToggle?: boolean
 }
 
 interface IMenu {
@@ -18,7 +22,14 @@ interface IMenu {
 }
 
 const Item: React.FC<IItem> = (props) => {
-  const { children, selected, onClick, groupId, background = 'light' } = props
+  const {
+    children,
+    selected,
+    onClick,
+    groupId,
+    background = 'light',
+    proToggle,
+  } = props
 
   const classes = `
     ${styles.Item}
@@ -28,7 +39,7 @@ const Item: React.FC<IItem> = (props) => {
 
   return (
     <motion.div
-      className={`${classes} cursor-pointer rounded-md px-8 py-1 text-sm font-medium`}
+      className={`${classes} group  cursor-pointer rounded-md px-8 py-1 text-sm font-medium  ${proToggle ? 'w-28 transition-[width] hover:w-32' : ''}`}
       whileHover={{
         scale: !selected ? 1.05 : 1,
         transition: {
@@ -53,7 +64,25 @@ const Item: React.FC<IItem> = (props) => {
           className={styles.virtualBox}
         />
       )}
-      {children}
+      <div className={'flex flex-row items-center gap-2'}>
+        {children}
+        {proToggle && (
+          <>
+            <div className="group-hover:hidden">
+              {selected ? (
+                <ArrowDownWhite height={10} width={10} />
+              ) : (
+                <ArrowDown height={10} width={10} />
+              )}
+            </div>
+            <div
+              className={`hidden group-hover:inline-flex ${!selected ? 'invert' : ''}`}
+            >
+              <ProToggle height={20} width={35} />
+            </div>
+          </>
+        )}
+      </div>
     </motion.div>
   )
 }
