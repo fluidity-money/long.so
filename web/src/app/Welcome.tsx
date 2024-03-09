@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
 import { Token } from "@/components";
@@ -12,8 +14,8 @@ export const Welcome = () => {
 
   return (
     <>
-      <div className="absolute top-[35%] z-50 w-full">
-        <div className="mt-32 flex flex-col items-center justify-around gap-10 bg-white">
+      <div className="absolute top-[50%] z-50 w-full">
+        <div className="flex flex-col items-center justify-around gap-10 bg-white">
           <div className="mt-10 flex flex-row items-center gap-1 text-3xl font-medium">
             Think{" "}
             <div className="rounded-md bg-black p-1 px-2 text-white">

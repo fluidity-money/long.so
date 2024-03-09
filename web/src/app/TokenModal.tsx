@@ -1,3 +1,5 @@
+"use client";
+
 import { Box, Input, Text, Token } from "@/components";
 import { Button } from "@/components/ui/button";
 import Search from "@/assets/icons/Search.svg";
