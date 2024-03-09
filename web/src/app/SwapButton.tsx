@@ -1,5 +1,4 @@
 import { Box } from "@/components";
-import styles from "@/app/page.module.scss";
 import Swap from "@/assets/icons/Swap.svg";
 
 export const SwapButton = ({ onClick }: { onClick?: () => void }) => (
@@ -23,9 +22,9 @@ export const SwapButton = ({ onClick }: { onClick?: () => void }) => (
     }}
     whileTap={{ scale: 0.9 }}
     background="dark"
-    className={styles.swapBtn}
+    className="width-[40px] height-[40px] absolute left-1/2 top-1/2 flex cursor-pointer items-center justify-center"
     onClick={onClick}
   >
-    <Swap className={styles.swapIcon} />
+    <Swap className="absolute w-[10px]" />
   </Box>
 );
