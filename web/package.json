@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "@apollo/client": "^3.8.3",
+    "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-popover": "^1.0.7",
     "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-switch": "^1.0.3",
     "@stylistic/eslint-plugin": "^1.0.0",
     "@types/node": "20.6.0",
     "@types/react": "18.2.21",

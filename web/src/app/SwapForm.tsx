@@ -4,7 +4,6 @@ import { CampaignBanner } from "@/app/CampaignBanner";
 import { Box, Input, Link, Slider, Text, Token } from "@/components";
 import { addressToSymbol } from "@/util/tokens";
 import Caret from "@/assets/icons/Caret.svg";
-import Cog from "@/assets/icons/cog.svg";
 import {
   getFormattedStringFromTokenAmount,
   getTokenAmountFromFormattedString,
@@ -18,11 +17,7 @@ import { useAccount, useBalance } from "wagmi";
 import { useSwap } from "@/hooks/useSwap";
 import { useModalStore } from "@/app/TokenModal";
 import { WelcomeGradient } from "@/app/WelcomeGradient";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { SuperloopPopover } from "@/app/SuperloopPopover";
 
 export const SwapForm = () => {
   const [inputReceive, setInputReceive] = useState("");
@@ -99,24 +94,7 @@ export const SwapForm = () => {
         <CampaignBanner />
 
         <div className="z-10 flex w-full flex-col gap-2">
-          <div className="relative top-5 flex h-4 w-full flex-row items-end justify-end">
-            <Popover>
-              <PopoverTrigger>
-                <div className="flex h-[35px] w-[35px] items-center justify-center">
-                  <Cog className="hover:animate-spin-once relative left-1 top-1 h-[30px] w-[30px] hover:h-[35px] hover:w-[35px]" />
-                </div>
-              </PopoverTrigger>
-              <PopoverContent>
-                <div>
-                  <p>Superloop</p>
-                  <p>
-                    Superloop is a decentralized exchange that allows you to
-                    swap tokens on the Ethereum network.
-                  </p>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
+          <SuperloopPopover />
 
           <div className="flex w-full flex-col gap-3 rounded-lg bg-black p-4 text-white">
             <div className="flex items-center justify-between">
