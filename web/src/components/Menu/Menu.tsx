@@ -7,6 +7,7 @@ import ProToggle from "@/assets/icons/pro-toggle.svg";
 import ProToggleSelected from "@/assets/icons/pro-toggle-selected.svg";
 import { useSwapPro } from "@/stores/useSwapPro";
 import { cn } from "@/lib/utils";
+import { clsx } from "clsx";
 
 interface ItemProps {
   children: React.ReactNode;
@@ -84,7 +85,9 @@ const Item: React.FC<ItemProps> = ({
               )}
             </div>
             <div
-              className={`hidden cursor-pointer group-hover:inline-flex ${!selected ? "invert" : ""}`}
+              className={clsx(`hidden cursor-pointer group-hover:inline-flex`, {
+                invert: !selected,
+              })}
               onClick={() => setSwapPro(!swapPro)}
             >
               {swapPro ? (
