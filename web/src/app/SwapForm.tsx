@@ -84,7 +84,7 @@ export const SwapForm = () => {
   if (activeModalToken) return null;
 
   return (
-    <div className="group flex flex-col items-center">
+    <div className="group flex flex-col items-center p-4">
       <WelcomeGradient />
 
       <div
