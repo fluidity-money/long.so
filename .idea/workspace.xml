@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="refactor: reorganize state">
-      <change beforePath="$PROJECT_DIR$/web/src/app/welcome.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/welcome.tsx" afterDir="false" />
-    </list>
+    <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="refactor: reorganize state" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -22,6 +20,9 @@
   </component>
   <component name="FormatOnSaveOptions">
     <option name="myRunOnSave" value="true" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="OptimizeOnSaveOptions">
     <option name="myRunOnSave" value="true" />
@@ -39,9 +40,10 @@
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "code.cleanup.on.save": "true",
     "git-widget-placeholder": "head",
+    "last_opened_file_path": "/Users/aidankinzett/Git/amm.superposition.so/web/src/assets/icons",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.standard": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.eslint": "",
     "node.js.selected.package.standard": "",
     "node.js.selected.package.tslint": "(autodetect)",
     "prettierjs.PrettierConfiguration.Package": "/Users/aidankinzett/Git/amm.superposition.so/web/node_modules/prettier",
@@ -56,7 +58,11 @@
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/web/src/assets/icons" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/web/.storybook" />
       <recent name="$PROJECT_DIR$/web/src" />
     </key>
   </component>
@@ -79,13 +85,6 @@
     </task>
     <option name="localTasksCounter" value="3" />
     <servers />
-  </component>
-  <component name="TypeScriptGeneratedFilesManager">
-    <option name="exactExcludedFiles">
-      <list>
-        <option value="$PROJECT_DIR$/web/tailwind.config.js" />
-      </list>
-    </option>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
