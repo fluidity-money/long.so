@@ -2,11 +2,16 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import Cog from "@/assets/icons/cog.svg";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Menu } from "@/components";
+import { useState } from "react";
 
 /**
  * Popover which contains the Superloop settings.
  */
 export const SuperloopPopover = () => {
+  const [autoSlippage, setAutoSlippage] = useState(true);
+  const [noTransactionDeadline, setNoTransactionDeadline] = useState(true);
+
   return (
     <div className="relative top-5 flex h-4 w-full flex-row items-end justify-end">
       <Popover>
@@ -16,11 +21,11 @@ export const SuperloopPopover = () => {
           </div>
         </PopoverTrigger>
         <PopoverContent className="bg-black text-xs text-white">
-          <div>
+          <div className="flex flex-col gap-2">
             <p className="iridescent-text text-base font-medium">
               💎 Superloop
             </p>
-            <div className="flex flex-row">
+            <div className="flex flex-row gap-2">
               <Label htmlFor="superloop" className="text-xs font-normal">
                 When available, aggregates liquidity sources for better price
                 and gas free swaps.
@@ -28,12 +33,42 @@ export const SuperloopPopover = () => {
               <Switch id="superloop" />
             </div>
 
-            <div className="flex flex-row">
+            <div className="flex flex-row justify-between">
               <p>Max. slippage</p>
+
+              <Menu id="slippage">
+                <Menu.Item
+                  selected={autoSlippage}
+                  onClick={() => setAutoSlippage(true)}
+                >
+                  Auto
+                </Menu.Item>
+                <Menu.Item
+                  selected={!autoSlippage}
+                  onClick={() => setAutoSlippage(false)}
+                >
+                  Custom
+                </Menu.Item>
+              </Menu>
             </div>
 
-            <div className="flex flex-row">
+            <div className="flex flex-row justify-between">
               <p>Transaction deadline</p>
+
+              <Menu id="transaction-deadline">
+                <Menu.Item
+                  selected={noTransactionDeadline}
+                  onClick={() => setNoTransactionDeadline(true)}
+                >
+                  Auto
+                </Menu.Item>
+                <Menu.Item
+                  selected={!noTransactionDeadline}
+                  onClick={() => setNoTransactionDeadline(false)}
+                >
+                  Custom
+                </Menu.Item>
+              </Menu>
             </div>
           </div>
         </PopoverContent>
