@@ -21,60 +21,60 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
   const { swapPro, setSwapPro } = useSwapPro();
 
   return (
-    <body className={inter.className}>
-      <div className="h-screen w-screen overflow-hidden bg-white">
-        <div
-          className={
-            "iridescent-blur calc absolute left-1/2 top-[180px] h-full max-h-[305px] w-full max-w-[557px] -translate-x-1/2 transform"
-          }
-        />
+    <body className={`${inter.className} bg-white`}>
+      <div
+        className={
+          "iridescent-blur calc absolute left-1/2 top-[180px] h-full max-h-[305px] w-full max-w-[557px] -translate-x-1/2 transform"
+        }
+      />
 
-        <header className="p-8">
-          <div className="flex w-full flex-col gap-8">
-            <div className="flex flex-row items-start justify-between">
-              <div className="flex flex-row items-center gap-4">
-                <Superposition height={34} width={34} />
-                <MobileNetworkSelection />
-              </div>
-
-              <div className="flex flex-row items-start gap-4">
-                <NetworkSelection />
-                <Button size="sm" color="light">
-                  Connect Wallet
-                </Button>
-              </div>
+      <header className="p-8">
+        <div className="flex w-full flex-col gap-8">
+          <div className="flex flex-row items-start justify-between">
+            <div className="flex flex-row items-center gap-4">
+              <Superposition height={34} width={34} />
+              <MobileNetworkSelection />
             </div>
-            <div className="flex w-full flex-col items-start md:items-center">
-              <Menu id="nav">
-                <Menu.Item
-                  onClick={() => {
-                    router.push("/");
-                  }}
-                  selected={pathname === "/"}
-                  proToggle
-                >
-                  <Text className="text-nowrap">Swap {swapPro && " Pro"}</Text>
-                </Menu.Item>
-                <Menu.Item
-                  onClick={() => {
-                    router.push("/stake");
-                  }}
-                  selected={pathname.startsWith("/stake")}
-                >
-                  <Text>Stake</Text>
-                </Menu.Item>
-              </Menu>
+
+            <div className="flex flex-row items-start gap-4">
+              <NetworkSelection />
+              <Button size="sm" color="light">
+                Connect Wallet
+              </Button>
             </div>
           </div>
-        </header>
-        {children}
-        <footer className="z-100 absolute bottom-0 w-full p-8">
-          <div className="flex flex-row justify-between">
-            <div>1002130192</div>
-            <div>Version 0.0.1</div>
+          <div className="flex w-full flex-col items-start md:items-center">
+            <Menu id="nav">
+              <Menu.Item
+                onClick={() => {
+                  router.push("/");
+                }}
+                selected={pathname === "/"}
+                proToggle
+              >
+                <Text className="text-nowrap">Swap {swapPro && " Pro"}</Text>
+              </Menu.Item>
+              <Menu.Item
+                onClick={() => {
+                  router.push("/stake");
+                }}
+                selected={pathname.startsWith("/stake")}
+              >
+                <Text>Stake</Text>
+              </Menu.Item>
+            </Menu>
           </div>
-        </footer>
-      </div>
+        </div>
+      </header>
+
+      {children}
+
+      <footer className="z-100 mt-32 w-full p-8">
+        <div className="flex flex-row justify-between">
+          <div>1002130192</div>
+          <div>Version 0.0.1</div>
+        </div>
+      </footer>
     </body>
   );
 };
