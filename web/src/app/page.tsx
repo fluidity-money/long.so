@@ -5,10 +5,10 @@ import { SwapPro } from "@/app/SwapPro";
 
 export default function Swap() {
   return (
-    <div className="flex max-h-screen flex-col">
+    <div className="flex w-full flex-col">
       <TokenModal />
 
-      <div className="flex flex-col-reverse justify-center gap-8 md:flex-row">
+      <div className="flex flex-col-reverse justify-center gap-8 lg:flex-row">
         <SwapPro />
         <SwapForm />
       </div>

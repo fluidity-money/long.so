@@ -88,7 +88,7 @@ export const SwapForm = () => {
       <WelcomeGradient />
 
       <div
-        className={`mt-8 flex w-full max-w-[400px] flex-col items-center gap-4 transition-transform ${welcome ? `cursor-pointer hover:-translate-y-8 hover:blur-0 ${hovering ? "-translate-y-8 blur-0" : "blur-sm"}` : ""}`}
+        className={`flex w-full max-w-[400px] flex-col items-center gap-1 transition-transform ${welcome ? `cursor-pointer hover:-translate-y-8 hover:blur-0 ${hovering ? "-translate-y-8 blur-0" : "blur-sm"}` : ""}`}
         onClick={() => setWelcome(false)}
       >
         <CampaignBanner />

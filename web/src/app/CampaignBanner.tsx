@@ -55,15 +55,17 @@ export const CampaignBanner = ({
         </div>
       </div>
 
-      <div className="cursor-pointer  text-xs">
+      <div className="cursor-pointer text-nowrap text-xs">
         <span className="underline">View all</span>
         {" ->"}
       </div>
 
       <div className="flex flex-row items-center gap-1 rounded bg-black px-1 text-xs text-white">
         <Hourglass width={15} height={20} />
-        <div className="hidden sm:inline-flex">{countdownLong}</div>
-        <div className="inline-flex sm:hidden">{countdownShort}</div>
+        <div className="hidden text-nowrap sm:inline-flex">{countdownLong}</div>
+        <div className="inline-flex text-nowrap sm:hidden">
+          {countdownShort}
+        </div>
       </div>
     </div>
   );

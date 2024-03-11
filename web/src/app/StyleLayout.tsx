@@ -21,12 +21,8 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
   const { swapPro, setSwapPro } = useSwapPro();
 
   return (
-    <body className={`${inter.className} bg-white`}>
-      <div
-        className={
-          "iridescent-blur calc absolute left-1/2 top-[180px] h-full max-h-[305px] w-full max-w-[557px] -translate-x-1/2 transform"
-        }
-      />
+    <body className={`${inter.className} flex flex-col bg-white`}>
+      <div className="iridescent-blur calc absolute left-1/2 top-[180px] h-full max-h-[305px] w-full max-w-[557px] -translate-x-1/2 transform" />
 
       <header className="p-8">
         <div className="flex w-full flex-col gap-8">
@@ -52,7 +48,12 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
                 selected={pathname === "/"}
                 proToggle
               >
-                <Text className="text-nowrap">Swap {swapPro && " Pro"}</Text>
+                <Text className="text-nowrap">
+                  Swap{" "}
+                  {swapPro && (
+                    <Text className="hidden md:inline-flex">{" Pro"}</Text>
+                  )}
+                </Text>
               </Menu.Item>
               <Menu.Item
                 onClick={() => {
@@ -69,7 +70,7 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
 
       {children}
 
-      <footer className="z-100 mt-32 w-full p-8">
+      <footer className="w-full p-8">
         <div className="flex flex-row justify-between">
           <div>1002130192</div>
           <div>Version 0.0.1</div>
