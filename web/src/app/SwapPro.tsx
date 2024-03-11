@@ -232,7 +232,7 @@ export const SwapPro = () => {
 
         <Graph />
 
-        <div className="flex hidden w-full flex-row items-center justify-between md:inline-flex">
+        <div className="flex hidden w-full flex-row flex-wrap items-center justify-between md:inline-flex">
           <div>
             <p className="text-xs">Liquidity</p>
             <p className="text-2xl">$1.01M</p>
