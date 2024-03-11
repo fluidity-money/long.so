@@ -6,6 +6,7 @@ import ArrowDown from "@/assets/icons/arrow-down.svg";
 import ProToggle from "@/assets/icons/pro-toggle.svg";
 import ProToggleSelected from "@/assets/icons/pro-toggle-selected.svg";
 import { useSwapPro } from "@/stores/useSwapPro";
+import { cn } from "@/lib/utils";
 
 interface ItemProps {
   children: React.ReactNode;
@@ -14,7 +15,7 @@ interface ItemProps {
   groupId?: string;
   background?: "light" | "dark";
   proToggle?: boolean;
-  onProToggleClick?: () => void;
+  className?: string;
 }
 
 const Item: React.FC<ItemProps> = ({
@@ -24,7 +25,7 @@ const Item: React.FC<ItemProps> = ({
   groupId,
   background = "light",
   proToggle,
-  onProToggleClick,
+  className,
 }) => {
   const classes = `
     ${styles.Item}
@@ -36,7 +37,15 @@ const Item: React.FC<ItemProps> = ({
 
   return (
     <motion.div
-      className={`${classes} group rounded-md px-4 py-3 text-sm font-medium ${proToggle ? `w-16 transition-[width]  ${swapPro ? "md:w-28 md:hover:w-36" : "md:w-20 md:hover:w-28"}` : ""} ${selected ? "" : "cursor-pointer"}`}
+      className={cn(
+        classes,
+        "group rounded-md px-4 py-3 text-sm font-medium",
+        proToggle
+          ? `w-16 transition-[width]  ${swapPro ? "md:w-28 md:hover:w-36" : "md:w-20 md:hover:w-28"}`
+          : "",
+        selected ? "" : "cursor-pointer",
+        className,
+      )}
       whileHover={{
         scale: !selected ? 1.05 : 1,
         transition: {
@@ -55,11 +64,13 @@ const Item: React.FC<ItemProps> = ({
       onClick={onClick}
     >
       {selected && (
-        <Box
-          layoutId={groupId}
-          background={background}
-          className={`${styles.virtualBox} ${proToggle && swapPro ? "shine" : ""}`}
-        />
+        <>
+          <Box
+            layoutId={groupId}
+            background={background}
+            className={`${styles.virtualBox} ${proToggle && swapPro ? "shine" : ""}`}
+          />
+        </>
       )}
       <div className={"flex flex-row items-center gap-2"}>
         {children}
