@@ -7,6 +7,7 @@ import { NetworkSelection } from "@/app/NetworkSelection";
 import { Button } from "@/components/ui/button";
 import { Menu, Text } from "@/components";
 import { Inter } from "next/font/google";
+import { useSwapPro } from "@/stores/useSwapPro";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -16,6 +17,8 @@ const inter = Inter({
 export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const router = useRouter();
+
+  const { swapPro, setSwapPro } = useSwapPro();
 
   return (
     <body className={inter.className}>
@@ -50,7 +53,7 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
                   selected={pathname === "/"}
                   proToggle
                 >
-                  <Text>Swap</Text>
+                  <Text className="text-nowrap">Swap {swapPro && " Pro"}</Text>
                 </Menu.Item>
                 <Menu.Item
                   onClick={() => {

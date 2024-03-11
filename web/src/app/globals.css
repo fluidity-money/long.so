@@ -99,3 +99,7 @@
     filter: blur(100px);
 }
 
+.shine {
+    background: linear-gradient(303.31deg, rgba(30, 30, 30, 0.5) 11.89%, rgba(138, 138, 138, 0.5) 42.34%, rgba(109, 109, 109, 0.5) 55.02%, rgba(14, 14, 14, 0.5) 69.4%, rgba(30, 30, 30, 0.5) 93.08%), linear-gradient(0deg, #1E1E1E, #1E1E1E);
+
+}
