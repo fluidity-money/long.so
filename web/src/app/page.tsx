@@ -8,7 +8,7 @@ export default function Swap() {
     <div className="flex w-full flex-col">
       <TokenModal />
 
-      <div className="flex flex-col-reverse justify-center gap-8 lg:flex-row">
+      <div className="flex max-w-full flex-col-reverse justify-center gap-8 lg:flex-row">
         <SwapPro />
         <SwapForm />
       </div>
