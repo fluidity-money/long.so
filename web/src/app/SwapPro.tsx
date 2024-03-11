@@ -3,17 +3,11 @@
 import { useSwapPro } from "@/stores/useSwapPro";
 import { TypographyH2, TypographyH3 } from "@/components/ui/typography";
 import { Bar, BarChart, ResponsiveContainer } from "recharts";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { Menu } from "@/components";
 import { useState } from "react";
+import { startCase } from "lodash";
+import { useModalStore } from "@/app/TokenModal";
 
 const data = [
   {
@@ -166,6 +160,7 @@ const Graph = () => {
   const [activeGraphType, setActiveGraphType] = useState<
     "price" | "volume" | "liquidity"
   >("volume");
+
   return (
     <>
       <Menu id="graph">
@@ -193,7 +188,11 @@ const Graph = () => {
       </Menu>
 
       <div className="flex flex-col gap-8">
-        <div className="text-sm md:hidden">fUSDC/ETH Price</div>
+        {/* this text is only shown on mobile */}
+        <div className="text-sm md:hidden">
+          fUSDC/ETH {startCase(activeGraphType)}
+        </div>
+
         <TypographyH2 className="border-b-0">$12.05</TypographyH2>
 
         <div className="flex flex-col gap-2">
@@ -212,6 +211,10 @@ const Graph = () => {
 
 export const SwapPro = () => {
   const { swapPro, setSwapPro } = useSwapPro();
+
+  const { enabled } = useModalStore();
+
+  if (enabled) return null;
 
   return (
     <div className="z-10 flex flex-col items-center justify-center">
@@ -258,67 +261,6 @@ export const SwapPro = () => {
               <span className="underline">My Transactions</span> {"->"}
             </div>
           </div>
-
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Value</TableHead>
-                <TableHead className="w-[180px]">fUSDC/ETH</TableHead>
-                <TableHead>Rewards</TableHead>
-                <TableHead>Time</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell>$100</TableCell>
-                <TableCell className="font-medium">fUSDC {"->"} ETH</TableCell>
-                <TableCell>$0.21</TableCell>
-                <TableCell>1 min</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>$100</TableCell>
-                <TableCell className="font-medium">fUSDC {"->"} ETH</TableCell>
-                <TableCell>$0.21</TableCell>
-                <TableCell>1 min</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>$100</TableCell>
-                <TableCell className="font-medium">fUSDC {"->"} ETH</TableCell>
-                <TableCell>$0.21</TableCell>
-                <TableCell>1 min</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>$100</TableCell>
-                <TableCell className="font-medium">fUSDC {"->"} ETH</TableCell>
-                <TableCell>$0.21</TableCell>
-                <TableCell>1 min</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>$100</TableCell>
-                <TableCell className="font-medium">fUSDC {"->"} ETH</TableCell>
-                <TableCell>$0.21</TableCell>
-                <TableCell>1 min</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>$100</TableCell>
-                <TableCell className="font-medium">fUSDC {"->"} ETH</TableCell>
-                <TableCell>$0.21</TableCell>
-                <TableCell>1 min</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>$100</TableCell>
-                <TableCell className="font-medium">fUSDC {"->"} ETH</TableCell>
-                <TableCell>$0.21</TableCell>
-                <TableCell>1 min</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>$100</TableCell>
-                <TableCell className="font-medium">fUSDC {"->"} ETH</TableCell>
-                <TableCell>$0.21</TableCell>
-                <TableCell>1 min</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
         </div>
       </div>
     </div>
