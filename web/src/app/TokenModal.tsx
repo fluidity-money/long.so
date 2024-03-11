@@ -1,12 +1,14 @@
 "use client";
 
-import { Box, Input, Text, Token } from "@/components";
+import { Box, Text, Token } from "@/components";
 import { Button } from "@/components/ui/button";
-import Search from "@/assets/icons/Search.svg";
 import { TokenList } from "@/util/tokens";
 import { ActiveModalToken } from "@/util/types";
 import { useActiveTokenStore } from "@/stores/useActiveTokenStore";
 import create from "zustand";
+import { useHotkeys } from "react-hotkeys-hook";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface ModalStore {
   // whether the modal is enabled
@@ -33,48 +35,51 @@ export const TokenModal = () => {
 
   const setToken = activeModalToken === "token0" ? setToken0 : setToken1;
 
+  useHotkeys("esc", () => disable());
+
   if (!enabled) return null;
 
   return (
-    <div className="flex flex-col items-center">
-      <Box size="large" className="flex max-w-screen-sm flex-col gap-4">
+    <div className="z-10 flex flex-col items-center">
+      <div className="flex max-w-screen-sm flex-col gap-4 rounded-lg bg-black p-4 text-white">
         <div className="flex flex-row items-center justify-between">
-          <Text>Select Token</Text>
-          <Button color="light" onClick={() => setActiveModalToken(undefined)}>
-            <Text>Esc</Text>
+          <Text>Swap</Text>
+          <Button
+            variant="secondary"
+            onClick={() => disable()}
+            className="px-2 py-0"
+          >
+            Esc
           </Button>
         </div>
-        <Text>Filter</Text>
-        <Text className="flex flex-row items-center justify-between border-b pb-2">
+
+        <div className="flex flex-col gap-4 p-2">
+          <Label htmlFor="filter">Filter</Label>
           <Input
-            value=""
-            onChange={() => {
-              return;
-            }}
+            id="filter"
             placeholder="e.g. Ether, ARB, 0x0bafe8babf38bf3ba83fb80a82..."
           />
-          <Search height={22} />
-        </Text>
-        {/* Placeholders */}
-        <Text>Highest Rewarders</Text>
-        <div className="flex flex-row gap-2">
-          {TokenList.map((token, i) => (
-            <Box
-              key={i}
-              outline
-              pill
-              background="light"
-              onClick={() => {
-                setToken(token.address);
-                disable();
-              }}
-            >
-              <Token />
-              <Text weight="semibold">{token.symbol}</Text>
-            </Box>
-          ))}
+
+          <Text>Highest Rewarders</Text>
+          <div className="flex flex-row gap-2">
+            {TokenList.map((token, i) => (
+              <Box
+                key={i}
+                outline
+                pill
+                background="light"
+                onClick={() => {
+                  setToken(token.address);
+                  disable();
+                }}
+              >
+                <Token />
+                <Text weight="semibold">{token.symbol}</Text>
+              </Box>
+            ))}
+          </div>
         </div>
-      </Box>
+      </div>
     </div>
   );
 };
