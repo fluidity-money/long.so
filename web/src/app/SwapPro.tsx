@@ -158,89 +158,96 @@ export const SwapPro = () => {
   return (
     <div className="flex flex-col items-center justify-center">
       <div
-        className={`z-10 flex flex-col gap-4 overflow-x-hidden transition-[width] sm:w-full ${swapPro ? " md:mr-10 md:w-[600px]" : "md:mr-0 md:w-0"}`}
+        className={`z-10 flex flex-col gap-4 overflow-x-hidden px-4 transition-[width] sm:w-[100%] sm:max-w-[400px] ${swapPro ? "md:mr-10 md:max-w-[600px]" : "md:mr-0 md:hidden md:w-0"}`}
       >
-        <p>fUSDC/ETH</p>
+        <div className="w-full">
+          <p className="hidden md:inline-flex">fUSDC/ETH</p>
 
-        <Tabs defaultValue="volume">
-          <TabsList>
-            <TabsTrigger value="price">Price</TabsTrigger>
-            <TabsTrigger value="volume">Volume</TabsTrigger>
-            <TabsTrigger value="liquidity">Liquidity</TabsTrigger>
-          </TabsList>
-          <TabsContent value="price">
-            <div className="flex flex-col gap-8">
-              <TypographyH3>$12.05</TypographyH3>
+          <Tabs defaultValue="volume">
+            <TabsList>
+              <TabsTrigger value="price">Price</TabsTrigger>
+              <TabsTrigger value="volume">Volume</TabsTrigger>
+              <TabsTrigger value="liquidity">Liquidity</TabsTrigger>
+            </TabsList>
+            <TabsContent value="price">
+              <div className="flex flex-col gap-8">
+                <div className="text-sm md:hidden">fUSDC/ETH Price</div>
+                <TypographyH3>$12.05</TypographyH3>
 
-              <div className="flex flex-col gap-4">
-                <ResponsiveContainer height={150} width="100%">
-                  <BarChart data={data}>
-                    <Bar dataKey="uv" fill="#1E1E1E" />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="flex flex-col gap-4">
+                  <ResponsiveContainer height={150} width="100%">
+                    <BarChart data={data}>
+                      <Bar dataKey="uv" fill="#1E1E1E" />
+                    </BarChart>
+                  </ResponsiveContainer>
 
-                <div className="text-xs">5th October 2023</div>
+                  <div className="text-xs">5th October 2023</div>
+                </div>
               </div>
-            </div>
-          </TabsContent>
-          <TabsContent value="volume">
-            <div className="flex flex-col gap-8">
-              <TypographyH3>$12.1M</TypographyH3>
+            </TabsContent>
+            <TabsContent value="volume">
+              <div className="flex flex-col gap-8">
+                <div className="text-sm md:hidden">fUSDC/ETH Volume</div>
 
-              <div className="flex flex-col gap-4">
-                <ResponsiveContainer height={150} width="100%">
-                  <BarChart data={data}>
-                    <Bar dataKey="uv" fill="#1E1E1E" />
-                  </BarChart>
-                </ResponsiveContainer>
+                <TypographyH3>$12.1M</TypographyH3>
 
-                <div className="text-xs">5th October 2023</div>
+                <div className="flex flex-col gap-4">
+                  <ResponsiveContainer height={150} width="100%">
+                    <BarChart data={data}>
+                      <Bar dataKey="uv" fill="#1E1E1E" />
+                    </BarChart>
+                  </ResponsiveContainer>
+
+                  <div className="text-xs">5th October 2023</div>
+                </div>
               </div>
-            </div>
-          </TabsContent>
-          <TabsContent value="liquidity">
-            <div className="flex flex-col gap-8">
-              <TypographyH3>$150.5K</TypographyH3>
+            </TabsContent>
+            <TabsContent value="liquidity">
+              <div className="flex flex-col gap-8">
+                <div className="text-sm md:hidden">fUSDC/ETH Liquidity</div>
 
-              <div className="flex flex-col gap-4">
-                <ResponsiveContainer height={150} width="100%">
-                  <BarChart data={data}>
-                    <Bar dataKey="uv" fill="#1E1E1E" />
-                  </BarChart>
-                </ResponsiveContainer>
+                <TypographyH3>$150.5K</TypographyH3>
 
-                <div className="text-xs">5th October 2023</div>
+                <div className="flex flex-col gap-4">
+                  <ResponsiveContainer height={150} width="100%">
+                    <BarChart data={data}>
+                      <Bar dataKey="uv" fill="#1E1E1E" />
+                    </BarChart>
+                  </ResponsiveContainer>
+
+                  <div className="text-xs">5th October 2023</div>
+                </div>
               </div>
+            </TabsContent>
+          </Tabs>
+
+          <div className="flex hidden w-full flex-row items-center justify-between md:inline-flex">
+            <div>
+              <p className="text-xs">Liquidity</p>
+              <p>$1.01M</p>
             </div>
-          </TabsContent>
-        </Tabs>
 
-        <div className="flex flex-row items-center justify-between">
-          <div>
-            <p className="text-xs">Liquidity</p>
-            <p>$1.01M</p>
+            <div>
+              <p className="text-xs">Volume 24H</p>
+              <p>$115.21K</p>
+            </div>
+
+            <div>
+              <p className="text-xs">Stake APY</p>
+              <p>1.62%</p>
+            </div>
+
+            <div>
+              <p className="text-xs">24H Trade Rewards</p>
+              <p>$300.56</p>
+            </div>
           </div>
 
-          <div>
-            <p className="text-xs">Volume 24H</p>
-            <p>$115.21K</p>
-          </div>
-
-          <div>
-            <p className="text-xs">Stake APY</p>
-            <p>1.62%</p>
-          </div>
-
-          <div>
-            <p className="text-xs">24H Trade Rewards</p>
-            <p>$300.56</p>
-          </div>
-        </div>
-
-        <div className="flex flex-row items-center justify-between">
-          <h3>Transaction History</h3>
-          <div>
-            <span className="underline">My Transactions</span> {"->"}
+          <div className="flex w-full flex-row items-center justify-between">
+            <h3>Transaction History</h3>
+            <div>
+              <span className="underline">My Transactions</span> {"->"}
+            </div>
           </div>
         </div>
       </div>

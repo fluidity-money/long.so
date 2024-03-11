@@ -36,7 +36,7 @@ const Item: React.FC<ItemProps> = ({
 
   return (
     <motion.div
-      className={`${classes}  group rounded-md px-4 py-3 text-sm font-medium ${proToggle ? `transition-[width]  ${swapPro ? "w-28 hover:w-36" : "w-20 hover:w-28"}` : ""} ${selected ? "" : "cursor-pointer"}`}
+      className={`${classes} group rounded-md px-4 py-3 text-sm font-medium ${proToggle ? `w-16 transition-[width]  ${swapPro ? "md:w-28 md:hover:w-36" : "md:w-20 md:hover:w-28"}` : ""} ${selected ? "" : "cursor-pointer"}`}
       whileHover={{
         scale: !selected ? 1.05 : 1,
         transition: {
@@ -64,7 +64,7 @@ const Item: React.FC<ItemProps> = ({
       <div className={"flex flex-row items-center gap-2"}>
         {children}
         {proToggle && (
-          <>
+          <div className="hidden md:inline-flex">
             <div className="group-hover:hidden">
               {selected ? (
                 <ArrowDownWhite height={10} width={10} />
@@ -82,7 +82,7 @@ const Item: React.FC<ItemProps> = ({
                 <ProToggle className="h-[20px] w-[35px]" />
               )}
             </div>
-          </>
+          </div>
         )}
       </div>
     </motion.div>
