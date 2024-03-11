@@ -4,42 +4,39 @@ import { Box } from "../index";
 import ArrowDownWhite from "@/assets/icons/arrow-down-white.svg";
 import ArrowDown from "@/assets/icons/arrow-down.svg";
 import ProToggle from "@/assets/icons/pro-toggle.svg";
+import ProToggleSelected from "@/assets/icons/pro-toggle-selected.svg";
+import { useSwapPro } from "@/stores/useSwapPro";
 
-interface IItem {
+interface ItemProps {
   children: React.ReactNode;
   selected?: boolean;
   onClick?: () => void;
   groupId?: string;
   background?: "light" | "dark";
   proToggle?: boolean;
+  onProToggleClick?: () => void;
 }
 
-interface IMenu {
-  children: React.ReactElement<IItem>[];
-  background?: "light" | "dark";
-  style?: "primary" | "secondary";
-  id: string;
-}
-
-const Item: React.FC<IItem> = (props) => {
-  const {
-    children,
-    selected,
-    onClick,
-    groupId,
-    background = "light",
-    proToggle,
-  } = props;
-
+const Item: React.FC<ItemProps> = ({
+  children,
+  selected,
+  onClick,
+  groupId,
+  background = "light",
+  proToggle,
+  onProToggleClick,
+}) => {
   const classes = `
     ${styles.Item}
     ${selected ? styles.selected : ""}
     ${styles[background]}
   `;
 
+  const { swapPro, setSwapPro } = useSwapPro();
+
   return (
     <motion.div
-      className={`${classes} group  cursor-pointer rounded-md px-8 py-1 text-sm font-medium  ${proToggle ? "w-28 transition-[width] hover:w-32" : ""}`}
+      className={`${classes}  group rounded-md px-4 py-3 text-sm font-medium ${proToggle ? `transition-[width]  ${swapPro ? "w-28 hover:w-36" : "w-20 hover:w-28"}` : ""} ${selected ? "" : "cursor-pointer"}`}
       whileHover={{
         scale: !selected ? 1.05 : 1,
         transition: {
@@ -61,7 +58,7 @@ const Item: React.FC<IItem> = (props) => {
         <Box
           layoutId={groupId}
           background={background}
-          className={styles.virtualBox}
+          className={`${styles.virtualBox} ${proToggle && swapPro ? "shine" : ""}`}
         />
       )}
       <div className={"flex flex-row items-center gap-2"}>
@@ -76,9 +73,14 @@ const Item: React.FC<IItem> = (props) => {
               )}
             </div>
             <div
-              className={`hidden group-hover:inline-flex ${!selected ? "invert" : ""}`}
+              className={`hidden cursor-pointer group-hover:inline-flex ${!selected ? "invert" : ""}`}
+              onClick={() => setSwapPro(!swapPro)}
             >
-              <ProToggle height={20} width={35} />
+              {swapPro ? (
+                <ProToggleSelected className="h-[20px] w-[35px]" />
+              ) : (
+                <ProToggle className="h-[20px] w-[35px]" />
+              )}
             </div>
           </>
         )}
@@ -87,9 +89,19 @@ const Item: React.FC<IItem> = (props) => {
   );
 };
 
-const Menu: React.FC<IMenu> = (props) => {
-  const { children, background = "light", style = "secondary", id } = props;
+interface MenuProps {
+  children: React.ReactElement<ItemProps>[];
+  background?: "light" | "dark";
+  style?: "primary" | "secondary";
+  id: string;
+}
 
+const Menu: React.FC<MenuProps> = ({
+  children,
+  background = "light",
+  style = "secondary",
+  id,
+}) => {
   const frameColor =
     (background === "light" && style === "primary") ||
     (background === "dark" && style === "secondary")
