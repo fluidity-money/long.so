@@ -1,8 +1,8 @@
-import { Box } from "@/components";
 import Swap from "@/assets/icons/Swap.svg";
+import { motion } from "framer-motion";
 
 export const SwapButton = ({ onClick }: { onClick?: () => void }) => (
-  <Box
+  <motion.div
     whileHover={{
       borderRadius: 32,
       transition: {
@@ -11,8 +11,6 @@ export const SwapButton = ({ onClick }: { onClick?: () => void }) => (
     }}
     initial={{
       borderRadius: 4,
-      x: "-50%",
-      y: "-50%",
     }}
     animate={{
       borderRadius: 4,
@@ -21,10 +19,9 @@ export const SwapButton = ({ onClick }: { onClick?: () => void }) => (
       },
     }}
     whileTap={{ scale: 0.9 }}
-    background="dark"
-    className="width-[40px] height-[40px] absolute left-1/2 top-1/2 flex cursor-pointer items-center justify-center"
+    className="z-10 flex h-[40px] w-[40px] cursor-pointer items-center justify-center bg-white"
     onClick={onClick}
   >
-    <Swap className="absolute w-[10px]" />
-  </Box>
+    <Swap className="w-[10px]" />
+  </motion.div>
 );

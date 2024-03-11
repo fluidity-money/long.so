@@ -4,6 +4,7 @@ import { CampaignBanner } from "@/app/CampaignBanner";
 import { Box, Input, Link, Slider, Text, Token } from "@/components";
 import { addressToSymbol } from "@/util/tokens";
 import Caret from "@/assets/icons/Caret.svg";
+import Cog from "@/assets/icons/cog.svg";
 import {
   getFormattedStringFromTokenAmount,
   getTokenAmountFromFormattedString,
@@ -17,6 +18,11 @@ import { useAccount, useBalance } from "wagmi";
 import { useSwap } from "@/hooks/useSwap";
 import { useModalStore } from "@/app/TokenModal";
 import { WelcomeGradient } from "@/app/WelcomeGradient";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export const SwapForm = () => {
   const [inputReceive, setInputReceive] = useState("");
@@ -85,12 +91,33 @@ export const SwapForm = () => {
   return (
     <div className="group flex flex-col items-center">
       <WelcomeGradient />
+
       <div
         className={`mt-8 flex w-full max-w-[400px] flex-col items-center gap-4 transition-transform ${welcome ? `cursor-pointer hover:-translate-y-8 hover:blur-0 ${hovering ? "-translate-y-8 blur-0" : "blur-sm"}` : ""}`}
         onClick={() => setWelcome(false)}
       >
         <CampaignBanner />
-        <div className="relative z-10 flex w-full flex-col gap-2">
+
+        <div className="z-10 flex w-full flex-col gap-2">
+          <div className="relative top-5 flex h-4 w-full flex-row items-end justify-end">
+            <Popover>
+              <PopoverTrigger>
+                <div className="flex h-[35px] w-[35px] items-center justify-center">
+                  <Cog className="hover:animate-spin-once relative left-1 top-1 h-[30px] w-[30px] hover:h-[35px] hover:w-[35px]" />
+                </div>
+              </PopoverTrigger>
+              <PopoverContent>
+                <div>
+                  <p>Superloop</p>
+                  <p>
+                    Superloop is a decentralized exchange that allows you to
+                    swap tokens on the Ethereum network.
+                  </p>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
           <div className="flex w-full flex-col gap-3 rounded-lg bg-black p-4 text-white">
             <div className="flex items-center justify-between">
               <Text size="small">Swap</Text>
@@ -140,22 +167,21 @@ export const SwapForm = () => {
             </div>
           </div>
 
-          <SwapButton
-            onClick={() => {
-              // swap amounts and trigger a quote update
-              const amount1 = result?.[1].toString();
-              setInputReceive(amountInDisplay);
-              setAmountInDisplay(
-                getFormattedStringFromTokenAmount(amount1 || "0", decimals1),
-              );
-              flipTokens();
-            }}
-          />
+          <div className="-mb-5 -mt-5 flex w-full flex-row items-center justify-center">
+            <SwapButton
+              onClick={() => {
+                // swap amounts and trigger a quote update
+                const amount1 = result?.[1].toString();
+                setInputReceive(amountInDisplay);
+                setAmountInDisplay(
+                  getFormattedStringFromTokenAmount(amount1 || "0", decimals1),
+                );
+                flipTokens();
+              }}
+            />
+          </div>
 
-          <div
-            className="flex w-full flex-col gap-3 rounded-lg bg-black p-4 text-white"
-            layoutId="main"
-          >
+          <div className="flex w-full flex-col gap-3 rounded-lg bg-black p-4 text-white">
             <div className="flex items-center justify-between">
               <Text size="small">Receive</Text>
               <Text size="small">${addressToSymbol(token1)}</Text>
