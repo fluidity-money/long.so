@@ -214,11 +214,13 @@ export const SwapPro = () => {
   const { swapPro, setSwapPro } = useSwapPro();
 
   return (
-    <div className="z-10 flex flex-col items-center justify-center px-4 pl-8">
+    <div className="z-10 flex flex-col items-center justify-center">
       <div
         className={cn(
-          "flex  w-[100%] max-w-[400px] flex-col gap-4 overflow-x-clip md:max-w-[600px]",
-          swapPro ? "md:mr-10" : "md:h-0 md:w-0",
+          "flex w-full flex-col gap-4 overflow-x-clip p-4 sm:w-[400px]",
+          swapPro
+            ? "px-4 pl-8 md:mr-10 md:w-[400px] lg:w-[500px] xl:w-[600px]"
+            : "md:h-0 md:w-0 md:p-0",
         )}
       >
         <TypographyH3 className="hidden font-normal md:inline-flex">

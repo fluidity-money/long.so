@@ -18,6 +18,7 @@ import { useSwap } from "@/hooks/useSwap";
 import { useModalStore } from "@/app/TokenModal";
 import { WelcomeGradient } from "@/app/WelcomeGradient";
 import { SuperloopPopover } from "@/app/SuperloopPopover";
+import { cn } from "@/lib/utils";
 
 export const SwapForm = () => {
   const [inputReceive, setInputReceive] = useState("");
@@ -84,11 +85,19 @@ export const SwapForm = () => {
   if (activeModalToken) return null;
 
   return (
-    <div className="group flex flex-col items-center p-4">
+    <div className="group z-10 flex flex-col items-center ">
       <WelcomeGradient />
 
       <div
-        className={`flex w-full max-w-[400px] flex-col items-center gap-1 transition-transform ${welcome ? `cursor-pointer hover:-translate-y-8 hover:blur-0 ${hovering ? "-translate-y-8 blur-0" : "blur-sm"}` : ""}`}
+        className={cn(
+          `flex w-full flex-col items-center gap-1 p-4 transition-transform sm:w-[400px] lg:w-[450px]`,
+          welcome
+            ? cn(
+                `cursor-pointer hover:-translate-y-8 hover:blur-0`,
+                hovering ? "-translate-y-8 blur-0" : "blur-sm",
+              )
+            : "",
+        )}
         onClick={() => setWelcome(false)}
       >
         <CampaignBanner />
