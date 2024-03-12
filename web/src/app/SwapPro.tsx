@@ -257,7 +257,7 @@ const Graph = () => {
   );
 };
 
-export const SwapPro = () => {
+export const SwapPro = ({ override }: { override?: boolean }) => {
   const { swapPro, setSwapPro } = useSwapPro();
 
   const { enabled } = useModalStore();
@@ -269,7 +269,7 @@ export const SwapPro = () => {
       <div
         className={cn(
           "flex w-full flex-col gap-4 overflow-x-clip p-4 sm:w-[500px]",
-          swapPro
+          override || swapPro
             ? "px-4 pl-8 md:mr-10 md:w-[500px] lg:w-[500px] xl:w-[600px]"
             : "md:h-0 md:w-0 md:p-0",
         )}
