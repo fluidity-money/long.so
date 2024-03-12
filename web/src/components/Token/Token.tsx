@@ -84,11 +84,11 @@ const Token: React.FC<IToken> = (props) => {
       >
         <div className={styles.tails}>
           {/* Placeholder */}
-          <USDC />
+          <USDC height={50} width={50} />
         </div>
         <div className={styles.heads}>
           {/* Placeholder */}
-          <ETH />
+          <ETH height={50} width={50} />
         </div>
       </motion.div>
     </motion.div>

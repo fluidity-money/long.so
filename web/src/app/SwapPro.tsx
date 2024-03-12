@@ -268,9 +268,9 @@ export const SwapPro = () => {
     <div className="z-10 flex flex-col items-center justify-center">
       <div
         className={cn(
-          "flex w-full flex-col gap-4 overflow-x-clip p-4 sm:w-[400px]",
+          "flex w-full flex-col gap-4 overflow-x-clip p-4 sm:w-[500px]",
           swapPro
-            ? "px-4 pl-8 md:mr-10 md:w-[400px] lg:w-[500px] xl:w-[600px]"
+            ? "px-4 pl-8 md:mr-10 md:w-[500px] lg:w-[500px] xl:w-[600px]"
             : "md:h-0 md:w-0 md:p-0",
         )}
       >
@@ -280,7 +280,7 @@ export const SwapPro = () => {
 
         <Graph />
 
-        <div className="flex hidden w-full flex-row flex-wrap items-center justify-between md:inline-flex">
+        <div className="flex hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:inline-flex">
           <div>
             <p className="text-xs">Liquidity</p>
             <p className="text-2xl">$1.01M</p>
@@ -320,12 +320,16 @@ export const SwapPro = () => {
                 value: 100,
                 rewards: 200,
                 time: startOfDay(new Date()),
+                amountFrom: 30.2,
+                amountTo: 0.0001,
               },
               {
                 id: "2",
                 value: 300,
                 rewards: 20,
                 time: startOfDay(new Date()),
+                amountFrom: 30.2,
+                amountTo: 0.0001,
               },
             ] as Transaction[]
           }
