@@ -161,6 +161,10 @@ const Graph = () => {
     "price" | "volume" | "liquidity"
   >("volume");
 
+  const [activeGraphDuration, setActiveGraphDuration] = useState<
+    "7D" | "1M" | "6M" | "1Y" | "ALL"
+  >("7D");
+
   return (
     <>
       <Menu id="graph">
@@ -188,11 +192,52 @@ const Graph = () => {
       </Menu>
 
       <div className="flex flex-col gap-8">
-        {/* this text is only shown on mobile */}
-        <div className="text-sm md:hidden">
-          fUSDC/ETH {startCase(activeGraphType)}
-        </div>
+        <div className="flex flex-row justify-between">
+          <div>
+            <div className="text-sm md:hidden">
+              {/* this text is only shown on mobile */}
+              fUSDC/ETH {startCase(activeGraphType)}
+            </div>
+          </div>
 
+          <Menu id="graph-duration">
+            <Menu.Item
+              className="mx-1 px-0.5 py-0.5 text-xs"
+              selected={activeGraphDuration === "7D"}
+              onClick={() => setActiveGraphDuration("7D")}
+            >
+              7D
+            </Menu.Item>
+            <Menu.Item
+              className="mx-1 px-0.5 py-0.5 text-xs"
+              selected={activeGraphDuration === "1M"}
+              onClick={() => setActiveGraphDuration("1M")}
+            >
+              1M
+            </Menu.Item>
+            <Menu.Item
+              className="mx-1 px-0.5 py-0.5 text-xs"
+              selected={activeGraphDuration === "6M"}
+              onClick={() => setActiveGraphDuration("6M")}
+            >
+              6M
+            </Menu.Item>
+            <Menu.Item
+              className="mx-1 px-0.5 py-0.5 text-xs"
+              selected={activeGraphDuration === "1Y"}
+              onClick={() => setActiveGraphDuration("1Y")}
+            >
+              1Y
+            </Menu.Item>
+            <Menu.Item
+              className="mx-1 px-0.5 py-0.5 text-xs"
+              selected={activeGraphDuration === "ALL"}
+              onClick={() => setActiveGraphDuration("ALL")}
+            >
+              ALL
+            </Menu.Item>
+          </Menu>
+        </div>
         <TypographyH2 className="border-b-0">$12.05</TypographyH2>
 
         <div className="flex flex-col gap-2">
