@@ -8,6 +8,9 @@ import { Menu } from "@/components";
 import { useState } from "react";
 import { startCase } from "lodash";
 import { useModalStore } from "@/app/TokenModal";
+import { DataTable } from "@/app/_DataTable/DataTable";
+import { columns, Transaction } from "@/app/_DataTable/columns";
+import { startOfDay } from "date-fns";
 
 const data = [
   {
@@ -307,6 +310,26 @@ export const SwapPro = () => {
             </div>
           </div>
         </div>
+
+        <DataTable
+          columns={columns}
+          data={
+            [
+              {
+                id: "1",
+                value: 100,
+                rewards: 200,
+                time: startOfDay(new Date()),
+              },
+              {
+                id: "2",
+                value: 300,
+                rewards: 20,
+                time: startOfDay(new Date()),
+              },
+            ] as Transaction[]
+          }
+        />
       </div>
     </div>
   );
