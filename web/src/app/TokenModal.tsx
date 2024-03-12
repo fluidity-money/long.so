@@ -9,6 +9,7 @@ import create from "zustand";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
 
 interface ModalStore {
   // whether the modal is enabled
@@ -41,7 +42,10 @@ export const TokenModal = () => {
 
   return (
     <div className="z-10 flex flex-col items-center">
-      <div className="flex max-w-screen-sm flex-col gap-4 rounded-lg bg-black p-4 text-white">
+      <motion.div
+        layoutId="modal"
+        className="flex max-w-screen-sm flex-col gap-4 rounded-lg bg-black p-4 text-white"
+      >
         <div className="flex flex-row items-center justify-between">
           <Text>Swap</Text>
           <Button
@@ -49,7 +53,7 @@ export const TokenModal = () => {
             onClick={() => disable()}
             className="px-2 py-0"
           >
-            Esc
+            {"<-"} Esc
           </Button>
         </div>
 
@@ -79,7 +83,7 @@ export const TokenModal = () => {
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

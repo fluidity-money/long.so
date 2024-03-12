@@ -1,12 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import { TypographyH3 } from "@/components/ui/typography";
-
-const poolId = "123";
+import { motion } from "framer-motion";
 
 const Stake = () => {
   return (
     <div className="z-10 flex flex-col items-center">
-      <div>
+      <motion.div
+        layoutId="modal"
+        className="flex w-[500px] flex-col gap-4 rounded-lg bg-black p-4 pt-0 text-white"
+      >
         <TypographyH3>Manage Pools</TypographyH3>
         <ul>
           <Link href={`/stake/pool/123`}>
@@ -18,7 +22,7 @@ const Stake = () => {
             <li>456</li>
           </Link>
         </ul>
-      </div>
+      </motion.div>
     </div>
   );
 };
