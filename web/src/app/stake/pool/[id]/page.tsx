@@ -7,7 +7,299 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { Token } from "@/components";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
+import { Bar, BarChart, ResponsiveContainer } from "recharts";
+import { Line } from "rc-progress";
 
+const data = [
+  {
+    name: "Page A",
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: "Page B",
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: "Page C",
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page D",
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: "Page E",
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: "Page F",
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+  {
+    name: "Page H",
+    uv: 3490,
+    pv: 4300,
+    amt: 2400,
+  },
+  {
+    name: "Page A",
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: "Page B",
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: "Page C",
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page D",
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: "Page E",
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: "Page F",
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+  {
+    name: "Page H",
+    uv: 3490,
+    pv: 4300,
+    amt: 2400,
+  },
+  {
+    name: "Page A",
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: "Page B",
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: "Page C",
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page D",
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: "Page E",
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: "Page F",
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+  {
+    name: "Page H",
+    uv: 3490,
+    pv: 4300,
+    amt: 2400,
+  },
+  {
+    name: "Page A",
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: "Page B",
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: "Page C",
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page D",
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: "Page E",
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: "Page F",
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+  {
+    name: "Page H",
+    uv: 3490,
+    pv: 4300,
+    amt: 2400,
+  },
+  {
+    name: "Page A",
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: "Page B",
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: "Page C",
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page D",
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: "Page E",
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: "Page F",
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+  {
+    name: "Page H",
+    uv: 3490,
+    pv: 4300,
+    amt: 2400,
+  },
+  {
+    name: "Page A",
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: "Page B",
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: "Page C",
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page D",
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: "Page E",
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: "Page F",
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+  {
+    name: "Page H",
+    uv: 3490,
+    pv: 4300,
+    amt: 2400,
+  },
+];
 export default function PoolPage() {
   const router = useRouter();
 
@@ -99,6 +391,89 @@ export default function PoolPage() {
                     >
                       <div className="text-2xs">Claim Yield</div>
                     </Button>
+                  </div>
+                </div>
+
+                <ResponsiveContainer height={150} width="100%">
+                  <BarChart data={data}>
+                    <Bar dataKey="uv" fill="#EBEBEB" />
+                  </BarChart>
+                </ResponsiveContainer>
+
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-row justify-between">
+                    <div>Pool Reward Range</div>
+
+                    <div>40% ~ 100%</div>
+                  </div>
+
+                  <div className="p-2">
+                    <div className="flex flex-row justify-between text-sm">
+                      <div>Earned Fees APR</div>
+
+                      <div className="flex flex-row items-center gap-2">
+                        <Token size="small" />
+                        <div>1% ~ 5%</div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-row justify-between text-sm">
+                      <div>Liquidity Incentives</div>
+
+                      <div className="flex flex-row items-center gap-2">
+                        <Token size="small" />
+                        <div className="z-20 -ml-3">
+                          <Token size="small" />
+                        </div>
+                        <div>15% ~ 25%</div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-row justify-between text-sm">
+                      <div>Super Incentives</div>
+
+                      <div className="flex flex-row items-center gap-2">
+                        <Token size="small" />
+                        <div>20% ~ 30%</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-row justify-between text-sm">
+                    <div>Utility Incentives</div>
+
+                    <div className="flex flex-row items-center gap-2">
+                      <Token size="small" />
+                      <div>20% ~ 30%</div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-row items-center justify-start gap-4 text-sm">
+                    <div className="h-10 w-0.5 bg-white" />
+
+                    <div className="flex flex-col gap-2">
+                      <div>200/1,000 tokens given out</div>
+                      <Line
+                        percent={20}
+                        strokeColor="#EBEBEB"
+                        strokeWidth={4}
+                        className="rounded-full border border-white"
+                        trailWidth={0}
+                        trailColor="#1E1E1E"
+                      />
+                    </div>
+
+                    <div className="flex flex-1" />
+
+                    <div>
+                      <Button
+                        variant="secondary"
+                        className="iridescent h-8 px-8 py-0.5"
+                        size="sm"
+                      >
+                        <div className="">Boost Incentives</div>
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
