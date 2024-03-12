@@ -1,13 +1,13 @@
-const path = require('path')
-const { version } = require('./package.json')
+const path = require("path");
+const { version } = require("./package.json");
 
-/** @type {import('next').NextConfig} */
+/** @type {import("next").NextConfig} */
 const nextConfig = {
   webpack(config) {
     // Grab the existing rule that handles SVG imports
     const fileLoaderRule = config.module.rules.find((rule) =>
-      rule.test?.test?.('.svg'),
-    )
+      rule.test?.test?.(".svg"),
+    );
 
     config.module.rules.push(
       // Reapply the existing rule, but only for svg imports ending in ?url
@@ -21,23 +21,22 @@ const nextConfig = {
         test: /\.svg$/i,
         issuer: fileLoaderRule.issuer,
         resourceQuery: { not: [...fileLoaderRule.resourceQuery.not, /url/] }, // exclude if *.svg?url
-        use: [{ loader: '@svgr/webpack', options: { icon: true } }],
+        use: [{ loader: "@svgr/webpack", options: { icon: true } }],
       },
-    )
+    );
 
     // Modify the file loader rule to ignore *.svg, since we have it handled now.
-    fileLoaderRule.exclude = /\.svg$/i
+    fileLoaderRule.exclude = /\.svg$/i;
 
-    return config
+    return config;
   },
-  output: 'export',
   sassOptions: {
-    includePaths: [path.join(__dirname, 'src/styles')],
+    includePaths: [path.join(__dirname, "src/styles")],
     prependData: `
       @use "@/styles/variables" as *;
       @use "@/styles/mixins" as *;
     `,
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

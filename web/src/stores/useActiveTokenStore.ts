@@ -1,4 +1,4 @@
-import create from "zustand";
+import { create } from "zustand";
 import { Hash, isHex } from "viem";
 import { ZeroAddress } from "../util/chainUtils";
 import { decimalsFromAddress, TokenList } from "../util/tokens";

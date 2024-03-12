@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { TokenList } from "@/util/tokens";
 import { ActiveModalToken } from "@/util/types";
 import { useActiveTokenStore } from "@/stores/useActiveTokenStore";
-import create from "zustand";
+import { create } from "zustand";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
