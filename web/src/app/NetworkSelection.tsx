@@ -7,7 +7,7 @@ import { clsx } from "clsx";
 export const NetworkSelection = () => {
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger className="group data-[state=open]:bg-amber-400">
+      <DropdownMenu.Trigger className="group">
         <Badge
           variant="invert"
           className={clsx(
@@ -50,11 +50,11 @@ export const NetworkSelection = () => {
         </Badge>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className="relative -left-[62px] top-[34px] flex w-[120px] flex-col gap-1 rounded-2xl rounded-t-none border border-t-0 border-black bg-white p-2 ">
+        <DropdownMenu.Content className="relative -left-[62.5px] top-[34px] flex w-[120px] flex-col gap-1 rounded-2xl rounded-t-none border border-t-0 border-black bg-white p-2 ">
           <DropdownMenu.Item className="cursor-pointer p-1 text-xs">
             Ethereum
           </DropdownMenu.Item>
-          <DropdownMenu.Item className="p-q cursor-pointer text-xs">
+          <DropdownMenu.Item className="cursor-pointer p-1 text-xs">
             Arbitrum
           </DropdownMenu.Item>
           <DropdownMenu.Item className="cursor-pointer p-1 text-xs">
