@@ -19,6 +19,7 @@ import { useModalStore } from "@/app/TokenModal";
 import { WelcomeGradient } from "@/app/WelcomeGradient";
 import { SuperloopPopover } from "@/app/SuperloopPopover";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 export const SwapForm = () => {
   const [inputReceive, setInputReceive] = useState("");
@@ -105,7 +106,10 @@ export const SwapForm = () => {
         <div className="z-10 flex w-full flex-col gap-2">
           <SuperloopPopover />
 
-          <div className="flex w-full flex-col gap-3 rounded-lg bg-black p-4 text-white">
+          <motion.div
+            layoutId="modal"
+            className="flex w-full flex-col gap-3 rounded-lg bg-black p-4 text-white"
+          >
             <div className="flex items-center justify-between">
               <Text size="small">Swap</Text>
               {/* Placeholder */}
@@ -152,7 +156,7 @@ export const SwapForm = () => {
                 </Link>
               </Text>
             </div>
-          </div>
+          </motion.div>
 
           <div className="-mb-5 -mt-5 flex w-full flex-row items-center justify-center">
             <SwapButton

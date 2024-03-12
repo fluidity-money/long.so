@@ -4,13 +4,14 @@ import { useSwapPro } from "@/stores/useSwapPro";
 import { TypographyH2, TypographyH3 } from "@/components/ui/typography";
 import { Bar, BarChart, ResponsiveContainer } from "recharts";
 import { cn } from "@/lib/utils";
-import { Menu } from "@/components";
+import { Menu, Token } from "@/components";
 import { useState } from "react";
 import { startCase } from "lodash";
 import { useModalStore } from "@/app/TokenModal";
 import { DataTable } from "@/app/_DataTable/DataTable";
 import { columns, Transaction } from "@/app/_DataTable/columns";
 import { startOfDay } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 const data = [
   {
@@ -257,7 +258,13 @@ const Graph = () => {
   );
 };
 
-export const SwapPro = ({ override }: { override?: boolean }) => {
+export const SwapPro = ({
+  override,
+  badgeTitle,
+}: {
+  override?: boolean;
+  badgeTitle?: boolean;
+}) => {
   const { swapPro, setSwapPro } = useSwapPro();
 
   const { enabled } = useModalStore();
@@ -274,9 +281,21 @@ export const SwapPro = ({ override }: { override?: boolean }) => {
             : "md:h-0 md:w-0 md:p-0",
         )}
       >
-        <TypographyH3 className="hidden font-normal md:inline-flex">
-          fUSDC/ETH
-        </TypographyH3>
+        {badgeTitle ? (
+          <div className="flex flex-row items-center">
+            <Token />
+            <Badge className="z-50 -ml-2 pl-1">
+              <div className="flex flex-row items-center gap-4">
+                <Token />
+                <div className="text-xl">fUSDC/ETH</div>
+              </div>
+            </Badge>
+          </div>
+        ) : (
+          <TypographyH3 className="hidden font-normal md:inline-flex">
+            fUSDC/ETH
+          </TypographyH3>
+        )}
 
         <Graph />
 
