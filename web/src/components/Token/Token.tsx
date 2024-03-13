@@ -3,6 +3,7 @@ import ETH from "@/assets/icons/ETH.svg";
 import styles from "./Token.module.scss";
 import { motion, useAnimate } from "framer-motion";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 const tokenVariants = {
   idle: {
@@ -25,16 +26,12 @@ const tokenVariants = {
 
 export interface IToken {
   size?: "small" | "medium" | "large";
+  className?: string;
 }
 
 const Token: React.FC<IToken> = (props) => {
-  const { size = "medium" } = props;
+  const { size = "medium", className } = props;
   const [hovered, setHovered] = useState(false);
-
-  const classNames = `
-    ${styles.TokenContainer}
-    ${styles[size]}
-  `;
 
   const sz = size === "small" ? 0 : size === "medium" ? 1 : 2;
 
@@ -68,7 +65,7 @@ const Token: React.FC<IToken> = (props) => {
   return (
     <motion.div
       custom={sz}
-      className={classNames}
+      className={cn(styles.TokenContainer, styles[size], className)}
       variants={tokenVariants}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
