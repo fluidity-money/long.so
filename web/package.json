@@ -39,6 +39,7 @@
     "graphql": "^16.8.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.344.0",
+    "nanoid": "^5.0.6",
     "next": "13.4.19",
     "rc-progress": "^3.5.1",
     "react": "18.2.0",
