@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { SwapPro } from "@/app/SwapPro";
+import { SwapPro } from "@/components/SwapPro";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Token } from "@/components";
 import { Badge } from "@/components/ui/badge";
