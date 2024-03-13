@@ -8,7 +8,6 @@ import { Token } from "@/components";
 import { Badge } from "@/components/ui/badge";
 import { Bar, BarChart, ResponsiveContainer } from "recharts";
 import { Line } from "rc-progress";
-import { motion } from "framer-motion";
 
 const data = [
   {
@@ -314,10 +313,7 @@ export default function PoolPage() {
 
         <div className="flex flex-col items-center">
           <div className="z-10 flex w-full max-w-[500px] flex-col px-4">
-            <motion.div
-              layoutId="modal"
-              className="flex flex-col gap-4 rounded-lg bg-black p-2 pt-0 text-white"
-            >
+            <div className="flex flex-col gap-4 rounded-lg bg-black p-2 pt-0 text-white">
               <div className="flex flex-row items-center justify-between">
                 <div className="p-4 text-xs">Manage Pool</div>
                 <Button
@@ -483,7 +479,7 @@ export default function PoolPage() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>

@@ -23,7 +23,8 @@ export const columns: ColumnDef<Pool>[] = [
       return (
         <div className="flex flex-row items-center gap-2">
           <TokenIcon size="small" />
-          {row.original.tokens[0].name} {"x"}
+          {row.original.tokens[0].name}
+          {" x "}
           {row.original.tokens[1].name}
         </div>
       );

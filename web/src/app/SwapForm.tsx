@@ -1,6 +1,6 @@
 "use client";
 
-import { CampaignBanner } from "@/app/CampaignBanner";
+import { CampaignBanner } from "@/components/CampaignBanner";
 import { Box, Input, Link, Slider, Text, Token } from "@/components";
 import { addressToSymbol } from "@/util/tokens";
 import Caret from "@/assets/icons/Caret.svg";
