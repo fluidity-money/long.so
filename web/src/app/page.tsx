@@ -1,7 +1,7 @@
 import { Welcome } from "@/app/Welcome";
 import { TokenModal } from "@/app/TokenModal";
 import { SwapForm } from "@/app/SwapForm";
-import { SwapPro } from "@/app/SwapPro";
+import { SwapPro } from "@/components/SwapPro";
 
 export default function Swap() {
   return (
