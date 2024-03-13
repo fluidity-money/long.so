@@ -61,7 +61,7 @@ export function DataTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                className="border-b-0"
+                className="cursor-pointer border-b-0"
                 onClick={() =>
                   router.push(`/stake/pool/${(row.original as any).id}`)
                 }
