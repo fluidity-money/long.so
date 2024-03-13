@@ -6,10 +6,10 @@ import { motion } from "framer-motion";
 
 const Stake = () => {
   return (
-    <div className="z-10 flex flex-col items-center">
+    <div className="z-10 flex flex-col items-center px-4">
       <motion.div
         layoutId="modal"
-        className="flex w-[500px] flex-col gap-4 rounded-lg bg-black p-4 pt-0 text-white"
+        className="flex w-full max-w-[500px] flex-col gap-4 rounded-lg bg-black p-4 pt-0 text-white"
       >
         <TypographyH3>Manage Pools</TypographyH3>
         <ul>

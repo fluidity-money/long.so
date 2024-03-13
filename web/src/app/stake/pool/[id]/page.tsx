@@ -6,9 +6,9 @@ import { SwapPro } from "@/app/SwapPro";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Token } from "@/components";
 import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
 import { Bar, BarChart, ResponsiveContainer } from "recharts";
 import { Line } from "rc-progress";
+import { motion } from "framer-motion";
 
 const data = [
   {
@@ -308,13 +308,15 @@ export default function PoolPage() {
   return (
     <div className="flex w-full flex-col">
       <div className="flex max-w-full flex-col-reverse justify-center gap-8 lg:flex-row">
-        <SwapPro override badgeTitle />
+        <div className="hidden md:inline-flex">
+          <SwapPro override badgeTitle />
+        </div>
 
         <div className="flex flex-col items-center">
-          <div className="z-10 flex flex-col">
+          <div className="z-10 flex w-full max-w-[500px] flex-col px-4">
             <motion.div
               layoutId="modal"
-              className="flex w-[500px] flex-col gap-4 rounded-lg bg-black p-2 pt-0 text-white"
+              className="flex flex-col gap-4 rounded-lg bg-black p-2 pt-0 text-white"
             >
               <div className="flex flex-row items-center justify-between">
                 <div className="p-4 text-xs">Manage Pool</div>
@@ -334,7 +336,9 @@ export default function PoolPage() {
                   <Token />
                   <Badge className="iridescent z-20 -ml-2 flex flex-row gap-2 border-4 border-black pl-1 text-black">
                     <Token />
-                    <div className="text-xl">fUSDC-ETH</div>
+                    <div className="text-nowrap text-lg md:text-xl">
+                      fUSDC-ETH
+                    </div>
                   </Badge>
                 </div>
 
@@ -345,7 +349,7 @@ export default function PoolPage() {
                       <Token size="small" />
                       <Token size="small" />
                     </div>
-                    <div className="text-nowrap text-xs">
+                    <div className="text-2xs text-nowrap md:text-xs">
                       Live Utility Rewards
                     </div>
                   </Badge>
@@ -374,13 +378,15 @@ export default function PoolPage() {
 
                 <div className="flex flex-row gap-2">
                   <div className="flex flex-1 flex-col">
-                    <div className="text-xs">My Pool Balance</div>
-                    <div className="text-2xl">$190,3013</div>
+                    <div className="text-2xs md:text-xs">My Pool Balance</div>
+                    <div className="text-xl md:text-2xl">$190,301</div>
                   </div>
 
                   <div className="flex flex-1 flex-col">
-                    <div className="text-xs">Unclaimed Rewards</div>
-                    <div className="text-2xl">$52,420</div>
+                    <div className="text-2xs text-nowrap md:text-xs">
+                      Unclaimed Rewards
+                    </div>
+                    <div className="text-xl md:text-2xl">$52,420</div>
                   </div>
 
                   <div>
@@ -452,7 +458,7 @@ export default function PoolPage() {
                     <div className="h-10 w-0.5 bg-white" />
 
                     <div className="flex flex-col gap-2">
-                      <div>200/1,000 tokens given out</div>
+                      <div className="text-2xs">200/1,000 tokens given out</div>
                       <Line
                         percent={20}
                         strokeColor="#EBEBEB"
@@ -468,7 +474,7 @@ export default function PoolPage() {
                     <div>
                       <Button
                         variant="secondary"
-                        className="iridescent h-8 px-8 py-0.5"
+                        className="iridescent h-8 px-4 py-0.5 text-xs md:px-8 md:text-base"
                         size="sm"
                       >
                         <div className="">Boost Incentives</div>
