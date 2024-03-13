@@ -4,7 +4,7 @@ import { useSwapPro } from "@/stores/useSwapPro";
 import { TypographyH2, TypographyH3 } from "@/components/ui/typography";
 import { Bar, BarChart, ResponsiveContainer } from "recharts";
 import { cn } from "@/lib/utils";
-import { Menu, Token } from "@/components";
+import { Menu, Token } from "@/components/index";
 import { useState } from "react";
 import { startCase } from "lodash";
 import { useModalStore } from "@/app/TokenModal";
