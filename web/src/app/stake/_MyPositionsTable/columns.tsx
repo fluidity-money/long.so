@@ -2,6 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Token as TokenIcon } from "@/components";
 import { Badge } from "@/components/ui/badge";
 import { usdFormat } from "@/lib/usdFormat";
+import { Button } from "@/components/ui/button";
 
 export type Token = {
   name: string;
@@ -49,9 +50,18 @@ export const columns: ColumnDef<Pool>[] = [
     header: "Total Yield",
     cell: ({ row }) => {
       return (
-        <Badge className="iridescent text-black">
-          {usdFormat(row.original.totalYield)}
-        </Badge>
+        <Badge variant="iridescent">{usdFormat(row.original.totalYield)}</Badge>
+      );
+    },
+  },
+  {
+    id: "manage",
+    header: "",
+    cell: ({ row }) => {
+      return (
+        <Button variant={"link"} className="p-0 text-white" size={"sm"}>
+          <span className="mr-2 underline">Manage</span> {"->"}
+        </Button>
       );
     },
   },
