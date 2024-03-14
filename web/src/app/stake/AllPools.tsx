@@ -9,7 +9,7 @@ import { columns, Pool } from "@/app/stake/_AllPoolsTable/columns";
 import { useState } from "react";
 import { nanoid } from "nanoid";
 import { Input } from "@/components/ui/input";
-import { SearchIcon } from "lucide-react";
+import Search from "@/assets/icons/Search.svg";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -164,10 +164,10 @@ export const AllPools = () => {
 
           <div className="flex flex-1 flex-row gap-4">
             <div className="flex flex-col gap-2">
-              <div className="flex flex-row items-center gap-2">
-                <SearchIcon />
+              <div className="flex flex-row items-center border-b border-black">
+                <Search className="size-4" />
                 <Input
-                  className="w-[350px] text-xs"
+                  className="h-8 w-[350px] border-0 bg-white text-xs"
                   placeholder="Search for tokens by name, symbol, or contract address."
                 />
               </div>
