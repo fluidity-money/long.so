@@ -4,6 +4,8 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -42,11 +44,16 @@ export function AllPoolsTable<TData, TValue>({
     });
   }, [isMd]);
 
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
     state: {
+      sorting,
       columnVisibility,
     },
     onColumnVisibilityChange: setColumnVisibility as any,
@@ -57,12 +64,12 @@ export function AllPoolsTable<TData, TValue>({
       <Table>
         <TableHeader className="[&_tr]:border-b-0">
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="border-b-0 md:bg-gray-0 ">
+            <TableRow key={headerGroup.id} className="border-b-0 md:bg-gray-0">
               {headerGroup.headers.map((header) => {
                 return (
                   <TableHead
                     key={header.id}
-                    className="text-2xs text-black md:text-sm"
+                    className="h-8 text-2xs text-black md:text-sm"
                   >
                     {header.isPlaceholder
                       ? null

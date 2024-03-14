@@ -2,6 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { usdFormat } from "@/lib/usdFormat";
 import { Button } from "@/components/ui/button";
+import Sort from "@/assets/icons/sort.svg";
 
 export type Token = {
   name: string;
@@ -32,28 +33,68 @@ export const columns: ColumnDef<Pool>[] = [
   },
   {
     accessorKey: "totalValueLocked",
-    header: "TVL",
+    header: ({ column }) => {
+      return (
+        <div
+          className="flex cursor-pointer flex-row items-center"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          TVL
+          <Sort className="ml-2 size-3" />
+        </div>
+      );
+    },
     cell: ({ row }) => {
       return usdFormat(row.original.totalValueLocked);
     },
   },
   {
     accessorKey: "fees",
-    header: "Fees",
+    header: ({ column }) => {
+      return (
+        <div
+          className="flex cursor-pointer flex-row items-center"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Fees
+          <Sort className="ml-2 size-3" />
+        </div>
+      );
+    },
     cell: ({ row }) => {
       return usdFormat(row.original.fees);
     },
   },
   {
     accessorKey: "volume",
-    header: "Volume",
+    header: ({ column }) => {
+      return (
+        <div
+          className="flex cursor-pointer flex-row items-center"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Volume
+          <Sort className="ml-2 size-3" />
+        </div>
+      );
+    },
     cell: ({ row }) => {
       return usdFormat(row.original.volume);
     },
   },
   {
     accessorKey: "rewards",
-    header: "Rewards",
+    header: ({ column }) => {
+      return (
+        <div
+          className="flex cursor-pointer flex-row items-center"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Rewards
+          <Sort className="ml-2 size-3" />
+        </div>
+      );
+    },
     cell: ({ row }) => {
       return (
         <Badge className="group-hover:invert">
@@ -64,7 +105,17 @@ export const columns: ColumnDef<Pool>[] = [
   },
   {
     accessorKey: "annualPercentageYield",
-    header: "APY",
+    header: ({ column }) => {
+      return (
+        <div
+          className="flex cursor-pointer flex-row items-center"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          APY
+          <Sort className="ml-2 size-3" />
+        </div>
+      );
+    },
     cell: ({ row }) => {
       return `${row.original.annualPercentageYield.toFixed(2)}%`;
     },
