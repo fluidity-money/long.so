@@ -8,6 +8,9 @@ import Grid from "@/assets/icons/grid.svg";
 import { clsx } from "clsx";
 import { Bar, BarChart, ResponsiveContainer } from "recharts";
 import { MyPositions } from "@/app/stake/MyPositions";
+import { AllPoolsTable } from "@/app/stake/_AllPoolsTable/AllPoolsTable";
+import { columns, Pool } from "@/app/stake/_AllPoolsTable/columns";
+import { nanoid } from "nanoid";
 
 const data = [
   {
@@ -340,6 +343,44 @@ const Stake = () => {
               <div className="text-2xl">$59.1K</div>
             </div>
           </div>
+
+          <AllPoolsTable
+            columns={columns}
+            data={
+              [
+                {
+                  id: nanoid(),
+                  tokens: [{ name: "USDC" }, { name: "fUSDC" }],
+                  annualPercentageYield: 12,
+                  claimable: false,
+                  fees: 14,
+                  rewards: 321,
+                  totalValueLocked: 4312,
+                  volume: 1231,
+                },
+                {
+                  id: nanoid(),
+                  tokens: [{ name: "USDC" }, { name: "fUSDC" }],
+                  annualPercentageYield: 12,
+                  claimable: false,
+                  fees: 14,
+                  rewards: 321,
+                  totalValueLocked: 4312,
+                  volume: 1231,
+                },
+                {
+                  id: nanoid(),
+                  tokens: [{ name: "USDC" }, { name: "fUSDC" }],
+                  annualPercentageYield: 12,
+                  claimable: false,
+                  fees: 14,
+                  rewards: 321,
+                  totalValueLocked: 4312,
+                  volume: 1231,
+                },
+              ] as Pool[]
+            }
+          />
         </div>
       </div>
     </div>
