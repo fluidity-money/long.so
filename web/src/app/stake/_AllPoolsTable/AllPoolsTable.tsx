@@ -69,7 +69,7 @@ export function AllPoolsTable<TData, TValue>({
                 return (
                   <TableHead
                     key={header.id}
-                    className="h-8 text-2xs text-black md:text-sm"
+                    className="h-8 p-0 text-2xs text-black md:text-sm"
                   >
                     {header.isPlaceholder
                       ? null

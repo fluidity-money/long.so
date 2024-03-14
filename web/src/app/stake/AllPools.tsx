@@ -8,12 +8,7 @@ import { AllPoolsTable } from "@/app/stake/_AllPoolsTable/AllPoolsTable";
 import { columns, Pool } from "@/app/stake/_AllPoolsTable/columns";
 import { useState } from "react";
 import { nanoid } from "nanoid";
-import { Input } from "@/components/ui/input";
-import Search from "@/assets/icons/Search.svg";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { AllPoolsFilter } from "@/app/stake/AllPoolsFilter";
 
 const pools: Pool[] = [
   {
@@ -124,10 +119,6 @@ const DisplayModeMenu = ({
 export const AllPools = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
 
-  const [newPools, setNewPools] = useState(false);
-  const [boostedPools, setBoostedPools] = useState(false);
-  const [myAssets, setMyAssets] = useState(false);
-
   return (
     <div className="flex w-full flex-col items-center">
       <div className="mt-4 flex w-full max-w-screen-lg flex-col gap-4">
@@ -144,8 +135,8 @@ export const AllPools = () => {
           </div>
         </div>
 
-        <div className="flex flex-row justify-between">
-          <div className="flex flex-1 flex-row justify-between pr-24">
+        <div className="flex flex-row flex-wrap justify-center gap-4">
+          <div className="flex flex-1 flex-row justify-between">
             <div className="flex flex-col">
               <div className="text-2xs">TVL</div>
               <div className="text-2xl">$12.1M</div>
@@ -162,69 +153,8 @@ export const AllPools = () => {
             </div>
           </div>
 
-          <div className="flex flex-1 flex-row gap-4">
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-row items-center border-b border-black">
-                <Search className="size-4" />
-                <Input
-                  className="h-8 w-[350px] border-0 bg-white text-xs"
-                  placeholder="Search for tokens by name, symbol, or contract address."
-                />
-              </div>
-              <div className="flex flex-row justify-between">
-                <Badge
-                  className={cn("h-6 py-0 pl-0", {
-                    "bg-white text-black hover:bg-white/80": !newPools,
-                  })}
-                >
-                  <Switch
-                    id={"new-pools"}
-                    className={cn("my-0 -ml-2 scale-50", {
-                      invert: !newPools,
-                    })}
-                    checked={newPools}
-                    onCheckedChange={setNewPools}
-                  />
-                  <Label htmlFor={"new-pools"} className="text-2xs">
-                    New Pools
-                  </Label>
-                </Badge>
-                <Badge
-                  className={cn("h-6 py-0 pl-0", {
-                    "bg-white text-black hover:bg-white/80": !boostedPools,
-                  })}
-                >
-                  <Switch
-                    id={"boosted-pools"}
-                    className={cn("my-0 -ml-2 scale-50", {
-                      invert: !boostedPools,
-                    })}
-                    checked={boostedPools}
-                    onCheckedChange={setBoostedPools}
-                  />
-                  <Label htmlFor={"boosted-pools"} className="text-2xs">
-                    Boosted Pools
-                  </Label>
-                </Badge>
-                <Badge
-                  className={cn("h-6 py-0 pl-0", {
-                    "bg-white text-black hover:bg-white/80": !myAssets,
-                  })}
-                >
-                  <Switch
-                    id={"my-assets"}
-                    className={cn("my-0 -ml-2 scale-50", {
-                      invert: !myAssets,
-                    })}
-                    checked={myAssets}
-                    onCheckedChange={setMyAssets}
-                  />
-                  <Label htmlFor={"my-assets"} className="text-2xs">
-                    My Assets
-                  </Label>
-                </Badge>
-              </div>
-            </div>
+          <div className="flex flex-1 flex-row justify-center gap-4">
+            <AllPoolsFilter />
 
             {/* not shown on mobile */}
             <div className="hidden flex-col justify-end md:flex">

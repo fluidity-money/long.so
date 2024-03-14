@@ -89,7 +89,8 @@ export const SwapForm = () => {
     <div className="group z-10 flex flex-col items-center ">
       <WelcomeGradient />
 
-      <div
+      <motion.div
+        layoutId={"swap-form"}
         className={cn(
           `flex w-full flex-col items-center gap-1 p-4 transition-transform sm:w-[400px] lg:w-[450px]`,
           welcome
@@ -227,7 +228,7 @@ export const SwapForm = () => {
             Swap
           </Button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
