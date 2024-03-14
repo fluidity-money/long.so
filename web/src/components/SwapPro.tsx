@@ -173,21 +173,21 @@ const Graph = () => {
     <>
       <Menu id="graph">
         <Menu.Item
-          className="mx-1 px-1 py-1"
+          className="mx-1 p-1"
           selected={activeGraphType === "price"}
           onClick={() => setActiveGraphType("price")}
         >
           Price
         </Menu.Item>
         <Menu.Item
-          className="mx-1 px-1 py-1"
+          className="mx-1 p-1"
           selected={activeGraphType === "volume"}
           onClick={() => setActiveGraphType("volume")}
         >
           Volume
         </Menu.Item>
         <Menu.Item
-          className="mx-1 px-1 py-1"
+          className="mx-1 p-1"
           selected={activeGraphType === "liquidity"}
           onClick={() => setActiveGraphType("liquidity")}
         >
@@ -206,35 +206,35 @@ const Graph = () => {
 
           <Menu id="graph-duration">
             <Menu.Item
-              className="mx-1 px-0.5 py-0.5 text-xs"
+              className="mx-1 p-0.5 text-xs"
               selected={activeGraphDuration === "7D"}
               onClick={() => setActiveGraphDuration("7D")}
             >
               7D
             </Menu.Item>
             <Menu.Item
-              className="mx-1 px-0.5 py-0.5 text-xs"
+              className="mx-1 p-0.5 text-xs"
               selected={activeGraphDuration === "1M"}
               onClick={() => setActiveGraphDuration("1M")}
             >
               1M
             </Menu.Item>
             <Menu.Item
-              className="mx-1 px-0.5 py-0.5 text-xs"
+              className="mx-1 p-0.5 text-xs"
               selected={activeGraphDuration === "6M"}
               onClick={() => setActiveGraphDuration("6M")}
             >
               6M
             </Menu.Item>
             <Menu.Item
-              className="mx-1 px-0.5 py-0.5 text-xs"
+              className="mx-1 p-0.5 text-xs"
               selected={activeGraphDuration === "1Y"}
               onClick={() => setActiveGraphDuration("1Y")}
             >
               1Y
             </Menu.Item>
             <Menu.Item
-              className="mx-1 px-0.5 py-0.5 text-xs"
+              className="mx-1 p-0.5 text-xs"
               selected={activeGraphDuration === "ALL"}
               onClick={() => setActiveGraphDuration("ALL")}
             >
@@ -299,7 +299,7 @@ export const SwapPro = ({
 
         <Graph />
 
-        <div className="flex hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:inline-flex">
+        <div className="hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:flex">
           <div>
             <p className="text-xs">Liquidity</p>
             <p className="text-2xl">$1.01M</p>
