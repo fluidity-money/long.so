@@ -59,7 +59,11 @@ export const columns: ColumnDef<Pool>[] = [
     header: "",
     cell: ({ row }) => {
       return (
-        <Button variant={"link"} className="p-0 text-white" size={"sm"}>
+        <Button
+          variant={"link"}
+          className="hidden p-0 text-white md:inline-flex"
+          size={"sm"}
+        >
           <span className="mr-2 underline">Manage</span> {"->"}
         </Button>
       );

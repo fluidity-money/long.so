@@ -15,6 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useEffect, useState } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface AllPoolsTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -25,21 +27,43 @@ export function AllPoolsTable<TData, TValue>({
   columns,
   data,
 }: AllPoolsTableProps<TData, TValue>) {
+  // hooks to hide fees and rewards when on mobile
+  const { isMd } = useMediaQuery();
+
+  const [columnVisibility, setColumnVisibility] = useState({
+    fees: isMd,
+    rewards: isMd,
+  });
+
+  useEffect(() => {
+    setColumnVisibility({
+      fees: isMd,
+      rewards: isMd,
+    });
+  }, [isMd]);
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    state: {
+      columnVisibility,
+    },
+    onColumnVisibilityChange: setColumnVisibility as any,
   });
 
   return (
-    <div className="rounded-lg text-sm">
+    <div className="rounded-lg ">
       <Table>
         <TableHeader className="[&_tr]:border-b-0">
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="border-b-0 bg-gray-0 ">
+            <TableRow key={headerGroup.id} className="border-b-0 md:bg-gray-0 ">
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id} className="text-black">
+                  <TableHead
+                    key={header.id}
+                    className="text-2xs text-black md:text-sm"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -58,10 +82,10 @@ export function AllPoolsTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                className="group rounded-xl border-b-0 hover:bg-black hover:text-white"
+                className="group rounded-xl border-b-0 text-2xs hover:bg-black hover:text-white md:text-sm"
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className="p-1">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

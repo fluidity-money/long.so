@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Menu, Token } from "@/components";
@@ -94,7 +96,7 @@ export const MyPositions = () => {
         <div className="text-2xs">My Positions</div>
         <Menu id="my-positions-list-grid" background="dark">
           <Menu.Item
-            className={"mx-1 px-0 py-0"}
+            className={"mx-1 p-0"}
             selected={displayMode === "list"}
             onClick={() => setDisplayMode("list")}
           >
@@ -108,7 +110,7 @@ export const MyPositions = () => {
             </div>
           </Menu.Item>
           <Menu.Item
-            className={"mx-1 px-0 py-0"}
+            className={"mx-1 p-0"}
             selected={displayMode === "grid"}
             onClick={() => setDisplayMode("grid")}
           >
@@ -150,7 +152,7 @@ export const MyPositions = () => {
                 onClick={() => router.push(`/stake/pool/${pool.id}`)}
               >
                 <div className="flex w-full flex-row">
-                  <div className="h-2 w-2 rounded-full bg-red-500" />
+                  <div className="size-2 rounded-full bg-red-500" />
                 </div>
 
                 <div className="flex flex-col">
@@ -210,13 +212,21 @@ export const MyPositions = () => {
 
       <div className="flex max-w-full flex-row gap-2">
         {pools.length > 0 && (
-          <Button
-            className="flex-1 text-xs text-black"
-            variant="iridescent"
-            size="sm"
-          >
-            Claim all yield
-          </Button>
+          <div className="flex flex-1 flex-col items-center">
+            <Button
+              className="w-full text-xs text-black"
+              variant="iridescent"
+              size="sm"
+            >
+              Claim all yield
+            </Button>
+            <Badge
+              variant="iridescent"
+              className="-mt-2 gap-2 border-2 border-black text-2xs"
+            >
+              {usdFormat(920.12)}
+            </Badge>
+          </div>
         )}
         <Button className="flex-1 text-xs" variant="secondary" size="sm">
           + Create New Pool

@@ -7,7 +7,7 @@ export const MobileNetworkSelection = () => {
     <Badge
       variant="invert"
       className={
-        "group w-14 cursor-pointer border-primary-foreground px-0 px-0.5 pr-2 invert transition-[width] md:hidden"
+        "group w-14 cursor-pointer border-primary-foreground px-0.5 pr-2 invert transition-[width] md:hidden"
       }
     >
       <div className={"flex-col"}>
