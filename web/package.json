@@ -45,6 +45,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hotkeys-hook": "^4.5.0",
+    "react-responsive": "^9.0.2",
     "recharts": "^2.12.2",
     "sass": "^1.69.3",
     "tailwind-merge": "^2.2.1",
