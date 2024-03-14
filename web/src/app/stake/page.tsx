@@ -26,8 +26,23 @@ const Stake = () => {
         <div className="flex flex-col items-center">
           <motion.div
             layoutId="modal"
-            className="flex w-full max-w-[500px] flex-col gap-4 rounded-lg bg-black p-4 text-white"
+            className="flex w-[500px] flex-col gap-4 rounded-lg bg-black p-4 text-white"
           >
+            <div className="flex flex-row justify-between">
+              <div className="text-xs">Earned since last login</div>
+              <Button
+                variant="secondary"
+                onClick={() => setWelcome(false)}
+                className="px-2 py-0"
+              >
+                {"<-"} Esc
+              </Button>
+            </div>
+
+            <div>Welcome back!</div>
+
+            <div>Since you left you've earned:</div>
+
             <Button
               variant="iridescent"
               className="w-full"
