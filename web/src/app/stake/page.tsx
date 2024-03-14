@@ -6,153 +6,184 @@ import { CampaignBanner } from "@/components/CampaignBanner";
 import List from "@/assets/icons/list.svg";
 import Grid from "@/assets/icons/grid.svg";
 import { clsx } from "clsx";
-import { Bar, BarChart, ResponsiveContainer } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, Tooltip } from "recharts";
 import { MyPositions } from "@/app/stake/MyPositions";
 import { AllPoolsTable } from "@/app/stake/_AllPoolsTable/AllPoolsTable";
 import { columns, Pool } from "@/app/stake/_AllPoolsTable/columns";
 import { nanoid } from "nanoid";
+import { ContentType } from "recharts/types/component/Tooltip";
+import {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
+import { format, subDays } from "date-fns";
+import { usdFormat } from "@/lib/usdFormat";
 
 const data = [
   {
     name: "Page A",
+    date: new Date(),
     uv: 4000,
     pv: 2400,
     amt: 2400,
   },
   {
     name: "Page B",
+    date: subDays(new Date(), 1),
     uv: 3000,
     pv: 1398,
     amt: 2210,
   },
   {
     name: "Page C",
+    date: subDays(new Date(), 2),
     uv: 2000,
     pv: 9800,
     amt: 2290,
   },
   {
     name: "Page D",
+    date: subDays(new Date(), 3),
     uv: 2780,
     pv: 3908,
     amt: 2000,
   },
   {
     name: "Page E",
+    date: subDays(new Date(), 4),
     uv: 1890,
     pv: 4800,
     amt: 2181,
   },
   {
     name: "Page F",
+    date: subDays(new Date(), 5),
     uv: 2390,
     pv: 3800,
     amt: 2500,
   },
   {
     name: "Page G",
+    date: subDays(new Date(), 6),
     uv: 3490,
     pv: 4300,
     amt: 2100,
   },
   {
     name: "Page H",
+    date: subDays(new Date(), 7),
     uv: 3490,
     pv: 4300,
     amt: 2400,
   },
   {
     name: "Page A",
+    date: subDays(new Date(), 8),
     uv: 4000,
     pv: 2400,
     amt: 2400,
   },
   {
     name: "Page B",
+    date: subDays(new Date(), 9),
     uv: 3000,
     pv: 1398,
     amt: 2210,
   },
   {
     name: "Page C",
+    date: subDays(new Date(), 10),
     uv: 2000,
     pv: 9800,
     amt: 2290,
   },
   {
     name: "Page D",
+    date: subDays(new Date(), 11),
     uv: 2780,
     pv: 3908,
     amt: 2000,
   },
   {
     name: "Page E",
+    date: subDays(new Date(), 12),
     uv: 1890,
     pv: 4800,
     amt: 2181,
   },
   {
     name: "Page F",
+    date: subDays(new Date(), 13),
     uv: 2390,
     pv: 3800,
     amt: 2500,
   },
   {
     name: "Page G",
+    date: subDays(new Date(), 14),
     uv: 3490,
     pv: 4300,
     amt: 2100,
   },
   {
     name: "Page H",
+    date: subDays(new Date(), 15),
     uv: 3490,
     pv: 4300,
     amt: 2400,
   },
   {
     name: "Page A",
+    date: subDays(new Date(), 16),
     uv: 4000,
     pv: 2400,
     amt: 2400,
   },
   {
     name: "Page B",
+    date: subDays(new Date(), 17),
     uv: 3000,
     pv: 1398,
     amt: 2210,
   },
   {
     name: "Page C",
+    date: subDays(new Date(), 18),
     uv: 2000,
     pv: 9800,
     amt: 2290,
   },
   {
     name: "Page D",
+    date: subDays(new Date(), 19),
     uv: 2780,
     pv: 3908,
     amt: 2000,
   },
   {
     name: "Page E",
+    date: subDays(new Date(), 20),
     uv: 1890,
     pv: 4800,
     amt: 2181,
   },
   {
     name: "Page F",
+    date: subDays(new Date(), 21),
     uv: 2390,
     pv: 3800,
     amt: 2500,
   },
   {
     name: "Page G",
+    date: subDays(new Date(), 22),
     uv: 3490,
     pv: 4300,
     amt: 2100,
   },
   {
     name: "Page H",
+    date: subDays(new Date(), 23),
     uv: 3490,
     pv: 4300,
     amt: 2400,
@@ -178,6 +209,58 @@ const CustomBar = (props: any) => {
   );
 };
 
+const CustomTooltip: ContentType<ValueType, NameType> = ({
+  active,
+  payload,
+  label,
+}) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="flex flex-col items-center rounded-xl bg-black p-4 text-white">
+        <p className="text-sm">{usdFormat(payload[0].value as number)}</p>
+        <p className="text-xs text-gray-2">
+          {format(payload[0].payload.date, "P")}
+        </p>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+const pools: Pool[] = [
+  {
+    id: nanoid(),
+    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
+    annualPercentageYield: 12,
+    claimable: false,
+    fees: 14,
+    rewards: 321,
+    totalValueLocked: 4312,
+    volume: 1231,
+  },
+  {
+    id: nanoid(),
+    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
+    annualPercentageYield: 12,
+    claimable: false,
+    fees: 14,
+    rewards: 321,
+    totalValueLocked: 4312,
+    volume: 1231,
+  },
+  {
+    id: nanoid(),
+    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
+    annualPercentageYield: 12,
+    claimable: false,
+    fees: 14,
+    rewards: 321,
+    totalValueLocked: 4312,
+    volume: 1231,
+  },
+];
+
 const Stake = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
 
@@ -195,41 +278,41 @@ const Stake = () => {
           <MyPositions />
         </div>
 
-        <div className="flex hidden w-full max-w-[500px] flex-1 flex-col md:inline-flex">
+        <div className="hidden w-full max-w-[500px] flex-1 flex-col md:flex">
           <div className="flex w-full flex-row items-center justify-between">
             <div className="text-nowrap text-2xs">My Yield Over Time</div>
 
             <Menu id="yield-over-time-graph-duration">
               <Menu.Item
-                className="mx-1 px-0.5 py-0.5 text-xs"
+                className="mx-1 p-0.5 text-xs"
                 selected={activeGraphDuration === "7D"}
                 onClick={() => setActiveGraphDuration("7D")}
               >
                 7D
               </Menu.Item>
               <Menu.Item
-                className="mx-1 px-0.5 py-0.5 text-xs"
+                className="mx-1 p-0.5 text-xs"
                 selected={activeGraphDuration === "1M"}
                 onClick={() => setActiveGraphDuration("1M")}
               >
                 1M
               </Menu.Item>
               <Menu.Item
-                className="mx-1 px-0.5 py-0.5 text-xs"
+                className="mx-1 p-0.5 text-xs"
                 selected={activeGraphDuration === "6M"}
                 onClick={() => setActiveGraphDuration("6M")}
               >
                 6M
               </Menu.Item>
               <Menu.Item
-                className="mx-1 px-0.5 py-0.5 text-xs"
+                className="mx-1 p-0.5 text-xs"
                 selected={activeGraphDuration === "1Y"}
                 onClick={() => setActiveGraphDuration("1Y")}
               >
                 1Y
               </Menu.Item>
               <Menu.Item
-                className="mx-1 px-0.5 py-0.5 text-xs"
+                className="mx-1 p-0.5 text-xs"
                 selected={activeGraphDuration === "ALL"}
                 onClick={() => setActiveGraphDuration("ALL")}
               >
@@ -242,7 +325,7 @@ const Stake = () => {
 
           <div className="mt-16 flex flex-col gap-2">
             <ResponsiveContainer height={150} width="100%">
-              <BarChart data={data}>
+              <BarChart data={data} dataKey={"date"}>
                 <defs>
                   <linearGradient id="gradientFill" x1="0" y1="0" x2="0" y2="1">
                     <stop
@@ -273,6 +356,8 @@ const Stake = () => {
                   </linearGradient>
                 </defs>
 
+                <Tooltip content={<CustomTooltip />} />
+
                 {/* Bar for the black bottom section */}
                 <Bar
                   dataKey="uv"
@@ -281,7 +366,7 @@ const Stake = () => {
                 />
 
                 {/* Bar with the gradient on top */}
-                <Bar dataKey="uv" stackId="stack" shape={<CustomBar />} />
+                <Bar dataKey="pv" stackId="stack" shape={<CustomBar />} />
               </BarChart>
             </ResponsiveContainer>
 
@@ -297,7 +382,7 @@ const Stake = () => {
 
             <Menu id="unknown-list-grid">
               <Menu.Item
-                className={"mx-1 px-0 py-0"}
+                className={"mx-1 p-0"}
                 selected={displayMode === "list"}
                 onClick={() => setDisplayMode("list")}
               >
@@ -311,7 +396,7 @@ const Stake = () => {
                 </div>
               </Menu.Item>
               <Menu.Item
-                className={"mx-1 px-0 py-0"}
+                className={"mx-1 p-0"}
                 selected={displayMode === "grid"}
                 onClick={() => setDisplayMode("grid")}
               >
@@ -344,43 +429,7 @@ const Stake = () => {
             </div>
           </div>
 
-          <AllPoolsTable
-            columns={columns}
-            data={
-              [
-                {
-                  id: nanoid(),
-                  tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-                  annualPercentageYield: 12,
-                  claimable: false,
-                  fees: 14,
-                  rewards: 321,
-                  totalValueLocked: 4312,
-                  volume: 1231,
-                },
-                {
-                  id: nanoid(),
-                  tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-                  annualPercentageYield: 12,
-                  claimable: false,
-                  fees: 14,
-                  rewards: 321,
-                  totalValueLocked: 4312,
-                  volume: 1231,
-                },
-                {
-                  id: nanoid(),
-                  tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-                  annualPercentageYield: 12,
-                  claimable: false,
-                  fees: 14,
-                  rewards: 321,
-                  totalValueLocked: 4312,
-                  volume: 1231,
-                },
-              ] as Pool[]
-            }
-          />
+          <AllPoolsTable columns={columns} data={pools} />
         </div>
       </div>
     </div>
