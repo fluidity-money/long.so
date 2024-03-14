@@ -158,7 +158,7 @@ export const SwapForm = () => {
             </div>
           </motion.div>
 
-          <div className="-mb-5 -mt-5 flex w-full flex-row items-center justify-center">
+          <div className="-my-5 flex w-full flex-row items-center justify-center">
             <SwapButton
               onClick={() => {
                 // swap amounts and trigger a quote update

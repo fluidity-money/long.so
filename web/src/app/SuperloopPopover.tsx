@@ -16,8 +16,8 @@ export const SuperloopPopover = () => {
     <div className="relative top-5 flex h-4 w-full flex-row items-end justify-end">
       <Popover>
         <PopoverTrigger>
-          <div className="flex h-[35px] w-[35px] items-center justify-center">
-            <Cog className="hover:animate-spin-once relative left-1 top-1 h-[30px] w-[30px] hover:h-[35px] hover:w-[35px]" />
+          <div className="flex size-[35px] items-center justify-center">
+            <Cog className="relative left-1 top-1 size-[30px] hover:size-[35px] hover:animate-spin-once" />
           </div>
         </PopoverTrigger>
         <PopoverContent className="bg-black text-xs text-white">
@@ -40,14 +40,14 @@ export const SuperloopPopover = () => {
                 <Menu.Item
                   selected={autoSlippage}
                   onClick={() => setAutoSlippage(true)}
-                  className={"mx-1 px-0 py-0"}
+                  className={"mx-1 p-0"}
                 >
                   Auto
                 </Menu.Item>
                 <Menu.Item
                   selected={!autoSlippage}
                   onClick={() => setAutoSlippage(false)}
-                  className={"mx-1 px-0 py-0"}
+                  className={"mx-1 p-0"}
                 >
                   Custom
                 </Menu.Item>
@@ -61,14 +61,14 @@ export const SuperloopPopover = () => {
                 <Menu.Item
                   selected={noTransactionDeadline}
                   onClick={() => setNoTransactionDeadline(true)}
-                  className={"mx-1 px-0 py-0"}
+                  className={"mx-1 p-0"}
                 >
                   Auto
                 </Menu.Item>
                 <Menu.Item
                   selected={!noTransactionDeadline}
                   onClick={() => setNoTransactionDeadline(false)}
-                  className={"mx-1 px-0 py-0"}
+                  className={"mx-1 p-0"}
                 >
                   Custom
                 </Menu.Item>

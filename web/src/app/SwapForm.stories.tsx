@@ -18,7 +18,7 @@ const meta: Meta<typeof SwapForm> = {
 
       useEffect(() => {
         setWelcome(false);
-      }, []);
+      }, [setWelcome]);
 
       return <Story />;
     },

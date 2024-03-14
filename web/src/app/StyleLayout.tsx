@@ -18,11 +18,11 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const router = useRouter();
 
-  const { swapPro, setSwapPro } = useSwapPro();
+  const { swapPro } = useSwapPro();
 
   return (
     <body className={`${inter.className} flex flex-col bg-white`}>
-      <div className="iridescent-blur calc absolute left-1/2 top-[180px] h-full max-h-[305px] w-full max-w-[557px] -translate-x-1/2 transform" />
+      <div className="iridescent-blur absolute left-1/2 top-[180px] size-full max-h-[305px] max-w-[557px] -translate-x-1/2" />
 
       <header className="p-8">
         <div className="flex w-full flex-col gap-8">

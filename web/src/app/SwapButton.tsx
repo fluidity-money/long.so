@@ -19,7 +19,7 @@ export const SwapButton = ({ onClick }: { onClick?: () => void }) => (
       },
     }}
     whileTap={{ scale: 0.9 }}
-    className="z-10 flex h-[40px] w-[40px] cursor-pointer items-center justify-center bg-white"
+    className="z-10 flex size-[40px] cursor-pointer items-center justify-center bg-white"
     onClick={onClick}
   >
     <Swap className="w-[10px]" />

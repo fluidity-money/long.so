@@ -50,7 +50,7 @@ export const NetworkSelection = () => {
         </Badge>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className="relative -left-[62.5px] top-[34px] flex w-[120px] flex-col gap-1 rounded-2xl rounded-t-none border border-t-0 border-black bg-white p-2 ">
+        <DropdownMenu.Content className="relative left-[62.5px] top-[34px] flex w-[120px] flex-col gap-1 rounded-2xl rounded-t-none border border-t-0 border-black bg-white p-2 ">
           <DropdownMenu.Item className="cursor-pointer p-1 text-xs">
             Ethereum
           </DropdownMenu.Item>
