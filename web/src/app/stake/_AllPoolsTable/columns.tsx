@@ -25,7 +25,7 @@ export const columns: ColumnDef<Pool>[] = [
     header: "Pair",
     cell: ({ row }) => {
       return (
-        <Badge>
+        <Badge className="text-2xs md:text-xs">
           {row.original.tokens[0].name} {row.original.tokens[1].name}
         </Badge>
       );

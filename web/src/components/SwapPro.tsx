@@ -12,6 +12,7 @@ import { DataTable } from "@/app/_DataTable/DataTable";
 import { columns, Transaction } from "@/app/_DataTable/columns";
 import { startOfDay } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { AnimatePresence, motion } from "framer-motion";
 
 const data = [
   {
@@ -269,91 +270,98 @@ export const SwapPro = ({
 
   const { enabled } = useModalStore();
 
-  if (enabled) return null;
-
   return (
-    <div className="z-10 flex flex-col items-center justify-center">
-      <div
-        className={cn(
-          "flex w-full flex-col gap-4 overflow-x-clip p-4 sm:w-[500px]",
-          override || swapPro
-            ? "px-4 pl-8 md:mr-10 md:w-[500px] lg:w-[500px] xl:w-[600px]"
-            : "md:h-0 md:w-0 md:p-0",
-        )}
-      >
-        {badgeTitle ? (
-          <div className="flex flex-row items-center">
-            <Token />
-            <Badge className="z-50 -ml-2 pl-1">
-              <div className="flex flex-row items-center gap-4">
+    <AnimatePresence>
+      {swapPro && (
+        <motion.div
+          initial={{ opacity: 0, x: -100 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -100 }}
+          className="z-10 flex flex-col items-center justify-center"
+        >
+          <div
+            className={cn(
+              "flex w-full flex-col gap-4 overflow-x-clip p-4 sm:w-[500px]",
+              override || swapPro
+                ? "px-4 pl-8 md:mr-10 md:w-[500px] lg:w-[500px] xl:w-[600px]"
+                : "md:h-0 md:w-0 md:p-0",
+            )}
+          >
+            {badgeTitle ? (
+              <div className="flex flex-row items-center">
                 <Token />
-                <div className="text-xl">fUSDC/ETH</div>
+                <Badge className="z-50 -ml-2 pl-1">
+                  <div className="flex flex-row items-center gap-4">
+                    <Token />
+                    <div className="text-xl">fUSDC/ETH</div>
+                  </div>
+                </Badge>
               </div>
-            </Badge>
-          </div>
-        ) : (
-          <TypographyH3 className="hidden font-normal md:inline-flex">
-            fUSDC/ETH
-          </TypographyH3>
-        )}
+            ) : (
+              <TypographyH3 className="hidden font-normal md:inline-flex">
+                fUSDC/ETH
+              </TypographyH3>
+            )}
 
-        <Graph />
+            <Graph />
 
-        <div className="hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:flex">
-          <div>
-            <p className="text-xs">Liquidity</p>
-            <p className="text-2xl">$1.01M</p>
-          </div>
+            <div className="hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:flex">
+              <div>
+                <p className="text-xs">Liquidity</p>
+                <p className="text-2xl">$1.01M</p>
+              </div>
 
-          <div>
-            <p className="text-xs">Volume 24H</p>
-            <p className="text-2xl">$115.21K</p>
-          </div>
+              <div>
+                <p className="text-xs">Volume 24H</p>
+                <p className="text-2xl">$115.21K</p>
+              </div>
 
-          <div>
-            <p className="text-xs">Stake APY</p>
-            <p className="text-2xl">1.62%</p>
-          </div>
+              <div>
+                <p className="text-xs">Stake APY</p>
+                <p className="text-2xl">1.62%</p>
+              </div>
 
-          <div>
-            <p className="text-xs">24H Trade Rewards</p>
-            <p className="text-2xl">$300.56</p>
-          </div>
-        </div>
-
-        <div className="mt-12">
-          <div className="flex w-full flex-row items-center justify-between">
-            <h3>Transaction History</h3>
-            <div>
-              <span className="underline">My Transactions</span> {"->"}
+              <div>
+                <p className="text-xs">24H Trade Rewards</p>
+                <p className="text-2xl">$300.56</p>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <DataTable
-          columns={columns}
-          data={
-            [
-              {
-                id: "1",
-                value: 100,
-                rewards: 200,
-                time: startOfDay(new Date()),
-                amountFrom: 30.2,
-                amountTo: 0.0001,
-              },
-              {
-                id: "2",
-                value: 300,
-                rewards: 20,
-                time: startOfDay(new Date()),
-                amountFrom: 30.2,
-                amountTo: 0.0001,
-              },
-            ] as Transaction[]
-          }
-        />
-      </div>
-    </div>
+            <div className="mt-12">
+              <div className="flex w-full flex-row items-center justify-between">
+                <h3>Transaction History</h3>
+                <div>
+                  <span className="underline">My Transactions</span> {"->"}
+                </div>
+              </div>
+            </div>
+
+            <DataTable
+              columns={columns}
+              data={
+                [
+                  {
+                    id: "1",
+                    value: 100,
+                    rewards: 200,
+                    time: startOfDay(new Date()),
+                    amountFrom: 30.2,
+                    amountTo: 0.0001,
+                  },
+                  {
+                    id: "2",
+                    value: 300,
+                    rewards: 20,
+                    time: startOfDay(new Date()),
+                    amountFrom: 30.2,
+                    amountTo: 0.0001,
+                  },
+                ] as Transaction[]
+              }
+            />
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

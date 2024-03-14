@@ -8,6 +8,7 @@ import ProToggleSelected from "@/assets/icons/pro-toggle-selected.svg";
 import { useSwapPro } from "@/stores/useSwapPro";
 import { cn } from "@/lib/utils";
 import { clsx } from "clsx";
+import { useWelcomeStore } from "@/stores/useWelcomeStore";
 
 interface ItemProps {
   children: React.ReactNode;
@@ -35,6 +36,7 @@ const Item: React.FC<ItemProps> = ({
   `;
 
   const { swapPro, setSwapPro } = useSwapPro();
+  const { setWelcome } = useWelcomeStore();
 
   return (
     <motion.div
@@ -88,7 +90,10 @@ const Item: React.FC<ItemProps> = ({
               className={clsx(`hidden cursor-pointer group-hover:inline-flex`, {
                 invert: !selected,
               })}
-              onClick={() => setSwapPro(!swapPro)}
+              onClick={() => {
+                setWelcome(false);
+                setSwapPro(!swapPro);
+              }}
             >
               {swapPro ? (
                 <ProToggleSelected className="h-[20px] w-[35px]" />
