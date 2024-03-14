@@ -1,3 +1,5 @@
+"use client";
+
 import Hourglass from "@/assets/icons/hourglass.svg";
 import { usdFormat } from "@/lib/usdFormat";
 import { differenceInSeconds, endOfDay } from "date-fns";

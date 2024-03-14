@@ -8,6 +8,7 @@ import { Token } from "@/components";
 import { Badge } from "@/components/ui/badge";
 import { Bar, BarChart, ResponsiveContainer } from "recharts";
 import { Line } from "rc-progress";
+import { motion } from "framer-motion";
 
 const data = [
   {
@@ -313,7 +314,10 @@ export default function PoolPage() {
 
         <div className="flex flex-col items-center">
           <div className="z-10 flex w-full max-w-[500px] flex-col px-4">
-            <div className="flex flex-col gap-4 rounded-lg bg-black p-2 pt-0 text-white">
+            <motion.div
+              layoutId="modal"
+              className="flex flex-col gap-4 rounded-lg bg-black p-2 pt-0 text-white"
+            >
               <div className="flex flex-row items-center justify-between">
                 <div className="p-4 text-xs">Manage Pool</div>
                 <Button
@@ -332,7 +336,7 @@ export default function PoolPage() {
                   <Token />
                   <Badge className="iridescent z-20 -ml-2 flex flex-row gap-2 border-4 border-black pl-1 text-black">
                     <Token />
-                    <div className="text-nowrap text-lg md:text-xl">
+                    <div className="text-lg text-nowrap md:text-xl">
                       fUSDC-ETH
                     </div>
                   </Badge>
@@ -345,7 +349,7 @@ export default function PoolPage() {
                       <Token size="small" />
                       <Token size="small" />
                     </div>
-                    <div className="text-2xs text-nowrap md:text-xs">
+                    <div className="text-nowrap text-2xs md:text-xs">
                       Live Utility Rewards
                     </div>
                   </Badge>
@@ -358,14 +362,14 @@ export default function PoolPage() {
                 <div className="flex flex-row gap-2">
                   <Button
                     variant="secondary"
-                    className="text-2xs flex-1"
+                    className="flex-1 text-2xs"
                     size="sm"
                   >
                     + Add Liquidity
                   </Button>
                   <Button
                     variant="secondary"
-                    className="text-2xs flex-1"
+                    className="flex-1 text-2xs"
                     size="sm"
                   >
                     - Withdraw Liquidity
@@ -379,7 +383,7 @@ export default function PoolPage() {
                   </div>
 
                   <div className="flex flex-1 flex-col">
-                    <div className="text-2xs text-nowrap md:text-xs">
+                    <div className="text-nowrap text-2xs md:text-xs">
                       Unclaimed Rewards
                     </div>
                     <div className="text-xl md:text-2xl">$52,420</div>
@@ -479,7 +483,7 @@ export default function PoolPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
