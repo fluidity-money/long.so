@@ -127,7 +127,7 @@ export const columns: ColumnDef<Pool>[] = [
       return (
         <div className="flex flex-row gap-2 group-hover:invert">
           <Button size="sm">+</Button>
-          <Button size="sm">Claim</Button>
+          {row.original.claimable && <Button size="sm">Claim</Button>}
         </div>
       );
     },
