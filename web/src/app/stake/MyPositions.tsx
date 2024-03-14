@@ -14,6 +14,7 @@ import { usdFormat } from "@/lib/usdFormat";
 import Position from "@/assets/icons/position.svg";
 import { Button } from "@/components/ui/button";
 import { nanoid } from "nanoid";
+import { motion } from "framer-motion";
 
 const pools: Pool[] = [
   {
@@ -91,7 +92,10 @@ export const MyPositions = () => {
   const router = useRouter();
 
   return (
-    <div className="flex w-full flex-col gap-4 rounded-lg bg-black p-4 text-white">
+    <motion.div
+      layoutId="modal"
+      className="flex w-full flex-col gap-4 rounded-lg bg-black p-4 text-white"
+    >
       <div className="flex flex-row items-center justify-between">
         <div className="text-2xs">My Positions</div>
         <Menu id="my-positions-list-grid" background="dark">
@@ -232,6 +236,6 @@ export const MyPositions = () => {
           + Create New Pool
         </Button>
       </div>
-    </div>
+    </motion.div>
   );
 };
