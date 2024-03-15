@@ -123,7 +123,7 @@ export const AllPools = () => {
     <div className="flex w-full flex-col items-center">
       <div className="mt-4 flex w-full max-w-screen-lg flex-col gap-4">
         <div className="flex flex-row justify-between">
-          <div className="text-xs">All Pools</div>
+          <div className="text-2xs md:text-sm">All Pools</div>
 
           {/* only shown on mobile */}
           <div className="md:hidden">
@@ -138,18 +138,18 @@ export const AllPools = () => {
         <div className="flex flex-row flex-wrap justify-center gap-4">
           <div className="flex flex-1 flex-row justify-between">
             <div className="flex flex-col">
-              <div className="text-2xs">TVL</div>
-              <div className="text-2xl">$12.1M</div>
+              <div className="text-3xs md:text-2xs">TVL</div>
+              <div className="text-2xl md:text-3xl">$12.1M</div>
             </div>
 
             <div className="flex flex-col">
-              <div className="text-2xs">Incentives</div>
-              <div className="text-2xl">$200k</div>
+              <div className="text-3xs md:text-2xs">Incentives</div>
+              <div className="text-2xl md:text-3xl">$200k</div>
             </div>
 
             <div className="flex flex-col">
-              <div className="text-2xs">Rewards Claimed</div>
-              <div className="text-2xl">$59.1K</div>
+              <div className="text-3xs md:text-2xs">Rewards Claimed</div>
+              <div className="text-2xl md:text-3xl">$59.1K</div>
             </div>
           </div>
 

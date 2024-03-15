@@ -126,8 +126,14 @@ export const columns: ColumnDef<Pool>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex flex-row gap-2 group-hover:invert">
-          <Button size="sm">+</Button>
-          {row.original.claimable && <Button size="sm">Claim</Button>}
+          <Button size="sm" className="text-2xs md:text-xs">
+            +
+          </Button>
+          {row.original.claimable && (
+            <Button size="sm" className="text-2xs md:text-xs">
+              Claim
+            </Button>
+          )}
         </div>
       );
     },

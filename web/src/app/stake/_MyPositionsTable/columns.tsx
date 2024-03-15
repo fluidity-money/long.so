@@ -50,7 +50,9 @@ export const columns: ColumnDef<Pool>[] = [
     header: "Total Yield",
     cell: ({ row }) => {
       return (
-        <Badge variant="iridescent">{usdFormat(row.original.totalYield)}</Badge>
+        <Badge variant="iridescent" className="text-2xs">
+          {usdFormat(row.original.totalYield)}
+        </Badge>
       );
     },
   },
