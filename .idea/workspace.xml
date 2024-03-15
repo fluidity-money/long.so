@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="refactor: reorganize state" />
+    <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="fix: align dropdown with trigger">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/stake/MyPositions.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/MyPositions.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/stake/_MyPositionsTable/MyPositionsTable.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/_MyPositionsTable/MyPositionsTable.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/stake/_MyPositionsTable/columns.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/_MyPositionsTable/columns.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/stake/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/CampaignBanner.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/CampaignBanner.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/tailwind.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/web/tailwind.config.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -23,10 +31,21 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/web/src/app/StyleLayout.tsx" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="OptimizeOnSaveOptions">
     <option name="myRunOnSave" value="true" />
   </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="2dWDOBEtIkoITJGmi2L6BHrbra4" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
@@ -35,37 +54,46 @@
     <option name="autoscrollToSource" value="true" />
     <option name="openDirectoriesWithSingleClick" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "code.cleanup.on.save": "true",
-    "git-widget-placeholder": "head",
-    "last_opened_file_path": "/Users/aidankinzett/Git/amm.superposition.so/web/src/assets/icons",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.standard": "true",
-    "node.js.selected.package.eslint": "",
-    "node.js.selected.package.standard": "",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "prettierjs.PrettierConfiguration.Package": "/Users/aidankinzett/Git/amm.superposition.so/web/node_modules/prettier",
-    "rearrange.code.on.save": "true",
-    "settings.editor.selected.configurable": "editor.preferences.appearance",
-    "ts.external.directory.path": "/Users/aidankinzett/Git/amm.superposition.so/web/node_modules/typescript/lib"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;code.cleanup.on.save&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;development&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/aidankinzett/Git/amm.superposition.so/web/src/app/stake/_AllPoolsTable&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.standard&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.standard&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;yarn&quot;,
+    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/Users/aidankinzett/Git/amm.superposition.so/web/node_modules/prettier&quot;,
+    &quot;rearrange.code.on.save&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.sourceCode.HTML&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/aidankinzett/Git/amm.superposition.so/web/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
-      "JSON"
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;JSON&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/web/src/app/stake/_AllPoolsTable" />
+      <recent name="$PROJECT_DIR$/web/src/app/stake/_DataTable" />
       <recent name="$PROJECT_DIR$/web/src/assets/icons" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/web/src/components" />
+      <recent name="$PROJECT_DIR$/web/src/app/_DataTable" />
       <recent name="$PROJECT_DIR$/web/.storybook" />
       <recent name="$PROJECT_DIR$/web/src" />
     </key>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task id="LOCAL-00001" summary="add tailwind and shadcn/ui">
       <option name="closed" value="true" />
@@ -83,8 +111,30 @@
       <option name="project" value="LOCAL" />
       <updated>1709724517761</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="refactor: reorganize state" />
+      <created>1710114909434</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1710114909434</updated>
+      <workItem from="1710114911134" duration="88550000" />
+      <workItem from="1710411121066" duration="848000" />
+      <workItem from="1710461373541" duration="1864000" />
+      <workItem from="1710483040518" duration="3225000" />
+    </task>
+    <task id="LOCAL-00003" summary="fix: align dropdown with trigger">
+      <option name="closed" value="true" />
+      <created>1710203315476</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1710203315476</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -101,6 +151,7 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="add tailwind and shadcn/ui" />
     <MESSAGE value="refactor: reorganize state" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor: reorganize state" />
+    <MESSAGE value="fix: align dropdown with trigger" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: align dropdown with trigger" />
   </component>
 </project>

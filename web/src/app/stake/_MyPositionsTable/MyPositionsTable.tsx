@@ -37,7 +37,7 @@ export function MyPositionsTable<TData, TValue>({
   return (
     <div className="rounded-lg text-xs">
       <Table>
-        <TableHeader className="text-2xs  [&_tr]:border-b-0">
+        <TableHeader className="text-3xs md:text-2xs [&_tr]:border-b-0">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="border-b-0">
               {headerGroup.headers.map((header) => {
@@ -67,7 +67,7 @@ export function MyPositionsTable<TData, TValue>({
                 }
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="p-0 py-1">
+                  <TableCell key={cell.id} className="p-0 py-1 text-2xs">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

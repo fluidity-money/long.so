@@ -42,19 +42,33 @@ const Stake = () => {
                   className="flex w-[500px] flex-col gap-4 rounded-lg bg-black p-4 text-white drop-shadow-white"
                 >
                   <div className="flex flex-row justify-between">
-                    <div className="text-xs">Earned since last login</div>
+                    <div className="text-3xs md:text-2xs">
+                      Earned since last login
+                    </div>
                     <Button
                       variant="secondary"
                       onClick={() => setWelcome(false)}
-                      className="px-2 py-0"
+                      className="px-2 py-0 text-2xs"
+                      size={"sm"}
                     >
                       {"<-"} Esc
                     </Button>
                   </div>
 
-                  <div>Welcome back!</div>
+                  <div className="md: w-full text-center text-2xs md:text-sm">
+                    Welcome back!
+                  </div>
 
-                  <div>{"Since you left you've earned:"}</div>
+                  <div className="text-2xs md:text-xs">
+                    {"Since you left you've earned:"}
+                  </div>
+
+                  <div className="flex w-full flex-col px-4">
+                    <div className="flex flex-row justify-between text-3xs md:text-2xs">
+                      <div>Pool Fees</div>
+                      <div>$21.72</div>
+                    </div>
+                  </div>
 
                   <Button
                     variant="iridescent"
