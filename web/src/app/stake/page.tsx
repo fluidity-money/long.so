@@ -7,52 +7,68 @@ import { AllPools } from "@/app/stake/AllPools";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import * as AlertDialog from "@radix-ui/react-alert-dialog";
+import { useHotkeys } from "react-hotkeys-hook";
 
 const Stake = () => {
   const [welcome, setWelcome] = useState(true);
 
+  useHotkeys(
+    "esc",
+    () => {
+      setWelcome(false);
+    },
+    [setWelcome],
+  );
+
   if (welcome) {
     return (
-      <div className="z-10 flex flex-col items-center gap-2 px-4">
-        <motion.div
-          className="w-full max-w-[500px]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <CampaignBanner />
-        </motion.div>
-
-        <div className="flex flex-col items-center">
-          <motion.div
-            layoutId="modal"
-            className="flex w-[500px] flex-col gap-4 rounded-lg bg-black p-4 text-white"
-          >
-            <div className="flex flex-row justify-between">
-              <div className="text-xs">Earned since last login</div>
-              <Button
-                variant="secondary"
-                onClick={() => setWelcome(false)}
-                className="px-2 py-0"
+      <AlertDialog.Root open={welcome}>
+        <AlertDialog.Portal>
+          <AlertDialog.Overlay className="fixed inset-0 z-30 bg-black/50" />
+          <AlertDialog.Content className="z-50 ">
+            <div className="flex flex-col items-center gap-2 px-4">
+              <motion.div
+                className="w-full max-w-[500px]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
-                {"<-"} Esc
-              </Button>
+                <CampaignBanner />
+              </motion.div>
+              <div className="flex flex-col items-center">
+                <motion.div
+                  layoutId="modal"
+                  className="flex w-[500px] flex-col gap-4 rounded-lg bg-black p-4 text-white drop-shadow-white"
+                >
+                  <div className="flex flex-row justify-between">
+                    <div className="text-xs">Earned since last login</div>
+                    <Button
+                      variant="secondary"
+                      onClick={() => setWelcome(false)}
+                      className="px-2 py-0"
+                    >
+                      {"<-"} Esc
+                    </Button>
+                  </div>
+
+                  <div>Welcome back!</div>
+
+                  <div>{"Since you left you've earned:"}</div>
+
+                  <Button
+                    variant="iridescent"
+                    className="w-full"
+                    onClick={() => setWelcome(false)}
+                  >
+                    Claim All Yield
+                  </Button>
+                </motion.div>
+              </div>
             </div>
-
-            <div>Welcome back!</div>
-
-            <div>Since you left you've earned:</div>
-
-            <Button
-              variant="iridescent"
-              className="w-full"
-              onClick={() => setWelcome(false)}
-            >
-              Claim All Yield
-            </Button>
-          </motion.div>
-        </div>
-      </div>
+          </AlertDialog.Content>
+        </AlertDialog.Portal>
+      </AlertDialog.Root>
     );
   }
 
