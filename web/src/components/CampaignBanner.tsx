@@ -48,21 +48,21 @@ export const CampaignBanner = ({
   }, []);
 
   return (
-    <div className="flex w-full flex-row items-center justify-between">
+    <div className="flex w-full flex-row items-center justify-between text-2xs md:text-xs">
       <div className="flex flex-row">
         {/*<Token size="small" />*/}
-        <div className="text-xs">
+        <div>
           {usdFormat(amount)} in{" "}
           <span className="font-medium">{currency} Rewards</span> available.
         </div>
       </div>
 
-      <div className="cursor-pointer text-nowrap text-xs">
+      <div className="cursor-pointer text-nowrap ">
         <span className="underline">View all</span>
         {" ->"}
       </div>
 
-      <div className="flex flex-row items-center gap-1 rounded bg-black px-1 text-xs text-white">
+      <div className="flex flex-row items-center gap-1 rounded bg-black px-1  text-white">
         <Hourglass width={15} height={20} />
         <div className="hidden text-nowrap sm:inline-flex">{countdownLong}</div>
         <div className="inline-flex text-nowrap sm:hidden">

@@ -97,7 +97,7 @@ export const MyPositions = () => {
       className="flex w-full flex-col gap-4 rounded-lg bg-black p-4 text-white"
     >
       <div className="flex flex-row items-center justify-between">
-        <div className="text-2xs">My Positions</div>
+        <div className="text-3xs md:text-2xs">My Positions</div>
         <Menu id="my-positions-list-grid" background="dark">
           <Menu.Item
             className={"mx-1 p-0"}
@@ -192,11 +192,11 @@ export const MyPositions = () => {
       </div>
 
       {pools.length > 0 && (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center ">
           <div className="z-20 mt-[calc(-3rem+1px)] h-4 w-full bg-gradient-to-t from-black to-transparent" />
           <Button
             variant="link"
-            className="group flex flex-row gap-2 text-white hover:no-underline"
+            className="group flex flex-row gap-2 text-2xs text-white hover:no-underline"
             onClick={() => setExpanded((v) => !v)}
           >
             {expanded ? (
@@ -218,7 +218,7 @@ export const MyPositions = () => {
         {pools.length > 0 && (
           <div className="flex flex-1 flex-col items-center">
             <Button
-              className="w-full text-xs text-black"
+              className="w-full text-3xs text-black md:text-xs"
               variant="iridescent"
               size="sm"
             >
@@ -226,13 +226,17 @@ export const MyPositions = () => {
             </Button>
             <Badge
               variant="iridescent"
-              className="-mt-2 gap-2 border-2 border-black text-2xs"
+              className="-mt-2 gap-2 border-2 border-black text-3xs"
             >
               {usdFormat(920.12)}
             </Badge>
           </div>
         )}
-        <Button className="flex-1 text-xs" variant="secondary" size="sm">
+        <Button
+          className="flex-1 text-3xs  md:text-xs"
+          variant="secondary"
+          size="sm"
+        >
           + Create New Pool
         </Button>
       </div>

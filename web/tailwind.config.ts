@@ -17,20 +17,11 @@ const config = {
         "2xl": "1400px",
       },
     },
-    fontSize: {
-      "3xs": "0.5rem", // "8px"
-      "2xs": "0.625rem", // "10px"
-      xs: "0.75rem",
-      sm: "0.8rem",
-      base: "1rem",
-      lg: "1.125rem",
-      xl: "1.25rem",
-      "2xl": "1.563rem",
-      "3xl": "1.953rem",
-      "4xl": "2.441rem",
-      "5xl": "3.052rem",
-    },
     extend: {
+      fontSize: {
+        "3xs": "0.5rem" /* 8px */,
+        "2xs": "0.625rem" /* 10px */,
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -97,6 +88,9 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "spin-once": "spin-once 1s ease-in-out",
+      },
+      dropShadow: {
+        white: "0px 4px 32.5px rgba(235, 235, 235, 0.6)",
       },
     },
   },
