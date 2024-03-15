@@ -308,7 +308,7 @@ export default function PoolPage() {
   return (
     <div className="flex w-full flex-col">
       <div className="flex max-w-full flex-col-reverse justify-center gap-8 lg:flex-row">
-        <div className="hidden md:inline-flex">
+        <div className="hidden w-full items-center md:flex md:flex-col">
           <SwapPro override badgeTitle />
         </div>
 
@@ -336,7 +336,7 @@ export default function PoolPage() {
                   <Token />
                   <Badge className="iridescent z-20 -ml-2 flex flex-row gap-2 border-4 border-black pl-1 text-black">
                     <Token />
-                    <div className="text-lg text-nowrap md:text-xl">
+                    <div className="text-nowrap text-lg md:text-xl">
                       fUSDC-ETH
                     </div>
                   </Badge>
