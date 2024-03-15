@@ -5,13 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="fix: align dropdown with trigger">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/stake/MyPositions.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/MyPositions.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/stake/_MyPositionsTable/MyPositionsTable.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/_MyPositionsTable/MyPositionsTable.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/stake/AllPools.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/AllPools.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/src/app/stake/_MyPositionsTable/columns.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/_MyPositionsTable/columns.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/stake/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/CampaignBanner.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/CampaignBanner.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/tailwind.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/web/tailwind.config.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -120,7 +115,7 @@
       <workItem from="1710114911134" duration="88550000" />
       <workItem from="1710411121066" duration="848000" />
       <workItem from="1710461373541" duration="1864000" />
-      <workItem from="1710483040518" duration="3225000" />
+      <workItem from="1710483040518" duration="3527000" />
     </task>
     <task id="LOCAL-00003" summary="fix: align dropdown with trigger">
       <option name="closed" value="true" />

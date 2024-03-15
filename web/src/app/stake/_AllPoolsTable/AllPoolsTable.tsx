@@ -89,7 +89,7 @@ export function AllPoolsTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                className="group rounded-xl border-b-0 text-2xs hover:bg-black hover:text-white md:text-sm"
+                className="group rounded-xl border-b-0 text-2xs hover:bg-black hover:text-white md:text-xs"
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id} className="p-1">
