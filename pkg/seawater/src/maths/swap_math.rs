@@ -292,6 +292,7 @@ mod test {
 
         assert!(sqrt_p < price_target);
         //TODO:FIXME: failing
+        #[cfg(feature = "testing-dbg-compute_swap_step")]
         println!(
             "sqrtp: {:?}, price_after_whole output amount: {:?}",
             sqrt_p, price_after_whole_output_amount

@@ -144,6 +144,8 @@ pub enum Error {
 
     #[error("Only the position owner can use this")]
     PositionOwnerOnly,
+
+    // 30
     #[error("Only the NFT manager can use this")]
     NftManagerOnly,
     #[error("Only the Seawater admin can use this")]

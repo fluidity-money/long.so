@@ -25,6 +25,7 @@ const-hex.workspace = true
 
 [dev-dependencies]
 rand = "0.8.5"
+csv = "1.3.0"
 
 [features]
 export-abi = ["stylus-sdk/export-abi"]
@@ -36,3 +37,8 @@ update_positions = []
 admin = []
 debug = []
 testing = []
+testing-dbg-erc20 = []
+testing-dbg-compute_swap_step = []
+testing-dbg-mul_div = []
+testing-dbg-get_tick_at_sqrt_ratio = []
+testing-dbg-get_sqrt_ratio_at_tick = []
