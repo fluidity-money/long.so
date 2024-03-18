@@ -31,8 +31,9 @@ export const Welcome = () => {
             Layer-3 focused on incentives and order flow.
           </div>
           {/* desktop */}
-          <div className="hidden md:inline-flex">
-            The AMM That Pays You To Use It
+          <div className="hidden text-center md:inline-flex">
+            The First AMM That Pays You To Use It. <br />
+            Earn Rewards On Every Trade!
           </div>
 
           <div className="flex flex-col gap-4">
