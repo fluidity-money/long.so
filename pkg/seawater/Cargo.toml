@@ -25,7 +25,6 @@ const-hex.workspace = true
 
 [dev-dependencies]
 rand = "0.8.5"
-csv = "1.3.0"
 
 [features]
 export-abi = ["stylus-sdk/export-abi"]
