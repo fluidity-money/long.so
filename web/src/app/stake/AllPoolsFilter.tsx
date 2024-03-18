@@ -15,9 +15,10 @@ export const AllPoolsFilter = () => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-row items-center border-b border-black">
+      <div className="flex flex-row items-center border-b border-black pl-2 has-[:focus-visible]:rounded-md has-[:focus-visible]:border-0 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2">
         <Search className="size-4" />
         <Input
+          variant="no-ring"
           className="h-8 w-[350px] border-0 bg-white text-xs"
           placeholder="Search for tokens by name, symbol, or contract address."
         />
