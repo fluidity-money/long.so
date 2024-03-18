@@ -68,6 +68,21 @@ const Stake = () => {
                       <div>Pool Fees</div>
                       <div>$21.72</div>
                     </div>
+
+                    <div className="flex flex-row justify-between text-3xs md:text-2xs">
+                      <div>Liquidity Boosts</div>
+                      <div>$13.06</div>
+                    </div>
+
+                    <div className="flex flex-row justify-between text-3xs md:text-2xs">
+                      <div>Super Boosts</div>
+                      <div>$8.34</div>
+                    </div>
+
+                    <div className="flex flex-row justify-between text-3xs md:text-2xs">
+                      <div>Utility Boosts</div>
+                      <div>$2.99</div>
+                    </div>
                   </div>
 
                   <Button
