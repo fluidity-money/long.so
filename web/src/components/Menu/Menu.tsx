@@ -43,19 +43,11 @@ const Item: React.FC<ItemProps> = ({
       className={cn(
         classes,
         "group rounded-md px-4 py-3 text-sm font-medium",
-        proToggle
-          ? `w-16 transition-[width]  ${swapPro ? "md:w-28 md:hover:w-36" : "md:w-20 md:hover:w-28"}`
-          : "",
-        selected ? "" : "cursor-pointer",
+        proToggle &&
+          `w-16 transition-[width]  ${swapPro ? "md:w-28 md:hover:w-36" : "md:w-20 md:hover:w-28"}`,
+        !selected && "cursor-pointer",
         className,
       )}
-      whileHover={{
-        scale: !selected ? 1.05 : 1,
-        transition: {
-          duration: 0.4,
-          ease: "easeInOut",
-        },
-      }}
       whileTap={{
         scale: !selected ? 0.95 : 1,
         y: 1,
