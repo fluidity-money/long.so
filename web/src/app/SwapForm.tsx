@@ -102,7 +102,7 @@ export const SwapForm = () => {
         )}
         onClick={() => setWelcome(false)}
       >
-        <CampaignBanner />
+        {!welcome && <CampaignBanner />}
 
         <div className="z-10 flex w-full flex-col gap-2">
           <SuperloopPopover />
