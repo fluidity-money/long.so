@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import SPNTest from "@/assets/icons/spn-test.svg";
 import ArrowDown from "@/assets/icons/arrow-down.svg";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { clsx } from "clsx";
 
 export const NetworkSelection = () => {
   return (
@@ -10,39 +9,17 @@ export const NetworkSelection = () => {
       <DropdownMenu.Trigger className="group">
         <Badge
           variant="invert"
-          className={clsx(
-            "absolute",
-            "right-44",
-            "hidden",
-            "w-28",
-            "px-0.5",
-            "transition-[width]",
-            "group-hover:w-[120px]",
-            "group-data-[state=open]:w-[120px]",
-            "md:inline-flex",
-            "group-data-[state=open]:border-b-0",
-            "group-data-[state=open]:rounded-b-none",
-            "rounded-2xl",
-          )}
+          className={
+            "hidden w-28 rounded-2xl px-0.5 transition-[width] group-hover:w-[120px] group-data-[state=open]:w-[120px] group-data-[state=open]:rounded-b-none group-data-[state=open]:border-b-0 md:inline-flex"
+          }
         >
-          <div className={"flex-col"}>
+          <div className="flex-col">
             <div className="flex flex-row items-center">
               <div className="mr-2">
-                <SPNTest height={30} width={30} />
+                <SPNTest className="size-[30px]" />
               </div>
               <div className="text-nowrap">SPN-Test</div>
-              <div
-                className={clsx(
-                  "ml-2",
-                  "transition-[width]",
-                  "group-hover:inline-flex",
-                  "group-hover:w-2",
-                  "group-data-[state=open]:inline-flex",
-                  "group-data-[state=open]:w-2",
-                  "hidden",
-                  "w-0",
-                )}
-              >
+              <div className="ml-2 hidden w-0 transition-[width] group-hover:inline-flex group-hover:w-2 group-data-[state=open]:inline-flex group-data-[state=open]:w-2">
                 <ArrowDown width={10} height={6} />
               </div>
             </div>
@@ -50,7 +27,7 @@ export const NetworkSelection = () => {
         </Badge>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className="relative left-[62.5px] top-[34px] flex w-[120px] flex-col gap-1 rounded-2xl rounded-t-none border border-t-0 border-black bg-white p-2 ">
+        <DropdownMenu.Content className="relative flex w-[120px] flex-col gap-1 rounded-2xl rounded-t-none border border-t-0 border-black bg-white p-2 ">
           <DropdownMenu.Item className="cursor-pointer p-1 text-xs">
             Ethereum
           </DropdownMenu.Item>
