@@ -1,7 +1,7 @@
 "use client";
 
 import { Menu } from "@/components";
-import { Bar, BarChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Bar, ComposedChart, ResponsiveContainer, Tooltip } from "recharts";
 import { format, subDays } from "date-fns";
 import { ContentType } from "recharts/types/component/Tooltip";
 import {
@@ -321,7 +321,7 @@ export const YieldOverTimeGraph = () => {
 
       <div className="mt-16 flex flex-col gap-2">
         <ResponsiveContainer height={150} width="100%">
-          <BarChart data={data} dataKey={"date"}>
+          <ComposedChart data={data} dataKey={"date"}>
             <defs>
               <linearGradient id="gradientFill" x1="0" y1="0" x2="0" y2="1">
                 <stop
@@ -352,7 +352,13 @@ export const YieldOverTimeGraph = () => {
               </linearGradient>
             </defs>
 
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip
+              content={<CustomTooltip />}
+              cursor={{
+                stroke: "black",
+                strokeDasharray: "3 3",
+              }}
+            />
 
             {/* Bar for the black bottom section */}
             <Bar
@@ -363,7 +369,7 @@ export const YieldOverTimeGraph = () => {
 
             {/* Bar with the gradient on top */}
             <Bar dataKey="pv" stackId="stack" shape={<CustomBarTop />} />
-          </BarChart>
+          </ComposedChart>
         </ResponsiveContainer>
 
         <div className="text-xs text-gray-2">Showing October 2023</div>
