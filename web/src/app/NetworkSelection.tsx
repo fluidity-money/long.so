@@ -3,10 +3,12 @@ import ArrowDown from "@/assets/icons/arrow-down.svg";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import SPNTest from "@/assets/icons/spn-test.svg";
 import Ethereum from "@/assets/icons/ethereum.svg";
+import { useWelcomeStore } from "@/stores/useWelcomeStore";
 
 export const NetworkSelection = () => {
+  const { setWelcome } = useWelcomeStore();
   return (
-    <DropdownMenu.Root>
+    <DropdownMenu.Root onOpenChange={() => setWelcome(false)}>
       <DropdownMenu.Trigger className="group">
         <Badge
           variant="invert"
@@ -18,11 +20,6 @@ export const NetworkSelection = () => {
             <div className="flex flex-row items-center">
               <div className="mr-2">
                 <SPNTest className="size-[20px] transition-none" />
-                {/*<Image*/}
-                {/*  src={NetworkSelectionIcon}*/}
-                {/*  alt={"network selection"}*/}
-                {/*  className="size-[20px] transition-none"*/}
-                {/*/>*/}
               </div>
               <div className="text-nowrap">SPN-Test</div>
               <div className="ml-2 hidden w-0 transition-[width] group-hover:inline-flex group-hover:w-2 group-data-[state=open]:inline-flex group-data-[state=open]:w-2">
