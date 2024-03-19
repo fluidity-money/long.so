@@ -13,15 +13,6 @@ const tokenVariants = {
       ease: "easeInOut",
     },
   },
-  hover: (size: number) => ({
-    rotateY: [0, 360],
-    x: [0, (size + 1) * 2, 0, (size + 1) * -2, 0],
-    transition: {
-      duration: 0.5 * size + 1.5,
-      ease: "linear",
-      repeat: Infinity,
-    },
-  }),
 };
 
 export interface IToken {
