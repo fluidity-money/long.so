@@ -96,7 +96,7 @@ export const SwapForm = () => {
           welcome
             ? cn(
                 `cursor-pointer hover:-translate-y-8 hover:blur-0`,
-                hovering ? "-translate-y-8 blur-0" : "blur-sm",
+                hovering ? "-translate-y-8 blur-0" : "blur-xs",
               )
             : "",
         )}
