@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import ArrowDown from "@/assets/icons/arrow-down.svg";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import SPNTest from "@/assets/icons/spn-test.svg";
+import Ethereum from "@/assets/icons/ethereum.svg";
 
 export const NetworkSelection = () => {
   return (
@@ -32,15 +33,15 @@ export const NetworkSelection = () => {
         </Badge>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className="-mt-2 flex w-[105px] flex-col gap-1 rounded-2xl rounded-t-none border border-t-0 border-black bg-white p-2">
-          <DropdownMenu.Item className="cursor-pointer p-1 text-xs">
-            Ethereum
+        <DropdownMenu.Content className="-mt-2 flex w-[105px] flex-col gap-0.5 rounded-2xl rounded-t-none border border-t-0 border-black bg-white p-2 text-xs">
+          <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
+            <Ethereum className={"size-[12px]"} /> Ethereum
           </DropdownMenu.Item>
-          <DropdownMenu.Item className="cursor-pointer p-1 text-xs">
-            Arbitrum
+          <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
+            <Ethereum className={"size-[12px]"} /> Arbitrum
           </DropdownMenu.Item>
-          <DropdownMenu.Item className="cursor-pointer p-1 text-xs">
-            Solana
+          <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
+            <Ethereum className={"size-[12px]"} /> Solana
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
