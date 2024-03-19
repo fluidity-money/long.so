@@ -18,7 +18,7 @@ export const Welcome = () => {
         <div className="flex flex-col items-center justify-around gap-10 bg-white">
           <div className="mt-10 flex flex-row items-center gap-1 text-3xl font-medium">
             Think{" "}
-            <div className="rounded-md bg-black p-1 px-2 text-white">
+            <div className="mx-1 rounded-md bg-black p-1 px-2 text-white">
               inside
             </div>{" "}
             the box.
