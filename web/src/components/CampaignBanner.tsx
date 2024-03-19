@@ -4,6 +4,7 @@ import Hourglass from "@/assets/icons/hourglass.svg";
 import { usdFormat } from "@/lib/usdFormat";
 import { differenceInSeconds, endOfDay } from "date-fns";
 import { useEffect, useState } from "react";
+import Token from "@/assets/icons/token.svg";
 
 interface CampaignBannerProps {
   amount?: number;
@@ -49,8 +50,8 @@ export const CampaignBanner = ({
 
   return (
     <div className="flex w-full flex-row items-center justify-between text-2xs md:text-xs">
-      <div className="flex flex-row">
-        {/*<Token size="small" />*/}
+      <div className="flex flex-row items-center gap-1">
+        <Token className="size-[20px]" />
         <div>
           {usdFormat(amount)} in{" "}
           <span className="font-medium">{currency} Rewards</span> available.
