@@ -182,17 +182,65 @@ const data = [
   },
 ];
 
-// Custom bar component to include borders
-const CustomBar = (props: any) => {
+/**
+ * Top custom bar component to include borders, border radius, and linear gradients.
+ *
+ * The top two corners are rounded.
+ * @param props
+ * @constructor
+ */
+const CustomBarTop = (props: any) => {
   const { fill, x, y, width, height } = props;
+
+  // Calculate the radius for the top corners
+  const radius = 5; // Adjust this value as needed
+
+  // Draw the path with rounded top corners
+  const path = `M ${x},${y + radius}
+                a ${radius},${radius} 0 0 1 ${radius},-${radius}
+                h ${width - 2 * radius}
+                a ${radius},${radius} 0 0 1 ${radius},${radius}
+                v ${height - radius}
+                h -${width}
+                Z`;
+  return (
+    <g>
+      <path
+        d={path}
+        stroke="black"
+        strokeWidth={2}
+        fill={fill ?? `url(#gradientFill)`}
+      />
+    </g>
+  );
+};
+
+/**
+ * Bottom custom bar component.
+ *
+ * The bottom two corners are rounded.
+ * @param props
+ * @constructor
+ */
+const CustomBarBottom = (props: any) => {
+  const { fill, x, y, width, height } = props;
+
+  // Calculate the radius for the bottom corners
+  const radius = 5; // Adjust this value as needed
+
+  // Draw the path with rounded bottom corners
+  const path = `M ${x},${y}
+                v ${height - radius}
+                a ${radius},${radius} 0 0 0 ${radius},${radius}
+                h ${width - 2 * radius}
+                a ${radius},${radius} 0 0 0 ${radius},-${radius}
+                v -${height - radius}
+                Z`;
 
   return (
     <g>
-      <rect
-        x={x}
-        y={y}
-        width={width}
-        height={height}
+      <path
+        d={path}
         stroke="black"
         strokeWidth={2}
         fill={fill ?? `url(#gradientFill)`}
@@ -208,7 +256,7 @@ const CustomTooltip: ContentType<ValueType, NameType> = ({
 }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="flex flex-col items-center rounded-xl bg-black p-2 text-white">
+      <div className="flex flex-col items-center rounded-lg bg-black p-2 text-white">
         <p className="text-sm">{usdFormat(payload[0].value as number)}</p>
         <p className="text-xs text-gray-2">
           {format(payload[0].payload.date, "P")}
@@ -310,11 +358,11 @@ export const YieldOverTimeGraph = () => {
             <Bar
               dataKey="uv"
               stackId="stack"
-              shape={<CustomBar fill="#000" />}
+              shape={<CustomBarBottom fill="#000" />}
             />
 
             {/* Bar with the gradient on top */}
-            <Bar dataKey="pv" stackId="stack" shape={<CustomBar />} />
+            <Bar dataKey="pv" stackId="stack" shape={<CustomBarTop />} />
           </BarChart>
         </ResponsiveContainer>
 
