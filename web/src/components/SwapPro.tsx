@@ -10,15 +10,10 @@ import { startCase } from "lodash";
 import { useModalStore } from "@/app/TokenModal";
 import { DataTable } from "@/app/_DataTable/DataTable";
 import { columns, Transaction } from "@/app/_DataTable/columns";
-import { format, startOfDay, subDays } from "date-fns";
+import { startOfDay, subDays } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { AnimatePresence, motion } from "framer-motion";
-import { ContentType } from "recharts/types/component/Tooltip";
-import {
-  NameType,
-  ValueType,
-} from "recharts/types/component/DefaultTooltipContent";
-import { usdFormat } from "@/lib/usdFormat";
+import { CustomTooltip } from "./CustomTooltip";
 
 const data = [
   {
@@ -190,25 +185,6 @@ const data = [
     amt: 2400,
   },
 ];
-
-const CustomTooltip: ContentType<ValueType, NameType> = ({
-  active,
-  payload,
-  label,
-}) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="flex flex-col items-center rounded-lg bg-black p-2 text-white">
-        <p className="text-sm">{usdFormat(payload[0].value as number)}</p>
-        <p className="text-xs text-gray-2">
-          {format(payload[0].payload.date, "P")}
-        </p>
-      </div>
-    );
-  }
-
-  return null;
-};
 
 const Graph = () => {
   const [activeGraphType, setActiveGraphType] = useState<
