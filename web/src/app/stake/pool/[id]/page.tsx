@@ -9,13 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Bar, ComposedChart, ResponsiveContainer, Tooltip } from "recharts";
 import { Line } from "rc-progress";
 import { motion } from "framer-motion";
-import { format, subDays } from "date-fns";
-import { ContentType } from "recharts/types/component/Tooltip";
-import {
-  NameType,
-  ValueType,
-} from "recharts/types/component/DefaultTooltipContent";
-import { usdFormat } from "@/lib/usdFormat";
+import { subDays } from "date-fns";
+import { CustomTooltip } from "@/components/CustomTooltip";
 
 const data = [
   {
@@ -188,29 +183,13 @@ const data = [
   },
 ];
 
-const CustomTooltip: ContentType<ValueType, NameType> = ({
-  active,
-  payload,
-  label,
-}) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="flex flex-col items-center rounded-lg bg-black p-2 text-white">
-        <p className="text-sm">{usdFormat(payload[0].value as number)}</p>
-        <p className="text-xs text-gray-2">
-          {format(payload[0].payload.date, "P")}
-        </p>
-      </div>
-    );
-  }
-
-  return null;
-};
 export default function PoolPage() {
   const router = useRouter();
 
   useHotkeys("esc", () => router.back());
 
+  // @ts-ignore
+  // @ts-ignore
   return (
     <div className="flex w-full flex-col">
       <div className="flex max-w-full flex-col-reverse justify-center gap-8 lg:flex-row">

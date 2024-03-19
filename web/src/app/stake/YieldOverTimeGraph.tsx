@@ -2,13 +2,8 @@
 
 import { Menu } from "@/components";
 import { Bar, ComposedChart, ResponsiveContainer, Tooltip } from "recharts";
-import { format, subDays } from "date-fns";
-import { ContentType } from "recharts/types/component/Tooltip";
-import {
-  NameType,
-  ValueType,
-} from "recharts/types/component/DefaultTooltipContent";
-import { usdFormat } from "@/lib/usdFormat";
+import { subDays } from "date-fns";
+import { CustomTooltip } from "@/components/CustomTooltip";
 import { useState } from "react";
 
 const data = [
@@ -247,25 +242,6 @@ const CustomBarBottom = (props: any) => {
       />
     </g>
   );
-};
-
-const CustomTooltip: ContentType<ValueType, NameType> = ({
-  active,
-  payload,
-  label,
-}) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="flex flex-col items-center rounded-lg bg-black p-2 text-white">
-        <p className="text-sm">{usdFormat(payload[0].value as number)}</p>
-        <p className="text-xs text-gray-2">
-          {format(payload[0].payload.date, "P")}
-        </p>
-      </div>
-    );
-  }
-
-  return null;
 };
 
 export const YieldOverTimeGraph = () => {
