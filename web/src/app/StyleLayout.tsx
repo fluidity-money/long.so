@@ -34,7 +34,7 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
 
             <div className="flex flex-row items-start gap-4">
               <NetworkSelection />
-              <Button size="sm" color="light">
+              <Button size="sm" color="light" className="h-[26px] text-sm">
                 Connect Wallet
               </Button>
             </div>
