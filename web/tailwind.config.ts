@@ -18,6 +18,9 @@ const config = {
       },
     },
     extend: {
+      blur: {
+        xs: "2px",
+      },
       fontSize: {
         "3xs": "0.5rem" /* 8px */,
         "2xs": "0.625rem" /* 10px */,
