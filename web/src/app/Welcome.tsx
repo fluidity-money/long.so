@@ -94,7 +94,7 @@ export const Welcome = () => {
             <Button onClick={() => setWelcome(false)}>
               <span className="iridescent-text">Get Started</span>
             </Button>
-            <Button variant="ghost">Learn more {"->"}</Button>
+            <Button variant="link">Learn more {"->"}</Button>
           </div>
         </div>
       </div>
