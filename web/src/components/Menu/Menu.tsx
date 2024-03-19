@@ -1,6 +1,5 @@
 import { LayoutGroup, motion } from "framer-motion";
 import styles from "./Menu.module.scss";
-import { Box } from "../index";
 import ArrowDownWhite from "@/assets/icons/arrow-down-white.svg";
 import ArrowDown from "@/assets/icons/arrow-down.svg";
 import ProToggle from "@/assets/icons/pro-toggle.svg";
@@ -42,9 +41,9 @@ const Item: React.FC<ItemProps> = ({
     <motion.div
       className={cn(
         classes,
-        "group rounded-md px-4 py-3 text-sm font-medium",
+        "group rounded-md",
         proToggle &&
-          `w-16 transition-[width]  ${swapPro ? "md:w-28 md:hover:w-36" : "md:w-20 md:hover:w-28"}`,
+          `h-[43px] transition-[width] ${swapPro ? "md:w-[125px] md:hover:w-[147px]" : "md:w-[97px] md:hover:w-[122px]"}`,
         !selected && "cursor-pointer",
         className,
       )}
@@ -60,14 +59,22 @@ const Item: React.FC<ItemProps> = ({
     >
       {selected && (
         <>
-          <Box
+          <motion.div
             layoutId={groupId}
-            background={background}
-            className={`${styles.virtualBox} ${proToggle && swapPro ? "shine" : ""}`}
+            // background={background}
+            className={cn(
+              "absolute inset-0 -z-10 rounded-md",
+              background === "light" ? "bg-black" : "bg-white",
+              proToggle && swapPro && "shine",
+            )}
           />
         </>
       )}
-      <div className={"flex flex-row items-center gap-2"}>
+      <div
+        className={
+          "flex h-full flex-row items-center justify-center gap-2 text-base font-medium"
+        }
+      >
         {children}
         {proToggle && (
           <div className="hidden md:inline-flex">
@@ -120,7 +127,7 @@ const Menu: React.FC<MenuProps> = ({
       : "light";
 
   return (
-    <div className="flex flex-row gap-1 rounded p-1">
+    <div className="flex flex-row gap-3 rounded">
       <LayoutGroup id={id}>
         {children.map((item, i) => {
           return (

@@ -56,6 +56,7 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
                 </Text>
               </Menu.Item>
               <Menu.Item
+                className={"w-[73px]"}
                 onClick={() => {
                   router.push("/stake");
                 }}

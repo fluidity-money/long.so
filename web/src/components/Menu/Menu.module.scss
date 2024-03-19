@@ -16,11 +16,4 @@
       color: $dark;
     }
   }
-
-  .virtualBox {
-    position: absolute;
-    z-index: -1;
-    inset: -4px -6px;
-    width: calc(100%);
-  }
 }
