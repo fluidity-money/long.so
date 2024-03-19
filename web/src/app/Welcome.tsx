@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
-import { Token } from "@/components";
+import Token from "@/assets/icons/token.svg";
 
 /**
  * Overlays the welcome screen on top of the app
@@ -38,8 +38,8 @@ export const Welcome = () => {
 
           <div className="flex flex-col gap-4">
             <div className="flex flex-row flex-wrap items-center justify-center gap-4">
-              <div className="group h-10 rounded-full border border-black p-1 px-3 transition-[height] hover:h-14 hover:bg-black hover:text-white ">
-                <div className=" flex h-full flex-col items-center justify-center gap-1">
+              <div className="group h-[35px] rounded-full border border-black p-3 transition-[height] hover:h-[60px] hover:bg-black hover:text-white ">
+                <div className="flex h-full w-[320px] flex-col items-center justify-center gap-1 group-hover:w-[365px]">
                   <div className="text-sm group-hover:text-base">
                     ⛽️💰 Gas Rebates and Negative Fees for traders
                   </div>
@@ -52,14 +52,13 @@ export const Welcome = () => {
                 </div>
               </div>
 
-              <div className="group h-10 rounded-full border border-black p-1 px-3 transition-[height] hover:h-14 hover:bg-black hover:text-white ">
-                <div className="flex h-full flex-col items-center justify-center gap-1">
+              <div className="group h-[35px] rounded-full border border-black p-1 px-3 transition-[height] hover:h-[60px] hover:bg-black hover:text-white ">
+                <div className="flex h-full w-[345px] flex-col items-center justify-center gap-1 group-hover:w-[400px]">
                   <div className="flex flex-row items-center gap-1 text-sm group-hover:text-base">
-                    <div
-                      className="group-hover:invert
-                    "
-                    >
-                      <Token size={"medium"} />
+                    <div className="group-hover:invert">
+                      <Token
+                        className={"size-[18px] group-hover:size-[24px]"}
+                      />
                     </div>
                     $29,123 Trader Rewards available on every swap
                   </div>
@@ -74,8 +73,8 @@ export const Welcome = () => {
             </div>
 
             <div className="flex flex-row justify-center">
-              <div className="group h-10 rounded-full border border-black p-1 px-3 transition-[height] hover:h-14 hover:bg-black hover:text-white ">
-                <div className="flex h-full flex-col items-center justify-center gap-1">
+              <div className="group h-[35px] rounded-full border border-black p-1 px-3 transition-[height] hover:h-[60px] hover:bg-black hover:text-white ">
+                <div className="flex h-full w-[305px] flex-col items-center justify-center gap-1 group-hover:w-[350px]">
                   <div className="text-sm group-hover:text-base">
                     🔺🚀️ Earn Higher Revenue with Utility Booster
                   </div>
