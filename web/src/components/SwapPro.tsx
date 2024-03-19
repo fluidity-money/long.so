@@ -2,7 +2,7 @@
 
 import { useSwapPro } from "@/stores/useSwapPro";
 import { TypographyH2, TypographyH3 } from "@/components/ui/typography";
-import { Bar, BarChart, ResponsiveContainer } from "recharts";
+import { Bar, ComposedChart, ResponsiveContainer, Tooltip } from "recharts";
 import { cn } from "@/lib/utils";
 import { Menu, Token } from "@/components/index";
 import { useState } from "react";
@@ -10,156 +10,205 @@ import { startCase } from "lodash";
 import { useModalStore } from "@/app/TokenModal";
 import { DataTable } from "@/app/_DataTable/DataTable";
 import { columns, Transaction } from "@/app/_DataTable/columns";
-import { startOfDay } from "date-fns";
+import { format, startOfDay, subDays } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { AnimatePresence, motion } from "framer-motion";
+import { ContentType } from "recharts/types/component/Tooltip";
+import {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
+import { usdFormat } from "@/lib/usdFormat";
 
 const data = [
   {
     name: "Page A",
+    date: new Date(),
     uv: 4000,
     pv: 2400,
     amt: 2400,
   },
   {
     name: "Page B",
+    date: subDays(new Date(), 1),
     uv: 3000,
     pv: 1398,
     amt: 2210,
   },
   {
     name: "Page C",
+    date: subDays(new Date(), 2),
     uv: 2000,
     pv: 9800,
     amt: 2290,
   },
   {
     name: "Page D",
+    date: subDays(new Date(), 3),
     uv: 2780,
     pv: 3908,
     amt: 2000,
   },
   {
     name: "Page E",
+    date: subDays(new Date(), 4),
     uv: 1890,
     pv: 4800,
     amt: 2181,
   },
   {
     name: "Page F",
+    date: subDays(new Date(), 5),
     uv: 2390,
     pv: 3800,
     amt: 2500,
   },
   {
     name: "Page G",
+    date: subDays(new Date(), 6),
     uv: 3490,
     pv: 4300,
     amt: 2100,
   },
   {
     name: "Page H",
+    date: subDays(new Date(), 7),
     uv: 3490,
     pv: 4300,
     amt: 2400,
   },
   {
     name: "Page A",
+    date: subDays(new Date(), 8),
     uv: 4000,
     pv: 2400,
     amt: 2400,
   },
   {
     name: "Page B",
+    date: subDays(new Date(), 9),
     uv: 3000,
     pv: 1398,
     amt: 2210,
   },
   {
     name: "Page C",
+    date: subDays(new Date(), 10),
     uv: 2000,
     pv: 9800,
     amt: 2290,
   },
   {
     name: "Page D",
+    date: subDays(new Date(), 11),
     uv: 2780,
     pv: 3908,
     amt: 2000,
   },
   {
     name: "Page E",
+    date: subDays(new Date(), 12),
     uv: 1890,
     pv: 4800,
     amt: 2181,
   },
   {
     name: "Page F",
+    date: subDays(new Date(), 13),
     uv: 2390,
     pv: 3800,
     amt: 2500,
   },
   {
     name: "Page G",
+    date: subDays(new Date(), 14),
     uv: 3490,
     pv: 4300,
     amt: 2100,
   },
   {
     name: "Page H",
+    date: subDays(new Date(), 15),
     uv: 3490,
     pv: 4300,
     amt: 2400,
   },
   {
     name: "Page A",
+    date: subDays(new Date(), 16),
     uv: 4000,
     pv: 2400,
     amt: 2400,
   },
   {
     name: "Page B",
+    date: subDays(new Date(), 17),
     uv: 3000,
     pv: 1398,
     amt: 2210,
   },
   {
     name: "Page C",
+    date: subDays(new Date(), 18),
     uv: 2000,
     pv: 9800,
     amt: 2290,
   },
   {
     name: "Page D",
+    date: subDays(new Date(), 19),
     uv: 2780,
     pv: 3908,
     amt: 2000,
   },
   {
     name: "Page E",
+    date: subDays(new Date(), 20),
     uv: 1890,
     pv: 4800,
     amt: 2181,
   },
   {
     name: "Page F",
+    date: subDays(new Date(), 21),
     uv: 2390,
     pv: 3800,
     amt: 2500,
   },
   {
     name: "Page G",
+    date: subDays(new Date(), 22),
     uv: 3490,
     pv: 4300,
     amt: 2100,
   },
   {
     name: "Page H",
+    date: subDays(new Date(), 23),
     uv: 3490,
     pv: 4300,
     amt: 2400,
   },
 ];
+
+const CustomTooltip: ContentType<ValueType, NameType> = ({
+  active,
+  payload,
+  label,
+}) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="flex flex-col items-center rounded-lg bg-black p-2 text-white">
+        <p className="text-sm">{usdFormat(payload[0].value as number)}</p>
+        <p className="text-xs text-gray-2">
+          {format(payload[0].payload.date, "P")}
+        </p>
+      </div>
+    );
+  }
+
+  return null;
+};
 
 const Graph = () => {
   const [activeGraphType, setActiveGraphType] = useState<
@@ -247,9 +296,17 @@ const Graph = () => {
 
         <div className="flex flex-col gap-2">
           <ResponsiveContainer height={150} width="100%">
-            <BarChart data={data}>
+            <ComposedChart data={data}>
               <Bar dataKey="uv" fill="#1E1E1E" />
-            </BarChart>
+
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{
+                  stroke: "black",
+                  strokeDasharray: "3 3",
+                }}
+              />
+            </ComposedChart>
           </ResponsiveContainer>
 
           <div className="text-xs">5th October 2023</div>
