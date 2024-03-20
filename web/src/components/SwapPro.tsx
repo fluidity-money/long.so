@@ -13,6 +13,7 @@ import { format, startOfDay, subDays } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { AnimatePresence, motion } from "framer-motion";
 import ReactECharts from "echarts-for-react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const data = [
   {
@@ -348,9 +349,13 @@ export const SwapPro = ({
 
   const { enabled } = useModalStore();
 
+  const { isLtSm } = useMediaQuery();
+
+  console.log({ isLtSm });
+
   return (
     <AnimatePresence>
-      {(swapPro || override) && (
+      {(swapPro || override || isLtSm) && (
         <motion.div
           initial={{ opacity: 0, x: -100 }}
           animate={{ opacity: 1, x: 0 }}
