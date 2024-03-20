@@ -90,7 +90,7 @@ export const Welcome = () => {
           </div>
 
           <div className="flex flex-col gap-4">
-            <Button onClick={() => setWelcome(false)}>
+            <Button onClick={() => setWelcome(false)} className="shine">
               <span className="iridescent-text">Get Started</span>
             </Button>
             <Button variant="link">Learn more {"->"}</Button>
