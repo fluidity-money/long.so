@@ -86,6 +86,17 @@ export const YieldOverTimeGraph = () => {
               top: "0", // or a small value
               bottom: "0", // or a small value
             },
+            tooltip: {
+              trigger: "axis", // Trigger tooltip on axis movement
+              axisPointer: {
+                type: "cross", // Display crosshair style pointers
+              },
+              borderWidth: 0,
+              backgroundColor: "#1E1E1E",
+              textStyle: {
+                color: "#EBEBEB",
+              },
+            },
             xAxis: {
               type: "category",
               data: [
@@ -137,9 +148,8 @@ export const YieldOverTimeGraph = () => {
                   134, 90, 120, 132, 101, 134, 90, 109,
                 ],
                 itemStyle: {
-                  // Custom styling for Series 2
-                  color: "black",
-                  barBorderRadius: [0, 0, 5, 5],
+                  color: "#1E1E1E",
+                  borderRadius: [0, 0, 5, 5],
                 },
                 barWidth: "90%", // Adjust bar width (can be in pixels e.g., '20px')
                 barGap: "5%", // Adjust the gap between bars in different series
@@ -155,21 +165,14 @@ export const YieldOverTimeGraph = () => {
 
                 itemStyle: {
                   color: colorGradient,
-
-                  barBorderRadius: [5, 5, 0, 0], // Specify radius for all corners
+                  borderRadius: [5, 5, 0, 0], // Specify radius for all corners
                   // Border configuration
-                  borderColor: "#000", // Border color
+                  borderColor: "#1E1E1E", // Border color
                   borderWidth: 2, // Border width
                   borderType: "solid", // Border type
                 },
               },
             ],
-            tooltip: {
-              trigger: "axis", // Trigger tooltip on axis movement
-              axisPointer: {
-                type: "cross", // Display crosshair style pointers
-              },
-            },
           }}
         />
 
