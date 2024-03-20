@@ -1,6 +1,10 @@
 import { useMediaQuery as useRrMediaQuery } from "react-responsive";
 
 export const useMediaQuery = () => {
+  const isLtSm = useRrMediaQuery({
+    query: "(max-width: 640px)",
+  });
+
   const isSm = useRrMediaQuery({
     query: "(min-width: 640px)",
   });
@@ -11,6 +15,7 @@ export const useMediaQuery = () => {
 
   return {
     isSm,
+    isLtSm,
     isMd,
   };
 };
