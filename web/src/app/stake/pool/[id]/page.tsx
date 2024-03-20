@@ -6,11 +6,10 @@ import { SwapPro } from "@/components/SwapPro";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Token } from "@/components";
 import { Badge } from "@/components/ui/badge";
-import { Bar, ComposedChart, ResponsiveContainer, Tooltip } from "recharts";
 import { Line } from "rc-progress";
 import { motion } from "framer-motion";
-import { subDays } from "date-fns";
-import { CustomTooltip } from "@/components/CustomTooltip";
+import { format, subDays } from "date-fns";
+import ReactECharts from "echarts-for-react";
 
 const data = [
   {
@@ -188,8 +187,6 @@ export default function PoolPage() {
 
   useHotkeys("esc", () => router.back());
 
-  // @ts-ignore
-  // @ts-ignore
   return (
     <div className="flex w-full flex-col">
       <div className="flex max-w-full flex-col-reverse justify-center gap-8 lg:flex-row">
@@ -285,19 +282,65 @@ export default function PoolPage() {
                   </div>
                 </div>
 
-                <ResponsiveContainer height={150} width="100%">
-                  <ComposedChart data={data}>
-                    <Bar dataKey="uv" fill="#EBEBEB" />
-
-                    <Tooltip
-                      content={<CustomTooltip />}
-                      cursor={{
-                        stroke: "black",
-                        strokeDasharray: "3 3",
-                      }}
-                    />
-                  </ComposedChart>
-                </ResponsiveContainer>
+                <ReactECharts
+                  opts={{
+                    height: 150,
+                  }}
+                  style={{
+                    height: 150,
+                  }}
+                  option={{
+                    grid: {
+                      left: "0", // or a small value like '10px'
+                      right: "0", // or a small value
+                      top: "0", // or a small value
+                      bottom: "0", // or a small value
+                    },
+                    tooltip: {
+                      trigger: "axis", // Trigger tooltip on axis movement
+                      axisPointer: {
+                        type: "cross", // Display crosshair style pointers
+                      },
+                      borderWidth: 0,
+                      backgroundColor: "#EBEBEB",
+                      textStyle: {
+                        color: "#1E1E1E",
+                      },
+                      formatter:
+                        "<div class='flex flex-col items-center'>${c} <div class='text-gray-2 text-center w-full'>{b}</div></div>",
+                    },
+                    xAxis: {
+                      type: "category",
+                      data: data.map((d) => format(d.date, "P")),
+                      show: false,
+                      axisPointer: {
+                        label: {
+                          show: false,
+                        },
+                      },
+                    },
+                    yAxis: {
+                      type: "value",
+                      show: false,
+                      axisPointer: {
+                        label: {
+                          show: false,
+                        },
+                      },
+                    },
+                    series: [
+                      {
+                        type: "bar",
+                        data: data.map((d) => d.uv),
+                        itemStyle: {
+                          color: "#EBEBEB",
+                        },
+                        barWidth: "60%", // Adjust bar width (can be in pixels e.g., '20px')
+                        barGap: "5%", // Adjust the gap between bars in different series
+                      },
+                    ],
+                  }}
+                />
 
                 <div className="flex flex-col gap-2">
                   <div className="flex flex-row justify-between">
