@@ -43,7 +43,7 @@ const Item: React.FC<ItemProps> = ({
         classes,
         "group rounded-md",
         proToggle &&
-          `h-[43px] transition-[width] ${swapPro ? "md:w-[125px] md:hover:w-[147px]" : "md:w-[97px] md:hover:w-[122px]"}`,
+          `h-[43px] px-2 transition-[width] ${swapPro ? "md:w-[125px] md:hover:w-[147px]" : "md:w-[97px] md:hover:w-[122px]"}`,
         !selected && "cursor-pointer",
         className,
       )}
