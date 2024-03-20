@@ -4,6 +4,16 @@ use stylus_sdk::storage::StorageCache;
 
 use crate::{test_shims, types::*, maths::sqrt_price_math::Q96};
 
+// hack to get the name of the current test running
+#[macro_export]
+macro_rules! current_test {
+    () => {
+        // the rust test framework usually names the thread the same as the running test, as long as
+        // tests are configured to run multithreaded
+        std::thread::current().name().unwrap()
+    }
+}
+
 // encodes a a/b price as a sqrt.q96 price
 pub fn encode_sqrt_price(num: u64, denom: u64) -> U256 {
     let num = U256::from(num);

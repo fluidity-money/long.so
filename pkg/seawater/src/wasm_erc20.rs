@@ -344,7 +344,7 @@ mod test {
         expected.extend::<[u8;32]>(U256::from_hex_str("0x0000000000000000000000000000000000000000000000000000000000000020").to_be_bytes());
         expected.extend::<[u8;32]>(U256::from_hex_str("0x000000000000000000000000000000000000000000000000000000000000001a").to_be_bytes());
         expected.extend::<[u8;32]>(U256::from_hex_str("0x4e6f7420656e6f7567682045746865722070726f76696465642e000000000000").to_be_bytes());
-                                                                                                
+
         assert_eq!(revert, expected);
 
         let revert = super::revert_from_msg("123456789123456789123456789123456789");
@@ -354,7 +354,7 @@ mod test {
         expected.extend::<[u8;32]>(U256::from_hex_str("0x0000000000000000000000000000000000000000000000000000000000000024").to_be_bytes());
         expected.extend::<[u8;32]>(U256::from_hex_str("0x3132333435363738393132333435363738393132333435363738393132333435").to_be_bytes());
         expected.extend::<[u8;32]>(U256::from_hex_str("0x3637383900000000000000000000000000000000000000000000000000000000").to_be_bytes());
-                                                                                                
+
         assert_eq!(revert, expected);
 
         let revert = super::revert_from_msg("123456789123456789123456789123456789123456789123456789123456789123456789");
@@ -365,7 +365,7 @@ mod test {
         expected.extend::<[u8;32]>(U256::from_hex_str("0x3132333435363738393132333435363738393132333435363738393132333435").to_be_bytes());
         expected.extend::<[u8;32]>(U256::from_hex_str("0x3637383931323334353637383931323334353637383931323334353637383931").to_be_bytes());
         expected.extend::<[u8;32]>(U256::from_hex_str("0x3233343536373839000000000000000000000000000000000000000000000000").to_be_bytes());
-                                                                                                
+
         assert_eq!(revert, expected);
 
     }
