@@ -4,6 +4,178 @@ import { Menu } from "@/components";
 import { useState } from "react";
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts/core";
+import { format, subDays } from "date-fns";
+
+const data = [
+  {
+    name: "Page A",
+    date: new Date(),
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: "Page B",
+    date: subDays(new Date(), 1),
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: "Page C",
+    date: subDays(new Date(), 2),
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page D",
+    date: subDays(new Date(), 3),
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: "Page E",
+    date: subDays(new Date(), 4),
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: "Page F",
+    date: subDays(new Date(), 5),
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    date: subDays(new Date(), 6),
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+  {
+    name: "Page H",
+    date: subDays(new Date(), 7),
+    uv: 3490,
+    pv: 4300,
+    amt: 2400,
+  },
+  {
+    name: "Page A",
+    date: subDays(new Date(), 8),
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: "Page B",
+    date: subDays(new Date(), 9),
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: "Page C",
+    date: subDays(new Date(), 10),
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page D",
+    date: subDays(new Date(), 11),
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: "Page E",
+    date: subDays(new Date(), 12),
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: "Page F",
+    date: subDays(new Date(), 13),
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    date: subDays(new Date(), 14),
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+  {
+    name: "Page H",
+    date: subDays(new Date(), 15),
+    uv: 3490,
+    pv: 4300,
+    amt: 2400,
+  },
+  {
+    name: "Page A",
+    date: subDays(new Date(), 16),
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: "Page B",
+    date: subDays(new Date(), 17),
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: "Page C",
+    date: subDays(new Date(), 18),
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page D",
+    date: subDays(new Date(), 19),
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: "Page E",
+    date: subDays(new Date(), 20),
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: "Page F",
+    date: subDays(new Date(), 21),
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    date: subDays(new Date(), 22),
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+  {
+    name: "Page H",
+    date: subDays(new Date(), 23),
+    uv: 3490,
+    pv: 4300,
+    amt: 2400,
+  },
+];
 
 const colorGradient = new echarts.graphic.LinearGradient(
   0,
@@ -101,29 +273,7 @@ export const YieldOverTimeGraph = () => {
             },
             xAxis: {
               type: "category",
-              data: [
-                "Mon",
-                "Tue",
-                "Wed",
-                "Thu",
-                "Fri",
-                "Sat",
-                "Sun",
-                "Mon",
-                "Tue",
-                "Wed",
-                "Thu",
-                "Fri",
-                "Sat",
-                "Sun",
-                "Mon",
-                "Tue",
-                "Wed",
-                "Thu",
-                "Fri",
-                "Sat",
-                "Sun",
-              ],
+              data: data.map((d) => format(d.date, "P")),
               show: false,
               axisPointer: {
                 label: {
@@ -145,10 +295,7 @@ export const YieldOverTimeGraph = () => {
                 name: "Series 2",
                 type: "bar",
                 stack: "total", // Same 'stack' value as Series 1 to stack them together
-                data: [
-                  120, 132, 101, 134, 90, 120, 132, 101, 134, 90, 120, 132, 101,
-                  134, 90, 120, 132, 101, 134, 90, 109,
-                ],
+                data: data.map((d) => d.uv),
                 itemStyle: {
                   color: "#1E1E1E",
                   borderRadius: [0, 0, 5, 5],
@@ -159,10 +306,7 @@ export const YieldOverTimeGraph = () => {
               {
                 name: "series 1",
                 stack: "total",
-                data: [
-                  120, 200, 150, 80, 70, 110, 130, 120, 200, 150, 80, 70, 110,
-                  130, 120, 200, 150, 80, 70, 110, 130,
-                ],
+                data: data.map((d) => d.pv),
                 type: "bar",
 
                 itemStyle: {
