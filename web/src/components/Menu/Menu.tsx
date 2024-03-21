@@ -112,6 +112,7 @@ interface MenuProps {
   background?: "light" | "dark";
   style?: "primary" | "secondary";
   id: string;
+  className?: string;
 }
 
 const Menu: React.FC<MenuProps> = ({
@@ -119,6 +120,7 @@ const Menu: React.FC<MenuProps> = ({
   background = "light",
   style = "secondary",
   id,
+  className,
 }) => {
   const frameColor =
     (background === "light" && style === "primary") ||
@@ -127,7 +129,7 @@ const Menu: React.FC<MenuProps> = ({
       : "light";
 
   return (
-    <div className="flex flex-row gap-3 rounded">
+    <div className={cn("flex flex-row gap-3 rounded", className)}>
       <LayoutGroup id={id}>
         {children.map((item, i) => {
           return (
