@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useHotkeys } from "react-hotkeys-hook";
+import { AnimatePresence } from "framer-motion";
 
 const data = [
   {
@@ -372,24 +373,71 @@ export default function CreatePoolPage() {
         </Menu>
       </div>
 
-      <div className="shine mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between rounded-lg px-[22px] py-[15px] md:h-[69px] md:w-[392px]">
-        <div className="flex flex-col items-center gap-[3px]">
-          <div className="iridescent-text text-xs font-medium md:text-sm">
-            0 ~ 0.3%
-          </div>
-          <Badge
-            variant="iridescent"
-            className="h-[10px] px-[7px] text-4xs font-normal md:h-[12px] md:text-3xs"
-          >
-            Fee Percentage
-          </Badge>
-        </div>
+      <AnimatePresence>
+        {feeTier === "auto" && (
+          <div className="shine mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between rounded-lg px-[22px] py-[15px] md:h-[69px] md:w-[392px]">
+            <div className="flex flex-col items-center gap-[3px]">
+              <div className="iridescent-text text-xs font-medium md:text-sm">
+                0 ~ 0.3%
+              </div>
+              <Badge
+                variant="iridescent"
+                className="h-[10px] px-[7px] text-4xs font-normal md:h-[12px] md:text-3xs"
+              >
+                Fee Percentage
+              </Badge>
+            </div>
 
-        <div className="iridescent-text w-[200px] text-3xs md:w-[247px] md:text-2xs">
-          The protocol automatically adjust your fees in order to maximise
-          rewards and reduce impermanent loss
-        </div>
-      </div>
+            <div className="iridescent-text w-[200px] text-3xs md:w-[247px] md:text-2xs">
+              The protocol automatically adjust your fees in order to maximise
+              rewards and reduce impermanent loss
+            </div>
+          </div>
+        )}
+        {feeTier === "manual" && (
+          <div className="mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between gap-[5px] rounded-lg md:h-[69px] md:w-[392px]">
+            <div className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] md:h-[80px] md:w-[93px] md:gap-1">
+              <div className="text-2xs font-medium md:text-xs">0.01%</div>
+              <div className="text-center text-3xs text-gray-2 ">
+                Best for Very <br /> Stable Pairs
+              </div>
+              <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                (0% popularity)
+              </div>
+            </div>
+
+            <div className="flex h-[66px] w-[75px] flex-col items-center rounded-md bg-black px-[7px] pb-[7px] pt-[9px] text-white md:h-[80px] md:w-[93px] md:gap-1">
+              <div className="text-2xs font-medium md:text-xs">0.05%</div>
+              <div className="text-center text-3xs text-gray-2 ">
+                Best for <br /> Stable Pairs
+              </div>
+              <div className="iridescent rounded bg-[#D8D8D8] px-1 text-4xs text-black md:text-3xs">
+                (0% popularity)
+              </div>
+            </div>
+
+            <div className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] md:h-[80px] md:w-[93px] md:gap-1">
+              <div className="text-2xs font-medium md:text-xs">0.01%</div>
+              <div className="text-center text-3xs text-gray-2 ">
+                Best for <br /> Stable Pairs
+              </div>
+              <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                (99% popularity)
+              </div>
+            </div>
+
+            <div className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] md:h-[80px] md:w-[93px] md:gap-1">
+              <div className="text-2xs font-medium md:text-xs">0.01%</div>
+              <div className="text-center text-3xs text-gray-2 ">
+                Best for <br /> Stable Pairs
+              </div>
+              <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                (99% popularity)
+              </div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <div className="mt-[20px] h-[212px] w-[318px] rounded-lg bg-black px-[20px] py-[11px] text-white md:h-[248px] md:w-[392px]">
         <div className="flex w-full flex-row items-center justify-between">

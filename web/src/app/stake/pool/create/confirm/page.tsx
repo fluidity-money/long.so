@@ -1,7 +1,11 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import Ethereum from "@/assets/icons/ethereum.svg";
+import { useRouter } from "next/navigation";
 
 export default function ConfirmCreatePool() {
+  const router = useRouter();
   return (
     <div className="z-10 flex flex-col items-center">
       <div className="w-[315px] rounded-lg bg-black text-white md:h-[673px] md:w-[393px]">
@@ -11,6 +15,7 @@ export default function ConfirmCreatePool() {
             size="sm"
             variant={"secondary"}
             className="h-[20px] w-[32px] text-3xs md:h-[26px] md:w-[36px] md:text-2xs"
+            onClick={() => router.back()}
           >
             Esc
           </Button>
