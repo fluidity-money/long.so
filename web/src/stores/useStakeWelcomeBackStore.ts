@@ -22,6 +22,9 @@ interface WelcomeStore {
    * @param yieldBreakdown
    */
   setYieldBreakdown: (yieldBreakdown: boolean) => void;
+
+  yieldBreakdownClaimed: boolean;
+  setYieldBreakdownClaimed: (yieldBreakdownClaimed: boolean) => void;
 }
 
 export const useStakeWelcomeBackStore = create<WelcomeStore>((set) => ({
@@ -30,4 +33,8 @@ export const useStakeWelcomeBackStore = create<WelcomeStore>((set) => ({
 
   yieldBreakdown: false,
   setYieldBreakdown: (yieldBreakdown) => set({ yieldBreakdown }),
+
+  yieldBreakdownClaimed: false,
+  setYieldBreakdownClaimed: (yieldBreakdownClaimed) =>
+    set({ yieldBreakdownClaimed }),
 }));

@@ -18,6 +18,8 @@ import { Drawer, DrawerClose, DrawerContent } from "@/components/ui/drawer";
 import { nanoid } from "nanoid";
 import { usdFormat } from "@/lib/usdFormat";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import Image from "next/image";
+import Success from "@/assets/icons/success.gif";
 
 const yieldData = [
   {
@@ -72,8 +74,14 @@ const yieldData = [
 ];
 
 const Stake = () => {
-  const { welcome, setWelcome, yieldBreakdown, setYieldBreakdown } =
-    useStakeWelcomeBackStore();
+  const {
+    welcome,
+    setWelcome,
+    yieldBreakdown,
+    setYieldBreakdown,
+    yieldBreakdownClaimed,
+    setYieldBreakdownClaimed,
+  } = useStakeWelcomeBackStore();
 
   useHotkeys(
     "esc",
@@ -290,9 +298,75 @@ const Stake = () => {
                     <Button
                       variant="secondary"
                       className={"mt-[25px] h-[37px] w-full text-xs"}
+                      onClick={() => {
+                        setYieldBreakdown(false);
+                        setYieldBreakdownClaimed(true);
+                      }}
                     >
                       Confirm Claim
                     </Button>
+                  </motion.div>
+                </div>
+              </div>
+            </AlertDialog.Content>
+          </AlertDialog.Portal>
+        </AlertDialog.Root>
+      </>
+    );
+  }
+
+  if (yieldBreakdownClaimed && !isLtSm) {
+    return (
+      <>
+        <AlertDialog.Root open={yieldBreakdownClaimed && !isLtSm}>
+          <AlertDialog.Portal>
+            <AlertDialog.Overlay className="fixed inset-0 z-30 bg-black/80 md:bg-black/50" />
+            <AlertDialog.Content className="z-50 ">
+              <div className="flex flex-col items-center gap-2 px-4">
+                <div className="flex flex-col items-center">
+                  <motion.div
+                    layoutId="modal"
+                    className="flex w-[400px] flex-col items-center justify-between rounded-lg bg-black p-[10px] text-white drop-shadow-white"
+                  >
+                    <div className="flex w-full flex-row justify-between p-[4px]">
+                      <div className="text-3xs md:text-2xs">
+                        Yield Breakdown
+                      </div>
+                      <Button
+                        variant="secondary"
+                        onClick={() => setYieldBreakdownClaimed(false)}
+                        className="h-[26px] px-2 py-0 text-2xs"
+                        size={"sm"}
+                      >
+                        Esc
+                      </Button>
+                    </div>
+                    
+                    <Image
+                      src={Success}
+                      alt="success"
+                      className="size-[52px]"
+                    />
+                    <div className="mt-[11px] text-xl">All Yield Claimed!</div>
+                    <div className="mt-[17px] text-3xs">
+                      You’ve successfully claimed all available yields from your
+                      pools!
+                    </div>
+
+                    <div className="mt-[26px] flex w-full flex-row gap-2">
+                      <Button variant="outline" className="flex-1 text-2xs">
+                        Add to Your Wallet
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1 text-2xs"
+                        onClick={() => {
+                          setYieldBreakdownClaimed(false);
+                        }}
+                      >
+                        Done
+                      </Button>
+                    </div>
                   </motion.div>
                 </div>
               </div>
@@ -349,11 +423,56 @@ const Stake = () => {
             </div>
           </div>
           <div className="flex w-full flex-col px-[13px] pb-[13px]">
-            <DrawerClose>
+            <DrawerClose
+              onClick={() => {
+                setYieldBreakdownClaimed(true);
+              }}
+            >
               <Button className="w-full text-2xs" variant="secondary">
                 Claim Yield
               </Button>
             </DrawerClose>
+          </div>
+        </DrawerContent>
+      </Drawer>
+      <Drawer
+        open={yieldBreakdownClaimed && isLtSm}
+        onOpenChange={setYieldBreakdownClaimed}
+      >
+        <DrawerContent>
+          <div className="flex flex-row items-center justify-between p-[14px]">
+            <div className="text-2xs">All Yield Claimed</div>
+            <DrawerClose>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="h-[21px] w-[32px] text-3xs"
+              >
+                Esc
+              </Button>
+            </DrawerClose>
+          </div>
+          <div className="flex flex-col items-center">
+            <Image src={Success} alt="success" className="size-[52px]" />
+            <div className="mt-[11px] text-xl">All Yield Claimed!</div>
+            <div className="mt-[17px] text-3xs">
+              You’ve successfully claimed all available yields from your pools!
+            </div>
+
+            <div className="mt-[26px] flex w-full flex-row gap-2 p-[13px]">
+              <Button variant="outline" className="flex-1 text-2xs">
+                Add to Your Wallet
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 text-2xs"
+                onClick={() => {
+                  setYieldBreakdownClaimed(false);
+                }}
+              >
+                Done
+              </Button>
+            </div>
           </div>
         </DrawerContent>
       </Drawer>
