@@ -8,9 +8,245 @@ import Padlock from "@/assets/icons/padlock.svg";
 import Token from "@/assets/icons/token.svg";
 import { Menu } from "@/components";
 import { useState } from "react";
+import ReactECharts from "echarts-for-react";
+import { format, subDays } from "date-fns";
+import * as echarts from "echarts/core";
+import SelectedRange from "@/assets/icons/legend/selected-range.svg";
+import CurrentPrice from "@/assets/icons/legend/current-price.svg";
+import LiquidityDistribution from "@/assets/icons/legend/liquidity-distribution.svg";
+
+const data = [
+  {
+    name: "Page A",
+    date: new Date(),
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: "Page B",
+    date: subDays(new Date(), 1),
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: "Page D",
+    date: subDays(new Date(), 3),
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: "Page E",
+    date: subDays(new Date(), 4),
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: "Page F",
+    date: subDays(new Date(), 5),
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    date: subDays(new Date(), 6),
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+  {
+    name: "Page C",
+    date: subDays(new Date(), 2),
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page F",
+    date: subDays(new Date(), 5),
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    date: subDays(new Date(), 6),
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+  {
+    name: "Page C",
+    date: subDays(new Date(), 2),
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page H",
+    date: subDays(new Date(), 7),
+    uv: 3490,
+    pv: 4300,
+    amt: 2400,
+  },
+  {
+    name: "Page A",
+    date: subDays(new Date(), 8),
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: "Page B",
+    date: subDays(new Date(), 9),
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: "Page C",
+    date: subDays(new Date(), 10),
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page D",
+    date: subDays(new Date(), 11),
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: "Page E",
+    date: subDays(new Date(), 12),
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: "Page F",
+    date: subDays(new Date(), 13),
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    date: subDays(new Date(), 14),
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+  {
+    name: "Page H",
+    date: subDays(new Date(), 15),
+    uv: 3490,
+    pv: 4300,
+    amt: 2400,
+  },
+  {
+    name: "Page F",
+    date: subDays(new Date(), 13),
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    date: subDays(new Date(), 14),
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+  {
+    name: "Page H",
+    date: subDays(new Date(), 15),
+    uv: 3490,
+    pv: 4300,
+    amt: 2400,
+  },
+  {
+    name: "Page A",
+    date: subDays(new Date(), 16),
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: "Page B",
+    date: subDays(new Date(), 17),
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: "Page C",
+    date: subDays(new Date(), 18),
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: "Page D",
+    date: subDays(new Date(), 19),
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: "Page E",
+    date: subDays(new Date(), 20),
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: "Page F",
+    date: subDays(new Date(), 21),
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: "Page G",
+    date: subDays(new Date(), 22),
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+  {
+    name: "Page H",
+    date: subDays(new Date(), 23),
+    uv: 3490,
+    pv: 4300,
+    amt: 2400,
+  },
+];
+
+const colorGradient = new echarts.graphic.LinearGradient(
+  0,
+  0,
+  0,
+  1, // Gradient direction from top(0,0) to bottom(0,1)
+  [
+    { offset: 0, color: "rgba(243, 184, 216, 1)" },
+    { offset: 0.25, color: "rgba(183, 147, 233,1)" },
+    { offset: 0.5, color: "rgba(159, 212, 243, 1)" },
+    { offset: 0.75, color: "rgba(255, 210, 196,1)" },
+    { offset: 1, color: "rgba(251, 243, 243, 1)" },
+  ],
+);
 
 export default function CreatePoolPage() {
   const [feeTier, setFeeTier] = useState<"auto" | "manual">("auto");
+  const [liquidityRange, setLiquidityRange] = useState<
+    "full-range" | "auto" | "custom"
+  >("full-range");
 
   return (
     <div className="flex flex-col items-center">
@@ -96,7 +332,7 @@ export default function CreatePoolPage() {
           id={"fee-tier"}
           background="dark"
           className={
-            "flex h-[26px] w-[82px] flex-row items-center justify-center gap-0 rounded-md bg-black"
+            "flex h-[26px] w-[82px] flex-row items-center justify-center gap-0 rounded-lg bg-black"
           }
         >
           <Menu.Item
@@ -104,14 +340,14 @@ export default function CreatePoolPage() {
             onClick={() => setFeeTier("auto")}
             className={"h-[18px] w-[33px] text-white"}
           >
-            <div className={"text-2xs"}>Auto</div>
+            <div className={"text-3xs md:text-2xs"}>Auto</div>
           </Menu.Item>
           <Menu.Item
             selected={feeTier === "manual"}
             onClick={() => setFeeTier("manual")}
             className={"h-[18px] w-[40px] text-white"}
           >
-            <div className={"text-2xs"}>Manual</div>
+            <div className={"text-3xs md:text-2xs"}>Manual</div>
           </Menu.Item>
         </Menu>
       </div>
@@ -135,7 +371,142 @@ export default function CreatePoolPage() {
         </div>
       </div>
 
-      <div className="mt-[20px] h-[212px] w-[318px] rounded-lg bg-black md:h-[248px] md:w-[392px]"></div>
+      <div className="mt-[20px] h-[212px] w-[318px] rounded-lg bg-black px-[20px] py-[11px] text-white md:h-[248px] md:w-[392px]">
+        <div className="flex w-full flex-row items-center justify-between">
+          <div className="text-3xs md:text-2xs">Liquidity Range</div>
+
+          <Menu
+            id={"liquidity-range"}
+            background="dark"
+            className={"flex  flex-row items-center justify-center gap-0 "}
+          >
+            <Menu.Item
+              selected={liquidityRange === "full-range"}
+              onClick={() => setLiquidityRange("full-range")}
+              className={"h-[17px] px-1 text-white"}
+            >
+              <div className={"text-3xs md:text-2xs"}>Full Range</div>
+            </Menu.Item>
+            <Menu.Item
+              selected={liquidityRange === "auto"}
+              onClick={() => setLiquidityRange("auto")}
+              className={"h-[17px] px-1 text-white"}
+            >
+              <div className={"text-3xs md:text-2xs"}>Auto</div>
+            </Menu.Item>
+            <Menu.Item
+              selected={liquidityRange === "custom"}
+              onClick={() => setLiquidityRange("custom")}
+              className={"h-[17px] px-1 text-white"}
+            >
+              <div className={"text-3xs md:text-2xs"}>Custom</div>
+            </Menu.Item>
+          </Menu>
+        </div>
+
+        <div className="mt-[22px] flex flex-row items-center justify-between px-[5px] md:mt-[24px] md:w-[270px]">
+          <div className="flex flex-col">
+            <div className="text-3xs text-gray-2 md:text-2xs">Low Price</div>
+            <div className={"border-b border-white text-2xs md:text-base"}>
+              780.28123
+            </div>
+            <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
+              <Ethereum className="invert" /> USDC per ETH
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            <div className="text-3xs text-gray-2 md:text-2xs">High Price</div>
+            <div className={"border-b border-white text-2xs md:text-base"}>
+              ∞
+            </div>
+            <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
+              <Ethereum className="invert" /> USDC per ETH
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-[22px]">
+          <div className="text-3xs text-gray-2 md:text-2xs">Visualiser</div>
+          <ReactECharts
+            className="mt-1"
+            opts={{
+              height: 44,
+            }}
+            style={{
+              height: 44,
+            }}
+            option={{
+              grid: {
+                left: "0", // or a small value like '10px'
+                right: "0", // or a small value
+                top: "0", // or a small value
+                bottom: "0", // or a small value
+              },
+              tooltip: {
+                trigger: "axis", // Trigger tooltip on axis movement
+                axisPointer: {
+                  type: "cross", // Display crosshair style pointers
+                },
+                borderWidth: 0,
+                backgroundColor: "#EBEBEB",
+                textStyle: {
+                  color: "#1E1E1E",
+                },
+                formatter:
+                  "<div class='flex flex-col items-center'>${c} <div class='text-gray-2 text-center w-full'>{b}</div></div>",
+              },
+              xAxis: {
+                type: "category",
+                data: data.map((d) => format(d.date, "P")),
+                show: false,
+                axisPointer: {
+                  label: {
+                    show: false,
+                  },
+                },
+              },
+              yAxis: {
+                type: "value",
+                show: false,
+                axisPointer: {
+                  label: {
+                    show: false,
+                  },
+                },
+              },
+              series: [
+                {
+                  data: data.map((d) => d.pv),
+                  type: "bar",
+                  barWidth: "90%", // Adjust bar width (can be in pixels e.g., '20px')
+                  barGap: "5%",
+                  itemStyle: {
+                    color: colorGradient,
+                    borderRadius: [5, 5, 0, 0], // Specify radius for all corners
+                    // Border configuration
+                    borderColor: "#1E1E1E", // Border color
+                    borderWidth: 2, // Border width
+                    borderType: "solid", // Border type
+                  },
+                },
+              ],
+            }}
+          />
+
+          <div className="mt-[16px] flex flex-row justify-around text-4xs md:text-2xs">
+            <div className="flex flex-row items-center gap-1">
+              <SelectedRange /> Selected Range
+            </div>
+            <div className="flex flex-row items-center gap-1">
+              <CurrentPrice /> Current Price
+            </div>
+            <div className="flex flex-row items-center gap-1">
+              <LiquidityDistribution /> Liquidity Distribution
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="mt-[21px] flex w-[318px] flex-row justify-end md:w-[392px]">
         <div className="text-2xs underline">Hide breakdown</div>
