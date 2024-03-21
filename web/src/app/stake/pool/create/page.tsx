@@ -16,6 +16,7 @@ import CurrentPrice from "@/assets/icons/legend/current-price.svg";
 import LiquidityDistribution from "@/assets/icons/legend/liquidity-distribution.svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const data = [
   {
@@ -251,6 +252,8 @@ export default function CreatePoolPage() {
   >("full-range");
   const [breakdownHidden, setBreakdownHidden] = useState(false);
 
+  const router = useRouter();
+
   return (
     <div className="flex flex-col items-center">
       <div className="max-w-[400px]">
@@ -259,7 +262,7 @@ export default function CreatePoolPage() {
 
       <div className="mt-[12px] flex flex-col gap-[5px] md:mt-[23px] md:gap-[7px]">
         <div className="relative flex h-[102px] w-[318px] flex-col justify-between rounded-lg bg-black p-[17px] text-white md:h-[150px] md:w-[392px] md:p-[25px]">
-          <div className="absolute -top-[15px] left-0 hidden  md:flex">
+          <div className="absolute -top-[15px] left-0 hidden md:flex">
             <Ethereum className="size-[30px] rounded-full border-[3px] border-white" />
             <Badge
               variant="outline"
@@ -269,6 +272,17 @@ export default function CreatePoolPage() {
               ƒUSDC - ETH
             </Badge>
           </div>
+
+          <div className="absolute -right-16 top-0 hidden md:inline-flex">
+            <Button
+              size={"sm"}
+              className="h-[30px] w-[48px]"
+              onClick={() => router.back()}
+            >
+              {"<-"} Esc
+            </Button>
+          </div>
+
           <div className="flex w-full flex-row items-center justify-between md:mt-[10px]">
             <div className="text-3xs md:hidden">Prime Asset</div>
             <div className="hidden text-2xs md:flex">Swap</div>
