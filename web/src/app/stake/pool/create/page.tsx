@@ -7,8 +7,12 @@ import Ethereum from "@/assets/icons/ethereum.svg";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import Padlock from "@/assets/icons/padlock.svg";
 import Token from "@/assets/icons/token.svg";
+import { Menu } from "@/components";
+import { useState } from "react";
 
 export default function CreatePoolPage() {
+  const [feeTier, setFeeTier] = useState<"auto" | "manual">("auto");
+
   return (
     <div className="flex flex-col items-center">
       <div className="max-w-[400px]">
@@ -91,7 +95,29 @@ export default function CreatePoolPage() {
 
       <div className="mt-[12px] flex w-[318px] flex-row items-center justify-between md:w-[392px]">
         <div className="text-3xs md:text-2xs">Fee Tier</div>
-        <div className="h-[26px] w-[82px] rounded-md bg-black"></div>
+
+        <Menu
+          id={"fee-tier"}
+          background="dark"
+          className={
+            "flex h-[26px] w-[82px] flex-row items-center justify-center gap-0 rounded-md bg-black"
+          }
+        >
+          <Menu.Item
+            selected={feeTier === "auto"}
+            onClick={() => setFeeTier("auto")}
+            className={"h-[18px] w-[33px] text-white"}
+          >
+            <div className={"text-2xs"}>Auto</div>
+          </Menu.Item>
+          <Menu.Item
+            selected={feeTier === "manual"}
+            onClick={() => setFeeTier("manual")}
+            className={"h-[18px] w-[40px] text-white"}
+          >
+            <div className={"text-2xs"}>Manual</div>
+          </Menu.Item>
+        </Menu>
       </div>
 
       <div className="shine mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between rounded-lg px-[22px] py-[15px] md:h-[69px] md:w-[392px]">
