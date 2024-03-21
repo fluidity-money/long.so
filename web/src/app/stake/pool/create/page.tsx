@@ -2,6 +2,7 @@
 
 import { CampaignBanner } from "@/components/CampaignBanner";
 import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 
 export default function CreatePoolPage() {
   return (
@@ -24,7 +25,24 @@ export default function CreatePoolPage() {
         <div className="h-[26px] w-[82px] rounded-md bg-black"></div>
       </div>
 
-      <div className="shine mt-[12px] h-[60px] w-[318px] rounded-lg md:h-[69px] md:w-[392px]"></div>
+      <div className="shine mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between rounded-lg px-[22px] py-[15px] md:h-[69px] md:w-[392px]">
+        <div className="flex flex-col items-center gap-[3px]">
+          <div className="iridescent-text text-xs font-medium md:text-sm">
+            0 ~ 0.3%
+          </div>
+          <Badge
+            variant="iridescent"
+            className="h-[10px] px-[7px] text-4xs md:h-[12px] md:text-3xs"
+          >
+            Fee Percentage
+          </Badge>
+        </div>
+
+        <div className="iridescent-text w-[247px] text-3xs md:text-2xs">
+          The protocol automatically adjust your fees in order to maximise
+          rewards and reduce impermanent loss
+        </div>
+      </div>
 
       <div className="mt-[20px] h-[212px] w-[318px] rounded-lg bg-black md:h-[248px] md:w-[392px]"></div>
 

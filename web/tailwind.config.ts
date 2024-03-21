@@ -22,6 +22,7 @@ const config = {
         xs: "2px",
       },
       fontSize: {
+        "4xs": "0.375rem" /* 6px */,
         "3xs": "0.5rem" /* 8px */,
         "2xs": "0.625rem" /* 10px */,
       },
