@@ -6,7 +6,7 @@ import Ethereum from "@/assets/icons/ethereum.svg";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import Padlock from "@/assets/icons/padlock.svg";
 import Token from "@/assets/icons/token.svg";
-import { Menu } from "@/components";
+import { Menu, Slider } from "@/components";
 import { useState } from "react";
 import ReactECharts from "echarts-for-react";
 import { format, subDays } from "date-fns";
@@ -14,6 +14,8 @@ import * as echarts from "echarts/core";
 import SelectedRange from "@/assets/icons/legend/selected-range.svg";
 import CurrentPrice from "@/assets/icons/legend/current-price.svg";
 import LiquidityDistribution from "@/assets/icons/legend/liquidity-distribution.svg";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const data = [
   {
@@ -247,6 +249,7 @@ export default function CreatePoolPage() {
   const [liquidityRange, setLiquidityRange] = useState<
     "full-range" | "auto" | "custom"
   >("full-range");
+  const [breakdownHidden, setBreakdownHidden] = useState(false);
 
   return (
     <div className="flex flex-col items-center">
@@ -359,7 +362,7 @@ export default function CreatePoolPage() {
           </div>
           <Badge
             variant="iridescent"
-            className="h-[10px] px-[7px] text-4xs md:h-[12px] md:text-3xs"
+            className="h-[10px] px-[7px] text-4xs font-normal md:h-[12px] md:text-3xs"
           >
             Fee Percentage
           </Badge>
@@ -509,12 +512,136 @@ export default function CreatePoolPage() {
       </div>
 
       <div className="mt-[21px] flex w-[318px] flex-row justify-end md:w-[392px]">
-        <div className="text-2xs underline">Hide breakdown</div>
+        <div
+          onClick={() => setBreakdownHidden((v) => !v)}
+          className="flex cursor-pointer flex-row"
+        >
+          {breakdownHidden ? (
+            <>
+              <div className="text-2xs underline">Show Breakdown</div>
+              <div className="ml-1 rotate-90 text-2xs">{"<-"}</div>
+            </>
+          ) : (
+            <>
+              <div className="text-2xs underline">Hide breakdown</div>
+              <div className="ml-1 rotate-90 text-2xs">{"->"}</div>
+            </>
+          )}
+        </div>
       </div>
 
-      <div className="mt-[15px] h-[200px] w-[318px] rounded-lg bg-black md:w-[392px]"></div>
+      <div
+        className={cn(
+          "mt-[10px] flex h-[60px] w-[318px] flex-col gap-[5px] overflow-hidden text-2xs transition-[height] md:w-[392px]",
+          {
+            "h-0": breakdownHidden,
+          },
+        )}
+      >
+        <div className="flex flex-row justify-between">
+          <div>Fees</div>
+          <div>$3.55</div>
+        </div>
 
-      <div className="mt-[20px]"></div>
+        <div className="flex flex-row justify-between">
+          <div>Rewards</div>
+          <Badge className="h-[17px] px-1 text-2xs font-normal">
+            <Token />
+            <Token className={"-ml-1"} />
+            <Token className={"-ml-1 mr-1"} />
+            <div className="iridescent-text">$6.11 - $33.12</div>
+          </Badge>
+        </div>
+
+        <div className="flex flex-row justify-between">
+          <div>Route</div>
+          <div>Super Route</div>
+        </div>
+      </div>
+
+      <div className="mt-[15px] h-[210px] w-[318px] rounded-lg bg-black px-[11px] pt-[16px] text-xs text-white md:w-[392px]">
+        <div>Yield Breakdown</div>
+
+        <div className="mt-[14px] flex w-full flex-col gap-[5px] pl-[5px] text-2xs">
+          <div className="flex flex-row justify-between">
+            <div>Pool Fees</div>
+
+            <div className={"flex flex-row items-center"}>
+              <Token />
+              <Token className={"-ml-1 mr-1"} />
+              $0 - $21.72
+            </div>
+          </div>
+
+          <div className="flex flex-row justify-between">
+            <div>Liquidity Boosts</div>
+
+            <div className={"flex flex-row items-center"}>
+              <Token />
+              <Token className={"-ml-1 mr-1"} />
+              $0.20 - $13.06
+            </div>
+          </div>
+
+          <div className="flex flex-row justify-between">
+            <div>Super Boosts</div>
+
+            <div className={"flex flex-row items-center"}>
+              <Token />
+              <Token className={"-ml-1 mr-1"} />
+              $5.91 - $8.34
+            </div>
+          </div>
+        </div>
+
+        <div className={"mt-[20px] flex flex-row justify-between pl-[5px]"}>
+          <div className="font-medium">Total</div>
+
+          <Badge
+            variant="iridescent"
+            className="h-[17px] px-1 text-2xs font-normal"
+          >
+            <Token />
+            <Token className={"-ml-1"} />
+            <Token className={"-ml-1 mr-1"} />
+            <div>$6.11 - $33.12</div>
+          </Badge>
+        </div>
+
+        <div className="mt-[20px] flex flex-row gap-1 text-2xs">
+          <div className="flex w-[3%] flex-col">
+            <div>3%</div>
+            <div className="h-1 w-full rounded bg-white"></div>
+          </div>
+
+          <div className="flex w-[7%] flex-col items-center">
+            <div>7%</div>
+            <div className="h-1 w-full rounded bg-white"></div>
+          </div>
+
+          <div className="flex w-[30%] flex-col items-center">
+            <div>30%</div>
+            <div className="h-1 w-full rounded bg-white"></div>
+            <div>Super Boosts</div>
+          </div>
+
+          <div className="flex w-3/5 flex-col items-center">
+            <div>60%</div>
+            <div className="iridescent h-1 w-full rounded"></div>
+            <div>Utility Boosts</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-[20px] w-[318px] md:hidden">
+        <Slider onSlideComplete={() => console.log("Stake")}>
+          <div className="text-xs">Stake</div>
+        </Slider>
+      </div>
+
+      <div className="mt-[20px] hidden md:inline-flex md:w-[392px]">
+        <Button className="w-full">Stake</Button>
+      </div>
     </div>
   );
 }
