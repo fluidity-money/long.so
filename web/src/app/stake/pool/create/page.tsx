@@ -17,6 +17,7 @@ import LiquidityDistribution from "@/assets/icons/legend/liquidity-distribution.
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useHotkeys } from "react-hotkeys-hook";
 
 const data = [
   {
@@ -254,9 +255,11 @@ export default function CreatePoolPage() {
 
   const router = useRouter();
 
+  useHotkeys("esc", () => router.back());
+
   return (
     <div className="flex flex-col items-center">
-      <div className="max-w-[400px]">
+      <div className="w-[318px] md:w-[392px]">
         <CampaignBanner />
       </div>
 
@@ -648,13 +651,20 @@ export default function CreatePoolPage() {
       </div>
 
       <div className="mt-[20px] w-[318px] md:hidden">
-        <Slider onSlideComplete={() => console.log("Stake")}>
+        <Slider
+          onSlideComplete={() => router.push("/stake/pool/create/confirm")}
+        >
           <div className="text-xs">Stake</div>
         </Slider>
       </div>
 
       <div className="mt-[20px] hidden md:inline-flex md:w-[392px]">
-        <Button className="w-full">Stake</Button>
+        <Button
+          className="w-full"
+          onClick={() => router.push("/stake/pool/create/confirm")}
+        >
+          Stake
+        </Button>
       </div>
     </div>
   );
