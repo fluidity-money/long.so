@@ -325,7 +325,7 @@ const Stake = () => {
               <div className="flex flex-col items-center gap-2 px-4">
                 <div className="flex flex-col items-center">
                   <motion.div
-                    layoutId="modal"
+                    // layoutId="modal"
                     className="flex w-[400px] flex-col items-center justify-between rounded-lg bg-black p-[10px] text-white drop-shadow-white"
                   >
                     <div className="flex w-full flex-row justify-between p-[4px]">
@@ -341,7 +341,7 @@ const Stake = () => {
                         Esc
                       </Button>
                     </div>
-                    
+
                     <Image
                       src={Success}
                       alt="success"

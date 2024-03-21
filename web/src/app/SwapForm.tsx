@@ -90,7 +90,7 @@ export const SwapForm = () => {
       <WelcomeGradient />
 
       <motion.div
-        layoutId={"swap-form"}
+        // layoutId={"swap-form"}
         className={cn(
           `flex w-full flex-col items-center gap-1 p-4 transition-transform sm:w-[400px] lg:w-[450px]`,
           welcome
@@ -108,7 +108,7 @@ export const SwapForm = () => {
           <SuperloopPopover />
 
           <motion.div
-            layoutId="modal"
+            // layoutId="modal"
             className="flex w-full flex-col gap-3 rounded-lg bg-black p-4 text-white"
           >
             <div className="flex items-center justify-between">

@@ -1,7 +1,6 @@
 "use client";
 
 import { CampaignBanner } from "@/components/CampaignBanner";
-import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import Ethereum from "@/assets/icons/ethereum.svg";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
@@ -20,10 +19,7 @@ export default function CreatePoolPage() {
       </div>
 
       <div className="mt-[12px] flex flex-col gap-[5px] md:mt-[23px] md:gap-[7px]">
-        <motion.div
-          layoutId={"modal"}
-          className="relative flex h-[102px] w-[318px] flex-col justify-between rounded-lg bg-black p-[17px] text-white md:h-[150px] md:w-[392px] md:p-[25px]"
-        >
+        <div className="relative flex h-[102px] w-[318px] flex-col justify-between rounded-lg bg-black p-[17px] text-white md:h-[150px] md:w-[392px] md:p-[25px]">
           <div className="absolute -top-[15px] left-0 hidden  md:flex">
             <Ethereum className="size-[30px] rounded-full border-[3px] border-white" />
             <Badge
@@ -62,7 +58,7 @@ export default function CreatePoolPage() {
               <div className="underline">Max</div>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         <div className="flex h-[102px] w-[318px] flex-col justify-between rounded-lg bg-black p-[17px] text-white md:h-[126px] md:w-[392px] md:p-[25px]">
           <div className="flex w-full flex-row items-center justify-between">

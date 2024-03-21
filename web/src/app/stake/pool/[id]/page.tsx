@@ -197,7 +197,7 @@ export default function PoolPage() {
         <div className="flex flex-col items-center">
           <div className="z-10 flex w-full max-w-[500px] flex-col px-4">
             <motion.div
-              layoutId="modal"
+              // layoutId="modal"
               className="flex flex-col gap-4 rounded-lg bg-black p-2 pt-0 text-white"
             >
               <div className="flex flex-row items-center justify-between">
