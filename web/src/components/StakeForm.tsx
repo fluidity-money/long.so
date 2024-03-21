@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useHotkeys } from "react-hotkeys-hook";
 import { AnimatePresence } from "framer-motion";
+import * as RadioGroup from "@radix-ui/react-radio-group";
 
 const data = [
   {
@@ -395,8 +396,14 @@ export const StakeForm = () => {
           </div>
         )}
         {feeTier === "manual" && (
-          <div className="mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between gap-[5px] rounded-lg md:h-[69px] md:w-[392px]">
-            <div className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] md:h-[80px] md:w-[93px] md:gap-1">
+          <RadioGroup.Root
+            className="mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between gap-[5px] rounded-lg md:h-[69px] md:w-[392px]"
+            defaultValue="0.05"
+          >
+            <RadioGroup.Item
+              value="0.01"
+              className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+            >
               <div className="text-2xs font-medium md:text-xs">0.01%</div>
               <div className="text-center text-3xs text-gray-2 ">
                 Best for Very <br /> Stable Pairs
@@ -404,38 +411,47 @@ export const StakeForm = () => {
               <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
                 (0% popularity)
               </div>
-            </div>
+            </RadioGroup.Item>
 
-            <div className="flex h-[66px] w-[75px] flex-col items-center rounded-md bg-black px-[7px] pb-[7px] pt-[9px] text-white md:h-[80px] md:w-[93px] md:gap-1">
+            <RadioGroup.Item
+              value={"0.05"}
+              className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+            >
               <div className="text-2xs font-medium md:text-xs">0.05%</div>
               <div className="text-center text-3xs text-gray-2 ">
                 Best for <br /> Stable Pairs
               </div>
               <div className="iridescent rounded bg-[#D8D8D8] px-1 text-4xs text-black md:text-3xs">
+                (99% popularity)
+              </div>
+            </RadioGroup.Item>
+
+            <RadioGroup.Item
+              value={"0.10"}
+              className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+            >
+              <div className="text-2xs font-medium md:text-xs">0.10%</div>
+              <div className="text-center text-3xs text-gray-2 ">
+                Best for <br /> Stable Pairs
+              </div>
+              <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
                 (0% popularity)
               </div>
-            </div>
+            </RadioGroup.Item>
 
-            <div className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] md:h-[80px] md:w-[93px] md:gap-1">
-              <div className="text-2xs font-medium md:text-xs">0.01%</div>
+            <RadioGroup.Item
+              value={"0.15"}
+              className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+            >
+              <div className="text-2xs font-medium md:text-xs">0.15%</div>
               <div className="text-center text-3xs text-gray-2 ">
                 Best for <br /> Stable Pairs
               </div>
               <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
-                (99% popularity)
+                (0% popularity)
               </div>
-            </div>
-
-            <div className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] md:h-[80px] md:w-[93px] md:gap-1">
-              <div className="text-2xs font-medium md:text-xs">0.01%</div>
-              <div className="text-center text-3xs text-gray-2 ">
-                Best for <br /> Stable Pairs
-              </div>
-              <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
-                (99% popularity)
-              </div>
-            </div>
-          </div>
+            </RadioGroup.Item>
+          </RadioGroup.Root>
         )}
       </AnimatePresence>
 
