@@ -15,6 +15,7 @@ import Position from "@/assets/icons/position.svg";
 import { Button } from "@/components/ui/button";
 import { nanoid } from "nanoid";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const pools: Pool[] = [
   {
@@ -232,13 +233,15 @@ export const MyPositions = () => {
             </Badge>
           </div>
         )}
-        <Button
-          className="flex-1 text-3xs  md:text-xs"
-          variant="secondary"
-          size="sm"
-        >
-          + Create New Pool
-        </Button>
+        <Link href={"/stake/pool/create"} className="flex-1">
+          <Button
+            className="w-full text-3xs md:text-xs"
+            variant="secondary"
+            size="sm"
+          >
+            + Create New Pool
+          </Button>
+        </Link>
       </div>
     </motion.div>
   );
