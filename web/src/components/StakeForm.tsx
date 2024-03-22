@@ -249,12 +249,19 @@ const colorGradient = new echarts.graphic.LinearGradient(
   ],
 );
 
-export const StakeForm = () => {
+interface StakeFormProps {
+  mode: "new" | "existing";
+}
+
+export const StakeForm = ({ mode }: StakeFormProps) => {
   const [feeTier, setFeeTier] = useState<"auto" | "manual">("auto");
   const [liquidityRange, setLiquidityRange] = useState<
     "full-range" | "auto" | "custom"
   >("full-range");
   const [breakdownHidden, setBreakdownHidden] = useState(false);
+  const [multiSingleToken, setMultiSingleToken] = useState<"multi" | "single">(
+    "multi",
+  );
 
   const router = useRouter();
 
@@ -266,9 +273,13 @@ export const StakeForm = () => {
         <CampaignBanner />
       </div>
 
-      <div className="mt-[12px] flex flex-col gap-[5px] md:mt-[23px] md:gap-[7px]">
+      <div className="mt-[23px] flex flex-col gap-[5px] md:gap-[7px]">
         <div className="relative flex h-[102px] w-[318px] flex-col justify-between rounded-lg bg-black p-[17px] text-white md:h-[150px] md:w-[392px] md:p-[25px]">
-          <div className="absolute -top-[15px] left-0 hidden md:flex">
+          <div
+            className={cn("absolute -top-[15px] left-0 hidden md:flex", {
+              flex: mode === "existing",
+            })}
+          >
             <Ethereum className="size-[30px] rounded-full border-[3px] border-white" />
             <Badge
               variant="outline"
@@ -278,6 +289,38 @@ export const StakeForm = () => {
               ƒUSDC - ETH
             </Badge>
           </div>
+
+          {mode === "existing" && (
+            <div className="absolute -top-[15px] right-0">
+              <Menu
+                id={"tokens"}
+                background="dark"
+                className={
+                  "flex h-[26px] w-[132px] flex-row items-center justify-center gap-2 rounded-lg bg-black md:h-[28px] md:w-[154px]"
+                }
+              >
+                <Menu.Item
+                  className={"h-[18px]"}
+                  selected={multiSingleToken === "multi"}
+                  onClick={() => setMultiSingleToken("multi")}
+                >
+                  <div className="text-nowrap px-1 text-3xs font-medium md:text-2xs">
+                    Multi-Token
+                  </div>
+                </Menu.Item>
+                <Menu.Item
+                  className={"h-[18px]"}
+                  selected={multiSingleToken === "single"}
+                  onClick={() => setMultiSingleToken("single")}
+                  variant={"iridescent"}
+                >
+                  <div className="text-nowrap px-1 text-3xs font-medium md:text-2xs">
+                    Single-Token
+                  </div>
+                </Menu.Item>
+              </Menu>
+            </div>
+          )}
 
           <div className="absolute -right-16 top-0 hidden md:inline-flex">
             <Button

@@ -17,6 +17,7 @@ interface ItemProps {
   background?: "light" | "dark";
   proToggle?: boolean;
   className?: string;
+  variant?: "iridescent";
 }
 
 const Item: React.FC<ItemProps> = ({
@@ -27,6 +28,7 @@ const Item: React.FC<ItemProps> = ({
   background = "light",
   proToggle,
   className,
+  variant,
 }) => {
   const classes = `
     ${styles.Item}
@@ -66,14 +68,21 @@ const Item: React.FC<ItemProps> = ({
               "absolute inset-0 -z-10 rounded-md",
               background === "light" ? "bg-black" : "bg-white",
               proToggle && swapPro && "shine",
+              {
+                iridescent: variant === "iridescent",
+              },
             )}
           />
         </>
       )}
       <div
-        className={
-          "flex h-full flex-row items-center justify-center gap-2 text-base font-medium"
-        }
+        className={cn(
+          "flex h-full flex-row items-center justify-center gap-2 text-base font-medium",
+          {
+            "iridescent-text": variant === "iridescent" && !selected,
+            "text-black": variant === "iridescent" && selected,
+          },
+        )}
       >
         {children}
         {proToggle && (
