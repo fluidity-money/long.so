@@ -25,7 +25,7 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     id: "amount",
-    header: "ƒUSDC/ETH",
+    header: () => <div className="font-bold">ƒUSDC/ETH</div>,
     cell: ({ row }) => {
       return (
         <div className="flex flex-row items-center gap-2">

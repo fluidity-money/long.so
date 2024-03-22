@@ -3,10 +3,9 @@
 import { useSwapPro } from "@/stores/useSwapPro";
 import { TypographyH2, TypographyH3 } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
-import { Menu, Token } from "@/components/index";
+import { Menu } from "@/components/index";
 import { useState } from "react";
 import { startCase } from "lodash";
-import { useModalStore } from "@/app/TokenModal";
 import { DataTable } from "@/app/_DataTable/DataTable";
 import { columns, Transaction } from "@/app/_DataTable/columns";
 import { format, startOfDay, subDays } from "date-fns";
@@ -14,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { AnimatePresence, motion } from "framer-motion";
 import ReactECharts from "echarts-for-react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import Token from "@/assets/icons/token.svg";
+import Ethereum from "@/assets/icons/ethereum.svg";
 
 const data = [
   {
@@ -199,25 +200,25 @@ const Graph = () => {
     <>
       <Menu id="graph">
         <Menu.Item
-          className="mx-1 p-1"
+          className="p-1"
           selected={activeGraphType === "price"}
           onClick={() => setActiveGraphType("price")}
         >
-          Price
+          <div className="px-1 text-xs">Price</div>
         </Menu.Item>
         <Menu.Item
-          className="mx-1 p-1"
+          className="p-1 text-xs"
           selected={activeGraphType === "volume"}
           onClick={() => setActiveGraphType("volume")}
         >
-          Volume
+          <div className="px-1 text-xs">Volume</div>
         </Menu.Item>
         <Menu.Item
-          className="mx-1 p-1"
+          className="p-1 text-xs"
           selected={activeGraphType === "liquidity"}
           onClick={() => setActiveGraphType("liquidity")}
         >
-          Liquidity
+          <div className="px-1 text-xs">Liquidity</div>
         </Menu.Item>
       </Menu>
 
@@ -232,39 +233,34 @@ const Graph = () => {
 
           <Menu id="graph-duration">
             <Menu.Item
-              className="mx-1 p-0.5 text-xs"
               selected={activeGraphDuration === "7D"}
               onClick={() => setActiveGraphDuration("7D")}
             >
-              7D
+              <div className="p-1 text-xs">7D</div>
             </Menu.Item>
             <Menu.Item
-              className="mx-1 p-0.5 text-xs"
               selected={activeGraphDuration === "1M"}
               onClick={() => setActiveGraphDuration("1M")}
             >
-              1M
+              <div className="p-1 text-xs">1M</div>
             </Menu.Item>
             <Menu.Item
-              className="mx-1 p-0.5 text-xs"
               selected={activeGraphDuration === "6M"}
               onClick={() => setActiveGraphDuration("6M")}
             >
-              6M
+              <div className="p-1 text-xs">6M</div>
             </Menu.Item>
             <Menu.Item
-              className="mx-1 p-0.5 text-xs"
               selected={activeGraphDuration === "1Y"}
               onClick={() => setActiveGraphDuration("1Y")}
             >
-              1Y
+              <div className="p-1 text-xs">1Y</div>
             </Menu.Item>
             <Menu.Item
-              className="mx-1 p-0.5 text-xs"
               selected={activeGraphDuration === "ALL"}
               onClick={() => setActiveGraphDuration("ALL")}
             >
-              ALL
+              <div className="p-1 text-xs">ALL</div>
             </Menu.Item>
           </Menu>
         </div>
@@ -331,7 +327,7 @@ const Graph = () => {
             }}
           />
 
-          <div className="text-xs">5th October 2023</div>
+          <div className="text-2xs">5th October 2023</div>
         </div>
       </div>
     </>
@@ -347,11 +343,7 @@ export const SwapPro = ({
 }) => {
   const { swapPro, setSwapPro } = useSwapPro();
 
-  const { enabled } = useModalStore();
-
   const { isLtSm } = useMediaQuery();
-
-  console.log({ isLtSm });
 
   return (
     <AnimatePresence>
@@ -372,11 +364,11 @@ export const SwapPro = ({
           >
             {badgeTitle ? (
               <div className="flex flex-row items-center">
-                <Token />
+                <Ethereum className={"size-[30px]"} />
                 <Badge className="z-50 -ml-2 pl-1">
-                  <div className="flex flex-row items-center gap-4">
-                    <Token />
-                    <div className="text-xl">fUSDC/ETH</div>
+                  <div className="flex flex-row items-center gap-1">
+                    <Token className={"size-[28px] invert"} />
+                    <div className="text-xl">fUSDC - ETH</div>
                   </div>
                 </Badge>
               </div>
@@ -390,31 +382,34 @@ export const SwapPro = ({
 
             <div className="hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:flex">
               <div>
-                <p className="text-xs">Liquidity</p>
-                <p className="text-2xl">$1.01M</p>
+                <p className="text-2xs">Liquidity</p>
+                <p className="text-xl">$1.01M</p>
               </div>
 
               <div>
-                <p className="text-xs">Volume 24H</p>
-                <p className="text-2xl">$115.21K</p>
+                <p className="text-2xs">Volume 24H</p>
+                <p className="text-xl">$115.21K</p>
               </div>
 
               <div>
-                <p className="text-xs">Stake APY</p>
-                <p className="text-2xl">1.62%</p>
+                <p className="text-2xs">Stake APY</p>
+                <p className="text-xl">1.62%</p>
               </div>
 
               <div>
-                <p className="text-xs">24H Trade Rewards</p>
-                <p className="text-2xl">$300.56</p>
+                <p className="text-2xs">24H Trade Rewards</p>
+                <p className="text-xl">$300.56</p>
               </div>
             </div>
 
-            <div className="mt-12">
+            <div className="mt-[35px]">
               <div className="flex w-full flex-row items-center justify-between">
-                <h3>Transaction History</h3>
+                <h3 className="text-sm">Transaction History</h3>
                 <div>
-                  <span className="underline">My Transactions</span> {"->"}
+                  <span className="cursor-pointer text-sm underline">
+                    My Transactions
+                  </span>{" "}
+                  {"->"}
                 </div>
               </div>
             </div>
