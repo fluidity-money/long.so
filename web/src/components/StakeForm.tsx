@@ -366,33 +366,42 @@ export const StakeForm = ({ mode }: StakeFormProps) => {
           </div>
         </div>
 
-        <div className="flex h-[102px] w-[318px] flex-col justify-between rounded-lg bg-black p-[17px] text-white md:h-[126px] md:w-[392px] md:p-[25px]">
-          <div className="flex w-full flex-row items-center justify-between">
-            <div className="text-3xs md:hidden">Super Asset</div>
-            <div className="hidden text-2xs md:flex">Receive</div>
-
-            <div className="text-3xs md:text-2xs">Fluid USDC</div>
-          </div>
-
-          <div className="mt-[7px] flex w-full flex-row items-center justify-between">
-            <div className="text-2xl">0.87</div>
-
-            <Badge
-              variant="outline"
-              className="flex h-[26px] w-[82px] flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[107px] md:pl-[4px] md:text-base"
+        <AnimatePresence mode={"popLayout"} initial={false}>
+          {(mode === "new" || multiSingleToken === "multi") && (
+            <motion.div
+              initial={{ y: -102, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -102, opacity: 0 }}
+              className="flex h-[102px] w-[318px] flex-col justify-between rounded-lg bg-black p-[17px] text-white md:h-[126px] md:w-[392px] md:p-[25px]"
             >
-              <Ethereum className="size-[20px] invert md:size-[25px]" />
-              <div className="iridescent-text">ƒUSDC</div>
-              <Padlock className="ml-[2px] h-[7.53px] w-[6.45px] md:h-[10.3px] md:w-[8.82px]" />
-            </Badge>
-          </div>
+              <div className="flex w-full flex-row items-center justify-between">
+                <div className="text-3xs md:hidden">Super Asset</div>
+                <div className="hidden text-2xs md:flex">Receive</div>
 
-          <div className="mt-[5px] flex w-full flex-row items-center justify-between">
-            <div className="text-2xs md:text-gray-1">$1,024.82</div>
+                <div className="text-3xs md:text-2xs">Fluid USDC</div>
+              </div>
 
-            <div className="text-3xs md:text-2xs">Balance: 0.5</div>
-          </div>
-        </div>
+              <div className="mt-[7px] flex w-full flex-row items-center justify-between">
+                <div className="text-2xl">0.87</div>
+
+                <Badge
+                  variant="outline"
+                  className="flex h-[26px] w-[82px] flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[107px] md:pl-[4px] md:text-base"
+                >
+                  <Ethereum className="size-[20px] invert md:size-[25px]" />
+                  <div className="iridescent-text">ƒUSDC</div>
+                  <Padlock className="ml-[2px] h-[7.53px] w-[6.45px] md:h-[10.3px] md:w-[8.82px]" />
+                </Badge>
+              </div>
+
+              <div className="mt-[5px] flex w-full flex-row items-center justify-between">
+                <div className="text-2xs md:text-gray-1">$1,024.82</div>
+
+                <div className="text-3xs md:text-2xs">Balance: 0.5</div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="mt-[12px] flex w-[318px] flex-row items-center justify-between md:w-[392px]">
