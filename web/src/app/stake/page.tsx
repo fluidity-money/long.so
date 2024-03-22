@@ -112,7 +112,7 @@ const Stake = () => {
                 <div className="flex flex-col items-center">
                   <motion.div
                     layoutId="modal"
-                    className="flex h-[366px] w-[394px] flex-col items-center justify-between rounded-lg bg-black p-[10px] text-white drop-shadow-white"
+                    className="flex h-[21.8125rem] w-[19.875rem] flex-col items-center justify-between rounded-lg bg-black p-[10px] text-white drop-shadow-white md:h-[366px] md:w-[394px]"
                   >
                     <div className="flex w-full flex-row justify-between p-[4px]">
                       <div className="text-3xs md:text-2xs">
@@ -325,48 +325,55 @@ const Stake = () => {
               <div className="flex flex-col items-center gap-2 px-4">
                 <div className="flex flex-col items-center">
                   <motion.div
-                    // layoutId="modal"
+                    layoutId="modal"
                     className="flex w-[400px] flex-col items-center justify-between rounded-lg bg-black p-[10px] text-white drop-shadow-white"
                   >
-                    <div className="flex w-full flex-row justify-between p-[4px]">
-                      <div className="text-3xs md:text-2xs">
-                        Yield Breakdown
+                    <motion.div
+                      layout
+                      className="flex w-full flex-col items-center justify-between"
+                    >
+                      <div className="flex w-full flex-row justify-between p-[4px]">
+                        <div className="text-3xs md:text-2xs">
+                          Yield Breakdown
+                        </div>
+                        <Button
+                          variant="secondary"
+                          onClick={() => setYieldBreakdownClaimed(false)}
+                          className="h-[26px] px-2 py-0 text-2xs"
+                          size={"sm"}
+                        >
+                          Esc
+                        </Button>
                       </div>
-                      <Button
-                        variant="secondary"
-                        onClick={() => setYieldBreakdownClaimed(false)}
-                        className="h-[26px] px-2 py-0 text-2xs"
-                        size={"sm"}
-                      >
-                        Esc
-                      </Button>
-                    </div>
 
-                    <Image
-                      src={Success}
-                      alt="success"
-                      className="size-[52px]"
-                    />
-                    <div className="mt-[11px] text-xl">All Yield Claimed!</div>
-                    <div className="mt-[17px] text-3xs">
-                      You’ve successfully claimed all available yields from your
-                      pools!
-                    </div>
+                      <Image
+                        src={Success}
+                        alt="success"
+                        className="size-[52px]"
+                      />
+                      <div className="mt-[11px] text-xl">
+                        All Yield Claimed!
+                      </div>
+                      <div className="mt-[17px] text-3xs">
+                        You’ve successfully claimed all available yields from
+                        your pools!
+                      </div>
 
-                    <div className="mt-[26px] flex w-full flex-row gap-2">
-                      <Button variant="outline" className="flex-1 text-2xs">
-                        Add to Your Wallet
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="flex-1 text-2xs"
-                        onClick={() => {
-                          setYieldBreakdownClaimed(false);
-                        }}
-                      >
-                        Done
-                      </Button>
-                    </div>
+                      <div className="mt-[26px] flex w-full flex-row gap-2">
+                        <Button variant="outline" className="flex-1 text-2xs">
+                          Add to Your Wallet
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="flex-1 text-2xs"
+                          onClick={() => {
+                            setYieldBreakdownClaimed(false);
+                          }}
+                        >
+                          Done
+                        </Button>
+                      </div>
+                    </motion.div>
                   </motion.div>
                 </div>
               </div>
