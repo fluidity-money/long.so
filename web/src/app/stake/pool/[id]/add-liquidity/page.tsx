@@ -3,5 +3,5 @@
 import { StakeForm } from "@/components/StakeForm";
 
 export default function CreatePoolPage() {
-  return <StakeForm mode="new" />;
+  return <StakeForm mode="existing" />;
 }

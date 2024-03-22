@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { usdFormat } from "@/lib/usdFormat";
 import { Button } from "@/components/ui/button";
 import Sort from "@/assets/icons/sort.svg";
+import Link from "next/link";
 
 export type Token = {
   name: string;
@@ -126,9 +127,11 @@ export const columns: ColumnDef<Pool>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex flex-row gap-2 group-hover:invert">
-          <Button size="sm" className="text-2xs md:text-xs">
-            +
-          </Button>
+          <Link href={`/stake/pool/${row.original.id}/add-liquidity`}>
+            <Button size="sm" className="text-2xs md:text-xs">
+              +
+            </Button>
+          </Link>
           {row.original.claimable && (
             <Button size="sm" className="text-2xs md:text-xs">
               Claim
