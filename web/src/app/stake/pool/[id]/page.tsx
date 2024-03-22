@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { SwapPro } from "@/components/SwapPro";
 import { useHotkeys } from "react-hotkeys-hook";
-import { Token } from "@/components";
+import Token from "@/assets/icons/token.svg";
+import Ethereum from "@/assets/icons/ethereum.svg";
 import { Badge } from "@/components/ui/badge";
 import { Line } from "rc-progress";
 import { motion } from "framer-motion";
@@ -190,21 +191,21 @@ export default function PoolPage() {
   return (
     <div className="flex w-full flex-col">
       <div className="flex max-w-full flex-col-reverse justify-center gap-8 lg:flex-row">
-        <div className="hidden w-full items-center md:flex md:flex-col">
+        <div className="flex w-full flex-col items-center">
           <SwapPro override badgeTitle />
         </div>
 
         <div className="flex flex-col items-center">
-          <div className="z-10 flex w-full max-w-[500px] flex-col px-4">
+          <div className="z-10 flex w-full flex-col items-center px-4">
             <motion.div
               // layoutId="modal"
-              className="flex flex-col gap-4 rounded-lg bg-black p-2 pt-0 text-white"
+              className="flex w-[19.8125rem] flex-col rounded-lg bg-black p-2 pt-0 text-white md:h-[502px] md:w-[393px]"
             >
               <div className="flex flex-row items-center justify-between">
-                <div className="p-4 text-xs">Manage Pool</div>
+                <div className="p-4 text-2xs">Manage Pool</div>
                 <Button
                   variant="secondary"
-                  className="h-8 px-2 text-xs"
+                  className="h-[26px] w-12 px-[9px] py-[7px] text-2xs"
                   onClick={() => {
                     router.back();
                   }}
@@ -213,30 +214,28 @@ export default function PoolPage() {
                 </Button>
               </div>
 
-              <div className="flex flex-row justify-between px-4">
+              <div className="mt-px flex flex-row items-center justify-between px-4">
                 <div className="flex flex-row items-center">
-                  <Token />
-                  <Badge className="iridescent z-20 -ml-2 flex flex-row gap-2 border-4 border-black pl-1 text-black">
-                    <Token />
-                    <div className="text-nowrap text-lg md:text-xl">
-                      fUSDC-ETH
-                    </div>
+                  <Ethereum className={"size-[24px] invert"} />
+                  <Badge className="iridescent z-20 -ml-1 flex flex-row gap-2 border-4 border-black pl-1 text-black">
+                    <Token className={"size-[24px]"} />
+                    <div className="text-nowrap text-sm">fUSDC-ETH</div>
                   </Badge>
                 </div>
 
-                <div className="flex flex-col items-end">
-                  <Badge className="iridescent z-20 flex h-8 flex-row gap-2 border-4 border-black pl-1 text-black">
+                <div className="flex flex-col items-end gap-1">
+                  <Badge className="iridescent flex h-4 w-[93px] flex-row pl-0.5 text-black md:w-[132px]">
                     <div className="flex flex-row">
-                      <Token size="small" />
-                      <Token size="small" />
-                      <Token size="small" />
+                      <Token className={"size-[14px]"} />
+                      <Token className={"-ml-[5px] size-[14px]"} />
+                      <Token className={"-ml-[5px] size-[14px]"} />
                     </div>
-                    <div className="text-nowrap text-2xs md:text-xs">
+                    <div className="text-nowrap text-4xs font-medium md:text-2xs">
                       Live Utility Rewards
                     </div>
                   </Badge>
 
-                  <p className="text-2xs">5days | 24hrs | 30min</p>
+                  <p className="text-3xs">5days | 24hrs | 30min</p>
                 </div>
               </div>
 
@@ -244,14 +243,14 @@ export default function PoolPage() {
                 <div className="flex flex-row gap-2">
                   <Button
                     variant="secondary"
-                    className="flex-1 text-2xs"
+                    className="flex-1 text-3xs md:text-2xs"
                     size="sm"
                   >
                     + Add Liquidity
                   </Button>
                   <Button
                     variant="secondary"
-                    className="flex-1 text-2xs"
+                    className="flex-1 text-3xs md:text-2xs"
                     size="sm"
                   >
                     - Withdraw Liquidity
@@ -260,12 +259,12 @@ export default function PoolPage() {
 
                 <div className="flex flex-row gap-2">
                   <div className="flex flex-1 flex-col">
-                    <div className="text-2xs md:text-xs">My Pool Balance</div>
+                    <div className="text-3xs md:text-2xs">My Pool Balance</div>
                     <div className="text-xl md:text-2xl">$190,301</div>
                   </div>
 
                   <div className="flex flex-1 flex-col">
-                    <div className="text-nowrap text-2xs md:text-xs">
+                    <div className="text-nowrap text-3xs md:text-2xs">
                       Unclaimed Rewards
                     </div>
                     <div className="text-xl md:text-2xl">$52,420</div>
@@ -274,20 +273,20 @@ export default function PoolPage() {
                   <div>
                     <Button
                       variant="secondary"
-                      className="h-8 px-8 py-0.5"
+                      className="h-[19px] w-[75px] px-[27px] py-[5px] md:h-[22px] md:w-[92px]"
                       size="sm"
                     >
-                      <div className="text-2xs">Claim Yield</div>
+                      <div className="text-3xs">Claim Yield</div>
                     </Button>
                   </div>
                 </div>
 
                 <ReactECharts
                   opts={{
-                    height: 150,
+                    height: 52,
                   }}
                   style={{
-                    height: 150,
+                    height: 52,
                   }}
                   option={{
                     grid: {
@@ -342,15 +341,17 @@ export default function PoolPage() {
                   }}
                 />
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-[7px]">
                   <div className="flex flex-row justify-between">
-                    <div>Pool Reward Range</div>
+                    <div className="text-xs">Pool Reward Range</div>
 
-                    <div>40% ~ 100%</div>
+                    <div className="text-xs">
+                      40% ~ <span className="font-bold">100%</span>
+                    </div>
                   </div>
 
                   <div className="p-2">
-                    <div className="flex flex-row justify-between text-sm">
+                    <div className="flex flex-row justify-between text-2xs">
                       <div>Earned Fees APR</div>
 
                       <div className="flex flex-row items-center gap-2">
@@ -359,7 +360,7 @@ export default function PoolPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-row justify-between text-sm">
+                    <div className="flex flex-row justify-between text-2xs">
                       <div>Liquidity Incentives</div>
 
                       <div className="flex flex-row items-center gap-2">
@@ -371,7 +372,7 @@ export default function PoolPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-row justify-between text-sm">
+                    <div className="flex flex-row justify-between text-2xs">
                       <div>Super Incentives</div>
 
                       <div className="flex flex-row items-center gap-2">
@@ -381,7 +382,7 @@ export default function PoolPage() {
                     </div>
                   </div>
 
-                  <div className="flex flex-row justify-between text-sm">
+                  <div className="flex flex-row justify-between text-2xs">
                     <div>Utility Incentives</div>
 
                     <div className="flex flex-row items-center gap-2">
@@ -390,11 +391,11 @@ export default function PoolPage() {
                     </div>
                   </div>
 
-                  <div className="flex flex-row items-center justify-start gap-4 text-sm">
-                    <div className="h-10 w-0.5 bg-white" />
+                  <div className="flex flex-row items-center justify-start gap-[10px] text-sm">
+                    <div className="mt-[6px] h-[25px] w-0.5 bg-white" />
 
-                    <div className="flex flex-col gap-2">
-                      <div className="text-2xs">200/1,000 tokens given out</div>
+                    <div className="flex flex-col gap-1">
+                      <div className="text-3xs">200/1,000 tokens given out</div>
                       <Line
                         percent={20}
                         strokeColor="#EBEBEB"
@@ -410,10 +411,10 @@ export default function PoolPage() {
                     <div>
                       <Button
                         variant="secondary"
-                        className="iridescent h-8 px-4 py-0.5 text-xs md:px-8 md:text-base"
+                        className="iridescent h-[19.24px] w-[102.15px] px-4 py-0.5 md:px-8 md:text-base"
                         size="sm"
                       >
-                        <div className="">Boost Incentives</div>
+                        <div className="text-2xs ">Boost Incentives</div>
                       </Button>
                     </div>
                   </div>
