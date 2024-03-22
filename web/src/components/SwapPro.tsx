@@ -346,7 +346,7 @@ export const SwapPro = ({
   const { isLtSm } = useMediaQuery();
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode={"popLayout"}>
       {(swapPro || override || isLtSm) && (
         <motion.div
           initial={{ opacity: 0, x: -100 }}
