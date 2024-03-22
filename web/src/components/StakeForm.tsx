@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { useHotkeys } from "react-hotkeys-hook";
 import { AnimatePresence, motion } from "framer-motion";
 import * as RadioGroup from "@radix-ui/react-radio-group";
+import { Input } from "@/components/ui/input";
 
 const data = [
   {
@@ -295,8 +296,12 @@ export const StakeForm = () => {
             <div className="text-3xs md:text-2xs">Ethereum</div>
           </div>
 
-          <div className="mt-[7px] flex w-full flex-row items-center justify-between">
-            <div className="text-2xl">1024.82</div>
+          <div className="mt-[7px] flex w-full flex-row items-center justify-between gap-4">
+            <Input
+              className="-ml-2 border-0 bg-black pl-2 text-2xl"
+              placeholder={"1024.82"}
+              autoFocus
+            />
 
             <Badge
               variant="outline"
