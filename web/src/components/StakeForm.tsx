@@ -251,9 +251,10 @@ const colorGradient = new echarts.graphic.LinearGradient(
 
 interface StakeFormProps {
   mode: "new" | "existing";
+  poolId: string;
 }
 
-export const StakeForm = ({ mode }: StakeFormProps) => {
+export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
   const [feeTier, setFeeTier] = useState<"auto" | "manual">("auto");
   const [liquidityRange, setLiquidityRange] = useState<
     "full-range" | "auto" | "custom"
@@ -266,6 +267,14 @@ export const StakeForm = ({ mode }: StakeFormProps) => {
   const router = useRouter();
 
   useHotkeys("esc", () => router.back());
+
+  const onSubmit = () => {
+    if (mode === "new") {
+      router.push("/stake/pool/create/confirm");
+    } else {
+      router.push(`/stake/pool/${poolId}/confirm-liquidity`);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center">
@@ -785,18 +794,13 @@ export const StakeForm = ({ mode }: StakeFormProps) => {
       </div>
 
       <div className="mt-[20px] w-[318px] md:hidden">
-        <Slider
-          onSlideComplete={() => router.push("/stake/pool/create/confirm")}
-        >
+        <Slider onSlideComplete={onSubmit}>
           <div className="text-xs">Stake</div>
         </Slider>
       </div>
 
       <div className="mt-[20px] hidden md:inline-flex md:w-[392px]">
-        <Button
-          className="w-full"
-          onClick={() => router.push("/stake/pool/create/confirm")}
-        >
+        <Button className="w-full" onClick={onSubmit}>
           Stake
         </Button>
       </div>

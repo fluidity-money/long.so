@@ -2,6 +2,6 @@
 
 import { ConfirmStake } from "@/components/ConfirmStake";
 
-export default function ConfirmCreatePool() {
+export default function ConfirmAddLiquidity() {
   return <ConfirmStake />;
 }
