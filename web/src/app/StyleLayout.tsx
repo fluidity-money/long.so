@@ -45,7 +45,7 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
                 onClick={() => {
                   router.push("/");
                 }}
-                selected={pathname === "/"}
+                selected={pathname === "/" || pathname.startsWith("/swap")}
                 proToggle
               >
                 <Text className="text-nowrap">

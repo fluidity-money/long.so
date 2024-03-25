@@ -67,7 +67,7 @@ export function MyPositionsTable<TData, TValue>({
                 }
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="p-0 py-0.5 text-2xs">
+                  <TableCell key={cell.id} className="p-0 py-[4px] text-2xs">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

@@ -83,13 +83,13 @@ const DisplayModeMenu = ({
   id: string;
 }) => {
   return (
-    <Menu id={`all-pools-list-grid-${id}`}>
+    <Menu id={`all-pools-list-grid-${id}`} className="gap-1">
       <Menu.Item
         className={"mx-1 p-0"}
         selected={displayMode === "list"}
         onClick={() => setDisplayMode("list")}
       >
-        <div className={"flex flex-row items-center gap-1 text-2xs"}>
+        <div className={"flex flex-row items-center gap-1 px-1 text-2xs"}>
           <List
             className={clsx({
               invert: displayMode !== "list",
@@ -103,7 +103,7 @@ const DisplayModeMenu = ({
         selected={displayMode === "grid"}
         onClick={() => setDisplayMode("grid")}
       >
-        <div className={"flex flex-row items-center gap-1 text-2xs"}>
+        <div className={"flex flex-row items-center gap-1 px-1 text-2xs"}>
           <Grid
             className={clsx({
               invert: displayMode !== "grid",
