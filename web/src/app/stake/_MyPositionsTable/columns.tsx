@@ -1,8 +1,10 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Token as TokenIcon } from "@/components";
+
 import { Badge } from "@/components/ui/badge";
 import { usdFormat } from "@/lib/usdFormat";
 import { Button } from "@/components/ui/button";
+import Token from "@/assets/icons/token.svg";
+import TokenIridescent from "@/assets/icons/token-iridescent.svg";
 
 export type Token = {
   name: string;
@@ -23,7 +25,10 @@ export const columns: ColumnDef<Pool>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex flex-row items-center gap-2">
-          <TokenIcon size="small" />
+          <Token className={"size-[20px]"} />
+          <TokenIridescent
+            className={"-ml-4 size-[20px] rounded-full border border-black"}
+          />
           {row.original.tokens[0].name}
           {" x "}
           {row.original.tokens[1].name}
