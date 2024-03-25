@@ -4,7 +4,7 @@ import Hourglass from "@/assets/icons/hourglass.svg";
 import { usdFormat } from "@/lib/usdFormat";
 import { differenceInSeconds, endOfDay } from "date-fns";
 import { useEffect, useState } from "react";
-import Token from "@/assets/icons/token.svg";
+import Token from "@/assets/icons/token-borderless.svg";
 
 interface CampaignBannerProps {
   amount?: number;
