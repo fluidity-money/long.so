@@ -3,5 +3,5 @@
 import { ConfirmStake } from "@/components/ConfirmStake";
 
 export default function ConfirmCreatePool() {
-  return <ConfirmStake />;
+  return <ConfirmStake mode="new" />;
 }
