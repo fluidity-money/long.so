@@ -23,6 +23,9 @@ export default function SequenceLayout({
         <Link href={"/swap/sequence/pending"}>
           <li>Pending</li>
         </Link>
+        <Link href={"/swap/sequence/success"}>
+          <li>Success</li>
+        </Link>
       </ul>
 
       {children}
