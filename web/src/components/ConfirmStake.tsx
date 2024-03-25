@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useStakeStore } from "@/stores/useStakeStore";
 import TokenIridescent from "@/assets/icons/token-iridescent.svg";
+import { motion } from "framer-motion";
 
 interface ConfirmStakeProps {
   mode: "new" | "existing";
@@ -18,7 +19,8 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
 
   return (
     <div className="z-10 flex flex-col items-center">
-      <div
+      <motion.div
+        layoutId={"modal"}
         className={cn("w-[315px] rounded-lg bg-black text-white md:w-[393px]", {
           "md:h-[685px]": mode === "existing",
           "md:h-[673px]": mode === "new",
@@ -156,7 +158,14 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
           </div>
         </div>
 
-        <div className="mt-[21px] flex flex-row justify-between px-[21px] text-3xs font-medium md:text-2xs md:font-normal">
+        <div
+          className={cn(
+            "mt-[21px] flex flex-row justify-between px-[21px] text-3xs font-medium md:text-2xs md:font-normal",
+            {
+              hidden: mode === "new",
+            },
+          )}
+        >
           <div>Expected Shares</div>
           <div>0.000321568910</div>
         </div>
@@ -232,7 +241,7 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
             Confirm Stake
           </Button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

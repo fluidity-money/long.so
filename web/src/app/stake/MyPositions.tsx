@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Menu, Token } from "@/components";
+import { Menu } from "@/components";
 import List from "@/assets/icons/list.svg";
 import { clsx } from "clsx";
 import Grid from "@/assets/icons/grid.svg";
@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { nanoid } from "nanoid";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Token from "@/assets/icons/token.svg";
+import TokenIridescent from "@/assets/icons/token-iridescent.svg";
 
 const pools: Pool[] = [
   {
@@ -96,7 +98,7 @@ export const MyPositions = () => {
     <motion.div
       layoutId="modal"
       className={cn(
-        "flex h-[240px] w-full flex-col gap-4 rounded-lg bg-black p-4 pb-2 text-white transition-[height] md:h-[248px]",
+        "flex h-[240px] w-full flex-col gap-2 rounded-lg bg-black p-4 pb-2 text-white transition-[height] md:h-[248px]",
         {
           "h-[412px]": expanded,
         },
@@ -137,7 +139,7 @@ export const MyPositions = () => {
       </div>
 
       <div
-        className={cn("mb-4 h-[150px] overflow-y-scroll transition-[height]", {
+        className={cn("h-[180px] overflow-y-scroll transition-[height]", {
           "h-[300px]": expanded,
         })}
       >
@@ -150,28 +152,33 @@ export const MyPositions = () => {
         ) : displayMode === "list" ? (
           <MyPositionsTable columns={columns} data={pools} />
         ) : (
-          <div
-            className={cn("flex flex-row gap-4", {
-              "flex-wrap": expanded,
+          <motion.div
+            layout
+            className={cn("flex flex-row items-center justify-around gap-4", {
+              "mb-4 flex-wrap": expanded,
             })}
           >
             {pools.map((pool) => (
-              <div
+              <motion.div
+                layout
                 key={pool.id}
-                className="flex h-[150px] w-[145px] cursor-pointer flex-col items-center gap-1 rounded-xl border border-white p-2"
+                className="flex h-[83px] w-[77px] cursor-pointer flex-col items-center rounded-xl border border-white p-2 md:h-[120px] md:min-w-[111px] md:gap-1"
                 onClick={() => router.push(`/stake/pool/${pool.id}`)}
               >
                 <div className="flex w-full flex-row">
-                  <div className="size-2 rounded-full bg-red-500" />
+                  <div className="size-1 rounded-full bg-red-500 md:size-2" />
                 </div>
 
-                <div className="flex flex-col">
+                <div className="-mt-1 flex flex-col md:-mt-2">
                   <div className="flex flex-row">
-                    <Token className="ml-1" />
-                    <Token className="-ml-2" />
+                    <Token className="ml-[-2px] size-[25px] rounded-full border border-black md:size-[35px]" />
+                    <TokenIridescent className="ml-[-6px] size-[25px] rounded-full border-2 border-black md:size-[35px]" />
                   </div>
                   <div className="flex flex-row justify-center">
-                    <Badge variant="secondary" className="p-0.5 px-1 text-3xs">
+                    <Badge
+                      variant="outline"
+                      className="z-20 -mt-1 text-nowrap bg-black p-0 px-px text-[4px] text-white md:-mt-2 md:px-[2px] md:text-3xs"
+                    >
                       {pool.tokens[0].name}
                       {" x "}
                       {pool.tokens[1].name}
@@ -180,26 +187,29 @@ export const MyPositions = () => {
                 </div>
 
                 <div className="flex flex-col items-center">
-                  <div>{usdFormat(pool.staked)}</div>
-                  <div className="text-3xs text-gray-2">No Yield Yet</div>
+                  <div className="text-xs md:text-sm">
+                    {usdFormat(pool.staked)}
+                  </div>
+                  <div className="mt-[-2px] text-[4px] text-gray-2 md:text-3xs">
+                    No Yield Yet
+                  </div>
                 </div>
 
                 <Badge
                   variant="secondary"
-                  className="gap-2 text-nowrap text-2xs"
+                  className="mt-[5px] h-6 w-full justify-center gap-1 text-nowrap p-0 px-1 text-2xs"
                 >
-                  <Position />
-                  <div>$20 Position</div>
+                  <Position className={"size-[6px] md:size-[10px]"} />
+                  <div className="text-4xs md:text-3xs">$20 Position</div>
                 </Badge>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
 
       {pools.length > 0 && (
         <div className="flex flex-col items-center md:hidden">
-          <div className="z-20 mt-[calc(-3rem+1px)] h-4 w-full bg-gradient-to-t from-black to-transparent" />
           <Button
             variant="link"
             className="group flex h-6 flex-row gap-2 text-2xs text-white hover:no-underline"

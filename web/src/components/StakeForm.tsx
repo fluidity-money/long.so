@@ -285,97 +285,99 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
       <div className="mt-[23px] flex flex-col gap-[5px] md:gap-[7px]">
         <motion.div
           layoutId="modal"
-          className="relative flex h-[102px] w-[318px] flex-col justify-between rounded-lg bg-black p-[17px] text-white md:h-[150px] md:w-[392px] md:p-[25px]"
+          className="relative h-[102px] w-[318px] justify-between rounded-lg bg-black p-[17px] text-white md:h-[150px] md:w-[392px] md:p-[25px]"
         >
-          <div
-            className={cn("absolute -top-[15px] left-0 hidden md:flex", {
-              flex: mode === "existing",
-            })}
-          >
-            <Ethereum className="size-[30px] rounded-full border-[3px] border-white" />
-            <Badge
-              variant="outline"
-              className="-ml-2 h-[30px] w-[124px] justify-between border-[3px] bg-black pl-px text-white"
+          <motion.div className="flex flex-col" layout>
+            <div
+              className={cn("absolute -top-[15px] left-0 hidden md:flex", {
+                flex: mode === "existing",
+              })}
             >
-              <Token className="size-[25px] invert" />
-              ƒUSDC - ETH
-            </Badge>
-          </div>
-
-          {mode === "existing" && (
-            <div className="absolute -top-[15px] right-0">
-              <Menu
-                id={"tokens"}
-                background="dark"
-                className={
-                  "flex h-[26px] w-[132px] flex-row items-center justify-center gap-2 rounded-lg bg-black md:h-[28px] md:w-[154px]"
-                }
+              <Ethereum className="size-[30px] rounded-full border-[3px] border-white" />
+              <Badge
+                variant="outline"
+                className="-ml-2 h-[30px] w-[124px] justify-between border-[3px] bg-black pl-px text-white"
               >
-                <Menu.Item
-                  className={"h-[18px]"}
-                  selected={multiSingleToken === "multi"}
-                  onClick={() => setMultiSingleToken("multi")}
-                >
-                  <div className="text-nowrap px-1 text-3xs font-medium md:text-2xs">
-                    Multi-Token
-                  </div>
-                </Menu.Item>
-                <Menu.Item
-                  className={"h-[18px]"}
-                  selected={multiSingleToken === "single"}
-                  onClick={() => setMultiSingleToken("single")}
-                  variant={"iridescent"}
-                >
-                  <div className="text-nowrap px-1 text-3xs font-medium md:text-2xs">
-                    Single-Token
-                  </div>
-                </Menu.Item>
-              </Menu>
+                <Token className="size-[25px] invert" />
+                ƒUSDC - ETH
+              </Badge>
             </div>
-          )}
 
-          <div className="absolute -right-16 top-0 hidden md:inline-flex">
-            <Button
-              size={"sm"}
-              className="h-[30px] w-[48px]"
-              onClick={() => router.back()}
-            >
-              {"<-"} Esc
-            </Button>
-          </div>
+            {mode === "existing" && (
+              <div className="absolute -top-[15px] right-0">
+                <Menu
+                  id={"tokens"}
+                  background="dark"
+                  className={
+                    "flex h-[26px] w-[132px] flex-row items-center justify-center gap-2 rounded-lg bg-black md:h-[28px] md:w-[154px]"
+                  }
+                >
+                  <Menu.Item
+                    className={"h-[18px]"}
+                    selected={multiSingleToken === "multi"}
+                    onClick={() => setMultiSingleToken("multi")}
+                  >
+                    <div className="text-nowrap px-1 text-3xs font-medium md:text-2xs">
+                      Multi-Token
+                    </div>
+                  </Menu.Item>
+                  <Menu.Item
+                    className={"h-[18px]"}
+                    selected={multiSingleToken === "single"}
+                    onClick={() => setMultiSingleToken("single")}
+                    variant={"iridescent"}
+                  >
+                    <div className="text-nowrap px-1 text-3xs font-medium md:text-2xs">
+                      Single-Token
+                    </div>
+                  </Menu.Item>
+                </Menu>
+              </div>
+            )}
 
-          <div className="flex w-full flex-row items-center justify-between md:mt-[10px]">
-            <div className="text-3xs md:hidden">Prime Asset</div>
-            <div className="hidden text-2xs md:flex">Swap</div>
-
-            <div className="text-3xs md:text-2xs">Ethereum</div>
-          </div>
-
-          <div className="mt-[7px] flex w-full flex-row items-center justify-between gap-4">
-            <Input
-              className="-ml-2 border-0 bg-black pl-2 text-2xl"
-              placeholder={"1024.82"}
-              autoFocus
-            />
-
-            <Badge
-              variant="outline"
-              className="flex h-[26px] w-[82px] flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[90px] md:pl-[4px] md:text-base"
-            >
-              <Ethereum className="size-[20px] invert md:size-[25px]" />
-              <div>ETH</div>
-              <ArrowDown className="h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
-            </Badge>
-          </div>
-
-          <div className="mt-[5px] flex w-full flex-row items-center justify-between">
-            <div className="text-2xs md:text-gray-1">$1,025.23</div>
-
-            <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
-              <div>Balance: 1231.01</div>
-              <div className="underline">Max</div>
+            <div className="absolute -right-16 top-0 hidden md:inline-flex">
+              <Button
+                size={"sm"}
+                className="h-[30px] w-[48px]"
+                onClick={() => router.back()}
+              >
+                {"<-"} Esc
+              </Button>
             </div>
-          </div>
+
+            <div className="flex w-full flex-row items-center justify-between md:mt-[10px]">
+              <div className="text-3xs md:hidden">Prime Asset</div>
+              <div className="hidden text-2xs md:flex">Swap</div>
+
+              <div className="text-3xs md:text-2xs">Ethereum</div>
+            </div>
+
+            <div className="mt-[7px] flex w-full flex-row items-center justify-between gap-4">
+              <Input
+                className="-ml-2 border-0 bg-black pl-2 text-2xl"
+                placeholder={"1024.82"}
+                autoFocus
+              />
+
+              <Badge
+                variant="outline"
+                className="flex h-[26px] w-[82px] flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[90px] md:pl-[4px] md:text-base"
+              >
+                <Ethereum className="size-[20px] invert md:size-[25px]" />
+                <div>ETH</div>
+                <ArrowDown className="h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
+              </Badge>
+            </div>
+
+            <div className="mt-[5px] flex w-full flex-row items-center justify-between">
+              <div className="text-2xs md:text-gray-1">$1,025.23</div>
+
+              <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
+                <div>Balance: 1231.01</div>
+                <div className="underline">Max</div>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
 
         <AnimatePresence mode={"popLayout"} initial={false}>
