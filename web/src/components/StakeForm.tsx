@@ -21,6 +21,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { AnimatePresence, motion } from "framer-motion";
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import { Input } from "@/components/ui/input";
+import { useStakeStore } from "@/stores/useStakeStore";
 
 const data = [
   {
@@ -260,9 +261,8 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     "full-range" | "auto" | "custom"
   >("full-range");
   const [breakdownHidden, setBreakdownHidden] = useState(false);
-  const [multiSingleToken, setMultiSingleToken] = useState<"multi" | "single">(
-    "multi",
-  );
+
+  const { multiSingleToken, setMultiSingleToken } = useStakeStore();
 
   const router = useRouter();
 
@@ -277,7 +277,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="z-10 flex flex-col items-center">
       <div className="w-[318px] md:w-[392px]">
         <CampaignBanner />
       </div>
@@ -420,7 +420,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
           id={"fee-tier"}
           background="dark"
           className={
-            "flex h-[26px] w-[82px] flex-row items-center justify-center gap-0 rounded-lg bg-black"
+            "flex h-[26px] w-[82px] flex-row items-center justify-center gap-1 rounded-lg bg-black"
           }
         >
           <Menu.Item
@@ -541,7 +541,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
           <Menu
             id={"liquidity-range"}
             background="dark"
-            className={"flex  flex-row items-center justify-center gap-0 "}
+            className={"flex flex-row items-center justify-center gap-1"}
           >
             <Menu.Item
               selected={liquidityRange === "full-range"}
