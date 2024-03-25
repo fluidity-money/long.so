@@ -95,17 +95,22 @@ export const MyPositions = () => {
   return (
     <motion.div
       layoutId="modal"
-      className="flex w-full flex-col gap-4 rounded-lg bg-black p-4 text-white"
+      className={cn(
+        "flex h-[240px] w-full flex-col gap-4 rounded-lg bg-black p-4 pb-2 text-white transition-[height] md:h-[248px]",
+        {
+          "h-[412px]": expanded,
+        },
+      )}
     >
       <div className="flex flex-row items-center justify-between">
         <div className="text-3xs md:text-2xs">My Positions</div>
-        <Menu id="my-positions-list-grid" background="dark">
+        <Menu id="my-positions-list-grid" className="gap-1" background="dark">
           <Menu.Item
             className={"mx-1 p-0"}
             selected={displayMode === "list"}
             onClick={() => setDisplayMode("list")}
           >
-            <div className={"flex flex-row items-center gap-1 text-2xs"}>
+            <div className={"flex flex-row items-center gap-1 px-1 text-2xs"}>
               <List
                 className={clsx({
                   invert: displayMode === "list",
@@ -119,7 +124,7 @@ export const MyPositions = () => {
             selected={displayMode === "grid"}
             onClick={() => setDisplayMode("grid")}
           >
-            <div className={"flex flex-row items-center gap-1 text-2xs"}>
+            <div className={"flex flex-row items-center gap-1 px-1 text-2xs"}>
               <Grid
                 className={clsx({
                   invert: displayMode === "grid",
@@ -193,11 +198,12 @@ export const MyPositions = () => {
       </div>
 
       {pools.length > 0 && (
-        <div className="flex flex-col items-center ">
+        <div className="flex flex-col items-center md:hidden">
           <div className="z-20 mt-[calc(-3rem+1px)] h-4 w-full bg-gradient-to-t from-black to-transparent" />
           <Button
             variant="link"
-            className="group flex flex-row gap-2 text-2xs text-white hover:no-underline"
+            className="group flex h-6 flex-row gap-2 text-2xs text-white hover:no-underline"
+            size={"sm"}
             onClick={() => setExpanded((v) => !v)}
           >
             {expanded ? (

@@ -283,7 +283,10 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
       </div>
 
       <div className="mt-[23px] flex flex-col gap-[5px] md:gap-[7px]">
-        <div className="relative flex h-[102px] w-[318px] flex-col justify-between rounded-lg bg-black p-[17px] text-white md:h-[150px] md:w-[392px] md:p-[25px]">
+        <motion.div
+          layoutId="modal"
+          className="relative flex h-[102px] w-[318px] flex-col justify-between rounded-lg bg-black p-[17px] text-white md:h-[150px] md:w-[392px] md:p-[25px]"
+        >
           <div
             className={cn("absolute -top-[15px] left-0 hidden md:flex", {
               flex: mode === "existing",
@@ -373,7 +376,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               <div className="underline">Max</div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         <AnimatePresence mode={"popLayout"} initial={false}>
           {(mode === "new" || multiSingleToken === "multi") && (
