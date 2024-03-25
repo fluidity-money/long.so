@@ -244,12 +244,12 @@ export const YieldOverTimeGraph = () => {
 
       <div className="mt-8 flex flex-col gap-2">
         <ReactECharts
-          className="h-[200px]"
+          className="h-[120px]"
           opts={{
-            height: 200,
+            height: 120,
           }}
           style={{
-            height: 200,
+            height: 120,
           }}
           option={{
             grid: {

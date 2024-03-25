@@ -50,7 +50,7 @@ export const columns: ColumnDef<Pool>[] = [
     header: "Total Yield",
     cell: ({ row }) => {
       return (
-        <Badge variant="iridescent" className="text-2xs">
+        <Badge variant="iridescent" className="h-4 px-1 text-2xs">
           {usdFormat(row.original.totalYield)}
         </Badge>
       );
@@ -63,7 +63,7 @@ export const columns: ColumnDef<Pool>[] = [
       return (
         <Button
           variant={"link"}
-          className="hidden p-0 text-2xs text-white md:inline-flex"
+          className="hidden h-6 p-0 text-2xs text-white md:inline-flex"
           size={"sm"}
         >
           <span className="mr-2 underline">Manage</span> {"->"}

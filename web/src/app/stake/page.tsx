@@ -15,13 +15,8 @@ import { YieldBreakdownDrawer } from "@/app/stake/YieldBreakdownDrawer";
 import { YieldBreakdownClaimedDrawer } from "@/app/stake/YieldBreakdownClaimedDrawer";
 
 const Stake = () => {
-  const {
-    welcome,
-    setWelcome,
-    yieldBreakdown,
-    yieldBreakdownClaimed,
-    setYieldBreakdownClaimed,
-  } = useStakeWelcomeBackStore();
+  const { welcome, setWelcome, yieldBreakdown, yieldBreakdownClaimed } =
+    useStakeWelcomeBackStore();
 
   useHotkeys(
     "esc",
@@ -33,17 +28,13 @@ const Stake = () => {
 
   const { isLtSm } = useMediaQuery();
 
-  if (welcome) {
-    return <WelcomeModal />;
-  }
+  if (welcome) return <WelcomeModal />;
 
-  if (yieldBreakdown && !isLtSm) {
-    return <YieldBreakdownModal />;
-  }
+  // modal only shown on desktop
+  if (yieldBreakdown && !isLtSm) return <YieldBreakdownModal />;
 
-  if (yieldBreakdownClaimed && !isLtSm) {
-    return <YieldBreakdownClaimedModal />;
-  }
+  // modal only shown on desktop
+  if (yieldBreakdownClaimed && !isLtSm) return <YieldBreakdownClaimedModal />;
 
   return (
     <>
