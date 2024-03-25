@@ -3,14 +3,28 @@
 import { Button } from "@/components/ui/button";
 import Ethereum from "@/assets/icons/ethereum.svg";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
-export const ConfirmStake = () => {
+interface ConfirmStakeProps {
+  mode: "new" | "existing";
+}
+
+export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
   const router = useRouter();
   return (
     <div className="z-10 flex flex-col items-center">
-      <div className="w-[315px] rounded-lg bg-black text-white md:h-[673px] md:w-[393px]">
+      <div
+        className={cn("w-[315px] rounded-lg bg-black text-white md:w-[393px]", {
+          "md:h-[685px]": mode === "existing",
+          "md:h-[673px] ": mode === "new",
+        })}
+      >
         <div className="flex flex-row items-center justify-between p-[9px]">
-          <div className="p-[6px] text-3xs md:text-xs">Stake Confirmation</div>
+          <div className="p-[6px] text-3xs md:text-xs">
+            {mode === "new"
+              ? "Stake Confirmation"
+              : "Add Liquidity Confirmation"}
+          </div>
           <Button
             size="sm"
             variant={"secondary"}
@@ -23,7 +37,9 @@ export const ConfirmStake = () => {
 
         <div className="mt-[26px] flex flex-col items-center md:mt-[30px]">
           <div className="text-3xs md:text-2xs">
-            Total Deposited Amount in{" "}
+            {mode === "new"
+              ? "Total Deposited Amount in"
+              : "Approximate Total Deposit Amount in"}{" "}
             <span className="hidden md:inline-flex">
               {" "}
               <span className="font-medium underline">$USD</span>
@@ -58,7 +74,16 @@ export const ConfirmStake = () => {
           </div>
         </div>
 
-        <div className="mt-[29px] px-[21px] md:mt-[37px]">
+        <div className="mt-[21px] flex flex-row justify-between px-[21px] text-3xs font-medium md:text-2xs md:font-normal">
+          <div>Expected Shares</div>
+          <div>0.000321568910</div>
+        </div>
+        <div
+          className={cn("px-[21px]", {
+            "mt-[29px] md:mt-[37px]": mode === "new",
+            "md:mt-[16px]": mode === "existing",
+          })}
+        >
           <div className="text-3xs font-medium md:text-2xs md:font-normal">
             Projected Yield
           </div>
