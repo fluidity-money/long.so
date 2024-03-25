@@ -191,7 +191,7 @@ export default function PoolPage() {
   return (
     <div className="flex w-full flex-col">
       <div className="flex max-w-full flex-col-reverse justify-center gap-8 lg:flex-row">
-        <div className="flex w-full flex-col items-center">
+        <div className="flex flex-col items-center">
           <SwapPro override badgeTitle />
         </div>
 
