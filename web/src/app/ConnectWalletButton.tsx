@@ -83,8 +83,6 @@ export const ConnectWalletButton = () => {
               </Badge>
             </div>
           </div>
-
-          
         </SheetContent>
       </Sheet>
     );
