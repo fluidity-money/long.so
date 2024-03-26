@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { useDetectClickOutside } from "react-detect-click-outside";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { Check } from "lucide-react";
+import { Menu } from "@/components";
 
 const address = "0x0000000000000000000000000000000000000000";
 
@@ -21,6 +22,8 @@ export const ConnectWalletButton = () => {
   });
 
   const [copied, setCopied] = useState(false);
+
+  const [content, setContent] = useState<"pools" | "trade">("trade");
 
   /**
    * When copied is set to true this will reset
@@ -115,6 +118,25 @@ export const ConnectWalletButton = () => {
                 {confirmDisconnect && "Disconnect"}
               </Badge>
             </div>
+          </div>
+
+          <div className="mt-[34px] flex flex-col items-center">
+            <Menu id="sidebar-content" background="dark" className="gap-1">
+              <Menu.Item
+                className={"p-1 text-white"}
+                selected={content === "trade"}
+                onClick={() => setContent("trade")}
+              >
+                <div className="text-xs">Trades</div>
+              </Menu.Item>
+              <Menu.Item
+                className={"p-1 text-white"}
+                selected={content === "pools"}
+                onClick={() => setContent("pools")}
+              >
+                <div className="text-xs">Pools</div>
+              </Menu.Item>
+            </Menu>
           </div>
         </SheetContent>
       </Sheet>
