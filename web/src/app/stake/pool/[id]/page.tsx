@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { SwapPro } from "@/components/SwapPro";
 import { useHotkeys } from "react-hotkeys-hook";
 import Token from "@/assets/icons/token.svg";
@@ -11,6 +11,7 @@ import { Line } from "rc-progress";
 import { motion } from "framer-motion";
 import { format, subDays } from "date-fns";
 import ReactECharts from "echarts-for-react";
+import Link from "next/link";
 
 const data = [
   {
@@ -188,6 +189,8 @@ export default function PoolPage() {
 
   useHotkeys("esc", () => router.back());
 
+  const params = useParams();
+
   return (
     <div className="flex w-full flex-col">
       <div className="flex max-w-full flex-col-reverse justify-center gap-8 lg:flex-row">
@@ -241,20 +244,30 @@ export default function PoolPage() {
 
               <div className="flex flex-col gap-8 p-4">
                 <div className="flex flex-row gap-2">
-                  <Button
-                    variant="secondary"
-                    className="flex-1 text-3xs md:text-2xs"
-                    size="sm"
+                  <Link
+                    href={`/stake/pool/${params.id}/add-liquidity`}
+                    legacyBehavior
                   >
-                    + Add Liquidity
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    className="flex-1 text-3xs md:text-2xs"
-                    size="sm"
+                    <Button
+                      variant="secondary"
+                      className="flex-1 text-3xs md:text-2xs"
+                      size="sm"
+                    >
+                      + Add Liquidity
+                    </Button>
+                  </Link>
+                  <Link
+                    href={`/stake/pool/${params.id}/withdraw-liquidity`}
+                    legacyBehavior
                   >
-                    - Withdraw Liquidity
-                  </Button>
+                    <Button
+                      variant="secondary"
+                      className="flex-1 text-3xs md:text-2xs"
+                      size="sm"
+                    >
+                      - Withdraw Liquidity
+                    </Button>
+                  </Link>
                 </div>
 
                 <div className="flex flex-row gap-2">
