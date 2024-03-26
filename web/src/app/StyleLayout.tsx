@@ -4,11 +4,11 @@ import { usePathname, useRouter } from "next/navigation";
 import Superposition from "@/assets/icons/superposition.svg";
 import { MobileNetworkSelection } from "@/app/MobileNetworkSelection";
 import { NetworkSelection } from "@/app/NetworkSelection";
-import { Button } from "@/components/ui/button";
 import { Menu, Text } from "@/components";
 import { Inter } from "next/font/google";
 import { useSwapPro } from "@/stores/useSwapPro";
 import Head from "next/head";
+import { ConnectWalletButton } from "@/app/ConnectWalletButton";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -37,11 +37,9 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
                 <MobileNetworkSelection />
               </div>
 
-              <div className="flex flex-row items-start gap-4">
+              <div className="flex flex-row items-center gap-4">
                 <NetworkSelection />
-                <Button size="sm" color="light" className="h-[26px] text-sm">
-                  Connect Wallet
-                </Button>
+                <ConnectWalletButton />
               </div>
             </div>
             <div className="flex w-full flex-col items-start md:items-center">
