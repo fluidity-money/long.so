@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Cog from "@/assets/icons/cog.svg";
@@ -7,6 +7,10 @@ import Disconnect from "@/assets/icons/disconnect.svg";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useDetectClickOutside } from "react-detect-click-outside";
+import CopyToClipboard from "react-copy-to-clipboard";
+import { Check } from "lucide-react";
+
+const address = "0x0000000000000000000000000000000000000000";
 
 export const ConnectWalletButton = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -16,13 +20,32 @@ export const ConnectWalletButton = () => {
     onTriggered: () => setConfirmDisconnect(false),
   });
 
+  const [copied, setCopied] = useState(false);
+
+  /**
+   * When copied is set to true this will reset
+   * the state after 2 seconds
+   */
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (copied) {
+      timer = setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    }
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [copied]);
+
   if (isConnected) {
     return (
       <Sheet>
         <div className="flex flex-row items-center justify-center gap-[10px] rounded">
           <SheetTrigger asChild>
             <div className="cursor-pointer text-nowrap rounded p-1 text-right text-xs font-semibold text-black transition-all hover:bg-black hover:text-base hover:text-white">
-              0x13s ... c4t
+              {address.slice(0, 5)} ... {address.slice(-3)}
             </div>
           </SheetTrigger>
           <Image
@@ -41,14 +64,24 @@ export const ConnectWalletButton = () => {
                 className={"size-[18px] rounded border border-gray-200"}
               />
 
-              <div className="inline-flex h-4 w-20 items-center justify-start gap-2.5 rounded-[3px] bg-gray-200 px-1 py-0.5">
+              <div className="inline-flex h-4 items-center justify-start gap-2.5 rounded-[3px] bg-gray-200 px-1 py-0.5">
                 <div className="flex items-center justify-end gap-1">
-                  <div className="relative h-[8.54px] w-2">
-                    <div className="absolute left-0 top-0 h-[6.54px] w-[5.90px] rounded-[0.73px] border border-stone-900" />
-                    <div className="absolute left-[2.10px] top-[2px] h-[6.54px] w-[5.90px] rounded-[0.73px] border border-stone-900 bg-gray-200" />
-                  </div>
+                  <CopyToClipboard
+                    text={address}
+                    onCopy={() => setCopied(true)}
+                  >
+                    {copied ? (
+                      <Check className="h-[8.54px] w-2" />
+                    ) : (
+                      <div className="relative h-[8.54px] w-2">
+                        <div className="absolute left-0 top-0 h-[6.54px] w-[5.90px] rounded-[0.73px] border border-stone-900" />
+                        <div className="absolute left-[2.10px] top-[2px] h-[6.54px] w-[5.90px] rounded-[0.73px] border border-stone-900 bg-gray-200" />
+                      </div>
+                    )}
+                  </CopyToClipboard>
+
                   <div className="text-[10px] font-medium text-stone-900">
-                    0x13s ... c4t
+                    {address.slice(0, 5)} ... {address.slice(-3)}
                   </div>
                 </div>
               </div>
