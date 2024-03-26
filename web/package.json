@@ -48,6 +48,7 @@
     "next": "13.4.19",
     "rc-progress": "^3.5.1",
     "react": "18.2.0",
+    "react-detect-click-outside": "^1.1.7",
     "react-dom": "18.2.0",
     "react-hotkeys-hook": "^4.5.0",
     "react-responsive": "^9.0.2",
