@@ -32,7 +32,7 @@ export const ConnectWalletButton = () => {
           />
         </div>
 
-        <SheetContent className="my-1 rounded-lg border-0 bg-black">
+        <SheetContent className="my-2 rounded-lg border-0 bg-black">
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-row items-center gap-1">
               <Image
