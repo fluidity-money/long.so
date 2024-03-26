@@ -15,7 +15,7 @@ export const SuperloopPopover = () => {
   return (
     <div className="relative top-5 flex h-4 w-full flex-row items-end justify-end">
       <Popover>
-        <PopoverTrigger>
+        <PopoverTrigger aria-label="open settings">
           <div className="flex size-[35px] items-center justify-center">
             <Cog className="relative left-1 top-1 size-[30px] hover:size-[35px] hover:animate-spin-once" />
           </div>
