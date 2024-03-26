@@ -17,7 +17,10 @@ export const YieldBreakdownClaimedModal = () => {
       <AlertDialog.Root open={yieldBreakdownClaimed && !isLtSm}>
         <AlertDialog.Portal>
           <AlertDialog.Overlay className="fixed inset-0 z-30 bg-black/80 md:bg-black/50" />
-          <AlertDialog.Content className="z-50 ">
+          <AlertDialog.Content
+            className="z-50"
+            aria-label="yield breakdown claimed modal"
+          >
             <div className="flex flex-col items-center gap-2 px-4">
               <div className="flex flex-col items-center">
                 <motion.div
