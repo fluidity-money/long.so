@@ -252,7 +252,7 @@ const colorGradient = new echarts.graphic.LinearGradient(
 
 interface StakeFormProps {
   mode: "new" | "existing";
-  poolId: string;
+  poolId?: string;
 }
 
 export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
