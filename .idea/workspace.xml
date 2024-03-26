@@ -5,8 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="fix: align dropdown with trigger">
+      <change afterPath="$PROJECT_DIR$/web/src/app/stake/pool/[id]/confirm-withdraw/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/stake/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/stake/pool/[id]/withdraw-liquidity/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/pool/[id]/withdraw-liquidity/page.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,6 +31,17 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/web/src/app/StyleLayout.tsx" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "contexts": [
+    {
+      "name": "gke_basic-breaker-313502_australia-southeast1-a_pegs-gke-production"
+    }
+  ],
+  "isMigrated": true
+}]]></component>
+  <component name="KubernetesSettings">
+    <option name="contextName" value="gke_basic-breaker-313502_australia-southeast1-a_pegs-gke-production" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -75,6 +87,15 @@
     ]
   }
 }</component>
+  <component name="ReactDesignerToolWindowState">
+    <option name="myId2Visible">
+      <map>
+        <entry key="com.intellij.reactbuddy.reactComponents" value="false" />
+        <entry key="com.intellij.reactbuddy.reactInspector" value="false" />
+        <entry key="com.intellij.reactbuddy.storybook" value="false" />
+      </map>
+    </option>
+  </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/web/src/app/stake/_AllPoolsTable" />
@@ -116,6 +137,7 @@
       <workItem from="1710411121066" duration="848000" />
       <workItem from="1710461373541" duration="1864000" />
       <workItem from="1710483040518" duration="5406000" />
+      <workItem from="1711418818164" duration="3354000" />
     </task>
     <task id="LOCAL-00003" summary="fix: align dropdown with trigger">
       <option name="closed" value="true" />
