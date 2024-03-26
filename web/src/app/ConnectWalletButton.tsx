@@ -58,7 +58,7 @@ export const ConnectWalletButton = () => {
           />
         </div>
 
-        <SheetContent className="my-2 rounded-lg border-0 bg-black">
+        <SheetContent className="my-2 rounded-lg border-0 bg-black text-white">
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-row items-center gap-1">
               <Image
@@ -138,6 +138,23 @@ export const ConnectWalletButton = () => {
               </Menu.Item>
             </Menu>
           </div>
+
+          {content === "trade" && (
+            <div className="mt-[34px] flex flex-col items-center">
+              <div className={"text-sm font-medium "}>
+                My Total Trade Rewards
+              </div>
+              <Badge
+                variant={"iridescent"}
+                className={"mt-[12px] text-3xl font-medium"}
+              >
+                $1,337
+              </Badge>
+              <div className="mt-[28px] w-[223px] text-center text-[10px] font-normal text-neutral-400">
+                Earn more by making more transactions!
+              </div>
+            </div>
+          )}
         </SheetContent>
       </Sheet>
     );
