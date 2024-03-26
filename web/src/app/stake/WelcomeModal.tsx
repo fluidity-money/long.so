@@ -16,7 +16,7 @@ export const WelcomeModal = () => {
       <AlertDialog.Root open={welcome}>
         <AlertDialog.Portal>
           <AlertDialog.Overlay className="fixed inset-0 z-30 bg-black/80 md:bg-black/50" />
-          <AlertDialog.Content className="z-50 ">
+          <AlertDialog.Content className="z-50" aria-label="welcome back modal">
             <div className="flex flex-col items-center gap-2 px-4">
               <motion.div
                 className="w-full max-w-[394px]"
