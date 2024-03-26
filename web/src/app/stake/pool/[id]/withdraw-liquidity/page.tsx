@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import Token from "@/assets/icons/token.svg";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
 
 export default function WithdrawLiquidity() {
   const router = useRouter();
@@ -44,6 +45,19 @@ export default function WithdrawLiquidity() {
 
           <div className={"mt-[14px]"}>
             <div className="text-3xs">Your Liquidity Positions</div>
+          </div>
+
+          <div className={"mt-[15px] flex flex-row justify-between gap-2"}>
+            <Badge variant={"outline"}>
+              <div className="text-nowrap text-sm font-semibold text-white">
+                ƒUSDC x ETH
+              </div>
+            </Badge>
+
+            <Input
+              className="border-0 bg-black text-right text-2xl font-medium"
+              placeholder={"0.00375"}
+            />
           </div>
         </motion.div>
       </motion.div>
