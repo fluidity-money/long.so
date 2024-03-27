@@ -1,10 +1,10 @@
 "use client";
 
-import { Menu } from "@/components";
 import { useState } from "react";
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts/core";
 import { format, subDays } from "date-fns";
+import { DurationSegmentedControl } from "@/components/DurationSegmentedControl";
 
 const data = [
   {
@@ -201,43 +201,7 @@ export const YieldOverTimeGraph = () => {
       <div className="flex w-full flex-row items-center justify-between">
         <div className="text-nowrap text-2xs">My Yield Over Time</div>
 
-        <Menu id="yield-over-time-graph-duration">
-          <Menu.Item
-            className="mx-1 p-0.5 text-xs"
-            selected={activeGraphDuration === "7D"}
-            onClick={() => setActiveGraphDuration("7D")}
-          >
-            7D
-          </Menu.Item>
-          <Menu.Item
-            className="mx-1 p-0.5 text-xs"
-            selected={activeGraphDuration === "1M"}
-            onClick={() => setActiveGraphDuration("1M")}
-          >
-            1M
-          </Menu.Item>
-          <Menu.Item
-            className="mx-1 p-0.5 text-xs"
-            selected={activeGraphDuration === "6M"}
-            onClick={() => setActiveGraphDuration("6M")}
-          >
-            6M
-          </Menu.Item>
-          <Menu.Item
-            className="mx-1 p-0.5 text-xs"
-            selected={activeGraphDuration === "1Y"}
-            onClick={() => setActiveGraphDuration("1Y")}
-          >
-            1Y
-          </Menu.Item>
-          <Menu.Item
-            className="mx-1 p-0.5 text-xs"
-            selected={activeGraphDuration === "ALL"}
-            onClick={() => setActiveGraphDuration("ALL")}
-          >
-            ALL
-          </Menu.Item>
-        </Menu>
+        <DurationSegmentedControl />
       </div>
 
       <div className="text-3xl">$12,500.42</div>

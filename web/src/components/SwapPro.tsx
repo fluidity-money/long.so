@@ -3,8 +3,7 @@
 import { useSwapPro } from "@/stores/useSwapPro";
 import { TypographyH2, TypographyH3 } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
-import { Menu } from "@/components/index";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { startCase } from "lodash";
 import { DataTable } from "@/app/_DataTable/DataTable";
 import { columns, Transaction } from "@/app/_DataTable/columns";
@@ -15,6 +14,8 @@ import ReactECharts from "echarts-for-react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import Token from "@/assets/icons/token.svg";
 import Ethereum from "@/assets/icons/ethereum.svg";
+import { DurationSegmentedControl } from "@/components/DurationSegmentedControl";
+import SegmentedControl from "@/components/ui/segmented-control";
 
 const data = [
   {
@@ -192,35 +193,31 @@ const Graph = () => {
     "price" | "volume" | "liquidity"
   >("volume");
 
-  const [activeGraphDuration, setActiveGraphDuration] = useState<
-    "7D" | "1M" | "6M" | "1Y" | "ALL"
-  >("7D");
-
   return (
     <>
-      <Menu id="graph">
-        <Menu.Item
-          className="p-1"
-          selected={activeGraphType === "price"}
-          onClick={() => setActiveGraphType("price")}
-        >
-          <div className="px-1 text-xs">Price</div>
-        </Menu.Item>
-        <Menu.Item
-          className="p-1 text-xs"
-          selected={activeGraphType === "volume"}
-          onClick={() => setActiveGraphType("volume")}
-        >
-          <div className="px-1 text-xs">Volume</div>
-        </Menu.Item>
-        <Menu.Item
-          className="p-1 text-xs"
-          selected={activeGraphType === "liquidity"}
-          onClick={() => setActiveGraphType("liquidity")}
-        >
-          <div className="px-1 text-xs">Liquidity</div>
-        </Menu.Item>
-      </Menu>
+      <div className={"flex flex-row justify-start"}>
+        <SegmentedControl
+          name={"graph-type"}
+          controlRef={useRef()}
+          segments={[
+            {
+              label: "Price",
+              value: "price",
+              ref: useRef(),
+            },
+            {
+              label: "Volume",
+              value: "volume",
+              ref: useRef(),
+            },
+            {
+              label: "Liquidity",
+              value: "liquidity",
+              ref: useRef(),
+            },
+          ]}
+        />
+      </div>
 
       <div className="flex flex-col gap-8">
         <div className="flex flex-row justify-between">
@@ -231,38 +228,7 @@ const Graph = () => {
             </div>
           </div>
 
-          <Menu id="graph-duration">
-            <Menu.Item
-              selected={activeGraphDuration === "7D"}
-              onClick={() => setActiveGraphDuration("7D")}
-            >
-              <div className="p-1 text-xs">7D</div>
-            </Menu.Item>
-            <Menu.Item
-              selected={activeGraphDuration === "1M"}
-              onClick={() => setActiveGraphDuration("1M")}
-            >
-              <div className="p-1 text-xs">1M</div>
-            </Menu.Item>
-            <Menu.Item
-              selected={activeGraphDuration === "6M"}
-              onClick={() => setActiveGraphDuration("6M")}
-            >
-              <div className="p-1 text-xs">6M</div>
-            </Menu.Item>
-            <Menu.Item
-              selected={activeGraphDuration === "1Y"}
-              onClick={() => setActiveGraphDuration("1Y")}
-            >
-              <div className="p-1 text-xs">1Y</div>
-            </Menu.Item>
-            <Menu.Item
-              selected={activeGraphDuration === "ALL"}
-              onClick={() => setActiveGraphDuration("ALL")}
-            >
-              <div className="p-1 text-xs">ALL</div>
-            </Menu.Item>
-          </Menu>
+          <DurationSegmentedControl />
         </div>
         <TypographyH2 className="border-b-0">$12.05</TypographyH2>
 
