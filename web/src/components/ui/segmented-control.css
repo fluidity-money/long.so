@@ -1,0 +1,75 @@
+.selected-item {
+    text-align: center;
+}
+
+.controls-container {
+    --highlight-width: auto;
+    --highlight-x-pos: 0;
+
+    display: flex;
+}
+
+.controls {
+    display: inline-flex;
+    justify-content: space-between;
+    background: transparent;
+    border-radius: 10px;
+    max-width: 500px;
+    margin: auto;
+    overflow: hidden;
+    position: relative;
+    gap: 8px;
+    font-size: 12px;
+    padding: 2.5px;
+}
+
+.controls input {
+    opacity: 0;
+    margin: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    width: 100%;
+    cursor: pointer;
+    height: 100%;
+}
+
+.segment {
+    width: 100%;
+    position: relative;
+    text-align: center;
+    z-index: 1;
+}
+
+.segment label {
+    cursor: pointer;
+    display: block;
+    font-weight: 700;
+    margin-right: 6px;
+    margin-left: 6px;
+    transition: color 0.5s ease;
+}
+
+.segment.active label {
+    color: #fff;
+}
+
+.controls::before {
+    content: "";
+    background: #1E1E1E;
+    border-radius: 4px;
+    width: var(--highlight-width);
+    transform: translateX(var(--highlight-x-pos));
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 0;
+}
+
+/* Only allow transitions once component is ready */
+.controls.ready::before {
+    transition: transform 0.3s ease, width 0.3s ease;
+}
