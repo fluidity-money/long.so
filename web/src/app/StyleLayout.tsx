@@ -72,7 +72,7 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </header>
 
-        {children}
+        <div className={"z-10"}>{children}</div>
 
         <footer className="w-full p-8">
           <div className="flex flex-row justify-between">
