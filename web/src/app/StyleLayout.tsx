@@ -26,7 +26,9 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
       <Head>
         <title>Superposition AMM</title>
       </Head>
-      <body className={`${inter.className} flex flex-col bg-white`}>
+      <body
+        className={`${inter.className} flex min-h-screen flex-col bg-white`}
+      >
         <div className="iridescent-blur absolute left-1/2 top-[180px] size-full max-h-[305px] max-w-[557px] -translate-x-1/2" />
 
         <header className="p-8">
@@ -72,9 +74,9 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </header>
 
-        <div className={"z-10"}>{children}</div>
+        <div className={"z-10 flex-1"}>{children}</div>
 
-        <footer className="w-full p-8">
+        <footer className="w-full self-end p-8">
           <div className="flex flex-row justify-between">
             <div>1002130192</div>
             <div>Version 0.0.1</div>
