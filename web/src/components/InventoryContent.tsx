@@ -424,6 +424,11 @@ export const InventoryContent = () => {
   const unclaimedRef = useRef();
   const allRef = useRef();
   const historicalRef = useRef();
+
+  const [yieldType, setYieldType] = useState<
+    "unclaimed" | "all" | "historical"
+  >("unclaimed");
+
   return (
     <div className="flex flex-col items-center">
       <div className="flex w-full flex-row items-center justify-between">
@@ -622,9 +627,13 @@ export const InventoryContent = () => {
       {content === "pools" && (
         <div className={"flex flex-col items-center"}>
           <div
-            className={
-              "iridescent mt-[22px] flex w-[284px] flex-col items-center rounded p-[10px] text-black md:w-[300px]"
-            }
+            className={cn(
+              "mt-[22px] flex w-[284px] flex-col items-center rounded p-[10px] transition-colors md:w-[300px]",
+              {
+                "iridescent text-black": yieldType === "unclaimed",
+                "border border-white text-white": yieldType !== "unclaimed",
+              },
+            )}
           >
             <div
               className={"flex w-full flex-row items-center justify-between"}
@@ -632,21 +641,24 @@ export const InventoryContent = () => {
               <div className={"text-[10px]"}>My Yield</div>
 
               <SegmentedControl
+                name={"yield-type"}
                 className={"text-[10px]"}
+                variant={yieldType === "unclaimed" ? undefined : "secondary"}
+                callback={(val) => setYieldType(val)}
                 segments={[
                   {
                     label: "Unclaimed",
-                    value: "unclaimed",
+                    value: "unclaimed" as const,
                     ref: unclaimedRef,
                   },
                   {
                     label: "All",
-                    value: "all",
+                    value: "all" as const,
                     ref: allRef,
                   },
                   {
                     label: "Historical",
-                    value: "historical",
+                    value: "historical" as const,
                     ref: historicalRef,
                   },
                 ]}
