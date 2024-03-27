@@ -3,17 +3,15 @@ import ArrowDown from "@/assets/icons/arrow-down.svg";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import SPNTest from "@/assets/icons/spn-test.svg";
 import Ethereum from "@/assets/icons/ethereum.svg";
-import { useWelcomeStore } from "@/stores/useWelcomeStore";
 
 export const NetworkSelection = () => {
-  const { setWelcome } = useWelcomeStore();
   return (
-    <DropdownMenu.Root onOpenChange={() => setWelcome(false)}>
+    <DropdownMenu.Root>
       <DropdownMenu.Trigger className="group">
         <Badge
           variant="invert"
           className={
-            "hidden h-[28px] w-[93px] rounded-2xl px-0.5 transition-[width] group-hover:w-[105px] group-data-[state=open]:w-[105px] group-data-[state=open]:rounded-b-none group-data-[state=open]:border-b-0 md:inline-flex"
+            "hidden h-[28px] w-[93px] rounded-2xl px-0.5 transition-[width] group-hover:w-[110px] group-data-[state=open]:w-[110px] group-data-[state=open]:rounded-b-none group-data-[state=open]:border-b-0 md:inline-flex"
           }
         >
           <div className="flex-col">
@@ -30,7 +28,7 @@ export const NetworkSelection = () => {
         </Badge>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className="-mt-2 flex w-[105px] flex-col gap-0.5 rounded-2xl rounded-t-none border border-t-0 border-black bg-white p-2 text-xs">
+        <DropdownMenu.Content className="-mt-2 flex w-[110px] flex-col gap-0.5 rounded-2xl rounded-t-none border border-t-0 border-black bg-white p-2 text-xs">
           <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
             <Ethereum className={"size-[12px]"} /> Ethereum
           </DropdownMenu.Item>
