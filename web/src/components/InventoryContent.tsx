@@ -713,10 +713,13 @@ export const InventoryContent = () => {
               </div>
             </Button>
             <Badge
-              className={"-mt-1.5 h-[12px] border border-black text-[7px]"}
+              className={
+                "-mt-1.5 h-[12px] gap-1 border border-black px-1 text-[7px]"
+              }
               variant={"iridescent"}
             >
-              <Token /> $41.12
+              <Token className={"size-[10px]"} />
+              <div>$41.12</div>
             </Badge>
           </div>
         </div>
