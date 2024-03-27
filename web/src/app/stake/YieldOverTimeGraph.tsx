@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts/core";
 import { format, subDays } from "date-fns";
@@ -192,10 +191,6 @@ const colorGradient = new echarts.graphic.LinearGradient(
 );
 
 export const YieldOverTimeGraph = () => {
-  const [activeGraphDuration, setActiveGraphDuration] = useState<
-    "7D" | "1M" | "6M" | "1Y" | "ALL"
-  >("7D");
-
   return (
     <>
       <div className="flex w-full flex-row items-center justify-between">

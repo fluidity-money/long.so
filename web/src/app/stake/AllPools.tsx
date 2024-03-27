@@ -1,14 +1,13 @@
 "use client";
 
-import { Menu } from "@/components";
 import List from "@/assets/icons/list.svg";
-import { clsx } from "clsx";
 import Grid from "@/assets/icons/grid.svg";
 import { AllPoolsTable } from "@/app/stake/_AllPoolsTable/AllPoolsTable";
 import { columns, Pool } from "@/app/stake/_AllPoolsTable/columns";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import { AllPoolsFilter } from "@/app/stake/AllPoolsFilter";
+import SegmentedControl from "@/components/ui/segmented-control";
 
 const pools: Pool[] = [
   {
@@ -74,45 +73,37 @@ const pools: Pool[] = [
 ];
 
 const DisplayModeMenu = ({
-  displayMode,
   setDisplayMode,
-  id,
 }: {
-  displayMode: "list" | "grid";
   setDisplayMode: (mode: "list" | "grid") => void;
-  id: string;
 }) => {
   return (
-    <Menu id={`all-pools-list-grid-${id}`} className="gap-1">
-      <Menu.Item
-        className={"mx-1 p-0"}
-        selected={displayMode === "list"}
-        onClick={() => setDisplayMode("list")}
-      >
-        <div className={"flex flex-row items-center gap-1 px-1 text-2xs"}>
-          <List
-            className={clsx({
-              invert: displayMode !== "list",
-            })}
-          />
-          List
-        </div>
-      </Menu.Item>
-      <Menu.Item
-        className={"mx-1 p-0"}
-        selected={displayMode === "grid"}
-        onClick={() => setDisplayMode("grid")}
-      >
-        <div className={"flex flex-row items-center gap-1 px-1 text-2xs"}>
-          <Grid
-            className={clsx({
-              invert: displayMode !== "grid",
-            })}
-          />
-          Grid
-        </div>
-      </Menu.Item>
-    </Menu>
+    <SegmentedControl
+      name={"display-mode"}
+      callback={(val) => setDisplayMode(val)}
+      segments={[
+        {
+          label: (
+            <div className={"flex flex-row items-center gap-1"}>
+              <List className={"invert"} />
+              List
+            </div>
+          ),
+          value: "list",
+          ref: useRef(),
+        },
+        {
+          label: (
+            <div className={"flex flex-row items-center gap-1"}>
+              <Grid className={"invert"} />
+              Grid
+            </div>
+          ),
+          value: "grid",
+          ref: useRef(),
+        },
+      ]}
+    />
   );
 };
 
@@ -127,11 +118,7 @@ export const AllPools = () => {
 
           {/* only shown on mobile */}
           <div className="md:hidden">
-            <DisplayModeMenu
-              id={"1"}
-              displayMode={displayMode}
-              setDisplayMode={setDisplayMode}
-            />
+            <DisplayModeMenu setDisplayMode={setDisplayMode} />
           </div>
         </div>
 
@@ -159,11 +146,7 @@ export const AllPools = () => {
             {/* not shown on mobile */}
             <div className="hidden flex-col justify-end md:flex">
               <div>
-                <DisplayModeMenu
-                  id={"2"}
-                  displayMode={displayMode}
-                  setDisplayMode={setDisplayMode}
-                />
+                <DisplayModeMenu setDisplayMode={setDisplayMode} />
               </div>
             </div>
           </div>

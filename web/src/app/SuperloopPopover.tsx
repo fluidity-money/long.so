@@ -2,8 +2,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import Cog from "@/assets/icons/cog.svg";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Menu } from "@/components";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import SegmentedControl from "@/components/ui/segmented-control";
 
 /**
  * Popover which contains the Superloop settings.
@@ -36,43 +36,27 @@ export const SuperloopPopover = () => {
             <div className="flex flex-row justify-between">
               <p>Max. slippage</p>
 
-              <Menu id="slippage" background="dark">
-                <Menu.Item
-                  selected={autoSlippage}
-                  onClick={() => setAutoSlippage(true)}
-                  className={"mx-1 p-0"}
-                >
-                  Auto
-                </Menu.Item>
-                <Menu.Item
-                  selected={!autoSlippage}
-                  onClick={() => setAutoSlippage(false)}
-                  className={"mx-1 p-0"}
-                >
-                  Custom
-                </Menu.Item>
-              </Menu>
+              <SegmentedControl
+                variant={"secondary"}
+                segments={[
+                  { label: "Auto", value: "auto" as const, ref: useRef() },
+                  { label: "Custom", value: "custom" as const, ref: useRef() },
+                ]}
+                callback={(val) => setAutoSlippage(val === "auto")}
+              />
             </div>
 
             <div className="flex flex-row justify-between">
               <p>Transaction deadline</p>
 
-              <Menu id="transaction-deadline" background="dark">
-                <Menu.Item
-                  selected={noTransactionDeadline}
-                  onClick={() => setNoTransactionDeadline(true)}
-                  className={"mx-1 p-0"}
-                >
-                  Auto
-                </Menu.Item>
-                <Menu.Item
-                  selected={!noTransactionDeadline}
-                  onClick={() => setNoTransactionDeadline(false)}
-                  className={"mx-1 p-0"}
-                >
-                  Custom
-                </Menu.Item>
-              </Menu>
+              <SegmentedControl
+                variant={"secondary"}
+                segments={[
+                  { label: "Auto", value: "auto" as const, ref: useRef() },
+                  { label: "Custom", value: "custom" as const, ref: useRef() },
+                ]}
+                callback={(val) => setNoTransactionDeadline(val === "auto")}
+              />
             </div>
           </div>
         </PopoverContent>

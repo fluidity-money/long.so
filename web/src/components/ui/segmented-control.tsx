@@ -1,22 +1,45 @@
-import { useEffect, useRef, useState } from "react";
-import "./segmented-control.css";
-import { cn } from "@/lib/utils";
+"use client";
 
-const SegmentedControl = ({
-  name,
+import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
+import { cva, VariantProps } from "class-variance-authority";
+
+const segmentedControlVariants = cva(
+  "relative m-auto inline-flex justify-between gap-2 overflow-hidden p-[2.5px] before:absolute before:inset-0 before:z-0 before:w-[var(--highlight-width)] before:translate-x-[var(--highlight-x-pos)] before:rounded-md before:bg-black before:transition-all before:content-['']",
+  {
+    variants: {
+      variant: {
+        secondary: "text-white before:bg-white",
+      },
+    },
+  },
+);
+
+export interface Segment<T extends string> {
+  label: React.ReactNode;
+  value: T;
+  ref: React.MutableRefObject<any>;
+}
+
+export interface SegmentedControlProps<T extends string>
+  extends VariantProps<typeof segmentedControlVariants> {
+  segments: Segment<T>[];
+  callback?: (value: T, index: number) => void;
+  defaultIndex?: number;
+  className?: string;
+  name?: string;
+}
+
+const SegmentedControl = <T extends string>({
   segments,
   callback,
   defaultIndex = 0,
-  controlRef,
   className,
-}: any) => {
+  variant,
+  name,
+}: SegmentedControlProps<T>) => {
   const [activeIndex, setActiveIndex] = useState(defaultIndex);
-  const componentReady = useRef<boolean>();
-
-  // Determine when the component is "ready"
-  useEffect(() => {
-    componentReady.current = true;
-  }, []);
+  const controlRef = useRef<any>();
 
   useEffect(() => {
     const activeSegmentRef = segments[activeIndex].ref;
@@ -33,23 +56,39 @@ const SegmentedControl = ({
   };
 
   return (
-    <div className={cn("controls-container", className)} ref={controlRef}>
-      <div className={`controls ${componentReady.current ? "ready" : "idle"}`}>
+    <div
+      className={cn("flex flex-row text-[12px]", className)}
+      ref={controlRef}
+    >
+      <div className={cn(segmentedControlVariants({ variant }))}>
         {segments?.map((item: any, i: number) => (
           <div
             key={item.value}
-            className={`segment ${i === activeIndex ? "active" : "inactive"}`}
+            className={"relative z-10 w-full text-center"}
             ref={item.ref}
           >
             <input
               type="radio"
               value={item.value}
-              id={item.value}
-              name={name}
+              id={`${name}-${item.value}`}
               onChange={() => onInputChange(item.value, i)}
               checked={i === activeIndex}
+              name={name}
+              className={
+                "absolute inset-0 m-0 size-full cursor-pointer opacity-0"
+              }
             />
-            <label htmlFor={item.value}>{item.label}</label>
+            <label
+              id={`${name}-${item.value}`}
+              className={cn(
+                "mx-[6px] block cursor-pointer text-nowrap font-medium transition-colors",
+                {
+                  invert: i === activeIndex,
+                },
+              )}
+            >
+              {item.label}
+            </label>
           </div>
         ))}
       </div>
