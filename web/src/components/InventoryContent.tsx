@@ -22,6 +22,13 @@ import Ethereum from "@/assets/icons/ethereum.svg";
 import { useConnectionStore } from "@/stores/useConnectionStore";
 import SegmentedControl from "@/components/ui/segmented-control";
 import { DurationSegmentedControl } from "@/components/DurationSegmentedControl";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const address = "0x0000000000000000000000000000000000000000";
 
@@ -515,8 +522,20 @@ export const InventoryContent = () => {
             </div>
             <DurationSegmentedControl
               variant={"secondary"}
-              className={"text-[10px]"}
+              className={"hidden text-[10px] md:flex"}
             />
+            <Select>
+              <SelectTrigger className="w-[90px] border-0 bg-transparent text-right text-[10px]">
+                <SelectValue defaultValue={"7D"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7D">7 Days</SelectItem>
+                <SelectItem value="1M">1 Month</SelectItem>
+                <SelectItem value="6M">6 Months</SelectItem>
+                <SelectItem value="1Y">1 Year</SelectItem>
+                <SelectItem value="ALL">All Time</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <ReactECharts
