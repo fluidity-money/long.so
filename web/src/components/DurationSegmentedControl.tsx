@@ -1,9 +1,20 @@
 import { useRef } from "react";
-import SegmentedControl from "@/components/ui/segmented-control";
+import SegmentedControl, {
+  SegmentedControlProps,
+} from "@/components/ui/segmented-control";
 
-export const DurationSegmentedControl = () => {
+export const DurationSegmentedControl = ({
+  className,
+  variant,
+}: {
+  className?: string;
+  variant?: SegmentedControlProps<string>["variant"];
+}) => {
   return (
     <SegmentedControl
+      name={"duration"}
+      className={className}
+      variant={variant}
       segments={[
         {
           label: "7D",

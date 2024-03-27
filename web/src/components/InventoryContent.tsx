@@ -7,7 +7,6 @@ import Cog from "@/assets/icons/cog.svg";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import Disconnect from "@/assets/icons/disconnect.svg";
-import { Menu } from "@/components/index";
 import ReactECharts from "echarts-for-react";
 import { format, subDays, subHours, subMinutes, subWeeks } from "date-fns";
 import { TransactionHistoryTable } from "@/app/_TransactionHistoryTable/TransactionHistoryTable";
@@ -15,12 +14,14 @@ import {
   columns,
   TransactionHistory,
 } from "@/app/_TransactionHistoryTable/columns";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDetectClickOutside } from "react-detect-click-outside";
 import { nanoid } from "nanoid";
 import Token from "@/assets/icons/token.svg";
 import Ethereum from "@/assets/icons/ethereum.svg";
 import { useConnectionStore } from "@/stores/useConnectionStore";
+import SegmentedControl from "@/components/ui/segmented-control";
+import { DurationSegmentedControl } from "@/components/DurationSegmentedControl";
 
 const address = "0x0000000000000000000000000000000000000000";
 
@@ -472,22 +473,23 @@ export const InventoryContent = () => {
       </div>
 
       <div className="mt-[29px] flex flex-col items-center md:mt-[34px]">
-        <Menu id="sidebar-content" background="dark" className="gap-1">
-          <Menu.Item
-            className={"p-1 text-white"}
-            selected={content === "trade"}
-            onClick={() => setContent("trade")}
-          >
-            <div className="text-xs">Trades</div>
-          </Menu.Item>
-          <Menu.Item
-            className={"p-1 text-white"}
-            selected={content === "pools"}
-            onClick={() => setContent("pools")}
-          >
-            <div className="text-xs">Pools</div>
-          </Menu.Item>
-        </Menu>
+        <SegmentedControl
+          name={"inventory-content"}
+          variant={"secondary"}
+          callback={(val) => setContent(val)}
+          segments={[
+            {
+              label: "Trades",
+              value: "trade" as const,
+              ref: useRef(),
+            },
+            {
+              label: "Pools",
+              value: "pools" as const,
+              ref: useRef(),
+            },
+          ]}
+        />
       </div>
 
       {content === "trade" && (
@@ -511,42 +513,10 @@ export const InventoryContent = () => {
             <div className="text-[10px] font-medium">
               Trader Rewards Over Time
             </div>
-            <Menu
-              id="trader-rewards-over-time"
-              background={"dark"}
-              className={"gap-1"}
-            >
-              <Menu.Item
-                selected={activeGraphDuration === "7D"}
-                onClick={() => setActiveGraphDuration("7D")}
-              >
-                <div className="px-1 text-[10px]">7D</div>
-              </Menu.Item>
-              <Menu.Item
-                selected={activeGraphDuration === "1M"}
-                onClick={() => setActiveGraphDuration("1M")}
-              >
-                <div className="px-1 text-[10px]">1M</div>
-              </Menu.Item>
-              <Menu.Item
-                selected={activeGraphDuration === "6M"}
-                onClick={() => setActiveGraphDuration("6M")}
-              >
-                <div className="px-1 text-[10px]">6M</div>
-              </Menu.Item>
-              <Menu.Item
-                selected={activeGraphDuration === "1Y"}
-                onClick={() => setActiveGraphDuration("1Y")}
-              >
-                <div className="px-1 text-[10px]">1Y</div>
-              </Menu.Item>
-              <Menu.Item
-                selected={activeGraphDuration === "ALL"}
-                onClick={() => setActiveGraphDuration("ALL")}
-              >
-                <div className="px-1 text-[10px]">All</div>
-              </Menu.Item>
-            </Menu>
+            <DurationSegmentedControl
+              variant={"secondary"}
+              className={"text-[10px]"}
+            />
           </div>
 
           <ReactECharts

@@ -5,16 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="fix: align dropdown with trigger">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/SuperloopPopover.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/SuperloopPopover.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/stake/AllPools.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/AllPools.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/stake/MyPositions.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/MyPositions.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/stake/YieldOverTimeGraph.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/YieldOverTimeGraph.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/DurationSegmentedControl.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/DurationSegmentedControl.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/StakeForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/StakeForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/SwapPro.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/SwapPro.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/ui/segmented-control.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/ui/segmented-control.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/ui/segmented-control.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/InventoryContent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/InventoryContent.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
