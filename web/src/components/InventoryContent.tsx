@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "./ui/button";
 
 const address = "0x0000000000000000000000000000000000000000";
 
@@ -419,6 +420,10 @@ export const InventoryContent = () => {
     "7D" | "1M" | "6M" | "1Y" | "ALL"
   >("7D");
 
+  // refs for segmented control
+  const unclaimedRef = useRef();
+  const allRef = useRef();
+  const historicalRef = useRef();
   return (
     <div className="flex flex-col items-center">
       <div className="flex w-full flex-row items-center justify-between">
@@ -611,6 +616,109 @@ export const InventoryContent = () => {
             columns={columns}
             data={transactionHistory}
           />
+        </div>
+      )}
+
+      {content === "pools" && (
+        <div className={"flex flex-col items-center"}>
+          <div
+            className={
+              "iridescent mt-[22px] flex w-[284px] flex-col items-center rounded p-[10px] text-black md:w-[300px]"
+            }
+          >
+            <div
+              className={"flex w-full flex-row items-center justify-between"}
+            >
+              <div className={"text-[10px]"}>My Yield</div>
+
+              <SegmentedControl
+                className={"text-[10px]"}
+                segments={[
+                  {
+                    label: "Unclaimed",
+                    value: "unclaimed",
+                    ref: unclaimedRef,
+                  },
+                  {
+                    label: "All",
+                    value: "all",
+                    ref: allRef,
+                  },
+                  {
+                    label: "Historical",
+                    value: "historical",
+                    ref: historicalRef,
+                  },
+                ]}
+              />
+            </div>
+
+            <div className={"mt-[14px] text-[30px]"}>$41.12</div>
+
+            <div>
+              <Badge className={"h-[14px] px-0.5 text-[8px]"}>
+                <Token />
+                <Token className={"-ml-1"} />
+                <Token className={"-ml-1"} />
+                <Token className={"-ml-1 mr-1"} />
+                Unclaimed Rewards
+              </Badge>
+            </div>
+
+            <div
+              className={
+                "mt-[18px] flex h-[64px] w-[240px] flex-col justify-between"
+              }
+            >
+              <div
+                className={"flex w-full flex-row justify-between text-[10px]"}
+              >
+                <div>Pool Fees</div>
+                <div className="flex flex-row items-center gap-1">
+                  <Token /> $21.72
+                </div>
+              </div>
+
+              <div
+                className={"flex w-full flex-row justify-between text-[10px]"}
+              >
+                <div>Liquidity Boosts</div>
+                <div className="flex flex-row items-center gap-1">
+                  <Token /> $13.06
+                </div>
+              </div>
+
+              <div
+                className={"flex w-full flex-row justify-between text-[10px]"}
+              >
+                <div>Super Boosts</div>
+                <div className="flex flex-row items-center gap-1">
+                  <Token /> $8.34
+                </div>
+              </div>
+
+              <div
+                className={"flex w-full flex-row justify-between text-[10px]"}
+              >
+                <div>Utility Boosts</div>
+                <div className="flex flex-row items-center gap-1">
+                  <Token /> $2.99
+                </div>
+              </div>
+            </div>
+
+            <Button className={"mt-[17px] w-full"}>
+              <div className={"iridescent-text text-[10px]"}>
+                Claim All Yield
+              </div>
+            </Button>
+            <Badge
+              className={"-mt-1.5 h-[12px] border border-black text-[7px]"}
+              variant={"iridescent"}
+            >
+              <Token /> $41.12
+            </Badge>
+          </div>
         </div>
       )}
     </div>
