@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="fix: align dropdown with trigger">
-      <change beforePath="$PROJECT_DIR$/web/src/app/StyleLayout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/StyleLayout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/ConnectWalletButton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/ConnectWalletButton.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

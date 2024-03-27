@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { InventoryContent } from "@/components/InventoryContent";
 import { useConnectionStore } from "@/stores/useConnectionStore";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const address = "0x0000000000000000000000000000000000000000";
 
@@ -14,6 +14,7 @@ export const ConnectWalletButton = () => {
   const { isLtSm } = useMediaQuery();
 
   const router = useRouter();
+  const pathname = usePathname();
 
   if (isConnected && !isLtSm) {
     return (
@@ -35,6 +36,25 @@ export const ConnectWalletButton = () => {
           <InventoryContent />
         </SheetContent>
       </Sheet>
+    );
+  }
+
+  if (isConnected && isLtSm && pathname === "/swap/inventory") {
+    return (
+      <div className="flex flex-row items-center justify-center gap-[10px] rounded">
+        <Button
+          size={"sm"}
+          className={"h-[28px]"}
+          onClick={() => router.back()}
+        >
+          X Close
+        </Button>
+        <Image
+          src={require("@/assets/profile-picture.png")}
+          alt={"profile picture"}
+          className={"size-[28px] rounded"}
+        />
+      </div>
     );
   }
 
