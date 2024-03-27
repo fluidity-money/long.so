@@ -26,7 +26,7 @@ export const columns: ColumnDef<TransactionHistory>[] = [
     header: "Trades",
     cell: ({ row }) => {
       return (
-        <div className="flex flex-row items-center gap-1 pr-6">
+        <div className="flex flex-row items-center gap-1 md:pr-6">
           {row.original.tokens[0].icon}
           {row.original.tokens[0].name} {"->"} {row.original.tokens[1].icon}
           {row.original.tokens[1].name}
@@ -38,7 +38,7 @@ export const columns: ColumnDef<TransactionHistory>[] = [
     accessorKey: "rewards",
     header: "Rewards",
     cell: ({ row }) => (
-      <div className="pr-6">
+      <div className="md:pr-6">
         <Badge
           variant={"secondary"}
           className={"h-4 px-0.5 text-[10px] font-semibold"}
