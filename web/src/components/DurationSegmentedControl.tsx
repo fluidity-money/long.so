@@ -4,8 +4,6 @@ import SegmentedControl from "@/components/ui/segmented-control";
 export const DurationSegmentedControl = () => {
   return (
     <SegmentedControl
-      name={"duration-segment-control"}
-      controlRef={useRef()}
       segments={[
         {
           label: "7D",

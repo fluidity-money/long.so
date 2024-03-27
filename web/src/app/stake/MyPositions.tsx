@@ -1,10 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Menu } from "@/components";
 import List from "@/assets/icons/list.svg";
-import { clsx } from "clsx";
 import Grid from "@/assets/icons/grid.svg";
 import { cn } from "@/lib/utils";
 import { MyPositionsTable } from "@/app/stake/_MyPositionsTable/MyPositionsTable";
@@ -18,6 +16,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Token from "@/assets/icons/token.svg";
 import TokenIridescent from "@/assets/icons/token-iridescent.svg";
+import SegmentedControl from "@/components/ui/segmented-control";
 
 const pools: Pool[] = [
   {
@@ -106,36 +105,32 @@ export const MyPositions = () => {
     >
       <div className="flex flex-row items-center justify-between">
         <div className="text-3xs md:text-2xs">My Positions</div>
-        <Menu id="my-positions-list-grid" className="gap-1" background="dark">
-          <Menu.Item
-            className={"mx-1 p-0"}
-            selected={displayMode === "list"}
-            onClick={() => setDisplayMode("list")}
-          >
-            <div className={"flex flex-row items-center gap-1 px-1 text-2xs"}>
-              <List
-                className={clsx({
-                  invert: displayMode === "list",
-                })}
-              />
-              List
-            </div>
-          </Menu.Item>
-          <Menu.Item
-            className={"mx-1 p-0"}
-            selected={displayMode === "grid"}
-            onClick={() => setDisplayMode("grid")}
-          >
-            <div className={"flex flex-row items-center gap-1 px-1 text-2xs"}>
-              <Grid
-                className={clsx({
-                  invert: displayMode === "grid",
-                })}
-              />
-              Grid
-            </div>
-          </Menu.Item>
-        </Menu>
+
+        <SegmentedControl
+          variant={"secondary"}
+          segments={[
+            {
+              label: (
+                <div className={"flex flex-row items-center gap-1"}>
+                  <List />
+                  List
+                </div>
+              ),
+              value: "list",
+              ref: useRef(),
+            },
+            {
+              label: (
+                <div className={"flex flex-row items-center gap-1"}>
+                  <Grid />
+                  Grid
+                </div>
+              ),
+              value: "grid",
+              ref: useRef(),
+            },
+          ]}
+        />
       </div>
 
       <div

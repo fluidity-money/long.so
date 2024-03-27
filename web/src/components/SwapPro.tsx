@@ -197,8 +197,6 @@ const Graph = () => {
     <>
       <div className={"flex flex-row justify-start"}>
         <SegmentedControl
-          name={"graph-type"}
-          controlRef={useRef()}
           segments={[
             {
               label: "Price",

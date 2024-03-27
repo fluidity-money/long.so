@@ -7,7 +7,7 @@ import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import Padlock from "@/assets/icons/padlock.svg";
 import Token from "@/assets/icons/token.svg";
 import { Menu, Slider } from "@/components";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import { format, subDays } from "date-fns";
 import * as echarts from "echarts/core";
@@ -22,6 +22,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import { Input } from "@/components/ui/input";
 import { useStakeStore } from "@/stores/useStakeStore";
+import SegmentedControl from "@/components/ui/segmented-control";
 
 const data = [
   {
@@ -257,9 +258,7 @@ interface StakeFormProps {
 
 export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
   const [feeTier, setFeeTier] = useState<"auto" | "manual">("auto");
-  const [liquidityRange, setLiquidityRange] = useState<
-    "full-range" | "auto" | "custom"
-  >("full-range");
+
   const [breakdownHidden, setBreakdownHidden] = useState(false);
 
   const { multiSingleToken, setMultiSingleToken } = useStakeStore();
@@ -421,28 +420,23 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
       <div className="mt-[12px] flex w-[318px] flex-row items-center justify-between md:w-[392px]">
         <div className="text-3xs md:text-2xs">Fee Tier</div>
 
-        <Menu
-          id={"fee-tier"}
-          background="dark"
-          className={
-            "flex h-[26px] w-[82px] flex-row items-center justify-center gap-1 rounded-lg bg-black"
-          }
-        >
-          <Menu.Item
-            selected={feeTier === "auto"}
-            onClick={() => setFeeTier("auto")}
-            className={"h-[18px] w-[33px] text-white"}
-          >
-            <div className={"text-3xs md:text-2xs"}>Auto</div>
-          </Menu.Item>
-          <Menu.Item
-            selected={feeTier === "manual"}
-            onClick={() => setFeeTier("manual")}
-            className={"h-[18px] w-[40px] text-white"}
-          >
-            <div className={"text-3xs md:text-2xs"}>Manual</div>
-          </Menu.Item>
-        </Menu>
+        <SegmentedControl
+          variant={"secondary"}
+          className={"h-[26px] rounded-lg bg-black text-3xs md:text-2xs"}
+          callback={(val) => setFeeTier(val)}
+          segments={[
+            {
+              label: "Auto",
+              value: "auto" as const,
+              ref: useRef(),
+            },
+            {
+              label: "Manual",
+              value: "manual" as const,
+              ref: useRef(),
+            },
+          ]}
+        />
       </div>
 
       <AnimatePresence initial={false} mode="popLayout">
@@ -543,33 +537,27 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
         <div className="flex w-full flex-row items-center justify-between">
           <div className="text-3xs md:text-2xs">Liquidity Range</div>
 
-          <Menu
-            id={"liquidity-range"}
-            background="dark"
-            className={"flex flex-row items-center justify-center gap-1"}
-          >
-            <Menu.Item
-              selected={liquidityRange === "full-range"}
-              onClick={() => setLiquidityRange("full-range")}
-              className={"h-[17px] px-1 text-white"}
-            >
-              <div className={"text-3xs md:text-2xs"}>Full Range</div>
-            </Menu.Item>
-            <Menu.Item
-              selected={liquidityRange === "auto"}
-              onClick={() => setLiquidityRange("auto")}
-              className={"h-[17px] px-1 text-white"}
-            >
-              <div className={"text-3xs md:text-2xs"}>Auto</div>
-            </Menu.Item>
-            <Menu.Item
-              selected={liquidityRange === "custom"}
-              onClick={() => setLiquidityRange("custom")}
-              className={"h-[17px] px-1 text-white"}
-            >
-              <div className={"text-3xs md:text-2xs"}>Custom</div>
-            </Menu.Item>
-          </Menu>
+          <SegmentedControl
+            variant={"secondary"}
+            className={"text-3xs md:text-2xs"}
+            segments={[
+              {
+                label: "Full Range",
+                value: "full-range",
+                ref: useRef(),
+              },
+              {
+                label: "Auto",
+                value: "auto",
+                ref: useRef(),
+              },
+              {
+                label: "Custom",
+                value: "custom",
+                ref: useRef(),
+              },
+            ]}
+          />
         </div>
 
         <div className="mt-[22px] flex flex-row items-center justify-between px-[5px] md:mt-[24px] md:w-[270px]">
