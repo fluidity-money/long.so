@@ -108,6 +108,7 @@ export const MyPositions = () => {
 
         <SegmentedControl
           variant={"secondary"}
+          callback={(val) => setDisplayMode(val)}
           segments={[
             {
               label: (
