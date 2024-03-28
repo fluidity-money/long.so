@@ -1,4 +1,3 @@
-import "./globals.css";
 import { StyleLayout } from "@/app/StyleLayout";
 import { Provider } from "@/app/Provider";
 
