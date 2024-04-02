@@ -5,10 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="fix: align dropdown with trigger">
+      <change afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/DataTable.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/columns.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/copilot/chatSessions/00000000000.xd" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/copilot/chatSessions/00000000000.xd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/copilot/chatSessions/xd.lck" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/copilot/chatSessions/xd.lck" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/ConnectWalletButton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/ConnectWalletButton.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/InventoryContent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/InventoryContent.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/Provider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/Provider.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/_DataTable/columns.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/_DataTable/columns.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/swap/inventory/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/swap/inventory/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/InventoryContent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/InventoryContent.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/InventorySheet.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/InventorySheet.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/ui/badge.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/ui/badge.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/ui/button.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/ui/button.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/ui/table.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/ui/table.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/ui/tabs.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/ui/tabs.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,7 +79,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "code.cleanup.on.save": "true",
     "git-widget-placeholder": "development",
-    "last_opened_file_path": "/Users/aidankinzett/Git/amm.superposition.so/web/src/app/_TransactionHistoryTable",
+    "last_opened_file_path": "/Users/aidankinzett/Git/amm.superposition.so/web/src/components/InventoryContent",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.standard": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -99,12 +109,14 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/web/src/components/InventoryContent" />
       <recent name="$PROJECT_DIR$/web/src/app/_TransactionHistoryTable" />
       <recent name="$PROJECT_DIR$/web/src/app/stake/_AllPoolsTable" />
       <recent name="$PROJECT_DIR$/web/src/app/stake/_DataTable" />
       <recent name="$PROJECT_DIR$/web/src/assets/icons" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/web/src/components/InventoryContent" />
       <recent name="$PROJECT_DIR$/web/src/components" />
       <recent name="$PROJECT_DIR$/web/src/app/_DataTable" />
       <recent name="$PROJECT_DIR$/web/.storybook" />
@@ -140,6 +152,7 @@
       <workItem from="1710461373541" duration="1864000" />
       <workItem from="1710483040518" duration="5406000" />
       <workItem from="1711418818164" duration="19730000" />
+      <workItem from="1712028204528" duration="4518000" />
     </task>
     <task id="LOCAL-00003" summary="fix: align dropdown with trigger">
       <option name="closed" value="true" />

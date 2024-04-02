@@ -1,6 +1,6 @@
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Image from "next/image";
-import { InventoryContent } from "@/components/InventoryContent";
+import { InventoryContent } from "@/components/InventoryContent/InventoryContent";
 import { useInventorySheet } from "@/stores/useInventorySheet";
 
 const address = "0x0000000000000000000000000000000000000000";

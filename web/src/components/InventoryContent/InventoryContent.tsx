@@ -29,10 +29,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { useStakeWelcomeBackStore } from "@/stores/useStakeWelcomeBackStore";
 import { useRouter } from "next/navigation";
 import { useInventorySheet } from "@/stores/useInventorySheet";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { DataTable } from "@/components/InventoryContent/DataTable";
+import {
+  columns as yieldColumns,
+  Yield,
+} from "@/components/InventoryContent/columns";
 
 const address = "0x0000000000000000000000000000000000000000";
 
@@ -390,6 +396,33 @@ const transactionHistory: TransactionHistory[] = [
   },
 ];
 
+const yieldData: Yield[] = [
+  {
+    id: nanoid(),
+    yield: 12.33,
+    status: "claimable",
+    pool: "ETH-fUSDC",
+  },
+  {
+    id: nanoid(),
+    yield: 12.33,
+    status: "claimable",
+    pool: "ETH x fUSDC",
+  },
+  {
+    id: nanoid(),
+    yield: 12.33,
+    status: "claimed",
+    pool: "ETH x fUSDC",
+  },
+  {
+    id: nanoid(),
+    yield: 12.33,
+    status: "claimed",
+    pool: "ETH x fUSDC",
+  },
+];
+
 export const InventoryContent = () => {
   const { setIsConnected } = useConnectionStore();
 
@@ -518,253 +551,269 @@ export const InventoryContent = () => {
         />
       </div>
 
-      {content === "trade" && (
-        <div className="mt-[34px] flex flex-col items-center ">
-          <div className={"text-[14px] font-medium "}>
-            My Total Trade Rewards
-          </div>
-
-          <Badge
-            variant={"iridescent"}
-            className={"mt-[12px] text-[30px] font-medium"}
-          >
-            $1,337
-          </Badge>
-
-          <div className="mt-[19px] w-[223px] text-center text-[10px] font-normal text-neutral-400 md:mt-[28px]">
-            Earn more by making more transactions!
-          </div>
-
-          <div className="mt-[42px] flex w-full flex-row items-center justify-between">
-            <div className="text-[10px] font-medium">
-              Trader Rewards Over Time
+      <Tabs defaultValue="trade" value={content}>
+        <TabsContent value="trade">
+          <div className="mt-[34px] flex flex-col items-center ">
+            <div className={"text-[14px] font-medium "}>
+              My Total Trade Rewards
             </div>
-            <DurationSegmentedControl
-              variant={"secondary"}
-              className={"hidden text-[10px] md:flex"}
-            />
-            <Select>
-              <SelectTrigger className="w-[90px] border-0 bg-transparent text-right text-[10px]">
-                <SelectValue defaultValue={"7D"} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7D">7 Days</SelectItem>
-                <SelectItem value="1M">1 Month</SelectItem>
-                <SelectItem value="6M">6 Months</SelectItem>
-                <SelectItem value="1Y">1 Year</SelectItem>
-                <SelectItem value="ALL">All Time</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
-          <ReactECharts
-            className="mt-[10px] h-[70px] w-full  md:mt-[20px]"
-            opts={{
-              height: 70,
-            }}
-            style={{
-              height: 70,
-            }}
-            option={{
-              grid: {
-                left: "0", // or a small value like '10px'
-                right: "0", // or a small value
-                top: "0", // or a small value
-                bottom: "0", // or a small value
-              },
-              tooltip: {
-                trigger: "axis", // Trigger tooltip on axis movement
-                axisPointer: {
-                  type: "cross", // Display crosshair style pointers
-                },
-                borderWidth: 0,
-                backgroundColor: "#EBEBEB",
-                textStyle: {
-                  color: "#1E1E1E",
-                },
-                formatter:
-                  "<div class='flex flex-col items-center'>${c} <div class='text-gray-2 text-center w-full'>{b}</div></div>",
-              },
-              xAxis: {
-                type: "category",
-                data: data.map((d) => format(d.date, "P")),
-                show: false,
-                axisPointer: {
-                  label: {
-                    show: false,
-                  },
-                },
-              },
-              yAxis: {
-                type: "value",
-                show: false,
-                axisPointer: {
-                  label: {
-                    show: false,
-                  },
-                },
-              },
-              series: [
-                {
-                  type: "bar",
-                  data: data.map((d) => d.uv),
-                  itemStyle: {
-                    color: "#EBEBEB",
-                  },
-                  barWidth: "70%", // Adjust bar width (can be in pixels e.g., '20px')
-                  barGap: "30%", // Adjust the gap between bars in different series
-                },
-              ],
-            }}
-          />
-
-          <div className={"mt-[13px] w-full text-left text-[10px]"}>
-            22nd February 2024
-          </div>
-
-          <div className="mt-[30px] w-full text-left text-[10px]">
-            My Transaction History
-          </div>
-
-          <TransactionHistoryTable
-            columns={columns}
-            data={transactionHistory}
-          />
-        </div>
-      )}
-
-      {content === "pools" && (
-        <div className={"flex flex-col items-center"}>
-          <div
-            className={cn(
-              "mt-[22px] flex w-[284px] flex-col items-center rounded p-[10px] transition-colors md:w-[300px]",
-              {
-                "iridescent text-black": yieldType === "unclaimed",
-                "border border-white text-white": yieldType !== "unclaimed",
-              },
-            )}
-          >
-            <div
-              className={"flex w-full flex-row items-center justify-between"}
+            <Badge
+              variant={"iridescent"}
+              className={"mt-[12px] text-[30px] font-medium"}
             >
-              <div className={"text-[10px]"}>My Yield</div>
+              $1,337
+            </Badge>
 
-              <SegmentedControl
-                name={"yield-type"}
-                className={"text-[10px]"}
-                variant={yieldType === "unclaimed" ? undefined : "secondary"}
-                callback={(val) => setYieldType(val)}
-                segments={[
-                  {
-                    label: "Unclaimed",
-                    value: "unclaimed" as const,
-                    ref: unclaimedRef,
-                  },
-                  {
-                    label: "All",
-                    value: "all" as const,
-                    ref: allRef,
-                  },
-                  {
-                    label: "Historical",
-                    value: "historical" as const,
-                    ref: historicalRef,
-                  },
-                ]}
-              />
+            <div className="mt-[19px] w-[223px] text-center text-[10px] font-normal text-neutral-400 md:mt-[28px]">
+              Earn more by making more transactions!
             </div>
 
-            {yieldType === "unclaimed" && (
-              <div className="flex flex-col items-center">
-                <div className={"mt-[14px] text-[30px]"}>$41.12</div>
+            <div className="mt-[42px] flex w-full flex-row items-center justify-between">
+              <div className="text-[10px] font-medium">
+                Trader Rewards Over Time
+              </div>
+              <DurationSegmentedControl
+                variant={"secondary"}
+                className={"hidden text-[10px] md:flex"}
+              />
+              <Select>
+                <SelectTrigger className="w-[90px] border-0 bg-transparent text-right text-[10px] md:hidden">
+                  <SelectValue defaultValue={"7D"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7D">7 Days</SelectItem>
+                  <SelectItem value="1M">1 Month</SelectItem>
+                  <SelectItem value="6M">6 Months</SelectItem>
+                  <SelectItem value="1Y">1 Year</SelectItem>
+                  <SelectItem value="ALL">All Time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                <div>
-                  <Badge className={"h-[14px] px-0.5 text-[8px]"}>
-                    <Token />
-                    <Token className={"-ml-1"} />
-                    <Token className={"-ml-1"} />
-                    <Token className={"-ml-1 mr-1"} />
-                    Unclaimed Rewards
+            <ReactECharts
+              className="mt-[10px] h-[70px] w-full  md:mt-[20px]"
+              opts={{
+                height: 70,
+              }}
+              style={{
+                height: 70,
+              }}
+              option={{
+                grid: {
+                  left: "0", // or a small value like '10px'
+                  right: "0", // or a small value
+                  top: "0", // or a small value
+                  bottom: "0", // or a small value
+                },
+                tooltip: {
+                  trigger: "axis", // Trigger tooltip on axis movement
+                  axisPointer: {
+                    type: "cross", // Display crosshair style pointers
+                  },
+                  borderWidth: 0,
+                  backgroundColor: "#EBEBEB",
+                  textStyle: {
+                    color: "#1E1E1E",
+                  },
+                  formatter:
+                    "<div class='flex flex-col items-center'>${c} <div class='text-gray-2 text-center w-full'>{b}</div></div>",
+                },
+                xAxis: {
+                  type: "category",
+                  data: data.map((d) => format(d.date, "P")),
+                  show: false,
+                  axisPointer: {
+                    label: {
+                      show: false,
+                    },
+                  },
+                },
+                yAxis: {
+                  type: "value",
+                  show: false,
+                  axisPointer: {
+                    label: {
+                      show: false,
+                    },
+                  },
+                },
+                series: [
+                  {
+                    type: "bar",
+                    data: data.map((d) => d.uv),
+                    itemStyle: {
+                      color: "#EBEBEB",
+                    },
+                    barWidth: "70%", // Adjust bar width (can be in pixels e.g., '20px')
+                    barGap: "30%", // Adjust the gap between bars in different series
+                  },
+                ],
+              }}
+            />
+
+            <div className={"mt-[13px] w-full text-left text-[10px]"}>
+              22nd February 2024
+            </div>
+
+            <div className="mt-[30px] w-full text-left text-[10px]">
+              My Transaction History
+            </div>
+
+            <TransactionHistoryTable
+              columns={columns}
+              data={transactionHistory}
+            />
+          </div>
+        </TabsContent>
+        <TabsContent value="pools">
+          <div className={"flex flex-col items-center"}>
+            <div
+              className={cn(
+                "mt-[22px] flex h-[266px] w-[284px] flex-col items-center overflow-y-scroll rounded p-[10px] transition-colors md:w-[300px]",
+                {
+                  "iridescent text-black": yieldType === "unclaimed",
+                  "border border-white text-white": yieldType !== "unclaimed",
+                },
+              )}
+            >
+              <div
+                className={"flex w-full flex-row items-center justify-between"}
+              >
+                <div className={"text-[10px]"}>My Yield</div>
+
+                <SegmentedControl
+                  name={"yield-type"}
+                  className={"text-[10px]"}
+                  variant={yieldType === "unclaimed" ? undefined : "secondary"}
+                  callback={(val) => setYieldType(val)}
+                  segments={[
+                    {
+                      label: "Unclaimed",
+                      value: "unclaimed" as const,
+                      ref: unclaimedRef,
+                    },
+                    {
+                      label: "All",
+                      value: "all" as const,
+                      ref: allRef,
+                    },
+                    {
+                      label: "Historical",
+                      value: "historical" as const,
+                      ref: historicalRef,
+                    },
+                  ]}
+                />
+              </div>
+
+              {yieldType === "unclaimed" && (
+                <div className="flex flex-col items-center">
+                  <div className={"mt-[14px] text-[30px]"}>$41.12</div>
+
+                  <div>
+                    <Badge className={"h-[14px] px-0.5 text-[8px]"}>
+                      <Token />
+                      <Token className={"-ml-1"} />
+                      <Token className={"-ml-1"} />
+                      <Token className={"-ml-1 mr-1"} />
+                      Unclaimed Rewards
+                    </Badge>
+                  </div>
+
+                  <div
+                    className={
+                      "mt-[18px] flex h-[64px] w-[240px] flex-col justify-between"
+                    }
+                  >
+                    <div
+                      className={
+                        "flex w-full flex-row justify-between text-[10px]"
+                      }
+                    >
+                      <div>Pool Fees</div>
+                      <div className="flex flex-row items-center gap-1">
+                        <Token /> $21.72
+                      </div>
+                    </div>
+
+                    <div
+                      className={
+                        "flex w-full flex-row justify-between text-[10px]"
+                      }
+                    >
+                      <div>Liquidity Boosts</div>
+                      <div className="flex flex-row items-center gap-1">
+                        <Token /> $13.06
+                      </div>
+                    </div>
+
+                    <div
+                      className={
+                        "flex w-full flex-row justify-between text-[10px]"
+                      }
+                    >
+                      <div>Super Boosts</div>
+                      <div className="flex flex-row items-center gap-1">
+                        <Token /> $8.34
+                      </div>
+                    </div>
+
+                    <div
+                      className={
+                        "flex w-full flex-row justify-between text-[10px]"
+                      }
+                    >
+                      <div>Utility Boosts</div>
+                      <div className="flex flex-row items-center gap-1">
+                        <Token /> $2.99
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    className={"mt-[17px] w-full"}
+                    onClick={() => {
+                      setYieldBreakdown(true);
+                      setIsOpen(false);
+                      router.push("/stake");
+                    }}
+                  >
+                    <div className={"iridescent-text text-[10px]"}>
+                      Claim All Yield
+                    </div>
+                  </Button>
+
+                  <Badge
+                    className={
+                      "-mt-1.5 h-[12px] gap-1 border border-black px-1 text-[7px]"
+                    }
+                    variant={"iridescent"}
+                  >
+                    <Token className={"size-[10px]"} />
+                    <div>$41.12</div>
                   </Badge>
                 </div>
+              )}
 
-                <div
-                  className={
-                    "mt-[18px] flex h-[64px] w-[240px] flex-col justify-between"
-                  }
-                >
-                  <div
-                    className={
-                      "flex w-full flex-row justify-between text-[10px]"
-                    }
-                  >
-                    <div>Pool Fees</div>
-                    <div className="flex flex-row items-center gap-1">
-                      <Token /> $21.72
-                    </div>
-                  </div>
-
-                  <div
-                    className={
-                      "flex w-full flex-row justify-between text-[10px]"
-                    }
-                  >
-                    <div>Liquidity Boosts</div>
-                    <div className="flex flex-row items-center gap-1">
-                      <Token /> $13.06
-                    </div>
-                  </div>
-
-                  <div
-                    className={
-                      "flex w-full flex-row justify-between text-[10px]"
-                    }
-                  >
-                    <div>Super Boosts</div>
-                    <div className="flex flex-row items-center gap-1">
-                      <Token /> $8.34
-                    </div>
-                  </div>
-
-                  <div
-                    className={
-                      "flex w-full flex-row justify-between text-[10px]"
-                    }
-                  >
-                    <div>Utility Boosts</div>
-                    <div className="flex flex-row items-center gap-1">
-                      <Token /> $2.99
-                    </div>
-                  </div>
+              {yieldType === "all" && (
+                <div className={"mt-[15px] flex w-full flex-col items-center"}>
+                  <DataTable columns={yieldColumns} data={yieldData} />
                 </div>
+              )}
 
-                <Button
-                  className={"mt-[17px] w-full"}
-                  onClick={() => {
-                    setYieldBreakdown(true);
-                    setIsOpen(false);
-                    router.push("/stake");
-                  }}
-                >
-                  <div className={"iridescent-text text-[10px]"}>
-                    Claim All Yield
-                  </div>
-                </Button>
-
-                <Badge
-                  className={
-                    "-mt-1.5 h-[12px] gap-1 border border-black px-1 text-[7px]"
-                  }
-                  variant={"iridescent"}
-                >
-                  <Token className={"size-[10px]"} />
-                  <div>$41.12</div>
-                </Badge>
-              </div>
-            )}
+              {yieldType === "historical" && (
+                <div className={"mt-[15px] flex w-full flex-col items-center"}>
+                  <DataTable
+                    columns={yieldColumns}
+                    data={yieldData.filter((v) => v.status === "claimed")}
+                  />
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

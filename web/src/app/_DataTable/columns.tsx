@@ -6,8 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Token } from "@/components";
 import { usdFormat } from "@/lib/usdFormat";
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
 export type Transaction = {
   id: string;
   value: number;
