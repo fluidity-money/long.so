@@ -23,6 +23,7 @@ import * as RadioGroup from "@radix-ui/react-radio-group";
 import { Input } from "@/components/ui/input";
 import { useStakeStore } from "@/stores/useStakeStore";
 import SegmentedControl from "@/components/ui/segmented-control";
+import { useAccount, useBalance } from "wagmi";
 
 const data = [
   {
@@ -275,6 +276,12 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     }
   };
 
+  const { address } = useAccount();
+
+  const { data: balanceData, isLoading } = useBalance({
+    address,
+  });
+
   return (
     <div className="z-10 flex flex-col items-center">
       <div className="w-[318px] md:w-[392px]">
@@ -372,7 +379,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               <div className="text-2xs md:text-gray-1">$1,025.23</div>
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
-                <div>Balance: 1231.01</div>
+                <div>Balance: {balanceData?.formatted}</div>
                 <div className="underline">Max</div>
               </div>
             </div>
