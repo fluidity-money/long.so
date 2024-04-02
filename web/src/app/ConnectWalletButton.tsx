@@ -4,6 +4,7 @@ import { useConnectionStore } from "@/stores/useConnectionStore";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePathname, useRouter } from "next/navigation";
 import { InventorySheet } from "@/components/InventorySheet";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 
 const address = "0x0000000000000000000000000000000000000000";
 
@@ -14,6 +15,8 @@ export const ConnectWalletButton = () => {
 
   const router = useRouter();
   const pathname = usePathname();
+
+  const { open } = useWeb3Modal();
 
   if (isConnected && !isLtSm) {
     return <InventorySheet />;
@@ -61,7 +64,7 @@ export const ConnectWalletButton = () => {
       size="sm"
       color="light"
       className="mb-1 h-[26px] text-sm"
-      onClick={() => setIsConnected(true)}
+      onClick={() => open()}
     >
       Connect Wallet
     </Button>
