@@ -1,15 +1,13 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { useConnectionStore } from "@/stores/useConnectionStore";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePathname, useRouter } from "next/navigation";
 import { InventorySheet } from "@/components/InventorySheet";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
-
-const address = "0x0000000000000000000000000000000000000000";
+import { useAccount } from "wagmi";
 
 export const ConnectWalletButton = () => {
-  const { isConnected, setIsConnected } = useConnectionStore();
+  const { address } = useAccount();
 
   const { isLtSm } = useMediaQuery();
 
@@ -18,11 +16,11 @@ export const ConnectWalletButton = () => {
 
   const { open } = useWeb3Modal();
 
-  if (isConnected && !isLtSm) {
+  if (address && !isLtSm) {
     return <InventorySheet />;
   }
 
-  if (isConnected && isLtSm && pathname === "/swap/inventory") {
+  if (address && isLtSm && pathname === "/swap/inventory") {
     return (
       <div className="flex flex-row items-center justify-center gap-[10px] rounded">
         <Button
@@ -41,7 +39,7 @@ export const ConnectWalletButton = () => {
     );
   }
 
-  if (isConnected && isLtSm) {
+  if (address && isLtSm) {
     return (
       <div className="flex flex-row items-center justify-center gap-[10px] rounded">
         <div
