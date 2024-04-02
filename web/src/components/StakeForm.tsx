@@ -345,8 +345,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
             </div>
 
             <div className="flex w-full flex-row items-center justify-between md:mt-[10px]">
-              <div className="text-3xs md:hidden">Prime Asset</div>
-              <div className="hidden text-2xs md:flex">Swap</div>
+              <div className="text-3xs md:text-2xs">Prime Asset</div>
 
               <div className="text-3xs md:text-2xs">Ethereum</div>
             </div>
@@ -356,6 +355,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
                 className="-ml-2 border-0 bg-black pl-2 text-2xl"
                 placeholder={"1024.82"}
                 autoFocus
+                variant={"no-ring"}
               />
 
               <Badge
@@ -388,8 +388,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               className="flex h-[102px] w-[318px] flex-col justify-between rounded-lg bg-black p-[17px] text-white md:h-[126px] md:w-[392px] md:p-[25px]"
             >
               <div className="flex w-full flex-row items-center justify-between">
-                <div className="text-3xs md:hidden">Super Asset</div>
-                <div className="hidden text-2xs md:flex">Receive</div>
+                <div className="text-3xs md:text-2xs">Super Asset</div>
 
                 <div className="text-3xs md:text-2xs">Fluid USDC</div>
               </div>
