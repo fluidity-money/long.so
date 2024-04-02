@@ -1,7 +1,7 @@
 "use client";
 
 import { CampaignBanner } from "@/components/CampaignBanner";
-import { Box, Input, Link, Slider, Text, Token } from "@/components";
+import { Box, Input, Link, Text, Token } from "@/components";
 import { addressToSymbol } from "@/util/tokens";
 import Caret from "@/assets/icons/Caret.svg";
 import {
@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
 import { useActiveTokenStore } from "@/stores/useActiveTokenStore";
 import { useAccount, useBalance } from "wagmi";
-import { useSwap } from "@/hooks/useSwap";
 import { useModalStore } from "@/app/TokenModal";
 import { WelcomeGradient } from "@/app/WelcomeGradient";
 import { SuperloopPopover } from "@/app/SuperloopPopover";
@@ -36,35 +35,16 @@ export const SwapForm = () => {
   const { address } = useAccount();
 
   const { data: token0Balance } = useBalance({
-    cacheTime: 2000,
     address,
     token: token0,
   });
 
   const { data: token1Balance } = useBalance({
-    cacheTime: 2000,
     address,
     token: token1,
   });
 
   const { isConnected } = useAccount();
-
-  const { swap, result, resultUsd, error, isLoading, isSwapping } = useSwap({
-    amountIn,
-    minOut,
-  });
-
-  // update output using quoted swap result
-  useEffect(() => {
-    if (result) {
-      const [, outAmount] = result;
-      const formattedOutAmount = getFormattedStringFromTokenAmount(
-        outAmount.toString(),
-        decimals1,
-      );
-      setInputReceive(formattedOutAmount);
-    }
-  }, [result, decimals1]);
 
   // update amountIn when input amount changes
   useEffect(() => {
@@ -163,12 +143,12 @@ export const SwapForm = () => {
             <SwapButton
               onClick={() => {
                 // swap amounts and trigger a quote update
-                const amount1 = result?.[1].toString();
-                setInputReceive(amountInDisplay);
-                setAmountInDisplay(
-                  getFormattedStringFromTokenAmount(amount1 || "0", decimals1),
-                );
-                flipTokens();
+                // const amount1 = result?.[1].toString();
+                // setInputReceive(amountInDisplay);
+                // setAmountInDisplay(
+                //   getFormattedStringFromTokenAmount(amount1 || "0", decimals1),
+                // );
+                // flipTokens();
               }}
             />
           </div>
@@ -180,12 +160,12 @@ export const SwapForm = () => {
             </div>
             <div className="flex items-center justify-between">
               <Text size="large">
-                <Input
-                  placeholder="0.00"
-                  value={isLoading ? "..." : inputReceive}
-                  disabled={true}
-                  onChange={(s) => setInputReceive(s)}
-                />
+                {/*<Input*/}
+                {/*  placeholder="0.00"*/}
+                {/*  // value={isLoading ? "..." : inputReceive}*/}
+                {/*  disabled={true}*/}
+                {/*  onChange={(s) => setInputReceive(s)}*/}
+                {/*/>*/}
               </Text>
               <Box
                 whileTap={{ scale: 0.98 }}
@@ -209,12 +189,12 @@ export const SwapForm = () => {
 
         {/* only shown on mobile */}
         <div className="w-full md:hidden">
-          <Slider
-            disabled={!isConnected || isSwapping || isLoading}
-            onSlideComplete={() => swap()}
-          >
-            Swap
-          </Slider>
+          {/*<Slider*/}
+          {/*// disabled={!isConnected || isSwapping || isLoading}*/}
+          {/*// onSlideComplete={() => swap()}*/}
+          {/*>*/}
+          {/*  Swap*/}
+          {/*</Slider>*/}
         </div>
 
         {/* only shown on desktop */}
@@ -222,8 +202,8 @@ export const SwapForm = () => {
           <Button
             className="w-full"
             size="lg"
-            disabled={!isConnected || isSwapping || isLoading}
-            onClick={() => swap()}
+            // disabled={!isConnected || isSwapping || isLoading}
+            // onClick={() => swap()}
           >
             Swap
           </Button>
