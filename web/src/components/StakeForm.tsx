@@ -282,6 +282,8 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     address,
   });
 
+  const [primeAssetAmount, setPrimeAssetAmount] = useState("");
+
   return (
     <div className="z-10 flex flex-col items-center">
       <div className="w-[318px] md:w-[392px]">
@@ -363,6 +365,8 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
                 placeholder={"1024.82"}
                 autoFocus
                 variant={"no-ring"}
+                value={primeAssetAmount}
+                onChange={(e) => setPrimeAssetAmount(e.target.value)}
               />
 
               <Badge
@@ -380,7 +384,14 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
                 <div>Balance: {balanceData?.formatted}</div>
-                <div className="underline">Max</div>
+                <div
+                  className="cursor-pointer underline"
+                  onClick={() =>
+                    setPrimeAssetAmount(balanceData?.formatted ?? "")
+                  }
+                >
+                  Max
+                </div>
               </div>
             </div>
           </motion.div>
