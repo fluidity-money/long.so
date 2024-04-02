@@ -858,7 +858,7 @@ export const InventoryContent = () => {
               <div className={"mt-[32px] flex flex-row justify-between"}>
                 <div className={"text-[10px]"}>My Positions</div>
                 <div className={"text-[10px]"}>
-                  <div>Sort By</div>
+                  <div>Sort By Yield</div>
                 </div>
               </div>
 
@@ -918,7 +918,7 @@ export const InventoryContent = () => {
                     </div>
 
                     {/* only on desktop */}
-                    <div className="relative h-[159px] w-[145px]">
+                    <div className="relative hidden h-[159px] w-[145px] md:inline-flex">
                       <div className="absolute left-0 top-0 h-[159px] w-[145px] rounded-[5px] border border-gray-200 bg-stone-900" />
                       <div className="absolute left-[19px] top-[103px] inline-flex w-[107px] items-center justify-between">
                         <div className="relative h-[18px] w-[33.50px]">
