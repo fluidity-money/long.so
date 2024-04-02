@@ -12,7 +12,6 @@ if (!multicall3AddressString || !isHex(multicall3AddressString))
   throw new Error(
     `Multicall3 address from env was not a valid address! Was ${multicall3AddressString}`,
   );
-const multicall3Address = multicall3AddressString;
 
 const { publicClient, webSocketPublicClient } =
   process.env.NODE_ENV === "development"
@@ -34,7 +33,7 @@ const { publicClient, webSocketPublicClient } =
             name: "Stylus Testnet",
             id: 23011913,
             // use a self-deployed multicall3 for Stylus Testnet as it doesn't support the standard address
-            contracts: { multicall3: { address: multicall3Address } },
+            contracts: { multicall3: { address: multicall3AddressString } },
             rpcUrls: {
               default: { http: ["https://stylus-testnet.arbitrum.io/rpc"] },
               public: { http: ["https://stylus-testnet.arbitrum.io/rpc"] },
