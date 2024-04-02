@@ -19,7 +19,6 @@ import { useDetectClickOutside } from "react-detect-click-outside";
 import { nanoid } from "nanoid";
 import Token from "@/assets/icons/token.svg";
 import Ethereum from "@/assets/icons/ethereum.svg";
-import { useConnectionStore } from "@/stores/useConnectionStore";
 import SegmentedControl from "@/components/ui/segmented-control";
 import { DurationSegmentedControl } from "@/components/DurationSegmentedControl";
 import {
@@ -465,8 +464,6 @@ const myPositionsData = [
 ];
 
 export const InventoryContent = () => {
-  const { setIsConnected } = useConnectionStore();
-
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
   const ref = useDetectClickOutside({
     onTriggered: () => setConfirmDisconnect(false),
