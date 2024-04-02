@@ -50,6 +50,13 @@ const SegmentedControl = <T extends string>({
     style.setProperty("--highlight-x-pos", `${offsetLeft}px`);
   }, [activeIndex, controlRef, segments]);
 
+  /**
+   * reset by calling the callback with the defaultIndex on mount
+   */
+  useEffect(() => {
+    if (callback) callback(segments[defaultIndex].value, defaultIndex);
+  }, [defaultIndex]);
+
   const onInputChange = (value: any, index: any) => {
     setActiveIndex(index);
     if (callback) callback(value, index);
