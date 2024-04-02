@@ -42,8 +42,7 @@ import {
 import { usdFormat } from "@/lib/usdFormat";
 import Position from "@/assets/icons/position.svg";
 import ArrowUpRight from "@/assets/icons/arrow-up-right.svg";
-
-const address = "0x0000000000000000000000000000000000000000";
+import { useAccount, useDisconnect } from "wagmi";
 
 const data = [
   {
@@ -477,6 +476,8 @@ export const InventoryContent = () => {
 
   const [content, setContent] = useState<"pools" | "trade">("trade");
 
+  const { disconnect } = useDisconnect();
+
   /**
    * When copied is set to true this will reset
    * the state after 2 seconds
@@ -513,6 +514,8 @@ export const InventoryContent = () => {
 
   const { setIsOpen } = useInventorySheet();
 
+  const { address } = useAccount();
+
   return (
     <div className="flex flex-col items-center">
       <div className="flex w-full flex-row items-center justify-between">
@@ -525,7 +528,10 @@ export const InventoryContent = () => {
 
           <div className="inline-flex h-4 items-center justify-start gap-2.5 rounded-[3px] bg-gray-200 px-1 py-0.5">
             <div className="flex items-center justify-end gap-1">
-              <CopyToClipboard text={address} onCopy={() => setCopied(true)}>
+              <CopyToClipboard
+                text={address ?? ""}
+                onCopy={() => setCopied(true)}
+              >
                 {copied ? (
                   <Check className="h-[8.54px] w-2 text-black" />
                 ) : (
@@ -537,7 +543,7 @@ export const InventoryContent = () => {
               </CopyToClipboard>
 
               <div className="text-[10px] font-medium text-stone-900">
-                {address.slice(0, 5)} ... {address.slice(-3)}
+                {address?.slice(0, 5)} ... {address?.slice(-3)}
               </div>
             </div>
           </div>
@@ -557,7 +563,7 @@ export const InventoryContent = () => {
             )}
             onClick={() => {
               if (confirmDisconnect) {
-                setIsConnected(false);
+                disconnect();
               } else {
                 setConfirmDisconnect(true);
               }
