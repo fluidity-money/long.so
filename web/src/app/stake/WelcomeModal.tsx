@@ -41,8 +41,7 @@ export const WelcomeModal = () => {
                       <Button
                         variant="secondary"
                         onClick={() => setWelcome(false)}
-                        className="h-[26px] px-2 py-0 text-2xs"
-                        size={"sm"}
+                        size={"esc"}
                       >
                         Esc
                       </Button>
