@@ -34,9 +34,8 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
               : "Add Liquidity Confirmation"}
           </div>
           <Button
-            size="sm"
+            size="esc"
             variant={"secondary"}
-            className="h-[20px] w-[32px] text-3xs md:h-[26px] md:w-[36px] md:text-2xs"
             onClick={() => router.back()}
           >
             Esc
