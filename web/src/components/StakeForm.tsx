@@ -31,6 +31,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Gas from "@/assets/icons/gas.svg";
+import Link from "next/link";
 
 const data = [
   {
@@ -375,14 +376,19 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
                 onChange={(e) => setPrimeAssetAmount(e.target.value)}
               />
 
-              <Badge
-                variant="outline"
-                className="flex h-[26px] w-[82px] flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[90px] md:pl-[4px] md:text-base"
+              <Link
+                href={"/stake/pool/create/select-prime-asset"}
+                legacyBehavior
               >
-                <Ethereum className="size-[20px] invert md:size-[25px]" />
-                <div>ETH</div>
-                <ArrowDown className="h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
-              </Badge>
+                <Badge
+                  variant="outline"
+                  className="flex h-[26px] w-[82px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[90px] md:pl-[4px] md:text-base"
+                >
+                  <Ethereum className="size-[20px] invert md:size-[25px]" />
+                  <div>ETH</div>
+                  <ArrowDown className="h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
+                </Badge>
+              </Link>
             </div>
 
             <div className="mt-[5px] flex w-full flex-row items-center justify-between">

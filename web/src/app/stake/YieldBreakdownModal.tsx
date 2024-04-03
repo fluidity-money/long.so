@@ -89,8 +89,7 @@ export const YieldBreakdownModal = () => {
                       <Button
                         variant="secondary"
                         onClick={() => setYieldBreakdown(false)}
-                        className="h-[26px] px-2 py-0 text-2xs"
-                        size={"sm"}
+                        size={"esc"}
                       >
                         Esc
                       </Button>
