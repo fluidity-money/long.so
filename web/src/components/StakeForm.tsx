@@ -651,7 +651,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
                 formatter:
                   "<div class='flex flex-col items-center'>${c} <div class='text-gray-2 text-center w-full'>{b}</div></div>",
               },
-
+              toolbox: false,
               brush: {
                 xAxisIndex: "all",
                 brushLink: "all",
