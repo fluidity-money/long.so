@@ -619,6 +619,18 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
             style={{
               height: 44,
             }}
+            onChartReady={(chart) => {
+              chart.dispatchAction({
+                type: "brush",
+                areas: [
+                  {
+                    brushType: "lineX",
+                    coordRange: [5, 25],
+                    xAxisIndex: 0,
+                  },
+                ],
+              });
+            }}
             option={{
               grid: {
                 left: "0", // or a small value like '10px'
@@ -638,6 +650,20 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
                 },
                 formatter:
                   "<div class='flex flex-col items-center'>${c} <div class='text-gray-2 text-center w-full'>{b}</div></div>",
+              },
+              toolbox: {
+                feature: {
+                  brush: {
+                    type: ["lineX", "clear"],
+                  },
+                },
+              },
+              brush: {
+                xAxisIndex: "all",
+                brushLink: "all",
+                outOfBrush: {
+                  colorAlpha: 0.1,
+                },
               },
               xAxis: {
                 type: "category",
