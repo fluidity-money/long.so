@@ -24,6 +24,13 @@ import { Input } from "@/components/ui/input";
 import { useStakeStore } from "@/stores/useStakeStore";
 import SegmentedControl from "@/components/ui/segmented-control";
 import { useAccount, useBalance } from "wagmi";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import Gas from "@/assets/icons/gas.svg";
 
 const data = [
   {
@@ -362,7 +369,6 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
             <div className="mt-[7px] flex w-full flex-row items-center justify-between gap-4">
               <Input
                 className="-ml-2 border-0 bg-black pl-2 text-2xl"
-                placeholder={"1024.82"}
                 autoFocus
                 variant={"no-ring"}
                 value={primeAssetAmount}
@@ -383,15 +389,19 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               <div className="text-2xs md:text-gray-1">$1,025.23</div>
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
-                <div>Balance: {balanceData?.formatted}</div>
-                <div
-                  className="cursor-pointer underline"
-                  onClick={() =>
-                    setPrimeAssetAmount(balanceData?.formatted ?? "")
-                  }
-                >
-                  Max
-                </div>
+                {balanceData && (
+                  <>
+                    <div>Balance: {balanceData.formatted}</div>
+                    <div
+                      className="cursor-pointer underline"
+                      onClick={() =>
+                        setPrimeAssetAmount(balanceData.formatted ?? "")
+                      }
+                    >
+                      Max
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
@@ -710,7 +720,48 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
       >
         <div className="flex flex-row justify-between">
           <div>Fees</div>
-          <div>$3.55</div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <div className={"flex flex-row items-center gap-1"}>
+                  <Gas />
+                  $3.55
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side={"bottom"}
+                className={
+                  "border-0 bg-black pb-[14px] text-[8px] text-neutral-400"
+                }
+              >
+                <div className={""}>Fees</div>
+                <div className={"mt-[7px] flex flex-row gap-[4px]"}>
+                  <div
+                    className={
+                      "flex w-[55.23px] flex-col items-center gap-[4px]"
+                    }
+                  >
+                    <div>$0.15</div>
+                    <div
+                      className={"h-[3px] w-full rounded-[1px] bg-neutral-400"}
+                    />
+                    <div>Pool Fees</div>
+                  </div>
+                  <div
+                    className={
+                      "flex w-[138.88px] flex-col items-center gap-[4px]"
+                    }
+                  >
+                    <div>$3.40</div>
+                    <div
+                      className={"h-[3px] w-full rounded-[1px] bg-neutral-400"}
+                    />
+                    <div>Network Fees</div>
+                  </div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         <div className="flex flex-row justify-between">
