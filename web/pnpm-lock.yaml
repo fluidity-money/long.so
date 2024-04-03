@@ -4448,7 +4448,7 @@ packages:
     peerDependencies:
       '@babel/preset-env': ^7.1.6
     dependencies:
-      '@babel/parser': 7.23.5
+      '@babel/parser': 7.24.1
       '@babel/preset-env': 7.23.5(@babel/core@7.23.5)
       flow-parser: 0.206.0
       glob: 7.2.3
@@ -11916,7 +11916,7 @@ packages:
       '@babel/preset-env': ^7.1.6
     dependencies:
       '@babel/core': 7.23.5
-      '@babel/parser': 7.23.5
+      '@babel/parser': 7.24.1
       '@babel/plugin-proposal-class-properties': 7.18.6(@babel/core@7.23.5)
       '@babel/plugin-proposal-nullish-coalescing-operator': 7.18.6(@babel/core@7.23.5)
       '@babel/plugin-proposal-optional-chaining': 7.21.0(@babel/core@7.23.5)
@@ -12597,7 +12597,7 @@ packages:
     dependencies:
       '@babel/core': 7.23.5
       '@babel/generator': 7.23.5
-      '@babel/parser': 7.23.5
+      '@babel/parser': 7.24.1
       '@babel/types': 7.23.5
       metro: 0.80.8
       metro-babel-transformer: 0.80.8
@@ -12622,7 +12622,7 @@ packages:
       '@babel/code-frame': 7.23.5
       '@babel/core': 7.23.5
       '@babel/generator': 7.23.5
-      '@babel/parser': 7.23.5
+      '@babel/parser': 7.24.1
       '@babel/template': 7.22.15
       '@babel/traverse': 7.23.5
       '@babel/types': 7.23.5
@@ -14186,7 +14186,7 @@ packages:
     resolution: {integrity: sha512-cq/o30z9W2Wb4rzBefjv5fBalHU0rJGZCHAkf/RHSBWSSYwh8PlQTqqOJmgIIbBtpj27T6FIPXeomIjZtCNVqA==}
     dependencies:
       shell-quote: 1.8.1
-      ws: 7.4.6
+      ws: 7.5.9
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
