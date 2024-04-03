@@ -731,7 +731,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               <TooltipContent
                 side={"bottom"}
                 className={
-                  "border-0 bg-black pb-[14px] text-[8px] text-neutral-400"
+                  "rounded-lg border-0 bg-black pb-[14px] text-[8px] text-neutral-400"
                 }
               >
                 <div className={""}>Fees</div>
@@ -766,12 +766,57 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
         <div className="flex flex-row justify-between">
           <div>Rewards</div>
-          <Badge className="h-[17px] px-1 text-2xs font-normal">
-            <Token />
-            <Token className={"-ml-1"} />
-            <Token className={"-ml-1 mr-1"} />
-            <div className="iridescent-text">$6.11 - $33.12</div>
-          </Badge>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Badge className="h-[17px] px-1 text-2xs font-normal">
+                  <Token />
+                  <Token className={"-ml-1"} />
+                  <Token className={"-ml-1 mr-1"} />
+                  <div className="iridescent-text">$6.11 - $33.12</div>
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent
+                side={"bottom"}
+                className={
+                  "iridescent w-[221px] rounded-lg border-black pb-[14px] text-[8px] text-black"
+                }
+              >
+                <div className={"mt-[12px]"}>Super Route</div>
+                <div className={"mt-[12px] flex flex-row"}>
+                  <div className={"flex flex-col items-center"}>
+                    <Token className={"size-[15px]"} />
+                    <div>fUSDC</div>
+                  </div>
+                  <div className={"flex flex-1 flex-col justify-center"}>
+                    <div
+                      className={
+                        "mb-3 w-full border border-dashed border-neutral-400"
+                      }
+                    />
+                  </div>
+                  <div className={"flex flex-col items-center"}>
+                    <div className={"flex flex-row"}>
+                      <Token className={"size-[15px]"} />
+                      <Token className={"-ml-1 size-[15px]"} />
+                    </div>
+                    Fluid Pool
+                  </div>
+                  <div className={"flex flex-1 flex-col justify-center"}>
+                    <div
+                      className={
+                        "mb-3 w-full border border-dashed border-neutral-400"
+                      }
+                    />
+                  </div>
+                  <div className={"flex flex-col items-center"}>
+                    <Token className={"size-[15px]"} />
+                    <div>ETH</div>
+                  </div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         <div className="flex flex-row justify-between">
