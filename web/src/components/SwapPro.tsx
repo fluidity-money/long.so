@@ -319,7 +319,12 @@ export const SwapPro = ({
       variants={variants}
       animate={swapPro || override || isLtSm ? "visible" : "hidden"}
       className="z-10 flex flex-col items-center justify-center"
-      transition={{ type: "spring", stiffness: 150 }}
+      transition={{
+        type: "spring",
+        stiffness: 150,
+        duration: 0.2,
+        opacity: { ease: "linear", duration: 0.2 },
+      }}
     >
       <div
         className={
