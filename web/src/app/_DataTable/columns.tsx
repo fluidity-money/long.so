@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { Token } from "@/components";
+import Token from "@/assets/icons/token.svg";
 import { usdFormat } from "@/lib/usdFormat";
 
 export type Transaction = {
@@ -27,7 +27,7 @@ export const columns: ColumnDef<Transaction>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex flex-row items-center gap-2">
-          <Token size="small" />
+          <Token />
           {row.original.amountFrom} {"->"} <Token size="small" />
           {row.original.amountTo}
         </div>

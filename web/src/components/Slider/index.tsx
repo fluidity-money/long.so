@@ -3,7 +3,6 @@
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import styles from "./Slider.module.scss";
 import { useEffect, useRef, useState } from "react";
-import { Box } from "..";
 
 interface ISlider {
   onSlideComplete: () => void;
@@ -11,7 +10,7 @@ interface ISlider {
   disabled?: boolean;
 }
 
-const Slider: React.FC<ISlider> = (props) => {
+const Index: React.FC<ISlider> = (props) => {
   const { children, onSlideComplete, disabled = false } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,7 +36,7 @@ const Slider: React.FC<ISlider> = (props) => {
   }, [dragComplete, disabled]);
 
   return (
-    <Box className={styles.Box}>
+    <div className={styles.Box}>
       <motion.div className={classes} ref={containerRef}>
         {!dragComplete && (
           <motion.div
@@ -66,8 +65,8 @@ const Slider: React.FC<ISlider> = (props) => {
         )}
         <motion.div className={styles.content}>{children}</motion.div>
       </motion.div>
-    </Box>
+    </div>
   );
 };
 
-export { Slider };
+export default Index;

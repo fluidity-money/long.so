@@ -6,7 +6,6 @@ import Ethereum from "@/assets/icons/ethereum.svg";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import Padlock from "@/assets/icons/padlock.svg";
 import Token from "@/assets/icons/token.svg";
-import { Menu, Slider } from "@/components";
 import { useRef, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import { format, subDays } from "date-fns";
@@ -32,6 +31,8 @@ import {
 } from "@/components/ui/tooltip";
 import Gas from "@/assets/icons/gas.svg";
 import Link from "next/link";
+import Menu from "@/components/Menu";
+import Index from "@/components/Slider";
 
 const data = [
   {
@@ -268,7 +269,7 @@ interface StakeFormProps {
 export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
   const [feeTier, setFeeTier] = useState<"auto" | "manual">("auto");
 
-  const [breakdownHidden, setBreakdownHidden] = useState(false);
+  const [breakdownHidden, setBreakdownHidden] = useState(true);
 
   const { multiSingleToken, setMultiSingleToken } = useStakeStore();
 
@@ -928,9 +929,9 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
       </div>
 
       <div className="mt-[20px] w-[318px] md:hidden">
-        <Slider onSlideComplete={onSubmit}>
+        <Index onSlideComplete={onSubmit}>
           <div className="text-xs">Stake</div>
-        </Slider>
+        </Index>
       </div>
 
       <div className="mt-[20px] hidden md:inline-flex md:w-[392px]">

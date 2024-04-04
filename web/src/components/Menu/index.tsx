@@ -20,6 +20,11 @@ interface ItemProps {
   variant?: "iridescent";
 }
 
+/**
+ * Menu item component
+ *
+ * @deprecated Use `SegmentedControl` instead
+ */
 const Item: React.FC<ItemProps> = ({
   children,
   selected,
@@ -124,6 +129,11 @@ interface MenuProps {
   className?: string;
 }
 
+/**
+ * Menu component
+ *
+ * @deprecated Use `SegmentedControl` instead
+ */
 const Menu: React.FC<MenuProps> = ({
   children,
   background = "light",
