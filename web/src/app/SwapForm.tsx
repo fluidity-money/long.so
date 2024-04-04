@@ -10,7 +10,7 @@ import Token from "@/assets/icons/token.svg";
 import Swap from "@/assets/icons/Swap.svg";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import { SuperloopPopover } from "@/app/SuperloopPopover";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
@@ -19,6 +19,14 @@ export const SwapForm = () => {
   const [breakdownHidden, setBreakdownHidden] = useState(true);
 
   const { setWelcome, welcome, hovering, setHovering } = useWelcomeStore();
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!welcome) {
+      inputRef.current?.focus();
+    }
+  }, [welcome]);
 
   return (
     <>
@@ -82,8 +90,8 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <Input
+                  ref={inputRef}
                   className="-ml-2 border-0 bg-black pl-2 text-2xl"
-                  autoFocus
                   variant={"no-ring"}
                   placeholder={welcome ? "1024.82" : undefined}
                 />
