@@ -2,14 +2,13 @@
 
 import { useSwapPro } from "@/stores/useSwapPro";
 import { TypographyH2, TypographyH3 } from "@/components/ui/typography";
-import { cn } from "@/lib/utils";
 import { useRef, useState } from "react";
 import { startCase } from "lodash";
 import { DataTable } from "@/app/_DataTable/DataTable";
 import { columns, Transaction } from "@/app/_DataTable/columns";
 import { format, startOfDay, subDays } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import ReactECharts from "echarts-for-react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import Token from "@/assets/icons/token.svg";
@@ -298,6 +297,11 @@ const Graph = () => {
   );
 };
 
+const variants = {
+  hidden: { opacity: 0, width: 0 },
+  visible: { opacity: 1, width: "auto" },
+};
+
 export const SwapPro = ({
   override,
   badgeTitle,
@@ -310,100 +314,94 @@ export const SwapPro = ({
   const { isLtSm } = useMediaQuery();
 
   return (
-    <AnimatePresence mode={"popLayout"}>
-      {(swapPro || override || isLtSm) && (
-        <motion.div
-          initial={{ opacity: 0, x: -100 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -100 }}
-          className="z-10 flex flex-col items-center justify-center"
-        >
-          <div
-            className={cn(
-              "flex w-full flex-col gap-4 overflow-x-clip p-4 sm:w-[500px]",
-              override || swapPro
-                ? "px-4 pl-8 md:mr-10 md:w-[500px] lg:w-[500px] xl:w-[600px]"
-                : "md:h-0 md:w-0 md:p-0",
-            )}
-          >
-            {badgeTitle ? (
-              <div className="flex flex-row items-center">
-                <Ethereum className={"size-[30px]"} />
-                <Badge className="z-50 -ml-2 pl-1">
-                  <div className="flex flex-row items-center gap-1">
-                    <Token className={"size-[28px] invert"} />
-                    <div className="text-xl">fUSDC - ETH</div>
-                  </div>
-                </Badge>
+    <motion.div
+      initial={"hidden"}
+      variants={variants}
+      animate={swapPro || override || isLtSm ? "visible" : "hidden"}
+      className="z-10 flex flex-col items-center justify-center"
+      transition={{ type: "spring", stiffness: 150 }}
+    >
+      <div
+        className={
+          "flex w-full flex-col gap-4 overflow-x-clip p-4 pl-8 sm:w-[500px] md:mr-10 md:w-[500px] lg:w-[500px] xl:w-[600px]"
+        }
+      >
+        {badgeTitle ? (
+          <div className="flex flex-row items-center">
+            <Ethereum className={"size-[30px]"} />
+            <Badge className="z-50 -ml-2 pl-1">
+              <div className="flex flex-row items-center gap-1">
+                <Token className={"size-[28px] invert"} />
+                <div className="text-xl">fUSDC - ETH</div>
               </div>
-            ) : (
-              <TypographyH3 className="hidden font-normal md:inline-flex">
-                fUSDC/ETH
-              </TypographyH3>
-            )}
-
-            <Graph />
-
-            <div className="hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:flex">
-              <div>
-                <p className="text-2xs">Liquidity</p>
-                <p className="text-xl">$1.01M</p>
-              </div>
-
-              <div>
-                <p className="text-2xs">Volume 24H</p>
-                <p className="text-xl">$115.21K</p>
-              </div>
-
-              <div>
-                <p className="text-2xs">Stake APY</p>
-                <p className="text-xl">1.62%</p>
-              </div>
-
-              <div>
-                <p className="text-2xs">24H Trade Rewards</p>
-                <p className="text-xl">$300.56</p>
-              </div>
-            </div>
-
-            <div className="mt-[35px]">
-              <div className="flex w-full flex-row items-center justify-between">
-                <h3 className="text-sm">Transaction History</h3>
-                <div>
-                  <span className="cursor-pointer text-sm underline">
-                    My Transactions
-                  </span>{" "}
-                  {"->"}
-                </div>
-              </div>
-            </div>
-
-            <DataTable
-              columns={columns}
-              data={
-                [
-                  {
-                    id: "1",
-                    value: 100,
-                    rewards: 200,
-                    time: startOfDay(new Date()),
-                    amountFrom: 30.2,
-                    amountTo: 0.0001,
-                  },
-                  {
-                    id: "2",
-                    value: 300,
-                    rewards: 20,
-                    time: startOfDay(new Date()),
-                    amountFrom: 30.2,
-                    amountTo: 0.0001,
-                  },
-                ] as Transaction[]
-              }
-            />
+            </Badge>
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        ) : (
+          <TypographyH3 className="hidden font-normal md:inline-flex">
+            fUSDC/ETH
+          </TypographyH3>
+        )}
+
+        <Graph />
+
+        <div className="hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:flex">
+          <div>
+            <p className="text-2xs">Liquidity</p>
+            <p className="text-xl">$1.01M</p>
+          </div>
+
+          <div>
+            <p className="text-2xs">Volume 24H</p>
+            <p className="text-xl">$115.21K</p>
+          </div>
+
+          <div>
+            <p className="text-2xs">Stake APY</p>
+            <p className="text-xl">1.62%</p>
+          </div>
+
+          <div>
+            <p className="text-2xs">24H Trade Rewards</p>
+            <p className="text-xl">$300.56</p>
+          </div>
+        </div>
+
+        <div className="mt-[35px]">
+          <div className="flex w-full flex-row items-center justify-between">
+            <h3 className="text-sm">Transaction History</h3>
+            <div>
+              <span className="cursor-pointer text-sm underline">
+                My Transactions
+              </span>{" "}
+              {"->"}
+            </div>
+          </div>
+        </div>
+
+        <DataTable
+          columns={columns}
+          data={
+            [
+              {
+                id: "1",
+                value: 100,
+                rewards: 200,
+                time: startOfDay(new Date()),
+                amountFrom: 30.2,
+                amountTo: 0.0001,
+              },
+              {
+                id: "2",
+                value: 300,
+                rewards: 20,
+                time: startOfDay(new Date()),
+                amountFrom: 30.2,
+                amountTo: 0.0001,
+              },
+            ] as Transaction[]
+          }
+        />
+      </div>
+    </motion.div>
   );
 };
