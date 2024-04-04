@@ -322,7 +322,7 @@ export const SwapPro = ({
       transition={{
         type: "spring",
         bounce: 0.5,
-        duration: 0.2,
+        duration: 0.5,
         opacity: { ease: "linear", duration: 0.2 },
       }}
     >
