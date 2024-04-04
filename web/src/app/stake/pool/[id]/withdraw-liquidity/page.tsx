@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useParams, useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import * as RadioGroup from "@radix-ui/react-radio-group";
-import { Slider } from "@/components/Index";
+import Slider from "@/components/Slider";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 
 export default function WithdrawLiquidity() {
