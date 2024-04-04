@@ -14,7 +14,7 @@ export const Welcome = () => {
 
   return (
     <>
-      <div className="absolute top-1/2 z-50 w-full">
+      <div className="absolute top-[40%] z-50 w-full">
         <div className="flex flex-col items-center justify-around gap-10 bg-white">
           <div className="mt-10 flex flex-row items-center gap-1 text-3xl font-medium">
             Think{" "}
