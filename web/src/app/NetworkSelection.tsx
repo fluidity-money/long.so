@@ -17,7 +17,7 @@ export const NetworkSelection = () => {
         <Badge
           variant="invert"
           className={
-            "hidden h-[28px] w-[93px] rounded-2xl px-0.5 transition-[width] group-hover:w-[110px] group-data-[state=open]:w-[110px] group-data-[state=open]:rounded-b-none group-data-[state=open]:border-b-0 md:inline-flex"
+            "hidden h-[28px] rounded-2xl px-0.5 pr-2 transition-[width] group-data-[state=open]:rounded-b-none group-data-[state=open]:border-b-0 md:inline-flex"
           }
         >
           <div className="flex-col">
@@ -34,7 +34,7 @@ export const NetworkSelection = () => {
         </Badge>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className="-mt-2 flex w-[110px] flex-col gap-0.5 rounded-2xl rounded-t-none border border-t-0 border-black bg-white p-2 text-xs">
+        <DropdownMenu.Content className="-mt-2 flex w-[--radix-dropdown-menu-trigger-width] flex-col gap-0.5 rounded-2xl rounded-t-none border border-t-0 border-black bg-white p-2 text-xs">
           {chains.map(
             (chain) =>
               chain.id !== chainId && (
