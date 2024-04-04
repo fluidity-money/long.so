@@ -46,6 +46,9 @@ export const config = defaultWagmiConfig({
   projectId,
   transports: {
     [arbitrumStylusTestnet.id]: http("https://stylus-testnet.arbitrum.io/rpc"),
+    [mainnet.id]: http(
+      "https://eth-mainnet.g.alchemy.com/v2/3NSSPOypXp4eykuGGlJ8W3FeCi9RXU_X",
+    ),
   },
   metadata,
   ssr: true,
