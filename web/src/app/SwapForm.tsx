@@ -147,16 +147,42 @@ export const SwapForm = () => {
           </div>
         </div>
 
-        <div className={cn("flex w-full flex-col text-[10px]")}>
+        <div
+          className={cn(
+            "flex h-[75px] h-auto w-full flex-col gap-[7px] overflow-hidden text-[10px] transition-all",
+            {
+              "h-0": breakdownHidden,
+              "mt-[7px]": !breakdownHidden,
+            },
+          )}
+        >
           <div className={"flex flex-row justify-between"}>
             <div>Fees</div>
             <div className={"flex flex-row items-center gap-1"}>
               <Gas /> $0.10
             </div>
           </div>
+          <div className={"flex flex-row justify-between"}>
+            <div>Rewards</div>
+            <Badge className="h-[17px] px-1 text-2xs font-normal">
+              <Token />
+              <Token className={"-ml-1"} />
+              <Token className={"-ml-1 mr-1"} />
+              <div className="iridescent-text">$6.11 - $33.12</div>
+            </Badge>
+          </div>
+
+          <div className="flex flex-row justify-between">
+            <div>Route</div>
+            <div>Super Route</div>
+          </div>
         </div>
 
-        <Badge className={"shine mt-[15px] h-[27px] w-full pl-1.5 md:h-[31px]"}>
+        <Badge
+          className={cn("shine mt-[15px] h-[27px] w-full pl-1.5 md:h-[31px]", {
+            hidden: !breakdownHidden,
+          })}
+        >
           <Token className={"size-[20px]"} />
           <Token className={"-ml-2 size-[20px]"} />
           <Token className={"-ml-2 mr-2 size-[20px]"} />
@@ -165,6 +191,63 @@ export const SwapForm = () => {
             Earn up-to $100 for making this trade!
           </div>
         </Badge>
+
+        <div
+          className={cn(
+            "mt-[15px] h-[140px] w-[317px] rounded-lg bg-black px-[15px] py-[17px] text-white md:mt-[22px] md:h-[140px] md:w-[393px]",
+            {
+              hidden: breakdownHidden,
+            },
+          )}
+        >
+          <div className={"text-[12px]"}>Rewards Breakdown</div>
+          <div className={"mt-[10px] flex flex-col gap-[4px] "}>
+            <div className={"flex flex-row justify-between text-[10px]"}>
+              <div>Fluid Rewards</div>
+              <div
+                className={"iridescent-text flex flex-row items-center gap-1"}
+              >
+                <Token />
+                <div>$0 - $21.72</div>
+              </div>
+            </div>
+            <div className={"flex flex-row justify-between text-[10px]"}>
+              <div>Trader Rewards</div>
+              <div
+                className={"iridescent-text flex flex-row items-center gap-1"}
+              >
+                <Token />
+                <div>$5.91 - $8.34</div>
+              </div>
+            </div>
+            <div className={"flex flex-row justify-between text-[10px]"}>
+              <div>Super Rewards</div>
+              <div
+                className={"iridescent-text flex flex-row items-center gap-1"}
+              >
+                <Token />
+                <Token className={"-ml-2"} />
+                <div>$0.20 - $13.06</div>
+              </div>
+            </div>
+          </div>
+          <div
+            className={
+              "mt-[10px] flex flex-row items-center justify-between text-[10px]"
+            }
+          >
+            <div className={"font-semibold"}>Total</div>
+            <Badge
+              variant="iridescent"
+              className="h-[17px] px-1 text-2xs font-normal"
+            >
+              <Token />
+              <Token className={"-ml-1"} />
+              <Token className={"-ml-1 mr-1"} />
+              <div>$6.11 - $33.12</div>
+            </Badge>
+          </div>
+        </div>
 
         <Button
           className={"mt-[20px] hidden h-[53.92px] w-full md:inline-flex"}
