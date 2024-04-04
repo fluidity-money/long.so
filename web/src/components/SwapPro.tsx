@@ -321,7 +321,7 @@ export const SwapPro = ({
       className="z-10 flex flex-col items-center justify-center"
       transition={{
         type: "spring",
-        stiffness: 150,
+        bounce: 0.5,
         duration: 0.2,
         opacity: { ease: "linear", duration: 0.2 },
       }}
