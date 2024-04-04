@@ -12,6 +12,7 @@ import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import { SuperloopPopover } from "@/app/SuperloopPopover";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 export const SwapForm = () => {
   const [breakdownHidden, setBreakdownHidden] = useState(true);
@@ -23,7 +24,10 @@ export const SwapForm = () => {
 
         <CampaignBanner />
 
-        <div className="relative mt-[19px] h-[102px] w-[317px] rounded-lg bg-black pb-[19px] pl-[21px] pr-[15px] pt-[17px] text-white md:h-[126.37px] md:w-[392.42px] md:pb-[25px] md:pl-[25px] md:pr-[20px] md:pt-[22px]">
+        <motion.div
+          layoutId={"modal"}
+          className="relative mt-[19px] h-[102px] w-[317px] rounded-lg bg-black pb-[19px] pl-[21px] pr-[15px] pt-[17px] text-white md:h-[126.37px] md:w-[392.42px] md:pb-[25px] md:pl-[25px] md:pr-[20px] md:pt-[22px]"
+        >
           <SuperloopPopover />
           <div className={"flex h-full flex-col justify-between"}>
             <div className={"flex flex-row items-center justify-between"}>
@@ -60,7 +64,7 @@ export const SwapForm = () => {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         <Button
           variant={"secondary"}

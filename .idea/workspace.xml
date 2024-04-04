@@ -7,6 +7,7 @@
     <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="fix: align dropdown with trigger">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/src/app/SwapForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/SwapForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/SwapPro.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/SwapPro.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -141,7 +142,7 @@
       <workItem from="1710483040518" duration="5406000" />
       <workItem from="1711418818164" duration="19730000" />
       <workItem from="1712028204528" duration="7925000" />
-      <workItem from="1712101489350" duration="21276000" />
+      <workItem from="1712101489350" duration="22046000" />
     </task>
     <task id="LOCAL-00003" summary="fix: align dropdown with trigger">
       <option name="closed" value="true" />
