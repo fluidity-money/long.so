@@ -6,8 +6,41 @@
   <component name="ChangeListManager">
     <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="fix: align dropdown with trigger">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/NetworkSelection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/NetworkSelection.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/StyleLayout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/StyleLayout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/SuperloopPopover.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/SuperloopPopover.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/src/app/SwapForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/SwapForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/ConfirmStake.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/ConfirmStake.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/TokenModal.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/_DataTable/columns.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/_DataTable/columns.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/stake/pool/[id]/withdraw-liquidity/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/pool/[id]/withdraw-liquidity/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Box/Box.module.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Box/Box.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Box/index.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Input/Input.module.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Input/Input.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Input/index.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Link/Link.module.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Link/Link.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Link/index.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Menu/Menu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/Menu/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Menu/index.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Slider/Slider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/Slider/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Slider/index.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Stack/Stack.module.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Stack/Stack.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Stack/index.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/StakeForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/StakeForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Supicon/Supicon.module.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Supicon/Supicon.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Supicon/index.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Text/Text.module.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Text/Text.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Text/index.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Token/Token.module.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Token/Token.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/Token/index.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/components/index.ts" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -142,7 +175,7 @@
       <workItem from="1710483040518" duration="5406000" />
       <workItem from="1711418818164" duration="19730000" />
       <workItem from="1712028204528" duration="7925000" />
-      <workItem from="1712101489350" duration="8382000" />
+      <workItem from="1712101489350" duration="17727000" />
     </task>
     <task id="LOCAL-00003" summary="fix: align dropdown with trigger">
       <option name="closed" value="true" />

@@ -4,11 +4,12 @@ import { usePathname, useRouter } from "next/navigation";
 import Superposition from "@/assets/icons/superposition.svg";
 import { MobileNetworkSelection } from "@/app/MobileNetworkSelection";
 import { NetworkSelection } from "@/app/NetworkSelection";
-import { Menu, Text } from "@/components";
+
 import { Inter } from "next/font/google";
 import { useSwapPro } from "@/stores/useSwapPro";
 import Head from "next/head";
 import { ConnectWalletButton } from "@/app/ConnectWalletButton";
+import Menu from "@/components/Menu";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -53,12 +54,12 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
                   selected={pathname === "/" || pathname.startsWith("/swap")}
                   proToggle
                 >
-                  <Text className="text-nowrap">
+                  <div className="text-nowrap">
                     Swap{" "}
                     {swapPro && (
-                      <Text className="hidden md:inline-flex">{" Pro"}</Text>
+                      <div className="hidden md:inline-flex">{" Pro"}</div>
                     )}
-                  </Text>
+                  </div>
                 </Menu.Item>
                 <Menu.Item
                   className={"w-[73px]"}
@@ -67,7 +68,7 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
                   }}
                   selected={pathname.startsWith("/stake")}
                 >
-                  <Text>Stake</Text>
+                  <div>Stake</div>
                 </Menu.Item>
               </Menu>
             </div>

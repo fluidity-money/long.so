@@ -3,8 +3,14 @@ import ArrowDown from "@/assets/icons/arrow-down.svg";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import SPNTest from "@/assets/icons/spn-test.svg";
 import Ethereum from "@/assets/icons/ethereum.svg";
+import { useChainId, useSwitchChain } from "wagmi";
 
 export const NetworkSelection = () => {
+  const { chains, switchChain } = useSwitchChain();
+  const chainId = useChainId();
+
+  const selectedChain = chains.find((chain) => chain.id === chainId);
+
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger className="group">
@@ -19,7 +25,7 @@ export const NetworkSelection = () => {
               <div className="mr-2">
                 <SPNTest className="size-[20px] transition-none" />
               </div>
-              <div className="text-nowrap">SPN-Test</div>
+              <div className="text-nowrap">{selectedChain?.name}</div>
               <div className="ml-2 hidden w-0 transition-[width] group-hover:inline-flex group-hover:w-2 group-data-[state=open]:inline-flex group-data-[state=open]:w-2">
                 <ArrowDown width={10} height={6} />
               </div>
@@ -29,15 +35,18 @@ export const NetworkSelection = () => {
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content className="-mt-2 flex w-[110px] flex-col gap-0.5 rounded-2xl rounded-t-none border border-t-0 border-black bg-white p-2 text-xs">
-          <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
-            <Ethereum className={"size-[12px]"} /> Ethereum
-          </DropdownMenu.Item>
-          <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
-            <Ethereum className={"size-[12px]"} /> Arbitrum
-          </DropdownMenu.Item>
-          <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
-            <Ethereum className={"size-[12px]"} /> Solana
-          </DropdownMenu.Item>
+          {chains.map(
+            (chain) =>
+              chain.id !== chainId && (
+                <DropdownMenu.Item
+                  key={chain.id}
+                  className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs"
+                  onSelect={() => switchChain({ chainId: chain.id })}
+                >
+                  <Ethereum className={"size-[12px]"} /> {chain.name}
+                </DropdownMenu.Item>
+              ),
+          )}
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
