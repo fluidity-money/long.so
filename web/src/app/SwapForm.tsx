@@ -131,7 +131,7 @@ export const SwapForm = () => {
             variants={{
               hidden: {
                 opacity: 0,
-                y: 10,
+                y: 100,
               },
               visible: {
                 opacity: 1,
