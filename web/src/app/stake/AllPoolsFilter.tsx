@@ -15,7 +15,7 @@ export const AllPoolsFilter = () => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-row items-center border-b border-black pl-2 has-[:focus-visible]:rounded-md  has-[:focus-visible]:border-transparent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2">
+      <div className="flex flex-row items-center border-b border-black pl-2">
         <Search className="size-4" />
         <Input
           variant="no-ring"
@@ -25,8 +25,8 @@ export const AllPoolsFilter = () => {
       </div>
       <div className="flex flex-row justify-between">
         <Badge
-          className={cn("h-6 py-0 pl-0", {
-            "bg-white text-black hover:bg-white/80": !newPools,
+          className={cn("h-5 py-0 pl-0", {
+            "bg-transparent text-black hover:bg-white/80": !newPools,
           })}
         >
           <Switch
@@ -42,8 +42,8 @@ export const AllPoolsFilter = () => {
           </Label>
         </Badge>
         <Badge
-          className={cn("h-6 py-0 pl-0", {
-            "bg-white text-black hover:bg-white/80": !boostedPools,
+          className={cn("h-5 py-0 pl-0", {
+            "bg-transparent text-black hover:bg-white/80": !boostedPools,
           })}
         >
           <Switch
@@ -59,8 +59,8 @@ export const AllPoolsFilter = () => {
           </Label>
         </Badge>
         <Badge
-          className={cn("h-6 py-0 pl-0", {
-            "bg-white text-black hover:bg-white/80": !myAssets,
+          className={cn("h-5 py-0 pl-0", {
+            "bg-transparent text-black hover:bg-white/80": !myAssets,
           })}
         >
           <Switch

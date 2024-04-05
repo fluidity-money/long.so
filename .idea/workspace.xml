@@ -5,20 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="fix: align dropdown with trigger">
-      <change afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/Address.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/DisconnectButton.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/InventoryHeader.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/MyYieldUnclaimed.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/PoolsTabContent.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/Position.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/TradeTabContent.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/data/myPositionsData.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/data/traderRewardsData.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/data/transactionHistoryData.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/data/yieldData.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/_TransactionHistoryTable/columns.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/_TransactionHistoryTable/columns.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/InventoryContent/InventoryContent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/InventoryContent.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/stake/AllPoolsFilter.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/AllPoolsFilter.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -153,7 +140,7 @@
       <workItem from="1710483040518" duration="5406000" />
       <workItem from="1711418818164" duration="19730000" />
       <workItem from="1712028204528" duration="7925000" />
-      <workItem from="1712101489350" duration="43540000" />
+      <workItem from="1712101489350" duration="44298000" />
     </task>
     <task id="LOCAL-00003" summary="fix: align dropdown with trigger">
       <option name="closed" value="true" />
