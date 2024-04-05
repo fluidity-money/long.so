@@ -14,8 +14,6 @@ export const ConnectWalletButton = () => {
     chainId: mainnet.id,
   });
 
-  console.log(ensName);
-
   const { isLtSm } = useMediaQuery();
 
   const router = useRouter();

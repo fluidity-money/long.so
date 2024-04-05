@@ -5,8 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="fix: align dropdown with trigger">
+      <change afterPath="$PROJECT_DIR$/web/src/app/swap/explore/_AllAssetsTable/AllAssetsTable.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/web/src/app/swap/explore/_AllAssetsTable/columns.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/web/src/app/swap/explore/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/web/src/assets/icons/iridescent-pickaxe.svg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/src/app/ConnectWalletButton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/ConnectWalletButton.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/SwapForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/SwapForm.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,32 +65,32 @@
     <option name="autoscrollToSource" value="true" />
     <option name="openDirectoriesWithSingleClick" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;code.cleanup.on.save&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;development&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/aidankinzett/Git/amm.superposition.so/web/src/components/InventoryContent&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.standard&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.standard&quot;: &quot;&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;yarn&quot;,
-    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/Users/aidankinzett/Git/amm.superposition.so/web/node_modules/prettier&quot;,
-    &quot;rearrange.code.on.save&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.rainbow.brackets.disable.when&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/aidankinzett/Git/amm.superposition.so/web/node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "code.cleanup.on.save": "true",
+    "git-widget-placeholder": "development",
+    "last_opened_file_path": "/Users/aidankinzett/Git/amm.superposition.so/web/src/app/swap/explore/_AllAssetsTable",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.standard": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.standard": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "yarn",
+    "prettierjs.PrettierConfiguration.Package": "/Users/aidankinzett/Git/amm.superposition.so/web/node_modules/prettier",
+    "rearrange.code.on.save": "true",
+    "settings.editor.selected.configurable": "preferences.rainbow.brackets.disable.when",
+    "ts.external.directory.path": "/Users/aidankinzett/Git/amm.superposition.so/web/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
-      &quot;JSON&quot;
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "JSON"
     ]
   }
-}</component>
+}]]></component>
   <component name="ReactDesignerToolWindowState">
     <option name="myId2Visible">
       <map>
@@ -97,11 +102,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/web/src/app/swap/explore/_AllAssetsTable" />
       <recent name="$PROJECT_DIR$/web/src/components/InventoryContent" />
       <recent name="$PROJECT_DIR$/web/src/app/_TransactionHistoryTable" />
       <recent name="$PROJECT_DIR$/web/src/app/stake/_AllPoolsTable" />
       <recent name="$PROJECT_DIR$/web/src/app/stake/_DataTable" />
-      <recent name="$PROJECT_DIR$/web/src/assets/icons" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/web/src/app/stake/pool/create" />
@@ -141,7 +146,7 @@
       <workItem from="1710483040518" duration="5406000" />
       <workItem from="1711418818164" duration="19730000" />
       <workItem from="1712028204528" duration="7925000" />
-      <workItem from="1712101489350" duration="27030000" />
+      <workItem from="1712101489350" duration="37298000" />
     </task>
     <task id="LOCAL-00003" summary="fix: align dropdown with trigger">
       <option name="closed" value="true" />
