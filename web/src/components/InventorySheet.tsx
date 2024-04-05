@@ -1,6 +1,6 @@
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Image from "next/image";
-import { InventoryContent } from "@/components/InventoryContent/InventoryContent";
+import { InventoryContent } from "@/components/InventoryContent";
 import { useInventorySheet } from "@/stores/useInventorySheet";
 import { useAccount, useEnsName } from "wagmi";
 import { mainnet } from "wagmi/chains";
