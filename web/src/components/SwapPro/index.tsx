@@ -2,11 +2,11 @@
 
 import { useSwapPro } from "@/stores/useSwapPro";
 import { TypographyH2, TypographyH3 } from "@/components/ui/typography";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { startCase } from "lodash";
 import { DataTable } from "@/app/_DataTable/DataTable";
 import { columns, Transaction } from "@/app/_DataTable/columns";
-import { format, startOfDay, subDays } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import ReactECharts from "echarts-for-react";
@@ -17,182 +17,29 @@ import { DurationSegmentedControl } from "@/components/DurationSegmentedControl"
 import SegmentedControl from "@/components/ui/segmented-control";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
 import { cn } from "@/lib/utils";
+import { getSwapProGraphData } from "@/components/SwapPro/SwapProGraphData";
 
-const data = [
-  {
-    name: "Page A",
-    date: new Date(),
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    date: subDays(new Date(), 1),
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page C",
-    date: subDays(new Date(), 2),
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page D",
-    date: subDays(new Date(), 3),
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    date: subDays(new Date(), 4),
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 5),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 6),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page H",
-    date: subDays(new Date(), 7),
-    uv: 3490,
-    pv: 4300,
-    amt: 2400,
-  },
-  {
-    name: "Page A",
-    date: subDays(new Date(), 8),
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    date: subDays(new Date(), 9),
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page C",
-    date: subDays(new Date(), 10),
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page D",
-    date: subDays(new Date(), 11),
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    date: subDays(new Date(), 12),
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 13),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 14),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page H",
-    date: subDays(new Date(), 15),
-    uv: 3490,
-    pv: 4300,
-    amt: 2400,
-  },
-  {
-    name: "Page A",
-    date: subDays(new Date(), 16),
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    date: subDays(new Date(), 17),
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page C",
-    date: subDays(new Date(), 18),
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page D",
-    date: subDays(new Date(), 19),
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    date: subDays(new Date(), 20),
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 21),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 22),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page H",
-    date: subDays(new Date(), 23),
-    uv: 3490,
-    pv: 4300,
-    amt: 2400,
-  },
-];
+const durationToDays = {
+  "7D": 7,
+  "1M": 30,
+  "6M": 180,
+  "1Y": 365,
+  ALL: 365,
+};
 
 const Graph = () => {
   const [activeGraphType, setActiveGraphType] = useState<
     "price" | "volume" | "liquidity"
   >("volume");
+
+  const [duration, setDuration] = useState<"7D" | "1M" | "6M" | "1Y" | "ALL">(
+    "7D",
+  );
+
+  const swapProGraphData = useMemo(
+    () => getSwapProGraphData(durationToDays[duration]),
+    [duration, activeGraphType],
+  );
 
   return (
     <>
@@ -227,7 +74,7 @@ const Graph = () => {
             </div>
           </div>
 
-          <DurationSegmentedControl />
+          <DurationSegmentedControl callback={(val) => setDuration(val)} />
         </div>
         <TypographyH2 className="border-b-0">$12.05</TypographyH2>
 
@@ -261,7 +108,7 @@ const Graph = () => {
               },
               xAxis: {
                 type: "category",
-                data: data.map((d) => format(d.date, "P")),
+                data: swapProGraphData.map((d) => format(d.date, "P")),
                 show: false,
                 axisPointer: {
                   label: {
@@ -281,7 +128,7 @@ const Graph = () => {
               series: [
                 {
                   type: "bar",
-                  data: data.map((d) => d.uv),
+                  data: swapProGraphData.map((d) => d.uv),
                   itemStyle: {
                     color: "#1E1E1E",
                   },
