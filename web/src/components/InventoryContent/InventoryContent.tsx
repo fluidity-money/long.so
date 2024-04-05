@@ -42,6 +42,7 @@ import { usdFormat } from "@/lib/usdFormat";
 import Position from "@/assets/icons/position.svg";
 import ArrowUpRight from "@/assets/icons/arrow-up-right.svg";
 import { useAccount, useDisconnect, useEnsName } from "wagmi";
+import { mainnet } from "wagmi/chains";
 
 const data = [
   {
@@ -514,6 +515,7 @@ export const InventoryContent = () => {
   const { address } = useAccount();
   const { data: ensName } = useEnsName({
     address,
+    chainId: mainnet.id,
   });
 
   return (
