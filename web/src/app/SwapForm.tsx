@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
+import Link from "next/link";
 
 export const SwapForm = () => {
   const [breakdownHidden, setBreakdownHidden] = useState(true);
@@ -96,14 +97,16 @@ export const SwapForm = () => {
                   placeholder={welcome ? "1024.82" : undefined}
                 />
 
-                <Badge
-                  variant="outline"
-                  className="flex h-[26px] w-[82px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[90px] md:pl-[4px] md:text-base"
-                >
-                  <Token className="size-[20px] md:size-[25px]" />
-                  <div>USDC</div>
-                  <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
-                </Badge>
+                <Link href={"/swap/explore"}>
+                  <Badge
+                    variant="outline"
+                    className="flex h-[26px] w-[82px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[90px] md:pl-[4px] md:text-base"
+                  >
+                    <Token className="size-[20px] md:size-[25px]" />
+                    <div>USDC</div>
+                    <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
+                  </Badge>
+                </Link>
               </div>
 
               <div className={"flex flex-row items-center justify-between"}>
@@ -156,14 +159,16 @@ export const SwapForm = () => {
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-2xl"}>0.87</div>
 
-                <Badge
-                  variant="outline"
-                  className="flex h-[26px] w-[82px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[90px] md:pl-[4px] md:text-base"
-                >
-                  <Token className="size-[20px] md:size-[25px]" />
-                  <div>ETH</div>
-                  <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
-                </Badge>
+                <Link href={"/swap/explore"}>
+                  <Badge
+                    variant="outline"
+                    className="flex h-[26px] w-[82px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[90px] md:pl-[4px] md:text-base"
+                  >
+                    <Token className="size-[20px] md:size-[25px]" />
+                    <div>ETH</div>
+                    <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
+                  </Badge>
+                </Link>
               </div>
 
               <div className={"flex flex-row items-center justify-between"}>

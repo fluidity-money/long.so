@@ -15,6 +15,8 @@ import Token from "@/assets/icons/token.svg";
 import Ethereum from "@/assets/icons/ethereum.svg";
 import { DurationSegmentedControl } from "@/components/DurationSegmentedControl";
 import SegmentedControl from "@/components/ui/segmented-control";
+import { useWelcomeStore } from "@/stores/useWelcomeStore";
+import { cn } from "@/lib/utils";
 
 const data = [
   {
@@ -310,15 +312,20 @@ export const SwapPro = ({
   badgeTitle?: boolean;
 }) => {
   const { swapPro, setSwapPro } = useSwapPro();
+  const { welcome } = useWelcomeStore();
 
   const { isLtSm } = useMediaQuery();
+
+  const isOpen = !welcome && (swapPro || override || isLtSm);
 
   return (
     <motion.div
       initial={"hidden"}
       variants={variants}
-      animate={swapPro || override || isLtSm ? "visible" : "hidden"}
-      className="z-10 flex flex-col items-center justify-center"
+      animate={isOpen ? "visible" : "hidden"}
+      className={cn("z-10 flex flex-col items-center justify-center", {
+        hidden: !isOpen,
+      })}
       transition={{
         type: "spring",
         bounce: 0.5,
