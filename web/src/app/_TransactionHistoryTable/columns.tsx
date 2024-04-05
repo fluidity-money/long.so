@@ -28,7 +28,9 @@ export const columns: ColumnDef<TransactionHistory>[] = [
       return (
         <div className="flex flex-row items-center gap-1 md:pr-6">
           {row.original.tokens[0].icon}
-          {row.original.tokens[0].name} {"->"} {row.original.tokens[1].icon}
+          {row.original.tokens[0].name}
+          <div className={"text-nowrap"}>{"->"}</div>
+          {row.original.tokens[1].icon}
           {row.original.tokens[1].name}
         </div>
       );
