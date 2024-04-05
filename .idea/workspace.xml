@@ -6,10 +6,15 @@
   <component name="ChangeListManager">
     <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="fix: align dropdown with trigger">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/web/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/web/pnpm-lock.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/swap/explore/_AllAssetsTable/AllAssetsTable.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/swap/explore/_AllAssetsTable/AllAssetsTable.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/swap/explore/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/swap/explore/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/stores/useActiveTokenStore.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/util/abi/LightweightERC20.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/util/abi/SeawaterAMM.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/util/chainUtils.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/util/converters.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/util/env.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/util/math.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/util/tokens.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/util/types.ts" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,7 +75,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "code.cleanup.on.save": "true",
     "git-widget-placeholder": "development",
-    "last_opened_file_path": "/Users/aidankinzett/Git/amm.superposition.so/web/src/app/swap/explore/_AllAssetsTable",
+    "last_opened_file_path": "/Users/aidankinzett/Git/amm.superposition.so/web/src/interfaces",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.standard": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -100,11 +105,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/web/src/interfaces" />
       <recent name="$PROJECT_DIR$/web/src/app/swap/explore/_AllAssetsTable" />
       <recent name="$PROJECT_DIR$/web/src/components/InventoryContent" />
       <recent name="$PROJECT_DIR$/web/src/app/_TransactionHistoryTable" />
       <recent name="$PROJECT_DIR$/web/src/app/stake/_AllPoolsTable" />
-      <recent name="$PROJECT_DIR$/web/src/app/stake/_DataTable" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/web/src/app/stake/pool/create" />
@@ -144,7 +149,7 @@
       <workItem from="1710483040518" duration="5406000" />
       <workItem from="1711418818164" duration="19730000" />
       <workItem from="1712028204528" duration="7925000" />
-      <workItem from="1712101489350" duration="38333000" />
+      <workItem from="1712101489350" duration="41628000" />
     </task>
     <task id="LOCAL-00003" summary="fix: align dropdown with trigger">
       <option name="closed" value="true" />
