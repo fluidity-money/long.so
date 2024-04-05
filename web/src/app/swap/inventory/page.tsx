@@ -1,4 +1,4 @@
-import { InventoryContent } from "@/components/InventoryContent/InventoryContent";
+import { InventoryContent } from "@/components/InventoryContent";
 
 export default function InvetoryPage() {
   return (
