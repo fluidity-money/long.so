@@ -2,179 +2,10 @@
 
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts/core";
-import { format, subDays } from "date-fns";
+import { format } from "date-fns";
 import { DurationSegmentedControl } from "@/components/DurationSegmentedControl";
-
-const data = [
-  {
-    name: "Page A",
-    date: new Date(),
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    date: subDays(new Date(), 1),
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page C",
-    date: subDays(new Date(), 2),
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page D",
-    date: subDays(new Date(), 3),
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    date: subDays(new Date(), 4),
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 5),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 6),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page H",
-    date: subDays(new Date(), 7),
-    uv: 3490,
-    pv: 4300,
-    amt: 2400,
-  },
-  {
-    name: "Page A",
-    date: subDays(new Date(), 8),
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    date: subDays(new Date(), 9),
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page C",
-    date: subDays(new Date(), 10),
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page D",
-    date: subDays(new Date(), 11),
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    date: subDays(new Date(), 12),
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 13),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 14),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page H",
-    date: subDays(new Date(), 15),
-    uv: 3490,
-    pv: 4300,
-    amt: 2400,
-  },
-  {
-    name: "Page A",
-    date: subDays(new Date(), 16),
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    date: subDays(new Date(), 17),
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page C",
-    date: subDays(new Date(), 18),
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page D",
-    date: subDays(new Date(), 19),
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    date: subDays(new Date(), 20),
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 21),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 22),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page H",
-    date: subDays(new Date(), 23),
-    uv: 3490,
-    pv: 4300,
-    amt: 2400,
-  },
-];
+import { getYieldOverTimeData } from "@/app/stake/YieldOverTimeGraph/YieldOverTimeData";
+import { useMemo, useState } from "react";
 
 const colorGradient = new echarts.graphic.LinearGradient(
   0,
@@ -190,13 +21,30 @@ const colorGradient = new echarts.graphic.LinearGradient(
   ],
 );
 
+const durationToDays = {
+  "7D": 7,
+  "1M": 30,
+  "6M": 180,
+  "1Y": 365,
+  ALL: 365,
+};
+
 export const YieldOverTimeGraph = () => {
+  const [duration, setDuration] = useState<"7D" | "1M" | "6M" | "1Y" | "ALL">(
+    "7D",
+  );
+
+  const yieldOverTimeData = useMemo(
+    () => getYieldOverTimeData(durationToDays[duration]),
+    [duration],
+  );
+
   return (
     <>
       <div className="flex w-full flex-row items-center justify-between">
         <div className="text-nowrap text-2xs">My Yield Over Time</div>
 
-        <DurationSegmentedControl />
+        <DurationSegmentedControl callback={(val) => setDuration(val)} />
       </div>
 
       <div className="text-3xl">$12,500.42</div>
@@ -232,7 +80,7 @@ export const YieldOverTimeGraph = () => {
             },
             xAxis: {
               type: "category",
-              data: data.map((d) => format(d.date, "P")),
+              data: yieldOverTimeData.map((d) => format(d.date, "P")),
               show: false,
               axisPointer: {
                 label: {
@@ -254,7 +102,7 @@ export const YieldOverTimeGraph = () => {
                 name: "Series 2",
                 type: "bar",
                 stack: "total", // Same 'stack' value as Series 1 to stack them together
-                data: data.map((d) => d.uv),
+                data: yieldOverTimeData.map((d) => d.uv),
                 itemStyle: {
                   color: "#1E1E1E",
                   borderRadius: [0, 0, 5, 5],
@@ -265,7 +113,7 @@ export const YieldOverTimeGraph = () => {
               {
                 name: "series 1",
                 stack: "total",
-                data: data.map((d) => d.pv),
+                data: yieldOverTimeData.map((d) => d.pv),
                 type: "bar",
 
                 itemStyle: {

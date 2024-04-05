@@ -6,15 +6,18 @@ import SegmentedControl, {
 export const DurationSegmentedControl = ({
   className,
   variant,
+  callback,
 }: {
   className?: string;
   variant?: SegmentedControlProps<string>["variant"];
+  callback?: (value: "7D" | "1M" | "6M" | "1Y" | "ALL") => void;
 }) => {
   return (
     <SegmentedControl
       name={"duration"}
       className={className}
       variant={variant}
+      callback={callback}
       segments={[
         {
           label: "7D",
