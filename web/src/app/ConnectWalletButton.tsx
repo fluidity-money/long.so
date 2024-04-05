@@ -4,10 +4,15 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePathname, useRouter } from "next/navigation";
 import { InventorySheet } from "@/components/InventorySheet";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
-import { useAccount } from "wagmi";
+import { useAccount, useEnsName } from "wagmi";
 
 export const ConnectWalletButton = () => {
   const { address } = useAccount();
+  const { data: ensName } = useEnsName({
+    address,
+  });
+
+  console.log(ensName);
 
   const { isLtSm } = useMediaQuery();
 
@@ -46,7 +51,13 @@ export const ConnectWalletButton = () => {
           onClick={() => router.push("/swap/inventory")}
           className="cursor-pointer text-nowrap rounded p-1 text-right text-xs font-semibold text-black transition-all hover:bg-black hover:text-base hover:text-white"
         >
-          {address.slice(0, 5)} ... {address.slice(-3)}
+          {ensName ? (
+            ensName
+          ) : (
+            <>
+              {address.slice(0, 5)} ... {address.slice(-3)}
+            </>
+          )}
         </div>
         <Image
           src={require("@/assets/profile-picture.png")}
