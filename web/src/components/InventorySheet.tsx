@@ -3,6 +3,7 @@ import Image from "next/image";
 import { InventoryContent } from "@/components/InventoryContent/InventoryContent";
 import { useInventorySheet } from "@/stores/useInventorySheet";
 import { useAccount, useEnsName } from "wagmi";
+import { mainnet } from "wagmi/chains";
 
 export const InventorySheet = () => {
   const { isOpen, setIsOpen } = useInventorySheet();
@@ -11,6 +12,7 @@ export const InventorySheet = () => {
 
   const { data: ensName } = useEnsName({
     address,
+    chainId: mainnet.id,
   });
 
   return (

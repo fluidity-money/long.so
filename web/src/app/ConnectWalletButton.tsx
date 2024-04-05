@@ -5,11 +5,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { InventorySheet } from "@/components/InventorySheet";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useAccount, useEnsName } from "wagmi";
+import { mainnet } from "wagmi/chains";
 
 export const ConnectWalletButton = () => {
   const { address } = useAccount();
   const { data: ensName } = useEnsName({
     address,
+    chainId: mainnet.id,
   });
 
   console.log(ensName);
