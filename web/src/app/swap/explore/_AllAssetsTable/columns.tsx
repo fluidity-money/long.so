@@ -64,6 +64,13 @@ export const columns: ColumnDef<Asset>[] = [
     },
   },
   {
+    accessorKey: "address",
+    header: "Address",
+    cell: ({ row }) => {
+      return row.original.address;
+    },
+  },
+  {
     accessorKey: "amount",
     header: "Amount",
     cell: ({ row }) => {
