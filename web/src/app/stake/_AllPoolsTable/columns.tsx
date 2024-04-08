@@ -18,6 +18,7 @@ export type Pool = {
   rewards: number;
   annualPercentageYield: number;
   claimable: boolean;
+  boosted?: boolean;
 };
 
 export const columns: ColumnDef<Pool>[] = [
