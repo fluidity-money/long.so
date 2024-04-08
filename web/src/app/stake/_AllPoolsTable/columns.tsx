@@ -4,6 +4,8 @@ import { usdFormat } from "@/lib/usdFormat";
 import { Button } from "@/components/ui/button";
 import Sort from "@/assets/icons/sort.svg";
 import Link from "next/link";
+import TokenIridescent from "@/assets/icons/iridescent-token.svg";
+import Ethereum from "@/assets/icons/ethereum.svg";
 
 export type Token = {
   name: string;
@@ -99,7 +101,11 @@ export const columns: ColumnDef<Pool>[] = [
     },
     cell: ({ row }) => {
       return (
-        <Badge className="group-hover:invert">
+        <Badge className="h-[19px] gap-1 px-0.5 pr-1 group-hover:invert">
+          <div className={"flex flex-row items-center"}>
+            <TokenIridescent className={"size-[18px]"} />
+            <Ethereum className={"-ml-2 size-[14px] invert"} />
+          </div>
           {usdFormat(row.original.rewards)}
         </Badge>
       );

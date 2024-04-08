@@ -68,7 +68,7 @@ export const columns: ColumnDef<Pool>[] = [
       return (
         <Button
           variant={"link"}
-          className="hidden h-6 p-0 text-2xs text-white md:inline-flex"
+          className="hidden h-6 p-0 text-2xs text-white hover:no-underline md:inline-flex"
           size={"sm"}
         >
           <span className="mr-2 underline">Manage</span> {"->"}
