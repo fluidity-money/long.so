@@ -169,7 +169,9 @@ export const AllPools = () => {
         )}
 
         {displayMode === "grid" && (
-          <div className={"flex flex-row flex-wrap gap-[20px] pl-[12px]"}>
+          <div
+            className={"mt-[30px] flex flex-row flex-wrap gap-[20px] pl-[12px]"}
+          >
             {pools.map((pool) => (
               <div
                 key={pool.id}

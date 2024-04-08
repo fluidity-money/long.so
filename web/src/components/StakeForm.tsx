@@ -6,7 +6,7 @@ import Ethereum from "@/assets/icons/ethereum.svg";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import Padlock from "@/assets/icons/padlock.svg";
 import Token from "@/assets/icons/token.svg";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import { format, subDays } from "date-fns";
 import * as echarts from "echarts/core";
@@ -293,6 +293,107 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
   const [primeAssetAmount, setPrimeAssetAmount] = useState("");
 
+  const chartRef = useRef<ReactECharts>(null);
+
+  const [liquidityRangeType, setLiquidityRangeType] = useState<
+    "full-range" | "auto" | "custom"
+  >("full-range");
+
+  const chartOptions = useMemo(() => {
+    return {
+      grid: {
+        left: "0", // or a small value like '10px'
+        right: "0", // or a small value
+        top: "0", // or a small value
+        bottom: "0", // or a small value
+      },
+      tooltip: {
+        trigger: "axis", // Trigger tooltip on axis movement
+        axisPointer: {
+          type: "cross", // Display crosshair style pointers
+        },
+        borderWidth: 0,
+        backgroundColor: "#EBEBEB",
+        textStyle: {
+          color: "#1E1E1E",
+        },
+        formatter:
+          "<div class='flex flex-col items-center'>${c} <div class='text-gray-2 text-center w-full'>{b}</div></div>",
+      },
+      toolbox: {
+        show: false,
+      },
+      brush: {
+        show: liquidityRangeType === "custom",
+        xAxisIndex: "all",
+        brushLink: "all",
+        outOfBrush: {
+          color: "white",
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: data.map((d) => format(d.date, "P")),
+        show: false,
+        axisPointer: {
+          label: {
+            show: false,
+          },
+        },
+      },
+      yAxis: {
+        type: "value",
+        show: false,
+        axisPointer: {
+          label: {
+            show: false,
+          },
+        },
+      },
+      series: [
+        {
+          data: data.map((d) => d.pv),
+          type: "bar",
+          barWidth: "90%", // Adjust bar width (can be in pixels e.g., '20px')
+          barGap: "5%",
+          itemStyle: {
+            color: colorGradient,
+            borderRadius: [5, 5, 0, 0], // Specify radius for all corners
+            // Border configuration
+            borderColor: "#1E1E1E", // Border color
+            borderWidth: 2, // Border width
+            borderType: "solid", // Border type
+          },
+        },
+      ],
+    };
+  }, [data, liquidityRangeType]);
+
+  useEffect(() => {
+    if (chartRef.current) {
+      const chart = chartRef.current.getEchartsInstance();
+      chart.setOption(chartOptions);
+
+      if (liquidityRangeType === "custom") {
+        chart.dispatchAction({
+          type: "brush",
+          areas: [
+            {
+              brushType: "lineX",
+              coordRange: [5, 25],
+              xAxisIndex: 0,
+            },
+          ],
+        });
+      } else {
+        chart.dispatchAction({
+          type: "brush",
+          areas: [],
+        });
+      }
+    }
+  }, [chartOptions]);
+
   return (
     <div className="z-10 flex flex-col items-center">
       <div className="w-[318px] md:w-[392px]">
@@ -574,6 +675,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
           <SegmentedControl
             variant={"secondary"}
             className={"text-3xs md:text-2xs"}
+            callback={(val) => setLiquidityRangeType(val)}
             segments={[
               {
                 label: "Full Range",
@@ -626,84 +728,22 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
             style={{
               height: 44,
             }}
+            ref={chartRef}
             onChartReady={(chart) => {
-              chart.dispatchAction({
-                type: "brush",
-                areas: [
-                  {
-                    brushType: "lineX",
-                    coordRange: [5, 25],
-                    xAxisIndex: 0,
-                  },
-                ],
-              });
+              if (liquidityRangeType === "custom") {
+                chart.dispatchAction({
+                  type: "brush",
+                  areas: [
+                    {
+                      brushType: "lineX",
+                      coordRange: [5, 25],
+                      xAxisIndex: 0,
+                    },
+                  ],
+                });
+              }
             }}
-            option={{
-              grid: {
-                left: "0", // or a small value like '10px'
-                right: "0", // or a small value
-                top: "0", // or a small value
-                bottom: "0", // or a small value
-              },
-              tooltip: {
-                trigger: "axis", // Trigger tooltip on axis movement
-                axisPointer: {
-                  type: "cross", // Display crosshair style pointers
-                },
-                borderWidth: 0,
-                backgroundColor: "#EBEBEB",
-                textStyle: {
-                  color: "#1E1E1E",
-                },
-                formatter:
-                  "<div class='flex flex-col items-center'>${c} <div class='text-gray-2 text-center w-full'>{b}</div></div>",
-              },
-              toolbox: {
-                show: false,
-              },
-              brush: {
-                xAxisIndex: "all",
-                brushLink: "all",
-                outOfBrush: {
-                  color: "white",
-                },
-              },
-              xAxis: {
-                type: "category",
-                data: data.map((d) => format(d.date, "P")),
-                show: false,
-                axisPointer: {
-                  label: {
-                    show: false,
-                  },
-                },
-              },
-              yAxis: {
-                type: "value",
-                show: false,
-                axisPointer: {
-                  label: {
-                    show: false,
-                  },
-                },
-              },
-              series: [
-                {
-                  data: data.map((d) => d.pv),
-                  type: "bar",
-                  barWidth: "90%", // Adjust bar width (can be in pixels e.g., '20px')
-                  barGap: "5%",
-                  itemStyle: {
-                    color: colorGradient,
-                    borderRadius: [5, 5, 0, 0], // Specify radius for all corners
-                    // Border configuration
-                    borderColor: "#1E1E1E", // Border color
-                    borderWidth: 2, // Border width
-                    borderType: "solid", // Border type
-                  },
-                },
-              ],
-            }}
+            option={chartOptions}
           />
 
           <div className="mt-[16px] flex flex-row justify-around text-4xs md:text-2xs">
