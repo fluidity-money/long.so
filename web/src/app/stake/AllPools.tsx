@@ -11,7 +11,12 @@ import SegmentedControl from "@/components/ui/segmented-control";
 import Ethereum from "@/assets/icons/ethereum.svg";
 import { Badge } from "@/components/ui/badge";
 import IridescentToken from "@/assets/icons/iridescent-token.svg";
+import Token from "@/assets/icons/token.svg";
 import { usdFormat } from "@/lib/usdFormat";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import Position from "@/assets/icons/position.svg";
+import Pickaxe from "@/assets/icons/iridescent-pickaxe-2.svg";
 
 const pools: Pool[] = [
   {
@@ -33,6 +38,7 @@ const pools: Pool[] = [
     rewards: 413,
     totalValueLocked: 1213,
     volume: 5421,
+    boosted: true,
   },
   {
     id: nanoid(),
@@ -53,6 +59,7 @@ const pools: Pool[] = [
     rewards: 321,
     totalValueLocked: 4312,
     volume: 1231,
+    boosted: true,
   },
   {
     id: nanoid(),
@@ -63,6 +70,7 @@ const pools: Pool[] = [
     rewards: 413,
     totalValueLocked: 1213,
     volume: 5421,
+    boosted: true,
   },
   {
     id: nanoid(),
@@ -169,7 +177,7 @@ export const AllPools = () => {
                   "relative h-[169px] w-[179px] rounded-[5px] bg-black text-white"
                 }
               >
-                <div className={"absolute -top-2 left-0 flex flex-row"}>
+                <div className={"absolute -left-1 -top-2 flex flex-row"}>
                   <Ethereum
                     className={"size-[24px] rounded-full border border-white"}
                   />
@@ -182,12 +190,86 @@ export const AllPools = () => {
                   </Badge>
                 </div>
 
+                {pool.boosted && (
+                  <div className={"absolute -right-1 -top-3"}>
+                    <Badge
+                      variant={"iridescent"}
+                      className={
+                        "h-4 gap-0.5 border border-black px-0.5 text-[9px]"
+                      }
+                    >
+                      <Pickaxe />
+                      Boosted
+                    </Badge>
+                  </div>
+                )}
+
                 <div
                   className={
                     "mt-[34px] w-full text-center text-xl font-semibold"
                   }
                 >
                   {usdFormat(pool.rewards)}
+                </div>
+
+                <div className={"mt-[5px] flex flex-row justify-center"}>
+                  <Badge
+                    variant={pool.boosted ? "iridescent" : "outline"}
+                    className={cn("h-3.5 gap-[3px] pl-0.5 text-[8px]", {
+                      "text-white": !pool.boosted,
+                    })}
+                  >
+                    <div className={"flex flex-row"}>
+                      <Token className={"size-[10px]"} />
+                      <Token className={"-ml-1 size-[10px]"} />
+                      <Token className={"-ml-1 size-[10px]"} />
+                    </div>
+                    <div>Available Yield</div>
+                  </Badge>
+                </div>
+
+                <div
+                  className={
+                    "mt-[16px] flex flex-row justify-between px-[21px]"
+                  }
+                >
+                  <div className={"flex flex-col"}>
+                    <div className={"text-[10px] text-neutral-400"}>Amount</div>
+                    <div className={"flex flex-row items-center gap-1 text-xs"}>
+                      <Position className={"invert"} />
+                      $10.1k
+                    </div>
+                  </div>
+                  <div className={"flex flex-col"}>
+                    <div
+                      className={
+                        "flex flex-row items-center text-[10px] text-neutral-400"
+                      }
+                    >
+                      Liq. Range{" "}
+                      <div className="w-1.5 text-right text-[5px] font-medium text-green-200">
+                        ●
+                      </div>
+                    </div>
+                    <div className={"text-xs"}>3.10k -3.98k</div>
+                  </div>
+                </div>
+
+                <div className={"mt-[10px] flex flex-row gap-2 px-2"}>
+                  <Button
+                    variant={"secondary"}
+                    size={"sm"}
+                    className={"flex h-[23px] flex-1 text-[9px]"}
+                  >
+                    View Pool
+                  </Button>
+                  <Button
+                    variant={"secondary"}
+                    size={"sm"}
+                    className={"h-[23px] text-[9px]"}
+                  >
+                    +
+                  </Button>
                 </div>
               </div>
             ))}
