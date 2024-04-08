@@ -7,9 +7,11 @@ import { useDisconnect } from "wagmi";
 
 export const DisconnectButton = () => {
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
+
   const ref = useDetectClickOutside({
     onTriggered: () => setConfirmDisconnect(false),
   });
+
   const { disconnect } = useDisconnect();
 
   return (
@@ -17,7 +19,7 @@ export const DisconnectButton = () => {
       ref={ref}
       variant="secondary"
       className={cn(
-        "h-[18px] w-[20px] cursor-pointer items-center gap-1 px-0.5 transition-all",
+        "h-[25px] w-[25px] cursor-pointer items-center gap-1 px-1 transition-all",
         {
           "bg-transparent": !confirmDisconnect,
           "w-[95px] ": confirmDisconnect,
