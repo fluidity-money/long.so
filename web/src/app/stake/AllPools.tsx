@@ -8,6 +8,10 @@ import { useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import { AllPoolsFilter } from "@/app/stake/AllPoolsFilter";
 import SegmentedControl from "@/components/ui/segmented-control";
+import Ethereum from "@/assets/icons/ethereum.svg";
+import { Badge } from "@/components/ui/badge";
+import IridescentToken from "@/assets/icons/iridescent-token.svg";
+import { usdFormat } from "@/lib/usdFormat";
 
 const pools: Pool[] = [
   {
@@ -152,7 +156,43 @@ export const AllPools = () => {
           </div>
         </div>
 
-        <AllPoolsTable columns={columns} data={pools} />
+        {displayMode === "list" && (
+          <AllPoolsTable columns={columns} data={pools} />
+        )}
+
+        {displayMode === "grid" && (
+          <div className={"flex flex-row flex-wrap gap-[20px] pl-[12px]"}>
+            {pools.map((pool) => (
+              <div
+                key={pool.id}
+                className={
+                  "relative h-[169px] w-[179px] rounded-[5px] bg-black text-white"
+                }
+              >
+                <div className={"absolute -top-2 left-0 flex flex-row"}>
+                  <Ethereum
+                    className={"size-[24px] rounded-full border border-white"}
+                  />
+                  <Badge
+                    variant={"outline"}
+                    className={"-ml-1.5 bg-black pl-0.5 text-white"}
+                  >
+                    <IridescentToken className={"size-[18px]"} />
+                    {pool.tokens[0].name}-{pool.tokens[1].name}
+                  </Badge>
+                </div>
+
+                <div
+                  className={
+                    "mt-[34px] w-full text-center text-xl font-semibold"
+                  }
+                >
+                  {usdFormat(pool.rewards)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
