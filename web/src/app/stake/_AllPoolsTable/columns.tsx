@@ -129,12 +129,12 @@ export const columns: ColumnDef<Pool>[] = [
       return (
         <div className="flex flex-row gap-2 group-hover:invert">
           <Link href={`/stake/pool/${row.original.id}/add-liquidity`}>
-            <Button size="sm" className="text-2xs md:text-xs">
+            <Button size="sm" className="h-[29px] text-2xs md:text-xs">
               +
             </Button>
           </Link>
           {row.original.claimable && (
-            <Button size="sm" className="text-2xs md:text-xs">
+            <Button size="sm" className="h-[29px] text-2xs md:text-xs">
               Claim
             </Button>
           )}
