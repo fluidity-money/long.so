@@ -328,7 +328,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
         xAxisIndex: "all",
         brushLink: "all",
         outOfBrush: {
-          color: "white",
+          color: "#1E1E1E",
         },
       },
       xAxis: {
@@ -360,9 +360,17 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
             color: colorGradient,
             borderRadius: [5, 5, 0, 0], // Specify radius for all corners
             // Border configuration
-            borderColor: "#1E1E1E", // Border color
-            borderWidth: 2, // Border width
-            borderType: "solid", // Border type
+            ...(liquidityRangeType === "custom"
+              ? {
+                  borderColor: "#EBEBEB", // Border color
+                  borderWidth: 1, // Border width
+                  borderType: "dashed", // Border type
+                }
+              : {
+                  borderColor: "#1E1E1E", // Border color
+                  borderWidth: 1, // Border width
+                  borderType: "solid", // Border type
+                }),
           },
         },
       ],
@@ -392,7 +400,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
         });
       }
     }
-  }, [chartOptions]);
+  }, [chartOptions, liquidityRangeType]);
 
   return (
     <div className="z-10 flex flex-col items-center">
