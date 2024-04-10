@@ -22,6 +22,7 @@ fn test_mul_div() {
         let a = rand_u256(&mut rng);
         let b = rand_u256(&mut rng);
         let denom = rand_u256(&mut rng);
+        #[cfg(feature = "testing-dbg-mul_div")]
         println!("testing {} {} {}", a, b, denom);
 
         let res = full_math::mul_div(a, b, denom);
@@ -50,6 +51,7 @@ fn test_get_tick_at_sqrt_ratio() {
             rng.gen_range(0..=4294805859),
             0,
         ]);
+        #[cfg(feature = "testing-dbg-get_tick_at_sqrt_ratio")]
         println!("testing {}", ratio);
 
         let tick = tick_math::get_tick_at_sqrt_ratio(ratio);
@@ -71,6 +73,7 @@ fn test_get_sqrt_ratio_at_tick() {
     let mut errs: i64 = 0;
     for _ in 0..1000 {
         let tick = rng.gen_range(tick_math::MIN_TICK..=tick_math::MAX_TICK);
+        #[cfg(feature = "testing-dbg-get_sqrt_ratio_at_tick")]
         println!("testing {}", tick);
 
         let ratio = tick_math::get_sqrt_ratio_at_tick(tick);
