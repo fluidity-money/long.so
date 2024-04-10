@@ -5,21 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="271cb190-0104-4056-b1f4-9532d05e740f" name="Changes" comment="fix: align dropdown with trigger">
-      <change afterPath="$PROJECT_DIR$/web/src/app/faucet/ERC20mintable.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/faucet/page.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/SelectPrimeAssetTable.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/columns.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/config/arbitrumStylusTestnet.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/config/tokens.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/SwapForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/SwapForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/stake/pool/create/select-prime-asset/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/stake/pool/create/select-prime-asset/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/InventoryContent/InventorySettings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/InventoryContent/InventorySettings.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/StakeForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/components/StakeForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/config/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/config/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/lib/publicClient.ts" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/lib/publicClient.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/stores/useStakeStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/stores/useStakeStore.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/web/tsconfig.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/src/app/faucet/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/faucet/page.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -164,7 +150,7 @@
       <workItem from="1712028204528" duration="7925000" />
       <workItem from="1712101489350" duration="51889000" />
       <workItem from="1712542005071" duration="11889000" />
-      <workItem from="1712632472672" duration="12927000" />
+      <workItem from="1712632472672" duration="13603000" />
     </task>
     <task id="LOCAL-00003" summary="fix: align dropdown with trigger">
       <option name="closed" value="true" />

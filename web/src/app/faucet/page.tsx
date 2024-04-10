@@ -19,8 +19,7 @@ const tokens: `0x${string}`[] = [
 ];
 
 const FaucetPage = () => {
-  const { writeContract, error } = useWriteContract();
-  console.log(error);
+  const { writeContract } = useWriteContract();
 
   const { address } = useAccount();
 
