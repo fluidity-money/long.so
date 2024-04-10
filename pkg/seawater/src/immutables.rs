@@ -1,8 +1,5 @@
 //! Per-deployment constants, intended to be used the same way `immutable` variables are in
 //! solidity
-//!
-//! (These should probably be implemented through the [std::env!] macro, but it's annoyingly
-//! difficult to do hex decoding in a const context, so for now they're implemented here.)
 
 use crate::types::Address;
 
@@ -18,10 +15,12 @@ macro_rules! addr {
     };
 }
 
+// test only implementation that returns a dummy value (so you can pick it from logs)
 #[cfg(not(target_arch = "wasm32"))]
 macro_rules! addr {
     ($_input:literal) => {
-        Address::ZERO
+        // this says "fluidity_1" if you squint
+        Address::new([0xf1, 0x01, 0xd1, 0x73, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01])
     };
 }
 

@@ -58,3 +58,4 @@ cat <<EOF
 	"ownership_nfts_token_uri": "$ownership_nfts_token_uri",
 	"seawater_fusdc_addr": "$FLU_SEAWATER_FUSDC_ADDR"
 }
+EOF

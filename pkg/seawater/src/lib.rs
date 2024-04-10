@@ -296,7 +296,7 @@ impl Pools {
 impl Pools {
 
     /// Quote a [Self::swap]. Will revert with the result of the swap
-    /// as a decimal number as the message of an `Error(string)`. 
+    /// as a decimal number as the message of an `Error(string)`.
     /// Returns a `Result` as Stylus expects but will always only fill the `Revert`.
     pub fn quote(
         &mut self,
@@ -321,12 +321,12 @@ impl Pools {
             // actual error, return it as normal
             Err(e) => {
                 Err(e)
-            } 
+            }
         }
     }
 
     /// Quote a [Self::swap_2_exact_in]. Will revert with the result of the swap
-    /// as a decimal number as the message of an `Error(string)`. 
+    /// as a decimal number as the message of an `Error(string)`.
     /// Returns a `Result` as Stylus expects but will always only fill the `Revert`.
     pub fn quote2(
         &mut self,
@@ -339,13 +339,13 @@ impl Pools {
 
         match swapped {
             Ok((_,_,amount_out,_,_,_)) => {
-                let revert = erc20::revert_from_msg(&amount_out.to_string()); 
+                let revert = erc20::revert_from_msg(&amount_out.to_string());
                 Err(revert)
             }
             // actual error, return it as normal
             Err(e) => {
                 Err(e)
-            } 
+            }
         }
     }
 }
@@ -866,6 +866,11 @@ mod test {
     }
 
     #[test]
+    fn test_sqrt_price() {
+        dbg!(test_utils::encode_sqrt_price(100, 1));
+    }
+
+    #[test]
     fn test_similar_to_ethers() -> Result<(), Vec<u8>> {
         test_utils::with_storage::<_, Pools, _>(|contract| {
             // Create the storage
@@ -883,6 +888,41 @@ mod test {
 
             let lower_tick = test_utils::encode_tick(50);
             let upper_tick = test_utils::encode_tick(150);
+            let liquidity_delta = 20000;
+
+            // Begin to create the position, following the same path as
+            // in `createPosition` in ethers-tests/tests.ts
+            contract.mint_position(token_addr, lower_tick, upper_tick)?;
+            let position_id = contract
+                .next_position_id
+                .clone()
+                .checked_sub(U256::one())
+                .unwrap();
+
+            contract.update_position(token_addr, position_id, liquidity_delta)?;
+
+            Ok(())
+        })
+    }
+
+    #[test]
+    fn test_alex() -> Result<(), Vec<u8>> {
+        test_utils::with_storage::<_, Pools, _>(|contract| {
+            // Create the storage
+            contract.seawater_admin.set(msg::sender());
+            let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
+
+            // First, we set up the pool.
+            contract.create_pool(
+                token_addr,
+                test_utils::encode_sqrt_price(100, 1), // the price
+                0,
+                1,
+                100000000000,
+            )?;
+
+            let lower_tick = 39122;
+            let upper_tick = 50108;
             let liquidity_delta = 20000;
 
             // Begin to create the position, following the same path as

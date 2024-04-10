@@ -65,6 +65,11 @@ which will also run tests on the host environment with stubbed out ERC20.
 
 	./tests.sh
 
+### Cargo test tracing
+
+Some of the cargo tests have optional logging, which might help with debugging. To see these logs, enable the `testing-dbg-<test>`
+feature and run the tests without capturing stdout, ie `cargo test --features=testing,testing-dbg-erc20 -- --nocapture`.
+
 ## Deployment
 
 You can deploy the contracts using the `deploy.sh` script.
