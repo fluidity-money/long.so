@@ -10,6 +10,23 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { SelectPrimeAssetTable } from "@/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/SelectPrimeAssetTable";
+import {
+  columns,
+  Pool,
+} from "@/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/columns";
+import { nanoid } from "nanoid";
+import { tokens } from "../../../../../config/tokens";
+
+const data: Pool[] = [
+  {
+    APR: 170.23,
+    volume: "$100k",
+    duration: 150,
+    id: nanoid(),
+    tokens: [tokens[0], tokens[1]],
+  },
+];
 
 const SelectPrimeAsset = () => {
   const router = useRouter();
@@ -104,7 +121,9 @@ const SelectPrimeAsset = () => {
           </div>
         </div>
 
-        <div className={"flex flex-1"}></div>
+        <div className={"mt-[20px] flex flex-1 overflow-y-auto"}>
+          <SelectPrimeAssetTable columns={columns} data={data} />
+        </div>
 
         <Button
           variant={"secondary"}

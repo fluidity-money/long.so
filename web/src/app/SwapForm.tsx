@@ -216,7 +216,7 @@ export const SwapForm = () => {
                 >
                   {breakdownHidden ? (
                     <>
-                      <div className="underline">See Breakdown</div>
+                      <div className="underline">See breakdown</div>
                       <div className="ml-1">{"->"}</div>
                     </>
                   ) : (
