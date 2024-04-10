@@ -109,7 +109,7 @@ export const InventorySettings = () => {
           />
 
           <Select defaultValue={"minutes"}>
-            <SelectTrigger className="h-6 w-auto border-0 bg-black p-0">
+            <SelectTrigger className="h-6 w-auto border-0 bg-black p-0 text-[12px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

@@ -271,7 +271,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
   const [breakdownHidden, setBreakdownHidden] = useState(true);
 
-  const { multiSingleToken, setMultiSingleToken } = useStakeStore();
+  const { multiSingleToken, setMultiSingleToken, token0 } = useStakeStore();
 
   const router = useRouter();
 
@@ -413,7 +413,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
           layoutId="modal"
           className="relative h-[102px] w-[318px] justify-between rounded-lg bg-black p-[17px] text-white md:h-[150px] md:w-[392px] md:p-[25px]"
         >
-          <motion.div className="flex flex-col">
+          <motion.div layout className="flex flex-col">
             <div
               className={cn("absolute -top-[15px] left-0 hidden md:flex", {
                 flex: mode === "existing",
@@ -422,10 +422,10 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               <Ethereum className="size-[30px] rounded-full border-[3px] border-white" />
               <Badge
                 variant="outline"
-                className="-ml-2 h-[30px] w-[124px] justify-between border-[3px] bg-black pl-px text-white"
+                className="-ml-2 h-[30px] justify-between border-[3px] bg-black pl-px text-white"
               >
                 <Token className="size-[25px] invert" />
-                ƒUSDC - ETH
+                ƒUSDC - {token0.symbol}
               </Badge>
             </div>
 
@@ -474,7 +474,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
             <div className="flex w-full flex-row items-center justify-between md:mt-[10px]">
               <div className="text-3xs md:text-2xs">Prime Asset</div>
 
-              <div className="text-3xs md:text-2xs">Ethereum</div>
+              <div className="text-3xs md:text-2xs">{token0.name}</div>
             </div>
 
             <div className="mt-[7px] flex w-full flex-row items-center justify-between gap-4">
@@ -492,10 +492,10 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               >
                 <Badge
                   variant="outline"
-                  className="flex h-[26px] w-[82px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[90px] md:pl-[4px] md:text-base"
+                  className="flex h-[26px] cursor-pointer flex-row justify-between gap-1 pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base"
                 >
                   <Ethereum className="size-[20px] invert md:size-[25px]" />
-                  <div>ETH</div>
+                  <div>{token0.symbol}</div>
                   <ArrowDown className="h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
                 </Badge>
               </Link>
@@ -523,7 +523,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
           </motion.div>
         </motion.div>
 
-        <AnimatePresence mode={"popLayout"} initial={false}>
+        <AnimatePresence mode={"popLayout"} initial={true}>
           {(mode === "new" || multiSingleToken === "multi") && (
             <motion.div
               initial={{ y: -102, opacity: 0 }}
@@ -559,434 +559,453 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
           )}
         </AnimatePresence>
       </div>
-
-      <div className="mt-[12px] flex w-[318px] flex-row items-center justify-between md:w-[392px]">
-        <div className="text-3xs md:text-2xs">Fee Tier</div>
-
-        <SegmentedControl
-          variant={"secondary"}
-          className={"h-[26px] rounded-lg bg-black text-3xs md:text-2xs"}
-          callback={(val) => setFeeTier(val)}
-          segments={[
-            {
-              label: "Auto",
-              value: "auto" as const,
-              ref: useRef(),
-            },
-            {
-              label: "Manual",
-              value: "manual" as const,
-              ref: useRef(),
-            },
-          ]}
-        />
-      </div>
-
-      <AnimatePresence initial={false} mode="popLayout">
-        {feeTier === "auto" && (
-          <motion.div
-            key={"auto"}
-            initial={{ x: -320, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -320, opacity: 0 }}
-            className="shine mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between rounded-lg px-[22px] py-[15px] md:h-[69px] md:w-[392px]"
-          >
-            <div className="flex flex-col items-center gap-[3px]">
-              <div className="iridescent-text text-xs font-medium md:text-sm">
-                0 ~ 0.3%
-              </div>
-              <Badge
-                variant="iridescent"
-                className="h-[10px] px-[7px] text-4xs font-normal md:h-[12px] md:text-3xs"
-              >
-                Fee Percentage
-              </Badge>
-            </div>
-
-            <div className="iridescent-text w-[200px] text-3xs md:w-[247px] md:text-2xs">
-              The protocol automatically adjust your fees in order to maximise
-              rewards and reduce impermanent loss
-            </div>
-          </motion.div>
-        )}
-        {feeTier === "manual" && (
-          <motion.div
-            key={"manual"}
-            initial={{ x: 320, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 320, opacity: 0 }}
-          >
-            <RadioGroup.Root
-              className="mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between gap-[5px] rounded-lg md:h-[69px] md:w-[392px]"
-              defaultValue="0.05"
-            >
-              <RadioGroup.Item
-                value="0.01"
-                className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
-              >
-                <div className="text-2xs font-medium md:text-xs">0.01%</div>
-                <div className="text-center text-3xs text-gray-2 ">
-                  Best for Very <br /> Stable Pairs
-                </div>
-                <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
-                  (0% popularity)
-                </div>
-              </RadioGroup.Item>
-
-              <RadioGroup.Item
-                value={"0.05"}
-                className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
-              >
-                <div className="text-2xs font-medium md:text-xs">0.05%</div>
-                <div className="text-center text-3xs text-gray-2 ">
-                  Best for <br /> Stable Pairs
-                </div>
-                <div className="iridescent rounded bg-[#D8D8D8] px-1 text-4xs text-black md:text-3xs">
-                  (99% popularity)
-                </div>
-              </RadioGroup.Item>
-
-              <RadioGroup.Item
-                value={"0.10"}
-                className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
-              >
-                <div className="text-2xs font-medium md:text-xs">0.10%</div>
-                <div className="text-center text-3xs text-gray-2 ">
-                  Best for <br /> Stable Pairs
-                </div>
-                <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
-                  (0% popularity)
-                </div>
-              </RadioGroup.Item>
-
-              <RadioGroup.Item
-                value={"0.15"}
-                className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
-              >
-                <div className="text-2xs font-medium md:text-xs">0.15%</div>
-                <div className="text-center text-3xs text-gray-2 ">
-                  Best for <br /> Stable Pairs
-                </div>
-                <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
-                  (0% popularity)
-                </div>
-              </RadioGroup.Item>
-            </RadioGroup.Root>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="mt-[20px] h-[212px] w-[318px] rounded-lg bg-black px-[20px] py-[11px] text-white md:h-[248px] md:w-[392px]">
-        <div className="flex w-full flex-row items-center justify-between">
-          <div className="text-3xs md:text-2xs">Liquidity Range</div>
+      <motion.div
+        className={"flex flex-col items-center"}
+        initial={{
+          opacity: 0,
+          y: 100,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        exit={{
+          opacity: 0,
+          y: 100,
+        }}
+      >
+        <div className="mt-[12px] flex w-[318px] flex-row items-center justify-between md:w-[392px]">
+          <div className="text-3xs md:text-2xs">Fee Tier</div>
 
           <SegmentedControl
             variant={"secondary"}
-            className={"text-3xs md:text-2xs"}
-            callback={(val) => setLiquidityRangeType(val)}
+            className={"h-[26px] rounded-lg bg-black text-3xs md:text-2xs"}
+            callback={(val) => setFeeTier(val)}
             segments={[
               {
-                label: "Full Range",
-                value: "full-range",
-                ref: useRef(),
-              },
-              {
                 label: "Auto",
-                value: "auto",
+                value: "auto" as const,
                 ref: useRef(),
               },
               {
-                label: "Custom",
-                value: "custom",
+                label: "Manual",
+                value: "manual" as const,
                 ref: useRef(),
               },
             ]}
           />
         </div>
 
-        <div className="mt-[22px] flex flex-row items-center justify-between px-[5px] md:mt-[24px] md:w-[270px]">
-          <div className="flex flex-col">
-            <div className="text-3xs text-gray-2 md:text-2xs">Low Price</div>
-            <div className={"border-b border-white text-2xs md:text-base"}>
-              780.28123
-            </div>
-            <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
-              <Ethereum className="invert" /> USDC per ETH
-            </div>
-          </div>
-
-          <div className="flex flex-col">
-            <div className="text-3xs text-gray-2 md:text-2xs">High Price</div>
-            <div className={"border-b border-white text-2xs md:text-base"}>
-              ∞
-            </div>
-            <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
-              <Ethereum className="invert" /> USDC per ETH
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-[22px]">
-          <div className="text-3xs text-gray-2 md:text-2xs">Visualiser</div>
-          <ReactECharts
-            className="mt-1"
-            opts={{
-              height: 44,
-            }}
-            style={{
-              height: 44,
-            }}
-            ref={chartRef}
-            onChartReady={(chart) => {
-              if (liquidityRangeType === "custom") {
-                chart.dispatchAction({
-                  type: "brush",
-                  areas: [
-                    {
-                      brushType: "lineX",
-                      coordRange: [5, 25],
-                      xAxisIndex: 0,
-                    },
-                  ],
-                });
-              }
-            }}
-            option={chartOptions}
-          />
-
-          <div className="mt-[16px] flex flex-row justify-around text-4xs md:text-2xs">
-            <div className="flex flex-row items-center gap-1">
-              <SelectedRange /> Selected Range
-            </div>
-            <div className="flex flex-row items-center gap-1">
-              <CurrentPrice /> Current Price
-            </div>
-            <div className="flex flex-row items-center gap-1">
-              <LiquidityDistribution /> Liquidity Distribution
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-[21px] flex w-[318px] flex-row justify-end md:w-[392px]">
-        <div
-          onClick={() => setBreakdownHidden((v) => !v)}
-          className="flex cursor-pointer flex-row"
-        >
-          {breakdownHidden ? (
-            <>
-              <div className="text-2xs underline">Show Breakdown</div>
-              <div className="ml-1 rotate-90 text-2xs">{"<-"}</div>
-            </>
-          ) : (
-            <>
-              <div className="text-2xs underline">Hide breakdown</div>
-              <div className="ml-1 rotate-90 text-2xs">{"->"}</div>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div
-        className={cn(
-          "mt-[10px] flex h-[60px] w-[318px] flex-col gap-[5px] overflow-hidden text-2xs transition-[height] md:w-[392px]",
-          {
-            "h-0": breakdownHidden,
-          },
-        )}
-      >
-        <div className="flex flex-row justify-between">
-          <div>Fees</div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className={"flex flex-row items-center gap-1"}>
-                  <Gas />
-                  $3.55
+        <AnimatePresence initial={false} mode="popLayout">
+          {feeTier === "auto" && (
+            <motion.div
+              key={"auto"}
+              initial={{ x: -320, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -320, opacity: 0 }}
+              className="shine mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between rounded-lg px-[22px] py-[15px] md:h-[69px] md:w-[392px]"
+            >
+              <div className="flex flex-col items-center gap-[3px]">
+                <div className="iridescent-text text-xs font-medium md:text-sm">
+                  0 ~ 0.3%
                 </div>
-              </TooltipTrigger>
-              <TooltipContent
-                side={"bottom"}
-                className={
-                  "rounded-lg border-0 bg-black pb-[14px] text-[8px] text-neutral-400"
-                }
-              >
-                <div className={""}>Fees</div>
-                <div className={"mt-[7px] flex flex-row gap-[4px]"}>
-                  <div
-                    className={
-                      "flex w-[55.23px] flex-col items-center gap-[4px]"
-                    }
-                  >
-                    <div>$0.15</div>
-                    <div
-                      className={"h-[3px] w-full rounded-[1px] bg-neutral-400"}
-                    />
-                    <div>Pool Fees</div>
-                  </div>
-                  <div
-                    className={
-                      "flex w-[138.88px] flex-col items-center gap-[4px]"
-                    }
-                  >
-                    <div>$3.40</div>
-                    <div
-                      className={"h-[3px] w-full rounded-[1px] bg-neutral-400"}
-                    />
-                    <div>Network Fees</div>
-                  </div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-
-        <div className="flex flex-row justify-between">
-          <div>Rewards</div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Badge className="h-[17px] px-1 text-2xs font-normal">
-                  <Token />
-                  <Token className={"-ml-1"} />
-                  <Token className={"-ml-1 mr-1"} />
-                  <div className="iridescent-text">$6.11 - $33.12</div>
+                <Badge
+                  variant="iridescent"
+                  className="h-[10px] px-[7px] text-4xs font-normal md:h-[12px] md:text-3xs"
+                >
+                  Fee Percentage
                 </Badge>
-              </TooltipTrigger>
-              <TooltipContent
-                side={"bottom"}
-                className={
-                  "iridescent w-[221px] rounded-lg border-black pb-[14px] text-[8px] text-black"
-                }
+              </div>
+
+              <div className="iridescent-text w-[200px] text-3xs md:w-[247px] md:text-2xs">
+                The protocol automatically adjust your fees in order to maximise
+                rewards and reduce impermanent loss
+              </div>
+            </motion.div>
+          )}
+          {feeTier === "manual" && (
+            <motion.div
+              key={"manual"}
+              initial={{ x: 320, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 320, opacity: 0 }}
+            >
+              <RadioGroup.Root
+                className="mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between gap-[5px] rounded-lg md:h-[69px] md:w-[392px]"
+                defaultValue="0.05"
               >
-                <div className={"mt-[12px]"}>Super Route</div>
-                <div className={"mt-[12px] flex flex-row"}>
-                  <div className={"flex flex-col items-center"}>
-                    <Token className={"size-[15px]"} />
-                    <div>fUSDC</div>
+                <RadioGroup.Item
+                  value="0.01"
+                  className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                >
+                  <div className="text-2xs font-medium md:text-xs">0.01%</div>
+                  <div className="text-center text-3xs text-gray-2 ">
+                    Best for Very <br /> Stable Pairs
                   </div>
-                  <div className={"flex flex-1 flex-col justify-center"}>
-                    <div
-                      className={
-                        "mb-3 w-full border border-dashed border-neutral-400"
-                      }
-                    />
+                  <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                    (0% popularity)
                   </div>
-                  <div className={"flex flex-col items-center"}>
-                    <div className={"flex flex-row"}>
-                      <Token className={"size-[15px]"} />
-                      <Token className={"-ml-1 size-[15px]"} />
-                    </div>
-                    Fluid Pool
-                  </div>
-                  <div className={"flex flex-1 flex-col justify-center"}>
-                    <div
-                      className={
-                        "mb-3 w-full border border-dashed border-neutral-400"
-                      }
-                    />
-                  </div>
-                  <div className={"flex flex-col items-center"}>
-                    <Token className={"size-[15px]"} />
-                    <div>ETH</div>
-                  </div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+                </RadioGroup.Item>
 
-        <div className="flex flex-row justify-between">
-          <div>Route</div>
-          <div>Super Route</div>
-        </div>
-      </div>
+                <RadioGroup.Item
+                  value={"0.05"}
+                  className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                >
+                  <div className="text-2xs font-medium md:text-xs">0.05%</div>
+                  <div className="text-center text-3xs text-gray-2 ">
+                    Best for <br /> Stable Pairs
+                  </div>
+                  <div className="iridescent rounded bg-[#D8D8D8] px-1 text-4xs text-black md:text-3xs">
+                    (99% popularity)
+                  </div>
+                </RadioGroup.Item>
 
-      <div className="mt-[15px] h-[210px] w-[318px] rounded-lg bg-black px-[11px] pt-[16px] text-xs text-white md:w-[392px]">
-        <div>Yield Breakdown</div>
+                <RadioGroup.Item
+                  value={"0.10"}
+                  className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                >
+                  <div className="text-2xs font-medium md:text-xs">0.10%</div>
+                  <div className="text-center text-3xs text-gray-2 ">
+                    Best for <br /> Stable Pairs
+                  </div>
+                  <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                    (0% popularity)
+                  </div>
+                </RadioGroup.Item>
 
-        <div className="mt-[14px] flex w-full flex-col gap-[5px] pl-[5px] text-2xs">
-          <div className="flex flex-row justify-between">
-            <div>Pool Fees</div>
+                <RadioGroup.Item
+                  value={"0.15"}
+                  className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                >
+                  <div className="text-2xs font-medium md:text-xs">0.15%</div>
+                  <div className="text-center text-3xs text-gray-2 ">
+                    Best for <br /> Stable Pairs
+                  </div>
+                  <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                    (0% popularity)
+                  </div>
+                </RadioGroup.Item>
+              </RadioGroup.Root>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-            <div className={"flex flex-row items-center"}>
-              <Token />
-              <Token className={"-ml-1 mr-1"} />
-              $0 - $21.72
+        <div className="mt-[20px] h-[212px] w-[318px] rounded-lg bg-black px-[20px] py-[11px] text-white md:h-[248px] md:w-[392px]">
+          <div className="flex w-full flex-row items-center justify-between">
+            <div className="text-3xs md:text-2xs">Liquidity Range</div>
+
+            <SegmentedControl
+              variant={"secondary"}
+              className={"text-3xs md:text-2xs"}
+              callback={(val) => setLiquidityRangeType(val)}
+              segments={[
+                {
+                  label: "Full Range",
+                  value: "full-range",
+                  ref: useRef(),
+                },
+                {
+                  label: "Auto",
+                  value: "auto",
+                  ref: useRef(),
+                },
+                {
+                  label: "Custom",
+                  value: "custom",
+                  ref: useRef(),
+                },
+              ]}
+            />
+          </div>
+
+          <div className="mt-[22px] flex flex-row items-center justify-between px-[5px] md:mt-[24px] md:w-[270px]">
+            <div className="flex flex-col">
+              <div className="text-3xs text-gray-2 md:text-2xs">Low Price</div>
+              <div className={"border-b border-white text-2xs md:text-base"}>
+                780.28123
+              </div>
+              <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
+                <Ethereum className="invert" /> USDC per ETH
+              </div>
+            </div>
+
+            <div className="flex flex-col">
+              <div className="text-3xs text-gray-2 md:text-2xs">High Price</div>
+              <div className={"border-b border-white text-2xs md:text-base"}>
+                ∞
+              </div>
+              <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
+                <Ethereum className="invert" /> USDC per ETH
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-row justify-between">
-            <div>Liquidity Boosts</div>
+          <div className="mt-[22px]">
+            <div className="text-3xs text-gray-2 md:text-2xs">Visualiser</div>
+            <ReactECharts
+              className="mt-1"
+              opts={{
+                height: 44,
+              }}
+              style={{
+                height: 44,
+              }}
+              ref={chartRef}
+              onChartReady={(chart) => {
+                if (liquidityRangeType === "custom") {
+                  chart.dispatchAction({
+                    type: "brush",
+                    areas: [
+                      {
+                        brushType: "lineX",
+                        coordRange: [5, 25],
+                        xAxisIndex: 0,
+                      },
+                    ],
+                  });
+                }
+              }}
+              option={chartOptions}
+            />
 
-            <div className={"flex flex-row items-center"}>
-              <Token />
-              <Token className={"-ml-1 mr-1"} />
-              $0.20 - $13.06
-            </div>
-          </div>
-
-          <div className="flex flex-row justify-between">
-            <div>Super Boosts</div>
-
-            <div className={"flex flex-row items-center"}>
-              <Token />
-              <Token className={"-ml-1 mr-1"} />
-              $5.91 - $8.34
+            <div className="mt-[16px] flex flex-row justify-around text-4xs md:text-2xs">
+              <div className="flex flex-row items-center gap-1">
+                <SelectedRange /> Selected Range
+              </div>
+              <div className="flex flex-row items-center gap-1">
+                <CurrentPrice /> Current Price
+              </div>
+              <div className="flex flex-row items-center gap-1">
+                <LiquidityDistribution /> Liquidity Distribution
+              </div>
             </div>
           </div>
         </div>
 
-        <div className={"mt-[20px] flex flex-row justify-between pl-[5px]"}>
-          <div className="font-medium">Total</div>
-
-          <Badge
-            variant="iridescent"
-            className="h-[17px] px-1 text-2xs font-normal"
+        <div className="mt-[21px] flex w-[318px] flex-row justify-end md:w-[392px]">
+          <div
+            onClick={() => setBreakdownHidden((v) => !v)}
+            className="flex cursor-pointer flex-row"
           >
-            <Token />
-            <Token className={"-ml-1"} />
-            <Token className={"-ml-1 mr-1"} />
-            <div>$6.11 - $33.12</div>
-          </Badge>
-        </div>
-
-        <div className="mt-[20px] flex flex-row gap-1 text-2xs">
-          <div className="flex w-[3%] flex-col">
-            <div>3%</div>
-            <div className="h-1 w-full rounded bg-white"></div>
-          </div>
-
-          <div className="flex w-[7%] flex-col items-center">
-            <div>7%</div>
-            <div className="h-1 w-full rounded bg-white"></div>
-          </div>
-
-          <div className="flex w-[30%] flex-col items-center">
-            <div>30%</div>
-            <div className="h-1 w-full rounded bg-white"></div>
-            <div>Super Boosts</div>
-          </div>
-
-          <div className="flex w-3/5 flex-col items-center">
-            <div>60%</div>
-            <div className="iridescent h-1 w-full rounded"></div>
-            <div>Utility Boosts</div>
+            {breakdownHidden ? (
+              <>
+                <div className="text-2xs underline">Show Breakdown</div>
+                <div className="ml-1 rotate-90 text-2xs">{"<-"}</div>
+              </>
+            ) : (
+              <>
+                <div className="text-2xs underline">Hide breakdown</div>
+                <div className="ml-1 rotate-90 text-2xs">{"->"}</div>
+              </>
+            )}
           </div>
         </div>
-      </div>
 
-      <div className="mt-[20px] w-[318px] md:hidden">
-        <Index onSlideComplete={onSubmit}>
-          <div className="text-xs">Stake</div>
-        </Index>
-      </div>
+        <div
+          className={cn(
+            "mt-[10px] flex h-[60px] w-[318px] flex-col gap-[5px] overflow-hidden text-2xs transition-[height] md:w-[392px]",
+            {
+              "h-0": breakdownHidden,
+            },
+          )}
+        >
+          <div className="flex flex-row justify-between">
+            <div>Fees</div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <div className={"flex flex-row items-center gap-1"}>
+                    <Gas />
+                    $3.55
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent
+                  side={"bottom"}
+                  className={
+                    "rounded-lg border-0 bg-black pb-[14px] text-[8px] text-neutral-400"
+                  }
+                >
+                  <div className={""}>Fees</div>
+                  <div className={"mt-[7px] flex flex-row gap-[4px]"}>
+                    <div
+                      className={
+                        "flex w-[55.23px] flex-col items-center gap-[4px]"
+                      }
+                    >
+                      <div>$0.15</div>
+                      <div
+                        className={
+                          "h-[3px] w-full rounded-[1px] bg-neutral-400"
+                        }
+                      />
+                      <div>Pool Fees</div>
+                    </div>
+                    <div
+                      className={
+                        "flex w-[138.88px] flex-col items-center gap-[4px]"
+                      }
+                    >
+                      <div>$3.40</div>
+                      <div
+                        className={
+                          "h-[3px] w-full rounded-[1px] bg-neutral-400"
+                        }
+                      />
+                      <div>Network Fees</div>
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
 
-      <div className="mt-[20px] hidden md:inline-flex md:w-[392px]">
-        <Button className="w-full" onClick={onSubmit}>
-          Stake
-        </Button>
-      </div>
+          <div className="flex flex-row justify-between">
+            <div>Rewards</div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge className="h-[17px] px-1 text-2xs font-normal">
+                    <Token />
+                    <Token className={"-ml-1"} />
+                    <Token className={"-ml-1 mr-1"} />
+                    <div className="iridescent-text">$6.11 - $33.12</div>
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent
+                  side={"bottom"}
+                  className={
+                    "iridescent w-[221px] rounded-lg border-black pb-[14px] text-[8px] text-black"
+                  }
+                >
+                  <div className={"mt-[12px]"}>Super Route</div>
+                  <div className={"mt-[12px] flex flex-row"}>
+                    <div className={"flex flex-col items-center"}>
+                      <Token className={"size-[15px]"} />
+                      <div>fUSDC</div>
+                    </div>
+                    <div className={"flex flex-1 flex-col justify-center"}>
+                      <div
+                        className={
+                          "mb-3 w-full border border-dashed border-neutral-400"
+                        }
+                      />
+                    </div>
+                    <div className={"flex flex-col items-center"}>
+                      <div className={"flex flex-row"}>
+                        <Token className={"size-[15px]"} />
+                        <Token className={"-ml-1 size-[15px]"} />
+                      </div>
+                      Fluid Pool
+                    </div>
+                    <div className={"flex flex-1 flex-col justify-center"}>
+                      <div
+                        className={
+                          "mb-3 w-full border border-dashed border-neutral-400"
+                        }
+                      />
+                    </div>
+                    <div className={"flex flex-col items-center"}>
+                      <Token className={"size-[15px]"} />
+                      <div>ETH</div>
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+
+          <div className="flex flex-row justify-between">
+            <div>Route</div>
+            <div>Super Route</div>
+          </div>
+        </div>
+
+        <div className="mt-[15px] h-[210px] w-[318px] rounded-lg bg-black px-[11px] pt-[16px] text-xs text-white md:w-[392px]">
+          <div>Yield Breakdown</div>
+
+          <div className="mt-[14px] flex w-full flex-col gap-[5px] pl-[5px] text-2xs">
+            <div className="flex flex-row justify-between">
+              <div>Pool Fees</div>
+
+              <div className={"flex flex-row items-center"}>
+                <Token />
+                <Token className={"-ml-1 mr-1"} />
+                $0 - $21.72
+              </div>
+            </div>
+
+            <div className="flex flex-row justify-between">
+              <div>Liquidity Boosts</div>
+
+              <div className={"flex flex-row items-center"}>
+                <Token />
+                <Token className={"-ml-1 mr-1"} />
+                $0.20 - $13.06
+              </div>
+            </div>
+
+            <div className="flex flex-row justify-between">
+              <div>Super Boosts</div>
+
+              <div className={"flex flex-row items-center"}>
+                <Token />
+                <Token className={"-ml-1 mr-1"} />
+                $5.91 - $8.34
+              </div>
+            </div>
+          </div>
+
+          <div className={"mt-[20px] flex flex-row justify-between pl-[5px]"}>
+            <div className="font-medium">Total</div>
+
+            <Badge
+              variant="iridescent"
+              className="h-[17px] px-1 text-2xs font-normal"
+            >
+              <Token />
+              <Token className={"-ml-1"} />
+              <Token className={"-ml-1 mr-1"} />
+              <div>$6.11 - $33.12</div>
+            </Badge>
+          </div>
+
+          <div className="mt-[20px] flex flex-row gap-1 text-2xs">
+            <div className="flex w-[3%] flex-col">
+              <div>3%</div>
+              <div className="h-1 w-full rounded bg-white"></div>
+            </div>
+
+            <div className="flex w-[7%] flex-col items-center">
+              <div>7%</div>
+              <div className="h-1 w-full rounded bg-white"></div>
+            </div>
+
+            <div className="flex w-[30%] flex-col items-center">
+              <div>30%</div>
+              <div className="h-1 w-full rounded bg-white"></div>
+              <div>Super Boosts</div>
+            </div>
+
+            <div className="flex w-3/5 flex-col items-center">
+              <div>60%</div>
+              <div className="iridescent h-1 w-full rounded"></div>
+              <div>Utility Boosts</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-[20px] w-[318px] md:hidden">
+          <Index onSlideComplete={onSubmit}>
+            <div className="text-xs">Stake</div>
+          </Index>
+        </div>
+
+        <div className="mt-[20px] hidden md:inline-flex md:w-[392px]">
+          <Button className="w-full" onClick={onSubmit}>
+            Stake
+          </Button>
+        </div>
+      </motion.div>
     </div>
   );
 };

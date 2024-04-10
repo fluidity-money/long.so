@@ -1,7 +1,7 @@
 import { createPublicClient, http } from "viem";
-import { mainnet } from "viem/chains";
+import { arbitrumStylusTestnet } from "../config/arbitrumStylusTestnet";
 
 export const publicClient = createPublicClient({
-  chain: mainnet,
+  chain: arbitrumStylusTestnet,
   transport: http(),
 });
