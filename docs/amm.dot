@@ -1,8 +1,0 @@
-strict digraph {
-    "OwnershipNFTs" -> "SeawaterAMM" -> {
-       "seawater-admin"
-       "seawater-positions"
-       "seawater-swaps"
-    }
-    "app.superposition.so" -> "SeawaterAMM"
-}
