@@ -9,13 +9,13 @@ export type Token = {
  */
 export const tokens: Token[] = [
   {
-    name: "Stylus",
-    address: "0x441cfB692518bD523664448E1561DbCeAC06fD4b",
-    symbol: "STYLE",
+    name: "New Token 1",
+    address: "0x9A8c1806087f8c4e1315AF7a2AC285334a8275ed",
+    symbol: "NEW_TOKEN_1",
   },
   {
-    name: "Stylus 2",
-    address: "0xE6ABce31f9B25A5f50790d0FdE963791837c9c97",
-    symbol: "STYLE2",
+    name: "New Token 2",
+    address: "0x65Dfe41220C438Bf069BBce9Eb66B087fe65dB36",
+    symbol: "NEW_TOKEN_2",
   },
 ];

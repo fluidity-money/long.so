@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import Token from "@/assets/icons/token.svg";
 import { usdFormat } from "@/lib/usdFormat";
+import { useSwapStore } from "@/stores/useSwapStore";
 
 export type Transaction = {
   id: string;
@@ -15,6 +16,15 @@ export type Transaction = {
   amountTo: number;
 };
 
+const AmountHeader = () => {
+  const { token0, token1 } = useSwapStore();
+  return (
+    <div className="font-bold">
+      {token0.symbol}/{token1.symbol}
+    </div>
+  );
+};
+
 export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "value",
@@ -23,7 +33,7 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     id: "amount",
-    header: () => <div className="font-bold">ƒUSDC/ETH</div>,
+    header: () => <AmountHeader />,
     cell: ({ row }) => {
       return (
         <div className="flex flex-row items-center gap-2">

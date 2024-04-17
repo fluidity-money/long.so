@@ -24,9 +24,9 @@ const colorGradient = new echarts.graphic.LinearGradient(
 const durationToDays = {
   "7D": 7,
   "1M": 30,
-  "6M": 180,
-  "1Y": 365,
-  ALL: 365,
+  "6M": 26, // one bar per week
+  "1Y": 52, // one bar per week
+  ALL: 52,
 };
 
 export const YieldOverTimeGraph = () => {
