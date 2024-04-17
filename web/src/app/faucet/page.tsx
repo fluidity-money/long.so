@@ -12,11 +12,7 @@ import {
 import { useAccount, useWriteContract } from "wagmi";
 import { abi } from "./ERC20mintable";
 import { useState } from "react";
-
-const tokens: `0x${string}`[] = [
-  "0x9A8c1806087f8c4e1315AF7a2AC285334a8275ed",
-  "0x65Dfe41220C438Bf069BBce9Eb66B087fe65dB36",
-];
+import { tokens } from "@/config/tokens";
 
 const FaucetPage = () => {
   const { writeContract } = useWriteContract();
@@ -24,7 +20,7 @@ const FaucetPage = () => {
   const { address } = useAccount();
 
   const [amount, setAmount] = useState("");
-  const [token, setToken] = useState(tokens[0]);
+  const [token, setToken] = useState(tokens[0].address);
 
   const onClick = () => {
     if (!address) {
@@ -57,8 +53,8 @@ const FaucetPage = () => {
             <SelectValue placeholder="Token" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={tokens[0]}>NEW_TOKEN_1</SelectItem>
-            <SelectItem value={tokens[1]}>NEW_TOKEN_2</SelectItem>
+            <SelectItem value={tokens[0].address}>{tokens[0].name}</SelectItem>
+            <SelectItem value={tokens[1].address}>{tokens[1].name}</SelectItem>
           </SelectContent>
         </Select>
         <Input

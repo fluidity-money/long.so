@@ -2,50 +2,34 @@
 
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import IridescentToken from "@/assets/icons/token-iridescent.svg";
 import { AllAssetsTable } from "@/app/swap/explore/_AllAssetsTable/AllAssetsTable";
-import { Asset, columns } from "@/app/swap/explore/_AllAssetsTable/columns";
-import { addDays } from "date-fns";
+import { columns } from "@/app/swap/explore/_AllAssetsTable/columns";
+import { tokens } from "@/config/tokens";
+import { useSwapStore } from "@/stores/useSwapStore";
 
-const highestRewarders = ["fDAI", "wETH", "wBTC", "wETH2", "wBTC2"];
+const allAssetsData = tokens.map((token) => ({
+  symbol: token.symbol,
+  address: token.address,
+  name: token.name,
+  amount: 0.000846,
+  amountUSD: 765.22,
+  token,
+}));
 
-const allAssetsData: Asset[] = [
-  {
-    symbol: "fUSDC",
-    address: "0x0bafe8babf38bf3ba83fb80a82",
-    name: "Fluid US Dollar Coin",
-    amount: 430.23,
-    amountUSD: 430.23,
-    boostedEndDate: addDays(new Date(), 7),
-  },
-  {
-    symbol: "ETH",
-    address: "0x0bafe8babf38bf3ba83fb80a82",
-    name: "Ethereum",
-    amount: 0.19,
-    amountUSD: 493.23,
-    boostedEndDate: addDays(new Date(), 15),
-  },
-  {
-    symbol: "wBTC",
-    address: "0x0bafe8babf38bf3ba83fb80a82",
-    name: "Wrapped Bitcoin",
-    amount: 0.000846,
-    amountUSD: 765.22,
-  },
-  {
-    symbol: "FRAX",
-    address: "0x0bafe8babf38bf3ba83fb80a82",
-    name: "Frax Coin",
-    amount: 0.000846,
-    amountUSD: 765.22,
-  },
-];
+const highestRewarders = allAssetsData;
 
 const ExplorePage = () => {
   const router = useRouter();
+
+  const { setToken0, setToken1 } = useSwapStore();
+
+  const searchParams = useSearchParams();
+
+  const token = searchParams.get("token");
+
   return (
     <div className={"flex flex-col items-center overflow-y-auto"}>
       <motion.div
@@ -80,11 +64,26 @@ const ExplorePage = () => {
                 {highestRewarders.map((rewarder) => (
                   <Badge
                     variant={"outline"}
-                    className={"relative h-[25.36px] gap-1 pl-0.5"}
-                    key={rewarder}
+                    className={
+                      "relative h-[25.36px] cursor-pointer gap-1 pl-0.5"
+                    }
+                    key={rewarder.address}
+                    onClick={() => {
+                      if (token === "0") {
+                        setToken0(rewarder.token);
+                      }
+
+                      if (token === "1") {
+                        setToken1(rewarder.token);
+                      }
+
+                      router.back();
+                    }}
                   >
                     <IridescentToken className={"size-[20px]"} />
-                    <div className={"iridescent-text text-sm"}>{rewarder}</div>
+                    <div className={"iridescent-text text-sm"}>
+                      {rewarder.symbol}
+                    </div>
                     <div className="iridescent absolute -bottom-2 right-0 inline-flex h-[13px] flex-col items-end justify-center rounded-sm border border-stone-900 px-[3px] py-[1.50px]">
                       <div className="text-[8px]">2 days</div>
                     </div>

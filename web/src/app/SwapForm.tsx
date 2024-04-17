@@ -15,6 +15,9 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
 import Link from "next/link";
+import { useSwapStore } from "@/stores/useSwapStore";
+import { useAccount, useSimulateContract } from "wagmi";
+import { erc20Abi, Hash } from "viem";
 
 export const SwapForm = () => {
   const [breakdownHidden, setBreakdownHidden] = useState(true);
@@ -28,6 +31,51 @@ export const SwapForm = () => {
       inputRef.current?.focus();
     }
   }, [welcome]);
+
+  const {
+    token0,
+    token1,
+    flipTokens,
+    token0Amount,
+    token1Amount,
+    setToken0Amount,
+    setToken1Amount,
+  } = useSwapStore();
+  const { address } = useAccount();
+
+  // token0 hooks
+  const { data: token0Deicmals, error } = useSimulateContract({
+    address: token0.address,
+    abi: erc20Abi,
+    // @ts-expect-error
+    functionName: "decimals",
+  });
+
+  const { data: token0Balance } = useSimulateContract({
+    address: token0.address,
+    abi: erc20Abi,
+    // @ts-expect-error I don't know why but this needs to use useSimulateContract instead of useReadContract which breaks all the types
+    functionName: "balanceOf",
+    // @ts-expect-error
+    args: [address as Hash],
+  });
+
+  // token1 hooks
+  const { data: token1Deicmals } = useSimulateContract({
+    address: token1.address,
+    abi: erc20Abi,
+    // @ts-expect-error
+    functionName: "decimals",
+  });
+
+  const { data: token1Balance } = useSimulateContract({
+    address: token1.address,
+    abi: erc20Abi,
+    // @ts-expect-error
+    functionName: "balanceOf",
+    // @ts-expect-error
+    args: [address as Hash],
+  });
 
   return (
     <>
@@ -80,13 +128,15 @@ export const SwapForm = () => {
             className="relative mt-[19px] h-[102px] w-[317px] rounded-lg bg-black pb-[19px] pl-[21px] pr-[15px] pt-[17px] text-white md:h-[126.37px] md:w-[392.42px] md:pb-[25px] md:pl-[25px] md:pr-[20px] md:pt-[22px]"
           >
             <SuperloopPopover />
-            <div className={"flex h-full flex-col justify-between"}>
+
+            <motion.div
+              layout
+              className={"flex h-full flex-col justify-between"}
+            >
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[8px] md:text-[10px]"}>Swap</div>
 
-                <div className={"text-[8px] md:text-[10px]"}>
-                  US Dollar Coin
-                </div>
+                <div className={"text-[8px] md:text-[10px]"}>{token0.name}</div>
               </div>
 
               <div className={"flex flex-row items-center justify-between"}>
@@ -95,15 +145,17 @@ export const SwapForm = () => {
                   className="-ml-2 border-0 bg-black pl-2 text-2xl"
                   variant={"no-ring"}
                   placeholder={welcome ? "1024.82" : undefined}
+                  value={token0Amount}
+                  onChange={(e) => setToken0Amount(e.target.value)}
                 />
 
-                <Link href={"/swap/explore"}>
+                <Link href={"/swap/explore?token=0"}>
                   <Badge
                     variant="outline"
-                    className="flex h-[26px] w-[82px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[90px] md:pl-[4px] md:text-base"
+                    className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base"
                   >
                     <Token className="size-[20px] md:size-[25px]" />
-                    <div>USDC</div>
+                    <div>{token0.symbol}</div>
                     <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
                   </Badge>
                 </Link>
@@ -117,11 +169,19 @@ export const SwapForm = () => {
                     "flex flex-row gap-[17px] text-[8px] md:text-[10px]"
                   }
                 >
-                  <div>Balance: 1231.01</div>
+                  {token0Balance && token0Deicmals && (
+                    <div>
+                      Balance:{" "}
+                      {(
+                        (token0Balance.result as unknown as bigint) /
+                        BigInt(10 ** token0Deicmals.result)
+                      ).toString()}
+                    </div>
+                  )}
                   <div className={"cursor-pointer underline"}>Max</div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
 
           <motion.div
@@ -145,6 +205,7 @@ export const SwapForm = () => {
               className={
                 "z-50 mt-[-12px] size-[32px] p-0 transition-all hover:rounded-[20px] hover:bg-white md:mt-[-15px] md:size-[40px]"
               }
+              onClick={flipTokens}
             >
               <Swap />
             </Button>
@@ -153,19 +214,19 @@ export const SwapForm = () => {
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[8px] md:text-[10px]"}>Receive</div>
 
-                <div className={"text-[8px] md:text-[10px]"}>Ether</div>
+                <div className={"text-[8px] md:text-[10px]"}>{token1.name}</div>
               </div>
 
               <div className={"flex flex-row items-center justify-between"}>
-                <div className={"text-2xl"}>0.87</div>
+                <div className={"text-2xl"}>{token1Amount}</div>
 
-                <Link href={"/swap/explore"}>
+                <Link href={"/swap/explore?token=1"}>
                   <Badge
                     variant="outline"
-                    className="flex h-[26px] w-[82px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[90px] md:pl-[4px] md:text-base"
+                    className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base"
                   >
                     <Token className="size-[20px] md:size-[25px]" />
-                    <div>ETH</div>
+                    <div>{token1.symbol}</div>
                     <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
                   </Badge>
                 </Link>
@@ -179,7 +240,15 @@ export const SwapForm = () => {
                     "flex flex-row gap-[17px] text-[8px] md:text-[10px]"
                   }
                 >
-                  <div>Balance: 1231.01</div>
+                  {token1Balance && token1Deicmals && (
+                    <div>
+                      Balance:{" "}
+                      {(
+                        (token1Balance.result as unknown as bigint) /
+                        BigInt(10 ** token1Deicmals.result)
+                      ).toString()}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
