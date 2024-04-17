@@ -1,5 +1,6 @@
 # misc
 .zed/
+.idea/
 
 # pkg
 pkg/target

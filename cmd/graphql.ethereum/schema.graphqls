@@ -1,0 +1,140 @@
+
+type Query {
+  """
+  Statelessly look up a block, using the arguments to collect information from the chain.
+  """
+  getBlockWithHashBloom(hash: String!, bloom: String!): Block
+
+  """
+  Statefully look up a block, collecting it's bloom using the database.
+  """
+  getBlockWithHash(hash: String!): Block
+}
+
+type Wallet {
+  address: String!
+}
+
+type Block {
+  hash: String!
+  bloom: String!
+  applications: [Application!]
+}
+
+type Transaction {
+  hash: String!
+  block: Block!
+  sender: Wallet!
+  recipient: Wallet!
+  applications: [Application!]
+}
+
+type Application {
+  transaction: Transaction!
+
+  erc20Transfer: Erc20Transfer
+
+  seawaterMintPosition: SeawaterMintPosition
+  seawaterBurnPosition: SeawaterBurnPosition
+  seawaterTransferPosition: SeawaterTransferPosition
+  seawaterUpdatePositionLiquidity: SeawaterUpdatePositionLiquidity
+  seawaterCollectFees: SeawaterCollectFees
+  seawaterNewPool: SeawaterNewPool
+  seawaterCollectProtocolFees: SeawaterCollectProtocolFees
+  seawaterSwap2: SeawaterSwap2
+  seawaterSwap1: SeawaterSwap1
+}
+
+type SeawaterPool {
+  address: String!
+  apyUsd: String!
+}
+
+type SeawaterPosition {
+  id: String!
+  owner: Wallet!
+}
+
+type SeawaterAmount {
+  token: Token!
+  value: String!
+  valueScaled: String!
+  valueUsd: String
+}
+
+type Token {
+  address: String!
+}
+
+type Erc20Transfer {
+  token: Token!
+  sender: Wallet!
+  recipient: Wallet!
+  value: String!
+}
+
+type SeawaterMintPosition {
+  id: SeawaterPosition!
+  owner: Wallet!
+  pool: SeawaterPool!
+  lower: String!
+  upper: String!
+}
+
+type SeawaterBurnPosition {
+  id: SeawaterPosition!
+  owner: Wallet!
+}
+
+type SeawaterTransferPosition {
+  from: Wallet!
+  to: Wallet!
+  id: SeawaterPosition!
+}
+
+type SeawaterUpdatePositionLiquidity {
+  id: SeawaterPosition!
+  delta: String!
+}
+
+type SeawaterCollectFees {
+  id: SeawaterPosition!
+  pool: SeawaterPool!
+  to: Wallet!
+  amount0: SeawaterAmount!
+  amount1: SeawaterAmount!
+}
+
+type SeawaterNewPool {
+  token: Token!
+  fee: String!
+  price: String!
+}
+
+type SeawaterCollectProtocolFees {
+  pool: SeawaterPool!
+  to: Wallet!
+  amount0: SeawaterAmount!
+  amount1: SeawaterAmount!
+}
+
+type SeawaterSwap2 {
+  user: Wallet!
+  from: Token!
+  to: Token!
+  amountIn: SeawaterAmount!
+  amountOut: SeawaterAmount!
+  fluidVolume: SeawaterAmount!
+  finalTick0: String!
+  finalTick1: String!
+}
+
+type SeawaterSwap1 {
+  user: Wallet!
+  pool: SeawaterPool!
+  zeroForOne: Boolean!
+  amount0: SeawaterAmount!
+  amount1: SeawaterAmount!
+  finalTick: String!
+}
+

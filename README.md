@@ -13,6 +13,8 @@ on-chain.
 
 Deployment addresses are available at [DEPLOYMENT.md](DEPLOYMENT.md).
 
+Architecture information is available at [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## Contributing
 
 (This is a TODO!)
