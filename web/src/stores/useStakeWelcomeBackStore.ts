@@ -28,7 +28,7 @@ interface WelcomeStore {
 }
 
 export const useStakeWelcomeBackStore = create<WelcomeStore>((set) => ({
-  welcome: true,
+  welcome: false,
   setWelcome: (welcome) => set({ welcome }),
 
   yieldBreakdown: false,
