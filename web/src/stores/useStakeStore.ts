@@ -7,6 +7,9 @@ interface StakeStore {
 
   token0: Token;
   setToken0: (token: Token) => void;
+
+  token0Amount: string;
+  setToken0Amount: (token0Amount: string) => void;
 }
 
 export const useStakeStore = create<StakeStore>((set) => ({
@@ -15,4 +18,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
 
   token0: tokens[0],
   setToken0: (token0) => set({ token0 }),
+
+  token0Amount: "",
+  setToken0Amount: (token0Amount) => set({ token0Amount }),
 }));

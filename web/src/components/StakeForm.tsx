@@ -22,7 +22,7 @@ import * as RadioGroup from "@radix-ui/react-radio-group";
 import { Input } from "@/components/ui/input";
 import { useStakeStore } from "@/stores/useStakeStore";
 import SegmentedControl from "@/components/ui/segmented-control";
-import { useAccount, useBalance } from "wagmi";
+import { useAccount, useBalance, useSimulateContract } from "wagmi";
 import {
   Tooltip,
   TooltipContent,
@@ -33,6 +33,7 @@ import Gas from "@/assets/icons/gas.svg";
 import Link from "next/link";
 import Menu from "@/components/Menu";
 import Index from "@/components/Slider";
+import { erc20Abi } from "viem";
 
 const data = [
   {
@@ -271,7 +272,13 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
   const [breakdownHidden, setBreakdownHidden] = useState(true);
 
-  const { multiSingleToken, setMultiSingleToken, token0 } = useStakeStore();
+  const {
+    multiSingleToken,
+    setMultiSingleToken,
+    token0,
+    token0Amount,
+    setToken0Amount,
+  } = useStakeStore();
 
   const router = useRouter();
 
@@ -291,13 +298,30 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     address,
   });
 
-  const [primeAssetAmount, setPrimeAssetAmount] = useState("");
-
   const chartRef = useRef<ReactECharts>(null);
 
   const [liquidityRangeType, setLiquidityRangeType] = useState<
     "full-range" | "auto" | "custom"
   >("full-range");
+
+  // token0 hooks
+  const { data: token0Deicmals, error } = useSimulateContract({
+    address: token0.address,
+    abi: erc20Abi,
+    // @ts-expect-error
+    functionName: "decimals",
+  });
+
+  console.log(error);
+
+  const { data: token0Balance } = useSimulateContract({
+    address: token0.address,
+    abi: erc20Abi,
+    // @ts-expect-error I don't know why but this needs to use useSimulateContract instead of useReadContract which breaks all the types
+    functionName: "balanceOf",
+    // @ts-expect-error
+    args: [address as Hash],
+  });
 
   const chartOptions = useMemo(() => {
     return {
@@ -482,8 +506,8 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
                 className="-ml-2 border-0 bg-black pl-2 text-2xl"
                 autoFocus
                 variant={"no-ring"}
-                value={primeAssetAmount}
-                onChange={(e) => setPrimeAssetAmount(e.target.value)}
+                value={token0Amount}
+                onChange={(e) => setToken0Amount(e.target.value)}
               />
 
               <Link
@@ -505,13 +529,24 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               <div className="text-2xs md:text-gray-1">$1,025.23</div>
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
-                {balanceData && (
+                {token0Balance && token0Deicmals && (
                   <>
-                    <div>Balance: {balanceData.formatted}</div>
+                    <div>
+                      Balance:{" "}
+                      {(
+                        (token0Balance.result as unknown as bigint) /
+                        BigInt(10 ** token0Deicmals.result)
+                      ).toString()}
+                    </div>
                     <div
                       className="cursor-pointer underline"
                       onClick={() =>
-                        setPrimeAssetAmount(balanceData.formatted ?? "")
+                        setToken0Amount(
+                          (
+                            (token0Balance.result as unknown as bigint) /
+                            BigInt(10 ** token0Deicmals.result)
+                          ).toString(),
+                        )
                       }
                     >
                       Max
