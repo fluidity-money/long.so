@@ -16,7 +16,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
   multiSingleToken: "multi",
   setMultiSingleToken: (multiSingleToken) => set({ multiSingleToken }),
 
-  token0: tokens[0],
+  token0: tokens[1],
   setToken0: (token0) => set({ token0 }),
 
   token0Amount: "",
