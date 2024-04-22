@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { useAccount, useSimulateContract } from "wagmi";
 import { erc20Abi, Hash } from "viem";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 
 export const SwapForm = () => {
   const [breakdownHidden, setBreakdownHidden] = useState(true);
@@ -76,6 +77,8 @@ export const SwapForm = () => {
     // @ts-expect-error
     args: [address as Hash],
   });
+
+  const { open } = useWeb3Modal();
 
   return (
     <>
@@ -409,11 +412,20 @@ export const SwapForm = () => {
               </div>
             </div>
 
-            <Button
-              className={"mt-[20px] hidden h-[53.92px] w-full md:inline-flex"}
-            >
-              Swap
-            </Button>
+            {address ? (
+              <Button
+                className={"mt-[20px] hidden h-[53.92px] w-full md:inline-flex"}
+              >
+                Swap
+              </Button>
+            ) : (
+              <Button
+                className={"mt-[20px] hidden h-[53.92px] w-full md:inline-flex"}
+                onClick={() => open()}
+              >
+                Connect Wallet
+              </Button>
+            )}
           </motion.div>
         </div>
       </motion.div>
