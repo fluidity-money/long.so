@@ -82,8 +82,8 @@ async function createPosition(
 
 test("amm", async t => {
     // setup and deploy contracts
-    const RPC_URL = process.env.RPC_URL
-    if (!RPC_URL) throw new Error("Set RPC_URL");
+    const RPC_URL = process.env.SPN_GETH_URL
+    if (!RPC_URL) throw new Error("Set SPN_GETH_URL");
     const provider = new JsonRpcProvider(RPC_URL)
     const chainid = Number((await provider.getNetwork()).chainId);
     console.log(`chainid: ${chainid}`);
