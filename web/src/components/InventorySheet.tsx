@@ -36,7 +36,7 @@ export const InventorySheet = () => {
         />
       </div>
 
-      <SheetContent className="my-2 max-h-screen overflow-y-scroll rounded-lg border-0 bg-black text-white">
+      <SheetContent className="my-2 max-h-screen overflow-y-auto rounded-lg border-0 bg-black text-white">
         <InventoryContent />
       </SheetContent>
     </Sheet>
