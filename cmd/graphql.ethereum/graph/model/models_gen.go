@@ -2,31 +2,35 @@
 
 package model
 
+type Amount struct {
+	ValueUnscaled string `json:"valueUnscaled"`
+	ValueScaled   string `json:"valueScaled"`
+	ValueUsd      string `json:"valueUsd"`
+}
+
+type PairAmount struct {
+	Fusdc  Amount `json:"fusdc"`
+	Token1 Amount `json:"token1"`
+}
+
 type Query struct {
 }
 
-type SeawaterAmount struct {
-	Token       Token   `json:"token"`
-	Value       string  `json:"value"`
-	ValueScaled string  `json:"valueScaled"`
-	ValueUsd    *string `json:"valueUsd,omitempty"`
+// SeawaterLiquidity is like SeawaterPosition, though it's an aggregation for easy use.
+type SeawaterLiquidity struct {
+	ID        string             `json:"id"`
+	Lower     string             `json:"lower"`
+	Upper     string             `json:"upper"`
+	Liquidity PairAmount         `json:"liquidity"`
+	Positions []SeawaterPosition `json:"positions"`
 }
 
-type SeawaterPool struct {
-	Address string `json:"address"`
-	ApyUsd  string `json:"apyUsd"`
+type TokenBalance struct {
+	Token   Token  `json:"token"`
+	Balance Amount `json:"balance"`
 }
 
-type SeawaterPosition struct {
-	ID    string `json:"id"`
-	Owner Wallet `json:"owner"`
-}
-
-type SeawaterSwap1 struct {
-	User       Wallet         `json:"user"`
-	Pool       SeawaterPool   `json:"pool"`
-	ZeroForOne bool           `json:"zeroForOne"`
-	Amount0    SeawaterAmount `json:"amount0"`
-	Amount1    SeawaterAmount `json:"amount1"`
-	FinalTick  string         `json:"finalTick"`
+type UtilityIncentive struct {
+	AmountGivenOut string `json:"amountGivenOut"`
+	MaximumAmount  string `json:"maximumAmount"`
 }

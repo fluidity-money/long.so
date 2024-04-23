@@ -7,7 +7,7 @@
 package types
 
 import (
-	"database/sql/driver"
+	sqlDriver "database/sql/driver"
 	"encoding/hex"
 	"math/big"
 	"fmt"
@@ -49,6 +49,13 @@ func (u UnscaledNumber) Big() (*big.Int, error) {
 	}
 	return i, nil
 }
+func (u UnscaledNumber) Value() (sqlDriver.Value, error) {
+	v, e := u.Big()
+	if e != nil {
+		return nil, e
+	}
+	return v.String(), nil
+}
 
 func HashFromString(s string) Hash {
 	return Hash(strings.ToLower(s))
@@ -56,7 +63,7 @@ func HashFromString(s string) Hash {
 func (h Hash) String() string {
 	return strings.ToLower(string(h))
 }
-func (h Hash) Value() (driver.Value, error) {
+func (h Hash) Value() (sqlDriver.Value, error) {
 	return h.String(), nil
 }
 
@@ -66,7 +73,7 @@ func AddressFromString(s string) Address {
 func (a Address) String() string {
 	return strings.ToLower(string(a))
 }
-func (a Address) Value() (driver.Value, error) {
+func (a Address) Value() (sqlDriver.Value, error) {
 	return a.String(), nil
 }
 
@@ -76,11 +83,15 @@ func DataFromString(s string) Data {
 func (a Data) String() string {
 	return strings.ToLower(string(a))
 }
-func (d Data) Value() (driver.Value, error) {
+func (d Data) Value() (sqlDriver.Value, error) {
 	return d.String(), nil
 }
 func (d Data) Bytes() ([]byte, error) {
 	return hex.DecodeString(strings.TrimPrefix(string(d), "0x"))
+}
+
+func NumberFromBigInt(b *big.Int) Number {
+	return Number(b.Text(16))
 }
 
 func UnscaledNumberFromBigInt(b *big.Int) UnscaledNumber {

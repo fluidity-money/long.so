@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"os"
 
@@ -12,23 +11,26 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/gorilla/websocket"
+	"gorm.io/gorm"
+	"gorm.io/driver/postgres"
+
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 // EnvGethUrl to connect to the websocket from.
 const EnvGethUrl = "SPN_GETH_WS_URL"
 
 func main() {
-	db, err := sql.Open("postgres", config.Get().TimescaleUrl)
+	config := config.Get()
+	db, err := gorm.Open(postgres.Open(config.TimescaleUrl))
 	if err != nil {
 		log.Fatalf("opening postgres: %v", err)
 	}
-	defer db.Close()
 	// Start to ingest block headers by connecting to the websocket given.
-	c, _, err := websocket.DefaultDialer.Dial(os.Getenv(EnvGethUrl), nil)
+	c, err := ethclient.Dial(os.Getenv(EnvGethUrl))
 	if err != nil {
 		log.Fatalf("websocket dial: %v", err)
 	}
 	defer c.Close()
-	Entry(features.Get(), c, db)
+	Entry(features.Get(), config, c, db)
 }

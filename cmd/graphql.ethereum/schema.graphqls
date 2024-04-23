@@ -1,140 +1,100 @@
 
 type Query {
-  """
-  Statelessly look up a block, using the arguments to collect information from the chain.
-  """
-  getBlockWithHashBloom(hash: String!, bloom: String!): Block
+  seawaterPools: [SeawaterPool!]!
 
-  """
-  Statefully look up a block, collecting it's bloom using the database.
-  """
-  getBlockWithHash(hash: String!): Block
-}
-
-type Wallet {
-  address: String!
-}
-
-type Block {
-  hash: String!
-  bloom: String!
-  applications: [Application!]
-}
-
-type Transaction {
-  hash: String!
-  block: Block!
-  sender: Wallet!
-  recipient: Wallet!
-  applications: [Application!]
-}
-
-type Application {
-  transaction: Transaction!
-
-  erc20Transfer: Erc20Transfer
-
-  seawaterMintPosition: SeawaterMintPosition
-  seawaterBurnPosition: SeawaterBurnPosition
-  seawaterTransferPosition: SeawaterTransferPosition
-  seawaterUpdatePositionLiquidity: SeawaterUpdatePositionLiquidity
-  seawaterCollectFees: SeawaterCollectFees
-  seawaterNewPool: SeawaterNewPool
-  seawaterCollectProtocolFees: SeawaterCollectProtocolFees
-  seawaterSwap2: SeawaterSwap2
-  seawaterSwap1: SeawaterSwap1
+  getPool(address: String!): SeawaterPool
+  getPoolPositions(address: String!): [SeawaterPosition!]
+  getPosition(id: String!): SeawaterPosition
+  getWallet(address: String!): Wallet
 }
 
 type SeawaterPool {
+  id: ID! # address
+
   address: String!
-  apyUsd: String!
+
+  volumeOverTimeDaily: [PairAmount!]
+  volumeOverTimeMonthly: [PairAmount!]
+  volumeOverTimeYearly: [PairAmount!]
+
+  yieldOverTimeDaily: [PairAmount!]!
+  yieldOverTimeMonthly: [PairAmount!]
+  yieldOverTimeYearly: [PairAmount!]
+
+  priceOverTimeDaily: [String!]
+  priceOverTimeMonthly: [String!]
+  priceOverTimeYearly: [String!]
+
+  tvlOverTimeDaily: [String!]
+  tvlOverTimeMonthly: [String!]
+  tvlOverTimeYearly: [String!]
+
+  earnedFeesAPRFUSDC: String!
+  earnedFeesAPRToken1: String!
+
+  liquidityIncentives: Amount!
+  superIncentives: Amount!
+  utilityIncentives: [UtilityIncentive!]!
+
+  positions: [SeawaterPosition!]!
+
+  liquidity: [SeawaterLiquidity!]!
+}
+
+"""
+SeawaterLiquidity is like SeawaterPosition, though it's an aggregation for easy use.
+"""
+type SeawaterLiquidity {
+  id: ID! # pool:lower:upper
+
+  lower: String!
+  upper: String!
+  liquidity: PairAmount!
+  positions: [SeawaterPosition!]!
 }
 
 type SeawaterPosition {
-  id: String!
-  owner: Wallet!
-}
+  id: ID! # positionId
 
-type SeawaterAmount {
-  token: Token!
-  value: String!
-  valueScaled: String!
-  valueUsd: String
-}
-
-type Token {
-  address: String!
-}
-
-type Erc20Transfer {
-  token: Token!
-  sender: Wallet!
-  recipient: Wallet!
-  value: String!
-}
-
-type SeawaterMintPosition {
-  id: SeawaterPosition!
+  positionId: String!
   owner: Wallet!
   pool: SeawaterPool!
   lower: String!
   upper: String!
+  liquidity: PairAmount!
 }
 
-type SeawaterBurnPosition {
-  id: SeawaterPosition!
-  owner: Wallet!
+type PairAmount {
+  fusdc: Amount!
+  token1: Amount!
 }
 
-type SeawaterTransferPosition {
-  from: Wallet!
-  to: Wallet!
-  id: SeawaterPosition!
+type Amount {
+  valueUnscaled: String!
+  valueScaled: String!
+  valueUsd: String!
 }
 
-type SeawaterUpdatePositionLiquidity {
-  id: SeawaterPosition!
-  delta: String!
+type Wallet {
+  id: ID! # address
+
+  address: String!
+  balances: [TokenBalance!]!
+  positions: [SeawaterPosition!]
 }
 
-type SeawaterCollectFees {
-  id: SeawaterPosition!
-  pool: SeawaterPool!
-  to: Wallet!
-  amount0: SeawaterAmount!
-  amount1: SeawaterAmount!
-}
-
-type SeawaterNewPool {
+type TokenBalance {
   token: Token!
-  fee: String!
-  price: String!
+  balance: Amount!
 }
 
-type SeawaterCollectProtocolFees {
-  pool: SeawaterPool!
-  to: Wallet!
-  amount0: SeawaterAmount!
-  amount1: SeawaterAmount!
+type Token {
+  name: String!
+  totalSupply: String!
+  decimals: String!
 }
 
-type SeawaterSwap2 {
-  user: Wallet!
-  from: Token!
-  to: Token!
-  amountIn: SeawaterAmount!
-  amountOut: SeawaterAmount!
-  fluidVolume: SeawaterAmount!
-  finalTick0: String!
-  finalTick1: String!
+type UtilityIncentive {
+  amountGivenOut: String!
+  maximumAmount: String!
 }
-
-type SeawaterSwap1 {
-  user: Wallet!
-  pool: SeawaterPool!
-  zeroForOne: Boolean!
-  amount0: SeawaterAmount!
-  amount1: SeawaterAmount!
-  finalTick: String!
-}
-

@@ -9,288 +9,182 @@ import (
 	"fmt"
 
 	"github.com/fluidity-money/amm.superposition.so/cmd/graphql.ethereum/graph/model"
-	"github.com/fluidity-money/amm.superposition.so/cmd/graphql.ethereum/lib"
-	"github.com/fluidity-money/amm.superposition.so/lib/types"
 )
 
-// Transaction is the resolver for the transaction field.
-func (r *applicationResolver) Transaction(ctx context.Context, obj *model.Application) (model.Transaction, error) {
-	if obj == nil {
-		return model.Transaction{}, fmt.Errorf("no application")
-	}
-	return model.Transaction{
-		Hash:      obj.TransactionHash,
-		BlockHash: obj.BlockHash,
-	}, nil
+// SeawaterPools is the resolver for the seawaterPools field.
+func (r *queryResolver) SeawaterPools(ctx context.Context) (pools []model.SeawaterPool, err error) {
+	err = r.DB.Table("seawater_active_positions_1").Scan(pools).Error
+	return pools, err
 }
 
-// Hash is the resolver for the hash field.
-func (r *blockResolver) Hash(ctx context.Context, obj *model.Block) (string, error) {
-	if obj == nil {
-		return "", fmt.Errorf("no hash")
-	}
-	return obj.Hash.String(), nil
+// GetPool is the resolver for the getPool field.
+func (r *queryResolver) GetPool(ctx context.Context, address string) (*model.SeawaterPool, error) {
+	panic(fmt.Errorf("not implemented: GetPool - getPool"))
 }
 
-// Bloom is the resolver for the bloom field.
-func (r *blockResolver) Bloom(ctx context.Context, obj *model.Block) (string, error) {
-	// If we can't get the bloom here, then look it up in the database if the hash is available.
-	if obj == nil {
-		return "", fmt.Errorf("no hash")
-	}
-	return obj.Bloom.String(), nil
+// GetPoolPositions is the resolver for the getPoolPositions field.
+func (r *queryResolver) GetPoolPositions(ctx context.Context, address string) ([]model.SeawaterPosition, error) {
+	panic(fmt.Errorf("not implemented: GetPoolPositions - getPoolPositions"))
 }
 
-// Applications is the resolver for the applications field.
-func (r *blockResolver) Applications(ctx context.Context, obj *model.Block) ([]model.Application, error) {
-	// Check if the bloom contains any of the applications that we want to
-	// track, then collate them here.
-	if obj == nil {
-		return nil, fmt.Errorf("no block data")
-	}
-	applications, err := lib.GetApplications(r.C, r.F, r.Geth, obj.Hash, obj.Bloom)
-	return applications, err
+// GetPosition is the resolver for the getPosition field.
+func (r *queryResolver) GetPosition(ctx context.Context, id string) (*model.SeawaterPosition, error) {
+	panic(fmt.Errorf("not implemented: GetPosition - getPosition"))
 }
 
-// Token is the resolver for the token field.
-func (r *erc20TransferResolver) Token(ctx context.Context, obj *model.Erc20Transfer) (model.Token, error) {
-	if obj == nil {
-		return model.Token{}, fmt.Errorf("erc20 transfer empty")
-	}
-	return model.Token{obj.TokenAddr}, nil
-}
-
-// Sender is the resolver for the sender field.
-func (r *erc20TransferResolver) Sender(ctx context.Context, obj *model.Erc20Transfer) (model.Wallet, error) {
-	if obj == nil {
-		return model.Wallet{}, fmt.Errorf("erc20 transfer empty")
-	}
-	return model.Wallet{obj.SenderAddr}, nil
-}
-
-// Recipient is the resolver for the recipient field.
-func (r *erc20TransferResolver) Recipient(ctx context.Context, obj *model.Erc20Transfer) (model.Wallet, error) {
-	if obj == nil {
-		return model.Wallet{}, fmt.Errorf("")
-	}
-	return model.Wallet{obj.RecipientAddr}, nil
-}
-
-// Value is the resolver for the value field.
-func (r *erc20TransferResolver) Value(ctx context.Context, obj *model.Erc20Transfer) (string, error) {
-	if obj == nil {
-		return "", fmt.Errorf("empty application")
-	}
-	return obj.Value.String(), nil
-}
-
-// GetBlockWithHashBloom is the resolver for the getBlockWithHashBloom field.
-func (r *queryResolver) GetBlockWithHashBloom(ctx context.Context, hash string, bloom string) (*model.Block, error) {
-	return &model.Block{
-		Hash:  types.HashFromString(hash),
-		Bloom: types.DataFromString(bloom),
-	}, nil
-}
-
-// GetBlockWithHash is the resolver for the getBlockWithHash field.
-func (r *queryResolver) GetBlockWithHash(ctx context.Context, hash string) (*model.Block, error) {
-	panic(fmt.Errorf("not implemented: GetBlockWithHash - getBlockWithHash"))
+// GetWallet is the resolver for the getWallet field.
+func (r *queryResolver) GetWallet(ctx context.Context, address string) (*model.Wallet, error) {
+	panic(fmt.Errorf("not implemented: GetWallet - getWallet"))
 }
 
 // ID is the resolver for the id field.
-func (r *seawaterBurnPositionResolver) ID(ctx context.Context, obj *model.SeawaterBurnPosition) (model.SeawaterPosition, error) {
+func (r *seawaterPoolResolver) ID(ctx context.Context, obj *model.SeawaterPool) (string, error) {
 	panic(fmt.Errorf("not implemented: ID - id"))
 }
 
-// Owner is the resolver for the owner field.
-func (r *seawaterBurnPositionResolver) Owner(ctx context.Context, obj *model.SeawaterBurnPosition) (model.Wallet, error) {
-	panic(fmt.Errorf("not implemented: Owner - owner"))
+// Address is the resolver for the address field.
+func (r *seawaterPoolResolver) Address(ctx context.Context, obj *model.SeawaterPool) (string, error) {
+	panic(fmt.Errorf("not implemented: Address - address"))
+}
+
+// VolumeOverTimeDaily is the resolver for the volumeOverTimeDaily field.
+func (r *seawaterPoolResolver) VolumeOverTimeDaily(ctx context.Context, obj *model.SeawaterPool) ([]model.PairAmount, error) {
+	panic(fmt.Errorf("not implemented: VolumeOverTimeDaily - volumeOverTimeDaily"))
+}
+
+// VolumeOverTimeMonthly is the resolver for the volumeOverTimeMonthly field.
+func (r *seawaterPoolResolver) VolumeOverTimeMonthly(ctx context.Context, obj *model.SeawaterPool) ([]model.PairAmount, error) {
+	panic(fmt.Errorf("not implemented: VolumeOverTimeMonthly - volumeOverTimeMonthly"))
+}
+
+// VolumeOverTimeYearly is the resolver for the volumeOverTimeYearly field.
+func (r *seawaterPoolResolver) VolumeOverTimeYearly(ctx context.Context, obj *model.SeawaterPool) ([]model.PairAmount, error) {
+	panic(fmt.Errorf("not implemented: VolumeOverTimeYearly - volumeOverTimeYearly"))
+}
+
+// YieldOverTimeDaily is the resolver for the yieldOverTimeDaily field.
+func (r *seawaterPoolResolver) YieldOverTimeDaily(ctx context.Context, obj *model.SeawaterPool) ([]model.PairAmount, error) {
+	panic(fmt.Errorf("not implemented: YieldOverTimeDaily - yieldOverTimeDaily"))
+}
+
+// YieldOverTimeMonthly is the resolver for the yieldOverTimeMonthly field.
+func (r *seawaterPoolResolver) YieldOverTimeMonthly(ctx context.Context, obj *model.SeawaterPool) ([]model.PairAmount, error) {
+	panic(fmt.Errorf("not implemented: YieldOverTimeMonthly - yieldOverTimeMonthly"))
+}
+
+// YieldOverTimeYearly is the resolver for the yieldOverTimeYearly field.
+func (r *seawaterPoolResolver) YieldOverTimeYearly(ctx context.Context, obj *model.SeawaterPool) ([]model.PairAmount, error) {
+	panic(fmt.Errorf("not implemented: YieldOverTimeYearly - yieldOverTimeYearly"))
+}
+
+// PriceOverTimeDaily is the resolver for the priceOverTimeDaily field.
+func (r *seawaterPoolResolver) PriceOverTimeDaily(ctx context.Context, obj *model.SeawaterPool) ([]string, error) {
+	panic(fmt.Errorf("not implemented: PriceOverTimeDaily - priceOverTimeDaily"))
+}
+
+// PriceOverTimeMonthly is the resolver for the priceOverTimeMonthly field.
+func (r *seawaterPoolResolver) PriceOverTimeMonthly(ctx context.Context, obj *model.SeawaterPool) ([]string, error) {
+	panic(fmt.Errorf("not implemented: PriceOverTimeMonthly - priceOverTimeMonthly"))
+}
+
+// PriceOverTimeYearly is the resolver for the priceOverTimeYearly field.
+func (r *seawaterPoolResolver) PriceOverTimeYearly(ctx context.Context, obj *model.SeawaterPool) ([]string, error) {
+	panic(fmt.Errorf("not implemented: PriceOverTimeYearly - priceOverTimeYearly"))
+}
+
+// TvlOverTimeDaily is the resolver for the tvlOverTimeDaily field.
+func (r *seawaterPoolResolver) TvlOverTimeDaily(ctx context.Context, obj *model.SeawaterPool) ([]string, error) {
+	panic(fmt.Errorf("not implemented: TvlOverTimeDaily - tvlOverTimeDaily"))
+}
+
+// TvlOverTimeMonthly is the resolver for the tvlOverTimeMonthly field.
+func (r *seawaterPoolResolver) TvlOverTimeMonthly(ctx context.Context, obj *model.SeawaterPool) ([]string, error) {
+	panic(fmt.Errorf("not implemented: TvlOverTimeMonthly - tvlOverTimeMonthly"))
+}
+
+// TvlOverTimeYearly is the resolver for the tvlOverTimeYearly field.
+func (r *seawaterPoolResolver) TvlOverTimeYearly(ctx context.Context, obj *model.SeawaterPool) ([]string, error) {
+	panic(fmt.Errorf("not implemented: TvlOverTimeYearly - tvlOverTimeYearly"))
+}
+
+// EarnedFeesAprfusdc is the resolver for the earnedFeesAPRFUSDC field.
+func (r *seawaterPoolResolver) EarnedFeesAprfusdc(ctx context.Context, obj *model.SeawaterPool) (string, error) {
+	panic(fmt.Errorf("not implemented: EarnedFeesAprfusdc - earnedFeesAPRFUSDC"))
+}
+
+// EarnedFeesAPRToken1 is the resolver for the earnedFeesAPRToken1 field.
+func (r *seawaterPoolResolver) EarnedFeesAPRToken1(ctx context.Context, obj *model.SeawaterPool) (string, error) {
+	panic(fmt.Errorf("not implemented: EarnedFeesAPRToken1 - earnedFeesAPRToken1"))
+}
+
+// LiquidityIncentives is the resolver for the liquidityIncentives field.
+func (r *seawaterPoolResolver) LiquidityIncentives(ctx context.Context, obj *model.SeawaterPool) (model.Amount, error) {
+	panic(fmt.Errorf("not implemented: LiquidityIncentives - liquidityIncentives"))
+}
+
+// SuperIncentives is the resolver for the superIncentives field.
+func (r *seawaterPoolResolver) SuperIncentives(ctx context.Context, obj *model.SeawaterPool) (model.Amount, error) {
+	panic(fmt.Errorf("not implemented: SuperIncentives - superIncentives"))
+}
+
+// UtilityIncentives is the resolver for the utilityIncentives field.
+func (r *seawaterPoolResolver) UtilityIncentives(ctx context.Context, obj *model.SeawaterPool) ([]model.UtilityIncentive, error) {
+	panic(fmt.Errorf("not implemented: UtilityIncentives - utilityIncentives"))
+}
+
+// Positions is the resolver for the positions field.
+func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *model.SeawaterPool) ([]model.SeawaterPosition, error) {
+	panic(fmt.Errorf("not implemented: Positions - positions"))
+}
+
+// Liquidity is the resolver for the liquidity field.
+func (r *seawaterPoolResolver) Liquidity(ctx context.Context, obj *model.SeawaterPool) ([]model.SeawaterLiquidity, error) {
+	panic(fmt.Errorf("not implemented: Liquidity - liquidity"))
 }
 
 // ID is the resolver for the id field.
-func (r *seawaterCollectFeesResolver) ID(ctx context.Context, obj *model.SeawaterCollectFees) (model.SeawaterPosition, error) {
+func (r *seawaterPositionResolver) ID(ctx context.Context, obj *model.SeawaterPosition) (string, error) {
 	panic(fmt.Errorf("not implemented: ID - id"))
 }
 
-// Pool is the resolver for the pool field.
-func (r *seawaterCollectFeesResolver) Pool(ctx context.Context, obj *model.SeawaterCollectFees) (model.SeawaterPool, error) {
-	panic(fmt.Errorf("not implemented: Pool - pool"))
-}
-
-// To is the resolver for the to field.
-func (r *seawaterCollectFeesResolver) To(ctx context.Context, obj *model.SeawaterCollectFees) (model.Wallet, error) {
-	panic(fmt.Errorf("not implemented: To - to"))
-}
-
-// Amount0 is the resolver for the amount0 field.
-func (r *seawaterCollectFeesResolver) Amount0(ctx context.Context, obj *model.SeawaterCollectFees) (model.SeawaterAmount, error) {
-	panic(fmt.Errorf("not implemented: Amount0 - amount0"))
-}
-
-// Amount1 is the resolver for the amount1 field.
-func (r *seawaterCollectFeesResolver) Amount1(ctx context.Context, obj *model.SeawaterCollectFees) (model.SeawaterAmount, error) {
-	panic(fmt.Errorf("not implemented: Amount1 - amount1"))
-}
-
-// Pool is the resolver for the pool field.
-func (r *seawaterCollectProtocolFeesResolver) Pool(ctx context.Context, obj *model.SeawaterCollectProtocolFees) (model.SeawaterPool, error) {
-	panic(fmt.Errorf("not implemented: Pool - pool"))
-}
-
-// To is the resolver for the to field.
-func (r *seawaterCollectProtocolFeesResolver) To(ctx context.Context, obj *model.SeawaterCollectProtocolFees) (model.Wallet, error) {
-	panic(fmt.Errorf("not implemented: To - to"))
-}
-
-// Amount0 is the resolver for the amount0 field.
-func (r *seawaterCollectProtocolFeesResolver) Amount0(ctx context.Context, obj *model.SeawaterCollectProtocolFees) (model.SeawaterAmount, error) {
-	panic(fmt.Errorf("not implemented: Amount0 - amount0"))
-}
-
-// Amount1 is the resolver for the amount1 field.
-func (r *seawaterCollectProtocolFeesResolver) Amount1(ctx context.Context, obj *model.SeawaterCollectProtocolFees) (model.SeawaterAmount, error) {
-	panic(fmt.Errorf("not implemented: Amount1 - amount1"))
-}
-
-// ID is the resolver for the id field.
-func (r *seawaterMintPositionResolver) ID(ctx context.Context, obj *model.SeawaterMintPosition) (model.SeawaterPosition, error) {
-	panic(fmt.Errorf("not implemented: ID - id"))
-}
-
-// Owner is the resolver for the owner field.
-func (r *seawaterMintPositionResolver) Owner(ctx context.Context, obj *model.SeawaterMintPosition) (model.Wallet, error) {
-	panic(fmt.Errorf("not implemented: Owner - owner"))
-}
-
-// Pool is the resolver for the pool field.
-func (r *seawaterMintPositionResolver) Pool(ctx context.Context, obj *model.SeawaterMintPosition) (model.SeawaterPool, error) {
-	panic(fmt.Errorf("not implemented: Pool - pool"))
+// PositionID is the resolver for the positionId field.
+func (r *seawaterPositionResolver) PositionID(ctx context.Context, obj *model.SeawaterPosition) (string, error) {
+	panic(fmt.Errorf("not implemented: PositionID - positionId"))
 }
 
 // Lower is the resolver for the lower field.
-func (r *seawaterMintPositionResolver) Lower(ctx context.Context, obj *model.SeawaterMintPosition) (string, error) {
+func (r *seawaterPositionResolver) Lower(ctx context.Context, obj *model.SeawaterPosition) (string, error) {
 	panic(fmt.Errorf("not implemented: Lower - lower"))
 }
 
 // Upper is the resolver for the upper field.
-func (r *seawaterMintPositionResolver) Upper(ctx context.Context, obj *model.SeawaterMintPosition) (string, error) {
+func (r *seawaterPositionResolver) Upper(ctx context.Context, obj *model.SeawaterPosition) (string, error) {
 	panic(fmt.Errorf("not implemented: Upper - upper"))
 }
 
-// Token is the resolver for the token field.
-func (r *seawaterNewPoolResolver) Token(ctx context.Context, obj *model.SeawaterNewPool) (model.Token, error) {
-	panic(fmt.Errorf("not implemented: Token - token"))
+// Liquidity is the resolver for the liquidity field.
+func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *model.SeawaterPosition) (model.PairAmount, error) {
+	panic(fmt.Errorf("not implemented: Liquidity - liquidity"))
 }
 
-// Fee is the resolver for the fee field.
-func (r *seawaterNewPoolResolver) Fee(ctx context.Context, obj *model.SeawaterNewPool) (string, error) {
-	panic(fmt.Errorf("not implemented: Fee - fee"))
+// Name is the resolver for the name field.
+func (r *tokenResolver) Name(ctx context.Context, obj *model.Token) (string, error) {
+	panic(fmt.Errorf("not implemented: Name - name"))
 }
 
-// Price is the resolver for the price field.
-func (r *seawaterNewPoolResolver) Price(ctx context.Context, obj *model.SeawaterNewPool) (string, error) {
-	panic(fmt.Errorf("not implemented: Price - price"))
+// TotalSupply is the resolver for the totalSupply field.
+func (r *tokenResolver) TotalSupply(ctx context.Context, obj *model.Token) (string, error) {
+	panic(fmt.Errorf("not implemented: TotalSupply - totalSupply"))
 }
 
-// User is the resolver for the user field.
-func (r *seawaterSwap2Resolver) User(ctx context.Context, obj *model.SeawaterSwap2) (model.Wallet, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
-}
-
-// From is the resolver for the from field.
-func (r *seawaterSwap2Resolver) From(ctx context.Context, obj *model.SeawaterSwap2) (model.Token, error) {
-	panic(fmt.Errorf("not implemented: From - from"))
-}
-
-// To is the resolver for the to field.
-func (r *seawaterSwap2Resolver) To(ctx context.Context, obj *model.SeawaterSwap2) (model.Token, error) {
-	panic(fmt.Errorf("not implemented: To - to"))
-}
-
-// AmountIn is the resolver for the amountIn field.
-func (r *seawaterSwap2Resolver) AmountIn(ctx context.Context, obj *model.SeawaterSwap2) (model.SeawaterAmount, error) {
-	panic(fmt.Errorf("not implemented: AmountIn - amountIn"))
-}
-
-// AmountOut is the resolver for the amountOut field.
-func (r *seawaterSwap2Resolver) AmountOut(ctx context.Context, obj *model.SeawaterSwap2) (model.SeawaterAmount, error) {
-	panic(fmt.Errorf("not implemented: AmountOut - amountOut"))
-}
-
-// FluidVolume is the resolver for the fluidVolume field.
-func (r *seawaterSwap2Resolver) FluidVolume(ctx context.Context, obj *model.SeawaterSwap2) (model.SeawaterAmount, error) {
-	panic(fmt.Errorf("not implemented: FluidVolume - fluidVolume"))
-}
-
-// FinalTick0 is the resolver for the finalTick0 field.
-func (r *seawaterSwap2Resolver) FinalTick0(ctx context.Context, obj *model.SeawaterSwap2) (string, error) {
-	panic(fmt.Errorf("not implemented: FinalTick0 - finalTick0"))
-}
-
-// FinalTick1 is the resolver for the finalTick1 field.
-func (r *seawaterSwap2Resolver) FinalTick1(ctx context.Context, obj *model.SeawaterSwap2) (string, error) {
-	panic(fmt.Errorf("not implemented: FinalTick1 - finalTick1"))
-}
-
-// From is the resolver for the from field.
-func (r *seawaterTransferPositionResolver) From(ctx context.Context, obj *model.SeawaterTransferPosition) (model.Wallet, error) {
-	panic(fmt.Errorf("not implemented: From - from"))
-}
-
-// To is the resolver for the to field.
-func (r *seawaterTransferPositionResolver) To(ctx context.Context, obj *model.SeawaterTransferPosition) (model.Wallet, error) {
-	panic(fmt.Errorf("not implemented: To - to"))
+// Decimals is the resolver for the decimals field.
+func (r *tokenResolver) Decimals(ctx context.Context, obj *model.Token) (string, error) {
+	panic(fmt.Errorf("not implemented: Decimals - decimals"))
 }
 
 // ID is the resolver for the id field.
-func (r *seawaterTransferPositionResolver) ID(ctx context.Context, obj *model.SeawaterTransferPosition) (model.SeawaterPosition, error) {
+func (r *walletResolver) ID(ctx context.Context, obj *model.Wallet) (string, error) {
 	panic(fmt.Errorf("not implemented: ID - id"))
-}
-
-// ID is the resolver for the id field.
-func (r *seawaterUpdatePositionLiquidityResolver) ID(ctx context.Context, obj *model.SeawaterUpdatePositionLiquidity) (model.SeawaterPosition, error) {
-	panic(fmt.Errorf("not implemented: ID - id"))
-}
-
-// Delta is the resolver for the delta field.
-func (r *seawaterUpdatePositionLiquidityResolver) Delta(ctx context.Context, obj *model.SeawaterUpdatePositionLiquidity) (string, error) {
-	panic(fmt.Errorf("not implemented: Delta - delta"))
-}
-
-// Address is the resolver for the address field.
-func (r *tokenResolver) Address(ctx context.Context, obj *model.Token) (string, error) {
-	if obj == nil {
-		return "", fmt.Errorf("no token")
-	}
-	return obj.Address.String(), nil
-}
-
-// Hash is the resolver for the hash field.
-func (r *transactionResolver) Hash(ctx context.Context, obj *model.Transaction) (string, error) {
-	if obj == nil {
-		return "", fmt.Errorf("transaction empty")
-	}
-	return obj.Hash.String(), nil
-}
-
-// Block is the resolver for the block field.
-func (r *transactionResolver) Block(ctx context.Context, obj *model.Transaction) (model.Block, error) {
-	panic(fmt.Errorf("not implemented: Block - block"))
-}
-
-// Sender is the resolver for the sender field.
-func (r *transactionResolver) Sender(ctx context.Context, obj *model.Transaction) (model.Wallet, error) {
-	panic(fmt.Errorf("not implemented: Sender - sender"))
-}
-
-// Recipient is the resolver for the recipient field.
-func (r *transactionResolver) Recipient(ctx context.Context, obj *model.Transaction) (model.Wallet, error) {
-	panic(fmt.Errorf("not implemented: Recipient - recipient"))
-}
-
-// Applications is the resolver for the applications field.
-func (r *transactionResolver) Applications(ctx context.Context, obj *model.Transaction) ([]model.Application, error) {
-	panic(fmt.Errorf("not implemented: Applications - applications"))
 }
 
 // Address is the resolver for the address field.
@@ -301,75 +195,33 @@ func (r *walletResolver) Address(ctx context.Context, obj *model.Wallet) (string
 	return obj.Address.String(), nil
 }
 
-// Application returns ApplicationResolver implementation.
-func (r *Resolver) Application() ApplicationResolver { return &applicationResolver{r} }
+// Balances is the resolver for the balances field.
+func (r *walletResolver) Balances(ctx context.Context, obj *model.Wallet) ([]model.TokenBalance, error) {
+	panic(fmt.Errorf("not implemented: Balances - balances"))
+}
 
-// Block returns BlockResolver implementation.
-func (r *Resolver) Block() BlockResolver { return &blockResolver{r} }
-
-// Erc20Transfer returns Erc20TransferResolver implementation.
-func (r *Resolver) Erc20Transfer() Erc20TransferResolver { return &erc20TransferResolver{r} }
+// Positions is the resolver for the positions field.
+func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet) ([]model.SeawaterPosition, error) {
+	panic(fmt.Errorf("not implemented: Positions - positions"))
+}
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-// SeawaterBurnPosition returns SeawaterBurnPositionResolver implementation.
-func (r *Resolver) SeawaterBurnPosition() SeawaterBurnPositionResolver {
-	return &seawaterBurnPositionResolver{r}
-}
+// SeawaterPool returns SeawaterPoolResolver implementation.
+func (r *Resolver) SeawaterPool() SeawaterPoolResolver { return &seawaterPoolResolver{r} }
 
-// SeawaterCollectFees returns SeawaterCollectFeesResolver implementation.
-func (r *Resolver) SeawaterCollectFees() SeawaterCollectFeesResolver {
-	return &seawaterCollectFeesResolver{r}
-}
-
-// SeawaterCollectProtocolFees returns SeawaterCollectProtocolFeesResolver implementation.
-func (r *Resolver) SeawaterCollectProtocolFees() SeawaterCollectProtocolFeesResolver {
-	return &seawaterCollectProtocolFeesResolver{r}
-}
-
-// SeawaterMintPosition returns SeawaterMintPositionResolver implementation.
-func (r *Resolver) SeawaterMintPosition() SeawaterMintPositionResolver {
-	return &seawaterMintPositionResolver{r}
-}
-
-// SeawaterNewPool returns SeawaterNewPoolResolver implementation.
-func (r *Resolver) SeawaterNewPool() SeawaterNewPoolResolver { return &seawaterNewPoolResolver{r} }
-
-// SeawaterSwap2 returns SeawaterSwap2Resolver implementation.
-func (r *Resolver) SeawaterSwap2() SeawaterSwap2Resolver { return &seawaterSwap2Resolver{r} }
-
-// SeawaterTransferPosition returns SeawaterTransferPositionResolver implementation.
-func (r *Resolver) SeawaterTransferPosition() SeawaterTransferPositionResolver {
-	return &seawaterTransferPositionResolver{r}
-}
-
-// SeawaterUpdatePositionLiquidity returns SeawaterUpdatePositionLiquidityResolver implementation.
-func (r *Resolver) SeawaterUpdatePositionLiquidity() SeawaterUpdatePositionLiquidityResolver {
-	return &seawaterUpdatePositionLiquidityResolver{r}
-}
+// SeawaterPosition returns SeawaterPositionResolver implementation.
+func (r *Resolver) SeawaterPosition() SeawaterPositionResolver { return &seawaterPositionResolver{r} }
 
 // Token returns TokenResolver implementation.
 func (r *Resolver) Token() TokenResolver { return &tokenResolver{r} }
 
-// Transaction returns TransactionResolver implementation.
-func (r *Resolver) Transaction() TransactionResolver { return &transactionResolver{r} }
-
 // Wallet returns WalletResolver implementation.
 func (r *Resolver) Wallet() WalletResolver { return &walletResolver{r} }
 
-type applicationResolver struct{ *Resolver }
-type blockResolver struct{ *Resolver }
-type erc20TransferResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-type seawaterBurnPositionResolver struct{ *Resolver }
-type seawaterCollectFeesResolver struct{ *Resolver }
-type seawaterCollectProtocolFeesResolver struct{ *Resolver }
-type seawaterMintPositionResolver struct{ *Resolver }
-type seawaterNewPoolResolver struct{ *Resolver }
-type seawaterSwap2Resolver struct{ *Resolver }
-type seawaterTransferPositionResolver struct{ *Resolver }
-type seawaterUpdatePositionLiquidityResolver struct{ *Resolver }
+type seawaterPoolResolver struct{ *Resolver }
+type seawaterPositionResolver struct{ *Resolver }
 type tokenResolver struct{ *Resolver }
-type transactionResolver struct{ *Resolver }
 type walletResolver struct{ *Resolver }
