@@ -10,9 +10,9 @@ import { format } from "date-fns";
 const durationToDays = {
   "7D": 7,
   "1M": 30,
-  "6M": 180,
-  "1Y": 365,
-  ALL: 365,
+  "6M": 26,
+  "1Y": 52,
+  ALL: 52,
 };
 
 export const Graph = () => {

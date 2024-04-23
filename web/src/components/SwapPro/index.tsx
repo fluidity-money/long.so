@@ -11,6 +11,8 @@ import { useWelcomeStore } from "@/stores/useWelcomeStore";
 import { cn } from "@/lib/utils";
 import { Graph } from "@/components/SwapPro/SwapProGraph";
 import { useSwapStore } from "@/stores/useSwapStore";
+import { columns, Transaction } from "@/app/_DataTable/columns";
+import { DataTable } from "@/app/_DataTable/DataTable";
 
 const variants = {
   hidden: { opacity: 0, width: 0 },
@@ -107,29 +109,29 @@ export const SwapPro = ({
           </div>
         </div>
 
-        {/*<DataTable*/}
-        {/*  columns={columns}*/}
-        {/*  data={*/}
-        {/*    [*/}
-        {/*      {*/}
-        {/*        id: "1",*/}
-        {/*        value: 100,*/}
-        {/*        rewards: 200,*/}
-        {/*        time: startOfDay(new Date()),*/}
-        {/*        amountFrom: 30.2,*/}
-        {/*        amountTo: 0.0001,*/}
-        {/*      },*/}
-        {/*      {*/}
-        {/*        id: "2",*/}
-        {/*        value: 300,*/}
-        {/*        rewards: 20,*/}
-        {/*        time: startOfDay(new Date()),*/}
-        {/*        amountFrom: 30.2,*/}
-        {/*        amountTo: 0.0001,*/}
-        {/*      },*/}
-        {/*    ] as Transaction[]*/}
-        {/*  }*/}
-        {/*/>*/}
+        <DataTable
+          columns={columns}
+          data={
+            [
+              {
+                id: "1",
+                value: 100,
+                rewards: 200,
+                time: new Date("2023-10-10T14:48:00.000+09:00"),
+                amountFrom: 30.2,
+                amountTo: 0.0001,
+              },
+              {
+                id: "2",
+                value: 300,
+                rewards: 20,
+                time: new Date("2023-10-10T16:32:00.000+09:00"),
+                amountFrom: 30.2,
+                amountTo: 0.0001,
+              },
+            ] as Transaction[]
+          }
+        />
       </div>
     </motion.div>
   );
