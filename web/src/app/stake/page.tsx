@@ -13,6 +13,7 @@ import { YieldBreakdownModal } from "@/app/stake/YieldBreakdownModal";
 import { YieldBreakdownClaimedModal } from "@/app/stake/YieldBreakdownClaimedModal";
 import { YieldBreakdownDrawer } from "@/app/stake/YieldBreakdownDrawer";
 import { YieldBreakdownClaimedDrawer } from "@/app/stake/YieldBreakdownClaimedDrawer";
+import { useAccount } from "wagmi";
 
 const Stake = () => {
   const { welcome, setWelcome, yieldBreakdown, yieldBreakdownClaimed } =
@@ -27,6 +28,8 @@ const Stake = () => {
   );
 
   const { isLtSm } = useMediaQuery();
+
+  const { address } = useAccount();
 
   if (welcome) return <WelcomeModal />;
 
@@ -57,14 +60,16 @@ const Stake = () => {
           </div>
 
           {/* this doesn't show on mobile */}
-          <motion.div
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 100 }}
-            className="hidden w-full max-w-[500px] flex-1 flex-col md:flex"
-          >
-            <YieldOverTimeGraph />
-          </motion.div>
+          {address && (
+            <motion.div
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 100 }}
+              className="hidden w-full max-w-[500px] flex-1 flex-col md:flex"
+            >
+              <YieldOverTimeGraph />
+            </motion.div>
+          )}
         </div>
 
         <motion.div

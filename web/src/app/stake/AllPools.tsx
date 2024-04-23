@@ -5,7 +5,6 @@ import Grid from "@/assets/icons/grid.svg";
 import { AllPoolsTable } from "@/app/stake/_AllPoolsTable/AllPoolsTable";
 import { columns, Pool } from "@/app/stake/_AllPoolsTable/columns";
 import { useRef, useState } from "react";
-import { nanoid } from "nanoid";
 import { AllPoolsFilter } from "@/app/stake/AllPoolsFilter";
 import SegmentedControl from "@/components/ui/segmented-control";
 import Ethereum from "@/assets/icons/ethereum.svg";
@@ -20,7 +19,7 @@ import Pickaxe from "@/assets/icons/iridescent-pickaxe-2.svg";
 
 const pools: Pool[] = [
   {
-    id: nanoid(),
+    id: "1",
     tokens: [{ name: "USDC" }, { name: "fUSDC" }],
     annualPercentageYield: 12,
     claimable: true,
@@ -30,7 +29,7 @@ const pools: Pool[] = [
     volume: 1231,
   },
   {
-    id: nanoid(),
+    id: "2",
     tokens: [{ name: "USDC" }, { name: "fUSDC" }],
     annualPercentageYield: 5,
     claimable: false,
@@ -41,7 +40,7 @@ const pools: Pool[] = [
     boosted: true,
   },
   {
-    id: nanoid(),
+    id: "3",
     tokens: [{ name: "USDC" }, { name: "fUSDC" }],
     annualPercentageYield: 4,
     claimable: true,
@@ -51,7 +50,7 @@ const pools: Pool[] = [
     volume: 8734,
   },
   {
-    id: nanoid(),
+    id: "4",
     tokens: [{ name: "USDC" }, { name: "fUSDC" }],
     annualPercentageYield: 12,
     claimable: true,
@@ -62,7 +61,7 @@ const pools: Pool[] = [
     boosted: true,
   },
   {
-    id: nanoid(),
+    id: "5",
     tokens: [{ name: "USDC" }, { name: "fUSDC" }],
     annualPercentageYield: 5,
     claimable: false,
@@ -73,7 +72,7 @@ const pools: Pool[] = [
     boosted: true,
   },
   {
-    id: nanoid(),
+    id: "6",
     tokens: [{ name: "USDC" }, { name: "fUSDC" }],
     annualPercentageYield: 4,
     claimable: true,

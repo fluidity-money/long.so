@@ -33,8 +33,8 @@ export function AllPoolsTable<TData, TValue>({
   const { isMd } = useMediaQuery();
 
   const [columnVisibility, setColumnVisibility] = useState({
-    fees: isMd,
-    rewards: isMd,
+    fees: true,
+    rewards: true,
   });
 
   useEffect(() => {
