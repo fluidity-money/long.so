@@ -17,8 +17,9 @@ import Link from "next/link";
 import Token from "@/assets/icons/token.svg";
 import TokenIridescent from "@/assets/icons/token-iridescent.svg";
 import SegmentedControl from "@/components/ui/segmented-control";
+import { useAccount } from "wagmi";
 
-const pools: Pool[] = [
+const poolsData: Pool[] = [
   {
     id: nanoid(),
     tokens: [{ name: "USDC" }, { name: "ETH" }],
@@ -92,6 +93,10 @@ export const MyPositions = () => {
   const [expanded, setExpanded] = useState(false);
 
   const router = useRouter();
+
+  const { address } = useAccount();
+
+  const pools = address ? poolsData : [];
 
   return (
     <motion.div
