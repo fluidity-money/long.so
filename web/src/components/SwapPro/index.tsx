@@ -2,9 +2,6 @@
 
 import { useSwapPro } from "@/stores/useSwapPro";
 import { TypographyH3 } from "@/components/ui/typography";
-import { DataTable } from "@/app/_DataTable/DataTable";
-import { columns, Transaction } from "@/app/_DataTable/columns";
-import { startOfDay } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -27,8 +24,8 @@ export const SwapPro = ({
   override?: boolean;
   badgeTitle?: boolean;
 }) => {
-  const { swapPro, setSwapPro } = useSwapPro();
-  const { welcome } = useWelcomeStore();
+  const swapPro = useSwapPro((s) => s.swapPro);
+  const welcome = useWelcomeStore((s) => s.welcome);
 
   const { isLtSm } = useMediaQuery();
 
@@ -110,29 +107,29 @@ export const SwapPro = ({
           </div>
         </div>
 
-        <DataTable
-          columns={columns}
-          data={
-            [
-              {
-                id: "1",
-                value: 100,
-                rewards: 200,
-                time: startOfDay(new Date()),
-                amountFrom: 30.2,
-                amountTo: 0.0001,
-              },
-              {
-                id: "2",
-                value: 300,
-                rewards: 20,
-                time: startOfDay(new Date()),
-                amountFrom: 30.2,
-                amountTo: 0.0001,
-              },
-            ] as Transaction[]
-          }
-        />
+        {/*<DataTable*/}
+        {/*  columns={columns}*/}
+        {/*  data={*/}
+        {/*    [*/}
+        {/*      {*/}
+        {/*        id: "1",*/}
+        {/*        value: 100,*/}
+        {/*        rewards: 200,*/}
+        {/*        time: startOfDay(new Date()),*/}
+        {/*        amountFrom: 30.2,*/}
+        {/*        amountTo: 0.0001,*/}
+        {/*      },*/}
+        {/*      {*/}
+        {/*        id: "2",*/}
+        {/*        value: 300,*/}
+        {/*        rewards: 20,*/}
+        {/*        time: startOfDay(new Date()),*/}
+        {/*        amountFrom: 30.2,*/}
+        {/*        amountTo: 0.0001,*/}
+        {/*      },*/}
+        {/*    ] as Transaction[]*/}
+        {/*  }*/}
+        {/*/>*/}
       </div>
     </motion.div>
   );
