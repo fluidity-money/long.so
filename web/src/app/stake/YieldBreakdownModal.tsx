@@ -71,7 +71,7 @@ export const YieldBreakdownModal = () => {
     <>
       <AlertDialog.Root open={yieldBreakdown && !isLtSm}>
         <AlertDialog.Portal>
-          <AlertDialog.Overlay className="fixed inset-0 z-30  overflow-y-scroll bg-black/80 md:bg-black/50">
+          <AlertDialog.Overlay className="fixed inset-0 z-30 overflow-y-auto bg-black/80 md:bg-black/50">
             <AlertDialog.Content
               className="z-50 mb-[30px] mt-[200px]"
               aria-label="yield breakdown modal"

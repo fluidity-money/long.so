@@ -140,7 +140,7 @@ export const MyPositions = () => {
       </div>
 
       <div
-        className={cn("h-[180px] overflow-y-scroll transition-[height]", {
+        className={cn("h-[180px] overflow-y-auto transition-[height]", {
           "h-[300px]": expanded,
         })}
       >
