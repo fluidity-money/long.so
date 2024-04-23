@@ -16,9 +16,17 @@ import { motion } from "framer-motion";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
 import Link from "next/link";
 import { useSwapStore } from "@/stores/useSwapStore";
-import { useAccount, useSimulateContract } from "wagmi";
-import { erc20Abi, Hash } from "viem";
+import {
+  useAccount,
+  useSimulateContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import { erc20Abi, Hash, maxUint256 } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
+import LightweightERC20 from "@/lib/abi/LightweightERC20";
+import { ammAddress } from "@/lib/addresses";
+import { output } from "@/lib/abi/ISeawaterAMM";
 
 export const SwapForm = () => {
   const [breakdownHidden, setBreakdownHidden] = useState(true);
@@ -45,7 +53,7 @@ export const SwapForm = () => {
   const { address } = useAccount();
 
   // token0 hooks
-  const { data: token0Deicmals, error } = useSimulateContract({
+  const { data: token0Decimals, error } = useSimulateContract({
     address: token0.address,
     abi: erc20Abi,
     // @ts-expect-error
@@ -62,7 +70,7 @@ export const SwapForm = () => {
   });
 
   // token1 hooks
-  const { data: token1Deicmals } = useSimulateContract({
+  const { data: token1Decimals } = useSimulateContract({
     address: token1.address,
     abi: erc20Abi,
     // @ts-expect-error
@@ -79,6 +87,74 @@ export const SwapForm = () => {
   });
 
   const { open } = useWeb3Modal();
+
+  // read the allowance of the token
+  const { data: allowanceData, error: allowanceError } = useSimulateContract({
+    address: token0.address,
+    abi: LightweightERC20,
+    // @ts-ignore this needs to use useSimulateContract which breaks the types
+    functionName: "allowance",
+    // @ts-ignore
+    args: [address as Hash, ammAddress],
+  });
+
+  // set up write hooks
+  const {
+    writeContract: writeContractApproval,
+    data: approvalData,
+    error: approvalError,
+    isPending: isApprovalPending,
+  } = useWriteContract();
+  const {
+    writeContract: writeContractSwap,
+    data: swapData,
+    error: swapError,
+    isPending: isSwapPending,
+  } = useWriteContract();
+
+  console.log(swapError);
+
+  /**
+   * Approve the AMM to spend the token
+   *
+   * Step 1.
+   */
+  const onSubmit = () => {
+    if (!allowanceData?.result || allowanceData.result === BigInt(0)) {
+      console.log("approving");
+      writeContractApproval({
+        address: token0.address,
+        abi: erc20Abi,
+        functionName: "approve",
+        args: [ammAddress, maxUint256],
+      });
+    } else {
+      performSwap();
+    }
+  };
+
+  // wait for the approval transaction to complete
+  const approvalResult = useWaitForTransactionReceipt({
+    hash: approvalData,
+  });
+
+  // once we have the result, initiate the swap
+  useEffect(() => {
+    if (!approvalResult.data) return;
+
+    performSwap();
+  }, [approvalResult.data]);
+
+  const performSwap = () => {
+    console.log("performing swap");
+
+    writeContractSwap({
+      address: ammAddress,
+      abi: output.abi,
+      functionName: "swap",
+      args: [token0.address, false, BigInt(token0Amount ?? 0), BigInt(1)],
+    });
+  };
 
   return (
     <>
@@ -172,12 +248,12 @@ export const SwapForm = () => {
                     "flex flex-row gap-[17px] text-[8px] md:text-[10px]"
                   }
                 >
-                  {token0Balance && token0Deicmals && (
+                  {token0Balance && token0Decimals && (
                     <div>
                       Balance:{" "}
                       {(
                         (token0Balance.result as unknown as bigint) /
-                        BigInt(10 ** token0Deicmals.result)
+                        BigInt(10 ** token0Decimals.result)
                       ).toString()}
                     </div>
                   )}
@@ -243,12 +319,12 @@ export const SwapForm = () => {
                     "flex flex-row gap-[17px] text-[8px] md:text-[10px]"
                   }
                 >
-                  {token1Balance && token1Deicmals && (
+                  {token1Balance && token1Decimals && (
                     <div>
                       Balance:{" "}
                       {(
                         (token1Balance.result as unknown as bigint) /
-                        BigInt(10 ** token1Deicmals.result)
+                        BigInt(10 ** token1Decimals.result)
                       ).toString()}
                     </div>
                   )}
@@ -415,6 +491,7 @@ export const SwapForm = () => {
             {address ? (
               <Button
                 className={"mt-[20px] hidden h-[53.92px] w-full md:inline-flex"}
+                onClick={() => onSubmit()}
               >
                 Swap
               </Button>
