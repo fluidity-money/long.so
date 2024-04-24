@@ -2,6 +2,10 @@
 
 package model
 
+import (
+	"github.com/fluidity-money/amm.superposition.so/lib/types/seawater"
+)
+
 type Amount struct {
 	ValueUnscaled string `json:"valueUnscaled"`
 	ValueScaled   string `json:"valueScaled"`
@@ -18,11 +22,11 @@ type Query struct {
 
 // SeawaterLiquidity is like SeawaterPosition, though it's an aggregation for easy use.
 type SeawaterLiquidity struct {
-	ID        string             `json:"id"`
-	Lower     string             `json:"lower"`
-	Upper     string             `json:"upper"`
-	Liquidity PairAmount         `json:"liquidity"`
-	Positions []SeawaterPosition `json:"positions"`
+	ID        string              `json:"id"`
+	Lower     string              `json:"lower"`
+	Upper     string              `json:"upper"`
+	Liquidity PairAmount          `json:"liquidity"`
+	Positions []seawater.Position `json:"positions"`
 }
 
 type TokenBalance struct {
