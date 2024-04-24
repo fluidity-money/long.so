@@ -68,7 +68,7 @@ func getFromBucket() F {
 		log.Fatalf("features bucket: draining: %v", err)
 	}
 	buf2 := buf
-	if err := json.NewDecoder(&buf).Decode(enabled); err != nil {
+	if err := json.NewDecoder(&buf).Decode(&enabled); err != nil {
 		log.Fatalf("features bucket: decoding %#v: %v", buf2.String(), err)
 	}
 	return F{
