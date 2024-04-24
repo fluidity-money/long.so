@@ -20,7 +20,7 @@ const EnvFeatures = "SPN_FEATURES"
 
 // FeaturesBucket where a JSON blob lives that contains each enabled
 // feature in a map.
-const FeaturesBucket = "https://features.long.so"
+const FeaturesBucket = "https://features.long.so/features.json"
 
 // Features that are supported in the code based on the bucket or env.
 type F struct {
