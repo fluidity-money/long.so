@@ -8,8 +8,8 @@ import (
 	"log"
 	"log/slog"
 
-	"github.com/fluidity-money/amm.superposition.so/lib/applications/erc20"
-	"github.com/fluidity-money/amm.superposition.so/lib/applications/seawater"
+	"github.com/fluidity-money/amm.superposition.so/lib/events/erc20"
+	"github.com/fluidity-money/amm.superposition.so/lib/events/seawater"
 
 	"github.com/fluidity-money/amm.superposition.so/lib/features"
 	"github.com/fluidity-money/amm.superposition.so/lib/config"
@@ -103,16 +103,40 @@ func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) erro
 
 	case seawater.TopicMintPosition:
 		a, err = seawater.UnpackMintPosition(topic1, topic2, data)
-		table = "applications_seawater_mintPosition"
+		table = "events_seawater_mintPosition"
 
 	case seawater.TopicBurnPosition:
+		a, err = seawater.UnpackBurnPosition(topic1, topic2, data)
+		table = "events_seawater_burnPosition"
+
 	case seawater.TopicTransferPosition:
+		a, err = seawater.UnpackTransferPosition(topic1, topic2, data)
+		table = "events_seawater_transferPosition"
+
 	case seawater.TopicUpdatePositionLiquidity:
+		a, err = seawater.UnpackUpdatePositionLiquidity(topic1, topic2, data)
+		table = "events_seawater_updatePositionLiquidity"
+
 	case seawater.TopicCollectFees:
+		a, err = seawater.UnpackCollectFees(topic1, topic2, data)
+		table = "events_seawater_collectFees"
+
 	case seawater.TopicNewPool:
+		a, err = seawater.UnpackNewPool(topic1, topic2, data)
+		table = "events_seawater_newPool"
+
 	case seawater.TopicCollectProtocolFees:
+		a, err = seawater.UnpackCollectProtocolFees(topic1, topic2, data)
+		table = "events_seawater_collectProtocolFees"
+
 	case seawater.TopicSwap2:
+		a, err = seawater.UnpackSwap2(topic1, topic2, data)
+		table = "events_seawater_swap2"
+
 	case seawater.TopicSwap1:
+		a, err = seawater.UnpackSwap1(topic1, topic2, data)
+		table = "events_seawater_swap1"
+
 	default:
 		return fmt.Errorf("unexpected topic: %v", topic0)
 	}

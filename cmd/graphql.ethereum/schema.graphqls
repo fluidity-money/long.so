@@ -54,7 +54,7 @@ type SeawaterLiquidity {
 }
 
 type SeawaterPosition {
-  id: ID! # positionId
+  id: ID! # positionId (pos:positionId)
 
   positionId: String!
   owner: Wallet!

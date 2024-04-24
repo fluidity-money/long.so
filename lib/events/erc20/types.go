@@ -2,11 +2,11 @@ package erc20
 
 import (
 	"github.com/fluidity-money/amm.superposition.so/lib/types"
-	"github.com/fluidity-money/amm.superposition.so/lib/applications/event"
+	"github.com/fluidity-money/amm.superposition.so/lib/events"
 )
 
 type Transfer struct {
-	event.Event
+	events.Event
 
 	Sender    types.Address        `json:"sender"`
 	Recipient types.Address        `json:"recipient"`
