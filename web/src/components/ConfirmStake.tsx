@@ -15,7 +15,7 @@ import {
 } from "wagmi";
 import { output } from "@/lib/abi/ISeawaterAMM";
 import { encodeTick } from "@/lib/math";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { erc20Abi, Hash, hexToBigInt, maxUint256 } from "viem";
 import { ammAddress } from "@/lib/addresses";
 import LightweightERC20 from "@/lib/abi/LightweightERC20";
@@ -42,10 +42,10 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
     if (token0 && token0Amount) return;
 
     router.push("/stake/pool/create");
-  }, [token0, token0Amount]);
+  }, [router, token0, token0Amount]);
 
   // read the allowance of the token
-  const { data: allowanceData, error: allowanceError } = useSimulateContract({
+  const { data: allowanceData, /* error: allowanceError */ } = useSimulateContract({
     address: token0.address,
     abi: LightweightERC20,
     // @ts-ignore this needs to use useSimulateContract which breaks the types
@@ -95,12 +95,28 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
   // extract the position ID from the mintPosition transaction
   const mintPositionId = result?.data?.logs[0].topics[1];
 
+  const updatePosition = useCallback((id: bigint) => {
+    const delta = BigInt(token0Amount);
+
+    writeContractUpdatePosition({
+      address: ammAddress,
+      abi: output.abi,
+      functionName: "updatePosition",
+      args: [token0.address, id, delta],
+    });
+  }, [
+    allowanceData,
+    writeContractUpdatePosition,
+    token0Amount,
+    token0,
+  ]);
+
   /**
    * Approve the AMM to spend the token
    *
    * Step 2. Approve the token
    */
-  const approve = () => {
+  const approve = useCallback(() => {
     if (!allowanceData?.result || allowanceData.result === BigInt(0)) {
       writeContractApproval({
         address: token0.address,
@@ -111,30 +127,20 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
     } else {
       updatePosition(hexToBigInt(mintPositionId as Hash));
     }
-  };
+  }, [
+    allowanceData,
+    writeContractApproval,
+    token0,
+    updatePosition,
+    mintPositionId
+  ]);
 
   // once we have the position ID, approve the AMM to spend the token
   useEffect(() => {
     if (!mintPositionId) return;
 
     approve();
-  }, [mintPositionId]);
-
-  /**
-   * Update the position with the delta
-   *
-   * Step 3. Update the position
-   */
-  const updatePosition = (id: bigint) => {
-    const delta = BigInt(token0Amount);
-
-    writeContractUpdatePosition({
-      address: ammAddress,
-      abi: output.abi,
-      functionName: "updatePosition",
-      args: [token0.address, id, delta],
-    });
-  };
+  }, [approve, mintPositionId]);
 
   // wait for the approval transaction to complete
   const approvalResult = useWaitForTransactionReceipt({
@@ -146,7 +152,7 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
     if (!approvalResult.data || !mintPositionId) return;
 
     updatePosition(hexToBigInt(mintPositionId));
-  }, [approvalResult.data, mintPositionId]);
+  }, [updatePosition, approvalResult.data, mintPositionId]);
 
   // wait for the updatePosition transaction to complete
   const updatePositionResult = useWaitForTransactionReceipt({

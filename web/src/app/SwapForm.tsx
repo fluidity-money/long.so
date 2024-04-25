@@ -10,7 +10,7 @@ import Token from "@/assets/icons/token.svg";
 import Swap from "@/assets/icons/Swap.svg";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import { SuperloopPopover } from "@/app/SuperloopPopover";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
@@ -48,12 +48,11 @@ export const SwapForm = () => {
     token0Amount,
     token1Amount,
     setToken0Amount,
-    setToken1Amount,
   } = useSwapStore();
   const { address } = useAccount();
 
   // token0 hooks
-  const { data: token0Decimals, error } = useSimulateContract({
+  const { data: token0Decimals, /* error */  } = useSimulateContract({
     address: token0.address,
     abi: erc20Abi,
     // @ts-expect-error
@@ -89,7 +88,7 @@ export const SwapForm = () => {
   const { open } = useWeb3Modal();
 
   // read the allowance of the token
-  const { data: allowanceData, error: allowanceError } = useSimulateContract({
+  const { data: allowanceData, /* error: allowanceError */ } = useSimulateContract({
     address: token0.address,
     abi: LightweightERC20,
     // @ts-ignore this needs to use useSimulateContract which breaks the types
@@ -102,14 +101,14 @@ export const SwapForm = () => {
   const {
     writeContract: writeContractApproval,
     data: approvalData,
-    error: approvalError,
-    isPending: isApprovalPending,
+    /* error: approvalError, */
+    /* isPending: isApprovalPending, */
   } = useWriteContract();
   const {
     writeContract: writeContractSwap,
-    data: swapData,
+    /* data: swapData, */
     error: swapError,
-    isPending: isSwapPending,
+    /* isPending: isSwapPending, */
   } = useWriteContract();
 
   console.log(swapError);
@@ -138,14 +137,7 @@ export const SwapForm = () => {
     hash: approvalData,
   });
 
-  // once we have the result, initiate the swap
-  useEffect(() => {
-    if (!approvalResult.data) return;
-
-    performSwap();
-  }, [approvalResult.data]);
-
-  const performSwap = () => {
+  const performSwap = useCallback(() => {
     console.log("performing swap");
 
     writeContractSwap({
@@ -154,7 +146,17 @@ export const SwapForm = () => {
       functionName: "swap",
       args: [token0.address, false, BigInt(token0Amount ?? 0), BigInt(1)],
     });
-  };
+  }, [
+    writeContractSwap,
+    token0,
+    token0Amount
+  ])
+
+  // once we have the result, initiate the swap
+  useEffect(() => {
+    if (!approvalResult.data) return;
+    performSwap();
+  }, [approvalResult.data, performSwap]);
 
   return (
     <>
