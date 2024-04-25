@@ -46,7 +46,7 @@ export const CampaignBanner = ({
 
     // Cleanup function for when the component unmounts
     return () => clearInterval(intervalId);
-  }, []);
+  });
 
   return (
     <div className="flex w-full flex-row items-center justify-between gap-1 text-2xs">
