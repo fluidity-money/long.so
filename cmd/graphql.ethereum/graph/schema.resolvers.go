@@ -13,6 +13,11 @@ import (
 	"github.com/fluidity-money/amm.superposition.so/lib/types/seawater"
 )
 
+// SetVolumeYieldPriceAndTVLForLastHour is the resolver for the setVolumeYieldPriceAndTVLForLastHour field.
+func (r *mutationResolver) SetVolumeYieldPriceAndTVLForLastHour(ctx context.Context) (*string, error) {
+	panic(fmt.Errorf("not implemented: SetVolumeYieldPriceAndTVLForLastHour - setVolumeYieldPriceAndTVLForLastHour"))
+}
+
 // SeawaterPools is the resolver for the seawaterPools field.
 func (r *queryResolver) SeawaterPools(ctx context.Context) (pools []seawater.Pool, err error) {
 	err = r.DB.Table("seawater_active_positions_1").Scan(pools).Error
@@ -257,6 +262,9 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet) ([]se
 	return nil, nil // TODO
 }
 
+// Mutation returns MutationResolver implementation.
+func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
+
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
@@ -272,6 +280,7 @@ func (r *Resolver) Token() TokenResolver { return &tokenResolver{r} }
 // Wallet returns WalletResolver implementation.
 func (r *Resolver) Wallet() WalletResolver { return &walletResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type seawaterPoolResolver struct{ *Resolver }
 type seawaterPositionResolver struct{ *Resolver }

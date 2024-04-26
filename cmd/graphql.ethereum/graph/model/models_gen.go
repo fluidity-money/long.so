@@ -12,6 +12,9 @@ type Amount struct {
 	ValueUsd      string `json:"valueUsd"`
 }
 
+type Mutation struct {
+}
+
 type PairAmount struct {
 	Fusdc  Amount `json:"fusdc"`
 	Token1 Amount `json:"token1"`

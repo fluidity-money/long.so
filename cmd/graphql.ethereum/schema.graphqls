@@ -8,6 +8,10 @@ type Query {
   getWallet(address: String!): Wallet
 }
 
+type Mutation {
+  setVolumeYieldPriceAndTVLForLastHour: ID
+}
+
 type SeawaterPool {
   id: ID! # address
 

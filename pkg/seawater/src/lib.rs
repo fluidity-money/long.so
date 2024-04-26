@@ -759,6 +759,11 @@ impl Pools {
         Ok(())
     }
 
+    /// Getter method for the sqrt price
+    pub fn sqrt_price(&self, pool: Address) -> Result<U256, Revert> {
+        Ok(self.pools.getter(pool).get_sqrt_price())
+    }
+
     /// Collects protocol fees from the AMM. Only usable by the seawater admin.
     ///
     /// # Errors

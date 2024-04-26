@@ -434,6 +434,10 @@ impl StoragePool {
         self.positions.positions.getter(id).liquidity.get()
     }
 
+    pub fn get_sqrt_price(&self) -> U256 {
+        self.sqrt_price.get()
+    }
+
     /// Enables or disables the pool.
     pub fn set_enabled(&mut self, enabled: bool) {
         self.enabled.set(enabled)

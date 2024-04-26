@@ -332,6 +332,10 @@ contract SeawaterAMM is ISeawaterAMM {
         directDelegate(_getExecutorPosition());
     }
 
+    function sqrtPrice(address /* pool */) external returns (uint256) {
+        directDelegate(_getExecutorPosition());
+    }
+
     /// @inheritdoc ISeawaterExecutorPosition
     function collect(
         address /* pool */,
