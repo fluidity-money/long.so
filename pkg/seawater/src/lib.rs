@@ -750,10 +750,13 @@ impl Pools {
             .setter(pool)
             .init(price, fee, tick_spacing, max_liquidity_per_tick)?;
 
+        let decimals = erc20::decimals(pool)?;
+
         evm::log(events::NewPool {
             token: pool,
             fee,
             price,
+            decimals,
         });
 
         Ok(())

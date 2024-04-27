@@ -76,6 +76,11 @@ const TRANSFER_FROM_SELECTOR: [u8; 4] = selector(
     b"transferFrom(address,address,uint256)",
     [0x23, 0xb8, 0x72, 0xdd],
 );
+// The selector for `decimals()`. No generation function is needed to use this.
+const DECIMALS_SELECTOR: [u8; 4] = selector(
+    b"decimals()",
+    [0x31, 0x3c, 0xe5, 0x67],
+);
 const PERMIT_TRANSFER_FROM_SELECTOR: [u8; 4] = selector(
     b"permitTransferFrom(((address,uint256),uint256,uint256),(address,uint256),address,bytes)",
     [0x30, 0xf2, 0x8b, 0x7a],
@@ -138,7 +143,6 @@ pub fn exchange(token: Address, amount: I256) -> Result<(), Error> {
         give(token, amount.abs_neg()?)
     } else if amount.is_positive() {
         // take tokens from the user
-        // TODO
         take_transfer_from(token, amount.abs_pos()?)
     } else {
         // no amount, do nothing
@@ -257,6 +261,21 @@ pub fn revert_from_msg(msg: &str) -> Vec<u8> {
     revert.extend_from_slice(&reason);
 
     revert
+}
+
+/// Get the decimals of the token given using the "decimals" function.
+pub fn decimals(address: Address) -> Result<u8, Error> {
+    match RawCall::new().call(address, &DECIMALS_SELECTOR) {
+        Err(revert) => Err(Error::Erc20Revert(revert)),
+        Ok(data) => {
+            match data.get(32) {
+                // no decimals were returned to us!
+                None | Some(0) => Err(Error::Erc20RevertNoData),
+                // the rightmost byte is the decimal number, so we can just return this.
+                Some(decimal) => Ok(*decimal)
+            }
+        }
+    }
 }
 
 #[cfg(test)]

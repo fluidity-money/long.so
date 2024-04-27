@@ -8,7 +8,14 @@ use stylus_sdk::alloy_primitives::{Address, U256};
 
 use permit2_types::*;
 
+#[allow(unused_imports)]
 use crate::current_test;
+
+pub fn decimals(_token: Address) -> Result<u8, Error> {
+    #[cfg(feature = "testing-dbg-erc20")]
+    dbg!(("decimals", _token));
+    Ok(6)
+}
 
 /// Pretends to take tokens from the user. Only useful for testing.
 pub fn take_transfer_from(_token: Address, _amount: U256) -> Result<(), Error> {

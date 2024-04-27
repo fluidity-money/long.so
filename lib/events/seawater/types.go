@@ -51,9 +51,10 @@ type (
 	NewPool struct {
 		events.Event
 
-		Token types.Address `json:"token"`
-		Fee   types.Number  `json:"fee"`
-		Price types.Number  `json:"price"`
+		Token    types.Address `json:"token"`
+		Fee      uint32        `json:"fee"`
+		Price    types.Number  `json:"price"`
+		Decimals uint8         `json:"decimals"`
 	}
 
 	CollectProtocolFees struct {
