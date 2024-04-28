@@ -332,7 +332,23 @@ contract SeawaterAMM is ISeawaterAMM {
         directDelegate(_getExecutorPosition());
     }
 
-    function sqrtPrice(address /* pool */) external returns (uint256) {
+    /// @inheritdoc ISeawaterExecutorPosition
+    function sqrtPriceX96(address /* pool */) external returns (uint256) {
+        directDelegate(_getExecutorPosition());
+    }
+
+    /// @inheritdoc ISeawaterExecutorPosition
+    function curTick(address /* pool */) external returns (uint256) {
+        directDelegate(_getExecutorPosition());
+    }
+
+    /// @inheritdoc ISeawaterExecutorPosition
+    function feeGrowthGlobal0(address /* pool */) external returns (uint256) {
+        directDelegate(_getExecutorPosition());
+    }
+
+    /// @inheritdoc ISeawaterExecutorPosition
+    function feeGrowthGlobal1(address /* pool */) external returns (uint256) {
         directDelegate(_getExecutorPosition());
     }
 

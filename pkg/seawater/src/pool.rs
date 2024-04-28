@@ -434,9 +434,17 @@ impl StoragePool {
         self.positions.positions.getter(id).liquidity.get()
     }
 
-    pub fn get_sqrt_price(&self) -> U256 {
-        self.sqrt_price.get()
-    }
+    /// Gets the current pool price.
+    pub fn get_sqrt_price(&self) -> U256 { self.sqrt_price.get() }
+
+    /// Get the current tick.
+    pub fn get_cur_tick(&self) -> I32 { self.cur_tick.get() }
+
+    /// Get the global fee growth for token0.
+    pub fn get_fee_growth_global_0(&self) -> U256 { self.fee_growth_global_0.get() }
+
+    /// Get the current fee growth for token1 (fUSDC.)
+    pub fn get_fee_growth_global_1(&self) -> U256 { self.fee_growth_global_1.get() }
 
     /// Enables or disables the pool.
     pub fn set_enabled(&mut self, enabled: bool) {

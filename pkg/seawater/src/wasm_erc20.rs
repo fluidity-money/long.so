@@ -268,9 +268,9 @@ pub fn decimals(address: Address) -> Result<u8, Error> {
     match RawCall::new().call(address, &DECIMALS_SELECTOR) {
         Err(revert) => Err(Error::Erc20Revert(revert)),
         Ok(data) => {
-            match data.get(32) {
+            match data.get(31) {
                 // no decimals were returned to us!
-                None | Some(0) => Err(Error::Erc20RevertNoData),
+                None => Err(Error::Erc20RevertNoData),
                 // the rightmost byte is the decimal number, so we can just return this.
                 Some(decimal) => Ok(*decimal)
             }

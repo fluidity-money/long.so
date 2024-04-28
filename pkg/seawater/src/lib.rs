@@ -750,6 +750,8 @@ impl Pools {
             .setter(pool)
             .init(price, fee, tick_spacing, max_liquidity_per_tick)?;
 
+        // get the decimals for the asset so we can log it's decimals for the indexer
+
         let decimals = erc20::decimals(pool)?;
 
         evm::log(events::NewPool {
@@ -765,6 +767,22 @@ impl Pools {
     /// Getter method for the sqrt price
     pub fn sqrt_price(&self, pool: Address) -> Result<U256, Revert> {
         Ok(self.pools.getter(pool).get_sqrt_price())
+    }
+
+    /// Getter method for the current tick
+    pub fn cur_tick(&self, pool: Address) -> Result<i32, Revert> {
+        // converted to i32 for automatic abi encoding
+        Ok(self.pools.getter(pool).get_cur_tick().sys())
+    }
+
+    /// Getter method for getting the fee growth for token 0
+    pub fn fee_growth_global_0(&self, pool: Address) -> Result<U256, Revert> {
+        Ok(self.pools.getter(pool).get_fee_growth_global_0())
+    }
+
+    /// Getter method for getting the fee growth for token 1
+    pub fn fee_growth_global_1(&self, pool: Address) -> Result<U256, Revert> {
+        Ok(self.pools.getter(pool).get_fee_growth_global_1())
     }
 
     /// Collects protocol fees from the AMM. Only usable by the seawater admin.
