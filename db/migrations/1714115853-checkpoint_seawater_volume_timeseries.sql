@@ -97,8 +97,8 @@ AS
 $$
 	SELECT
 		pool,
-		CAST(SUM(amount0) AS HUGEINT) AS fusdc_volume,
-		CAST(SUM(amount1) AS HUGEINT) AS tokena_volume
+		CAST(SUM(amount0) AS HUGEINT) AS tokena_volume,
+		CAST(SUM(amount1) AS HUGEINT) AS fusdc_volume
 	FROM events_seawater_swap1
 	WHERE created_by > since
 	GROUP BY pool;
