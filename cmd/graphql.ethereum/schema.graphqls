@@ -1,11 +1,44 @@
 
 type Query {
-  seawaterPools: [SeawaterPool!]!
+  pools: [SeawaterPool!]!
 
+  """
+  getPool using the address of the token that's involved.
+
+  Follows the same caching behaviour as the pools endpoint.
+  """
   getPool(address: String!): SeawaterPool
+
+  """
+  getPoolPositions using the address of the pool involved.
+
+  Very cached. Should not be used. The getPoolPositionsForOwner is better.
+  """
   getPoolPositions(address: String!): [SeawaterPosition!]
+
+  """
+  getPosition that's owned by any pool using it's ID, based on what's known to the database.
+
+  Skips the cache for the most part.
+  """
   getPosition(id: String!): SeawaterPosition
+
+  """
+  getWallet based on information including balances. SHOULD NOT be used to get
+  information that's needed consistently. Use the frontend instead after getting addresess
+  elsewhere.
+
+  Cached aggressively.
+  """
   getWallet(address: String!): Wallet
+
+  """
+  getSwaps made using a pool. Safe to use to get up to date information on swaps going
+  through the UI.
+
+  Not cached at all.
+  """
+  getSwaps(pool: String!): [SeawaterSwap!]
 }
 
 type Mutation {
@@ -19,21 +52,10 @@ type SeawaterPool {
 
   token: Token!
 
-  volumeOverTimeDaily: [PairAmount!]
-  volumeOverTimeMonthly: [PairAmount!]
-  volumeOverTimeYearly: [PairAmount!]
-
-  yieldOverTimeDaily: [PairAmount!]!
-  yieldOverTimeMonthly: [PairAmount!]
-  yieldOverTimeYearly: [PairAmount!]
-
-  priceOverTimeDaily: [String!]
-  priceOverTimeMonthly: [String!]
-  priceOverTimeYearly: [String!]
-
-  tvlOverTimeDaily: [String!]
-  tvlOverTimeMonthly: [String!]
-  tvlOverTimeYearly: [String!]
+  volumeOverTime: [PairAmount!]
+  yieldOverTime: [PairAmount!]!
+  priceOverTime: [String!]
+  tvlOverTime: [String!]
 
   earnedFeesAPRFUSDC: String!
   earnedFeesAPRToken1: String!
@@ -43,6 +65,7 @@ type SeawaterPool {
   utilityIncentives: [UtilityIncentive!]!
 
   positions: [SeawaterPosition!]!
+  swaps: [SeawaterSwap!]!
 
   liquidity: [SeawaterLiquidity!]!
 }
@@ -59,6 +82,9 @@ type SeawaterLiquidity {
   positions: [SeawaterPosition!]!
 }
 
+"""
+SeawaterPosition owned by a user.
+"""
 type SeawaterPosition {
   id: ID! # positionId (pos:positionId)
 
@@ -70,12 +96,25 @@ type SeawaterPosition {
   liquidity: PairAmount!
 }
 
+type SeawaterSwap {
+  # no caching takes place with this.
+  timestamp: Int!
+  sender: Wallet!
+  amountIn: Amount!
+  amountOut: Amount!
+}
+
 type PairAmount {
+  timestamp: Int!
   fusdc: Amount!
-  token0: Amount!
+  token1: Amount!
 }
 
 type Amount {
+  token: Token!
+  decimals: Int!
+  timestamp: Int!
+
   valueUnscaled: String!
   valueScaled: String!
   valueUsd: String!
@@ -95,6 +134,7 @@ type TokenBalance {
 }
 
 type Token {
+  address: String!
   name: String!
   totalSupply: String!
   decimals: Int!

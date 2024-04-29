@@ -6,18 +6,13 @@ import (
 	"github.com/fluidity-money/long.so/lib/types/seawater"
 )
 
-type Amount struct {
-	ValueUnscaled string `json:"valueUnscaled"`
-	ValueScaled   string `json:"valueScaled"`
-	ValueUsd      string `json:"valueUsd"`
-}
-
 type Mutation struct {
 }
 
 type PairAmount struct {
-	Fusdc  Amount `json:"fusdc"`
-	Token0 Amount `json:"token0"`
+	Timestamp int    `json:"timestamp"`
+	Fusdc     Amount `json:"fusdc"`
+	Token1    Amount `json:"token1"`
 }
 
 type Query struct {
@@ -33,6 +28,7 @@ type SeawaterLiquidity struct {
 }
 
 type Token struct {
+	Address     string `json:"address"`
 	Name        string `json:"name"`
 	TotalSupply string `json:"totalSupply"`
 	Decimals    int    `json:"decimals"`

@@ -12,8 +12,8 @@ import (
 
 // C is configuration for accessing configuration for making requests
 type C struct {
-	GethUrl, TimescaleUrl string
-	SeawaterAddr     types.Address
+	GethUrl, TimescaleUrl   string
+	SeawaterAddr, FusdcAddr types.Address
 }
 
 // Get config by querying environment variables.
@@ -30,9 +30,14 @@ func Get() C {
 	if seawaterAddr == "" {
 		log.Fatal("SPN_SEAWATER_ADDR not set")
 	}
+	fusdcAddr := os.Getenv("SPN_FUSDC_ADDR")
+	if fusdcAddr == "" {
+		log.Fatal("SPN_FUSDC_ADDR not set")
+	}
 	return C{
-		GethUrl:           gethUrl,
-		TimescaleUrl:      timescaleUrl,
-		SeawaterAddr: types.Address(seawaterAddr),
+		GethUrl:      gethUrl,
+		TimescaleUrl: timescaleUrl,
+		SeawaterAddr: types.AddressFromString(seawaterAddr),
+		FusdcAddr:    types.AddressFromString(fusdcAddr),
 	}
 }

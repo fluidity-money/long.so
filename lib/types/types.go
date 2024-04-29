@@ -87,6 +87,17 @@ func (u UnscaledNumber) Value() (sqlDriver.Value, error) {
 	// Use the underlying Int String method to get an actual number.
 	return u.Int.String(), nil
 }
+// Scale a number for visualisation or low-stakes math.
+func (u UnscaledNumber) Scale(decimals int) *big.Float {
+	f := new(big.Float).SetInt(u.Int)
+	i := new(big.Int).SetInt64(10)
+	i.Exp(i, new(big.Int).SetInt64(int64(decimals)), nil)
+	return f.Quo(f, new(big.Float).SetInt(i))
+}
+// ScaleStr to show a user or to send over the graph, scaling with 4 decimal places.
+func (u UnscaledNumber) ScaleStr(d int) string {
+	return fmt.Sprintf("%.4f", u.Scale(d))
+}
 
 func HashFromString(s string) Hash {
 	return Hash(strings.ToLower(s))

@@ -5,7 +5,6 @@ package main
 import (
 	"log"
 	"os"
-	"log/slog"
 	"net/http"
 
 	"github.com/fluidity-money/long.so/lib/config"
@@ -15,6 +14,7 @@ import (
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 
@@ -36,7 +36,6 @@ const (
 
 func main() {
 	config := config.Get()
-	slog.Info("connecting to the database")
 	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
 		DisableAutomaticPing: true,
 	})
@@ -56,14 +55,14 @@ func main() {
 			C:    config,
 		},
 	}))
-	slog.Info("creating the server")
 	http.Handle("/", srv)
+	http.Handle("/playground", playground.Handler("Long Tail playground", "/"))
 	switch typ := os.Getenv(EnvBackendType); typ {
 	case "lambda":
 		lambda.Start(httpadapter.New(http.DefaultServeMux).ProxyWithContext)
 	case "http":
 		log.Fatal(http.ListenAndServe(os.Getenv(EnvListenAddr), nil))
 	default:
-		log.Fatalf("unexpected listen type: %#v", typ)
+		log.Fatalf("unexpected listen type: %#v, use either (lambda|http) for SPN_LISTEN_BACKEND", typ)
 	}
 }

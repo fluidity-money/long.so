@@ -32,7 +32,7 @@ type F struct {
 // or use EnvFeatures.
 func Get() F {
 	f := get()
-	slog.Debug("enabled features", "features", f)
+	slog.Debug("enabled features", "features", f, "everything enabled?", f.everything)
 	return f
 }
 
@@ -77,9 +77,11 @@ func getFromBucket() F {
 	}
 }
 
-// IsFeatureEnabled for a specific binary "yes or no" question.
+// Is the feature enabled for a specific binary "yes or no" question.
+// Will enable everything if everything is enabled for features
+// (development mode.)
 func (f F) Is(name string) bool {
-	return f.enabled[name]
+	return f.everything || f.enabled[name]
 }
 
 // OnFeature being enabled, run the thunk given.

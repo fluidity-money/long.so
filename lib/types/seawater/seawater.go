@@ -9,10 +9,9 @@ import (
 // Pool is set by seawater_pools
 type Pool struct {
 	CreatedBy       time.Time     `json:"createdBy"`
-	BlockHash       types.Hash    `json:"blockHash"`
-	TransactionHash types.Hash    `json:"transactionHash"`
-	BlockNumber     types.Number  `json:"blockNumber"`
-	Id              types.Number  `json:"id",gorm:"pos_id"`
+	CreatedBlockHash       types.Hash    `json:"createdBlockHash"`
+	CreatedTransactionHash types.Hash    `json:"createdTransactionHash"`
+	CreatedBlockNumber     types.Number  `json:"blockNumber"`
 	Token           types.Address `json:"token"`
 	Fee             types.Number  `json:"fee"`
 	Price           types.Number  `json:"price"`
@@ -24,7 +23,7 @@ type Position struct {
 	CreatedBlockHash       types.Hash    `json:"createdBlockHash"`
 	CreatedTransactionHash types.Hash    `json:"createdTransactionHash"`
 	CreatedBlockNumber     types.Number  `json:"createdBlockNumber"`
-	Id                     types.Number  `json:"id",gorm:"posId"`
+	Id                     types.Number  `json:"id",gorm:"posId"` // ID name might cause issues with gorm
 	Owner                  types.Address `json:"owner"`
 	Pool                   types.Address `json:"pool"`
 	Lower                  types.Number  `json:"lower"`
