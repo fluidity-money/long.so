@@ -3,7 +3,7 @@ package seawater
 import (
 	"time"
 
-	"github.com/fluidity-money/amm.superposition.so/lib/types"
+	"github.com/fluidity-money/long.so/lib/types"
 )
 
 // Pool is set by seawater_pools

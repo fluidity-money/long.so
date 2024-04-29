@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/fluidity-money/amm.superposition.so/lib/types"
+	"github.com/fluidity-money/long.so/lib/types"
 )
 
 // C is configuration for accessing configuration for making requests

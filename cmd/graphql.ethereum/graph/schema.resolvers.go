@@ -8,9 +8,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/fluidity-money/amm.superposition.so/cmd/graphql.ethereum/graph/model"
-	"github.com/fluidity-money/amm.superposition.so/lib/types"
-	"github.com/fluidity-money/amm.superposition.so/lib/types/seawater"
+	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
+	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
+	"github.com/fluidity-money/long.so/lib/types"
+	"github.com/fluidity-money/long.so/lib/types/seawater"
 )
 
 // SetVolumeYieldPriceAndTVLForLastHour is the resolver for the setVolumeYieldPriceAndTVLForLastHour field.
@@ -65,6 +66,27 @@ func (r *seawaterPoolResolver) Address(ctx context.Context, obj *seawater.Pool) 
 		return "", fmt.Errorf("no pool obj")
 	}
 	return obj.Token.String(), nil
+}
+
+// Token is the resolver for the token field.
+func (r *seawaterPoolResolver) Token(ctx context.Context, obj *seawater.Pool) (t model.Token, err error) {
+	if obj == nil {
+		return t, fmt.Errorf("no pool obj")
+	}
+	name, symbol, totalSupply, decimals, err := erc20.GetErc20Details(
+		ctx,
+		r.Geth,
+		obj.Token,
+	)
+	if err != nil {
+		return t, fmt.Errorf("erc20: %v", err)
+	}
+	return model.Token{
+		Name:        name,
+		Symbol:      symbol,
+		TotalSupply: totalSupply.String(),
+		Decimals:    int(decimals),
+	}, nil
 }
 
 // VolumeOverTimeDaily is the resolver for the volumeOverTimeDaily field.
@@ -221,21 +243,6 @@ func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *seawater.
 	return model.PairAmount{}, nil // TODO
 }
 
-// Name is the resolver for the name field.
-func (r *tokenResolver) Name(ctx context.Context, obj *model.Token) (string, error) {
-	return "", nil // TODO
-}
-
-// TotalSupply is the resolver for the totalSupply field.
-func (r *tokenResolver) TotalSupply(ctx context.Context, obj *model.Token) (string, error) {
-	return "", nil // TODO
-}
-
-// Decimals is the resolver for the decimals field.
-func (r *tokenResolver) Decimals(ctx context.Context, obj *model.Token) (string, error) {
-	return "", nil // TODO
-}
-
 // ID is the resolver for the id field.
 func (r *walletResolver) ID(ctx context.Context, obj *model.Wallet) (string, error) {
 	if obj == nil {
@@ -274,9 +281,6 @@ func (r *Resolver) SeawaterPool() SeawaterPoolResolver { return &seawaterPoolRes
 // SeawaterPosition returns SeawaterPositionResolver implementation.
 func (r *Resolver) SeawaterPosition() SeawaterPositionResolver { return &seawaterPositionResolver{r} }
 
-// Token returns TokenResolver implementation.
-func (r *Resolver) Token() TokenResolver { return &tokenResolver{r} }
-
 // Wallet returns WalletResolver implementation.
 func (r *Resolver) Wallet() WalletResolver { return &walletResolver{r} }
 
@@ -284,5 +288,4 @@ type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type seawaterPoolResolver struct{ *Resolver }
 type seawaterPositionResolver struct{ *Resolver }
-type tokenResolver struct{ *Resolver }
 type walletResolver struct{ *Resolver }

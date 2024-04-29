@@ -3,7 +3,7 @@ package events
 import (
 	"time"
 
-	"github.com/fluidity-money/amm.superposition.so/lib/types"
+	"github.com/fluidity-money/long.so/lib/types"
 )
 
 type Event struct {

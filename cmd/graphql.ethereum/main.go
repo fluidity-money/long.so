@@ -4,17 +4,19 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 	"log/slog"
+	"net/http"
 
-	"github.com/fluidity-money/amm.superposition.so/lib/config"
-	"github.com/fluidity-money/amm.superposition.so/lib/features"
-	_ "github.com/fluidity-money/amm.superposition.so/lib/setup"
+	"github.com/fluidity-money/long.so/lib/config"
+	"github.com/fluidity-money/long.so/lib/features"
+	_ "github.com/fluidity-money/long.so/lib/setup"
 
-	"github.com/fluidity-money/amm.superposition.so/cmd/graphql.ethereum/graph"
+	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -41,7 +43,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("database open: %v", err)
 	}
-	var geth http.Client
+	geth, err := ethclient.Dial(config.GethUrl)
+	if err != nil {
+		log.Fatalf("geth open: %v", err)
+	}
+	defer geth.Close()
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
 			DB:   db,

@@ -14,6 +14,7 @@ bytes32 constant EXECUTOR_UPDATE_POSITION_SLOT = bytes32(uint256(keccak256("seaw
 bytes32 constant EXECUTOR_ADMIN_SLOT = bytes32(uint256(keccak256("seawater.impl.admin")) - 1);
 bytes32 constant EXECUTOR_FALLBACK_SLOT = bytes32(uint256(keccak256("seawater.impl.fallback")) - 1);
 
+//0xdfd6b2a695a9a2448c8c317669015a93e35dd154c29d011b7d533ae1dcabc1d5
 bytes32 constant PROXY_ADMIN_SLOT = bytes32(uint256(keccak256("seawater.role.proxy.admin")) - 1);
 
 // seawater admin / nft admin are stored in normal storage slots

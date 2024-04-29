@@ -3,7 +3,7 @@
 package model
 
 import (
-	"github.com/fluidity-money/amm.superposition.so/lib/types/seawater"
+	"github.com/fluidity-money/long.so/lib/types/seawater"
 )
 
 type Amount struct {
@@ -17,7 +17,7 @@ type Mutation struct {
 
 type PairAmount struct {
 	Fusdc  Amount `json:"fusdc"`
-	Token1 Amount `json:"token1"`
+	Token0 Amount `json:"token0"`
 }
 
 type Query struct {
@@ -30,6 +30,13 @@ type SeawaterLiquidity struct {
 	Upper     string              `json:"upper"`
 	Liquidity PairAmount          `json:"liquidity"`
 	Positions []seawater.Position `json:"positions"`
+}
+
+type Token struct {
+	Name        string `json:"name"`
+	TotalSupply string `json:"totalSupply"`
+	Decimals    int    `json:"decimals"`
+	Symbol      string `json:"symbol"`
 }
 
 type TokenBalance struct {

@@ -8,11 +8,11 @@ import (
 	"log"
 	"log/slog"
 
-	"github.com/fluidity-money/amm.superposition.so/lib/events/erc20"
-	"github.com/fluidity-money/amm.superposition.so/lib/events/seawater"
+	"github.com/fluidity-money/long.so/lib/events/erc20"
+	"github.com/fluidity-money/long.so/lib/events/seawater"
 
-	"github.com/fluidity-money/amm.superposition.so/lib/features"
-	"github.com/fluidity-money/amm.superposition.so/lib/config"
+	"github.com/fluidity-money/long.so/lib/features"
+	"github.com/fluidity-money/long.so/lib/config"
 
 	"gorm.io/gorm"
 

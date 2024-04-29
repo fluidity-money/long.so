@@ -17,6 +17,8 @@ type SeawaterPool {
 
   address: String!
 
+  token: Token!
+
   volumeOverTimeDaily: [PairAmount!]
   volumeOverTimeMonthly: [PairAmount!]
   volumeOverTimeYearly: [PairAmount!]
@@ -70,7 +72,7 @@ type SeawaterPosition {
 
 type PairAmount {
   fusdc: Amount!
-  token1: Amount!
+  token0: Amount!
 }
 
 type Amount {
@@ -95,7 +97,8 @@ type TokenBalance {
 type Token {
   name: String!
   totalSupply: String!
-  decimals: String!
+  decimals: Int!
+  symbol: String!
 }
 
 type UtilityIncentive {

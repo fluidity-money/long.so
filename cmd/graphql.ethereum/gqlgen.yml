@@ -30,4 +30,15 @@ resolvers_always_return_pointers: false
 return_pointers_in_unmarshalinput: false
 
 autobind:
- - "github.com/fluidity-money/amm.superposition.so/cmd/graphql.ethereum/graph/model"
+ - "github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
+
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.String
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32

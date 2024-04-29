@@ -4,10 +4,10 @@ import (
 	"log"
 	"os"
 
-	_ "github.com/fluidity-money/amm.superposition.so/lib/setup"
+	_ "github.com/fluidity-money/long.so/lib/setup"
 
-	"github.com/fluidity-money/amm.superposition.so/lib/features"
-	"github.com/fluidity-money/amm.superposition.so/lib/config"
+	"github.com/fluidity-money/long.so/lib/features"
+	"github.com/fluidity-money/long.so/lib/config"
 
 	_ "github.com/lib/pq"
 

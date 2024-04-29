@@ -1,8 +1,8 @@
 package seawater
 
 import (
-	"github.com/fluidity-money/amm.superposition.so/lib/events"
-	"github.com/fluidity-money/amm.superposition.so/lib/types"
+	"github.com/fluidity-money/long.so/lib/events"
+	"github.com/fluidity-money/long.so/lib/types"
 )
 
 type (
