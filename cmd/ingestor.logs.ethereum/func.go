@@ -69,6 +69,7 @@ func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) erro
 		topic0 = l.Topics[0]
 		topic1 = l.Topics[1]
 		topic2 = l.Topics[2]
+		topic3 = l.Topics[3]
 		data   = l.Data
 	)
 	var (
@@ -90,6 +91,7 @@ func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) erro
 		"topic0", topic0,
 		"topic1", topic1,
 		"topic2", topic2,
+		"topic3", topic3,
 	)
 	// If the event was made by Seawater. Assumed to be the case, so
 	// non-Seawater events should set this to false in this switch. Used to
@@ -102,7 +104,7 @@ func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) erro
 		isSeawater = false
 
 	case seawater.TopicMintPosition:
-		a, err = seawater.UnpackMintPosition(topic1, topic2, data)
+		a, err = seawater.UnpackMintPosition(topic1, topic2, topic3, data)
 		table = "events_seawater_mintPosition"
 
 	case seawater.TopicBurnPosition:
@@ -110,7 +112,7 @@ func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) erro
 		table = "events_seawater_burnPosition"
 
 	case seawater.TopicTransferPosition:
-		a, err = seawater.UnpackTransferPosition(topic1, topic2, data)
+		a, err = seawater.UnpackTransferPosition(topic1, topic2, topic3, data)
 		table = "events_seawater_transferPosition"
 
 	case seawater.TopicUpdatePositionLiquidity:
@@ -118,11 +120,11 @@ func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) erro
 		table = "events_seawater_updatePositionLiquidity"
 
 	case seawater.TopicCollectFees:
-		a, err = seawater.UnpackCollectFees(topic1, topic2, data)
+		a, err = seawater.UnpackCollectFees(topic1, topic2, topic3, data)
 		table = "events_seawater_collectFees"
 
 	case seawater.TopicNewPool:
-		a, err = seawater.UnpackNewPool(topic1, topic2, data)
+		a, err = seawater.UnpackNewPool(topic1, topic2, topic3, data)
 		table = "events_seawater_newPool"
 
 	case seawater.TopicCollectProtocolFees:
@@ -130,7 +132,7 @@ func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) erro
 		table = "events_seawater_collectProtocolFees"
 
 	case seawater.TopicSwap2:
-		a, err = seawater.UnpackSwap2(topic1, topic2, data)
+		a, err = seawater.UnpackSwap2(topic1, topic2, topic3, data)
 		table = "events_seawater_swap2"
 
 	case seawater.TopicSwap1:

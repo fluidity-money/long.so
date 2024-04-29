@@ -37,7 +37,7 @@ fn call_optional_return(contract: Address, data: &[u8]) -> Result<(), Error> {
         // reverting calls revert
         Err(revert) => Err(Error::Erc20Revert(revert)),
         Ok(data) => {
-            match data.get(32) {
+            match data.get(31) {
                 // first byte of a 32 byte word
                 // nonreverting with no return data is okay
                 None => Ok(()),

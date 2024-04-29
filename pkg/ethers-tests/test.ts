@@ -60,6 +60,8 @@ async function createPosition(
 ) {
     const mintResult = await amm.mintPosition(address, lower, upper);
 
+    console.log(`mint position tx: ${mintResult.hash}`);
+
     const [mintLog]: [mintLog: Log] = await mintResult.wait()
     type mintEventArgs = [
         BigInt,

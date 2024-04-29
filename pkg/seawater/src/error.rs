@@ -63,94 +63,139 @@ macro_rules! assert_neq_or {
 #[derive(Error, Debug)]
 #[repr(u8)]
 pub enum Error {
-    // 0
+    // 0 (0x00)
     #[error("Denominator is 0")]
     DenominatorIsZero,
+
+    // 1 (0x01)
     #[error("Result is U256::MAX")]
     ResultIsU256MAX,
+
+    // 2 (0x02)
     #[error("Sqrt price is 0")]
     SqrtPriceIsZero,
+
+    // 3 (0x03)
     #[error("Sqrt price is less than or equal to quotient")]
     SqrtPriceIsLteQuotient,
+
+    // 4 (0x04)
     #[error("Can not get most significant bit or least significant bit on zero value")]
     ZeroValue,
+
+    // 5 (0x05)
     #[error("Liquidity is 0")]
     LiquidityIsZero,
-    //TODO: Update this, shield your eyes for now
+
+    // 6 (0x06)
     #[error(
         "require((product = amount * sqrtPX96) / amount == sqrtPX96 && numerator1 > product);"
     )]
     ProductDivAmount,
+
+    // 7 (0x07)
     #[error("Denominator is less than or equal to prod_1")]
     DenominatorIsLteProdOne,
+
+    // 8 (0x08)
     #[error("Liquidity Sub")]
     LiquiditySub,
+
+    // 9 (0x09)
     #[error("Liquidity Add")]
     LiquidityAdd,
 
-    // 10
+    // 10 (0x0a)
     #[error("The given tick must be less than, or equal to, the maximum tick")]
     T,
+
+    // 11 (0x0b)
     #[error(
         "Second inequality must be < because the price can never reach the price at the max tick"
     )]
     R,
+
+    // 12 (0x0c)
     #[error("Overflow when casting to U160")]
     SafeCastToU160Overflow,
-    //#[error("Middleware error when getting next_initialized_tick_within_one_word")]
-    //MiddlewareError(String),
+
+    // 13 (0x0d)
     #[error("Liquidity higher than max")]
     LiquidityTooHigh,
 
+    // 14 (0x0e)
     #[error("Fee growth sub overflow")]
     FeeGrowthSub,
 
+    // 15 (0x0f)
     #[error("ERC20 call reverted")]
     Erc20Revert(Vec<u8>),
+
+    // 16 (0x10)
     #[error("ERC20 call reverted with no data")]
     Erc20RevertNoData,
 
+    // 17 (0x11)
     #[error("Pool is already initialised")]
     PoolAlreadyInitialised,
+
+    // 18 (0x012)
     #[error("Contract is already initialised")]
     ContractAlreadyInitialised,
+
     #[error("Price limit too high")]
+    // 19 (0x13)
     PriceLimitTooHigh,
-    // 20
+
+    // 20 (0x14)
     #[error("Price limit too low")]
     PriceLimitTooLow,
 
+    // 21 (0x15)
     #[error("Checked abs called on an unexpected positive number")]
     CheckedAbsIsNegative,
+
+    // 22 (0x16)
     #[error("Checked abs called on an unexpected negative number")]
     CheckedAbsIsPositive,
+
+    // 23 (0x17)
     #[error("Checked abs called on uint.min")]
     AbsTooLow,
 
+    // 24 (0x18)
     #[error("Fee result too high")]
     FeeTooHigh,
 
+    // 25 (0x19)
     #[error("Swap result too high")]
     SwapResultTooHigh,
 
+    // 26 (0x1a)
     #[error("Internal swap amounts not matched")]
     InterimSwapNotEq,
 
+    // 27 (0x1b)
     #[error("Internal swap result was positive")]
     InterimSwapPositive,
 
+    // 28 (0x1c)
     #[error("Minimum out not reached")]
     MinOutNotReached,
 
+    // 29 (0x1d)
     #[error("Only the position owner can use this")]
     PositionOwnerOnly,
 
-    // 30
+    // 30 (0x1e)
     #[error("Only the NFT manager can use this")]
     NftManagerOnly,
+
+    // 31 (0x1f)
     #[error("Only the Seawater admin can use this")]
     SeawaterAdminOnly,
 
+    // 32 (0x20)
     #[error("Operation unavailable when the pool is disabled")]
     PoolDisabled,
 }

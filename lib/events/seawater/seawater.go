@@ -1,6 +1,7 @@
 package seawater
 
 import (
+	"bytes"
 	_ "embed"
 	"fmt"
 	"math/big"
@@ -26,31 +27,27 @@ var (
 //go:embed abi.json
 var abiBytes []byte
 
-var abi ethAbi.ABI
+var abi, _ = ethAbi.JSON(bytes.NewReader(abiBytes))
 
-func UnpackMintPosition(topic1, topic2 ethCommon.Hash, d []byte) (*MintPosition, error) {
+func UnpackMintPosition(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*MintPosition, error) {
 	i, err := abi.Unpack("MintPosition", d)
 	if err != nil {
 		return nil, err
 	}
-	pool, ok := i[0].(ethCommon.Address)
+	lower, ok := i[0].(int32)
 	if !ok {
-		return nil, fmt.Errorf("bad pool: %T", i[0])
+		return nil, fmt.Errorf("bad lower: %T", i[0])
 	}
-	lower, ok := i[1].(*big.Int)
+	upper, ok := i[1].(int32)
 	if !ok {
-		return nil, fmt.Errorf("bad lower: %T", i[1])
-	}
-	upper, ok := i[2].(*big.Int)
-	if !ok {
-		return nil, fmt.Errorf("bad upper: %T", i[2])
+		return nil, fmt.Errorf("bad upper: %T", i[1])
 	}
 	return &MintPosition{
 		PosId: hashToNumber(topic1),
 		Owner: hashToAddr(topic2),
-		Pool:  ethAddrToAddr(pool),
-		Lower: types.NumberFromBig(lower),
-		Upper: types.NumberFromBig(upper),
+		Pool:  hashToAddr(topic3),
+		Lower: types.NumberFromInt32(lower),
+		Upper: types.NumberFromInt32(upper),
 	}, nil
 }
 
@@ -61,17 +58,9 @@ func UnpackBurnPosition(topic1, topic2 ethCommon.Hash, d []byte) (*BurnPosition,
 	}, nil
 }
 
-func UnpackTransferPosition(topic1, topic2 ethCommon.Hash, d []byte) (*TransferPosition, error) {
-	i, err := abi.Unpack("TransferPosition", d)
-	if err != nil {
-		return nil, err
-	}
-	id, ok := i[0].(*big.Int)
-	if !ok {
-		return nil, fmt.Errorf("bad id: %T", i[0])
-	}
+func UnpackTransferPosition(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*TransferPosition, error) {
 	return &TransferPosition{
-		PosId: types.NumberFromBig(id),
+		PosId: hashToNumber(topic3),
 		From:  hashToAddr(topic1),
 		To:    hashToAddr(topic2),
 	}, nil
@@ -84,50 +73,39 @@ func UnpackUpdatePositionLiquidity(topic1, topic2 ethCommon.Hash, d []byte) (*Up
 	}, nil
 }
 
-func UnpackCollectFees(topic1, topic2 ethCommon.Hash, d []byte) (*CollectFees, error) {
+func UnpackCollectFees(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*CollectFees, error) {
 	i, err := abi.Unpack("CollectFees", d)
 	if err != nil {
 		return nil, err
 	}
-	to, ok := i[0].(ethCommon.Address)
-	if !ok {
-		return nil, fmt.Errorf("bad to: %T", i[0])
-	}
-	amount0, ok := i[1].(*big.Int)
+	amount0, ok := i[0].(*big.Int)
 	if !ok {
 		return nil, fmt.Errorf("bad amount0: %T", i[1])
 	}
-	amount1, ok := i[2].(*big.Int)
+	amount1, ok := i[1].(*big.Int)
 	if !ok {
 		return nil, fmt.Errorf("bad amount1: %T", i[2])
 	}
 	return &CollectFees{
 		PosId:   hashToNumber(topic1),
 		Pool:    hashToAddr(topic2),
-		To:      ethAddrToAddr(to),
+		To:      hashToAddr(topic3),
 		Amount0: types.UnscaledNumberFromBig(amount0),
 		Amount1: types.UnscaledNumberFromBig(amount1),
 	}, nil
 }
 
-func UnpackNewPool(topic1, topic2 ethCommon.Hash, d []byte) (*NewPool, error) {
-	i, err := abi.Unpack("NewPool", d)
-	if err != nil {
-		return nil, err
-	}
-	price, ok := i[0].(*big.Int)
-	if !ok {
-		return nil, fmt.Errorf("bad to: %T", i[0])
-	}
+func UnpackNewPool(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*NewPool, error) {
+	fee := uint32(topic2.Big().Int64()) // This should be safe given the size in the event.
 	return &NewPool{
 		Token: hashToAddr(topic1),
-		Fee:   hashToNumber(topic2),
-		Price: types.NumberFromBig(price),
+		Fee:   fee,
+		Price: hashToNumber(topic2),
 	}, nil
 }
 
 func UnpackCollectProtocolFees(topic1, topic2 ethCommon.Hash, d []byte) (*CollectProtocolFees, error) {
-	i, err := abi.Unpack("ProtocolFees", d)
+	i, err := abi.Unpack("CollectProtocolFees", d)
 	if err != nil {
 		return nil, err
 	}
@@ -147,20 +125,16 @@ func UnpackCollectProtocolFees(topic1, topic2 ethCommon.Hash, d []byte) (*Collec
 	}, nil
 }
 
-func UnpackSwap2(topic1, topic2 ethCommon.Hash, d []byte) (*Swap2, error) {
+func UnpackSwap2(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*Swap2, error) {
 	i, err := abi.Unpack("Swap2", d)
 	if err != nil {
 		return nil, err
 	}
-	to, ok := i[0].(ethCommon.Address)
-	if !ok {
-		return nil, fmt.Errorf("bad to: %T", i[0])
-	}
-	amountIn, ok := i[1].(*big.Int)
+	amountIn, ok := i[0].(*big.Int)
 	if !ok {
 		return nil, fmt.Errorf("bad amountIn: %T", i[1])
 	}
-	amountOut, ok := i[2].(*big.Int)
+	amountOut, ok := i[1].(*big.Int)
 	if !ok {
 		return nil, fmt.Errorf("bad amountOut: %T", i[2])
 	}
@@ -172,19 +146,19 @@ func UnpackSwap2(topic1, topic2 ethCommon.Hash, d []byte) (*Swap2, error) {
 	if !ok {
 		return nil, fmt.Errorf("bad finalTick0: %T", i[4])
 	}
-	finalTick1, ok := i[3].(*big.Int)
+	finalTick1, ok := i[4].(*big.Int)
 	if !ok {
 		return nil, fmt.Errorf("bad finalTick1: %T", i[5])
 	}
 	return &Swap2{
-		User: hashToAddr(topic1),
-		From: hashToAddr(topic2),
-		To: ethAddrToAddr(to),
-		AmountIn: types.UnscaledNumberFromBig(amountIn),
-		AmountOut: types.UnscaledNumberFromBig(amountOut),
+		User:        hashToAddr(topic1),
+		From:        hashToAddr(topic2),
+		To:          hashToAddr(topic3),
+		AmountIn:    types.UnscaledNumberFromBig(amountIn),
+		AmountOut:   types.UnscaledNumberFromBig(amountOut),
 		FluidVolume: types.UnscaledNumberFromBig(fluidVolume),
-		FinalTick0: types.NumberFromBig(finalTick0),
-		FinalTick1: types.NumberFromBig(finalTick1),
+		FinalTick0:  types.NumberFromBig(finalTick0),
+		FinalTick1:  types.NumberFromBig(finalTick1),
 	}, nil
 }
 
@@ -211,12 +185,12 @@ func UnpackSwap1(topic1, topic2 ethCommon.Hash, d []byte) (*Swap1, error) {
 	}
 	finalTick := new(big.Int).SetInt64(int64(finalTick_))
 	return &Swap1{
-		User: hashToAddr(topic1),
-		Pool: hashToAddr(topic2),
+		User:       hashToAddr(topic1),
+		Pool:       hashToAddr(topic2),
 		ZeroForOne: zeroForOne,
-		Amount0: types.UnscaledNumberFromBig(amount0),
-		Amount1: types.UnscaledNumberFromBig(amount1),
-		FinalTick: types.NumberFromBig(finalTick),
+		Amount0:    types.UnscaledNumberFromBig(amount0),
+		Amount1:    types.UnscaledNumberFromBig(amount1),
+		FinalTick:  types.NumberFromBig(finalTick),
 	}, nil
 }
 

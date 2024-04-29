@@ -41,6 +41,10 @@ func NumberFromBig(v *big.Int) Number {
 	i := new(big.Int).Set(v)
 	return Number{i}
 }
+func NumberFromInt32(v int32) Number {
+	i := new(big.Int).SetInt64(int64(v))
+	return Number{i}
+}
 func NumberFromString(v string) (*Number, error) {
 	i, ok := new(big.Int).SetString(v, 16)
 	if !ok {
