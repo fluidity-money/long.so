@@ -53,7 +53,7 @@ export const SwapForm = () => {
   const { address } = useAccount();
 
   // token0 hooks
-  const { data: token0Decimals, /* error */  } = useSimulateContract({
+  const { data: token0Decimals /* error */ } = useSimulateContract({
     address: token0.address,
     abi: erc20Abi,
     // @ts-expect-error
@@ -89,21 +89,22 @@ export const SwapForm = () => {
   const { open } = useWeb3Modal();
 
   // read the allowance of the token
-  const { data: allowanceData, /* error: allowanceError */ } = useSimulateContract({
-    address: token0.address,
-    abi: LightweightERC20,
-    // @ts-ignore this needs to use useSimulateContract which breaks the types
-    functionName: "allowance",
-    // @ts-ignore
-    args: [address as Hash, ammAddress],
-  });
+  const { data: allowanceData /* error: allowanceError */ } =
+    useSimulateContract({
+      address: token0.address,
+      abi: LightweightERC20,
+      // @ts-ignore this needs to use useSimulateContract which breaks the types
+      functionName: "allowance",
+      // @ts-ignore
+      args: [address as Hash, ammAddress],
+    });
 
   // set up write hooks
   const {
     writeContract: writeContractApproval,
     data: approvalData,
     /* error: approvalError, */
-    /* isPending: isApprovalPending, */
+    isPending: isApprovalPending,
   } = useWriteContract();
   const {
     writeContract: writeContractSwap,
@@ -138,37 +139,23 @@ export const SwapForm = () => {
     hash: approvalData,
   });
 
-  const performSwap = useCallback(() => {
-    console.log("performing swap");
-
-    writeContractSwap({
-      address: ammAddress,
-      abi: output.abi,
-      functionName: "swap",
-      args: [token0.address, false, BigInt(token0Amount ?? 0), BigInt(1)],
-    });
-  }, [
-    writeContractSwap,
-    token0,
-    token0Amount
-  ])
-
-  // once we have the result, initiate the swap
-  useEffect(() => {
-    if (!approvalResult.data) return;
-    performSwap();
-  }, [approvalResult.data, performSwap]);
-
   const performSwap = () => {
     console.log("performing swap");
 
-    if (token0.address === fUSDC.address || token1.address === fUSDC.address) {
-      // if one of the assets is fusdc, use swap1
+    // if one of the assets is fusdc, use swap1
+    if (token0.address === fUSDC.address) {
       writeContractSwap({
         address: ammAddress,
         abi: output.abi,
         functionName: "swap",
-        args: [token0.address, true, BigInt(token0Amount ?? 0), BigInt(0)],
+        args: [token1.address, false, BigInt(token0Amount ?? 0), maxUint256],
+      });
+    } else if (token1.address === fUSDC.address) {
+      writeContractSwap({
+        address: ammAddress,
+        abi: output.abi,
+        functionName: "swap",
+        args: [token0.address, true, BigInt(token0Amount ?? 0), maxUint256],
       });
     } else {
       // if both of the assets aren't fusdc, use swap2
@@ -185,6 +172,12 @@ export const SwapForm = () => {
       });
     }
   };
+
+  // once we have the result, initiate the swap
+  useEffect(() => {
+    if (!approvalResult.data) return;
+    performSwap();
+  }, [approvalResult.data, performSwap]);
 
   if (isApprovalPending || (approvalData && !approvalResult.data)) {
     return <div>Approving...</div>;

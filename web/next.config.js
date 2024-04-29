@@ -4,6 +4,7 @@ const { version } = require("./package.json");
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   output: "export",
+  images: { unoptimized: true },
 
   webpack(config) {
     // Grab the existing rule that handles SVG imports
