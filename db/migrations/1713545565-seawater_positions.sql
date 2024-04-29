@@ -1,6 +1,6 @@
 -- migrate:up
 
-CREATE VIEW seawater_positions_1 AS
+CREATE MATERIALIZED VIEW seawater_positions_1 AS
 	SELECT
 		events_seawater_mintPosition.created_by AS created_by,
 		events_seawater_mintPosition.block_hash AS block_hash,
@@ -16,7 +16,7 @@ CREATE VIEW seawater_positions_1 AS
 		ON transfers.pos_id = events_seawater_mintPosition.pos_id
 ;
 
-CREATE VIEW seawater_active_positions_1 AS
+CREATE MATERIALIZED VIEW seawater_active_positions_1 AS
 	SELECT *
 	FROM seawater_positions_1
 	WHERE pos_id NOT IN (

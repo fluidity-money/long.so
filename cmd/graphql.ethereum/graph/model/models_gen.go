@@ -2,9 +2,10 @@
 
 package model
 
-import (
-	"github.com/fluidity-money/long.so/lib/types/seawater"
-)
+type LiquidityOverTime struct {
+	Daily   []PairAmount `json:"daily"`
+	Monthly []PairAmount `json:"monthly"`
+}
 
 type Mutation struct {
 }
@@ -16,21 +17,11 @@ type PairAmount struct {
 }
 
 type PriceOverTime struct {
-	Amounts []string `json:"amounts"`
-	Average string   `json:"average"`
-	Max     string   `json:"max"`
+	Daily   []string `json:"daily"`
+	Monthly []string `json:"monthly"`
 }
 
 type Query struct {
-}
-
-// SeawaterLiquidity is like SeawaterPosition, though it's an aggregation for easy use.
-type SeawaterLiquidity struct {
-	ID        string              `json:"id"`
-	Lower     string              `json:"lower"`
-	Upper     string              `json:"upper"`
-	Liquidity PairAmount          `json:"liquidity"`
-	Positions []seawater.Position `json:"positions"`
 }
 
 type Token struct {
@@ -47,9 +38,8 @@ type TokenBalance struct {
 }
 
 type TvlOverTime struct {
-	Amounts []string `json:"amounts"`
-	Average string   `json:"average"`
-	Max     string   `json:"max"`
+	Daily   []string `json:"daily"`
+	Monthly []string `json:"monthly"`
 }
 
 type UtilityIncentive struct {
@@ -58,13 +48,11 @@ type UtilityIncentive struct {
 }
 
 type VolumeOverTime struct {
-	Amounts []PairAmount `json:"amounts"`
-	Average PairAmount   `json:"average"`
-	Max     PairAmount   `json:"max"`
+	Daily   []PairAmount `json:"daily"`
+	Monthly []PairAmount `json:"monthly"`
 }
 
 type YieldOverTime struct {
-	Amounts []PairAmount `json:"amounts"`
-	Average PairAmount   `json:"average"`
-	Max     PairAmount   `json:"max"`
+	Daily   []PairAmount `json:"daily"`
+	Monthly []PairAmount `json:"monthly"`
 }

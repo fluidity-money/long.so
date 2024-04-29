@@ -135,6 +135,11 @@ func (r *queryResolver) GetPosition(ctx context.Context, id string) (position *s
 	return
 }
 
+// GetPositions is the resolver for the getPositions field.
+func (r *queryResolver) GetPositions(ctx context.Context, wallet string) ([]seawater.Position, error) {
+	panic(fmt.Errorf("not implemented: GetPositions - getPositions"))
+}
+
 // GetWallet is the resolver for the getWallet field.
 func (r *queryResolver) GetWallet(ctx context.Context, address string) (*model.Wallet, error) {
 	if r.F.Is(features.FeatureMockGraph) {
@@ -188,52 +193,61 @@ func (r *seawaterPoolResolver) Token(ctx context.Context, obj *seawater.Pool) (t
 	}, nil
 }
 
-// VolumeOverTime is the resolver for the volumeOverTime field.
-func (r *seawaterPoolResolver) VolumeOverTime(ctx context.Context, obj *seawater.Pool) (vol model.VolumeOverTime, err error) {
-	if obj == nil {
-		return vol, fmt.Errorf("pool empty")
-	}
-	if r.F.Is(features.FeatureMockGraph) {
-		// assuming we've been around 2 years, so 365 * 2 days
-		v, avg, max, err := MockVolumeOverTime(365*2, r.C.FusdcAddr, obj.Token)
-		if err != nil {
-			return vol, err
-		}
-		return model.VolumeOverTime{v, *avg, *max}, nil
-	}
-	return vol, nil // TODO
-}
-
-// YieldOverTime is the resolver for the yieldOverTime field.
-func (r *seawaterPoolResolver) YieldOverTime(ctx context.Context, obj *seawater.Pool) (yield model.YieldOverTime, err error) {
-	if obj == nil {
-		return yield, fmt.Errorf("pool empty")
-	}
-	if r.F.Is(features.FeatureMockGraph) {
-		// assuming we've been around 2 years, so 365 * 2 days
-		v, avg, max, err := MockVolumeOverTime(365*2, r.C.FusdcAddr, obj.Token)
-		if err != nil {
-			return yield, err
-		}
-		return model.YieldOverTime{v, *avg, *max}, nil
-	}
-	return yield, nil // TODO
-}
-
 // PriceOverTime is the resolver for the priceOverTime field.
 func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.Pool) (price model.PriceOverTime, err error) {
 	if obj == nil {
 		return price, fmt.Errorf("pool empty")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
-		// assuming we've been around 2 years, so 365 * 2 days
-		v, avg, max, err := MockPriceOverTime(365*2, r.C.FusdcAddr, obj.Token)
+		daily, _, _, err := MockPriceOverTime(31, r.C.FusdcAddr, obj.Token)
 		if err != nil {
 			return price, err
 		}
-		return model.PriceOverTime{v, avg, max}, nil
+		monthly, _, _, err := MockPriceOverTime(12, r.C.FusdcAddr, obj.Token)
+		if err != nil {
+			return price, err
+		}
+		return model.PriceOverTime{daily, monthly}, nil
 	}
 	return price, nil // TODO
+}
+
+// VolumeOverTime is the resolver for the volumeOverTime field.
+func (r *seawaterPoolResolver) VolumeOverTime(ctx context.Context, obj *seawater.Pool) (vol model.VolumeOverTime, err error) {
+	if obj == nil {
+		return vol, fmt.Errorf("pool empty")
+	}
+	if r.F.Is(features.FeatureMockGraph) {
+		daily, _, _, err := MockVolumeOverTime(31, r.C.FusdcAddr, obj.Token)
+		if err != nil {
+			return vol, err
+		}
+		monthly, _, _, err := MockVolumeOverTime(31, r.C.FusdcAddr, obj.Token)
+		if err != nil {
+			return vol, err
+		}
+		return model.VolumeOverTime{daily, monthly}, nil
+	}
+	return vol, nil // TODO
+}
+
+// LiquidityOverTime is the resolver for the liquidityOverTime field.
+func (r *seawaterPoolResolver) LiquidityOverTime(ctx context.Context, obj *seawater.Pool) (liq model.LiquidityOverTime, err error) {
+	if obj == nil {
+		return liq, fmt.Errorf("pool empty")
+	}
+	if r.F.Is(features.FeatureMockGraph) {
+		daily, _, _, err := MockVolumeOverTime(31, r.C.FusdcAddr, obj.Token)
+		if err != nil {
+			return liq, err
+		}
+		monthly, _, _, err := MockVolumeOverTime(31, r.C.FusdcAddr, obj.Token)
+		if err != nil {
+			return liq, err
+		}
+		return model.LiquidityOverTime{daily, monthly}, nil
+	}
+	return liq, nil // TODO
 }
 
 // TvlOverTime is the resolver for the tvlOverTime field.
@@ -242,14 +256,33 @@ func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Po
 		return tvl, fmt.Errorf("pool empty")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
-		// assuming we've been around 2 years, so 365 * 2 days
-		v, avg, max, err := MockPriceOverTime(365*2, r.C.FusdcAddr, obj.Token)
+		daily, _, _, err := MockPriceOverTime(31, r.C.FusdcAddr, obj.Token)
 		if err != nil {
 			return tvl, err
 		}
-		return model.TvlOverTime{v, avg, max}, nil
+		monthly, _, _, err := MockPriceOverTime(12, r.C.FusdcAddr, obj.Token)
+		if err != nil {
+			return tvl, err
+		}
+		return model.TvlOverTime{daily, monthly}, nil
 	}
 	return tvl, nil // TODO
+}
+
+// YieldOverTime is the resolver for the yieldOverTime field.
+func (r *seawaterPoolResolver) YieldOverTime(ctx context.Context, obj *seawater.Pool) (yield model.YieldOverTime, err error) {
+	if obj == nil {
+		return yield, fmt.Errorf("pool empty")
+	}
+	if r.F.Is(features.FeatureMockGraph) {
+		daily, _, _, err := MockVolumeOverTime(31, r.C.FusdcAddr, obj.Token)
+		if err != nil {
+			return yield, err
+		}
+		monthly, _, _, err := MockVolumeOverTime(12, r.C.FusdcAddr, obj.Token)
+		return model.YieldOverTime{daily, monthly}, nil
+	}
+	return yield, nil // TODO
 }
 
 // EarnedFeesAprfusdc is the resolver for the earnedFeesAPRFUSDC field.
@@ -290,6 +323,11 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 	return
 }
 
+// PositionsForUser is the resolver for the positionsForUser field.
+func (r *seawaterPoolResolver) PositionsForUser(ctx context.Context, obj *seawater.Pool, address string) ([]seawater.Position, error) {
+	panic(fmt.Errorf("not implemented: PositionsForUser - positionsForUser"))
+}
+
 // Swaps is the resolver for the swaps field.
 func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool) (swaps []model.SeawaterSwap, err error) {
 	if obj == nil {
@@ -302,9 +340,9 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool) (s
 	return nil, nil // TODO
 }
 
-// Liquidity is the resolver for the liquidity field.
-func (r *seawaterPoolResolver) Liquidity(ctx context.Context, obj *seawater.Pool) ([]model.SeawaterLiquidity, error) {
-	return nil, nil // TODO
+// SwapsForUser is the resolver for the swapsForUser field.
+func (r *seawaterPoolResolver) SwapsForUser(ctx context.Context, obj *seawater.Pool, address string) ([]model.SeawaterSwap, error) {
+	panic(fmt.Errorf("not implemented: SwapsForUser - swapsForUser"))
 }
 
 // ID is the resolver for the id field.

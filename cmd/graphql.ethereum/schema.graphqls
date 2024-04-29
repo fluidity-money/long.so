@@ -24,6 +24,13 @@ type Query {
   getPosition(id: String!): SeawaterPosition
 
   """
+  getPositions that're owned by a specific wallet.
+
+  Uses the cache with a 10-20 second window.
+  """
+  getPositions(wallet: String!): [SeawaterPosition!]!
+
+  """
   getWallet based on information including balances. SHOULD NOT be used to get
   information that's needed consistently. Use the frontend instead after getting addresess
   elsewhere.
@@ -52,10 +59,11 @@ type SeawaterPool {
 
   token: Token!
 
-  volumeOverTime: VolumeOverTime!
-  yieldOverTime: YieldOverTime!
   priceOverTime: PriceOverTime!
+  volumeOverTime: VolumeOverTime!
+  liquidityOverTime: LiquidityOverTime!
   tvlOverTime: TvlOverTime!
+  yieldOverTime: YieldOverTime!
 
   earnedFeesAPRFUSDC: String!
   earnedFeesAPRToken1: String!
@@ -65,45 +73,35 @@ type SeawaterPool {
   utilityIncentives: [UtilityIncentive!]!
 
   positions: [SeawaterPosition!]!
-  swaps: [SeawaterSwap!]!
+  positionsForUser(address: String!): [SeawaterPosition!]!
 
-  liquidity: [SeawaterLiquidity!]!
+  swaps: [SeawaterSwap!]!
+  swapsForUser(address: String!): [SeawaterSwap!]!
 }
 
 type VolumeOverTime {
-  amounts: [PairAmount!]!
-  average: PairAmount!
-  max: PairAmount!
+  daily: [PairAmount!]! # loads a month worth of daily data
+  monthly: [PairAmount!]! # loads 12 months of data
+}
+
+type LiquidityOverTime {
+  daily: [PairAmount!]! # loads a month worth of daily data (31 items)
+  monthly: [PairAmount!]! # loads 12 months of data
 }
 
 type YieldOverTime {
-  amounts: [PairAmount!]!
-  average: PairAmount!
-  max: PairAmount!
+  daily: [PairAmount!]! # loads a month worth of daily data (31 items)
+  monthly: [PairAmount!]! # loads 12 months of data
 }
 
 type PriceOverTime {
-  amounts: [String!]!
-  average: String!
-  max: String!
+  daily: [String!]! # loads a month worth of daily data (31 items)
+  monthly: [String!]! # loads 12 months of data
 }
 
 type TvlOverTime {
-  amounts: [String!]!
-  average: String!
-  max: String!
-}
-
-"""
-SeawaterLiquidity is like SeawaterPosition, though it's an aggregation for easy use.
-"""
-type SeawaterLiquidity {
-  id: ID! # pool:lower:upper
-
-  lower: String!
-  upper: String!
-  liquidity: PairAmount!
-  positions: [SeawaterPosition!]!
+  daily: [String!]! # loads a month worth of daily data (31 items)
+  monthly: [String!]! # loads 12 months of data
 }
 
 """

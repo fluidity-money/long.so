@@ -21,6 +21,7 @@ CREATE TABLE events_seawater_burnPosition (
 );
 
 CREATE UNIQUE INDEX ON events_seawater_burnPosition (pos_id);
+CREATE UNIQUE INDEX ON events_seawater_burnPosition (owner);
 
 CREATE TABLE events_seawater_mintPosition (
 	id SERIAL PRIMARY KEY,
@@ -39,6 +40,7 @@ CREATE TABLE events_seawater_mintPosition (
 );
 
 CREATE UNIQUE INDEX ON events_seawater_mintPosition (pos_id);
+CREATE UNIQUE INDEX ON events_seawater_mintPosition (owner, pool);
 
 CREATE TABLE events_seawater_transferPosition (
 	id SERIAL PRIMARY KEY,
@@ -55,6 +57,8 @@ CREATE TABLE events_seawater_transferPosition (
 );
 
 CREATE INDEX ON events_seawater_transferPosition (pos_id);
+CREATE INDEX ON events_seawater_transferPosition (from_);
+CREATE INDEX ON events_seawater_transferPosition (to_);
 
 CREATE TABLE events_seawater_updatePositionLiquidity (
 	id SERIAL PRIMARY KEY,
@@ -88,6 +92,7 @@ CREATE TABLE events_seawater_collectFees (
 );
 
 CREATE INDEX ON events_seawater_collectFees (pos_id);
+CREATE INDEX ON events_seawater_collectFees (pool, to_);
 
 CREATE TABLE events_seawater_newPool (
 	id SERIAL PRIMARY KEY,
@@ -120,6 +125,8 @@ CREATE TABLE events_seawater_collectProtocolFees (
 );
 
 CREATE INDEX ON events_seawater_collectProtocolFees (pool);
+CREATE INDEX ON events_seawater_collectProtocolFees (pool, to_);
+CREATE INDEX ON events_seawater_collectProtocolFees (to_);
 
 CREATE TABLE events_seawater_swap2 (
 	id SERIAL PRIMARY KEY,
@@ -140,6 +147,8 @@ CREATE TABLE events_seawater_swap2 (
 );
 
 CREATE INDEX ON events_seawater_swap2 (user_);
+CREATE INDEX ON events_seawater_swap2 (user_, from_);
+CREATE INDEX ON events_seawater_swap2 (user_, to_);
 
 CREATE TABLE events_seawater_swap1 (
 	id SERIAL PRIMARY KEY,
@@ -158,5 +167,6 @@ CREATE TABLE events_seawater_swap1 (
 );
 
 CREATE INDEX ON events_seawater_swap1 (user_);
+CREATE INDEX ON events_seawater_swap1 (user_, pool);
 
 -- migrate:down
