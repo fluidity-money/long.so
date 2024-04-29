@@ -189,51 +189,67 @@ func (r *seawaterPoolResolver) Token(ctx context.Context, obj *seawater.Pool) (t
 }
 
 // VolumeOverTime is the resolver for the volumeOverTime field.
-func (r *seawaterPoolResolver) VolumeOverTime(ctx context.Context, obj *seawater.Pool) ([]model.PairAmount, error) {
+func (r *seawaterPoolResolver) VolumeOverTime(ctx context.Context, obj *seawater.Pool) (vol model.VolumeOverTime, err error) {
 	if obj == nil {
-		return nil, fmt.Errorf("pool empty")
+		return vol, fmt.Errorf("pool empty")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		// assuming we've been around 2 years, so 365 * 2 days
-		return MockVolumeOverTime(365*2, r.C.FusdcAddr, obj.Token)
+		v, err := MockVolumeOverTime(365*2, r.C.FusdcAddr, obj.Token)
+		if err != nil {
+			return vol, err
+		}
+		return model.VolumeOverTime{v}, nil
 	}
-	return nil, nil // TODO
+	return vol, nil // TODO
 }
 
 // YieldOverTime is the resolver for the yieldOverTime field.
-func (r *seawaterPoolResolver) YieldOverTime(ctx context.Context, obj *seawater.Pool) ([]model.PairAmount, error) {
+func (r *seawaterPoolResolver) YieldOverTime(ctx context.Context, obj *seawater.Pool) (yield model.YieldOverTime, err error) {
 	if obj == nil {
-		return nil, fmt.Errorf("pool empty")
+		return yield, fmt.Errorf("pool empty")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		// assuming we've been around 2 years, so 365 * 2 days
-		return MockVolumeOverTime(365*2, r.C.FusdcAddr, obj.Token)
+		v, err := MockVolumeOverTime(365*2, r.C.FusdcAddr, obj.Token)
+		if err != nil {
+			return yield, err
+		}
+		return model.YieldOverTime{v}, nil
 	}
-	return nil, nil // TODO
+	return yield, nil // TODO
 }
 
 // PriceOverTime is the resolver for the priceOverTime field.
-func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.Pool) ([]string, error) {
+func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.Pool) (price model.PriceOverTime, err error) {
 	if obj == nil {
-		return nil, fmt.Errorf("pool empty")
+		return price, fmt.Errorf("pool empty")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		// assuming we've been around 2 years, so 365 * 2 days
-		return MockPriceOverTime(365*2, r.C.FusdcAddr, obj.Token)
+		v, err := MockPriceOverTime(365*2, r.C.FusdcAddr, obj.Token)
+		if err != nil {
+			return price, err
+		}
+		return model.PriceOverTime{v}, nil
 	}
-	return nil, nil // TODO
+	return price, nil // TODO
 }
 
 // TvlOverTime is the resolver for the tvlOverTime field.
-func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Pool) ([]string, error) {
+func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Pool) (tvl model.TvlOverTime, err error) {
 	if obj == nil {
-		return nil, fmt.Errorf("pool empty")
+		return tvl, fmt.Errorf("pool empty")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		// assuming we've been around 2 years, so 365 * 2 days
-		return MockPriceOverTime(365*2, r.C.FusdcAddr, obj.Token)
+		v, err := MockPriceOverTime(365*2, r.C.FusdcAddr, obj.Token)
+		if err != nil {
+			return tvl, err
+		}
+		return model.TvlOverTime{v}, nil
 	}
-	return nil, nil // TODO
+	return tvl, nil // TODO
 }
 
 // EarnedFeesAprfusdc is the resolver for the earnedFeesAPRFUSDC field.

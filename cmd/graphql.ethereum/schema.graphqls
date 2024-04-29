@@ -52,10 +52,10 @@ type SeawaterPool {
 
   token: Token!
 
-  volumeOverTime: [PairAmount!]
-  yieldOverTime: [PairAmount!]!
-  priceOverTime: [String!]
-  tvlOverTime: [String!]
+  volumeOverTime: VolumeOverTime!
+  yieldOverTime: YieldOverTime!
+  priceOverTime: PriceOverTime!
+  tvlOverTime: TvlOverTime!
 
   earnedFeesAPRFUSDC: String!
   earnedFeesAPRToken1: String!
@@ -68,6 +68,22 @@ type SeawaterPool {
   swaps: [SeawaterSwap!]!
 
   liquidity: [SeawaterLiquidity!]!
+}
+
+type VolumeOverTime {
+  amounts: [PairAmount!]!
+}
+
+type YieldOverTime {
+  amounts: [PairAmount!]!
+}
+
+type PriceOverTime {
+  amounts: [String!]!
+}
+
+type TvlOverTime {
+  amounts: [String!]!
 }
 
 """

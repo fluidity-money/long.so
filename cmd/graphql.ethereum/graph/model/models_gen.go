@@ -15,6 +15,10 @@ type PairAmount struct {
 	Token1    Amount `json:"token1"`
 }
 
+type PriceOverTime struct {
+	Amounts []string `json:"amounts"`
+}
+
 type Query struct {
 }
 
@@ -40,7 +44,19 @@ type TokenBalance struct {
 	Balance Amount `json:"balance"`
 }
 
+type TvlOverTime struct {
+	Amounts []string `json:"amounts"`
+}
+
 type UtilityIncentive struct {
 	AmountGivenOut string `json:"amountGivenOut"`
 	MaximumAmount  string `json:"maximumAmount"`
+}
+
+type VolumeOverTime struct {
+	Amounts []PairAmount `json:"amounts"`
+}
+
+type YieldOverTime struct {
+	Amounts []PairAmount `json:"amounts"`
 }
