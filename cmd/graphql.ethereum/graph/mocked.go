@@ -90,18 +90,39 @@ L:
 	return
 }
 
-func MockVolumeOverTime(period int, fusdc, token types.Address) (history []model.PairAmount, err error) {
+func MockVolumeOverTime(period int, fusdc, token types.Address) (history []model.PairAmount, average *model.PairAmount, maximum *model.PairAmount, err error) {
+	// Mock the volume over time, assuming that token1 will have
+	// decimals of 18, and fusdc 6.
+
 	// Using crypto/rand.Int to save myself from having a constant
 	// word size using the pseudorandom number generator
 	// (math/rand.Read)
 	history = make([]model.PairAmount, period)
 	t := time.Now()
+	var (
+		avgFusdc = new(big.Int)
+		avgToken1 = new(big.Int)
+	)
+	var (
+		maxFusdc = new(big.Int)
+		maxToken1 = new(big.Int)
+	)
 	for i := 0; i < period; i++ {
 		fusdcAmt, _ := rand.Int(rand.Reader, MaxMockedVolume)
 		token1Amt, _ := rand.Int(rand.Reader, MaxMockedVolume)
 		// Two years in the past plus the position we're at in the graph
 		days := time.Duration(i*24) * time.Hour
 		backThen := t.Add(-time.Duration(24 * time.Hour * 365)).Add(days)
+		avgFusdc.Add(avgFusdc, fusdcAmt)
+		avgToken1.Add(maxToken1, token1Amt)
+		//maxFusdc < fusdcAmt
+		if maxFusdc.Cmp(fusdcAmt) < 0 {
+			maxFusdc.Set(fusdcAmt)
+		}
+		//maxToken1 < token1Amt
+		if maxToken1.Cmp(token1Amt) < 0 {
+			maxToken1.Set(token1Amt)
+		}
 		history[i] = model.PairAmount{
 			Fusdc: model.Amount{
 				Token:         fusdc,
@@ -111,25 +132,68 @@ func MockVolumeOverTime(period int, fusdc, token types.Address) (history []model
 			},
 			Token1: model.Amount{
 				Token:         token,
-				Decimals:      6,
+				Decimals:      18,
 				Timestamp:     int(backThen.Unix()),
 				ValueUnscaled: types.UnscaledNumberFromBig(token1Amt),
 			},
 		}
 	}
+	p := new(big.Int).SetInt64(int64(period))
+	avgFusdc.Quo(avgFusdc, p)
+	avgToken1.Quo(avgToken1, p)
+	average = &model.PairAmount{
+		Fusdc: model.Amount{
+			Token: fusdc,
+			Decimals: 6,
+			Timestamp: int(t.Unix()),
+			ValueUnscaled: types.UnscaledNumberFromBig(avgFusdc),
+		},
+		Timestamp: int(t.Unix()),
+		Token1: model.Amount{
+			Token: token,
+			Decimals: 18,
+			Timestamp: int(t.Unix()),
+			ValueUnscaled: types.UnscaledNumberFromBig(avgFusdc),
+		},
+	}
+	maximum = &model.PairAmount{
+		Fusdc: model.Amount{
+			Token: fusdc,
+			Decimals: 6,
+			Timestamp: int(t.Unix()),
+			ValueUnscaled: types.UnscaledNumberFromBig(maxFusdc),
+		},
+		Timestamp: int(t.Unix()),
+		Token1: model.Amount{
+			Token: token,
+			Decimals: 18,
+			Timestamp: int(t.Unix()),
+			ValueUnscaled: types.UnscaledNumberFromBig(maxToken1),
+		},
+	}
 	return
 }
 
-func MockPriceOverTime(period int, fusdc, token types.Address) (history []string, err error) {
+func MockPriceOverTime(period int, fusdc, token types.Address) (history []string, average string, max string, err error) {
 	history = make([]string, period)
 	exp := new(big.Int).SetInt64(10)
 	exp.Mul(exp, new(big.Int).SetInt64(4))
+	avg := new(big.Float)
+	max_ := new(big.Float)
 	for i := 0; i < period; i++ {
 		priceI, _ := rand.Int(rand.Reader, MaxMockedPrice)
 		price := new(big.Float).SetInt(priceI)
 		price.Quo(price, new(big.Float).SetInt(exp))
+		avg.Add(avg, price)
+		//if max < price
+		if max_.Cmp(price) < 0 {
+			max_.Set(price)
+		}
 		history[i] = fmt.Sprintf("%0.04f", price)
 	}
+	avg.Sub(avg, new(big.Float).SetInt64(int64(period)))
+	average = fmt.Sprintf("%0.4f", avg)
+	max = fmt.Sprintf("%0.4f", max_)
 	return
 }
 

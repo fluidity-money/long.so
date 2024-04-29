@@ -195,11 +195,11 @@ func (r *seawaterPoolResolver) VolumeOverTime(ctx context.Context, obj *seawater
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		// assuming we've been around 2 years, so 365 * 2 days
-		v, err := MockVolumeOverTime(365*2, r.C.FusdcAddr, obj.Token)
+		v, avg, max, err := MockVolumeOverTime(365*2, r.C.FusdcAddr, obj.Token)
 		if err != nil {
 			return vol, err
 		}
-		return model.VolumeOverTime{v}, nil
+		return model.VolumeOverTime{v, *avg, *max}, nil
 	}
 	return vol, nil // TODO
 }
@@ -211,11 +211,11 @@ func (r *seawaterPoolResolver) YieldOverTime(ctx context.Context, obj *seawater.
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		// assuming we've been around 2 years, so 365 * 2 days
-		v, err := MockVolumeOverTime(365*2, r.C.FusdcAddr, obj.Token)
+		v, avg, max, err := MockVolumeOverTime(365*2, r.C.FusdcAddr, obj.Token)
 		if err != nil {
 			return yield, err
 		}
-		return model.YieldOverTime{v}, nil
+		return model.YieldOverTime{v, *avg, *max}, nil
 	}
 	return yield, nil // TODO
 }
@@ -227,11 +227,11 @@ func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		// assuming we've been around 2 years, so 365 * 2 days
-		v, err := MockPriceOverTime(365*2, r.C.FusdcAddr, obj.Token)
+		v, avg, max, err := MockPriceOverTime(365*2, r.C.FusdcAddr, obj.Token)
 		if err != nil {
 			return price, err
 		}
-		return model.PriceOverTime{v}, nil
+		return model.PriceOverTime{v, avg, max}, nil
 	}
 	return price, nil // TODO
 }
@@ -243,11 +243,11 @@ func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Po
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		// assuming we've been around 2 years, so 365 * 2 days
-		v, err := MockPriceOverTime(365*2, r.C.FusdcAddr, obj.Token)
+		v, avg, max, err := MockPriceOverTime(365*2, r.C.FusdcAddr, obj.Token)
 		if err != nil {
 			return tvl, err
 		}
-		return model.TvlOverTime{v}, nil
+		return model.TvlOverTime{v, avg, max}, nil
 	}
 	return tvl, nil // TODO
 }

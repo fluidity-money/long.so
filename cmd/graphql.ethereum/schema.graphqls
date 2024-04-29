@@ -72,18 +72,26 @@ type SeawaterPool {
 
 type VolumeOverTime {
   amounts: [PairAmount!]!
+  average: PairAmount!
+  max: PairAmount!
 }
 
 type YieldOverTime {
   amounts: [PairAmount!]!
+  average: PairAmount!
+  max: PairAmount!
 }
 
 type PriceOverTime {
   amounts: [String!]!
+  average: String!
+  max: String!
 }
 
 type TvlOverTime {
   amounts: [String!]!
+  average: String!
+  max: String!
 }
 
 """

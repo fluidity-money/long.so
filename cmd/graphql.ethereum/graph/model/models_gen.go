@@ -17,6 +17,8 @@ type PairAmount struct {
 
 type PriceOverTime struct {
 	Amounts []string `json:"amounts"`
+	Average string   `json:"average"`
+	Max     string   `json:"max"`
 }
 
 type Query struct {
@@ -46,6 +48,8 @@ type TokenBalance struct {
 
 type TvlOverTime struct {
 	Amounts []string `json:"amounts"`
+	Average string   `json:"average"`
+	Max     string   `json:"max"`
 }
 
 type UtilityIncentive struct {
@@ -55,8 +59,12 @@ type UtilityIncentive struct {
 
 type VolumeOverTime struct {
 	Amounts []PairAmount `json:"amounts"`
+	Average PairAmount   `json:"average"`
+	Max     PairAmount   `json:"max"`
 }
 
 type YieldOverTime struct {
 	Amounts []PairAmount `json:"amounts"`
+	Average PairAmount   `json:"average"`
+	Max     PairAmount   `json:"max"`
 }
