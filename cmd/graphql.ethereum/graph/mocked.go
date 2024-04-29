@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"fmt"
 	"time"
+	"slices"
 
 	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
@@ -177,6 +178,17 @@ func MockSwaps(fusdc types.Address, amount int, pool types.Address) (swaps []mod
 			AmountOut: types.UnscaledNumberFromBig(amountOut),
 		}
 	}
+	// Sort the remainder by the timestamps
+	slices.SortFunc(swaps, func(x, y model.SeawaterSwap) int {
+		switch {
+		case x.Timestamp > x.Timestamp:
+			return -1
+		case x.Timestamp > x.Timestamp:
+			return 1
+		default:
+			return 0
+		}
+	})
 	return
 }
 

@@ -5,7 +5,7 @@ ORG_ROOT := superposition
 
 GO_BUILD := CGO_ENABLED=0 go build
 
-GO_FILES := $(shell ls -1 *.go)
+GO_FILES := $(shell find . -name '*.go' -or -name '*.json' -type f)
 
 CMDLET := $(shell basename ${PWD})
 
