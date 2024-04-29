@@ -58,7 +58,6 @@ macro_rules! assert_neq_or {
     };
 }
 
-// TODO: make these errors better, some errors in univ3 libs are just require(condition) without a message.
 /// The list of possible errors the contract can return.
 #[derive(Error, Debug)]
 #[repr(u8)]
