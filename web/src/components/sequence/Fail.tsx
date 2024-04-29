@@ -44,7 +44,9 @@ export const Fail = ({ text, transactionHash }: FailProps) => {
         <div className="mt-[9px] w-[155px] text-center text-sm md:mt-[7px]">
           Failed
         </div>
-        <div className={"mt-[13px] text-2xs text-gray-2"}>{text}</div>
+        <div className={"mt-[13px] max-w-[80%] text-2xs text-gray-2"}>
+          {text}
+        </div>
         {transactionHash && chain?.blockExplorers?.default && (
           <a
             className="mt-[12px] cursor-pointer text-3xs underline md:mt-[26px]"

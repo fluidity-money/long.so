@@ -74,6 +74,8 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
     isPending: isUpdatePositionPending,
   } = useWriteContract();
 
+  console.log(updatePositionError);
+
   /**
    * Create a new position in the AMM.
    *

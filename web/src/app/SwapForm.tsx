@@ -27,6 +27,7 @@ import { useWeb3Modal } from "@web3modal/wagmi/react";
 import LightweightERC20 from "@/lib/abi/LightweightERC20";
 import { ammAddress } from "@/lib/addresses";
 import { output } from "@/lib/abi/ISeawaterAMM";
+import { fUSDC } from "@/config/tokens";
 
 export const SwapForm = () => {
   const [breakdownHidden, setBreakdownHidden] = useState(true);
@@ -157,6 +158,37 @@ export const SwapForm = () => {
     if (!approvalResult.data) return;
     performSwap();
   }, [approvalResult.data, performSwap]);
+
+  const performSwap = () => {
+    console.log("performing swap");
+
+    if (token0.address === fUSDC.address || token1.address === fUSDC.address) {
+      // if one of the assets is fusdc, use swap1
+      writeContractSwap({
+        address: ammAddress,
+        abi: output.abi,
+        functionName: "swap",
+        args: [token0.address, true, BigInt(token0Amount ?? 0), BigInt(0)],
+      });
+    } else {
+      // if both of the assets aren't fusdc, use swap2
+      writeContractSwap({
+        address: ammAddress,
+        abi: output.abi,
+        functionName: "swap2ExactIn",
+        args: [
+          token0.address,
+          token1.address,
+          BigInt(token0Amount ?? 0),
+          BigInt(0),
+        ],
+      });
+    }
+  };
+
+  if (isApprovalPending || (approvalData && !approvalResult.data)) {
+    return <div>Approving...</div>;
+  }
 
   return (
     <>
