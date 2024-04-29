@@ -1,4 +1,4 @@
 {
-	"ui show demo data", true,
+	"ui show demo data": true,
 	"graphql mock demo data": true
 }
