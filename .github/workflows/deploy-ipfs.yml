@@ -2,11 +2,9 @@
 
 name: Deploy IPFS
 on:
-  pull_request:
+  push:
     branches:
-      - 'deployment'
-    types:
-      - closed
+      - development
 
 jobs:
   deploy-to-ipfs:
