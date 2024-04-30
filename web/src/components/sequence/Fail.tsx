@@ -10,9 +10,10 @@ import { motion } from "framer-motion";
 interface FailProps {
   text: string;
   transactionHash?: Hash;
+  onDone?: () => void;
 }
 
-export const Fail = ({ text, transactionHash }: FailProps) => {
+export const Fail = ({ text, transactionHash, onDone }: FailProps) => {
   const router = useRouter();
   const chains = useChains();
   const chainId = useChainId();
@@ -31,7 +32,7 @@ export const Fail = ({ text, transactionHash }: FailProps) => {
           <Button
             variant="secondary"
             size={"esc"}
-            onClick={() => router.back()}
+            onClick={() => (onDone ?? router.back)()}
           >
             Esc
           </Button>
@@ -59,7 +60,7 @@ export const Fail = ({ text, transactionHash }: FailProps) => {
           <Button
             variant={"secondary"}
             className="mt-[18px] h-[29px] w-full md:mt-[42px] md:h-[35px]"
-            onClick={() => router.back()}
+            onClick={() => (onDone ?? router.back)()}
           >
             Done
           </Button>

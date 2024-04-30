@@ -112,7 +112,6 @@ export const SwapForm = () => {
    * Parse the quote amount from the error message
    *
    * TODO: add support for quote2
-   * TODO: why is this always 0?
    */
   const quoteAmount = useMemo(() => {
     const [, quoteAmountString] =
@@ -146,12 +145,14 @@ export const SwapForm = () => {
     data: approvalData,
     error: approvalError,
     isPending: isApprovalPending,
+    reset: resetApproval,
   } = useWriteContract();
   const {
     writeContract: writeContractSwap,
     data: swapData,
     error: swapError,
     isPending: isSwapPending,
+    reset: resetSwap,
   } = useWriteContract();
 
   console.log(approvalError);
@@ -240,13 +241,30 @@ export const SwapForm = () => {
 
   // success
   if (swapResult.data) {
-    return <Success />;
+    return (
+      <Success
+        onDone={() => {
+          resetApproval();
+          resetSwap();
+          swapResult.refetch();
+        }}
+      />
+    );
   }
 
   // error
   if (swapError || approvalError) {
     const error = swapError || approvalError;
-    return <Fail text={(error as any)?.shortMessage} />;
+    return (
+      <Fail
+        text={(error as any)?.shortMessage}
+        onDone={() => {
+          resetApproval();
+          resetSwap();
+          swapResult.refetch();
+        }}
+      />
+    );
   }
 
   return (
