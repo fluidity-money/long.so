@@ -10,7 +10,7 @@ import Token from "@/assets/icons/token.svg";
 import Swap from "@/assets/icons/Swap.svg";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import { SuperloopPopover } from "@/app/SuperloopPopover";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
@@ -53,6 +53,7 @@ export const SwapForm = () => {
     token0Amount,
     token1Amount,
     setToken0Amount,
+    setToken1Amount,
   } = useSwapStore();
   const { address } = useAccount();
 
@@ -89,6 +90,43 @@ export const SwapForm = () => {
     // @ts-expect-error
     args: [address as Hash],
   });
+
+  const { error: quote1Error } = useSimulateContract({
+    address: ammAddress,
+    abi: output.abi,
+    functionName: "quote",
+    args: [
+      token0.address === fUSDC.address ? token1.address : token0.address,
+      token1.address === fUSDC.address,
+      BigInt(token0Amount ?? 0),
+      maxUint256,
+    ],
+    // since this is intended to throw an error, we want to disable retries
+    query: {
+      retry: false,
+      retryOnMount: false,
+    },
+  });
+
+  /**
+   * Parse the quote amount from the error message
+   *
+   * TODO: add support for quote2
+   * TODO: why is this always 0?
+   */
+  const quoteAmount = useMemo(() => {
+    const [, quoteAmountString] =
+      quote1Error?.message.match(
+        /reverted with the following reason:\n(.+)\n/,
+      ) || [];
+
+    return BigInt(quoteAmountString ?? 0);
+  }, [quote1Error]);
+
+  // update the token1 amount when the quote amount changes
+  useEffect(() => {
+    setToken1Amount(quoteAmount.toString());
+  }, [quoteAmount]);
 
   const { open } = useWeb3Modal();
 
