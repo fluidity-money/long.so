@@ -5,7 +5,11 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-export const Success = () => {
+interface SuccessProps {
+  onDone?: () => void;
+}
+
+export const Success = ({ onDone }: SuccessProps) => {
   const router = useRouter();
 
   return (
@@ -20,7 +24,7 @@ export const Success = () => {
           <Button
             variant="secondary"
             size={"esc"}
-            onClick={() => router.back()}
+            onClick={() => (onDone ?? router.back)()}
           >
             Esc
           </Button>
@@ -43,7 +47,7 @@ export const Success = () => {
           <Button
             variant={"secondary"}
             className="mt-[18px] h-[29px] w-full md:mt-[42px] md:h-[35px]"
-            onClick={() => router.back()}
+            onClick={() => (onDone ?? router.back)()}
           >
             Done
           </Button>

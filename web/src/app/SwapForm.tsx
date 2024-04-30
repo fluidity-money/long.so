@@ -28,6 +28,10 @@ import LightweightERC20 from "@/lib/abi/LightweightERC20";
 import { ammAddress } from "@/lib/addresses";
 import { output } from "@/lib/abi/ISeawaterAMM";
 import { fUSDC } from "@/config/tokens";
+import { EnableSpending } from "@/components/sequence/EnableSpending";
+import Confirm from "@/components/sequence/Confirm";
+import { Success } from "@/components/sequence/Success";
+import { Fail } from "@/components/sequence/Fail";
 
 export const SwapForm = () => {
   const [breakdownHidden, setBreakdownHidden] = useState(true);
@@ -89,30 +93,30 @@ export const SwapForm = () => {
   const { open } = useWeb3Modal();
 
   // read the allowance of the token
-  const { data: allowanceData /* error: allowanceError */ } =
-    useSimulateContract({
-      address: token0.address,
-      abi: LightweightERC20,
-      // @ts-ignore this needs to use useSimulateContract which breaks the types
-      functionName: "allowance",
-      // @ts-ignore
-      args: [address as Hash, ammAddress],
-    });
+  const { data: allowanceData } = useSimulateContract({
+    address: token0.address,
+    abi: LightweightERC20,
+    // @ts-ignore this needs to use useSimulateContract which breaks the types
+    functionName: "allowance",
+    // @ts-ignore
+    args: [address as Hash, ammAddress],
+  });
 
   // set up write hooks
   const {
     writeContract: writeContractApproval,
     data: approvalData,
-    /* error: approvalError, */
+    error: approvalError,
     isPending: isApprovalPending,
   } = useWriteContract();
   const {
     writeContract: writeContractSwap,
-    /* data: swapData, */
+    data: swapData,
     error: swapError,
-    /* isPending: isSwapPending, */
+    isPending: isSwapPending,
   } = useWriteContract();
 
+  console.log(approvalError);
   console.log(swapError);
 
   /**
@@ -173,6 +177,10 @@ export const SwapForm = () => {
     }
   };
 
+  const swapResult = useWaitForTransactionReceipt({
+    hash: swapData,
+  });
+
   // once we have the result, initiate the swap
   useEffect(() => {
     if (!approvalResult.data) return;
@@ -180,7 +188,27 @@ export const SwapForm = () => {
   }, [approvalResult.data, performSwap]);
 
   if (isApprovalPending || (approvalData && !approvalResult.data)) {
-    return <div>Approving...</div>;
+    return (
+      <EnableSpending
+        tokenName={token0.symbol}
+        transactionHash={approvalData}
+      />
+    );
+  }
+
+  if (isSwapPending || (swapData && !swapResult.data)) {
+    return <Confirm text={"Swap"} />;
+  }
+
+  // success
+  if (swapResult.data) {
+    return <Success />;
+  }
+
+  // error
+  if (swapError || approvalError) {
+    const error = swapError || approvalError;
+    return <Fail text={(error as any)?.shortMessage} />;
   }
 
   return (
