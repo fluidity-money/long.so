@@ -10,6 +10,8 @@ import { useSwapPro } from "@/stores/useSwapPro";
 import Head from "next/head";
 import { ConnectWalletButton } from "@/app/ConnectWalletButton";
 import Menu from "@/components/Menu";
+import { FaFaucet } from "react-icons/fa";
+import { Badge } from "@/components/ui/Badge";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -41,6 +43,12 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
               </div>
 
               <div className="flex flex-row items-center gap-4">
+                <a href="https://bwarelabs.com/faucets/arbitrum-stylus-testnet">
+                  <Badge className="h-[28px] cursor-pointer gap-2">
+                    <FaFaucet />
+                    Faucet
+                  </Badge>
+                </a>
                 <NetworkSelection />
                 <ConnectWalletButton />
               </div>

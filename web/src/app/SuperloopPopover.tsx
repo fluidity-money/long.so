@@ -1,4 +1,8 @@
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import Cog from "@/assets/icons/cog.svg";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";

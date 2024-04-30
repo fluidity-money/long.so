@@ -8,7 +8,7 @@ import { useInventorySettings } from "@/components/InventoryContent/useInventory
 
 export const InventoryHeader = () => {
   const { settings, setSettings } = useInventorySettings();
-  
+
   return (
     <div className="flex w-full flex-row items-center justify-between">
       <div className="flex flex-row items-center gap-1">

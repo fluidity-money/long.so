@@ -45,14 +45,15 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
   }, [router, token0, token0Amount]);
 
   // read the allowance of the token
-  const { data: allowanceData, /* error: allowanceError */ } = useSimulateContract({
-    address: token0.address,
-    abi: LightweightERC20,
-    // @ts-ignore this needs to use useSimulateContract which breaks the types
-    functionName: "allowance",
-    // @ts-ignore
-    args: [address as Hash, ammAddress],
-  });
+  const { data: allowanceData /* error: allowanceError */ } =
+    useSimulateContract({
+      address: token0.address,
+      abi: LightweightERC20,
+      // @ts-ignore this needs to use useSimulateContract which breaks the types
+      functionName: "allowance",
+      // @ts-ignore
+      args: [address as Hash, ammAddress],
+    });
 
   // set up write contract hooks
   const {
@@ -97,21 +98,19 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
   // extract the position ID from the mintPosition transaction
   const mintPositionId = result?.data?.logs[0].topics[1];
 
-  const updatePosition = useCallback((id: bigint) => {
-    const delta = BigInt(token0Amount);
+  const updatePosition = useCallback(
+    (id: bigint) => {
+      const delta = BigInt(token0Amount);
 
-    writeContractUpdatePosition({
-      address: ammAddress,
-      abi: output.abi,
-      functionName: "updatePosition",
-      args: [token0.address, id, delta],
-    });
-  }, [
-    allowanceData,
-    writeContractUpdatePosition,
-    token0Amount,
-    token0,
-  ]);
+      writeContractUpdatePosition({
+        address: ammAddress,
+        abi: output.abi,
+        functionName: "updatePosition",
+        args: [token0.address, id, delta],
+      });
+    },
+    [allowanceData, writeContractUpdatePosition, token0Amount, token0],
+  );
 
   /**
    * Approve the AMM to spend the token
@@ -134,7 +133,7 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
     writeContractApproval,
     token0,
     updatePosition,
-    mintPositionId
+    mintPositionId,
   ]);
 
   // once we have the position ID, approve the AMM to spend the token

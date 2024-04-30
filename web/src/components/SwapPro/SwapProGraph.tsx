@@ -16,9 +16,9 @@ const durationToDays = {
 };
 
 export const Graph = () => {
-  const [activeGraphType] = useState<
-    "price" | "volume" | "liquidity"
-  >("volume");
+  const [activeGraphType] = useState<"price" | "volume" | "liquidity">(
+    "volume",
+  );
 
   const [duration, setDuration] = useState<"7D" | "1M" | "6M" | "1Y" | "ALL">(
     "7D",
