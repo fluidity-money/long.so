@@ -11,7 +11,7 @@ import Head from "next/head";
 import { ConnectWalletButton } from "@/app/ConnectWalletButton";
 import Menu from "@/components/Menu";
 import { FaFaucet } from "react-icons/fa";
-import { Badge } from "@/components/ui/Badge";
+import { Badge } from "@/components/ui/badge";
 
 const inter = Inter({
   subsets: ["latin"],
