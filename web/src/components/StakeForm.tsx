@@ -35,6 +35,7 @@ import Menu from "@/components/Menu";
 import Index from "@/components/Slider";
 import { erc20Abi } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 const data = [
   {
@@ -285,6 +286,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
   useHotkeys("esc", () => router.back());
 
+  const showManualFees = useFeatureFlag("show manual fees");
   const onSubmit = () => {
     if (mode === "new") {
       router.push("/stake/pool/create/confirm");
@@ -617,7 +619,9 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
           <SegmentedControl
             variant={"secondary"}
-            className={"h-[26px] rounded-lg bg-black text-3xs md:text-2xs"}
+            className={cn("h-[26px] rounded-lg bg-black text-3xs md:text-2xs", {
+              hidden: !showManualFees,
+            })}
             callback={(val) => setFeeTier(val)}
             segments={[
               {
