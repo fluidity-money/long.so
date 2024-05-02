@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Popover,
   PopoverContent,
@@ -8,13 +10,23 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useRef, useState } from "react";
 import SegmentedControl from "@/components/ui/segmented-control";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 /**
  * Popover which contains the Superloop settings.
  */
 export const SuperloopPopover = () => {
-  const [autoSlippage, setAutoSlippage] = useState(true);
-  const [noTransactionDeadline, setNoTransactionDeadline] = useState(true);
+  const [maxSlippage, setMaxSlippage] = useState<"auto" | "custom">("auto");
+  const [transactionDeadline, setTransactionDeadline] = useState<
+    "none" | "custom"
+  >("none");
 
   return (
     <Popover>
@@ -37,31 +49,86 @@ export const SuperloopPopover = () => {
             <Switch id="superloop" />
           </div>
 
-          <div className="flex flex-row justify-between">
-            <p>Max. slippage</p>
-
+          <div className="flex w-full flex-row items-center justify-between">
+            <div>Max. slippage</div>
             <SegmentedControl
+              name={"max-slippage"}
               variant={"secondary"}
+              className={"text-[10px] md:text-[12px]"}
+              callback={(val) => setMaxSlippage(val)}
               segments={[
-                { label: "Auto", value: "auto" as const, ref: useRef() },
-                { label: "Custom", value: "custom" as const, ref: useRef() },
+                {
+                  label: "Auto",
+                  value: "auto" as const,
+                  ref: useRef(),
+                },
+                {
+                  label: "Custom",
+                  value: "custom" as const,
+                  ref: useRef(),
+                },
               ]}
-              callback={(val) => setAutoSlippage(val === "auto")}
             />
           </div>
 
-          <div className="flex flex-row justify-between">
-            <p>Transaction deadline</p>
+          {maxSlippage === "custom" && (
+            <div className={"flex  w-full flex-row items-center justify-start"}>
+              <Input
+                placeholder={"0.5"}
+                className={
+                  "h-[25px] w-[80px] border-0 bg-zinc-800 text-center text-[12px]"
+                }
+              />
+            </div>
+          )}
 
+          <div className="flex flex-row justify-between">
+            <div>Transaction Deadline</div>
             <SegmentedControl
+              name={"transaction-deadline"}
               variant={"secondary"}
+              className={"text-[10px] md:text-[12px]"}
+              callback={(val) => setTransactionDeadline(val)}
               segments={[
-                { label: "Auto", value: "auto" as const, ref: useRef() },
-                { label: "Custom", value: "custom" as const, ref: useRef() },
+                {
+                  label: "None",
+                  value: "none" as const,
+                  ref: useRef(),
+                },
+                {
+                  label: "Custom",
+                  value: "custom" as const,
+                  ref: useRef(),
+                },
               ]}
-              callback={(val) => setNoTransactionDeadline(val === "auto")}
             />
           </div>
+
+          {transactionDeadline === "custom" && (
+            <div
+              className={
+                "mt-[6px] flex  w-full flex-row items-center justify-start gap-1"
+              }
+            >
+              <Input
+                placeholder={"15"}
+                className={
+                  "h-[25px] w-[80px] border-0 bg-zinc-800 text-center text-[12px]"
+                }
+              />
+
+              <Select defaultValue={"minutes"}>
+                <SelectTrigger className="h-6 w-auto border-0 bg-black p-0 text-[12px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="minutes">minutes</SelectItem>
+                  <SelectItem value="hours">hours</SelectItem>
+                  <SelectItem value="days">days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
       </PopoverContent>
     </Popover>
