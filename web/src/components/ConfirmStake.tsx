@@ -116,7 +116,7 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
 
   const updatePosition = useCallback(
     (id: bigint) => {
-      const delta = BigInt(token0Amount);
+      const delta = BigInt(parseFloat(token0Amount) * 10 ** 18);
 
       writeContractUpdatePosition({
         address: ammAddress,

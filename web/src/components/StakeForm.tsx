@@ -297,10 +297,6 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
   const { address } = useAccount();
 
-  const { data: balanceData, isLoading } = useBalance({
-    address,
-  });
-
   const chartRef = useRef<ReactECharts>(null);
 
   const [liquidityRangeType, setLiquidityRangeType] = useState<

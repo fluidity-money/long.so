@@ -98,7 +98,7 @@ export const SwapForm = () => {
     args: [
       token0.address === fUSDC.address ? token1.address : token0.address,
       token1.address === fUSDC.address,
-      BigInt(token0Amount ?? 0),
+      BigInt(parseFloat(token0Amount ?? "0") * 10 ** 18),
       maxUint256,
     ],
     // since this is intended to throw an error, we want to disable retries
