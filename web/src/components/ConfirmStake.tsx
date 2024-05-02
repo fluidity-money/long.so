@@ -35,6 +35,7 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
 
   const multiSingleToken = useStakeStore((s) => s.multiSingleToken);
   const token0 = useStakeStore((s) => s.token0);
+  const token1 = useStakeStore((s) => s.token1);
   const token0Amount = useStakeStore((s) => s.token0Amount);
 
   // if no token or no token amount redirect to the stake form
@@ -45,15 +46,23 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
   }, [router, token0, token0Amount]);
 
   // read the allowance of the token
-  const { data: allowanceData /* error: allowanceError */ } =
-    useSimulateContract({
-      address: token0.address,
-      abi: LightweightERC20,
-      // @ts-ignore this needs to use useSimulateContract which breaks the types
-      functionName: "allowance",
-      // @ts-ignore
-      args: [address as Hash, ammAddress],
-    });
+  const { data: allowanceDataToken0 } = useSimulateContract({
+    address: token0.address,
+    abi: LightweightERC20,
+    // @ts-ignore this needs to use useSimulateContract which breaks the types
+    functionName: "allowance",
+    // @ts-ignore
+    args: [address as Hash, ammAddress],
+  });
+
+  const { data: allowanceDataToken1 } = useSimulateContract({
+    address: token1.address,
+    abi: LightweightERC20,
+    // @ts-ignore this needs to use useSimulateContract which breaks the types
+    functionName: "allowance",
+    // @ts-ignore
+    args: [address as Hash, ammAddress],
+  });
 
   // set up write contract hooks
   const {
@@ -63,10 +72,16 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
     isPending: isMintPending,
   } = useWriteContract();
   const {
-    writeContract: writeContractApproval,
-    data: approvalData,
-    error: approvalError,
-    isPending: isApprovalPending,
+    writeContract: writeContractApprovalToken0,
+    data: approvalDataToken0,
+    error: approvalErrorToken0,
+    isPending: isApprovalPendingToken0,
+  } = useWriteContract();
+  const {
+    writeContract: writeContractApprovalToken1,
+    data: approvalDataToken1,
+    error: approvalErrorToken1,
+    isPending: isApprovalPendingToken1,
   } = useWriteContract();
   const {
     writeContract: writeContractUpdatePosition,
@@ -76,6 +91,7 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
   } = useWriteContract();
 
   console.log(updatePositionError);
+  console.log(mintData);
 
   /**
    * Create a new position in the AMM.
@@ -109,18 +125,22 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
         args: [token0.address, id, delta],
       });
     },
-    [allowanceData, writeContractUpdatePosition, token0Amount, token0],
+    [writeContractUpdatePosition, token0Amount, token0],
   );
 
   /**
    * Approve the AMM to spend the token
    *
-   * Step 2. Approve the token
+   * Step 3. Approve token 1
    */
-  const approve = useCallback(() => {
-    if (!allowanceData?.result || allowanceData.result === BigInt(0)) {
-      writeContractApproval({
-        address: token0.address,
+  const approveToken1 = useCallback(() => {
+    console.log("approving token1");
+    if (
+      !allowanceDataToken1?.result ||
+      allowanceDataToken1.result === BigInt(0)
+    ) {
+      writeContractApprovalToken1({
+        address: token1.address,
         abi: erc20Abi,
         functionName: "approve",
         args: [ammAddress, maxUint256],
@@ -129,31 +149,60 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
       updatePosition(hexToBigInt(mintPositionId as Hash));
     }
   }, [
-    allowanceData,
-    writeContractApproval,
-    token0,
+    allowanceDataToken1,
+    writeContractApprovalToken1,
+    token1,
     updatePosition,
     mintPositionId,
   ]);
+
+  /**
+   * Step 2. Approve token 0
+   */
+  const approveToken0 = useCallback(() => {
+    console.log("approving token0");
+    if (
+      !allowanceDataToken0?.result ||
+      allowanceDataToken0.result === BigInt(0)
+    ) {
+      writeContractApprovalToken0({
+        address: token0.address,
+        abi: erc20Abi,
+        functionName: "approve",
+        args: [ammAddress, maxUint256],
+      });
+    } else {
+      approveToken1();
+    }
+  }, [allowanceDataToken0, writeContractApprovalToken0, token0, approveToken1]);
 
   // once we have the position ID, approve the AMM to spend the token
   useEffect(() => {
     if (!mintPositionId) return;
 
-    approve();
-  }, [approve, mintPositionId]);
+    approveToken0();
+  }, [approveToken0, mintPositionId]);
 
   // wait for the approval transaction to complete
-  const approvalResult = useWaitForTransactionReceipt({
-    hash: approvalData,
+  const approvalToken0Result = useWaitForTransactionReceipt({
+    hash: approvalDataToken0,
+  });
+
+  // once approval of token 0 is complete,
+  useEffect(() => {
+    if (!approvalToken0Result.data || !mintPositionId) return;
+    approveToken1();
+  }, [approveToken1, approvalToken0Result.data, mintPositionId]);
+
+  const approvalToken1Result = useWaitForTransactionReceipt({
+    hash: approvalDataToken1,
   });
 
   // update the position once the approval is complete
   useEffect(() => {
-    if (!approvalResult.data || !mintPositionId) return;
-
-    updatePosition(hexToBigInt(mintPositionId));
-  }, [updatePosition, approvalResult.data, mintPositionId]);
+    if (!approvalToken1Result.data || !mintPositionId) return;
+    updatePosition(hexToBigInt(mintPositionId as Hash));
+  }, [approvalToken1Result.data, mintPositionId, updatePosition]);
 
   // wait for the updatePosition transaction to complete
   const updatePositionResult = useWaitForTransactionReceipt({
@@ -166,11 +215,27 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
   }
 
   // step 2 pending
-  if (isApprovalPending || (approvalData && approvalResult?.isPending)) {
+  if (
+    isApprovalPendingToken0 ||
+    (approvalDataToken0 && approvalToken0Result?.isPending)
+  ) {
     return (
       <EnableSpending
         tokenName={token0.symbol}
-        transactionHash={approvalData}
+        transactionHash={approvalDataToken0}
+      />
+    );
+  }
+
+  // step 3 pending
+  if (
+    isApprovalPendingToken1 ||
+    (approvalDataToken1 && approvalToken1Result?.isPending)
+  ) {
+    return (
+      <EnableSpending
+        tokenName={token1.symbol}
+        transactionHash={approvalDataToken1}
       />
     );
   }
@@ -189,8 +254,17 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
   }
 
   // error
-  if (mintError || approvalError || updatePositionError) {
-    const error = mintError || approvalError || updatePositionError;
+  if (
+    mintError ||
+    approvalErrorToken0 ||
+    approvalErrorToken1 ||
+    updatePositionError
+  ) {
+    const error =
+      mintError ||
+      approvalErrorToken0 ||
+      approvalErrorToken1 ||
+      updatePositionError;
     return <Fail text={(error as any)?.shortMessage} />;
   }
 
