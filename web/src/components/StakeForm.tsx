@@ -402,7 +402,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
         },
       ],
     };
-  }, [data, liquidityRangeType]);
+  }, [liquidityRangeType]);
 
   useEffect(() => {
     if (chartRef.current) {
@@ -459,7 +459,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
             </div>
 
             {mode === "existing" && (
-              <div className="absolute -top-[15px] right-0">
+              <div className="absolute right-0 top-[-15px]">
                 <Menu
                   id={"tokens"}
                   background="dark"
