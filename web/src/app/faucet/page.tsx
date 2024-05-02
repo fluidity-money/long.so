@@ -31,7 +31,7 @@ const FaucetPage = () => {
     writeContract({
       address: token,
       functionName: "mint",
-      args: [address, BigInt(amount)],
+      args: [address, BigInt(parseFloat(amount) * 10 ** 18)],
       abi: abi,
     });
   };
