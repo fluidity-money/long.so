@@ -28,6 +28,10 @@ export const StyleLayout = ({ children }: { children: React.ReactNode }) => {
     <>
       <Head>
         <title>Superposition AMM</title>
+        <meta property="og:title" content="Long Tail AMM" />
+        <meta property="og:image" content="https://static.long.so/embed.jpg" />
+        <meta property="og:url" content="https://long.so" />
+        <meta property="og:description" content="Long Tail is Arbitrum's cheapest and most rewarding AMM." />
       </Head>
       <body
         className={`${inter.className} flex min-h-screen flex-col bg-white`}
