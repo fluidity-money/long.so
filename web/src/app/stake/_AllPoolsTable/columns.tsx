@@ -142,7 +142,7 @@ export const columns: ColumnDef<Pool>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex flex-row gap-2 group-hover:invert">
-          <Link href={`/stake/pool/${row.original.id}/add-liquidity`}>
+          <Link href={`/stake/pool/add-liquidity?id=${row.original.id}`}>
             <Button size="sm" className="h-[29px] text-2xs md:text-xs">
               +
             </Button>

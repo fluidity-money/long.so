@@ -21,63 +21,63 @@ import { useAccount } from "wagmi";
 
 const poolsData: Pool[] = [
   {
-    id: nanoid(),
+    id: "1",
     tokens: [{ name: "USDC" }, { name: "ETH" }],
     duration: 100,
     staked: 100,
     totalYield: 100,
   },
   {
-    id: nanoid(),
+    id: "2",
     tokens: [{ name: "USDT" }, { name: "ETH" }],
     duration: 100,
     staked: 100,
     totalYield: 100,
   },
   {
-    id: nanoid(),
+    id: "3",
     tokens: [{ name: "USDC" }, { name: "USDT" }],
     duration: 100,
     staked: 100,
     totalYield: 100,
   },
   {
-    id: nanoid(),
+    id: "4",
     tokens: [{ name: "USDC" }, { name: "ETH" }],
     duration: 100,
     staked: 100,
     totalYield: 100,
   },
   {
-    id: nanoid(),
+    id: "5",
     tokens: [{ name: "USDT" }, { name: "ETH" }],
     duration: 100,
     staked: 100,
     totalYield: 100,
   },
   {
-    id: nanoid(),
+    id: "6",
     tokens: [{ name: "USDC" }, { name: "USDT" }],
     duration: 100,
     staked: 100,
     totalYield: 100,
   },
   {
-    id: nanoid(),
+    id: "7",
     tokens: [{ name: "USDC" }, { name: "ETH" }],
     duration: 100,
     staked: 100,
     totalYield: 100,
   },
   {
-    id: nanoid(),
+    id: "8",
     tokens: [{ name: "USDT" }, { name: "ETH" }],
     duration: 100,
     staked: 100,
     totalYield: 100,
   },
   {
-    id: nanoid(),
+    id: "9",
     tokens: [{ name: "USDC" }, { name: "USDT" }],
     duration: 100,
     staked: 100,
@@ -164,7 +164,7 @@ export const MyPositions = () => {
                 layout
                 key={pool.id}
                 className="flex h-[83px] w-[77px] cursor-pointer flex-col items-center rounded-xl border border-white p-2 md:h-[120px] md:min-w-[111px] md:gap-1"
-                onClick={() => router.push(`/stake/pool/${pool.id}`)}
+                onClick={() => router.push(`/stake/pool?id=${pool.id}`)}
               >
                 <div className="flex w-full flex-row">
                   <div className="size-1 rounded-full bg-red-500 md:size-2" />

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SwapPro } from "@/components/SwapPro";
 import { useHotkeys } from "react-hotkeys-hook";
 import Token from "@/assets/icons/token.svg";
@@ -189,7 +189,13 @@ export default function PoolPage() {
 
   useHotkeys("esc", () => router.back());
 
-  const params = useParams();
+  const params = useSearchParams();
+  const id = params.get("id");
+
+  if (!id) {
+    // TODO: redirect to stake page
+    return null;
+  }
 
   return (
     <div className="flex w-full flex-col">
@@ -230,8 +236,8 @@ export default function PoolPage() {
                   <Badge className="iridescent flex h-4 w-[93px] flex-row pl-0.5 text-black md:w-[132px]">
                     <div className="flex flex-row">
                       <Token className={"size-[14px]"} />
-                      <Token className={"-ml-[5px] size-[14px]"} />
-                      <Token className={"-ml-[5px] size-[14px]"} />
+                      <Token className={"ml-[-5px] size-[14px]"} />
+                      <Token className={"ml-[-5px] size-[14px]"} />
                     </div>
                     <div className="text-nowrap text-4xs font-medium md:text-2xs">
                       Live Utility Rewards
@@ -245,7 +251,7 @@ export default function PoolPage() {
               <div className="flex flex-col gap-8 p-4">
                 <div className="flex flex-row gap-2">
                   <Link
-                    href={`/stake/pool/${params.id}/add-liquidity`}
+                    href={`/stake/pool/add-liquidity?id=${id}`}
                     legacyBehavior
                   >
                     <Button
@@ -257,7 +263,7 @@ export default function PoolPage() {
                     </Button>
                   </Link>
                   <Link
-                    href={`/stake/pool/${params.id}/withdraw-liquidity`}
+                    href={`/stake/pool/withdraw-liquidity?id=${id}`}
                     legacyBehavior
                   >
                     <Button
