@@ -33,7 +33,7 @@ export const SwapPro = ({
 
   const { token0, token1 } = useSwapStore();
 
-  const isOpen = !welcome && (swapPro || override || isLtSm);
+  const isOpen = override || (!welcome && (swapPro || isLtSm));
 
   return (
     <motion.div
