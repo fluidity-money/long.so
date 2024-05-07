@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { format, subDays } from "date-fns";
 import ReactECharts from "echarts-for-react";
 import Link from "next/link";
+import { useEffect } from "react";
 
 const data = [
   {
@@ -192,8 +193,13 @@ export default function PoolPage() {
   const params = useSearchParams();
   const id = params.get("id");
 
+  useEffect(() => {
+    if (!id) {
+      router.push("/stake");
+    }
+  }, [router, id]);
+
   if (!id) {
-    // TODO: redirect to stake page
     return null;
   }
 
