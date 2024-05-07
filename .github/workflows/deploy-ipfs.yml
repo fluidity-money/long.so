@@ -14,6 +14,8 @@ jobs:
       NEXT_PUBLIC_PROJECT_ID: bf05d5b47c6d5a47c0de300dc3b80f70
     steps:
       - uses: actions/checkout@v3
+        with:
+          lfs: "true"
 
       - uses: pnpm/action-setup@v2
         with:
