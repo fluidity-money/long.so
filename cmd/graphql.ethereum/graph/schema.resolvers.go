@@ -23,6 +23,7 @@ func (r *amountResolver) Token(ctx context.Context, obj *model.Amount) (model.To
 		return model.Token{}, fmt.Errorf("empty amount")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(2 * time.Second)
 		return MockToken(obj.Token.String())
 	}
 	name, symbol, totalSupply, decimals, err := erc20.GetErc20Details(
@@ -65,6 +66,7 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 		return "", fmt.Errorf("empty amount")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(5 * time.Second)
 		// If we're mocking the graph, then we take the uncaled
 		// amount, and we simply divide it by 1e6, then we divide
 		// it by 0.04 unless the token is fUSDC.
@@ -94,6 +96,7 @@ func (r *mutationResolver) SetVolumeYieldPriceAndTVLForLastHour(ctx context.Cont
 // Pools is the resolver for the pools field.
 func (r *queryResolver) Pools(ctx context.Context) (pools []seawater.Pool, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(15 * time.Second)
 		pools = MockSeawaterPools()
 		return
 	}
@@ -104,6 +107,7 @@ func (r *queryResolver) Pools(ctx context.Context) (pools []seawater.Pool, err e
 // GetPool is the resolver for the getPool field.
 func (r *queryResolver) GetPool(ctx context.Context, address string) (pool *seawater.Pool, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(15 * time.Second)
 		pool = MockGetPool(address)
 		return
 	}
@@ -114,6 +118,7 @@ func (r *queryResolver) GetPool(ctx context.Context, address string) (pool *seaw
 // GetPoolPositions is the resolver for the getPoolPositions field.
 func (r *queryResolver) GetPoolPositions(ctx context.Context, address string) (positions []seawater.Position, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(15 * time.Second)
 		positions = MockGetPoolPositions(address)
 		return
 	}
@@ -124,6 +129,7 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, address string) (p
 // GetPosition is the resolver for the getPosition field.
 func (r *queryResolver) GetPosition(ctx context.Context, id string) (position *seawater.Position, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(10 * time.Second)
 		position = MockGetPosition(id)
 		return
 	}
@@ -143,6 +149,7 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string) ([]seaw
 // GetWallet is the resolver for the getWallet field.
 func (r *queryResolver) GetWallet(ctx context.Context, address string) (*model.Wallet, error) {
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(2 * time.Second)
 		return &model.Wallet{types.AddressFromString(address)}, nil
 	}
 	return nil, nil // TODO
@@ -175,6 +182,7 @@ func (r *seawaterPoolResolver) Token(ctx context.Context, obj *seawater.Pool) (t
 		return t, fmt.Errorf("no pool obj")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(5 * time.Second)
 		return MockToken(obj.Token.String())
 	}
 	name, symbol, totalSupply, decimals, err := erc20.GetErc20Details(
@@ -199,6 +207,7 @@ func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.
 		return price, fmt.Errorf("pool empty")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(20 * time.Second)
 		daily, _, _, err := MockPriceOverTime(31, r.C.FusdcAddr, obj.Token)
 		if err != nil {
 			return price, err
@@ -218,6 +227,7 @@ func (r *seawaterPoolResolver) VolumeOverTime(ctx context.Context, obj *seawater
 		return vol, fmt.Errorf("pool empty")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(20 * time.Second)
 		daily, _, _, err := MockVolumeOverTime(31, r.C.FusdcAddr, obj.Token)
 		if err != nil {
 			return vol, err
@@ -237,6 +247,7 @@ func (r *seawaterPoolResolver) LiquidityOverTime(ctx context.Context, obj *seawa
 		return liq, fmt.Errorf("pool empty")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(20 * time.Second)
 		daily, _, _, err := MockVolumeOverTime(31, r.C.FusdcAddr, obj.Token)
 		if err != nil {
 			return liq, err
@@ -256,6 +267,7 @@ func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Po
 		return tvl, fmt.Errorf("pool empty")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(20 * time.Second)
 		daily, _, _, err := MockPriceOverTime(31, r.C.FusdcAddr, obj.Token)
 		if err != nil {
 			return tvl, err
@@ -275,6 +287,7 @@ func (r *seawaterPoolResolver) YieldOverTime(ctx context.Context, obj *seawater.
 		return yield, fmt.Errorf("pool empty")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(20 * time.Second)
 		daily, _, _, err := MockVolumeOverTime(31, r.C.FusdcAddr, obj.Token)
 		if err != nil {
 			return yield, err
@@ -316,6 +329,7 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 		return nil, fmt.Errorf("no pool obj")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(10 * time.Second)
 		positions = MockGetPoolPositions(obj.Token.String())
 		return
 	}
@@ -334,6 +348,7 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool) (s
 		return nil, fmt.Errorf("empty pool")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(10 * time.Second)
 		swaps = MockSwaps(r.C.FusdcAddr, 150, obj.Token)
 		return
 	}

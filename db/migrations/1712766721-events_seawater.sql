@@ -17,7 +17,7 @@ CREATE TABLE events_seawater_burnPosition (
 
 	-- id
 	pos_id HUGEINT NOT NULL,
-	onwer ADDRESS NOT NULL
+	owner ADDRESS NOT NULL
 );
 
 CREATE UNIQUE INDEX ON events_seawater_burnPosition (pos_id);
