@@ -9,10 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAccount, useWriteContract } from "wagmi";
+import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
 import { abi } from "./ERC20mintable";
 import { useState } from "react";
 import { tokens } from "@/config/tokens";
+import { erc20Abi } from "viem";
 
 const FaucetPage = () => {
   const { writeContract } = useWriteContract();
@@ -22,16 +23,28 @@ const FaucetPage = () => {
   const [amount, setAmount] = useState("");
   const [token, setToken] = useState(tokens[0].address);
 
+  const { data: tokenDecimals } = useSimulateContract({
+    address: token,
+    abi: erc20Abi,
+    // @ts-expect-error
+    functionName: "decimals",
+  });
+
   const onClick = () => {
     if (!address) {
       alert("Please connect your wallet");
       return;
     }
 
+    if (!tokenDecimals) {
+      alert("Invalid token");
+      return;
+    }
+
     writeContract({
       address: token,
       functionName: "mint",
-      args: [address, BigInt(parseFloat(amount) * 10 ** 18)],
+      args: [address, BigInt(parseFloat(amount) * 10 ** tokenDecimals.result)],
       abi: abi,
     });
   };
