@@ -291,7 +291,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     if (mode === "new") {
       router.push("/stake/pool/create/confirm");
     } else {
-      router.push(`/stake/pool/${poolId}/confirm-liquidity`);
+      router.push(`/stake/pool/confirm-liquidity?id=${poolId}`);
     }
   };
 
