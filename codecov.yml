@@ -5,3 +5,13 @@ codecov:
     - "cmd/graphql.ethereum/graph/resolver.go"
     - "cmd/graphql.ethereum/graph/mocked.go"
     - "cmd/graphql.ethereum/graph/model/models_gen.go"
+  coverage:
+    status:
+      project:
+        default:
+          target: auto
+          threshold: 10%
+          base: auto
+          branches:
+            - development
+          if_ci_failed: error

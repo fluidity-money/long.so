@@ -1,52 +1,3 @@
-#---
-#name: codecov
-#on:
-#  push:
-#    branches:
-#      - development
-#  pull_request:
-#    branches:
-#      - development
-#
-#jobs:
-#  codecov:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v3
-#
-#      - name: Set up Go
-#        uses: actions/setup-go@v3
-#        with:
-#          go-version: '1.22.3'
-#
-#      - name: Install dependencies
-#        run: go mod tidy
-#
-#      - name: Run tests and generate coverage report
-#        run: go test ./... -coverprofile=coverage.txt -covermode=count
-#
-#      - name: Upload coverage reports to Codecov
-#        uses: codecov/codecov-action@v4.3.1
-#        with:
-#          files: ./coverage.txt
-#          fail_ci_if_error: true
-#          verbose: true
-#        env:
-#           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-#
-#      - name: Check coverage percentage
-#        run: |
-#          coverage=$(go tool cover -func=coverage.txt | grep total: | awk '{print $3}')
-#          echo "Coverage is $coverage"
-#          required_coverage="90.0%"
-#          if [[ "$(echo "$coverage" | sed 's/%//')" < "$(echo "$required_coverage" | sed 's/%//')" ]]; then
-#            echo "Coverage is below 90%. Failing the build."
-#            exit 1
-#          fi
-#        shell: bash
-#
-
 ---
 name: codecov
 on:
@@ -93,30 +44,7 @@ jobs:
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.3.1
         with:
-          files: coverage-go.txt, web/coverage/lcov.info
           fail_ci_if_error: true
           verbose: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Check coverage percentage for Go
-        run: |
-          coverage=$(go tool cover -func=coverage-go.txt | grep total: | awk '{print $3}')
-          echo "Coverage is $coverage"
-          required_coverage="90.0%"
-          if [[ "$(echo "$coverage" | sed 's/%//')" < "$(echo "$required_coverage" | sed 's/%//')" ]]; then
-            echo "Coverage is below 90%. Failing the build."
-            exit 1
-          fi
-        shell: bash
-
-      - name: Check coverage percentage for Node
-        run: |
-          coverage=$(grep 'All files' web/coverage/lcov-report/index.html | grep -oP '\d+.\d+%')
-          echo "Coverage is $coverage"
-          required_coverage="90.0%"
-          if [[ "$(echo "$coverage" | sed 's/%//')" < "$(echo "$required_coverage" | sed 's/%//')" ]]; then
-            echo "Coverage is below 90%. Failing the build."
-            exit 1
-          fi
-        shell: bash

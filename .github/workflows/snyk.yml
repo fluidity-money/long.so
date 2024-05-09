@@ -30,10 +30,3 @@ jobs:
         env:
           SNYK_ORG: ${{ secrets.SNYK_ORG }}
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-      - name: Run Snyk to monitor project
-        uses: snyk/actions/golang@master
-        with:
-          args: monitor --org=your-org-name  # Adjust the org as needed
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
