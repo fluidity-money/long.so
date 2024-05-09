@@ -1,5 +1,5 @@
 ---
-name: Check with Codecov
+name: codecov
 on:
   push:
     branches:
