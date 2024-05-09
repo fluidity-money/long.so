@@ -27,14 +27,17 @@ jobs:
         run: go test ./... -coverprofile=coverage-go.txt -covermode=count
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: pnpm/action-setup@v4
         with:
+          path: web
           node-version: '22'
+          version: 8
+          run_install: true
 
-      - name: Install Node dependencies
-        run: |
-          cd web
-          pnpm install
+#      - name: Install Node dependencies
+#        run: |
+#          cd web
+#          pnpm install
 
       - name: Run Node tests and generate coverage report
         run: |
