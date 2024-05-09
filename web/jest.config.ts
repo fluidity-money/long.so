@@ -13,6 +13,8 @@ const config: Config = {
     "/node_modules/"
   ],
 
+  collectCoverage: true,
+
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: "v8",
 
