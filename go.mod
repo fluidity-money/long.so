@@ -6,7 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.46
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
-	github.com/ethereum/go-ethereum v1.14.2
+	github.com/ethereum/go-ethereum v1.14.3
 	github.com/lib/pq v1.10.9
 	github.com/stretchr/testify v1.9.0
 	github.com/vektah/gqlparser/v2 v2.5.11
