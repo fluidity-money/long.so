@@ -32,6 +32,7 @@ import { EnableSpending } from "@/components/sequence/EnableSpending";
 import Confirm from "@/components/sequence/Confirm";
 import { Success } from "@/components/sequence/Success";
 import { Fail } from "@/components/sequence/Fail";
+import { LoaderIcon } from "lucide-react";
 
 export const SwapForm = () => {
   const [breakdownHidden, setBreakdownHidden] = useState(true);
@@ -91,22 +92,23 @@ export const SwapForm = () => {
     args: [address as Hash],
   });
 
-  const { error: quote1Error } = useSimulateContract({
-    address: ammAddress,
-    abi: output.abi,
-    functionName: "quote",
-    args: [
-      token0.address === fUSDC.address ? token1.address : token0.address,
-      token1.address === fUSDC.address,
-      BigInt(parseFloat(token0Amount ?? "0") * 10 ** 18),
-      maxUint256,
-    ],
-    // since this is intended to throw an error, we want to disable retries
-    query: {
-      retry: false,
-      retryOnMount: false,
-    },
-  });
+  const { error: quote1Error, isLoading: quote1IsLoading } =
+    useSimulateContract({
+      address: ammAddress,
+      abi: output.abi,
+      functionName: "quote",
+      args: [
+        token0.address === fUSDC.address ? token1.address : token0.address,
+        token1.address === fUSDC.address,
+        BigInt(parseFloat(token0Amount || "0") * 10 ** 18),
+        maxUint256,
+      ],
+      // since this is intended to throw an error, we want to disable retries
+      query: {
+        retry: false,
+        retryOnMount: false,
+      },
+    });
 
   /**
    * Parse the quote amount from the error message
@@ -408,7 +410,13 @@ export const SwapForm = () => {
               </div>
 
               <div className={"flex flex-row items-center justify-between"}>
-                <div className={"text-2xl"}>{token1Amount}</div>
+                <div className={"text-2xl"}>
+                  {quote1IsLoading ? (
+                    <LoaderIcon className="animate-spin" />
+                  ) : (
+                    token1Amount
+                  )}
+                </div>
 
                 <Link href={"/swap/explore?token=1"}>
                   <Badge
