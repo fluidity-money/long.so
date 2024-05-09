@@ -9,3 +9,5 @@ pkg/out
 pkg/*.rlib
 /web/.env
 *.zip
+
+.DS_Store
