@@ -11,8 +11,8 @@ jobs:
   frontend-tests:
     name: Run Frontend Tests
     runs-on: ubuntu-latest
-    if: |
-      contains(github.event.pull_request.changed_files, 'web/')
+#    if: |
+#      contains(github.event.pull_request.changed_files, 'web/')
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
