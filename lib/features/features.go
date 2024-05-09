@@ -85,10 +85,11 @@ func (f F) Is(name string) bool {
 }
 
 // OnFeature being enabled, run the thunk given.
-func (f F) On(name string, k func() error) {
+func (f F) On(name string, k func() error) (r error) {
 	if f.Is(name) {
 		if err := k(); err != nil {
-			log.Fatalf("feature %v err: %v", name, err)
+			r = err
 		}
 	}
+	return
 }
