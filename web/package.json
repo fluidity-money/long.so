@@ -44,7 +44,7 @@
     "echarts": "^5.5.0",
     "echarts-for-react": "^3.0.2",
     "eslint": "9.0.0",
-    "eslint-config-next": "14.1.0",
+    "eslint-config-next": "14.2.3",
     "file-loader": "^6.2.0",
     "framer-motion": "^10.16.4",
     "graphql": "^16.8.0",
