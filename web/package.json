@@ -9,6 +9,7 @@
     "lint": "next lint --fix",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "codegen": "graphql-codegen --config codegen.ts",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -49,7 +50,7 @@
     "eslint-config-next": "14.2.3",
     "file-loader": "^6.2.0",
     "framer-motion": "^10.16.4",
-    "graphql": "^16.8.0",
+    "graphql": "^16.8.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.344.0",
     "nanoid": "^5.0.6",
@@ -76,6 +77,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "5.0.2",
     "@storybook/addon-essentials": "^7.6.17",
     "@storybook/addon-interactions": "^7.6.17",
     "@storybook/addon-links": "^7.6.17",
@@ -100,6 +102,8 @@
     "prettier-plugin-tailwindcss": "^0.5.11",
     "storybook": "^8.0.10",
     "style-loader": "^3.3.4",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.4.1",
+    "typescript": "5.2.2",
+    "@graphql-codegen/client-preset": "4.2.5"
   }
 }
