@@ -15,31 +15,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-#      - name: Set up Go
-#        uses: actions/setup-go@v3
-#        with:
-#          go-version: '1.22.3'
-#
-#      - name: Install Go dependencies
-#        run: go mod tidy
-#
-#      - name: Run Go tests and generate coverage report
-#        run: go test ./... -coverprofile=coverage-go.txt -covermode=count
-#
-#      - name: Set up Node.js
-#        uses: actions/setup-node@v2
-#        with:
-#          node-version: '22'
-#
-#      - name: Install Node dependencies
-#        run: |
-#          cd web
-#          npm install
-#
-#      - name: Run Node tests and generate coverage report
-#        run: |
-#          cd web
-#          npm run test -- --coverage
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.22.3'
+
+      - name: Install Go dependencies
+        run: go mod tidy
+
+      - name: Run Go tests and generate coverage report
+        run: go test ./... -coverprofile=coverage-go.txt -covermode=count
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '22'
+
+      - name: Install Node dependencies
+        run: |
+          cd web
+          npm install
+
+      - name: Run Node tests and generate coverage report
+        run: |
+          cd web
+          npm run test
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.3.1
