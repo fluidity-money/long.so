@@ -1,0 +1,29 @@
+name: sqlfluff
+
+on:
+  push:
+    branches:
+      - development
+  pull_request:
+    branches:
+      - development
+
+jobs:
+  sqlfluff:
+    name: sqlfluff
+    runs-on: ubuntu-latest
+#    if: |
+#      contains(github.event.pull_request.changed_files, 'db/migrations/')
+    steps:
+      - uses: actions/checkout@v2
+      - uses: yu-iskw/action-sqlfluff@v3
+        id: lint-sql
+        with:
+          github_token: ${{ secrets.github_token }}
+          paths: '${{ github.workspace }}/db/migrations'
+          level: 'info'
+      - name: 'Show outputs (Optional)'
+        shell: bash
+        run: |
+          echo '${{ steps.lint-sql.outputs.sqlfluff-results }}' | jq -r '.'
+          echo '${{ steps.lint-sql.outputs.sqlfluff-results-rdjson }}' | jq -r '.'
