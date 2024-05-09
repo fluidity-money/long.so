@@ -16,10 +16,11 @@ jobs:
 #      contains(github.event.pull_request.changed_files, 'db/migrations/')
     steps:
       - uses: actions/checkout@v2
-      - uses: yu-iskw/action-sqlfluff@v3
+      - uses: yu-iskw/action-sqlfluff@v3.7.0
         id: lint-sql
         with:
           github_token: ${{ secrets.github_token }}
+          sqlfluff_version: "3.0.6"
           paths: '${{ github.workspace }}/db/migrations'
           level: 'info'
       - name: 'Show outputs (Optional)'
