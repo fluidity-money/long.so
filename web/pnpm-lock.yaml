@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -114,8 +114,8 @@ dependencies:
     specifier: ^10.16.4
     version: 10.16.4(react-dom@18.2.0)(react@18.2.0)
   graphql:
-    specifier: ^16.8.0
-    version: 16.8.0
+    specifier: ^16.8.1
+    version: 16.8.1
   lodash:
     specifier: ^4.17.21
     version: 4.17.21
@@ -1812,6 +1812,7 @@ packages:
 
   /@emotion/memoize@0.7.4:
     resolution: {integrity: sha512-Ja/Vfqe3HpuzRsG1oBtWTHk2PGZ7GR+2Vz5iYGelAw8dx32K0y7PjVuxK6z1nMpZOqAFsRUPCkK1YjJ56qJlgw==}
+    requiresBuild: true
     dev: false
     optional: true
 
@@ -3223,6 +3224,7 @@ packages:
 
   /@lit/reactive-element@2.0.4:
     resolution: {integrity: sha512-GFn91inaUa2oHLak8awSIigYz0cU0Payr1rcFsrkf5OJ5eSPxElyZfKh0f2p9FsTiZWXQdWGJeXZICEfXXYSXQ==}
+    requiresBuild: true
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.2.0
     dev: false
@@ -3329,7 +3331,7 @@ packages:
       - webpack-dev-server
     dev: false
 
-  /@metamask/providers@15.0.0:
+  /@metamask/providers@15.0.0(esbuild@0.20.2):
     resolution: {integrity: sha512-FXvL1NQNl6I7fMOJTfQYcBlBZ33vSlm6w80cMpmn8sJh0Lb7wcBpe02UwBsNlARnI+Qsr26XeDs6WHUHQh8CuA==}
     engines: {node: ^18.18 || >=20}
     dependencies:
@@ -3340,13 +3342,19 @@ packages:
       '@metamask/safe-event-emitter': 3.1.1
       '@metamask/utils': 8.4.0
       detect-browser: 5.3.0
-      extension-port-stream: 3.0.0
+      extension-port-stream: 3.0.0(esbuild@0.20.2)
       fast-deep-equal: 3.1.3
       is-stream: 2.0.1
       readable-stream: 3.6.2
       webextension-polyfill: 0.10.0
     transitivePeerDependencies:
+      - '@swc/core'
+      - '@webpack-cli/generators'
+      - esbuild
       - supports-color
+      - uglify-js
+      - webpack-bundle-analyzer
+      - webpack-dev-server
     dev: false
 
   /@metamask/rpc-errors@6.2.1:
@@ -3442,7 +3450,7 @@ packages:
       qr-code-styling: 1.6.0-rc.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-      react-i18next: 13.5.0(i18next@23.11.3)(react-dom@18.2.0)(react-native@0.74.1)(react@18.2.0)
+      react-i18next: 13.5.0(i18next@22.5.1)(react-dom@18.2.0)(react-native@0.74.1)(react@18.2.0)
       react-native: 0.74.1(@babel/core@7.24.5)(@babel/preset-env@7.24.5)(@types/react@18.2.21)(react@18.2.0)
     dev: false
 
@@ -3500,7 +3508,7 @@ packages:
       - webpack-dev-server
     dev: false
 
-  /@metamask/sdk@0.18.6(react-dom@18.2.0)(react-i18next@13.5.0)(react-native@0.74.1)(react@18.2.0):
+  /@metamask/sdk@0.18.6(esbuild@0.20.2)(react-dom@18.2.0)(react-i18next@13.5.0)(react-native@0.74.1)(react@18.2.0):
     resolution: {integrity: sha512-ZT8e4BrcWrm44apLb412WR0fDsgeaS8UlI1c0wKRUPu1w/UntpXuUVO+EaY8WDlnOPAiAsjyqWKey64/DfvbXQ==}
     peerDependencies:
       '@react-native-async-storage/async-storage': ^1.19.6
@@ -3518,7 +3526,7 @@ packages:
         optional: true
     dependencies:
       '@metamask/onboarding': 1.0.1
-      '@metamask/providers': 15.0.0
+      '@metamask/providers': 15.0.0(esbuild@0.20.2)
       '@metamask/sdk-communication-layer': 0.18.5(cross-fetch@4.0.0)(eciesjs@0.3.18)(eventemitter2@6.4.9)(readable-stream@3.6.2)(socket.io-client@4.7.5)
       '@metamask/sdk-install-modal-web': 0.18.5(i18next@22.5.1)(react-dom@18.2.0)(react-i18next@13.5.0)(react-native@0.74.1)(react@18.2.0)
       '@types/dom-screen-wake-lock': 1.0.3
@@ -3543,12 +3551,18 @@ packages:
       util: 0.12.5
       uuid: 8.3.2
     transitivePeerDependencies:
+      - '@swc/core'
+      - '@webpack-cli/generators'
       - bufferutil
       - encoding
+      - esbuild
       - react-i18next
       - rollup
       - supports-color
+      - uglify-js
       - utf-8-validate
+      - webpack-bundle-analyzer
+      - webpack-dev-server
     dev: false
 
   /@metamask/utils@5.0.2:
@@ -7931,6 +7945,7 @@ packages:
 
   /@vue/compiler-core@3.4.27:
     resolution: {integrity: sha512-E+RyqY24KnyDXsCuQrI+mlcdW3ALND6U7Gqa/+bVwbcpcR3BRRIckFoz7Qyd4TTlnugtwuI7YgjbvsLmxb+yvg==}
+    requiresBuild: true
     dependencies:
       '@babel/parser': 7.24.5
       '@vue/shared': 3.4.27
@@ -7941,6 +7956,7 @@ packages:
 
   /@vue/compiler-dom@3.4.27:
     resolution: {integrity: sha512-kUTvochG/oVgE1w5ViSr3KUBh9X7CWirebA3bezTbB5ZKBQZwR2Mwj9uoSKRMFcz4gSMzzLXBPD6KpCLb9nvWw==}
+    requiresBuild: true
     dependencies:
       '@vue/compiler-core': 3.4.27
       '@vue/shared': 3.4.27
@@ -7948,6 +7964,7 @@ packages:
 
   /@vue/compiler-sfc@3.4.27:
     resolution: {integrity: sha512-nDwntUEADssW8e0rrmE0+OrONwmRlegDA1pD6QhVeXxjIytV03yDqTey9SBDiALsvAd5U4ZrEKbMyVXhX6mCGA==}
+    requiresBuild: true
     dependencies:
       '@babel/parser': 7.24.5
       '@vue/compiler-core': 3.4.27
@@ -7962,6 +7979,7 @@ packages:
 
   /@vue/compiler-ssr@3.4.27:
     resolution: {integrity: sha512-CVRzSJIltzMG5FcidsW0jKNQnNRYC8bT21VegyMMtHmhW3UOI7knmUehzswXLrExDLE6lQCZdrhD4ogI7c+vuw==}
+    requiresBuild: true
     dependencies:
       '@vue/compiler-dom': 3.4.27
       '@vue/shared': 3.4.27
@@ -7969,12 +7987,14 @@ packages:
 
   /@vue/reactivity@3.4.27:
     resolution: {integrity: sha512-kK0g4NknW6JX2yySLpsm2jlunZJl2/RJGZ0H9ddHdfBVHcNzxmQ0sS0b09ipmBoQpY8JM2KmUw+a6sO8Zo+zIA==}
+    requiresBuild: true
     dependencies:
       '@vue/shared': 3.4.27
     dev: false
 
   /@vue/runtime-core@3.4.27:
     resolution: {integrity: sha512-7aYA9GEbOOdviqVvcuweTLe5Za4qBZkUY7SvET6vE8kyypxVgaT1ixHLg4urtOlrApdgcdgHoTZCUuTGap/5WA==}
+    requiresBuild: true
     dependencies:
       '@vue/reactivity': 3.4.27
       '@vue/shared': 3.4.27
@@ -7982,6 +8002,7 @@ packages:
 
   /@vue/runtime-dom@3.4.27:
     resolution: {integrity: sha512-ScOmP70/3NPM+TW9hvVAz6VWWtZJqkbdf7w6ySsws+EsqtHvkhxaWLecrTorFxsawelM5Ys9FnDEMt6BPBDS0Q==}
+    requiresBuild: true
     dependencies:
       '@vue/runtime-core': 3.4.27
       '@vue/shared': 3.4.27
@@ -7990,6 +8011,7 @@ packages:
 
   /@vue/server-renderer@3.4.27(vue@3.4.27):
     resolution: {integrity: sha512-dlAMEuvmeA3rJsOMJ2J1kXU7o7pOxgsNHVr9K8hB3ImIkSuBrIdy0vF66h8gf8Tuinf1TK3mPAz2+2sqyf3KzA==}
+    requiresBuild: true
     peerDependencies:
       vue: 3.4.27
     dependencies:
@@ -8000,6 +8022,7 @@ packages:
 
   /@vue/shared@3.4.27:
     resolution: {integrity: sha512-DL3NmY2OFlqmYYrzp39yi3LDkKxa5vZVwxWdQ3rG0ekuWscHraeIbnI8t+aZK7qhYqEqWKTUdijadunb9pnrgA==}
+    requiresBuild: true
     dev: false
 
   /@wagmi/connectors@4.1.23(@types/react@18.2.21)(@wagmi/core@2.6.14)(esbuild@0.20.2)(react-dom@18.2.0)(react-native@0.74.1)(react@18.2.0)(typescript@5.4.5)(viem@2.9.6):
@@ -8054,7 +8077,7 @@ packages:
       - zod
     dev: false
 
-  /@wagmi/connectors@4.3.5(@types/react@18.2.21)(@wagmi/core@2.9.3)(react-dom@18.2.0)(react-i18next@13.5.0)(react-native@0.74.1)(react@18.2.0)(typescript@5.4.5)(viem@2.9.6):
+  /@wagmi/connectors@4.3.5(@types/react@18.2.21)(@wagmi/core@2.9.3)(esbuild@0.20.2)(react-dom@18.2.0)(react-i18next@13.5.0)(react-native@0.74.1)(react@18.2.0)(typescript@5.4.5)(viem@2.9.6):
     resolution: {integrity: sha512-6olw6H4Zlp9H6WQeKJv0pJHUYbq2ckXc/57qOKhruvksuXde94gY34nUDZUNRKRTiYlXiUVtwJK7OP0/on7bGw==}
     peerDependencies:
       '@wagmi/core': 2.9.3
@@ -8065,7 +8088,7 @@ packages:
         optional: true
     dependencies:
       '@coinbase/wallet-sdk': 3.9.1
-      '@metamask/sdk': 0.18.6(react-dom@18.2.0)(react-i18next@13.5.0)(react-native@0.74.1)(react@18.2.0)
+      '@metamask/sdk': 0.18.6(esbuild@0.20.2)(react-dom@18.2.0)(react-i18next@13.5.0)(react-native@0.74.1)(react@18.2.0)
       '@safe-global/safe-apps-provider': 0.18.1(typescript@5.4.5)
       '@safe-global/safe-apps-sdk': 8.1.0(typescript@5.4.5)
       '@wagmi/core': 2.9.3(@types/react@18.2.21)(react@18.2.0)(typescript@5.4.5)(viem@2.9.6)
@@ -8084,11 +8107,14 @@ packages:
       - '@netlify/blobs'
       - '@planetscale/database'
       - '@react-native-async-storage/async-storage'
+      - '@swc/core'
       - '@types/react'
       - '@upstash/redis'
       - '@vercel/kv'
+      - '@webpack-cli/generators'
       - bufferutil
       - encoding
+      - esbuild
       - ioredis
       - react
       - react-dom
@@ -8097,7 +8123,10 @@ packages:
       - rollup
       - supports-color
       - uWebSockets.js
+      - uglify-js
       - utf-8-validate
+      - webpack-bundle-analyzer
+      - webpack-dev-server
       - zod
     dev: false
 
@@ -8813,9 +8842,6 @@ packages:
     resolution: {integrity: sha512-daOCaa8h4AT9BGqbsBAAU0CQL/hFWt9Bs6CK9zjesvhwxK2qQZ2O/t8tU2c68Gsj6VRDim7CcWCKjNYAqtGNyQ==}
     peerDependencies:
       '@web3modal/wallet': 4.1.3
-    peerDependenciesMeta:
-      '@web3modal/siwe':
-        optional: true
     dependencies:
       '@web3modal/common': 4.1.3
       '@web3modal/core': 4.1.3(@types/react@18.2.21)(react@18.2.0)
@@ -8856,17 +8882,8 @@ packages:
       '@wagmi/connectors': '>=4.0.0'
       '@wagmi/core': '>=2.0.0'
       viem: '>=2.0.0'
-    peerDependenciesMeta:
-      '@web3modal/siwe':
-        optional: true
-      react:
-        optional: true
-      react-dom:
-        optional: true
-      vue:
-        optional: true
     dependencies:
-      '@wagmi/connectors': 4.3.5(@types/react@18.2.21)(@wagmi/core@2.9.3)(react-dom@18.2.0)(react-i18next@13.5.0)(react-native@0.74.1)(react@18.2.0)(typescript@5.4.5)(viem@2.9.6)
+      '@wagmi/connectors': 4.3.5(@types/react@18.2.21)(@wagmi/core@2.9.3)(esbuild@0.20.2)(react-dom@18.2.0)(react-i18next@13.5.0)(react-native@0.74.1)(react@18.2.0)(typescript@5.4.5)(viem@2.9.6)
       '@wagmi/core': 2.9.3(@types/react@18.2.21)(react@18.2.0)(typescript@5.4.5)(viem@2.9.6)
       '@web3modal/polyfills': 4.1.3
       '@web3modal/scaffold': 4.1.3(@types/react@18.2.21)(@web3modal/wallet@4.1.3)(react@18.2.0)
@@ -10271,6 +10288,7 @@ packages:
 
   /color-string@1.9.1:
     resolution: {integrity: sha512-shrVawQFojnZv6xM40anx4CkoDP+fZsw/ZerEMsW/pyzsRbElpsL/DBVW7q3ExxwusdNXI3lXpuhEZkzs8p5Eg==}
+    requiresBuild: true
     dependencies:
       color-name: 1.1.4
       simple-swizzle: 0.2.2
@@ -10280,6 +10298,7 @@ packages:
   /color@4.2.3:
     resolution: {integrity: sha512-1rXeuUUiGGrykh+CeBdu5Ie7OJwinCgQY0bc7GCRxy5xVHy+moaqkpL/jqQq0MtQOeYcrqEz4abc5f0KtU7W4A==}
     engines: {node: '>=12.5.0'}
+    requiresBuild: true
     dependencies:
       color-convert: 2.0.1
       color-string: 1.9.1
@@ -11107,6 +11126,7 @@ packages:
   /detect-libc@2.0.3:
     resolution: {integrity: sha512-bwy0MGW55bG41VqxxypOsdSdGqLwXPI/focwgTYCFMbdUiBAxLg9CFzG08sz2aqzknwiX7Hkl0bQENjg8iLByw==}
     engines: {node: '>=8'}
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -12048,6 +12068,7 @@ packages:
 
   /estree-walker@2.0.2:
     resolution: {integrity: sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==}
+    requiresBuild: true
     dev: false
 
   /esutils@2.0.3:
@@ -12295,12 +12316,19 @@ packages:
       - webpack-dev-server
     dev: false
 
-  /extension-port-stream@3.0.0:
+  /extension-port-stream@3.0.0(esbuild@0.20.2):
     resolution: {integrity: sha512-an2S5quJMiy5bnZKEf6AkfH/7r8CzHvhchU40gxN+OM6HPhe7Z9T1FUychcf2M9PpPOO0Hf7BAEfJkw2TDIBDw==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      readable-stream: 3.6.2
-      webextension-polyfill: 0.10.0
+      readable-stream: 4.5.2
+      webextension-polyfill: 0.11.0(esbuild@0.20.2)
+    transitivePeerDependencies:
+      - '@swc/core'
+      - '@webpack-cli/generators'
+      - esbuild
+      - uglify-js
+      - webpack-bundle-analyzer
+      - webpack-dev-server
     dev: false
 
   /extract-zip@2.0.1(supports-color@8.1.1):
@@ -12938,8 +12966,8 @@ packages:
   /graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
-  /graphql@16.8.0:
-    resolution: {integrity: sha512-0oKGaR+y3qcS5mCu1vb7KG+a89vjn06C7Ihq/dDl3jA+A8B3TKomvi3CiEcVLJQGalbu8F52LxkOym7U5sSfbg==}
+  /graphql@16.8.1:
+    resolution: {integrity: sha512-59LZHPdGZVh695Ud9lRzPBVTtlX9ZCV150Er2W43ro37wVof0ctenSaskPPjN7lVTIN8mSZt8PHUNKZuNQUuxw==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
     dev: false
 
@@ -13250,12 +13278,6 @@ packages:
       '@babel/runtime': 7.24.5
     dev: false
 
-  /i18next@23.11.3:
-    resolution: {integrity: sha512-Pq/aSKowir7JM0rj+Wa23Kb6KKDUGno/HjG+wRQu0PxoTbpQ4N89MAT0rFGvXmLkRLNMb1BbBOKGozl01dabzg==}
-    dependencies:
-      '@babel/runtime': 7.24.5
-    dev: false
-
   /iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
     engines: {node: '>=0.10.0'}
@@ -13404,6 +13426,7 @@ packages:
 
   /is-arrayish@0.3.2:
     resolution: {integrity: sha512-eVRqCvVlZbuw3GrM63ovNSNAeA1K16kaR/LRY/92w0zxQ5/1YzwblUX652i4Xs9RwAGjW9d9y6X88t8OaAJfWQ==}
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -14654,6 +14677,7 @@ packages:
 
   /lit-element@4.0.5:
     resolution: {integrity: sha512-iTWskWZEtn9SyEf4aBG6rKT8GABZMrTWop1+jopsEOgEcugcXJGKuX5bEbkq9qfzY+XB4MAgCaSPwnNpdsNQ3Q==}
+    requiresBuild: true
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.2.0
       '@lit/reactive-element': 2.0.4
@@ -14668,6 +14692,7 @@ packages:
 
   /lit-html@3.1.3:
     resolution: {integrity: sha512-FwIbqDD8O/8lM4vUZ4KvQZjPPNx7V1VhT7vmRB8RBAO0AU6wuTVdoXiu2CivVjEGdugvcbPNBLtPE1y0ifplHA==}
+    requiresBuild: true
     dependencies:
       '@types/trusted-types': 2.0.7
     dev: false
@@ -16247,6 +16272,7 @@ packages:
   /postcss@8.4.38:
     resolution: {integrity: sha512-Wglpdk03BSfXkHoQa3b/oulrotAkwrlLDRSOb9D0bN86FdRyE9lppSp33aHNPgBa0JKCoB+drFLZkQoRRYae5A==}
     engines: {node: ^10 || ^12 || >=14}
+    requiresBuild: true
     dependencies:
       nanoid: 3.3.7
       picocolors: 1.0.0
@@ -16408,6 +16434,7 @@ packages:
 
   /proxy-compare@2.5.1:
     resolution: {integrity: sha512-oyfc0Tx87Cpwva5ZXezSp5V9vht1c7dZBhvuV/y3ctkgMVUmiAGDVeeB0dKhGSyT0v1ZTEQYpe/RXlBVBNuCLA==}
+    requiresBuild: true
     dev: false
 
   /proxy-from-env@1.0.0:
@@ -16732,27 +16759,6 @@ packages:
       react-native: 0.74.1(@babel/core@7.24.5)(@babel/preset-env@7.24.5)(@types/react@18.2.21)(react@18.2.0)
     dev: false
 
-  /react-i18next@13.5.0(i18next@23.11.3)(react-dom@18.2.0)(react-native@0.74.1)(react@18.2.0):
-    resolution: {integrity: sha512-CFJ5NDGJ2MUyBohEHxljOq/39NQ972rh1ajnadG9BjTk+UXbHLq4z5DKEbEQBDoIhUmmbuS/fIMJKo6VOax1HA==}
-    peerDependencies:
-      i18next: '>= 23.2.3'
-      react: '>= 16.8.0'
-      react-dom: '*'
-      react-native: '*'
-    peerDependenciesMeta:
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.24.5
-      html-parse-stringify: 3.0.1
-      i18next: 23.11.3
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-native: 0.74.1(@babel/core@7.24.5)(@babel/preset-env@7.24.5)(@types/react@18.2.21)(react@18.2.0)
-    dev: false
-
   /react-icons@5.1.0(react@18.2.0):
     resolution: {integrity: sha512-D3zug1270S4hbSlIRJ0CUS97QE1yNNKDjzQe3HqY0aefp2CBn9VgzgES27sRR2gOvFK+0CNx/BW0ggOESp6fqQ==}
     peerDependencies:
@@ -17018,7 +17024,6 @@ packages:
       events: 3.3.0
       process: 0.11.10
       string_decoder: 1.3.0
-    dev: true
 
   /readdirp@3.6.0:
     resolution: {integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==}
@@ -17630,6 +17635,7 @@ packages:
 
   /simple-swizzle@0.2.2:
     resolution: {integrity: sha512-JA//kQgZtbuY83m+xT+tXJkmJncGMTFT+C+g2h2R9uxkYIrE2yy9sgmcLhCnw57/WSD+Eh3J97FPEDFnbXnDUg==}
+    requiresBuild: true
     dependencies:
       is-arrayish: 0.3.2
     dev: true
@@ -19639,6 +19645,7 @@ packages:
 
   /zod@3.22.4:
     resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
+    requiresBuild: true
     dev: false
 
   /zrender@5.5.0:
