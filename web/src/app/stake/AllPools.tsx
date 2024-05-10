@@ -134,17 +134,26 @@ export const AllPools = () => {
           <div className="flex flex-1 flex-row justify-between">
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">TVL</div>
-              <div className="text-2xl md:text-3xl">$12.1M</div>
+              <div className="text-2xl md:text-3xl">
+                {/*TODO: where to get this data from?*/}$
+                {showDemoData ? "12.1M" : 0}
+              </div>
             </div>
 
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">Incentives</div>
-              <div className="text-2xl md:text-3xl">$200k</div>
+              <div className="text-2xl md:text-3xl">
+                {/*TODO: where to get this data from?*/}$
+                {showDemoData ? "200k" : 0}
+              </div>
             </div>
 
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">Rewards Claimed</div>
-              <div className="text-2xl md:text-3xl">$59.1K</div>
+              <div className="text-2xl md:text-3xl">
+                {/*TODO: where to get this data from?*/}$
+                {showDemoData ? "59.1K" : 0}
+              </div>
             </div>
           </div>
 
