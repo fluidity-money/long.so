@@ -131,6 +131,7 @@ export const AllPools = () => {
     if (showDemoData) return mockPools;
 
     return data?.pools.map(
+      // TODO: this shouldnt need to be set to any
       (pool: any): Pool => ({
         id: pool.address,
         tokens: [
@@ -205,7 +206,8 @@ export const AllPools = () => {
           <div
             className={"mt-[30px] flex flex-row flex-wrap gap-[20px] pl-[12px]"}
           >
-            {pools?.map((pool) => (
+            {/*TODO: should not require using any*/}
+            {pools?.map((pool: any) => (
               <div
                 key={pool.id}
                 className={
