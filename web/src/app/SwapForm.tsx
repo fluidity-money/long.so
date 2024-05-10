@@ -127,7 +127,7 @@ export const SwapForm = () => {
   // update the token1 amount when the quote amount changes
   useEffect(() => {
     setToken1Amount(quoteAmount.toString());
-  }, [quoteAmount]);
+  }, [quoteAmount, setToken1Amount]);
 
   const { open } = useWeb3Modal();
 
@@ -184,7 +184,7 @@ export const SwapForm = () => {
     hash: approvalData,
   });
 
-  const performSwap = () => {
+  const performSwap = useCallback(() => {
     console.log("performing swap");
 
     // if one of the assets is fusdc, use swap1
@@ -216,7 +216,7 @@ export const SwapForm = () => {
         ],
       });
     }
-  };
+  }, [token0Amount, token0.address, token1.address, writeContractSwap]);
 
   const swapResult = useWaitForTransactionReceipt({
     hash: swapData,

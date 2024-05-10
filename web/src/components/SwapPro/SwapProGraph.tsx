@@ -26,7 +26,7 @@ export const Graph = () => {
 
   const swapProGraphData = useMemo(
     () => getSwapProGraphData(durationToDays[duration]),
-    [duration, activeGraphType],
+    [duration],
   );
 
   return (
