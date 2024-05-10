@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Flag, LoaderIcon, Settings } from "lucide-react";
 import { FeatureFlags } from "@/hooks/useFeatureFlag";
 import { useQuery } from "@tanstack/react-query";
-import ReactJson from "react-json-view";
+import { cn } from "@/lib/utils";
 
 const featureFlagsLabels: { key: keyof FeatureFlags; label: string }[] = [
   { key: "ui show demo data", label: "UI Show Demo Data" },
@@ -38,7 +38,9 @@ export const FeatureFlagConfig = () => {
       <PopoverContent>
         <div className={"flex flex-col gap-2"}>
           <div className={"text-xs"}>Default Feature Flags</div>
-          <ReactJson src={data} />
+          <div className={"rounded-lg bg-gray-200 p-2 font-mono text-xs"}>
+            {JSON.stringify(data, null, 2)}
+          </div>
 
           <div className={"text-xs"}>Overrides</div>
           <div className={"flex flex-row items-center justify-between"}>
