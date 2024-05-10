@@ -286,7 +286,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
   useHotkeys("esc", () => router.back());
 
-  const showManualFees = useFeatureFlag("show manual fees");
+  const showManualFees = useFeatureFlag("ui show manual fees");
   const onSubmit = () => {
     if (mode === "new") {
       router.push("/stake/pool/create/confirm");

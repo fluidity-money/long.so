@@ -16,6 +16,11 @@ export interface FeatureFlags {
    * This is not used in the web app.
    */
   "graphql mock demo data": boolean;
+
+  /**
+   * Show options to pick fee tier in the staking form.
+   */
+  "ui show manual fees": boolean;
 }
 
 /**

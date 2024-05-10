@@ -9,6 +9,12 @@ import { useFeatureFlagOverride } from "@/hooks/useFeatureFlagOverride";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Settings } from "lucide-react";
+import { FeatureFlags } from "@/hooks/useFeatureFlag";
+
+const featureFlagsLabels: { key: keyof FeatureFlags; label: string }[] = [
+  { key: "ui show demo data", label: "UI Show Demo Data" },
+  { key: "ui show manual fees", label: "UI Show Manual Fees" },
+];
 
 export const FeatureFlagConfig = () => {
   const { featureFlags, setFeatureFlagOverride, override, setOverride } =
@@ -24,21 +30,30 @@ export const FeatureFlagConfig = () => {
       <PopoverContent>
         <div className={"flex flex-col gap-2"}>
           <div className={"flex flex-row items-center justify-between"}>
-            <Label>Override Feature Flags</Label>
+            <div className={"flex flex-col"}>
+              <Label>Override Feature Flags</Label>
+              <div className={"text-2xs"}>
+                If enabled use the below overrides
+              </div>
+            </div>
+
             <Switch checked={override} onCheckedChange={setOverride} />
           </div>
 
-          <div className={"text-xs"}>Flags</div>
+          <div className={"text-xs"}>Feature Flags</div>
 
-          <div className={"flex flex-row items-center justify-between"}>
-            <Label>UI Show Demo Data</Label>
-            <Switch
-              checked={featureFlags["ui show demo data"]}
-              onCheckedChange={(value) =>
-                setFeatureFlagOverride("ui show demo data", value)
-              }
-            />
-          </div>
+          {featureFlagsLabels.map(({ key, label }) => (
+            <div
+              className={"flex flex-row items-center justify-between"}
+              key={key}
+            >
+              <Label>{label}</Label>
+              <Switch
+                checked={featureFlags[key]}
+                onCheckedChange={(value) => setFeatureFlagOverride(key, value)}
+              />
+            </div>
+          ))}
         </div>
       </PopoverContent>
     </Popover>
