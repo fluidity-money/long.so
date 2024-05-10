@@ -4,7 +4,7 @@ import List from "@/assets/icons/list.svg";
 import Grid from "@/assets/icons/grid.svg";
 import { AllPoolsTable } from "@/app/stake/_AllPoolsTable/AllPoolsTable";
 import { columns, Pool } from "@/app/stake/_AllPoolsTable/columns";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { AllPoolsFilter } from "@/app/stake/AllPoolsFilter";
 import SegmentedControl from "@/components/ui/segmented-control";
 import Ethereum from "@/assets/icons/ethereum.svg";
@@ -16,8 +16,10 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Position from "@/assets/icons/position.svg";
 import Pickaxe from "@/assets/icons/iridescent-pickaxe-2.svg";
+import { useAllPoolsData } from "@/hooks/useAllPoolsData";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
-const pools: Pool[] = [
+const mockPools: Pool[] = [
   {
     id: "1",
     tokens: [{ name: "USDC" }, { name: "fUSDC" }],
@@ -121,6 +123,38 @@ const DisplayModeMenu = ({
 export const AllPools = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
 
+  const { data } = useAllPoolsData();
+
+  const showDemoData = useFeatureFlag("ui show demo data");
+
+  const pools = useMemo(() => {
+    if (showDemoData) return mockPools;
+
+    return data?.pools.map(
+      (pool): Pool => ({
+        id: pool.address,
+        tokens: [
+          {
+            name: pool.token.name,
+          },
+          // TODO: assume that the second token is fUSDC
+          {
+            name: "fUSDC",
+          },
+        ],
+        // TODO: I assume that the first daily value is the current value
+        volume: parseFloat(pool.volumeOverTime.daily[0].fusdc.valueScaled),
+        totalValueLocked: parseFloat(pool.tvlOverTime.daily[0]),
+        // TODO: I don't know where to get this info from
+        boosted: false,
+        fees: 0,
+        rewards: 0,
+        claimable: false,
+        annualPercentageYield: 0,
+      }),
+    );
+  }, [data]);
+
   return (
     <div className="flex w-full flex-col items-center">
       <div className="mt-4 flex w-full max-w-screen-lg flex-col gap-4">
@@ -163,7 +197,7 @@ export const AllPools = () => {
           </div>
         </div>
 
-        {displayMode === "list" && (
+        {displayMode === "list" && pools && (
           <AllPoolsTable columns={columns} data={pools} />
         )}
 
@@ -171,7 +205,7 @@ export const AllPools = () => {
           <div
             className={"mt-[30px] flex flex-row flex-wrap gap-[20px] pl-[12px]"}
           >
-            {pools.map((pool) => (
+            {pools?.map((pool) => (
               <div
                 key={pool.id}
                 className={

@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import SPNTest from "@/assets/icons/spn-test.svg";
 import ArrowDown from "@/assets/icons/arrow-down.svg";
@@ -5,11 +7,13 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Ethereum from "@/assets/icons/ethereum.svg";
 import { useChainId, useSwitchChain } from "wagmi";
 
+/**
+ * Shows a dropdown menu with links to switch the network.
+ */
 export const MobileNetworkSelection = () => {
   const { chains, switchChain } = useSwitchChain();
-  const chainId = useChainId();
 
-  const selectedChain = chains.find((chain) => chain.id === chainId);
+  const chainId = useChainId();
 
   return (
     <DropdownMenu.Root>
