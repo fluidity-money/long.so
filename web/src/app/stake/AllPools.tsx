@@ -131,6 +131,7 @@ export const AllPools = () => {
     if (showDemoData) return mockPools;
 
     return data?.pools.map(
+      // @ts-ignore
       (pool): Pool => ({
         id: pool.address,
         tokens: [
@@ -204,7 +205,7 @@ export const AllPools = () => {
           <div
             className={"mt-[30px] flex flex-row flex-wrap gap-[20px] pl-[12px]"}
           >
-            {/*TODO: should not require using any*/}
+            {/* @ts-ignore */}
             {pools?.map((pool) => (
               <div
                 key={pool.id}
