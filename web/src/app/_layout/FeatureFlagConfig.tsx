@@ -8,8 +8,10 @@ import {
 import { useFeatureFlagOverride } from "@/hooks/useFeatureFlagOverride";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Settings } from "lucide-react";
+import { Flag, Settings } from "lucide-react";
 import { FeatureFlags } from "@/hooks/useFeatureFlag";
+import { useQuery } from "@tanstack/react-query";
+import ReactJson from "react-json-view";
 
 const featureFlagsLabels: { key: keyof FeatureFlags; label: string }[] = [
   { key: "ui show demo data", label: "UI Show Demo Data" },
@@ -20,15 +22,25 @@ export const FeatureFlagConfig = () => {
   const { featureFlags, setFeatureFlagOverride, override, setOverride } =
     useFeatureFlagOverride();
 
+  const { data } = useQuery({
+    queryKey: ["featureFlags"],
+    queryFn: async () => {
+      const response = await fetch("https://features.long.so/features.json");
+      return response.json();
+    },
+  });
+
   return (
     <Popover>
       <PopoverTrigger>
-        <div>
-          <Settings />
-        </div>
+        <Flag />
       </PopoverTrigger>
       <PopoverContent>
         <div className={"flex flex-col gap-2"}>
+          <div className={"text-xs"}>Default Feature Flags</div>
+          <ReactJson src={data} />
+
+          <div className={"text-xs"}>Overrides</div>
           <div className={"flex flex-row items-center justify-between"}>
             <div className={"flex flex-col"}>
               <Label>Override Feature Flags</Label>
@@ -39,8 +51,6 @@ export const FeatureFlagConfig = () => {
 
             <Switch checked={override} onCheckedChange={setOverride} />
           </div>
-
-          <div className={"text-xs"}>Feature Flags</div>
 
           {featureFlagsLabels.map(({ key, label }) => (
             <div
