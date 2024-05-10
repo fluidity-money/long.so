@@ -131,7 +131,7 @@ export const AllPools = () => {
     if (showDemoData) return mockPools;
 
     return data?.pools.map(
-      (pool): Pool => ({
+      (pool: any): Pool => ({
         id: pool.address,
         tokens: [
           {
