@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import List from "@/assets/icons/list.svg";
 import Grid from "@/assets/icons/grid.svg";
@@ -18,74 +18,8 @@ import Token from "@/assets/icons/token.svg";
 import TokenIridescent from "@/assets/icons/token-iridescent.svg";
 import SegmentedControl from "@/components/ui/segmented-control";
 import { useAccount } from "wagmi";
-
-const poolsData: Pool[] = [
-  {
-    id: "1",
-    tokens: [{ name: "USDC" }, { name: "ETH" }],
-    duration: 100,
-    staked: 100,
-    totalYield: 100,
-  },
-  {
-    id: "2",
-    tokens: [{ name: "USDT" }, { name: "ETH" }],
-    duration: 100,
-    staked: 100,
-    totalYield: 100,
-  },
-  {
-    id: "3",
-    tokens: [{ name: "USDC" }, { name: "USDT" }],
-    duration: 100,
-    staked: 100,
-    totalYield: 100,
-  },
-  {
-    id: "4",
-    tokens: [{ name: "USDC" }, { name: "ETH" }],
-    duration: 100,
-    staked: 100,
-    totalYield: 100,
-  },
-  {
-    id: "5",
-    tokens: [{ name: "USDT" }, { name: "ETH" }],
-    duration: 100,
-    staked: 100,
-    totalYield: 100,
-  },
-  {
-    id: "6",
-    tokens: [{ name: "USDC" }, { name: "USDT" }],
-    duration: 100,
-    staked: 100,
-    totalYield: 100,
-  },
-  {
-    id: "7",
-    tokens: [{ name: "USDC" }, { name: "ETH" }],
-    duration: 100,
-    staked: 100,
-    totalYield: 100,
-  },
-  {
-    id: "8",
-    tokens: [{ name: "USDT" }, { name: "ETH" }],
-    duration: 100,
-    staked: 100,
-    totalYield: 100,
-  },
-  {
-    id: "9",
-    tokens: [{ name: "USDC" }, { name: "USDT" }],
-    duration: 100,
-    staked: 100,
-    totalYield: 100,
-  },
-];
-
-// const pools: Pool[] = [];
+import { mockMyPositions } from "@/demoData/myPositions";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 export const MyPositions = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
@@ -96,7 +30,13 @@ export const MyPositions = () => {
 
   const { address } = useAccount();
 
-  const pools = address ? poolsData : [];
+  const showDemoData = useFeatureFlag("ui show demo data");
+
+  const pools = useMemo(() => {
+    if (showDemoData && address) return mockMyPositions;
+    // TODO: add in graphql call once data is available
+    return [];
+  }, []);
 
   return (
     <motion.div
