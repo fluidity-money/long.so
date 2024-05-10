@@ -9,6 +9,7 @@ import { ConnectWalletButton } from "@/app/_layout/ConnectWalletButton";
 import { NavigationMenu } from "@/app/_layout/NavigationMenu";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { FeatureFlagConfig } from "@/app/_layout/FeatureFlagConfig";
 
 export const metadata: Metadata = {
   title: "Superposition AMM",
@@ -51,6 +52,7 @@ export default function RootLayout({
                 <div className="flex flex-row items-center gap-4">
                   <Superposition height={34} width={34} />
                   <MobileNetworkSelection />
+                  <FeatureFlagConfig />
                   <DemoData />
                 </div>
                 <div className="flex flex-row items-center gap-4">

@@ -2,8 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { useFeatureFlagOverride } from "@/hooks/useFeatureFlagOverride";
 
-interface FeatureFlags {
+export interface FeatureFlags {
   /**
    * Show demo data in the UI.
    * When set to `false`, the UI will fetch data from the GraphQL API.
@@ -18,13 +19,6 @@ interface FeatureFlags {
 }
 
 /**
- * Override feature flags for local development
- */
-const developmentOverride: Partial<FeatureFlags> = {
-  "ui show demo data": true,
-};
-
-/**
  * Fetches feature flags from the features API.
  *
  * @param featureFlag The feature flag to fetch
@@ -33,6 +27,9 @@ const developmentOverride: Partial<FeatureFlags> = {
 export const useFeatureFlag = <T extends keyof FeatureFlags>(
   featureFlag: T,
 ): FeatureFlags[T] => {
+  const override = useFeatureFlagOverride((s) => s.override);
+  const featureFlagOverride = useFeatureFlagOverride((s) => s.featureFlags);
+
   const { data } = useQuery({
     queryKey: ["featureFlags"],
     queryFn: async () => {
@@ -42,18 +39,11 @@ export const useFeatureFlag = <T extends keyof FeatureFlags>(
   });
 
   /**
-   * Determine the value of the feature flag.
-   * This overrides the feature flag in development.
+   * If override is enabled, return the value from the override.
+   * Otherwise, return the value from the API.
    */
-  const flag = useMemo(() => {
-    // if we are running in development
-    if (process.env.NODE_ENV === "development") {
-      return developmentOverride[featureFlag] ?? data?.[featureFlag];
-    }
-
-    // if we are running in production
+  return useMemo(() => {
+    if (override) return featureFlagOverride[featureFlag];
     return data?.[featureFlag];
-  }, [data, featureFlag]);
-
-  return flag;
+  }, [override, featureFlagOverride, data, featureFlag]);
 };
