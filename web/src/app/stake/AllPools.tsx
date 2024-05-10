@@ -20,6 +20,7 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql } from "@/gql";
 import { useQuery } from "@tanstack/react-query";
 import request from "graphql-request";
+import { graphqlEndpoint } from "@/config/graphqlEndpoint";
 
 const mockPools: Pool[] = [
   {
@@ -148,7 +149,7 @@ export const AllPools = () => {
 
   const { data } = useQuery({
     queryKey: ["AllPools"],
-    queryFn: async () => request("https://testnet-graph.long.so/", poolsQuery),
+    queryFn: () => request(graphqlEndpoint, poolsQuery),
   });
 
   const showDemoData = useFeatureFlag("ui show demo data");
