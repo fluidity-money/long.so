@@ -2,7 +2,7 @@ import { graphql } from "@/gql";
 import { useQuery } from "@tanstack/react-query";
 import request from "graphql-request";
 
-const allPoolsQueryDocument = graphql(/* GraphQL */ `
+const allPoolsQueryDocument = graphql(`
   query allPools {
     pools {
       address
