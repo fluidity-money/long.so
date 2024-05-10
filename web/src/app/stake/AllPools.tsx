@@ -21,72 +21,8 @@ import { graphql } from "@/gql";
 import { useQuery } from "@tanstack/react-query";
 import request from "graphql-request";
 import { graphqlEndpoint } from "@/config/graphqlEndpoint";
-
-const mockPools: Pool[] = [
-  {
-    id: "1",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-    annualPercentageYield: 12,
-    claimable: true,
-    fees: 14,
-    rewards: 321,
-    totalValueLocked: 4312,
-    volume: 1231,
-  },
-  {
-    id: "2",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-    annualPercentageYield: 5,
-    claimable: false,
-    fees: 13,
-    rewards: 413,
-    totalValueLocked: 1213,
-    volume: 5421,
-    boosted: true,
-  },
-  {
-    id: "3",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-    annualPercentageYield: 4,
-    claimable: true,
-    fees: 16,
-    rewards: 131,
-    totalValueLocked: 5412,
-    volume: 8734,
-  },
-  {
-    id: "4",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-    annualPercentageYield: 12,
-    claimable: true,
-    fees: 14,
-    rewards: 321,
-    totalValueLocked: 4312,
-    volume: 1231,
-    boosted: true,
-  },
-  {
-    id: "5",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-    annualPercentageYield: 5,
-    claimable: false,
-    fees: 13,
-    rewards: 413,
-    totalValueLocked: 1213,
-    volume: 5421,
-    boosted: true,
-  },
-  {
-    id: "6",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-    annualPercentageYield: 4,
-    claimable: true,
-    fees: 16,
-    rewards: 131,
-    totalValueLocked: 5412,
-    volume: 8734,
-  },
-];
+import { mockAllPools } from "@/demoData/allPools";
+import { LoaderIcon } from "lucide-react";
 
 const DisplayModeMenu = ({
   setDisplayMode,
@@ -147,16 +83,17 @@ const poolsQuery = graphql(`
 export const AllPools = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
 
-  const { data } = useQuery({
-    queryKey: ["AllPools"],
+  const { data, isLoading } = useQuery({
+    queryKey: ["allPools"],
     queryFn: () => request(graphqlEndpoint, poolsQuery),
   });
 
   const showDemoData = useFeatureFlag("ui show demo data");
 
   const pools = useMemo(() => {
-    if (showDemoData) return mockPools;
+    if (showDemoData) return mockAllPools;
 
+    // reformat the data to match the Pool type
     return data?.pools.map(
       (pool): Pool => ({
         id: pool.address,
@@ -222,6 +159,12 @@ export const AllPools = () => {
             </div>
           </div>
         </div>
+
+        {isLoading && (
+          <div className={"flex flex-col items-center"}>
+            <LoaderIcon className="size-8 animate-spin" />
+          </div>
+        )}
 
         {displayMode === "list" && pools && (
           <AllPoolsTable columns={columns} data={pools} />

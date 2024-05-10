@@ -8,7 +8,7 @@ import {
 import { useFeatureFlagOverride } from "@/hooks/useFeatureFlagOverride";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Flag, Settings } from "lucide-react";
+import { Flag, LoaderIcon, Settings } from "lucide-react";
 import { FeatureFlags } from "@/hooks/useFeatureFlag";
 import { useQuery } from "@tanstack/react-query";
 import ReactJson from "react-json-view";
@@ -22,7 +22,7 @@ export const FeatureFlagConfig = () => {
   const { featureFlags, setFeatureFlagOverride, override, setOverride } =
     useFeatureFlagOverride();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["featureFlags"],
     queryFn: async () => {
       const response = await fetch("https://features.long.so/features.json");
@@ -33,7 +33,7 @@ export const FeatureFlagConfig = () => {
   return (
     <Popover>
       <PopoverTrigger>
-        <Flag />
+        {isLoading ? <LoaderIcon className={"animate-spin"} /> : <Flag />}
       </PopoverTrigger>
       <PopoverContent>
         <div className={"flex flex-col gap-2"}>
@@ -59,6 +59,7 @@ export const FeatureFlagConfig = () => {
             >
               <Label>{label}</Label>
               <Switch
+                disabled={!override}
                 checked={featureFlags[key]}
                 onCheckedChange={(value) => setFeatureFlagOverride(key, value)}
               />
