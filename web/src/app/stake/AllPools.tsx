@@ -16,8 +16,10 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Position from "@/assets/icons/position.svg";
 import Pickaxe from "@/assets/icons/iridescent-pickaxe-2.svg";
-import { useAllPoolsData } from "@/hooks/useAllPoolsData";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { graphql } from "@/gql";
+import { useQuery } from "@tanstack/react-query";
+import request from "graphql-request";
 
 const mockPools: Pool[] = [
   {
@@ -120,10 +122,34 @@ const DisplayModeMenu = ({
   );
 };
 
+const poolsQuery = graphql(`
+  query AllPools {
+    pools {
+      address
+      token {
+        name
+      }
+      volumeOverTime {
+        daily {
+          fusdc {
+            valueScaled
+          }
+        }
+      }
+      tvlOverTime {
+        daily
+      }
+    }
+  }
+`);
+
 export const AllPools = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
 
-  const { data } = useAllPoolsData();
+  const { data } = useQuery({
+    queryKey: ["AllPools"],
+    queryFn: async () => request("https://testnet-graph.long.so/", poolsQuery),
+  });
 
   const showDemoData = useFeatureFlag("ui show demo data");
 
