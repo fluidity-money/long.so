@@ -46,7 +46,7 @@
     "date-fns": "^3.3.1",
     "echarts": "^5.5.0",
     "echarts-for-react": "^3.0.2",
-    "eslint": "8.57.0",
+    "eslint": "9.0.0",
     "eslint-config-next": "14.2.3",
     "file-loader": "^6.2.0",
     "framer-motion": "^10.16.4",
