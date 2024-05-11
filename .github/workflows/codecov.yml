@@ -1,14 +1,53 @@
 ---
-
-name: Check with Codecov
+name: codecov
 on:
+  push:
+    branches:
+      - development
   pull_request:
     branches:
-      - 'deployment'
+      - development
 
 jobs:
-  check-codecov:
-    - name: Upload coverage reports to Codecov
-    uses: codecov/codecov-action@v3
-    env:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  codecov:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.22.3'
+
+      - name: Install Go dependencies
+        run: go mod tidy
+
+      - name: Run Go tests and generate coverage report
+        run: go test ./... -coverprofile=coverage-go.txt -covermode=count
+
+      - name: Set up Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          path: web
+          node-version: '22'
+          version: 8
+          run_install: true
+
+#      - name: Install Node dependencies
+#        run: |
+#          cd web
+#          pnpm install
+
+      - name: Run Node tests and generate coverage report
+        run: |
+          cd web
+          pnpm run test
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.3.1
+        with:
+          fail_ci_if_error: true
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

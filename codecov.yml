@@ -1,0 +1,17 @@
+codecov:
+  ignore:
+    - "cmd/graphql.ethereum/tools.go"
+    - "cmd/graphql.ethereum/graph/generated.go"
+    - "cmd/graphql.ethereum/graph/resolver.go"
+    - "cmd/graphql.ethereum/graph/mocked.go"
+    - "cmd/graphql.ethereum/graph/model/models_gen.go"
+  coverage:
+    status:
+      project:
+        default:
+          target: auto
+          threshold: 1%
+          base: auto
+          branches:
+            - development
+          if_ci_failed: error
