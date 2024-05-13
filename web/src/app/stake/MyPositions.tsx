@@ -85,7 +85,7 @@ export const MyPositions = () => {
         })}
       >
         {pools.length === 0 ? (
-          <div className="flex min-h-[150px] flex-col items-center justify-center">
+          <div className="flex min-h-[149px] flex-col items-center justify-center">
             <div className="text-2xs">
               Your active staked positions will appear here.
             </div>
