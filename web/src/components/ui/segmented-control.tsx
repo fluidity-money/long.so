@@ -55,7 +55,7 @@ const SegmentedControl = <T extends string>({
    */
   useEffect(() => {
     if (callback) callback(segments[defaultIndex].value, defaultIndex);
-  }, [defaultIndex, callback, segments]);
+  }, [defaultIndex]);
 
   const onInputChange = (value: any, index: any) => {
     setActiveIndex(index);
