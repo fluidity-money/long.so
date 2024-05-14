@@ -36,7 +36,7 @@ export const MyPositions = () => {
     if (showDemoData && address) return mockMyPositions;
     // TODO: add in graphql call once data is available
     return [];
-  }, []);
+  }, [showDemoData, address]);
 
   return (
     <motion.div
