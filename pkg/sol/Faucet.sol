@@ -5,52 +5,61 @@ import "../interfaces/IFaucet.sol";
 import "../interfaces/IERC20.sol";
 
 contract Faucet is IFaucet {
-    uint8 constant BLOOM_HASH_COUNT = 8;
+    uint constant PRELUDE = 1;
 
-      uint256 constant MIN_GIVEAWAY_AMOUNT = 100;
+    uint constant HOLDER_SIZE = 24576 - 1;
 
-      uint256 constant MAX_GIVEAWAY_AMOUNT = 100;
+    uint256 constant MIN_GIVEAWAY_AMOUNT = 100;
 
-      uint256 constant SECONDS_UNTIL_NEXT_CLAIM = 8 hours;
+    uint256 constant MAX_GIVEAWAY_AMOUNT = 100;
+
+    uint256 constant SECONDS_UNTIL_NEXT_CLAIM = 8 hours;
 
       /// @dev operator that's allowed to create new tokens to send.
     address public operator;
 
-      /// @dev tokenDecimals to use for knowing which amount to increase to.
+    /// @dev tokenDecimals to use for knowing which amount to increase to.
     uint8[] private tokenDecimals;
 
-      /// @dev tokenBasket to send random amounts of each request.
+    /// @dev tokenBasket to send random amounts of each request.
     IERC20[] public tokenBasket;
 
-      /// @dev bloomBitmap to for storage of the allowed addresses.
-    bytes32 public bloomBitmap;
+    /// @dev holderContract stores the addresses of the allowed
+    /// participants in the staking.
+    address public holderContract;
 
-      /// @dev lastClaimTimestamp to know how many seconds to wait until the next claim.
+    /// @dev lastClaimTimestamp to know how many seconds to wait until
+    /// the next claim.
     mapping(address => uint256) lastClaimTimestamp;
 
       constructor(
         address _operator,
-        bytes32 _initialBloomBitmap,
+        address _holderContract,
         IERC20[] memory _initialTokens
     ) {
         operator = _operator;
         tokenBasket = _initialTokens;
-        bloomBitmap = _initialBloomBitmap;
+        holderContract = _holderContract;
     }
 
       /**
-     * @notice isMember test by checking the bloom filter.
+     * @notice isMember test by checking the bloom filter extcode.
      */
     function isMember(address _recipient) public view returns (bool) {
-        for (uint i = 0; i < BLOOM_HASH_COUNT; ++i) {
-            uint256 pos = uint256(keccak256(abi.encodePacked(_recipient))) % 256;
-            require(pos < 256, "overflow");
-            bytes32 digest = bytes32(1 << pos);
-            bool included = bloomBitmap == bloomBitmap | digest;
-            if (!included) return false;
+        uint256 pos =
+            PRELUDE +
+            (uint256(keccak256(abi.encodePacked(_recipient))) % HOLDER_SIZE);
+        address holder = holderContract;
+        bool included;
+        assembly {
+            extcodecopy(
+                mload(holder),
+                mload(included),
+                pos,
+                32
+            )
         }
-
-          return true;
+        return included;
     }
 
     function _sendRandomTokens(
