@@ -22,13 +22,8 @@ COPY cmd cmd/
 
 ENV INSTALL_DIR /bin
 
-RUN sh -c 'cd cmd/ingestor.logs.ethereum && make install'
-
 RUN sh -c 'cd cmd/graphql.ethereum && make install'
 
-FROM alpine:3.19
-
-WORKDIR /bin
-
-COPY --from=build-1 /bin/ingestor.logs.ethereum .
-COPY --from=build-1 /bin/graphql.ethereum .
+FROM scratch
+COPY --from=builder cmd/graphql.ethereum cmd/graphql.ethereum
+CMD ["cmd/graphql.ethereum"]
