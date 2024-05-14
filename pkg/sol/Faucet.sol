@@ -50,7 +50,7 @@ contract Faucet is IFaucet {
             PRELUDE +
             (uint256(keccak256(abi.encodePacked(_recipient))) % HOLDER_SIZE);
         address holder = holderContract;
-        bool included;
+        uint256 included;
         assembly {
             extcodecopy(
                 mload(holder),
@@ -59,7 +59,7 @@ contract Faucet is IFaucet {
                 32
             )
         }
-        return included;
+        return included & 255 > 0;
     }
 
     function _sendRandomTokens(
