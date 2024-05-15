@@ -11,22 +11,47 @@ export const SwapProPoolFragment = graphql(`
     }
     priceOverTime {
       daily
+      monthly
     }
     volumeOverTime {
-      daily {
+      monthly {
         timestamp
         token1 {
-          valueScaled
           valueUsd
         }
         fusdc {
-          valueScaled
+          valueUsd
+        }
+      }
+      daily {
+        timestamp # TODO: timestamp is always 0
+        token1 {
+          valueUsd
+        }
+        fusdc {
           valueUsd
         }
       }
     }
-    tvlOverTime {
-      daily
+    liquidityOverTime {
+      daily {
+        timestamp
+        fusdc {
+          # TODO: uncomment this when the data is available
+          # valueUsd
+          # TODO: this is returning hex values, not sure what it is
+          valueUnscaled
+        }
+      }
+      monthly {
+        timestamp
+        fusdc {
+          # TODO: uncomment this when the data is available
+          # valueUsd
+          # TODO: this is returning hex values, not sure what it is
+          valueUnscaled
+        }
+      }
     }
   }
 `);

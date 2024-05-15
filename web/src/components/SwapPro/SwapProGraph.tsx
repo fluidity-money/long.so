@@ -1,11 +1,13 @@
+"use client";
+
 import { useMemo, useRef, useState } from "react";
-import { getSwapProGraphData } from "@/components/SwapPro/SwapProGraphData";
+import { getSwapProGraphMockData } from "@/components/SwapPro/SwapProGraphData";
 import SegmentedControl from "@/components/ui/segmented-control";
 import { startCase } from "lodash";
 import { DurationSegmentedControl } from "@/components/DurationSegmentedControl";
 import { TypographyH2 } from "@/components/ui/typography";
 import ReactECharts from "echarts-for-react";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import { SwapProPoolFragmentFragment } from "@/gql/graphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
@@ -17,30 +19,100 @@ const durationToDays = {
   ALL: 52,
 };
 
-export const Graph = ({ pool }: { pool: SwapProPoolFragmentFragment }) => {
-  const [activeGraphType] = useState<"price" | "volume" | "liquidity">(
-    "volume",
-  );
+export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
+  const [activeGraphType, setActiveGraphType] = useState<
+    "price" | "volume" | "liquidity"
+  >("volume");
 
   const [duration, setDuration] = useState<"7D" | "1M" | "6M" | "1Y" | "ALL">(
     "7D",
   );
 
   const swapProGraphMockData = useMemo(
-    () => getSwapProGraphData(durationToDays[duration]),
+    () => getSwapProGraphMockData(durationToDays[duration]),
     [duration],
   );
 
   const showMockData = useFeatureFlag("ui show demo data");
 
   const graphData = useMemo(() => {
+    // if the feature flag is enabled show mock data
     if (showMockData) return swapProGraphMockData;
-  }, [showMockData]);
+
+    // if the duration is 7D or 1M
+    let durationKey: "daily" | "monthly" = "daily";
+
+    // if the duration is 6M, 1Y or ALL
+    if (duration === "6M" || duration === "1Y" || duration === "ALL") {
+      durationKey = "monthly";
+    }
+
+    // work out what data to show
+    if (activeGraphType === "volume") {
+      // return the data for the duration
+      let slicedData = pool?.volumeOverTime[durationKey];
+
+      // slice out the data we want
+      if (duration !== "ALL") {
+        slicedData = slicedData?.slice(0, durationToDays[duration]);
+      }
+
+      return (
+        slicedData
+          // reformat pool data to match expected graph data
+          ?.map((d) => ({
+            date: new Date(d.timestamp),
+            value: parseFloat(d.fusdc.valueUsd),
+          }))
+      );
+    }
+
+    if (activeGraphType === "price") {
+      // return the data for the duration
+      let slicedData = pool?.priceOverTime[durationKey];
+
+      if (duration !== "ALL") {
+        slicedData = slicedData?.slice(0, durationToDays[duration]);
+      }
+
+      return (
+        slicedData
+          // reformat pool data to match expected graph data
+          ?.map((d, i) => ({
+            // TODO: assume that the first value is the most recent (yesterday)
+            date: subDays(new Date(), i),
+            value: parseFloat(d),
+          }))
+      );
+    }
+
+    if (activeGraphType === "liquidity") {
+      // return the data for the duration
+      let slicedData = pool?.liquidityOverTime[durationKey];
+
+      if (duration !== "ALL") {
+        slicedData = slicedData?.slice(0, durationToDays[duration]);
+      }
+
+      return (
+        slicedData
+          // reformat pool data to match expected graph data
+          ?.map((d) => ({
+            date: new Date(d.timestamp),
+            value: parseFloat(d.fusdc.valueUnscaled),
+          }))
+      );
+    }
+
+    // should never reach here
+    return [];
+  }, [showMockData, swapProGraphMockData, pool, activeGraphType, duration]);
 
   return (
     <>
       <div className={"flex flex-row justify-start"}>
         <SegmentedControl
+          callback={(val) => setActiveGraphType(val)}
           segments={[
             {
               label: "Price",
@@ -100,11 +172,12 @@ export const Graph = ({ pool }: { pool: SwapProPoolFragmentFragment }) => {
                   color: "#EBEBEB",
                 },
                 formatter:
+                  // TODO: value is very large, how to format?
                   "<div class='flex flex-col items-center'>${c} <div class='text-gray-2 text-center w-full'>{b}</div></div>",
               },
               xAxis: {
                 type: "category",
-                data: swapProGraphMockData.map((d) => format(d.date, "P")),
+                data: graphData?.map((d) => format(d.date, "P")),
                 show: false,
                 axisPointer: {
                   label: {
@@ -124,7 +197,7 @@ export const Graph = ({ pool }: { pool: SwapProPoolFragmentFragment }) => {
               series: [
                 {
                   type: "bar",
-                  data: swapProGraphMockData.map((d) => d.uv),
+                  data: graphData?.map((d) => d.value),
                   itemStyle: {
                     color: "#1E1E1E",
                   },

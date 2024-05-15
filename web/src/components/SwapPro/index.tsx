@@ -49,7 +49,8 @@ export const SwapPro = ({
     () =>
       pools?.find(
         (pool) =>
-          pool.token.address.toLowerCase() === token0.address.toLowerCase(),
+          pool.token.address.toLowerCase() === token0.address.toLowerCase() ||
+          pool.token.address.toLowerCase() === token1.address.toLowerCase(),
       ),
     [pools, token0],
   );
@@ -92,7 +93,7 @@ export const SwapPro = ({
           </TypographyH3>
         )}
 
-        {pool && <Graph pool={pool} />}
+        <Graph pool={pool} />
 
         <div className="hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:flex">
           <div>
