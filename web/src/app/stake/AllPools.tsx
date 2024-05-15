@@ -17,12 +17,9 @@ import { Button } from "@/components/ui/button";
 import Position from "@/assets/icons/position.svg";
 import Pickaxe from "@/assets/icons/iridescent-pickaxe-2.svg";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-import { graphql } from "@/gql";
-import { useQuery } from "@tanstack/react-query";
-import request from "graphql-request";
-import { graphqlEndpoint } from "@/config/graphqlEndpoint";
 import { mockAllPools } from "@/demoData/allPools";
 import { LoaderIcon } from "lucide-react";
+import { useGraphql } from "@/hooks/useGraphql";
 
 const DisplayModeMenu = ({
   setDisplayMode,
@@ -59,34 +56,10 @@ const DisplayModeMenu = ({
   );
 };
 
-const poolsQuery = graphql(`
-  query AllPools {
-    pools {
-      address
-      token {
-        name
-      }
-      volumeOverTime {
-        daily {
-          fusdc {
-            valueScaled
-          }
-        }
-      }
-      tvlOverTime {
-        daily
-      }
-    }
-  }
-`);
-
 export const AllPools = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["allPools"],
-    queryFn: () => request(graphqlEndpoint, poolsQuery),
-  });
+  const { data, isLoading } = useGraphql();
 
   const showDemoData = useFeatureFlag("ui show demo data");
 
