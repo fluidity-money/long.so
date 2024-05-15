@@ -9,26 +9,32 @@ import { useFeatureFlagOverride } from "@/hooks/useFeatureFlagOverride";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Flag, LoaderIcon, Settings } from "lucide-react";
-import { FeatureFlags } from "@/hooks/useFeatureFlag";
+import { FeatureFlags, useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
 const featureFlagsLabels: { key: keyof FeatureFlags; label: string }[] = [
   { key: "ui show demo data", label: "UI Show Demo Data" },
   { key: "ui show manual fees", label: "UI Show Manual Fees" },
+  { key: "ui show feature flags panel", label: "UI Show Feature Flags Panel" },
 ];
 
 export const FeatureFlagConfig = () => {
   const { featureFlags, setFeatureFlagOverride, override, setOverride } =
     useFeatureFlagOverride();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["featureFlags"],
     queryFn: async () => {
       const response = await fetch("https://features.long.so/features.json");
       return response.json();
     },
   });
+
+  const showFeatureFlagsPanel = useFeatureFlag("ui show feature flags panel");
+
+  if (!(showFeatureFlagsPanel || process.env.NODE_ENV === "development"))
+    return null;
 
   return (
     <Popover>
@@ -37,7 +43,15 @@ export const FeatureFlagConfig = () => {
       </PopoverTrigger>
       <PopoverContent>
         <div className={"flex flex-col gap-2"}>
-          <div className={"text-xs"}>Default Feature Flags</div>
+          <div className={"flex flex-row justify-between"}>
+            <div className={"text-xs"}>Default Feature Flags</div>
+            <div
+              onClick={() => refetch()}
+              className={"cursor-pointer text-xs underline"}
+            >
+              Reload
+            </div>
+          </div>
           <div className={"rounded-lg bg-gray-200 p-2 font-mono text-xs"}>
             {JSON.stringify(data, null, 2)}
           </div>

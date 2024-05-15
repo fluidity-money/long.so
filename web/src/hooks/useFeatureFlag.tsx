@@ -21,6 +21,11 @@ export interface FeatureFlags {
    * Show options to pick fee tier in the staking form.
    */
   "ui show manual fees": boolean;
+
+  /**
+   * Show the feature flags panel in the UI.
+   */
+  "ui show feature flags panel": boolean;
 }
 
 /**
