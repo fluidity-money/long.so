@@ -24,4 +24,14 @@ CREATE MATERIALIZED VIEW seawater_active_positions_1 AS
 	)
 ;
 
+CREATE OR REPLACE FUNCTION refresh_position_views()
+RETURNS VOID LANGUAGE PLPGSQL
+AS $$
+BEGIN
+	REFRESH MATERIALIZED VIEW CONCURRENTLY seawater_positions_1;
+	REFRESH MATERIALIZED VIEW CONCURRENTLY seawater_active_positions_1;
+END $$;
+
+SELECT cron.schedule('refresh-positions', '*/30 * * * *', $$SELECT refresh_position_views()$$);
+
 -- migrate:down

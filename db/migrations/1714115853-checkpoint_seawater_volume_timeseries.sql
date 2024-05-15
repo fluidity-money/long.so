@@ -4,35 +4,34 @@
 -- against fUSDC, which is always assumed to be 1 (ie, currently the price of Ethereum is
 -- 3,143.52, so the price is 3,143.52.)
 
---REFRESH MATERIALIZED VIEW CONCURRENTLY seawater_swap1_average_price_last_hour_1;
-
--- Used to store each hourly swap output here, scheduled by a cron.
-
-CREATE TABLE checkpoint_seawater_swaps_average_price_hourly_1 (
-	id SERIAL PRIMARY KEY,
-	created_by TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	pool ADDRESS NOT NULL,
-	hourly_interval TIMESTAMP NOT NULL, -- the timestamp of the hour
-	price DECIMAL NOT NULL,
-	decimals INTEGER NOT NULL
-);
-
-CREATE VIEW seawater_pool_swap1_price_hourly_1 AS
+-- swap1_price_hourly_1 requires a single join, so it can be a continuous aggregate
+CREATE MATERIALIZED VIEW seawater_pool_swap1_price_hourly_1 WITH (
+	timescaledb.continuous, 
+	timescaledb.materialized_only = false
+) AS
 	SELECT
+		time_bucket(INTERVAL '1 hour', events_seawater_swap1.created_by) AS hourly_interval,
 		pool,
-		date_trunc('hour', events_seawater_swap1.created_by) AS hourly_interval,
-		1.0001 ^ (AVG(final_tick)) * 1000000 / (10 ^ events_seawater_newPool.decimals) as price,
-		events_seawater_newpool.decimals as decimals
+		1.0001 ^ (AVG(final_tick)) * 1000000 / (10 ^ events_seawater_newPool.decimals) AS price,
+		events_seawater_newpool.decimals AS decimals
 	FROM events_seawater_swap1
-	LEFT JOIN events_seawater_newPool ON token = pool
-	GROUP BY pool, hourly_interval, events_seawater_newpool.decimals;
+	-- assume that all swaps have a token that is referenced by a pool!
+	JOIN events_seawater_newPool ON token = pool
+	GROUP BY pool, hourly_interval, events_seawater_newpool.decimals
+	WITH NO DATA;
 
-CREATE VIEW seawater_pool_swap2_price_hourly_1 AS
+SELECT add_continuous_aggregate_policy('seawater_pool_swap1_price_hourly_1',
+  start_offset => NULL,
+  end_offset => INTERVAL '1 hour',
+  schedule_interval => INTERVAL '1 hour');
+
+-- swap2_price_hourly_1 requires a UNION and LEFT JOIN, so it cannot be a continuous aggregate
+CREATE MATERIALIZED VIEW seawater_pool_swap2_price_hourly_1 AS
 	SELECT
 		pool,
 		date_trunc('hour', combined.created_by) AS hourly_interval,
-		1.0001 ^ (AVG(final_tick)) * 1000000 / (10 ^ events_seawater_newPool.decimals) as price,
-		events_seawater_newpool.decimals as decimals
+		1.0001 ^ (AVG(final_tick)) * 1000000 / (10 ^ events_seawater_newPool.decimals) AS price,
+		events_seawater_newpool.decimals AS decimals
 	FROM (
 		SELECT
 			from_ AS pool,
@@ -51,19 +50,7 @@ CREATE VIEW seawater_pool_swap2_price_hourly_1 AS
 	LEFT JOIN events_seawater_newPool ON token = pool
 	GROUP BY pool, hourly_interval, events_seawater_newpool.decimals;
 
--- Insert into the checkpoints table the average price of the last hour.
-
-CREATE FUNCTION do_checkpoint_pool_price_hourly_1()
-RETURNS void
-LANGUAGE SQL
-STABLE
-AS
-$$
-	INSERT INTO checkpoint_seawater_swaps_average_price_hourly_1 (
-		pool,
-		hourly_interval,
-		price, decimals
-	)
+CREATE MATERIALIZED VIEW seawater_swaps_average_price_hourly_1 AS
 	SELECT pool, hourly_interval, SUM(price) AS price, decimals
 	FROM (
 		SELECT pool, hourly_interval, price, decimals
@@ -73,7 +60,6 @@ $$
 		FROM seawater_pool_swap2_price_hourly_1
 	) AS combined
 	GROUP BY pool, hourly_interval, decimals;
-$$;
 
 CREATE VIEW seawater_pool_swap1_volume_hourly_1 AS
 	SELECT
@@ -112,16 +98,16 @@ CREATE VIEW seawater_pool_swap2_volume_hourly_1 AS
 	) AS combined
 	GROUP BY combined.pool, hourly_interval;
 
-CREATE VIEW seawater_pool_swap_volume_hourly_1 AS
+CREATE MATERIALIZED VIEW seawater_pool_swap_volume_hourly_1 AS
 	SELECT
-		pool,
+		combined.pool,
 		combined.hourly_interval AS hourly_interval,
 		new_pool.decimals,
 		CAST(SUM(fusdc_volume) AS HUGEINT) AS fusdc_volume_unscaled,
 		SUM(fusdc_volume) AS fusdc_volume_scaled,
 		SUM(tokena_volume) AS tokena_volume_unscaled,
 		SUM(tokena_volume) / (10 ^ new_pool.decimals) AS tokena_volume_scaled,
-		SUM(tokena_volume) / (10 ^ new_pool.decimals) * checkpoint.price
+		SUM(tokena_volume / (10 ^ new_pool.decimals) * checkpoint.price),
 	FROM (
 		SELECT pool, hourly_interval, fusdc_volume, tokena_volume
 		FROM seawater_pool_swap2_volume_hourly_1
@@ -133,12 +119,24 @@ CREATE VIEW seawater_pool_swap_volume_hourly_1 AS
 		events_seawater_newPool AS new_pool
 		ON new_pool.token = combined.pool
 	LEFT JOIN
-		checkpoint_seawater_swaps_average_price_hourly_1 AS checkpoint
-		ON combined.hourly_interval = checkpoint.price
+		seawater_swaps_average_price_hourly_1 AS checkpoint
+		ON combined.hourly_interval = checkpoint.hourly_interval
 	GROUP BY
-		pool,
+		combined.pool,
 		combined.hourly_interval,
 		new_pool.decimals
 	ORDER BY hourly_interval;
+
+-- This would make use of triggers to keep the materialized views up to date, but Postgres doesn't support triggers on materialized views. Instead, schedule regular updates with pg_cron
+CREATE OR REPLACE FUNCTION refresh_swap_price_volume_views()
+RETURNS VOID LANGUAGE PLPGSQL
+AS $$
+BEGIN
+	REFRESH MATERIALIZED VIEW CONCURRENTLY seawater_pool_swap2_price_hourly_1;
+	REFRESH MATERIALIZED VIEW CONCURRENTLY seawater_swaps_average_price_hourly_1;
+	REFRESH MATERIALIZED VIEW CONCURRENTLY seawater_pool_swap_volume_hourly_1;
+END $$;
+
+SELECT cron.schedule('refresh-swap-price-volume', '*/30 * * * *', $$SELECT refresh_swap_price_volume_views()$$);
 
 -- migrate:down
