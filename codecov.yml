@@ -3,6 +3,7 @@ codecov:
     - "cmd/graphql.ethereum/tools.go"
     - "cmd/graphql.ethereum/graph/generated.go"
     - "cmd/graphql.ethereum/graph/resolver.go"
+    - "cmd/graphql.ethereum/graph/schema.resolvers.go"
     - "cmd/graphql.ethereum/graph/mocked.go"
     - "cmd/graphql.ethereum/graph/model/models_gen.go"
   coverage:

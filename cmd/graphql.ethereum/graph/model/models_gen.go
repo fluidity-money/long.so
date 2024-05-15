@@ -25,11 +25,12 @@ type Query struct {
 }
 
 type Token struct {
-	Address     string `json:"address"`
-	Name        string `json:"name"`
-	TotalSupply string `json:"totalSupply"`
-	Decimals    int    `json:"decimals"`
-	Symbol      string `json:"symbol"`
+	Address      string `json:"address"`
+	Name         string `json:"name"`
+	TotalSupply  string `json:"totalSupply"`
+	Decimals     int    `json:"decimals"`
+	Symbol       string `json:"symbol"`
+	LastUsdValue string `json:"lastUsdValue"`
 }
 
 type TokenBalance struct {

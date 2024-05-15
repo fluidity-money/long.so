@@ -129,11 +129,12 @@ type ComplexityRoot struct {
 	}
 
 	Token struct {
-		Address     func(childComplexity int) int
-		Decimals    func(childComplexity int) int
-		Name        func(childComplexity int) int
-		Symbol      func(childComplexity int) int
-		TotalSupply func(childComplexity int) int
+		Address      func(childComplexity int) int
+		Decimals     func(childComplexity int) int
+		LastUsdValue func(childComplexity int) int
+		Name         func(childComplexity int) int
+		Symbol       func(childComplexity int) int
+		TotalSupply  func(childComplexity int) int
 	}
 
 	TokenBalance struct {
@@ -644,6 +645,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Token.Decimals(childComplexity), true
 
+	case "Token.lastUsdValue":
+		if e.complexity.Token.LastUsdValue == nil {
+			break
+		}
+
+		return e.complexity.Token.LastUsdValue(childComplexity), true
+
 	case "Token.name":
 		if e.complexity.Token.Name == nil {
 			break
@@ -903,16 +911,12 @@ type Query {
   getWallet based on information including balances. SHOULD NOT be used to get
   information that's needed consistently. Use the frontend instead after getting addresess
   elsewhere.
-
-  Cached aggressively.
   """
   getWallet(address: String!): Wallet
 
   """
   getSwaps made using a pool. Safe to use to get up to date information on swaps going
   through the UI.
-
-  Not cached at all.
   """
   getSwaps(pool: String!): [SeawaterSwap!]
 }
@@ -1030,6 +1034,8 @@ type Token {
   totalSupply: String!
   decimals: Int!
   symbol: String!
+
+  lastUsdValue: String!
 }
 
 type UtilityIncentive {
@@ -1248,7 +1254,7 @@ func (ec *executionContext) _Amount_token(ctx context.Context, field graphql.Col
 	return ec.marshalNToken2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐToken(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Amount_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Amount_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Amount",
 		Field:      field,
@@ -1266,6 +1272,8 @@ func (ec *executionContext) fieldContext_Amount_token(ctx context.Context, field
 				return ec.fieldContext_Token_decimals(ctx, field)
 			case "symbol":
 				return ec.fieldContext_Token_symbol(ctx, field)
+			case "lastUsdValue":
+				return ec.fieldContext_Token_lastUsdValue(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Token", field.Name)
 		},
@@ -1304,7 +1312,7 @@ func (ec *executionContext) _Amount_decimals(ctx context.Context, field graphql.
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Amount_decimals(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Amount_decimals(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Amount",
 		Field:      field,
@@ -1348,7 +1356,7 @@ func (ec *executionContext) _Amount_timestamp(ctx context.Context, field graphql
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Amount_timestamp(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Amount_timestamp(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Amount",
 		Field:      field,
@@ -1392,7 +1400,7 @@ func (ec *executionContext) _Amount_valueUnscaled(ctx context.Context, field gra
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Amount_valueUnscaled(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Amount_valueUnscaled(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Amount",
 		Field:      field,
@@ -1436,7 +1444,7 @@ func (ec *executionContext) _Amount_valueScaled(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Amount_valueScaled(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Amount_valueScaled(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Amount",
 		Field:      field,
@@ -1480,7 +1488,7 @@ func (ec *executionContext) _Amount_valueUsd(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Amount_valueUsd(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Amount_valueUsd(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Amount",
 		Field:      field,
@@ -1524,7 +1532,7 @@ func (ec *executionContext) _LiquidityOverTime_daily(ctx context.Context, field 
 	return ec.marshalNPairAmount2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmountᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_LiquidityOverTime_daily(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_LiquidityOverTime_daily(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "LiquidityOverTime",
 		Field:      field,
@@ -1576,7 +1584,7 @@ func (ec *executionContext) _LiquidityOverTime_monthly(ctx context.Context, fiel
 	return ec.marshalNPairAmount2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmountᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_LiquidityOverTime_monthly(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_LiquidityOverTime_monthly(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "LiquidityOverTime",
 		Field:      field,
@@ -1625,7 +1633,7 @@ func (ec *executionContext) _Mutation_setVolumeYieldPriceAndTVLForLastHour(ctx c
 	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_setVolumeYieldPriceAndTVLForLastHour(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_setVolumeYieldPriceAndTVLForLastHour(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -1669,7 +1677,7 @@ func (ec *executionContext) _PairAmount_timestamp(ctx context.Context, field gra
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_PairAmount_timestamp(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PairAmount_timestamp(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "PairAmount",
 		Field:      field,
@@ -1713,7 +1721,7 @@ func (ec *executionContext) _PairAmount_fusdc(ctx context.Context, field graphql
 	return ec.marshalNAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐAmount(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_PairAmount_fusdc(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PairAmount_fusdc(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "PairAmount",
 		Field:      field,
@@ -1771,7 +1779,7 @@ func (ec *executionContext) _PairAmount_token1(ctx context.Context, field graphq
 	return ec.marshalNAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐAmount(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_PairAmount_token1(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PairAmount_token1(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "PairAmount",
 		Field:      field,
@@ -1829,7 +1837,7 @@ func (ec *executionContext) _PriceOverTime_daily(ctx context.Context, field grap
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_PriceOverTime_daily(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PriceOverTime_daily(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "PriceOverTime",
 		Field:      field,
@@ -1873,7 +1881,7 @@ func (ec *executionContext) _PriceOverTime_monthly(ctx context.Context, field gr
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_PriceOverTime_monthly(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PriceOverTime_monthly(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "PriceOverTime",
 		Field:      field,
@@ -1917,7 +1925,7 @@ func (ec *executionContext) _Query_pools(ctx context.Context, field graphql.Coll
 	return ec.marshalNSeawaterPool2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋlibᚋtypesᚋseawaterᚐPoolᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_pools(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_pools(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2487,7 +2495,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2545,7 +2553,7 @@ func (ec *executionContext) _SeawaterPool_id(ctx context.Context, field graphql.
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -2589,7 +2597,7 @@ func (ec *executionContext) _SeawaterPool_address(ctx context.Context, field gra
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_address(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_address(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -2633,7 +2641,7 @@ func (ec *executionContext) _SeawaterPool_token(ctx context.Context, field graph
 	return ec.marshalNToken2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐToken(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -2651,6 +2659,8 @@ func (ec *executionContext) fieldContext_SeawaterPool_token(ctx context.Context,
 				return ec.fieldContext_Token_decimals(ctx, field)
 			case "symbol":
 				return ec.fieldContext_Token_symbol(ctx, field)
+			case "lastUsdValue":
+				return ec.fieldContext_Token_lastUsdValue(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Token", field.Name)
 		},
@@ -2689,7 +2699,7 @@ func (ec *executionContext) _SeawaterPool_priceOverTime(ctx context.Context, fie
 	return ec.marshalNPriceOverTime2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPriceOverTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_priceOverTime(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_priceOverTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -2739,7 +2749,7 @@ func (ec *executionContext) _SeawaterPool_volumeOverTime(ctx context.Context, fi
 	return ec.marshalNVolumeOverTime2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐVolumeOverTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_volumeOverTime(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_volumeOverTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -2789,7 +2799,7 @@ func (ec *executionContext) _SeawaterPool_liquidityOverTime(ctx context.Context,
 	return ec.marshalNLiquidityOverTime2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐLiquidityOverTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_liquidityOverTime(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_liquidityOverTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -2839,7 +2849,7 @@ func (ec *executionContext) _SeawaterPool_tvlOverTime(ctx context.Context, field
 	return ec.marshalNTvlOverTime2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐTvlOverTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_tvlOverTime(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_tvlOverTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -2889,7 +2899,7 @@ func (ec *executionContext) _SeawaterPool_yieldOverTime(ctx context.Context, fie
 	return ec.marshalNYieldOverTime2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐYieldOverTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_yieldOverTime(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_yieldOverTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -2939,7 +2949,7 @@ func (ec *executionContext) _SeawaterPool_earnedFeesAPRFUSDC(ctx context.Context
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_earnedFeesAPRFUSDC(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_earnedFeesAPRFUSDC(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -2983,7 +2993,7 @@ func (ec *executionContext) _SeawaterPool_earnedFeesAPRToken1(ctx context.Contex
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_earnedFeesAPRToken1(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -3027,7 +3037,7 @@ func (ec *executionContext) _SeawaterPool_liquidityIncentives(ctx context.Contex
 	return ec.marshalNAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐAmount(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_liquidityIncentives(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_liquidityIncentives(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -3085,7 +3095,7 @@ func (ec *executionContext) _SeawaterPool_superIncentives(ctx context.Context, f
 	return ec.marshalNAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐAmount(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_superIncentives(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_superIncentives(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -3143,7 +3153,7 @@ func (ec *executionContext) _SeawaterPool_utilityIncentives(ctx context.Context,
 	return ec.marshalNUtilityIncentive2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐUtilityIncentiveᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_utilityIncentives(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_utilityIncentives(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -3193,7 +3203,7 @@ func (ec *executionContext) _SeawaterPool_positions(ctx context.Context, field g
 	return ec.marshalNSeawaterPosition2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋlibᚋtypesᚋseawaterᚐPositionᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_positions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_positions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -3324,7 +3334,7 @@ func (ec *executionContext) _SeawaterPool_swaps(ctx context.Context, field graph
 	return ec.marshalNSeawaterSwap2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterSwapᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_swaps(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_swaps(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -3443,7 +3453,7 @@ func (ec *executionContext) _SeawaterPosition_id(ctx context.Context, field grap
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPosition_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPosition_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPosition",
 		Field:      field,
@@ -3487,7 +3497,7 @@ func (ec *executionContext) _SeawaterPosition_positionId(ctx context.Context, fi
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPosition_positionId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPosition_positionId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPosition",
 		Field:      field,
@@ -3531,7 +3541,7 @@ func (ec *executionContext) _SeawaterPosition_owner(ctx context.Context, field g
 	return ec.marshalNWallet2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐWallet(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPosition_owner(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPosition_owner(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPosition",
 		Field:      field,
@@ -3585,7 +3595,7 @@ func (ec *executionContext) _SeawaterPosition_pool(ctx context.Context, field gr
 	return ec.marshalNSeawaterPool2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋlibᚋtypesᚋseawaterᚐPool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPosition_pool(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPosition_pool(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPosition",
 		Field:      field,
@@ -3665,7 +3675,7 @@ func (ec *executionContext) _SeawaterPosition_lower(ctx context.Context, field g
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPosition_lower(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPosition_lower(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPosition",
 		Field:      field,
@@ -3709,7 +3719,7 @@ func (ec *executionContext) _SeawaterPosition_upper(ctx context.Context, field g
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPosition_upper(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPosition_upper(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPosition",
 		Field:      field,
@@ -3753,7 +3763,7 @@ func (ec *executionContext) _SeawaterPosition_liquidity(ctx context.Context, fie
 	return ec.marshalNPairAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmount(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPosition_liquidity(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPosition_liquidity(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPosition",
 		Field:      field,
@@ -3805,7 +3815,7 @@ func (ec *executionContext) _SeawaterSwap_timestamp(ctx context.Context, field g
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterSwap_timestamp(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterSwap_timestamp(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterSwap",
 		Field:      field,
@@ -3849,7 +3859,7 @@ func (ec *executionContext) _SeawaterSwap_sender(ctx context.Context, field grap
 	return ec.marshalNWallet2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐWallet(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterSwap_sender(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterSwap_sender(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterSwap",
 		Field:      field,
@@ -3903,7 +3913,7 @@ func (ec *executionContext) _SeawaterSwap_amountIn(ctx context.Context, field gr
 	return ec.marshalNAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐAmount(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterSwap_amountIn(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterSwap_amountIn(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterSwap",
 		Field:      field,
@@ -3961,7 +3971,7 @@ func (ec *executionContext) _SeawaterSwap_amountOut(ctx context.Context, field g
 	return ec.marshalNAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐAmount(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterSwap_amountOut(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterSwap_amountOut(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterSwap",
 		Field:      field,
@@ -4019,7 +4029,7 @@ func (ec *executionContext) _Token_address(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Token_address(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Token_address(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Token",
 		Field:      field,
@@ -4063,7 +4073,7 @@ func (ec *executionContext) _Token_name(ctx context.Context, field graphql.Colle
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Token_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Token_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Token",
 		Field:      field,
@@ -4107,7 +4117,7 @@ func (ec *executionContext) _Token_totalSupply(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Token_totalSupply(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Token_totalSupply(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Token",
 		Field:      field,
@@ -4151,7 +4161,7 @@ func (ec *executionContext) _Token_decimals(ctx context.Context, field graphql.C
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Token_decimals(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Token_decimals(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Token",
 		Field:      field,
@@ -4195,7 +4205,51 @@ func (ec *executionContext) _Token_symbol(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Token_symbol(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Token_symbol(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Token",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Token_lastUsdValue(ctx context.Context, field graphql.CollectedField, obj *model.Token) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Token_lastUsdValue(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LastUsdValue, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Token_lastUsdValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Token",
 		Field:      field,
@@ -4239,7 +4293,7 @@ func (ec *executionContext) _TokenBalance_token(ctx context.Context, field graph
 	return ec.marshalNToken2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐToken(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_TokenBalance_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_TokenBalance_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "TokenBalance",
 		Field:      field,
@@ -4257,6 +4311,8 @@ func (ec *executionContext) fieldContext_TokenBalance_token(ctx context.Context,
 				return ec.fieldContext_Token_decimals(ctx, field)
 			case "symbol":
 				return ec.fieldContext_Token_symbol(ctx, field)
+			case "lastUsdValue":
+				return ec.fieldContext_Token_lastUsdValue(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Token", field.Name)
 		},
@@ -4295,7 +4351,7 @@ func (ec *executionContext) _TokenBalance_balance(ctx context.Context, field gra
 	return ec.marshalNAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐAmount(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_TokenBalance_balance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_TokenBalance_balance(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "TokenBalance",
 		Field:      field,
@@ -4353,7 +4409,7 @@ func (ec *executionContext) _TvlOverTime_daily(ctx context.Context, field graphq
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_TvlOverTime_daily(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_TvlOverTime_daily(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "TvlOverTime",
 		Field:      field,
@@ -4397,7 +4453,7 @@ func (ec *executionContext) _TvlOverTime_monthly(ctx context.Context, field grap
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_TvlOverTime_monthly(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_TvlOverTime_monthly(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "TvlOverTime",
 		Field:      field,
@@ -4441,7 +4497,7 @@ func (ec *executionContext) _UtilityIncentive_amountGivenOut(ctx context.Context
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UtilityIncentive_amountGivenOut(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UtilityIncentive_amountGivenOut(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UtilityIncentive",
 		Field:      field,
@@ -4485,7 +4541,7 @@ func (ec *executionContext) _UtilityIncentive_maximumAmount(ctx context.Context,
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UtilityIncentive_maximumAmount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UtilityIncentive_maximumAmount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UtilityIncentive",
 		Field:      field,
@@ -4529,7 +4585,7 @@ func (ec *executionContext) _VolumeOverTime_daily(ctx context.Context, field gra
 	return ec.marshalNPairAmount2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmountᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VolumeOverTime_daily(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VolumeOverTime_daily(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VolumeOverTime",
 		Field:      field,
@@ -4581,7 +4637,7 @@ func (ec *executionContext) _VolumeOverTime_monthly(ctx context.Context, field g
 	return ec.marshalNPairAmount2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmountᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_VolumeOverTime_monthly(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VolumeOverTime_monthly(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VolumeOverTime",
 		Field:      field,
@@ -4633,7 +4689,7 @@ func (ec *executionContext) _Wallet_id(ctx context.Context, field graphql.Collec
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Wallet_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Wallet_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Wallet",
 		Field:      field,
@@ -4677,7 +4733,7 @@ func (ec *executionContext) _Wallet_address(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Wallet_address(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Wallet_address(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Wallet",
 		Field:      field,
@@ -4721,7 +4777,7 @@ func (ec *executionContext) _Wallet_balances(ctx context.Context, field graphql.
 	return ec.marshalNTokenBalance2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐTokenBalanceᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Wallet_balances(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Wallet_balances(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Wallet",
 		Field:      field,
@@ -4768,7 +4824,7 @@ func (ec *executionContext) _Wallet_positions(ctx context.Context, field graphql
 	return ec.marshalOSeawaterPosition2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋlibᚋtypesᚋseawaterᚐPositionᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Wallet_positions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Wallet_positions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Wallet",
 		Field:      field,
@@ -4828,7 +4884,7 @@ func (ec *executionContext) _YieldOverTime_daily(ctx context.Context, field grap
 	return ec.marshalNPairAmount2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmountᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_YieldOverTime_daily(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_YieldOverTime_daily(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "YieldOverTime",
 		Field:      field,
@@ -4880,7 +4936,7 @@ func (ec *executionContext) _YieldOverTime_monthly(ctx context.Context, field gr
 	return ec.marshalNPairAmount2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmountᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_YieldOverTime_monthly(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_YieldOverTime_monthly(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "YieldOverTime",
 		Field:      field,
@@ -4932,7 +4988,7 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Directive_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Directive_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -4973,7 +5029,7 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Directive_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Directive_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -5017,7 +5073,7 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 	return ec.marshalN__DirectiveLocation2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Directive_locations(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Directive_locations(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -5061,7 +5117,7 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Directive_args(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Directive_args(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -5115,7 +5171,7 @@ func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Directive_isRepeatable(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Directive_isRepeatable(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -5159,7 +5215,7 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___EnumValue_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___EnumValue_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__EnumValue",
 		Field:      field,
@@ -5200,7 +5256,7 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___EnumValue_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___EnumValue_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__EnumValue",
 		Field:      field,
@@ -5244,7 +5300,7 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___EnumValue_isDeprecated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___EnumValue_isDeprecated(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__EnumValue",
 		Field:      field,
@@ -5285,7 +5341,7 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___EnumValue_deprecationReason(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___EnumValue_deprecationReason(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__EnumValue",
 		Field:      field,
@@ -5329,7 +5385,7 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Field_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Field_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -5370,7 +5426,7 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Field_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Field_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -5414,7 +5470,7 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Field_args(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Field_args(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -5468,7 +5524,7 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 	return ec.marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Field_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Field_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -5534,7 +5590,7 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Field_isDeprecated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Field_isDeprecated(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -5575,7 +5631,7 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Field_deprecationReason(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Field_deprecationReason(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -5619,7 +5675,7 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___InputValue_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___InputValue_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__InputValue",
 		Field:      field,
@@ -5660,7 +5716,7 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___InputValue_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___InputValue_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__InputValue",
 		Field:      field,
@@ -5704,7 +5760,7 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 	return ec.marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___InputValue_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___InputValue_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__InputValue",
 		Field:      field,
@@ -5767,7 +5823,7 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___InputValue_defaultValue(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___InputValue_defaultValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__InputValue",
 		Field:      field,
@@ -5808,7 +5864,7 @@ func (ec *executionContext) ___Schema_description(ctx context.Context, field gra
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Schema_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Schema_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -5852,7 +5908,7 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 	return ec.marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Schema_types(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Schema_types(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -5918,7 +5974,7 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 	return ec.marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Schema_queryType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Schema_queryType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -5981,7 +6037,7 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 	return ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Schema_mutationType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Schema_mutationType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -6044,7 +6100,7 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 	return ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Schema_subscriptionType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Schema_subscriptionType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -6110,7 +6166,7 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 	return ec.marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Schema_directives(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Schema_directives(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -6166,7 +6222,7 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 	return ec.marshalN__TypeKind2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Type_kind(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Type_kind(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -6207,7 +6263,7 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Type_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Type_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -6248,7 +6304,7 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Type_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Type_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -6355,7 +6411,7 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 	return ec.marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Type_interfaces(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Type_interfaces(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -6418,7 +6474,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 	return ec.marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Type_possibleTypes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Type_possibleTypes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -6543,7 +6599,7 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 	return ec.marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Type_inputFields(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Type_inputFields(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -6594,7 +6650,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Type_ofType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Type_ofType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -6657,7 +6713,7 @@ func (ec *executionContext) ___Type_specifiedByURL(ctx context.Context, field gr
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext___Type_specifiedByURL(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -7097,7 +7153,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "getPool":
 			field := field
 
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -7116,7 +7172,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "getPoolPositions":
 			field := field
 
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -7135,7 +7191,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "getPosition":
 			field := field
 
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -7176,7 +7232,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "getWallet":
 			field := field
 
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -7195,7 +7251,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "getSwaps":
 			field := field
 
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -8357,6 +8413,11 @@ func (ec *executionContext) _Token(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "lastUsdValue":
+			out.Values[i] = ec._Token_lastUsdValue(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8678,7 +8739,7 @@ func (ec *executionContext) _Wallet(ctx context.Context, sel ast.SelectionSet, o
 		case "positions":
 			field := field
 
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))

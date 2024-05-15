@@ -34,16 +34,12 @@ type Query {
   getWallet based on information including balances. SHOULD NOT be used to get
   information that's needed consistently. Use the frontend instead after getting addresess
   elsewhere.
-
-  Cached aggressively.
   """
   getWallet(address: String!): Wallet
 
   """
   getSwaps made using a pool. Safe to use to get up to date information on swaps going
   through the UI.
-
-  Not cached at all.
   """
   getSwaps(pool: String!): [SeawaterSwap!]
 }
@@ -161,6 +157,8 @@ type Token {
   totalSupply: String!
   decimals: Int!
   symbol: String!
+
+  lastUsdValue: String!
 }
 
 type UtilityIncentive {
