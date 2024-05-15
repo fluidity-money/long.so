@@ -20,8 +20,10 @@ import { fUSDC, tokens } from "../../../../../config/tokens";
 import { useGraphql } from "@/hooks/useGraphql";
 import { Hash } from "viem";
 import { usdFormat } from "@/lib/usdFormat";
+import { graphql, useFragment } from "@/gql";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
-const data: Pool[] = [
+const mockData: Pool[] = [
   {
     APR: 170.23,
     volume: "$100k",
@@ -31,21 +33,44 @@ const data: Pool[] = [
   },
 ];
 
+export const SelectPrimeAssetFragment = graphql(`
+  fragment SelectPrimeAssetFragment on SeawaterPool {
+    address
+    volumeOverTime {
+      daily {
+        fusdc {
+          valueUsd
+        }
+      }
+    }
+    token {
+      name
+      symbol
+      address
+    }
+  }
+`);
+
 const SelectPrimeAsset = () => {
   const router = useRouter();
 
   const [boostedPools, setBoostedPools] = useState(false);
   const [myAssets, setMyAssets] = useState(false);
 
+  const showMockData = useFeatureFlag("ui show demo data");
+
   const { data, isLoading } = useGraphql();
 
+  const poolsData = useFragment(SelectPrimeAssetFragment, data?.pools);
   /**
    * Reformat our data to match the table columns
    */
   const pools = useMemo((): Pool[] => {
-    if (isLoading || !data) return [];
+    if (showMockData) return mockData;
 
-    return data?.pools?.map((pool) => ({
+    if (isLoading || !poolsData) return [];
+
+    return poolsData?.map((pool) => ({
       id: pool.address,
       // assume the first token is always the main token
       volume: usdFormat(

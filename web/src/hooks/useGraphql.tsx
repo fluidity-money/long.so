@@ -3,46 +3,22 @@ import request from "graphql-request";
 import { graphqlEndpoint } from "@/config/graphqlEndpoint";
 import { graphql } from "@/gql";
 
+/**
+ * The main GraphQL query to fetch all data.
+ */
 const graphqlQuery = graphql(`
   query AllData {
     pools {
-      address
-      token {
-        name
-        address
-        symbol
-        decimals
-        totalSupply
-      }
-      volumeOverTime {
-        daily {
-          fusdc {
-            valueScaled
-            valueUsd
-          }
-        }
-      }
-      tvlOverTime {
-        daily
-      }
-      liquidityIncentives {
-        # TODO: uncomment when this field is enabled
-        # valueUsd
-        valueUnscaled
-      }
-      superIncentives {
-        # TODO: uncomment when this field is enabled
-        # valueUsd
-        valueUnscaled
-      }
-      utilityIncentives {
-        maximumAmount
-        amountGivenOut
-      }
+      ...SwapProPoolFragment
+      ...AllPoolsFragment
+      ...SelectPrimeAssetFragment
     }
   }
 `);
 
+/**
+ * Fetch all data from the GraphQL endpoint.
+ */
 export const useGraphql = () =>
   useQuery({
     queryKey: ["graphql"],

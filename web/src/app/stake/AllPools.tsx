@@ -21,6 +21,7 @@ import { mockAllPools } from "@/demoData/allPools";
 import { LoaderIcon } from "lucide-react";
 import { useGraphql } from "@/hooks/useGraphql";
 import { sum } from "lodash";
+import { graphql, useFragment } from "@/gql";
 
 const DisplayModeMenu = ({
   setDisplayMode,
@@ -57,10 +58,41 @@ const DisplayModeMenu = ({
   );
 };
 
+export const AllPoolsFragment = graphql(`
+  fragment AllPoolsFragment on SeawaterPool {
+    address
+    token {
+      name
+    }
+    volumeOverTime {
+      daily {
+        fusdc {
+          valueScaled
+        }
+      }
+    }
+    tvlOverTime {
+      daily
+    }
+    liquidityIncentives {
+      # TODO: uncomment when this field is enabled
+      # valueUsd
+      valueUnscaled
+    }
+    superIncentives {
+      # TODO: uncomment when this field is enabled
+      # valueUsd
+      valueUnscaled
+    }
+  }
+`);
+
 export const AllPools = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
 
   const { data, isLoading } = useGraphql();
+
+  const poolsData = useFragment(AllPoolsFragment, data?.pools);
 
   const showDemoData = useFeatureFlag("ui show demo data");
 
@@ -68,7 +100,7 @@ export const AllPools = () => {
     if (showDemoData) return mockAllPools;
 
     // reformat the data to match the Pool type
-    return data?.pools.map(
+    return poolsData?.map(
       (pool): Pool => ({
         id: pool.address,
         tokens: [
@@ -92,8 +124,6 @@ export const AllPools = () => {
     );
   }, [data, showDemoData]);
 
-  const { data: graphqlData, isLoading: isGraphqlLoading } = useGraphql();
-
   return (
     <div className="flex w-full flex-col items-center">
       <div className="mt-4 flex w-full max-w-screen-lg flex-col gap-4">
@@ -115,9 +145,7 @@ export const AllPools = () => {
                   ? "12.1M"
                   : // sum the tvl of all pools, assume the first daily value is the current value
                     usdFormat(
-                      sum(
-                        data?.pools?.map((pool) => pool.tvlOverTime.daily[0]),
-                      ),
+                      sum(poolsData?.map((pool) => pool.tvlOverTime.daily[0])),
                     )}
               </div>
             </div>
@@ -130,7 +158,7 @@ export const AllPools = () => {
                   : // sum the liquidity and super incentives of all pools
                     usdFormat(
                       sum(
-                        data?.pools?.map(
+                        poolsData?.map(
                           (pool) =>
                             parseFloat(pool.liquidityIncentives.valueUnscaled) + // TODO: use USD value when enabled in GraphQL
                             parseFloat(pool.superIncentives.valueUnscaled), // TODO: use USD value when enabled in GraphQL

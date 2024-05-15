@@ -6,6 +6,8 @@ import { DurationSegmentedControl } from "@/components/DurationSegmentedControl"
 import { TypographyH2 } from "@/components/ui/typography";
 import ReactECharts from "echarts-for-react";
 import { format } from "date-fns";
+import { SwapProPoolFragmentFragment } from "@/gql/graphql";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 const durationToDays = {
   "7D": 7,
@@ -15,7 +17,7 @@ const durationToDays = {
   ALL: 52,
 };
 
-export const Graph = () => {
+export const Graph = ({ pool }: { pool: SwapProPoolFragmentFragment }) => {
   const [activeGraphType] = useState<"price" | "volume" | "liquidity">(
     "volume",
   );
@@ -24,10 +26,16 @@ export const Graph = () => {
     "7D",
   );
 
-  const swapProGraphData = useMemo(
+  const swapProGraphMockData = useMemo(
     () => getSwapProGraphData(durationToDays[duration]),
     [duration],
   );
+
+  const showMockData = useFeatureFlag("ui show demo data");
+
+  const graphData = useMemo(() => {
+    if (showMockData) return swapProGraphMockData;
+  }, [showMockData]);
 
   return (
     <>
@@ -96,7 +104,7 @@ export const Graph = () => {
               },
               xAxis: {
                 type: "category",
-                data: swapProGraphData.map((d) => format(d.date, "P")),
+                data: swapProGraphMockData.map((d) => format(d.date, "P")),
                 show: false,
                 axisPointer: {
                   label: {
@@ -116,7 +124,7 @@ export const Graph = () => {
               series: [
                 {
                   type: "bar",
-                  data: swapProGraphData.map((d) => d.uv),
+                  data: swapProGraphMockData.map((d) => d.uv),
                   itemStyle: {
                     color: "#1E1E1E",
                   },
