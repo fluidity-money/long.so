@@ -20,6 +20,7 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { mockAllPools } from "@/demoData/allPools";
 import { LoaderIcon } from "lucide-react";
 import { useGraphql } from "@/hooks/useGraphql";
+import { sum } from "lodash";
 
 const DisplayModeMenu = ({
   setDisplayMode,
@@ -91,6 +92,8 @@ export const AllPools = () => {
     );
   }, [data, showDemoData]);
 
+  const { data: graphqlData, isLoading: isGraphqlLoading } = useGraphql();
+
   return (
     <div className="flex w-full flex-col items-center">
       <div className="mt-4 flex w-full max-w-screen-lg flex-col gap-4">
@@ -108,23 +111,39 @@ export const AllPools = () => {
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">TVL</div>
               <div className="text-2xl md:text-3xl">
-                {/*TODO: where to get this data from?*/}$
-                {showDemoData ? "12.1M" : 0}
+                {showDemoData
+                  ? "12.1M"
+                  : // sum the tvl of all pools, assume the first daily value is the current value
+                    usdFormat(
+                      sum(
+                        data?.pools?.map((pool) => pool.tvlOverTime.daily[0]),
+                      ),
+                    )}
               </div>
             </div>
 
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">Incentives</div>
               <div className="text-2xl md:text-3xl">
-                {/*TODO: where to get this data from?*/}$
-                {showDemoData ? "200k" : 0}
+                {showDemoData
+                  ? "200k"
+                  : // sum the liquidity and super incentives of all pools
+                    usdFormat(
+                      sum(
+                        data?.pools?.map(
+                          (pool) =>
+                            parseFloat(pool.liquidityIncentives.valueUnscaled) +
+                            parseFloat(pool.superIncentives.valueUnscaled),
+                        ),
+                      ),
+                    )}
               </div>
             </div>
 
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">Rewards Claimed</div>
               <div className="text-2xl md:text-3xl">
-                {/*TODO: where to get this data from?*/}$
+                {/* TODO: not sure where to get this from */}
                 {showDemoData ? "59.1K" : 0}
               </div>
             </div>

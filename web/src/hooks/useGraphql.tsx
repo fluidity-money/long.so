@@ -20,9 +20,24 @@ const graphqlQuery = graphql(`
       tvlOverTime {
         daily
       }
+      liquidityIncentives {
+        # TODO: uncomment when this field is enabled
+        # valueUsd
+        valueUnscaled
+      }
+      superIncentives {
+        # TODO: uncomment when this field is enabled
+        # valueUsd
+        valueUnscaled
+      }
+      utilityIncentives {
+        maximumAmount
+        amountGivenOut
+      }
     }
   }
 `);
+
 export const useGraphql = () =>
   useQuery({
     queryKey: ["graphql"],
