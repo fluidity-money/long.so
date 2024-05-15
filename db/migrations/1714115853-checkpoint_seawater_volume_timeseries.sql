@@ -132,9 +132,9 @@ CREATE OR REPLACE FUNCTION refresh_swap_price_volume_views()
 RETURNS VOID LANGUAGE PLPGSQL
 AS $$
 BEGIN
-	REFRESH MATERIALIZED VIEW CONCURRENTLY seawater_pool_swap2_price_hourly_1;
-	REFRESH MATERIALIZED VIEW CONCURRENTLY seawater_swaps_average_price_hourly_1;
-	REFRESH MATERIALIZED VIEW CONCURRENTLY seawater_pool_swap_volume_hourly_1;
+	REFRESH MATERIALIZED VIEW seawater_pool_swap2_price_hourly_1;
+	REFRESH MATERIALIZED VIEW seawater_swaps_average_price_hourly_1;
+	REFRESH MATERIALIZED VIEW seawater_pool_swap_volume_hourly_1;
 END $$;
 
 SELECT cron.schedule('refresh-swap-price-volume', '*/30 * * * *', $$SELECT refresh_swap_price_volume_views()$$);

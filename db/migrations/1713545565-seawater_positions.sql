@@ -24,11 +24,13 @@ CREATE MATERIALIZED VIEW seawater_active_positions_1 AS
 	)
 ;
 
+CREATE UNIQUE INDEX ON seawater_active_positions_1 (pos_id);
+
 CREATE OR REPLACE FUNCTION refresh_position_views()
 RETURNS VOID LANGUAGE PLPGSQL
 AS $$
 BEGIN
-	REFRESH MATERIALIZED VIEW CONCURRENTLY seawater_positions_1;
+	REFRESH MATERIALIZED VIEW seawater_positions_1;
 	REFRESH MATERIALIZED VIEW CONCURRENTLY seawater_active_positions_1;
 END $$;
 
