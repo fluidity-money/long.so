@@ -32,7 +32,7 @@ type F struct {
 // or use EnvFeatures.
 func Get() F {
 	f := get()
-	slog.Debug("enabled features", "features", f, "everything enabled?", f.everything)
+	slog.Debug("enabled features", "features", f.enabled, "everything enabled?", f.everything)
 	return f
 }
 
