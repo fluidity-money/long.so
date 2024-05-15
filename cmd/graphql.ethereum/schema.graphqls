@@ -54,6 +54,7 @@ type SeawaterPool {
   address: String!
 
   token: Token!
+  price: String!
 
   priceOverTime: PriceOverTime!
   volumeOverTime: VolumeOverTime!
@@ -157,8 +158,6 @@ type Token {
   totalSupply: String!
   decimals: Int!
   symbol: String!
-
-  lastUsdValue: String!
 }
 
 type UtilityIncentive {

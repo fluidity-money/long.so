@@ -234,6 +234,27 @@ func (r *seawaterPoolResolver) Token(ctx context.Context, obj *seawater.Pool) (t
 	}, nil
 }
 
+// Price is the resolver for the price field.
+func (r *seawaterPoolResolver) Price(ctx context.Context, obj *seawater.Pool) (string, error) {
+	// Get the last price item for the pool given.
+	if obj == nil {
+		return "", fmt.Errorf("empty pool")
+	}
+	if r.F.Is(features.FeatureMockGraph) {
+		r.F.On(features.FeatureMockGraphDataDelay, func() error {
+			time.Sleep(2 * time.Second)
+			return nil
+		})
+		daily, _, _, err := MockPriceOverTime(31, r.C.FusdcAddr, obj.Token)
+		if err != nil {
+			return "", err
+		}
+		return daily[0], nil
+	}
+	// TODO
+	return "", nil
+}
+
 // PriceOverTime is the resolver for the priceOverTime field.
 func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.Pool) (price model.PriceOverTime, err error) {
 	if obj == nil {
