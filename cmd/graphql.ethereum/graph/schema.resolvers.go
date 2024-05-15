@@ -91,7 +91,7 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 
 // SetVolumeYieldPriceAndTVLForLastHour is the resolver for the setVolumeYieldPriceAndTVLForLastHour field.
 func (r *mutationResolver) SetVolumeYieldPriceAndTVLForLastHour(ctx context.Context) (*string, error) {
-	panic(fmt.Errorf("not implemented: SetVolumeYieldPriceAndTVLForLastHour - setVolumeYieldPriceAndTVLForLastHour"))
+	return nil, nil // TODO
 }
 
 // Pools is the resolver for the pools field.
