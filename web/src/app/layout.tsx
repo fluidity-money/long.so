@@ -13,7 +13,7 @@ import { FeatureFlagConfig } from "@/app/_layout/FeatureFlagConfig";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export const metadata: Metadata = {
-  title: "Superposition AMM",
+  title: "Long Tail AMM",
   description: "Long Tail is Arbitrum's cheapest and most rewarding AMM.",
   openGraph: {
     title: "Long Tail AMM",
