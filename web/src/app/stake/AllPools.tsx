@@ -132,8 +132,8 @@ export const AllPools = () => {
                       sum(
                         data?.pools?.map(
                           (pool) =>
-                            parseFloat(pool.liquidityIncentives.valueUnscaled) +
-                            parseFloat(pool.superIncentives.valueUnscaled),
+                            parseFloat(pool.liquidityIncentives.valueUnscaled) + // TODO: use USD value when enabled in GraphQL
+                            parseFloat(pool.superIncentives.valueUnscaled), // TODO: use USD value when enabled in GraphQL
                         ),
                       ),
                     )}

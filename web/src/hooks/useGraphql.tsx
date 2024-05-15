@@ -4,16 +4,21 @@ import { graphqlEndpoint } from "@/config/graphqlEndpoint";
 import { graphql } from "@/gql";
 
 const graphqlQuery = graphql(`
-  query AllPools {
+  query AllData {
     pools {
       address
       token {
         name
+        address
+        symbol
+        decimals
+        totalSupply
       }
       volumeOverTime {
         daily {
           fusdc {
             valueScaled
+            valueUsd
           }
         }
       }
