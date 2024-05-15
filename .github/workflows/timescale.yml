@@ -1,0 +1,33 @@
+name: Run timescale migration
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - 'db/migrations/**'
+  pull_request:
+    branches:
+      - development
+    paths:
+      - 'db/migrations/**'
+
+jobs:
+  run-migration:
+    runs-on: ubuntu-latest
+
+    env:
+      SPN_TIMESCALE: ${{ secrets.SPN_TIMESCALE }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install dbmate
+        run: |
+          wget -qO- https://github.com/amacneil/dbmate/releases/download/v1.12.0/dbmate-linux-amd64 | sudo tee /usr/local/bin/dbmate > /dev/null
+          sudo chmod +x /usr/local/bin/dbmate
+
+      - name: Run dbmate migration
+        run: |
+          dbmate -u "$SPN_TIMESCALE" -d db/migrations up
