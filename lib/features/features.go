@@ -46,6 +46,8 @@ func get() F {
 	case "*":
 		// Everything should be enabled on request!
 		return F{true, nil}
+	case "none":
+		return F{false, nil}
 	default:
 		keys := strings.Split(v, ",")
 		enabled := make(map[string]bool, len(keys))
