@@ -199,8 +199,8 @@ type SeawaterPoolResolver interface {
 	LiquidityOverTime(ctx context.Context, obj *seawater.Pool) (model.LiquidityOverTime, error)
 	TvlOverTime(ctx context.Context, obj *seawater.Pool) (model.TvlOverTime, error)
 	YieldOverTime(ctx context.Context, obj *seawater.Pool) (model.YieldOverTime, error)
-	EarnedFeesAprfusdc(ctx context.Context, obj *seawater.Pool) (string, error)
-	EarnedFeesAPRToken1(ctx context.Context, obj *seawater.Pool) (string, error)
+	EarnedFeesAprfusdc(ctx context.Context, obj *seawater.Pool) ([]string, error)
+	EarnedFeesAPRToken1(ctx context.Context, obj *seawater.Pool) ([]string, error)
 	LiquidityIncentives(ctx context.Context, obj *seawater.Pool) (model.Amount, error)
 	SuperIncentives(ctx context.Context, obj *seawater.Pool) (model.Amount, error)
 	UtilityIncentives(ctx context.Context, obj *seawater.Pool) ([]model.UtilityIncentive, error)
@@ -940,8 +940,8 @@ type SeawaterPool {
   tvlOverTime: TvlOverTime!
   yieldOverTime: YieldOverTime!
 
-  earnedFeesAPRFUSDC: String!
-  earnedFeesAPRToken1: String!
+  earnedFeesAPRFUSDC: [String!]!
+  earnedFeesAPRToken1: [String!]!
 
   liquidityIncentives: Amount!
   superIncentives: Amount!
@@ -2988,9 +2988,9 @@ func (ec *executionContext) _SeawaterPool_earnedFeesAPRFUSDC(ctx context.Context
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.([]string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_SeawaterPool_earnedFeesAPRFUSDC(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3032,9 +3032,9 @@ func (ec *executionContext) _SeawaterPool_earnedFeesAPRToken1(ctx context.Contex
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.([]string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_SeawaterPool_earnedFeesAPRToken1(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {

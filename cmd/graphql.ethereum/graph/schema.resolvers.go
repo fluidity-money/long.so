@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"log/slog"
 	"math/big"
-	"time"
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
@@ -24,7 +23,7 @@ func (r *amountResolver) Token(ctx context.Context, obj *model.Amount) (model.To
 		return model.Token{}, fmt.Errorf("empty amount")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
-		time.Sleep(2 * time.Second)
+		MockDelay(r.F)
 		return MockToken(obj.Token.String())
 	}
 	name, symbol, totalSupply, decimals, err := erc20.GetErc20Details(
@@ -58,6 +57,7 @@ func (r *amountResolver) ValueScaled(ctx context.Context, obj *model.Amount) (st
 		return "", fmt.Errorf("empty amount")
 	}
 	amt := obj.ValueUnscaled
+	slog.Info("value scaled", "obj decimals", obj.Decimals)
 	return amt.ScaleStr(obj.Decimals), nil
 }
 
@@ -67,7 +67,7 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 		return "", fmt.Errorf("empty amount")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
-		time.Sleep(2 * time.Second)
+		MockDelay(r.F)
 		// If we're mocking the graph, then we take the uncaled
 		// amount, and we simply divide it by 1e6, then we divide
 		// it by 0.04 unless the token is fUSDC.
@@ -97,7 +97,7 @@ func (r *mutationResolver) SetVolumeYieldPriceAndTVLForLastHour(ctx context.Cont
 // Pools is the resolver for the pools field.
 func (r *queryResolver) Pools(ctx context.Context) (pools []seawater.Pool, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
-		time.Sleep(2 * time.Second)
+		MockDelay(r.F)
 		pools = MockSeawaterPools()
 		return
 	}
@@ -109,7 +109,7 @@ func (r *queryResolver) Pools(ctx context.Context) (pools []seawater.Pool, err e
 func (r *queryResolver) GetPool(ctx context.Context, address string) (pool *seawater.Pool, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
 		r.F.On(features.FeatureMockGraphDataDelay, func() error {
-			time.Sleep(2 * time.Second)
+			MockDelay(r.F)
 			return nil
 		})
 		pool = MockGetPool(address)
@@ -123,7 +123,7 @@ func (r *queryResolver) GetPool(ctx context.Context, address string) (pool *seaw
 func (r *queryResolver) GetPoolPositions(ctx context.Context, address string) (positions []seawater.Position, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
 		r.F.On(features.FeatureMockGraphDataDelay, func() error {
-			time.Sleep(2 * time.Second)
+			MockDelay(r.F)
 			return nil
 		})
 		positions = MockGetPoolPositions(address)
@@ -137,7 +137,7 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, address string) (p
 func (r *queryResolver) GetPosition(ctx context.Context, id string) (position *seawater.Position, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
 		r.F.On(features.FeatureMockGraphDataDelay, func() error {
-			time.Sleep(2 * time.Second)
+			MockDelay(r.F)
 			return nil
 		})
 		position = MockGetPosition(id)
@@ -155,7 +155,7 @@ func (r *queryResolver) GetPosition(ctx context.Context, id string) (position *s
 func (r *queryResolver) GetPositions(ctx context.Context, wallet string) (positions []seawater.Position, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
 		r.F.On(features.FeatureMockGraphDataDelay, func() error {
-			time.Sleep(2 * time.Second)
+			MockDelay(r.F)
 			return nil
 		})
 		positions = MockGetPoolPositions("0x65dfe41220c438bf069bbce9eb66b087fe65db36")
@@ -172,7 +172,7 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string) (positi
 func (r *queryResolver) GetWallet(ctx context.Context, address string) (*model.Wallet, error) {
 	if r.F.Is(features.FeatureMockGraph) {
 		r.F.On(features.FeatureMockGraphDataDelay, func() error {
-			time.Sleep(2 * time.Second)
+			MockDelay(r.F)
 			return nil
 		})
 		return &model.Wallet{types.AddressFromString(address)}, nil
@@ -183,7 +183,7 @@ func (r *queryResolver) GetWallet(ctx context.Context, address string) (*model.W
 // GetSwaps is the resolver for the getSwaps field.
 func (r *queryResolver) GetSwaps(ctx context.Context, pool string) (swaps []model.SeawaterSwap, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
-		time.Sleep(2 * time.Second)
+		MockDelay(r.F)
 		swaps = MockSwaps(r.C.FusdcAddr, 150, types.AddressFromString(pool))
 		return
 	}
@@ -213,7 +213,7 @@ func (r *seawaterPoolResolver) Token(ctx context.Context, obj *seawater.Pool) (t
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		r.F.On(features.FeatureMockGraphDataDelay, func() error {
-			time.Sleep(2 * time.Second)
+			MockDelay(r.F)
 			return nil
 		})
 		return MockToken(obj.Token.String())
@@ -242,7 +242,7 @@ func (r *seawaterPoolResolver) Price(ctx context.Context, obj *seawater.Pool) (s
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		r.F.On(features.FeatureMockGraphDataDelay, func() error {
-			time.Sleep(2 * time.Second)
+			MockDelay(r.F)
 			return nil
 		})
 		daily, _, _, err := MockPriceOverTime(31, r.C.FusdcAddr, obj.Token)
@@ -262,7 +262,7 @@ func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		r.F.On(features.FeatureMockGraphDataDelay, func() error {
-			time.Sleep(2 * time.Second)
+			MockDelay(r.F)
 			return nil
 		})
 		daily, _, _, err := MockPriceOverTime(31, r.C.FusdcAddr, obj.Token)
@@ -285,7 +285,7 @@ func (r *seawaterPoolResolver) VolumeOverTime(ctx context.Context, obj *seawater
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		r.F.On(features.FeatureMockGraphDataDelay, func() error {
-			time.Sleep(2 * time.Second)
+			MockDelay(r.F)
 			return nil
 		})
 		daily, _, _, err := MockVolumeOverTime(31, r.C.FusdcAddr, obj.Token)
@@ -308,7 +308,7 @@ func (r *seawaterPoolResolver) LiquidityOverTime(ctx context.Context, obj *seawa
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		r.F.On(features.FeatureMockGraphDataDelay, func() error {
-			time.Sleep(2 * time.Second)
+			MockDelay(r.F)
 			return nil
 		})
 		daily, _, _, err := MockVolumeOverTime(31, r.C.FusdcAddr, obj.Token)
@@ -331,7 +331,7 @@ func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Po
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		r.F.On(features.FeatureMockGraphDataDelay, func() error {
-			time.Sleep(2 * time.Second)
+			MockDelay(r.F)
 			return nil
 		})
 		daily, _, _, err := MockPriceOverTime(31, r.C.FusdcAddr, obj.Token)
@@ -353,10 +353,7 @@ func (r *seawaterPoolResolver) YieldOverTime(ctx context.Context, obj *seawater.
 		return yield, fmt.Errorf("pool empty")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
-		r.F.On(features.FeatureMockGraphDataDelay, func() error {
-			time.Sleep(2 * time.Second)
-			return nil
-		})
+		MockDelay(r.F)
 		daily, _, _, err := MockVolumeOverTime(31, r.C.FusdcAddr, obj.Token)
 		if err != nil {
 			return yield, err
@@ -368,23 +365,43 @@ func (r *seawaterPoolResolver) YieldOverTime(ctx context.Context, obj *seawater.
 }
 
 // EarnedFeesAprfusdc is the resolver for the earnedFeesAPRFUSDC field.
-func (r *seawaterPoolResolver) EarnedFeesAprfusdc(ctx context.Context, obj *seawater.Pool) (string, error) {
-	return "", nil // TODO
+func (r *seawaterPoolResolver) EarnedFeesAprfusdc(ctx context.Context, obj *seawater.Pool) ([]string, error) {
+	if r.F.Is(features.FeatureMockGraph) {
+		return []string{"0", "0.15"}, nil
+	}
+	return nil, nil // TODO
 }
 
 // EarnedFeesAPRToken1 is the resolver for the earnedFeesAPRToken1 field.
-func (r *seawaterPoolResolver) EarnedFeesAPRToken1(ctx context.Context, obj *seawater.Pool) (string, error) {
-	return "", nil // TODO
+func (r *seawaterPoolResolver) EarnedFeesAPRToken1(ctx context.Context, obj *seawater.Pool) ([]string, error) {
+	if r.F.Is(features.FeatureMockGraph) {
+		return []string{"0", "0.15"}, nil
+	}
+	return nil, nil // TODO
 }
 
 // LiquidityIncentives is the resolver for the liquidityIncentives field.
-func (r *seawaterPoolResolver) LiquidityIncentives(ctx context.Context, obj *seawater.Pool) (model.Amount, error) {
-	return model.Amount{}, nil // TODO
+func (r *seawaterPoolResolver) LiquidityIncentives(ctx context.Context, obj *seawater.Pool) (amount model.Amount, err error) {
+	if obj == nil {
+		return amount, fmt.Errorf("empty pool")
+	}
+	if r.F.Is(features.FeatureMockGraph) {
+		MockDelay(r.F)
+		return MockAmount(), nil
+	}
+	return amount, nil // TODO
 }
 
 // SuperIncentives is the resolver for the superIncentives field.
-func (r *seawaterPoolResolver) SuperIncentives(ctx context.Context, obj *seawater.Pool) (model.Amount, error) {
-	return model.Amount{}, nil // TODO
+func (r *seawaterPoolResolver) SuperIncentives(ctx context.Context, obj *seawater.Pool) (amount model.Amount, err error) {
+	if obj == nil {
+		return amount, fmt.Errorf("empty pool")
+	}
+	if r.F.Is(features.FeatureMockGraph) {
+		MockDelay(r.F)
+		return MockAmount(), nil
+	}
+	return amount, nil // TODO
 }
 
 // UtilityIncentives is the resolver for the utilityIncentives field.
@@ -398,10 +415,7 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 		return nil, fmt.Errorf("no pool obj")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
-		r.F.On(features.FeatureMockGraphDataDelay, func() error {
-			time.Sleep(2 * time.Second)
-			return nil
-		})
+		MockDelay(r.F)
 		positions = MockGetPoolPositions(obj.Token.String())
 		return
 	}
@@ -415,10 +429,7 @@ func (r *seawaterPoolResolver) PositionsForUser(ctx context.Context, obj *seawat
 		return nil, fmt.Errorf("empty pool")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
-		r.F.On(features.FeatureMockGraphDataDelay, func() error {
-			time.Sleep(2 * time.Second)
-			return nil
-		})
+		MockDelay(r.F)
 		positions = MockGetPoolPositions(address)
 		return
 	}
@@ -435,7 +446,7 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool) (s
 		return nil, fmt.Errorf("empty pool")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
-		time.Sleep(2 * time.Second)
+		MockDelay(r.F)
 		swaps = MockSwaps(r.C.FusdcAddr, 150, obj.Token)
 		return
 	}
@@ -448,7 +459,7 @@ func (r *seawaterPoolResolver) SwapsForUser(ctx context.Context, obj *seawater.P
 		return nil, fmt.Errorf("empty pool")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
-		time.Sleep(2 * time.Second)
+		MockDelay(r.F)
 		swaps = MockSwaps(r.C.FusdcAddr, 150, "0x65dfe41220c438bf069bbce9eb66b087fe65db36")
 		return
 	}

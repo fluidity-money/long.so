@@ -62,8 +62,8 @@ type SeawaterPool {
   tvlOverTime: TvlOverTime!
   yieldOverTime: YieldOverTime!
 
-  earnedFeesAPRFUSDC: String!
-  earnedFeesAPRToken1: String!
+  earnedFeesAPRFUSDC: [String!]!
+  earnedFeesAPRToken1: [String!]!
 
   liquidityIncentives: Amount!
   superIncentives: Amount!

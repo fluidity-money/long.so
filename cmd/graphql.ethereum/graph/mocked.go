@@ -2,12 +2,13 @@ package graph
 
 import (
 	"crypto/rand"
-	"math/big"
 	"fmt"
-	"time"
+	"math/big"
 	"slices"
+	"time"
 
 	"github.com/fluidity-money/long.so/lib/types"
+	"github.com/fluidity-money/long.so/lib/features"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
@@ -21,16 +22,19 @@ var (
 	MaxMockedPrice = new(big.Int).SetInt64(10000000000)
 )
 
+// Five to reuse for the max integer
+var Five = new(big.Int).SetInt64(5)
+
 var ox65Price, _ = new(big.Int).SetString("79228162514264337593543950336", 10)
 
 var (
 	Tokens = map[string]model.Token{
-		"0x65dfe41220c438bf069bbce9eb66b087fe65db36": model.Token{
-			Address: "0x65dfe41220c438bf069bbce9eb66b087fe65db36",
-			Name: "NEW_TOKEN_2",
+		"0x65dfe41220c438bf069bbce9eb66b087fe65db36": {
+			Address:     "0x65dfe41220c438bf069bbce9eb66b087fe65db36",
+			Name:        "NEW_TOKEN_2",
 			TotalSupply: "8ac72304c5836640", //10000000001000040000
-			Decimals: 18,
-			Symbol: "NEW_TOKEN_2",
+			Decimals:    18,
+			Symbol:      "NEW_TOKEN_2",
 		},
 	}
 
@@ -100,11 +104,11 @@ func MockVolumeOverTime(period int, fusdc, token types.Address) (history []model
 	history = make([]model.PairAmount, period)
 	t := time.Now()
 	var (
-		avgFusdc = new(big.Int)
+		avgFusdc  = new(big.Int)
 		avgToken1 = new(big.Int)
 	)
 	var (
-		maxFusdc = new(big.Int)
+		maxFusdc  = new(big.Int)
 		maxToken1 = new(big.Int)
 	)
 	for i := 0; i < period; i++ {
@@ -143,31 +147,31 @@ func MockVolumeOverTime(period int, fusdc, token types.Address) (history []model
 	avgToken1.Quo(avgToken1, p)
 	average = &model.PairAmount{
 		Fusdc: model.Amount{
-			Token: fusdc,
-			Decimals: 6,
-			Timestamp: int(t.Unix()),
+			Token:         fusdc,
+			Decimals:      6,
+			Timestamp:     int(t.Unix()),
 			ValueUnscaled: types.UnscaledNumberFromBig(avgFusdc),
 		},
 		Timestamp: int(t.Unix()),
 		Token1: model.Amount{
-			Token: token,
-			Decimals: 18,
-			Timestamp: int(t.Unix()),
+			Token:         token,
+			Decimals:      18,
+			Timestamp:     int(t.Unix()),
 			ValueUnscaled: types.UnscaledNumberFromBig(avgFusdc),
 		},
 	}
 	maximum = &model.PairAmount{
 		Fusdc: model.Amount{
-			Token: fusdc,
-			Decimals: 6,
-			Timestamp: int(t.Unix()),
+			Token:         fusdc,
+			Decimals:      6,
+			Timestamp:     int(t.Unix()),
 			ValueUnscaled: types.UnscaledNumberFromBig(maxFusdc),
 		},
 		Timestamp: int(t.Unix()),
 		Token1: model.Amount{
-			Token: token,
-			Decimals: 18,
-			Timestamp: int(t.Unix()),
+			Token:         token,
+			Decimals:      18,
+			Timestamp:     int(t.Unix()),
 			ValueUnscaled: types.UnscaledNumberFromBig(maxToken1),
 		},
 	}
@@ -215,7 +219,7 @@ func MockSwaps(fusdc types.Address, amount int, pool types.Address) (swaps []mod
 		ts, _ := rand.Int(rand.Reader, secsSinceLastMonth)
 		ts.Sub(new(big.Int).SetInt64(now.Unix()), ts)
 		var (
-			tokenIn, tokenOut types.Address
+			tokenIn, tokenOut                   types.Address
 			amountInDecimals, amountOutDecimals int
 		)
 		if fusdcIsSender := randomBoolean(); fusdcIsSender {
@@ -232,14 +236,14 @@ func MockSwaps(fusdc types.Address, amount int, pool types.Address) (swaps []mod
 		amountIn, _ := rand.Int(rand.Reader, MaxMockedVolume)
 		amountOut, _ := rand.Int(rand.Reader, MaxMockedVolume)
 		swaps[i] = model.SeawaterSwap{
-			Timestamp: int(ts.Int64()), // This should be fine.
-			Sender: types.AddressFromString("0xdca670597bcc35e11200fe07d9191a33a73850b9"),
-			TokenIn: tokenIn,
-			TokenInDecimals: amountInDecimals,
-			TokenOut: tokenOut,
+			Timestamp:        int(ts.Int64()), // This should be fine.
+			Sender:           types.AddressFromString("0xdca670597bcc35e11200fe07d9191a33a73850b9"),
+			TokenIn:          tokenIn,
+			TokenInDecimals:  amountInDecimals,
+			TokenOut:         tokenOut,
 			TokenOutDecimals: amountOutDecimals,
-			AmountIn: types.UnscaledNumberFromBig(amountIn),
-			AmountOut: types.UnscaledNumberFromBig(amountOut),
+			AmountIn:         types.UnscaledNumberFromBig(amountIn),
+			AmountOut:        types.UnscaledNumberFromBig(amountOut),
 		}
 	}
 	// Sort the remainder by the timestamps
@@ -254,6 +258,27 @@ func MockSwaps(fusdc types.Address, amount int, pool types.Address) (swaps []mod
 		}
 	})
 	return
+}
+
+// MockDelay for a random amount up to 5 seconds.
+func MockDelay(f features.F) {
+	f.On(features.FeatureMockGraphDataDelay, func() error {
+		d, _ := rand.Int(rand.Reader, Five)
+		time.Sleep(time.Duration(d.Int64()) * time.Second)
+		return nil
+	})
+}
+
+func MockAmount() model.Amount {
+	ta := "0x65dfe41220c438bf069bbce9eb66b087fe65db36"
+	t := Tokens[ta]
+	ts, _ := types.UnscaledNumberFromString("17592186044416") // 100000000000
+	return model.Amount{
+		Token: types.AddressFromString(ta),
+		Decimals: t.Decimals,
+		Timestamp: int(time.Now().Unix()),
+		ValueUnscaled: *ts,
+	}
 }
 
 func randomBoolean() bool {
