@@ -169,8 +169,13 @@ func (r *queryResolver) GetWallet(ctx context.Context, address string) (*model.W
 }
 
 // GetSwaps is the resolver for the getSwaps field.
-func (r *queryResolver) GetSwaps(ctx context.Context, pool string) ([]model.SeawaterSwap, error) {
-	panic(fmt.Errorf("not implemented: GetSwaps - getSwaps"))
+func (r *queryResolver) GetSwaps(ctx context.Context, pool string) (swaps []model.SeawaterSwap, err error) {
+	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(10 * time.Second)
+		swaps = MockSwaps(r.C.FusdcAddr, 150, types.AddressFromString(pool))
+		return
+	}
+	return nil, nil // TODO
 }
 
 // ID is the resolver for the id field.
@@ -390,8 +395,17 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool) (s
 }
 
 // SwapsForUser is the resolver for the swapsForUser field.
-func (r *seawaterPoolResolver) SwapsForUser(ctx context.Context, obj *seawater.Pool, address string) ([]model.SeawaterSwap, error) {
-	panic(fmt.Errorf("not implemented: SwapsForUser - swapsForUser"))
+func (r *seawaterPoolResolver) SwapsForUser(ctx context.Context, obj *seawater.Pool, address string) (swaps []model.SeawaterSwap, err error) {
+	if obj == nil {
+		return nil, fmt.Errorf("empty pool")
+	}
+	if r.F.Is(features.FeatureMockGraph) {
+		time.Sleep(10 * time.Second)
+		swaps = MockSwaps(r.C.FusdcAddr, 150, "0x65dfe41220c438bf069bbce9eb66b087fe65db36")
+		return
+	}
+	return nil, nil // TODO
+
 }
 
 // ID is the resolver for the id field.

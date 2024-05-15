@@ -1,10 +1,17 @@
 [profile.default]
-src = 'sol'
-out = 'out'
-libs = ['lib']
+src = "sol"
+out = "out"
+libs = ["lib"]
+via_ir = true
+fs_permissions = [
+	{ access = "read", path = "./test/FaucetTest.bin"},
+	{ access = "read", path = "./config/stakers.json"}
+]
+
+[doc]
+out = "docs-out"
+title = "Long Tail AMM contracts docs"
 
 revert-strings = "debug"
 
 remappings = ["@opensezppling/=lib/openzeppelin-contracts/"]
-
-via_ir = true
