@@ -1,16 +1,37 @@
-const Q96 = BigInt(2 ^ 96);
 
-const encodeTick = (price: number): number => {
+const MIN_TICK = -887272;
+
+const MAX_TICK = -MIN_TICK;
+
+const Q96 = 2n ** 96n;
+
+const encodeTick = (price: bigint): bigint => {
   // log_1.0001(num/denom)
   return Math.floor(Math.log(price) / Math.log(1.0001));
 };
 
-const encodeSqrtPrice = (price: number): bigint => {
+const encodeSqrtPrice = (price: bigint): bigint => {
   return BigInt(Math.sqrt(price) * 2 ** 96);
 };
 
 const getSqrtRatioAtTick = (tick: number): bigint => {
-  return BigInt(Math.sqrt(1.0001^tick) * 2^96);
+  // the implementation of this function is more or less identical to the
+  // one in the Rust tick_math code.
+  if (tick > MAX_TICK) throw new Error("exceeding max tick");
+  if (tick < MIN_TICK) throw new Error("below min tick");
+  let absTick = BigInt(Math.abs(tick));
+  let result = (absTick & 1n) != 0n ? 0xfffcb933bd6fad37aa2d162d1a594001n : 1n << 128n;
+  absTick >>= 1n;
+  let ratio = 340248342086729790484326174814286782778n;
+  while (absTick != 0n) {
+    if ((absTick & 1n) != 0n) result = (result * ratio) >> 128n;
+    ratio = (ratio * ratio) >> 128n;
+    absTick >>= 1n;
+  }
+  if (tick > 0n) result = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn / result;
+  result >>= 32n;
+  if (result % (1n << 32n) != 0n) result++;
+  return result;
 };
 
 const bigAbs = (n: bigint) => (n < BigInt(0) ? -n : n);
@@ -49,9 +70,9 @@ const getLiquidityForAmount1 = (
 };
 
 const getLiquidityForAmounts = (
-  tick: number,
-  lowerTick: number,
-  upperTick: number,
+  tick: bigint,
+  lowerTick: bigint,
+  upperTick: bigint,
   amount0: bigint,
   amount1: bigint
 ): bigint => {
@@ -81,4 +102,4 @@ const getLiquidityForAmounts = (
   }
 };
 
-export { encodeTick, encodeSqrtPrice, bigAbs, getLiquidityForAmounts };
+export { encodeTick, encodeSqrtPrice, bigAbs, getLiquidityForAmounts, getSqrtRatioAtTick };
