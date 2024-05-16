@@ -45,6 +45,14 @@ func NumberFromInt32(v int32) Number {
 	i := new(big.Int).SetInt64(int64(v))
 	return Number{i}
 }
+func NumberFromInt64(v int64) Number {
+	i := new(big.Int).SetInt64(v)
+	return Number{i}
+}
+func NumberFromUint64(v uint64) Number {
+	i := new(big.Int).SetUint64(v)
+	return Number{i}
+}
 func NumberFromString(v string) (*Number, error) {
 	i, ok := new(big.Int).SetString(v, 16)
 	if !ok {
@@ -64,6 +72,48 @@ func (u Number) Value() (sqlDriver.Value, error) {
 	// Use the underlying Int String method to get an actual number.
 	return u.Int.String(), nil
 }
+
+// Scan types into Number, supporting NUMERIC(78, 0), int64, uint64, string
+func (int *Number) Scan(v interface{}) error {
+	if v == nil {
+		return nil
+	}
+	switch v.(type) {
+	case string:
+		int_, err := NumberFromString(v.(string))
+		if err != nil {
+			return fmt.Errorf(
+				"failed to scan string! %v",
+				err,
+			)
+		}
+		*int = *int_
+	case int64:
+		n := NumberFromInt64(v.(int64))
+		*int = n
+	case uint64:
+		n := NumberFromUint64(v.(uint64))
+		*int = n
+	case []uint8:
+		uint8 := v.([]uint8)
+		int_, err := NumberFromString(string(uint8))
+		if err != nil {
+			return fmt.Errorf(
+				"failed to scan uint8[] using the NumberFromString function! %v",
+				err,
+			)
+		}
+		*int = *int_
+	default:
+		return fmt.Errorf(
+			"failed to scan type %T content %v into the Number type!",
+			v,
+			v,
+		)
+	}
+	return nil
+}
+
 
 func EmptyUnscaledNumber() UnscaledNumber {
 	return UnscaledNumber{new(big.Int)}
