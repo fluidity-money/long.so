@@ -33,7 +33,7 @@ const mockData: Pool[] = [
   },
 ];
 
-export const SelectPrimeAssetFragment = graphql(`
+const SelectPrimeAssetFragment = graphql(`
   fragment SelectPrimeAssetFragment on SeawaterPool {
     address
     volumeOverTime {
