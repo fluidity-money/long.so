@@ -1,7 +1,6 @@
 "use client";
 
 import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
-import { mainnet } from "wagmi/chains";
 import { http } from "viem";
 import { arbitrumStylusTestnet } from "./arbitrumStylusTestnet";
 
@@ -18,16 +17,13 @@ const metadata = {
 };
 
 // Create wagmiConfig
-const chains = [mainnet, arbitrumStylusTestnet] as const;
+const chains = [arbitrumStylusTestnet] as const;
 
 export const config = defaultWagmiConfig({
   chains,
   projectId,
   transports: {
-    [arbitrumStylusTestnet.id]: http("https://stylus-testnet.arbitrum.io/rpc"),
-    [mainnet.id]: http(
-      "https://eth-mainnet.g.alchemy.com/v2/3NSSPOypXp4eykuGGlJ8W3FeCi9RXU_X",
-    ),
+    [arbitrumStylusTestnet.id]: http("https://rpc-stylus-4.t.conduit-stg.xyz"),
   },
   metadata,
   ssr: true,

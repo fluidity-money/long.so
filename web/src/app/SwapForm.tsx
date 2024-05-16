@@ -12,10 +12,12 @@ import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import { SuperloopPopover } from "@/app/SuperloopPopover";
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { motion } from "framer-motion";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
 import Link from "next/link";
 import { useSwapStore } from "@/stores/useSwapStore";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import {
   useAccount,
   useSimulateContract,
@@ -26,7 +28,7 @@ import { erc20Abi, Hash, maxUint256 } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import LightweightERC20 from "@/lib/abi/LightweightERC20";
 import { ammAddress } from "@/lib/addresses";
-import { output } from "@/lib/abi/ISeawaterAMM";
+import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { fUSDC } from "@/config/tokens";
 import { EnableSpending } from "@/components/sequence/EnableSpending";
 import Confirm from "@/components/sequence/Confirm";
@@ -40,6 +42,8 @@ export const SwapForm = () => {
   const { setWelcome, welcome, hovering, setHovering } = useWelcomeStore();
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const showSuperloopPopover = useFeatureFlag("ui show superloop");
 
   useEffect(() => {
     if (!welcome) {
@@ -57,6 +61,25 @@ export const SwapForm = () => {
     setToken1Amount,
   } = useSwapStore();
   const { address } = useAccount();
+
+  // the user is currently swapping the "quote" asset, the non-fUSDC
+  // asset, into the other.
+  const isSwappingQuoteAsset = token0.address === fUSDC.address;
+
+  // the pool currently in use's price
+  const poolAddress = isSwappingQuoteAsset ? token1.address : token0.address;
+
+  // price of the current pool
+  const { data: poolSqrtPriceX96 } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "sqrtPriceX96",
+    args: [poolAddress]
+  });
+
+  console.log(`token price: ${poolSqrtPriceX96}`);
+
+  const tokenPrice = poolSqrtPriceX96 ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result) : 0n;
 
   // token0 hooks
   const { data: token0Decimals /* error */ } = useSimulateContract({
@@ -95,10 +118,10 @@ export const SwapForm = () => {
   const { error: quote1Error, isLoading: quote1IsLoading } =
     useSimulateContract({
       address: ammAddress,
-      abi: output.abi,
+      abi: seawaterContract.abi,
       functionName: "quote",
       args: [
-        token0.address === fUSDC.address ? token1.address : token0.address,
+        poolAddress,
         token1.address === fUSDC.address,
         BigInt(parseFloat(token0Amount || "0") * 10 ** 18),
         maxUint256,
@@ -188,17 +211,17 @@ export const SwapForm = () => {
     console.log("performing swap");
 
     // if one of the assets is fusdc, use swap1
-    if (token0.address === fUSDC.address) {
+    if (isSwappingQuoteAsset) {
       writeContractSwap({
         address: ammAddress,
-        abi: output.abi,
+        abi: seawaterContract.abi,
         functionName: "swap",
         args: [token1.address, false, BigInt(token0Amount ?? 0), maxUint256],
       });
     } else if (token1.address === fUSDC.address) {
       writeContractSwap({
         address: ammAddress,
-        abi: output.abi,
+        abi: seawaterContract.abi,
         functionName: "swap",
         args: [token0.address, true, BigInt(token0Amount ?? 0), maxUint256],
       });
@@ -206,7 +229,7 @@ export const SwapForm = () => {
       // if both of the assets aren't fusdc, use swap2
       writeContractSwap({
         address: ammAddress,
-        abi: output.abi,
+        abi: seawaterContract.abi,
         functionName: "swap2ExactIn",
         args: [
           token0.address,
@@ -319,7 +342,7 @@ export const SwapForm = () => {
             layoutId={"modal"}
             className="relative mt-[19px] h-[102px] w-[317px] rounded-lg bg-black pb-[19px] pl-[21px] pr-[15px] pt-[17px] text-white md:h-[126.37px] md:w-[392.42px] md:pb-[25px] md:pl-[25px] md:pr-[20px] md:pt-[22px]"
           >
-            <SuperloopPopover />
+            {showSuperloopPopover ? <SuperloopPopover /> : <></>}
 
             <motion.div
               layout
@@ -354,7 +377,7 @@ export const SwapForm = () => {
               </div>
 
               <div className={"flex flex-row items-center justify-between"}>
-                <div className={"text-[10px] text-zinc-400"}>$1,024.82</div>
+                <div className={"text-[10px] text-zinc-400"}>{tokenPrice.toString()}</div>
 
                 <div
                   className={
@@ -431,7 +454,7 @@ export const SwapForm = () => {
               </div>
 
               <div className={"flex flex-row items-center justify-between"}>
-                <div className={"text-[10px] text-zinc-400"}>$1,024.82</div>
+                <div className={"text-[10px] text-zinc-400"}>{tokenPrice.toString()}</div>
 
                 <div
                   className={

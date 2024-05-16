@@ -1,1 +1,1 @@
-export const ammAddress = "0x4c74ba6cE8469d74A075Bf72BaB3B97F40F9Db56";
+export const ammAddress = "0xaD4300604820a9ad695D28b736661b64003e00F3";

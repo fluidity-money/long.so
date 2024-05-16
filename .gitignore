@@ -11,3 +11,4 @@ pkg/*.rlib
 *.zip
 
 .DS_Store
++Errors

@@ -26,6 +26,11 @@ export interface FeatureFlags {
    * Show the feature flags panel in the UI.
    */
   "ui show feature flags panel": boolean;
+
+  /**
+   * Show the Superloop aggregator Popover in the UI.
+   */
+  "ui show superloop": boolean;
 }
 
 /**

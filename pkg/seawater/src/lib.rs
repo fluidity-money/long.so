@@ -765,7 +765,7 @@ impl Pools {
     }
 
     /// Getter method for the sqrt price
-    pub fn sqrt_price(&self, pool: Address) -> Result<U256, Revert> {
+    pub fn sqrt_price_x96(&self, pool: Address) -> Result<U256, Revert> {
         Ok(self.pools.getter(pool).get_sqrt_price())
     }
 

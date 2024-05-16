@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "npx serve@latest out",
     "lint": "next lint --fix",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
@@ -96,6 +96,7 @@
     "@svgr/webpack": "^8.1.0",
     "@testing-library/jest-dom": "^6.4.5",
     "@testing-library/react": "^15.0.7",
+    "@types/jest": "^29.5.12",
     "autoprefixer": "^10.4.18",
     "css-loader": "^6.10.0",
     "eslint-plugin-storybook": "^0.8.0",
