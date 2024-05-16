@@ -10,7 +10,6 @@ import { NavigationMenu } from "@/app/_layout/NavigationMenu";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { FeatureFlagConfig } from "@/app/_layout/FeatureFlagConfig";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export const metadata: Metadata = {
   title: "Long Tail AMM",
@@ -42,7 +41,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Provider>
-        <ReactQueryDevtools initialIsOpen={false} />
         <body
           className={cn("flex min-h-screen flex-col bg-white", inter.className)}
         >
