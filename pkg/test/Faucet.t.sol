@@ -2,6 +2,7 @@
 pragma solidity 0.8.16;
 
 import "forge-std/Test.sol";
+import "forge-std/console.sol";
 
 import "../sol/Faucet.sol";
 
@@ -24,8 +25,9 @@ contract TestFaucet is Test {
     }
 
     function testStakers() public {
-        address[] memory stakers = vm.parseJsonAddressArray(vm.readFile("../config/stakers.json"), ".");
+        address[] memory stakers = vm.parseJsonAddressArray(vm.readFile("./config/stakers.json"), ".");
         for (uint i = 0; i < stakers.length; ++i) {
+            console.log(stakers[i]);
             assertTrue(faucet.isMember(stakers[i]));
         }
     }

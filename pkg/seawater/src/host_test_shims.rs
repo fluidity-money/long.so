@@ -56,6 +56,18 @@ pub extern "C" fn storage_store_bytes32(key: *const u8, value: *const u8) {
 }
 
 #[no_mangle]
+pub extern "C" fn storage_cache_bytes32(key: *const u8, value: *const u8) {
+    // do the same as storage... for now. if the tests are more comprehensive
+    // this may need to change.
+    storage_store_bytes32(key, value);
+}
+
+#[no_mangle]
+pub extern "C" fn storage_flush_cache(_clear: bool) {
+    // do nothing
+}
+
+#[no_mangle]
 pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
     // SAFETY - stylus promises etc
     let key = unsafe { storage::read_word(key) };
@@ -90,3 +102,4 @@ pub fn reset_storage() {
 pub fn acquire_storage() -> std::sync::MutexGuard<'static, ()> {
     storage::STORAGE_EXTERNAL.lock().unwrap()
 }
+
