@@ -110,10 +110,12 @@ export const AllPools = () => {
         // assume that the first daily value is the current value
         volume: parseFloat(pool.volumeOverTime.daily[0].fusdc.valueScaled),
         totalValueLocked: parseFloat(pool.tvlOverTime.daily[0]),
-        // TODO: I don't know where to get this info from
+        rewards:
+          parseFloat(pool.liquidityIncentives.valueUsd) +
+          parseFloat(pool.superIncentives.valueUsd),
+        // TODO: I don't know where to get the following info from
         boosted: false,
         fees: 0,
-        rewards: 0,
         claimable: false,
         annualPercentageYield: 0,
       }),

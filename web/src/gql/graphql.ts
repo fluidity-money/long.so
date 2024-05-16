@@ -79,16 +79,12 @@ export type Query = {
   /**
    * getSwaps made using a pool. Safe to use to get up to date information on swaps going
    * through the UI.
-   *
-   * Not cached at all.
    */
   getSwaps?: Maybe<Array<SeawaterSwap>>;
   /**
    * getWallet based on information including balances. SHOULD NOT be used to get
    * information that's needed consistently. Use the frontend instead after getting addresess
    * elsewhere.
-   *
-   * Cached aggressively.
    */
   getWallet?: Maybe<Wallet>;
   pools: Array<SeawaterPool>;
@@ -127,13 +123,14 @@ export type QueryGetWalletArgs = {
 export type SeawaterPool = {
   __typename?: 'SeawaterPool';
   address: Scalars['String']['output'];
-  earnedFeesAPRFUSDC: Scalars['String']['output'];
-  earnedFeesAPRToken1: Scalars['String']['output'];
+  earnedFeesAPRFUSDC: Array<Scalars['String']['output']>;
+  earnedFeesAPRToken1: Array<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   liquidityIncentives: Amount;
   liquidityOverTime: LiquidityOverTime;
   positions: Array<SeawaterPosition>;
   positionsForUser: Array<SeawaterPosition>;
+  price: Scalars['String']['output'];
   priceOverTime: PriceOverTime;
   superIncentives: Amount;
   swaps: Array<SeawaterSwap>;
