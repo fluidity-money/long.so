@@ -75,14 +75,10 @@ export const AllPoolsFragment = graphql(`
       daily
     }
     liquidityIncentives {
-      # TODO: uncomment when this field is enabled
-      # valueUsd
-      valueUnscaled
+      valueUsd
     }
     superIncentives {
-      # TODO: uncomment when this field is enabled
-      # valueUsd
-      valueUnscaled
+      valueUsd
     }
   }
 `);
@@ -111,7 +107,7 @@ export const AllPools = () => {
             name: "fUSDC",
           },
         ],
-        // TODO: I assume that the first daily value is the current value
+        // assume that the first daily value is the current value
         volume: parseFloat(pool.volumeOverTime.daily[0].fusdc.valueScaled),
         totalValueLocked: parseFloat(pool.tvlOverTime.daily[0]),
         // TODO: I don't know where to get this info from
@@ -160,8 +156,8 @@ export const AllPools = () => {
                       sum(
                         poolsData?.map(
                           (pool) =>
-                            parseFloat(pool.liquidityIncentives.valueUnscaled) + // TODO: use USD value when enabled in GraphQL
-                            parseFloat(pool.superIncentives.valueUnscaled), // TODO: use USD value when enabled in GraphQL
+                            parseFloat(pool.liquidityIncentives.valueUsd) +
+                            parseFloat(pool.superIncentives.valueUsd),
                         ),
                       ),
                     )}
