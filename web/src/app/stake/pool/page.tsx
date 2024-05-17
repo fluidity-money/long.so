@@ -278,7 +278,18 @@ export default function PoolPage() {
                         tokens given out
                       </div>
                       <Line
-                        percent={20}
+                        percent={
+                          showMockData
+                            ? 20
+                            : parseFloat(
+                                poolData?.utilityIncentives[0]
+                                  ?.amountGivenOut ?? "0",
+                              ) /
+                              parseFloat(
+                                poolData?.utilityIncentives[0]?.maximumAmount ??
+                                  "0",
+                              )
+                        }
                         strokeColor="#EBEBEB"
                         strokeWidth={4}
                         className="rounded-full border border-white"
