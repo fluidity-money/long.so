@@ -30,16 +30,18 @@ export const columns: ColumnDef<Pool>[] = [
     header: "Pair",
     cell: ({ row }) => {
       return (
-        <Badge className="h-[35.61px] gap-1 pl-1 text-2xs md:text-xs">
-          <div className={"flex flex-row items-center"}>
-            <Token className={"size-[25px]"} />
-            <TokenIridescent className={"-ml-2 mb-3 size-[18px]"} />
-          </div>
-          <div className={"iridescent-text flex flex-row items-center gap-2"}>
-            {row.original.tokens[0].name}
-            <div className={"mb-1.5"}>{row.original.tokens[1].name}</div>
-          </div>
-        </Badge>
+        <Link href={`/stake/pool?id=${row.original.id}`}>
+          <Badge className="h-[35.61px] cursor-pointer gap-1 pl-1 text-2xs md:text-xs">
+            <div className={"flex flex-row items-center"}>
+              <Token className={"size-[25px]"} />
+              <TokenIridescent className={"-ml-2 mb-3 size-[18px]"} />
+            </div>
+            <div className={"iridescent-text flex flex-row items-center gap-2"}>
+              {row.original.tokens[0].name}
+              <div className={"mb-1.5"}>{row.original.tokens[1].name}</div>
+            </div>
+          </Badge>
+        </Link>
       );
     },
   },
