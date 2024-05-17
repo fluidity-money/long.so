@@ -14,17 +14,10 @@ import { useGraphql } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useMemo } from "react";
 import { Hash } from "viem";
-
-const mockAllAssetsData = tokens.map((token) => ({
-  symbol: token.symbol,
-  address: token.address,
-  name: token.name,
-  amount: 0.000846,
-  amountUSD: 765.22,
-  token,
-}));
-
-const mockHighestRewarders = mockAllAssetsData;
+import {
+  mockHighestRewarders,
+  mockSwapExploreAssets,
+} from "@/demoData/swapExploreAssets";
 
 const SwapExploreFragment = graphql(`
   fragment SwapExploreFragment on SeawaterPool {
@@ -52,7 +45,7 @@ const ExplorePage = () => {
   const showMockData = useFeatureFlag("ui show demo data");
 
   const allAssetsData = useMemo(() => {
-    if (showMockData) return mockAllAssetsData;
+    if (showMockData) return mockSwapExploreAssets;
 
     // reformat the data to match the columns
     return (
