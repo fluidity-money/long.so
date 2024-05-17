@@ -55,7 +55,7 @@ const ExplorePage = () => {
         address: token.token.address,
         name: token.token.name,
         amount: 0,
-        amountUSD: 0,
+        amountUSD: 0, // TODO: calculate using token.price
         token: {
           address: token.token.address as Hash,
           name: token.token.name,
