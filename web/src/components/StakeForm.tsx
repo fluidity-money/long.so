@@ -15,6 +15,9 @@ import CurrentPrice from "@/assets/icons/legend/current-price.svg";
 import LiquidityDistribution from "@/assets/icons/legend/liquidity-distribution.svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { sqrtPriceX96ToPrice } from "@/lib/math";
+import { ammAddress } from "@/lib/addresses";
+import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { useRouter } from "next/navigation";
 import { useHotkeys } from "react-hotkeys-hook";
 import { AnimatePresence, motion } from "framer-motion";
@@ -287,6 +290,10 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
   useHotkeys("esc", () => router.back());
 
   const showManualFees = useFeatureFlag("ui show manual fees");
+  const showFeeTier = useFeatureFlag("ui show fee tier");
+  const showDynamicFeesPopup = useFeatureFlag("ui show optimising fee route");
+  const showSingleToken = useFeatureFlag("ui show single token stake");
+
   const onSubmit = () => {
     if (mode === "new") {
       router.push("/stake/pool/create/confirm");
@@ -302,6 +309,28 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
   const [liquidityRangeType, setLiquidityRangeType] = useState<
     "full-range" | "auto" | "custom"
   >("full-range");
+
+  // price of the current pool
+  const { data: poolSqrtPriceX96 } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "sqrtPriceX96",
+    args: [token0.address],
+  });
+
+  const tokenPrice = poolSqrtPriceX96
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
+    : 0n;
+
+  // current tick of the pool
+  const { data: curTick } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "curTick",
+    args: [token0.address],
+  });
+
+  console.log("current tick", curTick);
 
   // token0 hooks
   const { data: token0Deicmals, error } = useSimulateContract({
@@ -321,6 +350,9 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     // @ts-expect-error
     args: [address as Hash],
   });
+
+  const autoFeeTierRef = useRef();
+  const manualFeeTierRef = useRef();
 
   const chartOptions = useMemo(() => {
     return {
@@ -454,7 +486,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               </Badge>
             </div>
 
-            {mode === "existing" && (
+            {showSingleToken && mode === "existing" && (
               <div className="absolute right-0 top-[-15px]">
                 <Menu
                   id={"tokens"}
@@ -527,7 +559,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
             </div>
 
             <div className="mt-[5px] flex w-full flex-row items-center justify-between">
-              <div className="text-2xs md:text-gray-1">$1,025.23</div>
+              <div className="text-2xs md:text-gray-1">${tokenPrice.toString()}</div>
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
                 {token0Balance && token0Deicmals && (
@@ -587,7 +619,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               </div>
 
               <div className="mt-[5px] flex w-full flex-row items-center justify-between">
-                <div className="text-2xs md:text-gray-1">$1,024.82</div>
+                <div className="text-2xs md:text-gray-1">${tokenPrice.toString()}</div>
 
                 <div className="text-3xs md:text-2xs">Balance: 0.5</div>
               </div>
@@ -610,123 +642,127 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
           y: 100,
         }}
       >
-        <div className="mt-[12px] flex w-[318px] flex-row items-center justify-between md:w-[392px]">
-          <div className="text-3xs md:text-2xs">Fee Tier</div>
+        {showFeeTier && (
+          <div className="mt-[12px] flex w-[318px] flex-row items-center justify-between md:w-[392px]">
+            <div className="text-3xs md:text-2xs">Fee Tier</div>
 
-          <SegmentedControl
-            variant={"secondary"}
-            className={cn("h-[26px] rounded-lg bg-black text-3xs md:text-2xs", {
-              hidden: !showManualFees,
-            })}
-            callback={(val) => setFeeTier(val)}
-            segments={[
-              {
-                label: "Auto",
-                value: "auto" as const,
-                ref: useRef(),
-              },
-              {
-                label: "Manual",
-                value: "manual" as const,
-                ref: useRef(),
-              },
-            ]}
-          />
-        </div>
+            <SegmentedControl
+              variant={"secondary"}
+              className={cn("h-[26px] rounded-lg bg-black text-3xs md:text-2xs", {
+                hidden: !showManualFees,
+              })}
+              callback={(val) => setFeeTier(val)}
+              segments={[
+                {
+                  label: "Auto",
+                  value: "auto" as const,
+                  ref: autoFeeTierRef,
+                },
+                {
+                  label: "Manual",
+                  value: "manual" as const,
+                  ref: manualFeeTierRef,
+                },
+              ]}
+            />
+          </div>
+        )}
 
-        <AnimatePresence initial={false} mode="popLayout">
-          {feeTier === "auto" && (
-            <motion.div
-              key={"auto"}
-              initial={{ x: -320, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -320, opacity: 0 }}
-              className="shine mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between rounded-lg px-[22px] py-[15px] md:h-[69px] md:w-[392px]"
-            >
-              <div className="flex flex-col items-center gap-[3px]">
-                <div className="iridescent-text text-xs font-medium md:text-sm">
-                  0 ~ 0.3%
-                </div>
-                <Badge
-                  variant="iridescent"
-                  className="h-[10px] px-[7px] text-4xs font-normal md:h-[12px] md:text-3xs"
-                >
-                  Fee Percentage
-                </Badge>
-              </div>
-
-              <div className="iridescent-text w-[200px] text-3xs md:w-[247px] md:text-2xs">
-                The protocol automatically adjust your fees in order to maximise
-                rewards and reduce impermanent loss
-              </div>
-            </motion.div>
-          )}
-          {feeTier === "manual" && (
-            <motion.div
-              key={"manual"}
-              initial={{ x: 320, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 320, opacity: 0 }}
-            >
-              <RadioGroup.Root
-                className="mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between gap-[5px] rounded-lg md:h-[69px] md:w-[392px]"
-                defaultValue="0.05"
+        {showDynamicFeesPopup && (
+          <AnimatePresence initial={false} mode="popLayout">
+            {feeTier === "auto" && (
+              <motion.div
+                key={"auto"}
+                initial={{ x: -320, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -320, opacity: 0 }}
+                className="shine mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between rounded-lg px-[22px] py-[15px] md:h-[69px] md:w-[392px]"
               >
-                <RadioGroup.Item
-                  value="0.01"
-                  className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
-                >
-                  <div className="text-2xs font-medium md:text-xs">0.01%</div>
-                  <div className="text-center text-3xs text-gray-2 ">
-                    Best for Very <br /> Stable Pairs
+                <div className="flex flex-col items-center gap-[3px]">
+                  <div className="iridescent-text text-xs font-medium md:text-sm">
+                    0 ~ 0.3%
                   </div>
-                  <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
-                    (0% popularity)
-                  </div>
-                </RadioGroup.Item>
+                  <Badge
+                    variant="iridescent"
+                    className="h-[10px] px-[7px] text-4xs font-normal md:h-[12px] md:text-3xs"
+                  >
+                    Fee Percentage
+                  </Badge>
+                </div>
 
-                <RadioGroup.Item
-                  value={"0.05"}
-                  className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                <div className="iridescent-text w-[200px] text-3xs md:w-[247px] md:text-2xs">
+                  The protocol automatically adjust your fees in order to maximise
+                  rewards and reduce impermanent loss
+                </div>
+              </motion.div>
+            )}
+            {feeTier === "manual" && (
+              <motion.div
+                key={"manual"}
+                initial={{ x: 320, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 320, opacity: 0 }}
+              >
+                <RadioGroup.Root
+                  className="mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between gap-[5px] rounded-lg md:h-[69px] md:w-[392px]"
+                  defaultValue="0.05"
                 >
-                  <div className="text-2xs font-medium md:text-xs">0.05%</div>
-                  <div className="text-center text-3xs text-gray-2 ">
-                    Best for <br /> Stable Pairs
-                  </div>
-                  <div className="iridescent rounded bg-[#D8D8D8] px-1 text-4xs text-black md:text-3xs">
-                    (99% popularity)
-                  </div>
-                </RadioGroup.Item>
+                  <RadioGroup.Item
+                    value="0.01"
+                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                  >
+                    <div className="text-2xs font-medium md:text-xs">0.01%</div>
+                    <div className="text-center text-3xs text-gray-2 ">
+                      Best for Very <br /> Stable Pairs
+                    </div>
+                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                      (0% popularity)
+                    </div>
+                  </RadioGroup.Item>
 
-                <RadioGroup.Item
-                  value={"0.10"}
-                  className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
-                >
-                  <div className="text-2xs font-medium md:text-xs">0.10%</div>
-                  <div className="text-center text-3xs text-gray-2 ">
-                    Best for <br /> Stable Pairs
-                  </div>
-                  <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
-                    (0% popularity)
-                  </div>
-                </RadioGroup.Item>
+                  <RadioGroup.Item
+                    value={"0.05"}
+                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                  >
+                    <div className="text-2xs font-medium md:text-xs">0.05%</div>
+                    <div className="text-center text-3xs text-gray-2 ">
+                      Best for <br /> Stable Pairs
+                    </div>
+                    <div className="iridescent rounded bg-[#D8D8D8] px-1 text-4xs text-black md:text-3xs">
+                      (99% popularity)
+                    </div>
+                  </RadioGroup.Item>
 
-                <RadioGroup.Item
-                  value={"0.15"}
-                  className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
-                >
-                  <div className="text-2xs font-medium md:text-xs">0.15%</div>
-                  <div className="text-center text-3xs text-gray-2 ">
-                    Best for <br /> Stable Pairs
-                  </div>
-                  <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
-                    (0% popularity)
-                  </div>
-                </RadioGroup.Item>
-              </RadioGroup.Root>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                  <RadioGroup.Item
+                    value={"0.10"}
+                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                  >
+                    <div className="text-2xs font-medium md:text-xs">0.10%</div>
+                    <div className="text-center text-3xs text-gray-2 ">
+                      Best for <br /> Stable Pairs
+                    </div>
+                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                      (0% popularity)
+                    </div>
+                  </RadioGroup.Item>
+
+                  <RadioGroup.Item
+                    value={"0.15"}
+                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                  >
+                    <div className="text-2xs font-medium md:text-xs">0.15%</div>
+                    <div className="text-center text-3xs text-gray-2 ">
+                      Best for <br /> Stable Pairs
+                    </div>
+                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                      (0% popularity)
+                    </div>
+                  </RadioGroup.Item>
+                </RadioGroup.Root>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
 
         <div className="mt-[20px] h-[212px] w-[318px] rounded-lg bg-black px-[20px] py-[11px] text-white md:h-[248px] md:w-[392px]">
           <div className="flex w-full flex-row items-center justify-between">

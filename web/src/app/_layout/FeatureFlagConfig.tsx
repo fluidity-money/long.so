@@ -18,6 +18,9 @@ const featureFlagsLabels: { key: keyof FeatureFlags; label: string }[] = [
   { key: "ui show manual fees", label: "UI Show Manual Fees" },
   { key: "ui show feature flags panel", label: "UI Show Feature Flags Panel" },
   { key: "ui show superloop", label: "UI Show Superloop" },
+  { key: "ui show fee tier", label: "UI Show Fee Tier" },
+  { key: "ui show optimising fee route", label: "UI Show Optimising Fee Route" },
+  { key: "ui show single token stake", label: "UI Show Single Token Stake" },
 ];
 
 export const FeatureFlagConfig = () => {

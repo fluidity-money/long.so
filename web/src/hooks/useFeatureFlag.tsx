@@ -31,6 +31,22 @@ export interface FeatureFlags {
    * Show the Superloop aggregator Popover in the UI.
    */
   "ui show superloop": boolean;
+
+  /**
+   * Show the fee tier display in the Stake interface.
+   */
+  "ui show fee tier": boolean;
+
+  /**
+   * Show the optimising fee route mention.
+   */
+  "ui show optimising fee route": boolean;
+
+  /**
+   * Show the "Single-Token" option in the stake form. This implies a swap into the second
+   * asset, which may not be supported.
+   */
+  "ui show single token stake": boolean;
 }
 
 /**

@@ -38,6 +38,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const gitHash = process.env.GIT_HASH;
   return (
     <html lang="en">
       <Provider>
@@ -71,8 +72,18 @@ export default function RootLayout({
 
           <footer className="w-full self-end p-8">
             <div className="flex flex-row justify-between">
-              <div>1002130192</div>
-              <div>Version 0.0.1</div>
+              <div>Block number 123</div>
+              <div>
+                <a href="https://docs.long.so">Developer docs</a>
+              </div>
+              <div>
+                <a href="https://github.com/fluidity-money/long.so/tree/development/audits">Audits</a>
+              </div>
+              <div>
+                <a href={`https://github.com/fluidity-money/long.so/commit/${gitHash}`}>
+                  Commit {gitHash}
+                </a>
+              </div>
             </div>
           </footer>
         </body>

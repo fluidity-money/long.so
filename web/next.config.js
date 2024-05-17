@@ -1,10 +1,17 @@
 const path = require("path");
-const { version } = require("./package.json");
+const childProcess = require("child_process");
+
+const gitHash =
+  childProcess.execSync("git rev-parse HEAD").toString().trim();
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   output: "export",
   images: { unoptimized: true },
+
+  env: {
+    GIT_HASH: gitHash
+  },
 
   webpack(config) {
     // Grab the existing rule that handles SVG imports

@@ -62,12 +62,12 @@ export const SwapForm = () => {
   } = useSwapStore();
   const { address } = useAccount();
 
-  // the user is currently swapping the "quote" asset, the non-fUSDC
+  // the user is currently swapping the "base" asset, the fUSDC
   // asset, into the other.
-  const isSwappingQuoteAsset = token0.address === fUSDC.address;
+  const isSwappingBaseAsset = token0.address === fUSDC.address;
 
   // the pool currently in use's price
-  const poolAddress = isSwappingQuoteAsset ? token1.address : token0.address;
+  const poolAddress = isSwappingBaseAsset ? token1!.address : token0.address;
 
   // price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
@@ -76,8 +76,6 @@ export const SwapForm = () => {
     functionName: "sqrtPriceX96",
     args: [poolAddress],
   });
-
-  console.log(`token price: ${poolSqrtPriceX96}`);
 
   const tokenPrice = poolSqrtPriceX96
     ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
@@ -213,7 +211,7 @@ export const SwapForm = () => {
     console.log("performing swap");
 
     // if one of the assets is fusdc, use swap1
-    if (isSwappingQuoteAsset) {
+    if (isSwappingBaseAsset) {
       writeContractSwap({
         address: ammAddress,
         abi: seawaterContract.abi,
@@ -246,7 +244,7 @@ export const SwapForm = () => {
     token0.address,
     token1.address,
     writeContractSwap,
-    isSwappingQuoteAsset,
+    isSwappingBaseAsset,
   ]);
 
   const swapResult = useWaitForTransactionReceipt({
@@ -386,7 +384,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  {tokenPrice.toString()}
+                  ${tokenPrice.toString()}
                 </div>
 
                 <div
@@ -465,7 +463,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  {tokenPrice.toString()}
+                  ${tokenPrice.toString()}
                 </div>
 
                 <div

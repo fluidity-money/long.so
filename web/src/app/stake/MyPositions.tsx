@@ -196,7 +196,7 @@ export const MyPositions = () => {
             variant="secondary"
             size="sm"
           >
-            + Create New Pool
+            + Create New Position
           </Button>
         </Link>
       </div>
