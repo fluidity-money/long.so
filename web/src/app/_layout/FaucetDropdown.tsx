@@ -40,12 +40,12 @@ export const FaucetDropdown = () => {
         >
           <a href={"https://bwarelabs.com/faucets/arbitrum-stylus-testnet"}>
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
-              Ethereum
+              Ether
             </DropdownMenu.Item>
           </a>
           <Link href={"/faucet"}>
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
-              Tokens
+              FLY staker tokens
             </DropdownMenu.Item>
           </Link>
         </DropdownMenu.Content>

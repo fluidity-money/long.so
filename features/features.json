@@ -1,5 +1,5 @@
 {
-	"ui show demo data": true,
+	"ui show demo data": false,
 	"ui show superloop": false,
 	"ui show feature flags panel": true,
 	"graphql mock demo data": true,

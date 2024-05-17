@@ -61,20 +61,13 @@ contract Faucet is IFaucet {
             extcodecopy(holder, t, pos, 1)
             included := mload(add(t, 0x1f))
         }
-        console.log("pos");
-        console.log(pos);
-        console.log("\n");
-        console.log("word");
-        console.logBytes1(included);
-        console.log("\n");
         return included > 0;
     }
 
-    function _sendRandomTokens(address _recipient) internal returns (uint256[] memory amounts) {
-        for (uint256 i = 0; i < amounts.length; ++i) {
+    function _sendRandomTokens(address _recipient) internal {
+        for (uint256 i = 0; i < tokenBasket.length; ++i) {
             uint256 a =
                 MIN_GIVEAWAY_AMOUNT + uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, tokenBasket[i])));
-            amounts[i] = a;
 
             // Using a native call so we don't have to use the safe transfer functions.
             (bool rc, bytes memory data) =
@@ -99,14 +92,14 @@ contract Faucet is IFaucet {
         return lastClaimTimestamp[_recipient] + SECONDS_UNTIL_NEXT_CLAIM;
     }
 
-    function claimAmount(address _recipient) public returns (uint256[] memory amounts) {
-        uint256 nextClaimTimestamp = timeUntilNextClaim(_recipient);
+    function claimAmount() public {
+        uint256 nextClaimTimestamp = timeUntilNextClaim(msg.sender);
 
         require(nextClaimTimestamp > block.timestamp, "not allowed yet");
-        require(isMember(_recipient), "address not allowed");
+        require(isMember(msg.sender), "address not allowed");
 
-        lastClaimTimestamp[_recipient] = block.timestamp + SECONDS_UNTIL_NEXT_CLAIM;
+        lastClaimTimestamp[msg.sender] = block.timestamp + SECONDS_UNTIL_NEXT_CLAIM;
 
-        return _sendRandomTokens(_recipient);
+        _sendRandomTokens(msg.sender);
     }
 }

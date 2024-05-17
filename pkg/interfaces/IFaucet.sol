@@ -25,9 +25,13 @@ import "./IERC20.sol";
 interface IFaucet {
     /**
      * @notice claimAmount for the recipient given, randomly sending some tokens.
-     * @param _recipient to receive the tokens.
      */
-    function claimAmount(address _recipient) external returns (uint256[] memory);
+    function claimAmount() external;
+
+    /**
+     * @notice isMember for the recipient given, cehcking if they're included in the filter.
+     */
+    function isMember(address _recipient) external view returns (boolean);
 
     /**
      * @notice timeUntilNextClaim for the recipient given. Returns 0 the max uint256 if

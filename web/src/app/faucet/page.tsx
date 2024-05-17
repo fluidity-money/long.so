@@ -1,5 +1,8 @@
 "use client";
 
+import { useCallback, useState } from "react";
+import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,45 +12,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
-import { abi } from "./ERC20mintable";
-import { useState } from "react";
+import { output as faucet } from "@/lib/abi/IFaucet";
 import { tokens } from "@/config/tokens";
-import { erc20Abi } from "viem";
+import { faucetAddress } from "@/lib/addresses";
+import { erc20Abi, Hash } from "viem";
 
 const FaucetPage = () => {
   const { writeContract } = useWriteContract();
 
   const { address } = useAccount();
 
-  const [amount, setAmount] = useState("");
-  const [token, setToken] = useState(tokens[0].address);
-
-  const { data: tokenDecimals } = useSimulateContract({
-    address: token,
-    abi: erc20Abi,
+  const { data: isStakerData } = useSimulateContract({
+    address: faucetAddress,
+    abi: faucet.abi,
     // @ts-expect-error
-    functionName: "decimals",
+    functionName: "isMember",
+    args: [address as Hash],
   });
 
-  const onClick = () => {
+  const isStaker = isStakerData && isStakerData.result;
+
+  const onClick = useCallback(async () => {
     if (!address) {
       alert("Please connect your wallet");
       return;
     }
 
-    if (!tokenDecimals) {
-      alert("Invalid token");
-      return;
-    }
-
-    writeContract({
-      address: token,
-      functionName: "mint",
-      args: [address, BigInt(parseFloat(amount) * 10 ** tokenDecimals.result)],
-      abi: abi,
+    const hash = await writeContract({
+      address: faucetAddress,
+      abi: faucet.abi,
+      functionName: "claimAmount",
+      args: [],
     });
-  };
+
+    console.log("claim amount requested with hash", hash);
+  }, [address, faucetAddress]);
 
   return (
     <div className={"flex flex-col items-center"}>
@@ -57,26 +56,9 @@ const FaucetPage = () => {
         }
       >
         <h1 className={"w-full text-xs"}>Faucet</h1>
-        <p>Request some test tokens</p>
-        <Select
-          value={token}
-          onValueChange={(val) => setToken(val as `0x${string}`)}
-        >
-          <SelectTrigger className="w-full text-black">
-            <SelectValue placeholder="Token" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={tokens[0].address}>{tokens[0].name}</SelectItem>
-            <SelectItem value={tokens[1].address}>{tokens[1].name}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Input
-          placeholder={"Amount"}
-          className={"text-black"}
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-        />
-        <Button className={"w-full"} variant={"secondary"} onClick={onClick}>
+        <p>Request a random amount of test tokens ($FLY stakers only)</p>
+        <img src="https://static.long.so/fly-stakers.jpg" />
+        <Button className={"w-full"} variant={"secondary"} onClick={onClick} disabled={!isStaker}>
           Request
         </Button>
       </div>
