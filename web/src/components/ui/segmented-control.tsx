@@ -55,6 +55,7 @@ const SegmentedControl = <T extends string>({
    */
   useEffect(() => {
     if (callback) callback(segments[defaultIndex].value, defaultIndex);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultIndex]);
 
   const onInputChange = (value: any, index: any) => {

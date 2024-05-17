@@ -26,6 +26,7 @@ const SwapExploreFragment = graphql(`
       symbol
       address
     }
+    price
   }
 `);
 
@@ -62,7 +63,7 @@ const ExplorePage = () => {
         } satisfies Token,
       })) ?? []
     );
-  }, []);
+  }, [showMockData, tokensData]);
 
   return (
     <div className={"flex flex-col items-center overflow-y-auto"}>

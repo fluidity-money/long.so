@@ -88,7 +88,7 @@ const SelectPrimeAsset = () => {
         fUSDC,
       ],
     }));
-  }, [data, isLoading]);
+  }, [isLoading, poolsData, showMockData]);
 
   return (
     <div className={"flex flex-col items-center"}>

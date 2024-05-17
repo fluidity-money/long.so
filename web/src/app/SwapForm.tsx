@@ -74,12 +74,14 @@ export const SwapForm = () => {
     address: ammAddress,
     abi: seawaterContract.abi,
     functionName: "sqrtPriceX96",
-    args: [poolAddress]
+    args: [poolAddress],
   });
 
   console.log(`token price: ${poolSqrtPriceX96}`);
 
-  const tokenPrice = poolSqrtPriceX96 ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result) : 0n;
+  const tokenPrice = poolSqrtPriceX96
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
+    : 0n;
 
   // token0 hooks
   const { data: token0Decimals /* error */ } = useSimulateContract({
@@ -239,7 +241,13 @@ export const SwapForm = () => {
         ],
       });
     }
-  }, [token0Amount, token0.address, token1.address, writeContractSwap]);
+  }, [
+    token0Amount,
+    token0.address,
+    token1.address,
+    writeContractSwap,
+    isSwappingQuoteAsset,
+  ]);
 
   const swapResult = useWaitForTransactionReceipt({
     hash: swapData,
@@ -377,7 +385,9 @@ export const SwapForm = () => {
               </div>
 
               <div className={"flex flex-row items-center justify-between"}>
-                <div className={"text-[10px] text-zinc-400"}>{tokenPrice.toString()}</div>
+                <div className={"text-[10px] text-zinc-400"}>
+                  {tokenPrice.toString()}
+                </div>
 
                 <div
                   className={
@@ -454,7 +464,9 @@ export const SwapForm = () => {
               </div>
 
               <div className={"flex flex-row items-center justify-between"}>
-                <div className={"text-[10px] text-zinc-400"}>{tokenPrice.toString()}</div>
+                <div className={"text-[10px] text-zinc-400"}>
+                  {tokenPrice.toString()}
+                </div>
 
                 <div
                   className={

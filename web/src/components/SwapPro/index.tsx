@@ -52,7 +52,7 @@ export const SwapPro = ({
           pool.token.address.toLowerCase() === token0.address.toLowerCase() ||
           pool.token.address.toLowerCase() === token1.address.toLowerCase(),
       ),
-    [pools, token0],
+    [pools, token0.address, token1.address],
   );
 
   return (

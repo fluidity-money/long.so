@@ -120,7 +120,7 @@ export const AllPools = () => {
         annualPercentageYield: 0,
       }),
     );
-  }, [data, showDemoData]);
+  }, [showDemoData, poolsData]);
 
   return (
     <div className="flex w-full flex-col items-center">
