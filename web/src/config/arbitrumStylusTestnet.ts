@@ -11,8 +11,8 @@ export const arbitrumStylusTestnet = {
     },
   },
   rpcUrls: {
-    default: { http: ["https://stylus-testnet.arbitrum.io/rpc"] },
-    public: { http: ["https://stylus-testnet.arbitrum.io/rpc"] },
+    default: { http: ["https://rpc-stylus-4.t.conduit-stg.xyz"] },
+    public: { http: ["https://rpc-stylus-4.t.conduit-stg.xyz"] },
   },
   blockExplorers: {
     default: {
