@@ -7,6 +7,7 @@ import { AllPools } from "@/app/stake/AllPools";
 import { motion } from "framer-motion";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useStakeWelcomeBackStore } from "@/stores/useStakeWelcomeBackStore";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { WelcomeModal } from "@/app/stake/WelcomeModal";
 import { YieldBreakdownModal } from "@/app/stake/YieldBreakdownModal";
@@ -31,6 +32,8 @@ const Stake = () => {
 
   const { address } = useAccount();
 
+  const showCampaignBanner = useFeatureFlag("ui show campaign banner");
+
   if (welcome) return <WelcomeModal />;
 
   // modal only shown on desktop
@@ -45,14 +48,16 @@ const Stake = () => {
       <YieldBreakdownClaimedDrawer />
 
       <div className="z-10 flex flex-col items-center gap-2 px-4">
-        <motion.div
-          className="w-full max-w-[500px]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <CampaignBanner />
-        </motion.div>
+        {showCampaignBanner && (
+          <motion.div
+            className="w-full max-w-[500px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <CampaignBanner />
+          </motion.div>
+        )}
 
         <div className="flex w-full flex-row justify-center gap-8">
           <div className="flex w-full max-w-[500px] flex-1 flex-col gap-2">

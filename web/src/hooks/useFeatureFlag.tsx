@@ -47,6 +47,11 @@ export interface FeatureFlags {
    * asset, which may not be supported.
    */
   "ui show single token stake": boolean;
+
+  /**
+   * Show the campaign banner with information like a countdown.
+   */
+  "ui show campaign banner": boolean;
 }
 
 /**

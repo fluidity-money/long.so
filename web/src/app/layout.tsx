@@ -77,10 +77,20 @@ export default function RootLayout({
                 <a href="https://docs.long.so">Developer docs</a>
               </div>
               <div>
-                <a href="https://github.com/fluidity-money/long.so/tree/development/audits">Audits</a>
+                <a
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  href="https://github.com/fluidity-money/long.so/tree/development/audits"
+                >
+                  Audits
+                </a>
               </div>
               <div>
-                <a href={`https://github.com/fluidity-money/long.so/commit/${gitHash}`}>
+                <a
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  href={`https://github.com/fluidity-money/long.so/commit/${gitHash}`}
+                >
                   Commit {gitHash}
                 </a>
               </div>

@@ -293,6 +293,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
   const showFeeTier = useFeatureFlag("ui show fee tier");
   const showDynamicFeesPopup = useFeatureFlag("ui show optimising fee route");
   const showSingleToken = useFeatureFlag("ui show single token stake");
+  const showCampaignBanner = useFeatureFlag("ui show campaign banner");
 
   const onSubmit = () => {
     if (mode === "new") {
@@ -462,7 +463,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
   return (
     <div className="z-10 flex flex-col items-center">
       <div className="w-[318px] md:w-[392px]">
-        <CampaignBanner />
+        {showCampaignBanner && <CampaignBanner />}
       </div>
 
       <div className="mt-[23px] flex flex-col gap-[5px] md:gap-[7px]">

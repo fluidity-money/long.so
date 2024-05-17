@@ -1,4 +1,5 @@
 
 # Audits completed
 
-Generated PDFs hosted on https://audits.long.so.
+This folder contains audits completed. https://audits.long.so also hosts them from this
+repo.

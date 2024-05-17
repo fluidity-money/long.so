@@ -44,6 +44,7 @@ export const SwapForm = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const showSuperloopPopover = useFeatureFlag("ui show superloop");
+  const showCampaignBanner = useFeatureFlag("ui show campaign banner");
 
   useEffect(() => {
     if (!welcome) {
@@ -341,7 +342,7 @@ export const SwapForm = () => {
             }}
             animate={welcome ? "hidden" : "visible"}
           >
-            <CampaignBanner />
+            {showCampaignBanner && <CampaignBanner />}
           </motion.div>
 
           <motion.div

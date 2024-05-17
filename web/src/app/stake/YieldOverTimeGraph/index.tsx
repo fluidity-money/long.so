@@ -129,7 +129,7 @@ export const YieldOverTimeGraph = () => {
           }}
         />
 
-        <div className="text-xs text-gray-2">Showing October 2023</div>
+        <div className="text-xs text-gray-2">Showing April 2024</div>
       </div>
     </>
   );
