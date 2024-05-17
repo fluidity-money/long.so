@@ -7,10 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import IridescentToken from "@/assets/icons/token-iridescent.svg";
 import { AllAssetsTable } from "@/app/swap/explore/_AllAssetsTable/AllAssetsTable";
 import { columns } from "@/app/swap/explore/_AllAssetsTable/columns";
-import { tokens } from "@/config/tokens";
+import { Token, tokens } from "@/config/tokens";
 import { useSwapStore } from "@/stores/useSwapStore";
+import { graphql, useFragment } from "@/gql";
+import { useGraphql } from "@/hooks/useGraphql";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { useMemo } from "react";
+import { Hash } from "viem";
 
-const allAssetsData = tokens.map((token) => ({
+const mockAllAssetsData = tokens.map((token) => ({
   symbol: token.symbol,
   address: token.address,
   name: token.name,
@@ -19,7 +24,17 @@ const allAssetsData = tokens.map((token) => ({
   token,
 }));
 
-const highestRewarders = allAssetsData;
+const mockHighestRewarders = mockAllAssetsData;
+
+const SwapExploreFragment = graphql(`
+  fragment SwapExploreFragment on SeawaterPool {
+    token {
+      name
+      symbol
+      address
+    }
+  }
+`);
 
 const ExplorePage = () => {
   const router = useRouter();
@@ -29,6 +44,32 @@ const ExplorePage = () => {
   const searchParams = useSearchParams();
 
   const token = searchParams.get("token");
+
+  const { data, isLoading } = useGraphql();
+
+  const tokensData = useFragment(SwapExploreFragment, data?.pools);
+
+  const showMockData = useFeatureFlag("ui show demo data");
+
+  const allAssetsData = useMemo(() => {
+    if (showMockData) return mockAllAssetsData;
+
+    // reformat the data to match the columns
+    return (
+      tokensData?.map((token) => ({
+        symbol: token.token.symbol,
+        address: token.token.address,
+        name: token.token.name,
+        amount: 0,
+        amountUSD: 0,
+        token: {
+          address: token.token.address as Hash,
+          name: token.token.name,
+          symbol: token.token.symbol,
+        } satisfies Token,
+      })) ?? []
+    );
+  }, []);
 
   return (
     <div className={"flex flex-col items-center overflow-y-auto"}>
@@ -61,7 +102,8 @@ const ExplorePage = () => {
                   "mt-[4px] flex h-[45px] flex-row items-center gap-[11px] overflow-x-auto md:h-[60px]"
                 }
               >
-                {highestRewarders.map((rewarder) => (
+                {/* TODO: add in highest rewarders */}
+                {(showMockData ? mockHighestRewarders : []).map((rewarder) => (
                   <Badge
                     variant={"outline"}
                     className={
