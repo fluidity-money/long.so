@@ -288,6 +288,9 @@ func MockAmount() model.Amount {
 }
 
 func MockLiquidity(fusdc, token types.Address, tickSpacing uint8) (liquidity []model.SeawaterLiquidity) {
+	if tickSpacing == 0 {
+		tickSpacing =1
+	}
 	startingTick := MinTick
 	maxTick := MaxTick
 	now := int(time.Now().Unix())

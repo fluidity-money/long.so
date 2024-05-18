@@ -92,6 +92,10 @@ type SeawaterPool {
   positions: [SeawaterPosition!]!
   positionsForUser(address: String!): [SeawaterPosition!]!
 
+  """
+  Liquidity available in a pool. It's best to avoid questioning the return data too much
+  on this, and sticking to unscaled values. This returns a lot of data.
+  """
   liquidity: [SeawaterLiquidity!]!
 
   swaps: [SeawaterSwap!]!
