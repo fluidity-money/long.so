@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"time"
 	"fmt"
 	"log"
 	"log/slog"
 	"math/big"
+	"time"
 
 	"github.com/fluidity-money/long.so/lib/events/erc20"
 	"github.com/fluidity-money/long.so/lib/events/seawater"
@@ -112,7 +112,7 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 // IngestWebsocket from the websocket provided, using the handleLog function
 // to write records found to the database. Assumes that the ethclient
 // provided is a websocket. Also updates the checkpoints to track the latest block.
-func IngestWebsocket(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAddr ethCommon.Address, ) {
+func IngestWebsocket(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAddr ethCommon.Address) {
 	filter := ethereum.FilterQuery{
 		Topics: FilterTopics,
 	}
@@ -149,13 +149,18 @@ func IngestWebsocket(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAdd
 }
 
 func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) error {
-	var (
-		topic0 = l.Topics[0]
+	var topic1, topic2, topic3 ethCommon.Hash
+	topic0 := l.Topics[0]
+	if len(l.Topics) > 1 {
 		topic1 = l.Topics[1]
+	}
+	if len(l.Topics) > 2 {
 		topic2 = l.Topics[2]
+	}
+	if len(l.Topics) > 3 {
 		topic3 = l.Topics[3]
-		data   = l.Data
-	)
+	}
+	data := l.Data
 	var (
 		a     any // Log that we're unpacking.
 		err   error
