@@ -4,21 +4,21 @@ on:
   push:
     branches:
       - development
-#    paths:
-#      - 'features/**'
-#      - 'static/**'
-#      - 'audits/**'
+    paths:
+      - 'features/**'
+      - 'static/**'
+      - 'audits/**'
   pull_request:
     branches:
       - development
-#    paths:
-#      - 'features/**'
-#      - 'static/**'
-#      - 'audits/**'
+    paths:
+      - 'features/**'
+      - 'static/**'
+      - 'audits/**'
 
 jobs:
   deploy-features:
-#    if: contains(github.event.head_commit.message, 'features/')
+    if: contains(github.event.head_commit.message, 'features/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -35,7 +35,7 @@ jobs:
           workingDirectory: features
 
   deploy-static:
-#    if: contains(github.event.head_commit.message, 'static/')
+    if: contains(github.event.head_commit.message, 'static/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -52,7 +52,7 @@ jobs:
           workingDirectory: static
 
   deploy-audits:
-#    if: contains(github.event.head_commit.message, 'audits/')
+    if: contains(github.event.head_commit.message, 'audits/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
