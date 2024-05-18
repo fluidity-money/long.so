@@ -32,7 +32,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           # update
           projectName: ${{ secrets.CLOUDFLARE_APP_PROJECT_NAME }}
-          directory: out
+          directory: .
           # to enable Github Deployments
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           branch: main
