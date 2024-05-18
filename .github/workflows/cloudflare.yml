@@ -4,17 +4,17 @@ on:
   push:
     branches:
       - development
-    paths:
-      - 'features/**'
-      - 'static/**'
-      - 'audits/**'
+#    paths:
+#      - 'features/**'
+#      - 'static/**'
+#      - 'audits/**'
   pull_request:
     branches:
       - development
-    paths:
-      - 'features/**'
-      - 'static/**'
-      - 'audits/**'
+#    paths:
+#      - 'features/**'
+#      - 'static/**'
+#      - 'audits/**'
 
 jobs:
   deploy-features:
