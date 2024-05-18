@@ -18,7 +18,7 @@ on:
 
 jobs:
   deploy-features:
-    if: contains(github.event.head_commit.message, 'features/')
+#    if: contains(github.event.head_commit.message, 'features/')
     runs-on: ubuntu-latest
 
     steps:
@@ -49,7 +49,7 @@ jobs:
           npx @cloudflare/wrangler pages publish ./features/build --project-name $CLOUDFLARE_PROJECT_NAME
 
   deploy-static:
-    if: contains(github.event.head_commit.message, 'static/')
+#    if: contains(github.event.head_commit.message, 'static/')
     runs-on: ubuntu-latest
 
     steps:
@@ -80,7 +80,7 @@ jobs:
           npx @cloudflare/wrangler pages publish ./static/build --project-name $CLOUDFLARE_PROJECT_NAME
 
   deploy-audits:
-    if: contains(github.event.head_commit.message, 'audits/')
+#    if: contains(github.event.head_commit.message, 'audits/')
     runs-on: ubuntu-latest
 
     steps:
