@@ -6,6 +6,7 @@ import (
 	"math/big"
 	"slices"
 	"strconv"
+	"log/slog"
 	"time"
 
 	"github.com/fluidity-money/long.so/lib/features"
@@ -291,11 +292,13 @@ func MockLiquidity(fusdc, token types.Address, tickSpacing uint8) (liquidity []m
 	if tickSpacing == 0 {
 		tickSpacing =1
 	}
+	slog.Info("ticks", "min tick" ,MinTick, "max tick", MaxTick)
 	startingTick := MinTick
 	maxTick := MaxTick
 	now := int(time.Now().Unix())
 	for i := startingTick; i < maxTick; i += int(tickSpacing) {
-		tickStr := strconv.FormatUint(uint64(i), 10)
+		tickStr := strconv.Itoa(i)
+		slog.Info("tick str", "tick str", tickStr)
 		fusdcAmt, _ := rand.Int(rand.Reader, MaxMockedVolume)
 		token1Amt, _ := rand.Int(rand.Reader, MaxMockedVolume)
 		liquidity = append(liquidity, model.SeawaterLiquidity{
