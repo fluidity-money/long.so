@@ -17,7 +17,7 @@ func getLastBlockCheckpointed(db *gorm.DB) (uint64, error) {
 
 func updateCheckpoint(db *gorm.DB, blockNo uint64) error {
 	err := db.Table("ingestor_checkpointing_1").
-		Update("block_number", blockNo).
+		Save(BlockCheckpoint{blockNo}).
 		Error
 	return err
 }
