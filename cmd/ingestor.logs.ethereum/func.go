@@ -89,7 +89,7 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 		log.Fatalf("failed to filter logs: %v", err)
 	}
 	err = db.Transaction(func(db *gorm.DB) error {
-		var biggestBlockNo uint64 = 0
+		biggestBlockNo := from
 		for _, l := range logs {
 			if err := handleLog(db, seawaterAddr, l); err != nil {
 				return fmt.Errorf("failed to unpack log: %v", err)
