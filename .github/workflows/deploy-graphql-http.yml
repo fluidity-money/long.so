@@ -38,4 +38,4 @@ jobs:
           AWS_REGION: ap-southeast-2
         run: |
           aws lambda update-function-code --function-name graphql-ethereum \
-          --zip-file fileb:cmd/graphql.ethereum/bootstrap.zip
+          --zip-file fileb://cmd/graphql.ethereum/bootstrap.zip
