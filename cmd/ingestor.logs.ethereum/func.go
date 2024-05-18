@@ -182,6 +182,19 @@ func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) erro
 		"topic2", topic2,
 		"topic3", topic3,
 	)
+	logEvent := func(n string) {
+		slog.Debug("event identified! unpacked",
+			"event name", n,
+			"block hash", blockHash,
+			"transaction hash", transactionHash,
+			"block number", blockNumber,
+			"emitter addr", emitterAddr,
+			"topic0", topic0,
+			"topic1", topic1,
+			"topic2", topic2,
+			"topic3", topic3,
+		)
+	}
 	// If the event was made by Seawater. Assumed to be the case, so
 	// non-Seawater events should set this to false in this switch. Used to
 	// check the event emitter.
@@ -190,42 +203,52 @@ func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) erro
 	case erc20.TopicTransfer:
 		a, err = erc20.UnpackTransfer(topic1, topic2, data)
 		table = "events_erc20_transfer"
+		logEvent("Transfer")
 		isSeawater = false
 
 	case seawater.TopicMintPosition:
 		a, err = seawater.UnpackMintPosition(topic1, topic2, topic3, data)
+		logEvent("MintPosition")
 		table = "events_seawater_mintPosition"
 
 	case seawater.TopicBurnPosition:
 		a, err = seawater.UnpackBurnPosition(topic1, topic2, data)
+		logEvent("BurnPosition")
 		table = "events_seawater_burnPosition"
 
 	case seawater.TopicTransferPosition:
 		a, err = seawater.UnpackTransferPosition(topic1, topic2, topic3, data)
+		logEvent("TransferPosition")
 		table = "events_seawater_transferPosition"
 
 	case seawater.TopicUpdatePositionLiquidity:
 		a, err = seawater.UnpackUpdatePositionLiquidity(topic1, topic2, data)
+		logEvent("UpdatePositionLiquidity")
 		table = "events_seawater_updatePositionLiquidity"
 
 	case seawater.TopicCollectFees:
 		a, err = seawater.UnpackCollectFees(topic1, topic2, topic3, data)
+		logEvent("CollectFees")
 		table = "events_seawater_collectFees"
 
 	case seawater.TopicNewPool:
 		a, err = seawater.UnpackNewPool(topic1, topic2, topic3, data)
+		logEvent("NewPool")
 		table = "events_seawater_newPool"
 
 	case seawater.TopicCollectProtocolFees:
 		a, err = seawater.UnpackCollectProtocolFees(topic1, topic2, data)
+		logEvent("CollectProtocolFees")
 		table = "events_seawater_collectProtocolFees"
 
 	case seawater.TopicSwap2:
 		a, err = seawater.UnpackSwap2(topic1, topic2, topic3, data)
+		logEvent("Swap2")
 		table = "events_seawater_swap2"
 
 	case seawater.TopicSwap1:
 		a, err = seawater.UnpackSwap1(topic1, topic2, data)
+		logEvent("Swap1")
 		table = "events_seawater_swap1"
 
 	default:
