@@ -105,6 +105,10 @@ const ExplorePage = () => {
                     }
                     key={rewarder.address}
                     onClick={() => {
+                      if (token === "0") {
+                        setToken0(rewarder.token);
+                      }
+
                       if (token === "1") {
                         setToken1(rewarder.token);
                       }
