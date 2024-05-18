@@ -10,7 +10,7 @@ on:
       - 'audits/**'
   pull_request:
     branches:
-      - main
+      - development
     paths:
       - 'features/**'
       - 'static/**'
