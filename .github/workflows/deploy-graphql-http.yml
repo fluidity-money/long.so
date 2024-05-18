@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - development
+    paths:
+      - 'cmd/graphql.ethereum/**'
   pull_request:
     branches:
       - development
+    paths:
+      - 'cmd/graphql.ethereum/**'
 
 jobs:
   deploy:
