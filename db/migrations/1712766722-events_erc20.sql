@@ -16,4 +16,4 @@ CREATE TABLE events_erc20_transfer (
 
 -- migrate:down
 
--- whitespace change 2
+-- whitespace change 3
