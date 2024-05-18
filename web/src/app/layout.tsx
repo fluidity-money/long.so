@@ -11,15 +11,32 @@ import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { FeatureFlagConfig } from "@/app/_layout/FeatureFlagConfig";
 
+const title = "Long Tail AMM";
+
+const description = "Long Tail is Arbitrum's cheapest and most rewarding AMM.";
+
+const image = "https://static.long.so/embed.jpg";
+
 export const metadata: Metadata = {
-  title: "Long Tail AMM",
-  description: "Long Tail is Arbitrum's cheapest and most rewarding AMM.",
+  title: title,
+  description: description,
+  metadataBase: new URL("https://long.so"),
+  twitter: {
+    card: "summary_large_image",
+    title: title,
+    description: description,
+    site: "@superpositionso",
+    siteId: "",
+    creator: "@superpositionso",
+    creatorId: "",
+    images: [image]
+  },
   openGraph: {
     title: "Long Tail AMM",
     url: "https://long.so",
     images: [
       {
-        url: "https://static.long.so/embed.jpg",
+        url: image,
         width: 1069,
         height: 816,
         alt: "Long Tail AMM",
@@ -72,10 +89,6 @@ export default function RootLayout({
 
           <footer className="w-full self-end p-8">
             <div className="flex flex-row justify-between">
-              <div>Block number 123</div>
-              <div>
-                <a href="https://docs.long.so">Developer docs</a>
-              </div>
               <div>
                 <a
                   rel="noopener noreferrer"

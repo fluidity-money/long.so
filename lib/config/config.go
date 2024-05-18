@@ -9,17 +9,24 @@ import (
 	"os"
 	"strconv"
 
+	_ "github.com/fluidity-money/long.so/lib/setup"
 	"github.com/fluidity-money/long.so/lib/types"
 )
 
-// C is configuration for accessing configuration for making requests
+// C is configuration for each service, and globally.
 type C struct {
+	/* Global configuration */
+
 	GethUrl, TimescaleUrl   string
 	SeawaterAddr, FusdcAddr types.Address
 
-	/* Ingestor specific configurations */
+	/* Ingestor specific configuration */
+
+	// IngestorShouldPoll enabling the feature to poll the HTTP RPC.
 	IngestorShouldPoll bool
-	IngestorPagination   uint64
+	// IngestorPagination amount of blocks to use between polls.
+	IngestorPagination uint64
+	// IngestorPollWait to use as the number of seconds to wait between polls.
 	IngestorPollWait int
 }
 
@@ -90,6 +97,6 @@ func Get() C {
 
 		IngestorShouldPoll: ingestorShouldPoll,
 		IngestorPagination: ingestorPagination,
-		IngestorPollWait: ingestorPollWait,
+		IngestorPollWait:   ingestorPollWait,
 	}
 }
