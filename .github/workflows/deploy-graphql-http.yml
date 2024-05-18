@@ -19,7 +19,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: '1.21'
+          go-version: '1.21.1'
 
       - name: Install dependencies
         run: |
@@ -38,4 +38,4 @@ jobs:
           AWS_REGION: ap-southeast-2
         run: |
           export zip_file=fileb:cmd/graphql.ethereum/bootstrap.zip
-          ./deploy-lambda.sh graphql-ethereum
+          cd cmd/graphql.ethereum && ./deploy-lambda.sh graphql-ethereum
