@@ -1,9 +1,14 @@
 package main
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type BlockCheckpoint struct {
 	ID int
+	LastUpdated time.Time
 	BlockNumber uint64
 }
 
@@ -18,7 +23,7 @@ func getLastBlockCheckpointed(db *gorm.DB) (uint64, error) {
 
 func updateCheckpoint(db *gorm.DB, blockNo uint64) error {
 	err := db.Table("ingestor_checkpointing_1").
-		Save(BlockCheckpoint{1, blockNo}).
+		Save(BlockCheckpoint{1, time.Now(), blockNo}).
 		Error
 	return err
 }
