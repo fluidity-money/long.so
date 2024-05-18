@@ -31,7 +31,7 @@ interface IFaucet {
     /**
      * @notice isMember for the recipient given, cehcking if they're included in the filter.
      */
-    function isMember(address _recipient) external view returns (boolean);
+    function isMember(address _recipient) external view returns (bool);
 
     /**
      * @notice timeUntilNextClaim for the recipient given. Returns 0 the max uint256 if

@@ -190,6 +190,11 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string) (swaps []mode
 	return nil, nil // TODO
 }
 
+// Positions is the resolver for the positions field.
+func (r *seawaterLiquidityResolver) Positions(ctx context.Context, obj *model.SeawaterLiquidity) ([]seawater.Position, error) {
+	panic(fmt.Errorf("not implemented: Positions - positions"))
+}
+
 // ID is the resolver for the id field.
 func (r *seawaterPoolResolver) ID(ctx context.Context, obj *seawater.Pool) (string, error) {
 	if obj == nil {
@@ -204,6 +209,11 @@ func (r *seawaterPoolResolver) Address(ctx context.Context, obj *seawater.Pool) 
 		return "", fmt.Errorf("no pool obj")
 	}
 	return obj.Token.String(), nil
+}
+
+// TickSpacing is the resolver for the tickSpacing field.
+func (r *seawaterPoolResolver) TickSpacing(ctx context.Context, obj *seawater.Pool) (string, error) {
+	panic(fmt.Errorf("not implemented: TickSpacing - tickSpacing"))
 }
 
 // Token is the resolver for the token field.
@@ -440,6 +450,19 @@ func (r *seawaterPoolResolver) PositionsForUser(ctx context.Context, obj *seawat
 	return
 }
 
+// Liquidity is the resolver for the liquidity field.
+func (r *seawaterPoolResolver) Liquidity(ctx context.Context, obj *seawater.Pool) (liquidity []model.SeawaterLiquidity, err error) {
+	if obj == nil {
+		return nil, fmt.Errorf("empty pool")
+	}
+	if r.F.Is(features.FeatureMockGraph) {
+		MockDelay(r.F)
+		liquidity = MockLiquidity(r.C.FusdcAddr, obj.Token, obj.TickSpacing)
+		return
+	}
+	return nil, nil // TODO
+}
+
 // Swaps is the resolver for the swaps field.
 func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool) (swaps []model.SeawaterSwap, err error) {
 	if obj == nil {
@@ -590,6 +613,11 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// SeawaterLiquidity returns SeawaterLiquidityResolver implementation.
+func (r *Resolver) SeawaterLiquidity() SeawaterLiquidityResolver {
+	return &seawaterLiquidityResolver{r}
+}
+
 // SeawaterPool returns SeawaterPoolResolver implementation.
 func (r *Resolver) SeawaterPool() SeawaterPoolResolver { return &seawaterPoolResolver{r} }
 
@@ -605,6 +633,7 @@ func (r *Resolver) Wallet() WalletResolver { return &walletResolver{r} }
 type amountResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type seawaterLiquidityResolver struct{ *Resolver }
 type seawaterPoolResolver struct{ *Resolver }
 type seawaterPositionResolver struct{ *Resolver }
 type seawaterSwapResolver struct{ *Resolver }

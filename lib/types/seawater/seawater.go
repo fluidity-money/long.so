@@ -6,7 +6,7 @@ import (
 	"github.com/fluidity-money/long.so/lib/types"
 )
 
-// Pool is set by seawater_pools
+// Pool is set by events_seawater_newPool
 type Pool struct {
 	CreatedBy       time.Time     `json:"createdBy"`
 	CreatedBlockHash       types.Hash    `json:"createdBlockHash"`
@@ -14,7 +14,7 @@ type Pool struct {
 	CreatedBlockNumber     types.Number  `json:"blockNumber"`
 	Token           types.Address `json:"token"`
 	Fee             types.Number  `json:"fee"`
-	Price           types.Number  `json:"price"`
+	TickSpacing uint8 `json:"tickSpacing"`
 }
 
 // Position is set by seawater_active_positions_1

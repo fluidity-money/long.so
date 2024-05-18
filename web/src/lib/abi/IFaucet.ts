@@ -39,8 +39,8 @@ export const output = {
       "outputs": [
         {
           "name": "",
-          "type": "boolean",
-          "internalType": "boolean"
+          "type": "bool",
+          "internalType": "bool"
         }
       ],
       "stateMutability": "view"

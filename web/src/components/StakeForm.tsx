@@ -8,7 +8,7 @@ import Padlock from "@/assets/icons/padlock.svg";
 import Token from "@/assets/icons/token.svg";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReactECharts from "echarts-for-react";
-import { format, subDays } from "date-fns";
+import { format } from "date-fns";
 import * as echarts from "echarts/core";
 import SelectedRange from "@/assets/icons/legend/selected-range.svg";
 import CurrentPrice from "@/assets/icons/legend/current-price.svg";
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { ammAddress } from "@/lib/addresses";
+import { createChartData } from "@/lib/chartData";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { useRouter } from "next/navigation";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -39,219 +40,6 @@ import Index from "@/components/Slider";
 import { erc20Abi } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-
-const data = [
-  {
-    name: "Page A",
-    date: new Date(),
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    date: subDays(new Date(), 1),
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page D",
-    date: subDays(new Date(), 3),
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    date: subDays(new Date(), 4),
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 5),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 6),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page C",
-    date: subDays(new Date(), 2),
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 5),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 6),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page C",
-    date: subDays(new Date(), 2),
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page H",
-    date: subDays(new Date(), 7),
-    uv: 3490,
-    pv: 4300,
-    amt: 2400,
-  },
-  {
-    name: "Page A",
-    date: subDays(new Date(), 8),
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    date: subDays(new Date(), 9),
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page C",
-    date: subDays(new Date(), 10),
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page D",
-    date: subDays(new Date(), 11),
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    date: subDays(new Date(), 12),
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 13),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 14),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page H",
-    date: subDays(new Date(), 15),
-    uv: 3490,
-    pv: 4300,
-    amt: 2400,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 13),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 14),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page H",
-    date: subDays(new Date(), 15),
-    uv: 3490,
-    pv: 4300,
-    amt: 2400,
-  },
-  {
-    name: "Page A",
-    date: subDays(new Date(), 16),
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    date: subDays(new Date(), 17),
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page C",
-    date: subDays(new Date(), 18),
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page D",
-    date: subDays(new Date(), 19),
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    date: subDays(new Date(), 20),
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 21),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 22),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page H",
-    date: subDays(new Date(), 23),
-    uv: 3490,
-    pv: 4300,
-    amt: 2400,
-  },
-];
 
 const colorGradient = new echarts.graphic.LinearGradient(
   0,
@@ -283,6 +71,9 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     token0,
     token0Amount,
     setToken0Amount,
+    token1,
+    token1Amount,
+    setToken1Amount,
   } = useStakeStore();
 
   const router = useRouter();
@@ -311,7 +102,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     "full-range" | "auto" | "custom"
   >("full-range");
 
-  // price of the current pool
+  // Price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
@@ -323,7 +114,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
     : 0n;
 
-  // current tick of the pool
+  // Current tick of the pool
   const { data: curTick } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
@@ -331,17 +122,16 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     args: [token0.address],
   });
 
-  console.log("current tick", curTick);
+  // in this context, token0 is actually token1. It's converted to token1
+  // when we use it.
 
   // token0 hooks
-  const { data: token0Deicmals, error } = useSimulateContract({
+  const { data: token0Decimals, error } = useSimulateContract({
     address: token0.address,
     abi: erc20Abi,
     // @ts-expect-error
     functionName: "decimals",
   });
-
-  console.log(error);
 
   const { data: token0Balance } = useSimulateContract({
     address: token0.address,
@@ -352,8 +142,21 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     args: [address as Hash],
   });
 
+  // The tick spacing will determine how granular the graph is.
+  const { data: tickSpacing } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "curTick",
+    args: [token0.address],
+  });
+
   const autoFeeTierRef = useRef();
   const manualFeeTierRef = useRef();
+
+  const chartData = (() => {
+    if (!tickSpacing || tickSpacing.result === 0n) return [];
+    return createChartData(tickSpacing.result, []);
+  })();
 
   const chartOptions = useMemo(() => {
     return {
@@ -389,7 +192,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
       },
       xAxis: {
         type: "category",
-        data: data.map((d) => format(d.date, "P")),
+        data: chartData.map((d) => format(d.date, "P")),
         show: false,
         axisPointer: {
           label: {
@@ -408,7 +211,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
       },
       series: [
         {
-          data: data.map((d) => d.pv),
+          data: chartData.map((d) => d.pv),
           type: "bar",
           barWidth: "90%", // Adjust bar width (can be in pixels e.g., '20px')
           barGap: "5%",
@@ -563,13 +366,13 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               <div className="text-2xs md:text-gray-1">${tokenPrice.toString()}</div>
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
-                {token0Balance && token0Deicmals && (
+                {token0Balance && token0Decimals && (
                   <>
                     <div>
                       Balance:{" "}
                       {(
                         (token0Balance.result as unknown as bigint) /
-                        BigInt(10 ** token0Deicmals.result)
+                        BigInt(10 ** token0Decimals.result)
                       ).toString()}
                     </div>
                     <div
@@ -578,7 +381,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
                         setToken0Amount(
                           (
                             (token0Balance.result as unknown as bigint) /
-                            BigInt(10 ** token0Deicmals.result)
+                            BigInt(10 ** token0Decimals.result)
                           ).toString(),
                         )
                       }
@@ -607,7 +410,13 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               </div>
 
               <div className="mt-[7px] flex w-full flex-row items-center justify-between">
-                <div className="text-2xl">0.87</div>
+                <Input
+                  className="-ml-2 border-0 bg-black pl-2 text-2xl"
+                  autoFocus
+                  variant={"no-ring"}
+                  value={token1Amount}
+                  onChange={(e) => setToken1Amount(e.target.value)}
+                />
 
                 <Badge
                   variant="outline"

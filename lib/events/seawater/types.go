@@ -48,13 +48,14 @@ type (
 		Amount1 types.UnscaledNumber `json:"amount1"`
 	}
 
+	// NewPool created
 	NewPool struct {
 		events.Event
 
-		Token    types.Address `json:"token"`
-		Fee      uint32        `json:"fee"`
-		Price    types.Number  `json:"price"`
-		Decimals uint8         `json:"decimals"`
+		Token       types.Address `json:"token"`
+		Fee         uint32        `json:"fee"`
+		Decimals    uint8         `json:"decimals"`
+		TickSpacing uint8         `json:"tickSpacing"`
 	}
 
 	CollectProtocolFees struct {

@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"math/big"
 	"slices"
+	"strconv"
 	"time"
 
-	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/features"
+	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
@@ -20,6 +21,12 @@ var (
 
 	// MaxMockedPrice for the random mocking of the price/tvl/earned, divided by 1e5 for decimals
 	MaxMockedPrice = new(big.Int).SetInt64(10000000000)
+
+	// MinTick supported by the tick system of concentrated liquidity.
+	MinTick = -887272
+
+	// MaxTick of the inverted form of MinTick.
+	MaxTick = -MinTick
 )
 
 // Five to reuse for the max integer
@@ -44,7 +51,6 @@ var (
 			CreatedBlockNumber:     types.Number{}, // TODO
 			Token:                  types.AddressFromString("0x65dfe41220c438bf069bbce9eb66b087fe65db36"),
 			Fee:                    types.NumberFromBig(new(big.Int).SetInt64(0)),
-			Price:                  types.NumberFromBig(ox65Price),
 		},
 	}
 
@@ -274,11 +280,42 @@ func MockAmount() model.Amount {
 	t := Tokens[ta]
 	ts, _ := types.UnscaledNumberFromString("17592186044416") // 100000000000
 	return model.Amount{
-		Token: types.AddressFromString(ta),
-		Decimals: t.Decimals,
-		Timestamp: int(time.Now().Unix()),
+		Token:         types.AddressFromString(ta),
+		Decimals:      t.Decimals,
+		Timestamp:     int(time.Now().Unix()),
 		ValueUnscaled: *ts,
 	}
+}
+
+func MockLiquidity(fusdc, token types.Address, tickSpacing uint8) (liquidity []model.SeawaterLiquidity) {
+	startingTick := MinTick
+	maxTick := MaxTick
+	now := int(time.Now().Unix())
+	for i := startingTick; i < maxTick; i += int(tickSpacing) {
+		tickStr := strconv.FormatUint(uint64(i), 10)
+		fusdcAmt, _ := rand.Int(rand.Reader, MaxMockedVolume)
+		token1Amt, _ := rand.Int(rand.Reader, MaxMockedVolume)
+		liquidity = append(liquidity, model.SeawaterLiquidity{
+			ID:   "tick:" + tickStr,
+			Tick: tickStr,
+			Amount: model.PairAmount{
+				Timestamp: now,
+				Fusdc: model.Amount{
+					Token:         fusdc,
+					Decimals:      6,
+					Timestamp:     now, // This should be safe
+					ValueUnscaled: types.UnscaledNumberFromBig(fusdcAmt),
+				},
+				Token1: model.Amount{
+					Token:         token,
+					Decimals:      18,
+					Timestamp:     now,
+					ValueUnscaled: types.UnscaledNumberFromBig(token1Amt),
+				},
+			},
+		})
+	}
+	return
 }
 
 func randomBoolean() bool {

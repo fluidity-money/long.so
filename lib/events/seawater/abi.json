@@ -140,10 +140,16 @@
 				"internalType": "uint32"
 			},
 			{
-				"name": "price",
-				"type": "uint256",
-				"indexed": true,
-				"internalType": "uint256"
+				"name": "decimals",
+				"type": "uint8",
+				"indexed": false,
+				"internalType": "uint8"
+			},
+			{
+				"name": "tickSpacing",
+				"type": "uint8",
+				"indexed": false,
+				"internalType": "uint8"
 			}
 		],
 		"anonymous": false

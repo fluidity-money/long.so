@@ -33,7 +33,7 @@ const SwapExploreFragment = graphql(`
 const ExplorePage = () => {
   const router = useRouter();
 
-  const { setToken0, setToken1 } = useSwapStore();
+  const { setToken1 } = useSwapStore();
 
   const searchParams = useSearchParams();
 
@@ -105,10 +105,6 @@ const ExplorePage = () => {
                     }
                     key={rewarder.address}
                     onClick={() => {
-                      if (token === "0") {
-                        setToken0(rewarder.token);
-                      }
-
                       if (token === "1") {
                         setToken1(rewarder.token);
                       }

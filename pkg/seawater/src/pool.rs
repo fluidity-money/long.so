@@ -440,6 +440,9 @@ impl StoragePool {
     /// Get the current tick.
     pub fn get_cur_tick(&self) -> I32 { self.cur_tick.get() }
 
+    /// Get the tick spacing for the pool given.
+    pub fn get_tick_spacing(&self) -> U8 { self.tick_spacing.get() }
+
     /// Get the global fee growth for token0.
     pub fn get_fee_growth_global_0(&self) -> U256 { self.fee_growth_global_0.get() }
 

@@ -104,8 +104,8 @@ CREATE TABLE events_seawater_newPool (
 
 	token ADDRESS NOT NULL,
 	fee INTEGER NOT NULL,
-	price HUGEINT NOT NULL,
-	decimals INTEGER NOT NULL
+	decimals INTEGER NOT NULL,
+	tick_spacing INTEGER NOT NULL
 );
 
 CREATE INDEX ON events_seawater_newPool (token);

@@ -343,6 +343,10 @@ contract SeawaterAMM is ISeawaterAMM {
         directDelegate(_getExecutorAdmin());
     }
 
+    function tickSpacing(address /* pool */) external returns (uint8) {
+        directDelegate(_getExecutorAdmin());
+    }
+
     /// @inheritdoc ISeawaterExecutorPosition
     function feeGrowthGlobal0(address /* pool */) external returns (uint256) {
         directDelegate(_getExecutorAdmin());

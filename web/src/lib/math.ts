@@ -3,6 +3,8 @@ const MIN_TICK = -887272;
 
 const MAX_TICK = -MIN_TICK;
 
+const POSSIBLE_TICKS = -MIN_TICK + MAX_TICK;
+
 const Q96 = 2n ** 96n;
 
 const encodeTick = (price: number): number => {
@@ -105,4 +107,14 @@ const getLiquidityForAmounts = (
   }
 };
 
-export { sqrtPriceX96ToPrice, encodeTick, encodeSqrtPrice, bigAbs, getLiquidityForAmounts, getSqrtRatioAtTick };
+export {
+  MIN_TICK,
+  MAX_TICK,
+  POSSIBLE_TICKS,
+  sqrtPriceX96ToPrice,
+  encodeTick,
+  encodeSqrtPrice,
+  bigAbs,
+  getLiquidityForAmounts,
+  getSqrtRatioAtTick,
+};

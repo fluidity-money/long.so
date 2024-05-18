@@ -97,10 +97,23 @@ func UnpackCollectFees(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*Collec
 
 func UnpackNewPool(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*NewPool, error) {
 	fee := uint32(topic2.Big().Int64()) // This should be safe given the size in the event.
+	i, err := abi.Unpack("NewPool", d)
+	if err != nil {
+		return nil, err
+	}
+	decimals, ok := i[0].(uint8)
+	if !ok {
+		return nil, fmt.Errorf("bad amount0: %T", i[0])
+	}
+	tickSpacing, ok := i[1].(uint8)
+	if !ok {
+		return nil, fmt.Errorf("bad tickSpacing: %T", i[1])
+	}
 	return &NewPool{
-		Token: hashToAddr(topic1),
-		Fee:   fee,
-		Price: hashToNumber(topic2),
+		Token:       hashToAddr(topic1),
+		Fee:         fee,
+		Decimals:    decimals,
+		TickSpacing: tickSpacing,
 	}, nil
 }
 
