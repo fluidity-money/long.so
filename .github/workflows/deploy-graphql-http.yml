@@ -37,5 +37,5 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ap-southeast-2
         run: |
-          export zip_file=fileb:cmd/graphql.ethereum/bootstrap.zip
-          cd cmd/graphql.ethereum && ./deploy-lambda.sh graphql-ethereum
+          aws lambda update-function-code --function-name graphql-ethereum \
+          --zip-file fileb:cmd/graphql.ethereum/bootstrap.zip
