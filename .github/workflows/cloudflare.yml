@@ -3,14 +3,14 @@ name: Deploy to Cloudflare Pages
 on:
   push:
     branches:
-      - development
+      - main
 #    paths:
 #      - 'features/**'
 #      - 'static/**'
 #      - 'audits/**'
   pull_request:
     branches:
-      - development
+      - main
 #    paths:
 #      - 'features/**'
 #      - 'static/**'
@@ -25,28 +25,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-
-      - name: Install dependencies
-        run: |
-          cd features
-          npm install
-
-      - name: Build project
-        run: |
-          cd features
-          npm run build
-
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages (features)
         env:
           CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_PROJECT_NAME: 'features'
+          CLOUDFLARE_PROJECT_NAME: ${{ secrets.CLOUDFLARE_PROJECT_NAME_FEATURES }}
         run: |
-          npx @cloudflare/wrangler pages publish ./features/build --project-name $CLOUDFLARE_PROJECT_NAME
+          npx @cloudflare/wrangler pages publish ./features --project-name $CLOUDFLARE_PROJECT_NAME
 
   deploy-static:
 #    if: contains(github.event.head_commit.message, 'static/')
@@ -56,28 +41,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-
-      - name: Install dependencies
-        run: |
-          cd static
-          npm install
-
-      - name: Build project
-        run: |
-          cd static
-          npm run build
-
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages (static)
         env:
           CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_PROJECT_NAME: 'static'
+          CLOUDFLARE_PROJECT_NAME: ${{ secrets.CLOUDFLARE_PROJECT_NAME_STATIC }}
         run: |
-          npx @cloudflare/wrangler pages publish ./static/build --project-name $CLOUDFLARE_PROJECT_NAME
+          npx @cloudflare/wrangler pages publish ./static --project-name $CLOUDFLARE_PROJECT_NAME
 
   deploy-audits:
 #    if: contains(github.event.head_commit.message, 'audits/')
@@ -87,25 +57,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-
-      - name: Install dependencies
-        run: |
-          cd audits
-          npm install
-
-      - name: Build project
-        run: |
-          cd audits
-          npm run build
-
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages (audits)
         env:
           CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_PROJECT_NAME: 'audits'
+          CLOUDFLARE_PROJECT_NAME: ${{ secrets.CLOUDFLARE_PROJECT_NAME_AUDITS }}
         run: |
-          npx @cloudflare/wrangler pages publish ./audits/build --project-name $CLOUDFLARE_PROJECT_NAME
+          npx @cloudflare/wrangler pages publish ./audits --project-name $CLOUDFLARE_PROJECT_NAME
