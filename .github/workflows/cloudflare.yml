@@ -3,14 +3,14 @@ name: Deploy to Cloudflare Pages
 on:
   push:
     branches:
-      - main
+      - development
 #    paths:
 #      - 'features/**'
 #      - 'static/**'
 #      - 'audits/**'
   pull_request:
     branches:
-      - main
+      - development
 #    paths:
 #      - 'features/**'
 #      - 'static/**'
