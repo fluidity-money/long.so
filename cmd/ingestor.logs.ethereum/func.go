@@ -102,6 +102,9 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 			return err
 		}
 		// Update checkpoint here.
+		if err := updateCheckpoint(db, biggestBlockNo); err != nil {
+			return fmt.Errorf("failed to update a checkpoint: %v", err)
+		}
 		return nil
 	})
 	if err != nil {
@@ -138,7 +141,10 @@ func IngestWebsocket(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAdd
 				if err := handleLog(db, seawaterAddr, l); err != nil {
 					return fmt.Errorf("failed to handle a database log: %v", err)
 				}
-				// Update the checkpoint here.
+				// Update the checkpoint here. Assuming the log here's block number is the latest.
+				if err := updateCheckpoint(db, l.BlockNumber); err != nil {
+					return fmt.Errorf("failed to update a checkpoint: %v", err)
+				}
 				return nil
 			})
 			if err != nil {
