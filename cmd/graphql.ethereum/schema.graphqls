@@ -93,8 +93,8 @@ type SeawaterPool {
   positionsForUser(address: String!): [SeawaterPosition!]!
 
   """
-  Liquidity available in a pool. It's best to avoid questioning the return data too much
-  on this, and sticking to unscaled values. This returns a lot of data.
+  Liquidity available in a pool, with only 20 elements being returned encompassing the
+  tick ranges subdivided.
   """
   liquidity: [SeawaterLiquidity!]!
 
@@ -128,11 +128,12 @@ type TvlOverTime {
 }
 
 """
-SeawaterLiquidity available in a pool summed and grouped by ticks.
+SeawaterLiquidity available in a pool summed and grouped by ticks of 5000 at a time.
 """
 type SeawaterLiquidity {
-  id: ID! # tick number (liq:tick number)
-  tick: String!
+  id: ID! # tick number (liq:tick-from:tick-to)
+  tickLower: String!
+  tickUpper: String!
   positions: [SeawaterPosition!]!
   amount: PairAmount!
 }

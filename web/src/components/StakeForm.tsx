@@ -74,7 +74,16 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     token1,
     token1Amount,
     setToken1Amount,
+    tickLower,
+    tickUpper,
+    setTickLower,
+    setTickUpper,
   } = useStakeStore();
+
+  const [priceLower, setPriceLower] = useState("");
+  const [priceUpper, setPriceUpper] = useState("");
+
+  // Parse the price lower and upper, and set the ticks properly.
 
   const router = useRouter();
 
@@ -153,10 +162,8 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
   const autoFeeTierRef = useRef();
   const manualFeeTierRef = useRef();
 
-  const chartData = (() => {
-    if (!tickSpacing || tickSpacing.result === 0n) return [];
-    return createChartData(tickSpacing.result, []);
-  })();
+  // @TODO: use the graph data for this
+  const chartData = createChartData([1000n]);
 
   const chartOptions = useMemo(() => {
     return {
@@ -605,21 +612,25 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
           <div className="mt-[22px] flex flex-row items-center justify-between px-[5px] md:mt-[24px] md:w-[270px]">
             <div className="flex flex-col">
               <div className="text-3xs text-gray-2 md:text-2xs">Low Price</div>
-              <div className={"border-b border-white text-2xs md:text-base"}>
-                780.28123
-              </div>
+                <Input
+                  className="border-b border-white text-2xs md:text-base"
+                  value={priceLower}
+                  onChange={(e) => setPriceLower(e.target.value)}
+                />
               <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
-                <Ethereum className="invert" /> USDC per ETH
+                <Ethereum className="invert" /> fUSDC per {token0.name}
               </div>
             </div>
 
             <div className="flex flex-col">
               <div className="text-3xs text-gray-2 md:text-2xs">High Price</div>
-              <div className={"border-b border-white text-2xs md:text-base"}>
-                ∞
-              </div>
+                <Input
+                  className="border-b border-white text-2xs md:text-base"
+                  value={priceUpper}
+                  onChange={(e) => setPriceUpper(e.target.value)}
+                />
               <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
-                <Ethereum className="invert" /> USDC per ETH
+                <Ethereum className="invert" /> fUSDC per {token0.name}
               </div>
             </div>
           </div>
@@ -790,7 +801,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
                     </div>
                     <div className={"flex flex-col items-center"}>
                       <Token className={"size-[15px]"} />
-                      <div>ETH</div>
+                      <div>{token0.name}</div>
                     </div>
                   </div>
                 </TooltipContent>

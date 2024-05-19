@@ -96,7 +96,8 @@ type ComplexityRoot struct {
 		Amount    func(childComplexity int) int
 		ID        func(childComplexity int) int
 		Positions func(childComplexity int) int
-		Tick      func(childComplexity int) int
+		TickLower func(childComplexity int) int
+		TickUpper func(childComplexity int) int
 	}
 
 	SeawaterPool struct {
@@ -462,12 +463,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SeawaterLiquidity.Positions(childComplexity), true
 
-	case "SeawaterLiquidity.tick":
-		if e.complexity.SeawaterLiquidity.Tick == nil {
+	case "SeawaterLiquidity.tickLower":
+		if e.complexity.SeawaterLiquidity.TickLower == nil {
 			break
 		}
 
-		return e.complexity.SeawaterLiquidity.Tick(childComplexity), true
+		return e.complexity.SeawaterLiquidity.TickLower(childComplexity), true
+
+	case "SeawaterLiquidity.tickUpper":
+		if e.complexity.SeawaterLiquidity.TickUpper == nil {
+			break
+		}
+
+		return e.complexity.SeawaterLiquidity.TickUpper(childComplexity), true
 
 	case "SeawaterPool.address":
 		if e.complexity.SeawaterPool.Address == nil {
@@ -1027,6 +1035,10 @@ type SeawaterPool {
   positions: [SeawaterPosition!]!
   positionsForUser(address: String!): [SeawaterPosition!]!
 
+  """
+  Liquidity available in a pool, with only 20 elements being returned encompassing the
+  tick ranges subdivided.
+  """
   liquidity: [SeawaterLiquidity!]!
 
   swaps: [SeawaterSwap!]!
@@ -1059,11 +1071,12 @@ type TvlOverTime {
 }
 
 """
-SeawaterLiquidity available in a pool summed and grouped by ticks.
+SeawaterLiquidity available in a pool summed and grouped by ticks of 5000 at a time.
 """
 type SeawaterLiquidity {
-  id: ID! # tick number (liq:tick number)
-  tick: String!
+  id: ID! # tick number (liq:tick-from:tick-to)
+  tickLower: String!
+  tickUpper: String!
   positions: [SeawaterPosition!]!
   amount: PairAmount!
 }
@@ -2665,8 +2678,8 @@ func (ec *executionContext) fieldContext_SeawaterLiquidity_id(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _SeawaterLiquidity_tick(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterLiquidity) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SeawaterLiquidity_tick(ctx, field)
+func (ec *executionContext) _SeawaterLiquidity_tickLower(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterLiquidity) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterLiquidity_tickLower(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2679,7 +2692,7 @@ func (ec *executionContext) _SeawaterLiquidity_tick(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Tick, nil
+		return obj.TickLower, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2696,7 +2709,51 @@ func (ec *executionContext) _SeawaterLiquidity_tick(ctx context.Context, field g
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterLiquidity_tick(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterLiquidity_tickLower(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SeawaterLiquidity",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SeawaterLiquidity_tickUpper(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterLiquidity) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterLiquidity_tickUpper(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TickUpper, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SeawaterLiquidity_tickUpper(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterLiquidity",
 		Field:      field,
@@ -3729,8 +3786,10 @@ func (ec *executionContext) fieldContext_SeawaterPool_liquidity(_ context.Contex
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_SeawaterLiquidity_id(ctx, field)
-			case "tick":
-				return ec.fieldContext_SeawaterLiquidity_tick(ctx, field)
+			case "tickLower":
+				return ec.fieldContext_SeawaterLiquidity_tickLower(ctx, field)
+			case "tickUpper":
+				return ec.fieldContext_SeawaterLiquidity_tickUpper(ctx, field)
 			case "positions":
 				return ec.fieldContext_SeawaterLiquidity_positions(ctx, field)
 			case "amount":
@@ -7713,8 +7772,13 @@ func (ec *executionContext) _SeawaterLiquidity(ctx context.Context, sel ast.Sele
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "tick":
-			out.Values[i] = ec._SeawaterLiquidity_tick(ctx, field, obj)
+		case "tickLower":
+			out.Values[i] = ec._SeawaterLiquidity_tickLower(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "tickUpper":
+			out.Values[i] = ec._SeawaterLiquidity_tickUpper(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
