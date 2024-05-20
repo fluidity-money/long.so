@@ -37,6 +37,7 @@ import { Fail } from "@/components/sequence/Fail";
 import { LoaderIcon } from "lucide-react";
 import { graphql, useFragment } from "@/gql";
 import { useGraphql } from "@/hooks/useGraphql";
+import { usdFormat } from "@/lib/usdFormat";
 
 const SwapFormFragment = graphql(`
   fragment SwapFormFragment on SeawaterPool {
@@ -61,6 +62,7 @@ export const SwapForm = () => {
 
   const showSuperloopPopover = useFeatureFlag("ui show superloop");
   const showCampaignBanner = useFeatureFlag("ui show campaign banner");
+  const showMockData = useFeatureFlag("ui show demo data");
 
   useEffect(() => {
     if (!welcome) {
@@ -581,7 +583,11 @@ export const SwapForm = () => {
                   <Token />
                   <Token className={"-ml-1"} />
                   <Token className={"-ml-1 mr-1"} />
-                  <div className="iridescent-text">$6.11 - $33.12</div>
+                  <div className="iridescent-text">
+                    {showMockData
+                      ? "$6.11 - $33.12"
+                      : `${usdFormat(parseFloat(poolData?.earnedFeesAPRFUSDC[0] ?? "0") ?? 0)} - ${usdFormat(parseFloat(poolData?.earnedFeesAPRFUSDC[1] ?? "0") ?? 0)}`}
+                  </div>
                 </Badge>
               </div>
 
