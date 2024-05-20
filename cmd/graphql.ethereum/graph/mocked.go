@@ -47,8 +47,8 @@ var (
 
 	Pools = map[string]seawater.Pool{
 		"0x65dfe41220c438bf069bbce9eb66b087fe65db36": {
-			CreatedTransactionHash: "",             // TODO
-			CreatedBlockNumber:     types.Number{}, // TODO
+			TransactionHash: "",             // TODO
+			BlockNumber:     types.Number{}, // TODO
 			Token:                  types.AddressFromString("0x65dfe41220c438bf069bbce9eb66b087fe65db36"),
 			Fee:                    types.NumberFromBig(new(big.Int).SetInt64(0)),
 		},
@@ -56,8 +56,8 @@ var (
 
 	Positions = map[string][]seawater.Position{
 		"0x65dfe41220c438bf069bbce9eb66b087fe65db36": {{
-			CreatedTransactionHash: "",             // TODO
-			CreatedBlockNumber:     types.Number{}, // TODO
+			TransactionHash: "",             // TODO
+			BlockNumber:     types.Number{}, // TODO
 			Id:                     types.EmptyNumber(),
 			Owner:                  types.AddressFromString("0xdca670597bcc35e11200fe07d9191a33a73850b9"),
 			Pool:                   types.AddressFromString("0x65dfe41220c438bf069bbce9eb66b087fe65db36"),
