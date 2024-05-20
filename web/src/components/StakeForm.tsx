@@ -40,6 +40,9 @@ import Index from "@/components/Slider";
 import { erc20Abi } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { graphql, useFragment } from "@/gql";
+import { useGraphql } from "@/hooks/useGraphql";
+import { usdFormat } from "@/lib/usdFormat";
 
 const colorGradient = new echarts.graphic.LinearGradient(
   0,
@@ -59,6 +62,13 @@ interface StakeFormProps {
   mode: "new" | "existing";
   poolId?: string;
 }
+
+const StakeFormFragment = graphql(`
+  fragment StakeFormFragment on SeawaterPool {
+    address
+    earnedFeesAPRFUSDC
+  }
+`);
 
 export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
   const [feeTier, setFeeTier] = useState<"auto" | "manual">("auto");
@@ -84,6 +94,13 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
   const [priceUpper, setPriceUpper] = useState("");
 
   // Parse the price lower and upper, and set the ticks properly.
+
+  const { data } = useGraphql();
+
+  const poolsData = useFragment(StakeFormFragment, data?.pools);
+  const poolData = poolsData?.find((pool) => pool.address === poolId);
+
+  const showMockData = useFeatureFlag("ui show demo data");
 
   const router = useRouter();
 
@@ -370,7 +387,9 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
             </div>
 
             <div className="mt-[5px] flex w-full flex-row items-center justify-between">
-              <div className="text-2xs md:text-gray-1">${tokenPrice.toString()}</div>
+              <div className="text-2xs md:text-gray-1">
+                ${tokenPrice.toString()}
+              </div>
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
                 {token0Balance && token0Decimals && (
@@ -436,7 +455,9 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               </div>
 
               <div className="mt-[5px] flex w-full flex-row items-center justify-between">
-                <div className="text-2xs md:text-gray-1">${tokenPrice.toString()}</div>
+                <div className="text-2xs md:text-gray-1">
+                  ${tokenPrice.toString()}
+                </div>
 
                 <div className="text-3xs md:text-2xs">Balance: 0.5</div>
               </div>
@@ -465,9 +486,12 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
             <SegmentedControl
               variant={"secondary"}
-              className={cn("h-[26px] rounded-lg bg-black text-3xs md:text-2xs", {
-                hidden: !showManualFees,
-              })}
+              className={cn(
+                "h-[26px] rounded-lg bg-black text-3xs md:text-2xs",
+                {
+                  hidden: !showManualFees,
+                },
+              )}
               callback={(val) => setFeeTier(val)}
               segments={[
                 {
@@ -508,8 +532,8 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
                 </div>
 
                 <div className="iridescent-text w-[200px] text-3xs md:w-[247px] md:text-2xs">
-                  The protocol automatically adjust your fees in order to maximise
-                  rewards and reduce impermanent loss
+                  The protocol automatically adjust your fees in order to
+                  maximise rewards and reduce impermanent loss
                 </div>
               </motion.div>
             )}
@@ -612,11 +636,11 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
           <div className="mt-[22px] flex flex-row items-center justify-between px-[5px] md:mt-[24px] md:w-[270px]">
             <div className="flex flex-col">
               <div className="text-3xs text-gray-2 md:text-2xs">Low Price</div>
-                <Input
-                  className="border-b border-white text-2xs md:text-base"
-                  value={priceLower}
-                  onChange={(e) => setPriceLower(e.target.value)}
-                />
+              <Input
+                className="border-b border-white text-2xs md:text-base"
+                value={priceLower}
+                onChange={(e) => setPriceLower(e.target.value)}
+              />
               <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
                 <Ethereum className="invert" /> fUSDC per {token0.name}
               </div>
@@ -624,11 +648,11 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
             <div className="flex flex-col">
               <div className="text-3xs text-gray-2 md:text-2xs">High Price</div>
-                <Input
-                  className="border-b border-white text-2xs md:text-base"
-                  value={priceUpper}
-                  onChange={(e) => setPriceUpper(e.target.value)}
-                />
+              <Input
+                className="border-b border-white text-2xs md:text-base"
+                value={priceUpper}
+                onChange={(e) => setPriceUpper(e.target.value)}
+              />
               <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
                 <Ethereum className="invert" /> fUSDC per {token0.name}
               </div>
@@ -763,7 +787,11 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
                     <Token />
                     <Token className={"-ml-1"} />
                     <Token className={"-ml-1 mr-1"} />
-                    <div className="iridescent-text">$6.11 - $33.12</div>
+                    <div className="iridescent-text">
+                      {showMockData
+                        ? "$6.11 - $33.12"
+                        : `${usdFormat(parseFloat(poolData?.earnedFeesAPRFUSDC[0] ?? "0") ?? 0)} - ${usdFormat(parseFloat(poolData?.earnedFeesAPRFUSDC[1] ?? "0") ?? 0)}`}
+                    </div>
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent

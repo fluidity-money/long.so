@@ -18,6 +18,7 @@ const graphqlQuery = graphql(`
       ...SwapExploreFragment
       ...ManagePoolFragment
       ...SwapFormFragment
+      ...StakeFormFragment
     }
   }
 `);
