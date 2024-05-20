@@ -2,7 +2,7 @@ import { arbitrumSepolia } from "wagmi/chains";
 
 export const arbitrumStylusTestnet = {
   name: "Superposition Testnet",
-  id: 1111281,
+  id: 96521,
   nativeCurrency: { name: "Superposition", symbol: "SPN", decimals: 18 },
   contracts: {
     multicall3: {
@@ -15,7 +15,7 @@ export const arbitrumStylusTestnet = {
   },
   blockExplorers: {
     default: {
-      name: "Catscan",
+      name: "CatScan",
       url: "https://testnet-explorer.superpositionso",
     },
   },
