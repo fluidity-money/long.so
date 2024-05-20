@@ -35,6 +35,22 @@ import Confirm from "@/components/sequence/Confirm";
 import { Success } from "@/components/sequence/Success";
 import { Fail } from "@/components/sequence/Fail";
 import { LoaderIcon } from "lucide-react";
+import { graphql, useFragment } from "@/gql";
+import { useGraphql } from "@/hooks/useGraphql";
+
+const SwapFormFragment = graphql(`
+  fragment SwapFormFragment on SeawaterPool {
+    address
+    earnedFeesAPRFUSDC
+    earnedFeesAPRToken1
+    token {
+      address
+      decimals
+      name
+      symbol
+    }
+  }
+`);
 
 export const SwapForm = () => {
   const [breakdownHidden, setBreakdownHidden] = useState(true);
@@ -61,6 +77,20 @@ export const SwapForm = () => {
     setToken0Amount,
     setToken1Amount,
   } = useSwapStore();
+  const { data } = useGraphql();
+
+  const poolsData = useFragment(SwapFormFragment, data?.pools);
+
+  const poolData = useMemo(() => {
+    // find the pool containing token0 or token1
+    return poolsData?.find((pool) => {
+      return (
+        pool.token.address === token0.address ||
+        pool.token.address === token1.address
+      );
+    });
+  }, [poolsData, token0.address, token1.address]);
+
   const { address } = useAccount();
 
   // the user is currently swapping the "base" asset, the fUSDC
