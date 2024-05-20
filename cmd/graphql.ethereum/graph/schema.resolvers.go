@@ -334,6 +334,28 @@ func (r *seawaterPoolResolver) LiquidityOverTime(ctx context.Context, obj *seawa
 	return liq, nil // TODO
 }
 
+// TvlOverTime is the resolver for the tvlOverTime field.
+func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Pool) (tvl model.TvlOverTime, err error) {	if obj == nil {
+		return tvl, fmt.Errorf("pool empty")
+	}
+	if r.F.Is(features.FeatureMockGraph) {
+		r.F.On(features.FeatureMockGraphDataDelay, func() error {
+			MockDelay(r.F)
+			return nil
+		})
+		daily, _, _, err := MockPriceOverTime(31, r.C.FusdcAddr, obj.Token)
+		if err != nil {
+			return tvl, err
+		}
+		monthly, _, _, err := MockPriceOverTime(12, r.C.FusdcAddr, obj.Token)
+		if err != nil {
+			return tvl, err
+		}
+		return model.TvlOverTime{daily, monthly}, nil
+	}
+	return tvl, nil // TODO
+}
+
 // YieldOverTime is the resolver for the yieldOverTime field.
 func (r *seawaterPoolResolver) YieldOverTime(ctx context.Context, obj *seawater.Pool) (yield model.YieldOverTime, err error) {
 	if obj == nil {
