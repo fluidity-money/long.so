@@ -15,7 +15,7 @@ const title = "Long Tail AMM";
 
 const description = "Long Tail is Arbitrum's cheapest and most rewarding AMM.";
 
-const image = "https://static.long.so/embed.jpg";
+const image = "https://static.long.so/embed.png";
 
 export const metadata: Metadata = {
   title: title,
@@ -37,8 +37,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: image,
-        width: 1069,
-        height: 816,
+        width: 1200,
+        height: 800,
         alt: "Long Tail AMM",
       },
     ],
