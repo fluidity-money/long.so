@@ -1,6 +1,6 @@
 import { subDays } from "date-fns";
 
-export const getYieldOverTimeData = (length: number) => {
+export const getMockYieldOverTimeData = (length: number) => {
   const data = [];
   for (let i = 0; i < length; i++) {
     data.push({
