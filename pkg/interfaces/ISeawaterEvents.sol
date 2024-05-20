@@ -63,7 +63,7 @@ interface ISeawaterEvents {
     /// @notice emitted when a new pool is created
     /// @param token the token0 the pool is associated with (where token1 is a fluid token)
     /// @param fee the fee being used for this pool
-    /// @param price the starting price for this pool
+    /// @param tickSpacing in the pool
     event NewPool(
         address indexed token,
         uint32 indexed fee,
