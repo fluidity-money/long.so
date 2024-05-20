@@ -77,9 +77,20 @@ type SeawaterPool {
   """
   priceOverTime: PriceOverTime!
 
+  """
+  The number of assets that were traded (the volume) over time in the pool, historically.
+  """
   volumeOverTime: VolumeOverTime!
+
+  """
+  The number of assets (the liquidity) that were kept in the pool, historically.
+  """
   liquidityOverTime: LiquidityOverTime!
-  tvlOverTime: TvlOverTime!
+
+  """
+  Yield paid by the pool over time. Yield is fees paid to the pool, as well as yield from
+  using Fluid Assets on the pool (Utility Mining and otherwise.)
+  """
   yieldOverTime: YieldOverTime!
 
   earnedFeesAPRFUSDC: [String!]!
@@ -118,11 +129,6 @@ type YieldOverTime {
 }
 
 type PriceOverTime {
-  daily: [String!]! # loads a month worth of daily data (31 items)
-  monthly: [String!]! # loads 12 months of data
-}
-
-type TvlOverTime {
   daily: [String!]! # loads a month worth of daily data (31 items)
   monthly: [String!]! # loads 12 months of data
 }

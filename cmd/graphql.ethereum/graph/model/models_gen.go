@@ -37,11 +37,6 @@ type TokenBalance struct {
 	Balance Amount `json:"balance"`
 }
 
-type TvlOverTime struct {
-	Daily   []string `json:"daily"`
-	Monthly []string `json:"monthly"`
-}
-
 type UtilityIncentive struct {
 	AmountGivenOut string `json:"amountGivenOut"`
 	MaximumAmount  string `json:"maximumAmount"`
