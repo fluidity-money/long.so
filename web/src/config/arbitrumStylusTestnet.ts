@@ -1,23 +1,22 @@
 import { arbitrumSepolia } from "wagmi/chains";
 
 export const arbitrumStylusTestnet = {
-  name: "Conduit Stylus 2 Testnet",
+  name: "Superposition Testnet",
   id: 1111281,
-  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-  // use a self-deployed multicall3 for Conduit Stylus V2 as it doesn't support the standard address
+  nativeCurrency: { name: "Superposition", symbol: "SPN", decimals: 18 },
   contracts: {
     multicall3: {
-      address: "0x21329A8bF996f5112a4DCDfE0785C043F56CcF7B" as const,
+      address: "0x69B6eb359E3f9CE04078B96249aFceA1809A350f" as const,
     },
   },
   rpcUrls: {
-    default: { http: ["https://rpc-stylus-4.t.conduit-stg.xyz"] },
-    public: { http: ["https://rpc-stylus-4.t.conduit-stg.xyz"] },
+    default: { http: ["https://testnet-rpc.superposition.so"] },
+    public: { http: ["https://testnet-rpc.superposition.so"] },
   },
   blockExplorers: {
     default: {
-      name: "Arbiscan",
-      url: "https://stylus-testnet-explorer.arbitrum.io/",
+      name: "Catscan",
+      url: "https://testnet-explorer.superpositionso",
     },
   },
 };
