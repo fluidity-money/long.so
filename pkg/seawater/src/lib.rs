@@ -757,15 +757,15 @@ impl Pools {
         evm::log(events::NewPool {
             token: pool,
             fee,
-            price,
             decimals,
+            tickSpacing: tick_spacing,
         });
 
         Ok(())
     }
 
     /// Getter method for the sqrt price
-    pub fn sqrt_price(&self, pool: Address) -> Result<U256, Revert> {
+    pub fn sqrt_price_x96(&self, pool: Address) -> Result<U256, Revert> {
         Ok(self.pools.getter(pool).get_sqrt_price())
     }
 
@@ -773,6 +773,12 @@ impl Pools {
     pub fn cur_tick(&self, pool: Address) -> Result<i32, Revert> {
         // converted to i32 for automatic abi encoding
         Ok(self.pools.getter(pool).get_cur_tick().sys())
+    }
+
+    /// Getter method for the tick spacing of the pool given.
+    pub fn tick_spacing(&self, pool: Address) -> Result<u8, Revert> {
+        // converted to i32 for automatic abi encoding
+        Ok(self.pools.getter(pool).get_tick_spacing().sys())
     }
 
     /// Getter method for getting the fee growth for token 0

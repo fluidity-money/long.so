@@ -150,6 +150,9 @@ func (u UnscaledNumber) Scale(decimals int) *big.Float {
 }
 // ScaleStr to show a user or to send over the graph, scaling with 4 decimal places.
 func (u UnscaledNumber) ScaleStr(d int) string {
+	if d == 0 {
+		return u.String()
+	}
 	return fmt.Sprintf("%.4f", u.Scale(d))
 }
 

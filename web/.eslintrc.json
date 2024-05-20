@@ -8,5 +8,23 @@
     "@stylistic/ts",
     "@typescript-eslint"
   ],
-  "parser": "@typescript-eslint/parser"
+  "parser": "@typescript-eslint/parser",
+  "overrides": [
+    {
+      "files": [
+        "*.ts",
+        "*.tsx"
+      ],
+      "processor": "@graphql-eslint/graphql"
+    },
+    {
+      "files": [
+        "*.graphql"
+      ],
+      "parser": "@graphql-eslint/eslint-plugin",
+      "plugins": [
+        "@graphql-eslint"
+      ]
+    }
+  ]
 }

@@ -32,7 +32,7 @@ type F struct {
 // or use EnvFeatures.
 func Get() F {
 	f := get()
-	slog.Debug("enabled features", "features", f, "everything enabled?", f.everything)
+	slog.Debug("enabled features", "features", f.enabled, "everything enabled?", f.everything)
 	return f
 }
 
@@ -87,10 +87,11 @@ func (f F) Is(name string) bool {
 }
 
 // OnFeature being enabled, run the thunk given.
-func (f F) On(name string, k func() error) {
+func (f F) On(name string, k func() error) (r error) {
 	if f.Is(name) {
 		if err := k(); err != nil {
-			log.Fatalf("feature %v err: %v", name, err)
+			r = err
 		}
 	}
+	return
 }

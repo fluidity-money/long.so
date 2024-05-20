@@ -18,7 +18,7 @@ debug-assertions = false
 incremental = false
 
 [workspace.dependencies]
-stylus-sdk = "0.4.1"
+stylus-sdk = "0.5.0"
 thiserror = "1.0.48"
 tiny-keccak = "2.0.2"
 ruint = "1.11.0"

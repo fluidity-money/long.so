@@ -1,5 +1,10 @@
 {
-	"ui show demo data": true,
-	"graphql mock demo data": true
-	"graphql mock demo data should delay", true
+	"ui show demo data": false,
+	"ui show superloop": false,
+	"ui show feature flags panel": true,
+	"graphql mock demo data": true,
+	"graphql mock demo data should delay": true,
+	"ui show fee tier": false,
+	"ui show optimising fee route": false,
+	"ui show campaign banner": false
 }

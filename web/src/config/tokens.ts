@@ -5,9 +5,9 @@ export type Token = {
 };
 
 export const fUSDC: Token = {
-  name: "Fluid Token",
-  address: "0x9A8c1806087f8c4e1315AF7a2AC285334a8275ed",
-  symbol: "fUSDC",
+  name: "test-token-1",
+  address: "0x0fFC26C47FeD8C54AF2f0872cc51d79D173730a8",
+  symbol: "TT1",
 };
 
 /**
@@ -16,8 +16,13 @@ export const fUSDC: Token = {
 export const tokens: Token[] = [
   fUSDC,
   {
-    name: "New Token 2",
-    address: "0x65Dfe41220C438Bf069BBce9Eb66B087fe65dB36",
-    symbol: "NEW_TOKEN_2",
+    name: "test-token-2",
+    address: "0x77bE2Fa1Af6a366D6f7dB166268E46614EA8DD92",
+    symbol: "TT2",
   },
+  {
+    name: "test-token-3",
+    address: "0xBEf8358A102Ee25157dcda535AaAa752927932BA",
+    symbol: "TT3",
+  }
 ];

@@ -12,10 +12,12 @@ import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import { SuperloopPopover } from "@/app/SuperloopPopover";
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { motion } from "framer-motion";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
 import Link from "next/link";
 import { useSwapStore } from "@/stores/useSwapStore";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import {
   useAccount,
   useSimulateContract,
@@ -26,12 +28,30 @@ import { erc20Abi, Hash, maxUint256 } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import LightweightERC20 from "@/lib/abi/LightweightERC20";
 import { ammAddress } from "@/lib/addresses";
-import { output } from "@/lib/abi/ISeawaterAMM";
+import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { fUSDC } from "@/config/tokens";
 import { EnableSpending } from "@/components/sequence/EnableSpending";
 import Confirm from "@/components/sequence/Confirm";
 import { Success } from "@/components/sequence/Success";
 import { Fail } from "@/components/sequence/Fail";
+import { LoaderIcon } from "lucide-react";
+import { graphql, useFragment } from "@/gql";
+import { useGraphql } from "@/hooks/useGraphql";
+import { usdFormat } from "@/lib/usdFormat";
+
+const SwapFormFragment = graphql(`
+  fragment SwapFormFragment on SeawaterPool {
+    address
+    earnedFeesAPRFUSDC
+    earnedFeesAPRToken1
+    token {
+      address
+      decimals
+      name
+      symbol
+    }
+  }
+`);
 
 export const SwapForm = () => {
   const [breakdownHidden, setBreakdownHidden] = useState(true);
@@ -39,6 +59,10 @@ export const SwapForm = () => {
   const { setWelcome, welcome, hovering, setHovering } = useWelcomeStore();
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const showSuperloopPopover = useFeatureFlag("ui show superloop");
+  const showCampaignBanner = useFeatureFlag("ui show campaign banner");
+  const showMockData = useFeatureFlag("ui show demo data");
 
   useEffect(() => {
     if (!welcome) {
@@ -55,7 +79,40 @@ export const SwapForm = () => {
     setToken0Amount,
     setToken1Amount,
   } = useSwapStore();
+  const { data } = useGraphql();
+
+  const poolsData = useFragment(SwapFormFragment, data?.pools);
+
+  const poolData = useMemo(() => {
+    // find the pool containing token0 or token1
+    return poolsData?.find((pool) => {
+      return (
+        pool.token.address === token0.address ||
+        pool.token.address === token1.address
+      );
+    });
+  }, [poolsData, token0.address, token1.address]);
+
   const { address } = useAccount();
+
+  // the user is currently swapping the "base" asset, the fUSDC
+  // asset, into the other.
+  const isSwappingBaseAsset = token0.address === fUSDC.address;
+
+  // the pool currently in use's price
+  const poolAddress = isSwappingBaseAsset ? token1!.address : token0.address;
+
+  // price of the current pool
+  const { data: poolSqrtPriceX96 } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "sqrtPriceX96",
+    args: [poolAddress],
+  });
+
+  const tokenPrice = poolSqrtPriceX96
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
+    : 0n;
 
   // token0 hooks
   const { data: token0Decimals /* error */ } = useSimulateContract({
@@ -91,22 +148,23 @@ export const SwapForm = () => {
     args: [address as Hash],
   });
 
-  const { error: quote1Error } = useSimulateContract({
-    address: ammAddress,
-    abi: output.abi,
-    functionName: "quote",
-    args: [
-      token0.address === fUSDC.address ? token1.address : token0.address,
-      token1.address === fUSDC.address,
-      BigInt(parseFloat(token0Amount ?? "0") * 10 ** 18),
-      maxUint256,
-    ],
-    // since this is intended to throw an error, we want to disable retries
-    query: {
-      retry: false,
-      retryOnMount: false,
-    },
-  });
+  const { error: quote1Error, isLoading: quote1IsLoading } =
+    useSimulateContract({
+      address: ammAddress,
+      abi: seawaterContract.abi,
+      functionName: "quote",
+      args: [
+        poolAddress,
+        token1.address === fUSDC.address,
+        BigInt(parseFloat(token0Amount || "0") * 10 ** 18),
+        maxUint256,
+      ],
+      // since this is intended to throw an error, we want to disable retries
+      query: {
+        retry: false,
+        retryOnMount: false,
+      },
+    });
 
   /**
    * Parse the quote amount from the error message
@@ -125,7 +183,7 @@ export const SwapForm = () => {
   // update the token1 amount when the quote amount changes
   useEffect(() => {
     setToken1Amount(quoteAmount.toString());
-  }, [quoteAmount]);
+  }, [quoteAmount, setToken1Amount]);
 
   const { open } = useWeb3Modal();
 
@@ -182,21 +240,21 @@ export const SwapForm = () => {
     hash: approvalData,
   });
 
-  const performSwap = () => {
+  const performSwap = useCallback(() => {
     console.log("performing swap");
 
     // if one of the assets is fusdc, use swap1
-    if (token0.address === fUSDC.address) {
+    if (isSwappingBaseAsset) {
       writeContractSwap({
         address: ammAddress,
-        abi: output.abi,
+        abi: seawaterContract.abi,
         functionName: "swap",
         args: [token1.address, false, BigInt(token0Amount ?? 0), maxUint256],
       });
     } else if (token1.address === fUSDC.address) {
       writeContractSwap({
         address: ammAddress,
-        abi: output.abi,
+        abi: seawaterContract.abi,
         functionName: "swap",
         args: [token0.address, true, BigInt(token0Amount ?? 0), maxUint256],
       });
@@ -204,7 +262,7 @@ export const SwapForm = () => {
       // if both of the assets aren't fusdc, use swap2
       writeContractSwap({
         address: ammAddress,
-        abi: output.abi,
+        abi: seawaterContract.abi,
         functionName: "swap2ExactIn",
         args: [
           token0.address,
@@ -214,7 +272,13 @@ export const SwapForm = () => {
         ],
       });
     }
-  };
+  }, [
+    token0Amount,
+    token0.address,
+    token1.address,
+    writeContractSwap,
+    isSwappingBaseAsset,
+  ]);
 
   const swapResult = useWaitForTransactionReceipt({
     hash: swapData,
@@ -310,14 +374,14 @@ export const SwapForm = () => {
             }}
             animate={welcome ? "hidden" : "visible"}
           >
-            <CampaignBanner />
+            {showCampaignBanner && <CampaignBanner />}
           </motion.div>
 
           <motion.div
             layoutId={"modal"}
             className="relative mt-[19px] h-[102px] w-[317px] rounded-lg bg-black pb-[19px] pl-[21px] pr-[15px] pt-[17px] text-white md:h-[126.37px] md:w-[392.42px] md:pb-[25px] md:pl-[25px] md:pr-[20px] md:pt-[22px]"
           >
-            <SuperloopPopover />
+            {showSuperloopPopover ? <SuperloopPopover /> : <></>}
 
             <motion.div
               layout
@@ -352,7 +416,9 @@ export const SwapForm = () => {
               </div>
 
               <div className={"flex flex-row items-center justify-between"}>
-                <div className={"text-[10px] text-zinc-400"}>$1,024.82</div>
+                <div className={"text-[10px] text-zinc-400"}>
+                  ${tokenPrice.toString()}
+                </div>
 
                 <div
                   className={
@@ -408,7 +474,13 @@ export const SwapForm = () => {
               </div>
 
               <div className={"flex flex-row items-center justify-between"}>
-                <div className={"text-2xl"}>{token1Amount}</div>
+                <div className={"text-2xl"}>
+                  {quote1IsLoading ? (
+                    <LoaderIcon className="animate-spin" />
+                  ) : (
+                    token1Amount
+                  )}
+                </div>
 
                 <Link href={"/swap/explore?token=1"}>
                   <Badge
@@ -423,7 +495,9 @@ export const SwapForm = () => {
               </div>
 
               <div className={"flex flex-row items-center justify-between"}>
-                <div className={"text-[10px] text-zinc-400"}>$1,024.82</div>
+                <div className={"text-[10px] text-zinc-400"}>
+                  ${tokenPrice.toString()}
+                </div>
 
                 <div
                   className={
@@ -509,7 +583,11 @@ export const SwapForm = () => {
                   <Token />
                   <Token className={"-ml-1"} />
                   <Token className={"-ml-1 mr-1"} />
-                  <div className="iridescent-text">$6.11 - $33.12</div>
+                  <div className="iridescent-text">
+                    {showMockData
+                      ? "$6.11 - $33.12"
+                      : `${usdFormat(parseFloat(poolData?.earnedFeesAPRFUSDC[0] ?? "0") ?? 0)} - ${usdFormat(parseFloat(poolData?.earnedFeesAPRFUSDC[1] ?? "0") ?? 0)}`}
+                  </div>
                 </Badge>
               </div>
 

@@ -4,7 +4,7 @@ import List from "@/assets/icons/list.svg";
 import Grid from "@/assets/icons/grid.svg";
 import { AllPoolsTable } from "@/app/stake/_AllPoolsTable/AllPoolsTable";
 import { columns, Pool } from "@/app/stake/_AllPoolsTable/columns";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { AllPoolsFilter } from "@/app/stake/AllPoolsFilter";
 import SegmentedControl from "@/components/ui/segmented-control";
 import Ethereum from "@/assets/icons/ethereum.svg";
@@ -16,72 +16,12 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Position from "@/assets/icons/position.svg";
 import Pickaxe from "@/assets/icons/iridescent-pickaxe-2.svg";
-
-const pools: Pool[] = [
-  {
-    id: "1",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-    annualPercentageYield: 12,
-    claimable: true,
-    fees: 14,
-    rewards: 321,
-    totalValueLocked: 4312,
-    volume: 1231,
-  },
-  {
-    id: "2",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-    annualPercentageYield: 5,
-    claimable: false,
-    fees: 13,
-    rewards: 413,
-    totalValueLocked: 1213,
-    volume: 5421,
-    boosted: true,
-  },
-  {
-    id: "3",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-    annualPercentageYield: 4,
-    claimable: true,
-    fees: 16,
-    rewards: 131,
-    totalValueLocked: 5412,
-    volume: 8734,
-  },
-  {
-    id: "4",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-    annualPercentageYield: 12,
-    claimable: true,
-    fees: 14,
-    rewards: 321,
-    totalValueLocked: 4312,
-    volume: 1231,
-    boosted: true,
-  },
-  {
-    id: "5",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-    annualPercentageYield: 5,
-    claimable: false,
-    fees: 13,
-    rewards: 413,
-    totalValueLocked: 1213,
-    volume: 5421,
-    boosted: true,
-  },
-  {
-    id: "6",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
-    annualPercentageYield: 4,
-    claimable: true,
-    fees: 16,
-    rewards: 131,
-    totalValueLocked: 5412,
-    volume: 8734,
-  },
-];
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { mockAllPools } from "@/demoData/allPools";
+import { LoaderIcon } from "lucide-react";
+import { useGraphql } from "@/hooks/useGraphql";
+import { sum } from "lodash";
+import { graphql, useFragment } from "@/gql";
 
 const DisplayModeMenu = ({
   setDisplayMode,
@@ -118,8 +58,69 @@ const DisplayModeMenu = ({
   );
 };
 
+export const AllPoolsFragment = graphql(`
+  fragment AllPoolsFragment on SeawaterPool {
+    address
+    token {
+      name
+    }
+    volumeOverTime {
+      daily {
+        fusdc {
+          valueScaled
+        }
+      }
+    }
+    tvlOverTime {
+      daily
+    }
+    liquidityIncentives {
+      valueUsd
+    }
+    superIncentives {
+      valueUsd
+    }
+  }
+`);
+
 export const AllPools = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
+
+  const { data, isLoading } = useGraphql();
+
+  const poolsData = useFragment(AllPoolsFragment, data?.pools);
+
+  const showDemoData = useFeatureFlag("ui show demo data");
+
+  const pools = useMemo(() => {
+    if (showDemoData) return mockAllPools;
+
+    // reformat the data to match the Pool type
+    return poolsData?.map(
+      (pool): Pool => ({
+        id: pool.address,
+        tokens: [
+          {
+            name: pool.token.name,
+          },
+          {
+            name: "fUSDC",
+          },
+        ],
+        // assume that the first daily value is the current value
+        volume: parseFloat(pool.volumeOverTime.daily[0].fusdc.valueScaled),
+        totalValueLocked: parseFloat(pool.tvlOverTime.daily[0]),
+        rewards:
+          parseFloat(pool.liquidityIncentives.valueUsd) +
+          parseFloat(pool.superIncentives.valueUsd),
+        // TODO: I don't know where to get the following info from
+        boosted: false,
+        fees: 0,
+        claimable: false,
+        annualPercentageYield: 0,
+      }),
+    );
+  }, [showDemoData, poolsData]);
 
   return (
     <div className="flex w-full flex-col items-center">
@@ -137,17 +138,40 @@ export const AllPools = () => {
           <div className="flex flex-1 flex-row justify-between">
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">TVL</div>
-              <div className="text-2xl md:text-3xl">$12.1M</div>
+              <div className="text-2xl md:text-3xl">
+                {showDemoData
+                  ? "12.1M"
+                  : // sum the tvl of all pools, assume the first daily value is the current value
+                    usdFormat(
+                      sum(poolsData?.map((pool) => pool.tvlOverTime.daily[0])),
+                    )}
+              </div>
             </div>
 
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">Incentives</div>
-              <div className="text-2xl md:text-3xl">$200k</div>
+              <div className="text-2xl md:text-3xl">
+                {showDemoData
+                  ? "200k"
+                  : // sum the liquidity and super incentives of all pools
+                    usdFormat(
+                      sum(
+                        poolsData?.map(
+                          (pool) =>
+                            parseFloat(pool.liquidityIncentives.valueUsd) +
+                            parseFloat(pool.superIncentives.valueUsd),
+                        ),
+                      ),
+                    )}
+              </div>
             </div>
 
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">Rewards Claimed</div>
-              <div className="text-2xl md:text-3xl">$59.1K</div>
+              <div className="text-2xl md:text-3xl">
+                {/* TODO: not sure where to get this from */}
+                {showDemoData ? "59.1K" : 0}
+              </div>
             </div>
           </div>
 
@@ -163,7 +187,13 @@ export const AllPools = () => {
           </div>
         </div>
 
-        {displayMode === "list" && (
+        {isLoading && (
+          <div className={"flex flex-col items-center"}>
+            <LoaderIcon className="size-8 animate-spin" />
+          </div>
+        )}
+
+        {displayMode === "list" && pools && (
           <AllPoolsTable columns={columns} data={pools} />
         )}
 
@@ -171,7 +201,7 @@ export const AllPools = () => {
           <div
             className={"mt-[30px] flex flex-row flex-wrap gap-[20px] pl-[12px]"}
           >
-            {pools.map((pool) => (
+            {pools?.map((pool) => (
               <div
                 key={pool.id}
                 className={

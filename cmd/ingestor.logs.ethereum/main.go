@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
 
 	_ "github.com/fluidity-money/long.so/lib/setup"
 
@@ -17,9 +16,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-// EnvGethUrl to connect to the websocket from.
-const EnvGethUrl = "SPN_GETH_WS_URL"
-
 func main() {
 	config := config.Get()
 	db, err := gorm.Open(postgres.Open(config.TimescaleUrl))
@@ -27,7 +23,7 @@ func main() {
 		log.Fatalf("opening postgres: %v", err)
 	}
 	// Start to ingest block headers by connecting to the websocket given.
-	c, err := ethclient.Dial(os.Getenv(EnvGethUrl))
+	c, err := ethclient.Dial(config.GethUrl)
 	if err != nil {
 		log.Fatalf("websocket dial: %v", err)
 	}

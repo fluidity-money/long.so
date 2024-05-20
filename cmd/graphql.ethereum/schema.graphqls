@@ -34,16 +34,12 @@ type Query {
   getWallet based on information including balances. SHOULD NOT be used to get
   information that's needed consistently. Use the frontend instead after getting addresess
   elsewhere.
-
-  Cached aggressively.
   """
   getWallet(address: String!): Wallet
 
   """
   getSwaps made using a pool. Safe to use to get up to date information on swaps going
   through the UI.
-
-  Not cached at all.
   """
   getSwaps(pool: String!): [SeawaterSwap!]
 }
@@ -55,18 +51,39 @@ type Mutation {
 type SeawaterPool {
   id: ID! # address
 
+  """
+  Address of the pool, and of the token that's traded.
+  """
   address: String!
 
+  """
+  Tick spacing of the current pool, useful for graph rendering.
+  """
+  tickSpacing: String!
+
+  """
+  More token information about the counter asset that's available.
+  """
   token: Token!
 
+  """
+  Information on the current price, last cached. Determined by the last tick of a trade
+  that was made.
+  """
+  price: String!
+
+  """
+  Historical price over time data that's available.
+  """
   priceOverTime: PriceOverTime!
+
   volumeOverTime: VolumeOverTime!
   liquidityOverTime: LiquidityOverTime!
   tvlOverTime: TvlOverTime!
   yieldOverTime: YieldOverTime!
 
-  earnedFeesAPRFUSDC: String!
-  earnedFeesAPRToken1: String!
+  earnedFeesAPRFUSDC: [String!]!
+  earnedFeesAPRToken1: [String!]!
 
   liquidityIncentives: Amount!
   superIncentives: Amount!
@@ -74,6 +91,12 @@ type SeawaterPool {
 
   positions: [SeawaterPosition!]!
   positionsForUser(address: String!): [SeawaterPosition!]!
+
+  """
+  Liquidity available in a pool, with only 20 elements being returned encompassing the
+  tick ranges subdivided.
+  """
+  liquidity: [SeawaterLiquidity!]!
 
   swaps: [SeawaterSwap!]!
   swapsForUser(address: String!): [SeawaterSwap!]!
@@ -102,6 +125,17 @@ type PriceOverTime {
 type TvlOverTime {
   daily: [String!]! # loads a month worth of daily data (31 items)
   monthly: [String!]! # loads 12 months of data
+}
+
+"""
+SeawaterLiquidity available in a pool summed and grouped by ticks of 5000 at a time.
+"""
+type SeawaterLiquidity {
+  id: ID! # tick number (liq:tick-from:tick-to)
+  tickLower: String!
+  tickUpper: String!
+  positions: [SeawaterPosition!]!
+  amount: PairAmount!
 }
 
 """

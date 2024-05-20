@@ -40,7 +40,7 @@ export default function SequencePage() {
           <div className="iridescent-text text-2xl">$1321.58</div>
         </div>
 
-        <div className="mt-[21px] h-[115px] w-[270px] rounded-lg border border-white border-opacity-70 bg-stone-900 p-[13px] md:h-[130px] md:w-[348px]">
+        <div className="mt-[21px] h-[115px] w-[270px] rounded-lg border border-white/70 bg-stone-900 p-[13px] md:h-[130px] md:w-[348px]">
           <div className="text-2xs">Rewards Breakdown:</div>
           <div className="mt-[11px] flex flex-col gap-[3.25px] text-3xs md:gap-[5px] md:text-2xs">
             <div className="flex flex-row justify-between">

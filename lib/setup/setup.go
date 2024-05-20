@@ -8,6 +8,7 @@ import (
 	"log/slog"
 )
 
+// EnvDebug for enabling debug printing of messages.
 const EnvDebug = "SPN_DEBUG"
 
 func init() {

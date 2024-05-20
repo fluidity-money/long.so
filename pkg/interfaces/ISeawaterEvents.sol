@@ -67,8 +67,8 @@ interface ISeawaterEvents {
     event NewPool(
         address indexed token,
         uint32 indexed fee,
-        uint256 indexed price,
-        uint8 decimals
+        uint8 decimals,
+        uint8 tickSpacing
     );
 
     /// @notice emitted when a protocol admin collects protocol fees

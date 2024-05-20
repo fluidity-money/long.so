@@ -61,7 +61,12 @@ func main() {
 	case "lambda":
 		lambda.Start(httpadapter.New(http.DefaultServeMux).ProxyWithContext)
 	case "http":
-		log.Fatal(http.ListenAndServe(os.Getenv(EnvListenAddr), nil))
+		err := http.ListenAndServe(os.Getenv(EnvListenAddr), nil)
+		log.Fatalf( // This should only return if there's an error.
+			"err listening, %#v not set?: %v",
+			EnvListenAddr,
+			err,
+		)
 	default:
 		log.Fatalf("unexpected listen type: %#v, use either (lambda|http) for SPN_LISTEN_BACKEND", typ)
 	}

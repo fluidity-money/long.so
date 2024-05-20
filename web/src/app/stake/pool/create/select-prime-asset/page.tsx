@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { SelectPrimeAssetTable } from "@/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/SelectPrimeAssetTable";
 import {
@@ -16,9 +16,14 @@ import {
   Pool,
 } from "@/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/columns";
 import { nanoid } from "nanoid";
-import { tokens } from "../../../../../config/tokens";
+import { fUSDC, tokens } from "../../../../../config/tokens";
+import { useGraphql } from "@/hooks/useGraphql";
+import { Hash } from "viem";
+import { usdFormat } from "@/lib/usdFormat";
+import { graphql, useFragment } from "@/gql";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
-const data: Pool[] = [
+const mockData: Pool[] = [
   {
     APR: 170.23,
     volume: "$100k",
@@ -28,11 +33,62 @@ const data: Pool[] = [
   },
 ];
 
+const SelectPrimeAssetFragment = graphql(`
+  fragment SelectPrimeAssetFragment on SeawaterPool {
+    address
+    volumeOverTime {
+      daily {
+        fusdc {
+          valueUsd
+        }
+      }
+    }
+    token {
+      name
+      symbol
+      address
+    }
+  }
+`);
+
 const SelectPrimeAsset = () => {
   const router = useRouter();
 
   const [boostedPools, setBoostedPools] = useState(false);
   const [myAssets, setMyAssets] = useState(false);
+
+  const showMockData = useFeatureFlag("ui show demo data");
+
+  const { data, isLoading } = useGraphql();
+
+  const poolsData = useFragment(SelectPrimeAssetFragment, data?.pools);
+  /**
+   * Reformat our data to match the table columns
+   */
+  const pools = useMemo((): Pool[] => {
+    if (showMockData) return mockData;
+
+    if (isLoading || !poolsData) return [];
+
+    return poolsData?.map((pool) => ({
+      id: pool.address,
+      // assume the first token is always the main token
+      volume: usdFormat(
+        parseFloat(pool.volumeOverTime.daily[0].fusdc.valueUsd),
+      ),
+      APR: 0, // TODO: calculate APR
+      duration: 0, // TODO: get duration
+      tokens: [
+        {
+          name: pool.token.name,
+          symbol: pool.token.symbol,
+          address: pool.token.address as Hash,
+        },
+        // assume the second token is always fUSDC
+        fUSDC,
+      ],
+    }));
+  }, [isLoading, poolsData, showMockData]);
 
   return (
     <div className={"flex flex-col items-center"}>
@@ -122,7 +178,7 @@ const SelectPrimeAsset = () => {
         </div>
 
         <div className={"mt-[20px] flex flex-1 overflow-y-auto"}>
-          <SelectPrimeAssetTable columns={columns} data={data} />
+          <SelectPrimeAssetTable columns={columns} data={pools} />
         </div>
 
         <Button

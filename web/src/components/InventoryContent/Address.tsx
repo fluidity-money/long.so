@@ -1,3 +1,4 @@
+import CopyToClipboard from "react-copy-to-clipboard";
 import { Check } from "lucide-react";
 import { useAccount, useEnsName } from "wagmi";
 import { mainnet } from "wagmi/chains";
@@ -39,30 +40,35 @@ export const Address = () => {
         },
       )}
     >
-      <div className="flex items-center justify-center gap-1">
-        {copied ? (
-          <>
-            <Check className="h-[8.54px] w-2 text-green-400" />
-            <div className={"text-[10px]"}>Copied</div>
-          </>
-        ) : (
-          <>
-            <div className="relative h-[8.54px] w-2">
-              <div className="absolute left-0 top-0 h-[6.54px] w-[5.90px] rounded-[0.73px] border border-stone-900" />
-              <div className="absolute left-[2.10px] top-[2px] h-[6.54px] w-[5.90px] rounded-[0.73px] border border-stone-900 bg-gray-200" />
-            </div>
-            <div className="text-[10px] text-black">
-              {ensName ? (
-                ensName
-              ) : (
-                <>
-                  {address?.slice(0, 5)} ... {address?.slice(-3)}
-                </>
-              )}
-            </div>
-          </>
-        )}
-      </div>
+      <CopyToClipboard
+        text={ensName ?? address ?? ""}
+        onCopy={() => setCopied(true)}
+      >
+        <div className="flex items-center justify-center gap-1">
+          {copied ? (
+            <>
+              <Check className="h-[8.54px] w-2 text-green-400" />
+              <div className={"text-[10px]"}>Copied</div>
+            </>
+          ) : (
+            <>
+              <div className="relative h-[8.54px] w-2">
+                <div className="absolute left-0 top-0 h-[6.54px] w-[5.90px] rounded-[0.73px] border border-stone-900" />
+                <div className="absolute left-[2.10px] top-[2px] h-[6.54px] w-[5.90px] rounded-[0.73px] border border-stone-900 bg-gray-200" />
+              </div>
+              <div className="text-[10px] text-black">
+                {ensName ? (
+                  ensName
+                ) : (
+                  <>
+                    {address?.slice(0, 5)} ... {address?.slice(-3)}
+                  </>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </CopyToClipboard>
     </div>
   );
 };

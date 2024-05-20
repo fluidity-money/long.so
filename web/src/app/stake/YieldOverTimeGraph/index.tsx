@@ -4,8 +4,9 @@ import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts/core";
 import { format } from "date-fns";
 import { DurationSegmentedControl } from "@/components/DurationSegmentedControl";
-import { getYieldOverTimeData } from "@/app/stake/YieldOverTimeGraph/YieldOverTimeData";
+import { getMockYieldOverTimeData } from "@/demoData/yieldOverTimeData";
 import { useMemo, useState } from "react";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 const colorGradient = new echarts.graphic.LinearGradient(
   0,
@@ -34,10 +35,12 @@ export const YieldOverTimeGraph = () => {
     "7D",
   );
 
-  const yieldOverTimeData = useMemo(
-    () => getYieldOverTimeData(durationToDays[duration]),
+  const mockYieldOverTimeData = useMemo(
+    () => getMockYieldOverTimeData(durationToDays[duration]),
     [duration],
   );
+
+  const showMockData = useFeatureFlag("ui show demo data");
 
   return (
     <>
@@ -80,7 +83,7 @@ export const YieldOverTimeGraph = () => {
             },
             xAxis: {
               type: "category",
-              data: yieldOverTimeData.map((d) => format(d.date, "P")),
+              data: mockYieldOverTimeData.map((d) => format(d.date, "P")),
               show: false,
               axisPointer: {
                 label: {
@@ -102,7 +105,7 @@ export const YieldOverTimeGraph = () => {
                 name: "Series 2",
                 type: "bar",
                 stack: "total", // Same 'stack' value as Series 1 to stack them together
-                data: yieldOverTimeData.map((d) => d.uv),
+                data: mockYieldOverTimeData.map((d) => d.uv),
                 itemStyle: {
                   color: "#1E1E1E",
                   borderRadius: [0, 0, 5, 5],
@@ -113,7 +116,7 @@ export const YieldOverTimeGraph = () => {
               {
                 name: "series 1",
                 stack: "total",
-                data: yieldOverTimeData.map((d) => d.pv),
+                data: mockYieldOverTimeData.map((d) => d.pv),
                 type: "bar",
 
                 itemStyle: {
@@ -129,7 +132,7 @@ export const YieldOverTimeGraph = () => {
           }}
         />
 
-        <div className="text-xs text-gray-2">Showing October 2023</div>
+        <div className="text-xs text-gray-2">Showing May 2024</div>
       </div>
     </>
   );

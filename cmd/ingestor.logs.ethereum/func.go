@@ -7,12 +7,14 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"math/big"
+	"time"
 
 	"github.com/fluidity-money/long.so/lib/events/erc20"
 	"github.com/fluidity-money/long.so/lib/events/seawater"
 
-	"github.com/fluidity-money/long.so/lib/features"
 	"github.com/fluidity-money/long.so/lib/config"
+	"github.com/fluidity-money/long.so/lib/features"
 
 	"gorm.io/gorm"
 
@@ -22,22 +24,101 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+// FilterTopics to filter for using the Websocket/HTTP collection of logs.
+var FilterTopics = [][]ethCommon.Hash{{ // Matches any of these in the first topic position.
+	erc20.TopicTransfer,
+	seawater.TopicMintPosition,
+	seawater.TopicBurnPosition,
+	seawater.TopicTransferPosition,
+	seawater.TopicUpdatePositionLiquidity,
+	seawater.TopicCollectFees,
+	seawater.TopicNewPool,
+	seawater.TopicCollectProtocolFees,
+	seawater.TopicSwap2,
+	seawater.TopicSwap1,
+}}
+
+// Entry function, using the database to determine if polling should be
+// used exclusively to receive logs, polling only for catchup, or
+// exclusively websockets.
 func Entry(f features.F, config config.C, c *ethclient.Client, db *gorm.DB) {
 	seawaterAddr := ethCommon.HexToAddress(config.SeawaterAddr.String())
-	topics := [][]ethCommon.Hash{{
-		erc20.TopicTransfer,
-		seawater.TopicMintPosition,
-		seawater.TopicBurnPosition,
-		seawater.TopicTransferPosition,
-		seawater.TopicUpdatePositionLiquidity,
-		seawater.TopicCollectFees,
-		seawater.TopicNewPool,
-		seawater.TopicCollectProtocolFees,
-		seawater.TopicSwap2,
-		seawater.TopicSwap1,
-	}}
+	if config.IngestorShouldPoll {
+		IngestPolling(f, c, db, config.IngestorPagination, config.IngestorPollWait, seawaterAddr)
+	} else {
+		IngestWebsocket(f, c, db, seawaterAddr)
+	}
+}
+
+// IngestPolling by repeatedly polling the Geth RPC for changes to
+// receive log updates. Checks the database first to determine where the
+// last point is before continuing. Assumes ethclient is HTTP.
+// Uses the IngestBlockRange function to do all the lifting.
+func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagination uint64, ingestorPollWait int, seawaterAddr ethCommon.Address) {
+	for {
+		// Start by finding the latest block number.
+		from, err := getLastBlockCheckpointed(db)
+		if err != nil {
+			log.Fatalf("failed to get the last block checkpoint: %v", err)
+		}
+		from++ // Add 1 so we can start from the next block.
+		to := from + ingestorPagination
+		slog.Info("latest block checkpoint",
+			"from", from,
+			"collecting until", to,
+		)
+		IngestBlockRange(f, c, db, seawaterAddr, from, to)
+		slog.Info("about to sleep before polling again",
+			"poll seconds", ingestorPollWait,
+		)
+		time.Sleep(time.Duration(ingestorPollWait) * time.Second)
+	}
+}
+
+// IngestBlockRange using the Geth RPC provided, using the handleLog
+// funciton to write records found to the database. Assumes the ethclient
+// provided is a HTTP client. Also updates the underlying last block it
+// saw into the database checkpoints. Fatals if something goes wrong.
+func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAddr ethCommon.Address, from, to uint64) {
+	logs, err := c.FilterLogs(context.Background(), ethereum.FilterQuery{
+		FromBlock: new(big.Int).SetUint64(from),
+		ToBlock:   new(big.Int).SetUint64(to),
+		Topics:    FilterTopics,
+	})
+	if err != nil {
+		log.Fatalf("failed to filter logs: %v", err)
+	}
+	err = db.Transaction(func(db *gorm.DB) error {
+		biggestBlockNo := from
+		for _, l := range logs {
+			if err := handleLog(db, seawaterAddr, l); err != nil {
+				return fmt.Errorf("failed to unpack log: %v", err)
+			}
+			isBigger := biggestBlockNo < l.BlockNumber
+			if isBigger {
+				biggestBlockNo = l.BlockNumber
+			}
+		}
+		if err != nil {
+			return err
+		}
+		// Update checkpoint here.
+		if err := updateCheckpoint(db, biggestBlockNo); err != nil {
+			return fmt.Errorf("failed to update a checkpoint: %v", err)
+		}
+		return nil
+	})
+	if err != nil {
+		log.Fatalf("failed to ingest logs into db: %v", err)
+	}
+}
+
+// IngestWebsocket from the websocket provided, using the handleLog function
+// to write records found to the database. Assumes that the ethclient
+// provided is a websocket. Also updates the checkpoints to track the latest block.
+func IngestWebsocket(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAddr ethCommon.Address) {
 	filter := ethereum.FilterQuery{
-		Topics: topics,
+		Topics: FilterTopics,
 	}
 	var (
 		logs   = make(chan ethTypes.Log)
@@ -57,21 +138,36 @@ func Entry(f features.F, config config.C, c *ethclient.Client, db *gorm.DB) {
 			log.Fatalf("subscription error: %v", err)
 		case l := <-logs:
 			// Figure out what kind of log this is, and then insert it into the database.
-			if err := handleLog(db, seawaterAddr, l); err != nil {
-				log.Fatalf("handling log: %v", err)
+			err := db.Transaction(func(db *gorm.DB) error {
+				if err := handleLog(db, seawaterAddr, l); err != nil {
+					return fmt.Errorf("failed to handle a database log: %v", err)
+				}
+				// Update the checkpoint here. Assuming the log here's block number is the latest.
+				if err := updateCheckpoint(db, l.BlockNumber); err != nil {
+					return fmt.Errorf("failed to update a checkpoint: %v", err)
+				}
+				return nil
+			})
+			if err != nil {
+				log.Fatalf("failed to handle a database log: %v", err)
 			}
 		}
 	}
 }
 
 func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) error {
-	var (
-		topic0 = l.Topics[0]
+	var topic1, topic2, topic3 ethCommon.Hash
+	topic0 := l.Topics[0]
+	if len(l.Topics) > 1 {
 		topic1 = l.Topics[1]
+	}
+	if len(l.Topics) > 2 {
 		topic2 = l.Topics[2]
+	}
+	if len(l.Topics) > 3 {
 		topic3 = l.Topics[3]
-		data   = l.Data
-	)
+	}
+	data := l.Data
 	var (
 		a     any // Log that we're unpacking.
 		err   error
@@ -80,8 +176,8 @@ func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) erro
 	var (
 		blockHash       = l.BlockHash.String()
 		transactionHash = l.TxHash.String()
-		blockNumber = l.BlockNumber
-		emitterAddr = l.Address
+		blockNumber     = l.BlockNumber
+		emitterAddr     = l.Address
 	)
 	slog.Debug("unpacking event",
 		"block hash", blockHash,
@@ -93,6 +189,19 @@ func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) erro
 		"topic2", topic2,
 		"topic3", topic3,
 	)
+	logEvent := func(n string) {
+		slog.Debug("event identified! unpacked",
+			"event name", n,
+			"block hash", blockHash,
+			"transaction hash", transactionHash,
+			"block number", blockNumber,
+			"emitter addr", emitterAddr,
+			"topic0", topic0,
+			"topic1", topic1,
+			"topic2", topic2,
+			"topic3", topic3,
+		)
+	}
 	// If the event was made by Seawater. Assumed to be the case, so
 	// non-Seawater events should set this to false in this switch. Used to
 	// check the event emitter.
@@ -101,42 +210,52 @@ func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) erro
 	case erc20.TopicTransfer:
 		a, err = erc20.UnpackTransfer(topic1, topic2, data)
 		table = "events_erc20_transfer"
+		logEvent("Transfer")
 		isSeawater = false
 
 	case seawater.TopicMintPosition:
 		a, err = seawater.UnpackMintPosition(topic1, topic2, topic3, data)
+		logEvent("MintPosition")
 		table = "events_seawater_mintPosition"
 
 	case seawater.TopicBurnPosition:
 		a, err = seawater.UnpackBurnPosition(topic1, topic2, data)
+		logEvent("BurnPosition")
 		table = "events_seawater_burnPosition"
 
 	case seawater.TopicTransferPosition:
 		a, err = seawater.UnpackTransferPosition(topic1, topic2, topic3, data)
+		logEvent("TransferPosition")
 		table = "events_seawater_transferPosition"
 
 	case seawater.TopicUpdatePositionLiquidity:
 		a, err = seawater.UnpackUpdatePositionLiquidity(topic1, topic2, data)
+		logEvent("UpdatePositionLiquidity")
 		table = "events_seawater_updatePositionLiquidity"
 
 	case seawater.TopicCollectFees:
 		a, err = seawater.UnpackCollectFees(topic1, topic2, topic3, data)
+		logEvent("CollectFees")
 		table = "events_seawater_collectFees"
 
 	case seawater.TopicNewPool:
 		a, err = seawater.UnpackNewPool(topic1, topic2, topic3, data)
+		logEvent("NewPool")
 		table = "events_seawater_newPool"
 
 	case seawater.TopicCollectProtocolFees:
 		a, err = seawater.UnpackCollectProtocolFees(topic1, topic2, data)
+		logEvent("CollectProtocolFees")
 		table = "events_seawater_collectProtocolFees"
 
 	case seawater.TopicSwap2:
 		a, err = seawater.UnpackSwap2(topic1, topic2, topic3, data)
+		logEvent("Swap2")
 		table = "events_seawater_swap2"
 
 	case seawater.TopicSwap1:
 		a, err = seawater.UnpackSwap1(topic1, topic2, data)
+		logEvent("Swap1")
 		table = "events_seawater_swap1"
 
 	default:
@@ -158,7 +277,7 @@ func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) erro
 		}
 	}
 	setEventFields(&a, blockHash, transactionHash, blockNumber, emitterAddr.String())
-	databaseInsertLog(db,table,a)
+	databaseInsertLog(db, table, a)
 	return nil
 }
 

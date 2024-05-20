@@ -107,6 +107,8 @@ test("amm", async t => {
     const tusdc2Address = await deployToken(erc20Factory, "Test USDC 2.0", "TUSDC2", 6, sixDecimals(1_000_000), defaultAccount);
     console.log("tusdc2",tusdc2Address)
 
+    console.log("done deploying all the tokens");
+
     execSync(
       "make -B build",
       { env: {

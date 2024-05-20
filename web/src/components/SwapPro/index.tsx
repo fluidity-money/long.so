@@ -13,6 +13,10 @@ import { Graph } from "@/components/SwapPro/SwapProGraph";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { columns, Transaction } from "@/app/_DataTable/columns";
 import { DataTable } from "@/app/_DataTable/DataTable";
+import { useGraphql } from "@/hooks/useGraphql";
+import { graphql, useFragment } from "@/gql";
+import { SwapProPoolFragment } from "@/components/SwapPro/SwapProPoolFragment";
+import { useMemo } from "react";
 
 const variants = {
   hidden: { opacity: 0, width: 0 },
@@ -34,6 +38,22 @@ export const SwapPro = ({
   const { token0, token1 } = useSwapStore();
 
   const isOpen = override || (!welcome && (swapPro || isLtSm));
+
+  const { data, isLoading } = useGraphql();
+
+  // all pools
+  const pools = useFragment(SwapProPoolFragment, data?.pools);
+
+  // the selected pool
+  const pool = useMemo(
+    () =>
+      pools?.find(
+        (pool) =>
+          pool.token.address.toLowerCase() === token0.address.toLowerCase() ||
+          pool.token.address.toLowerCase() === token1.address.toLowerCase(),
+      ),
+    [pools, token0.address, token1.address],
+  );
 
   return (
     <motion.div
@@ -73,7 +93,7 @@ export const SwapPro = ({
           </TypographyH3>
         )}
 
-        <Graph />
+        <Graph pool={pool} />
 
         <div className="hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:flex">
           <div>

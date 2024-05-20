@@ -1,0 +1,29 @@
+
+FROM golang:alpine3.19 AS builder
+
+RUN apk add --no-cache \
+	openssl \
+	ca-certificates \
+	make \
+	bash \
+	curl \
+	gcc \
+	musl-dev
+
+ENV SUPERPOSITION_DIR /usr/local/src/superposition
+
+WORKDIR ${SUPERPOSITION_DIR}
+
+COPY go.mod .
+COPY go.sum .
+
+COPY lib lib/
+COPY cmd cmd/
+
+ENV INSTALL_DIR /bin
+
+RUN sh -c 'cd cmd/ingestor.logs.ethereum && make install'
+
+FROM scratch
+COPY --from=builder /bin/ingestor.logs.ethereum /bin/ingestor.logs.ethereum
+CMD ["/bin/ingestor.logs.ethereum"]

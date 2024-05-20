@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import ArrowDown from "@/assets/icons/arrow-down.svg";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";

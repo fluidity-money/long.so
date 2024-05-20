@@ -8,13 +8,17 @@ import Padlock from "@/assets/icons/padlock.svg";
 import Token from "@/assets/icons/token.svg";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReactECharts from "echarts-for-react";
-import { format, subDays } from "date-fns";
+import { format } from "date-fns";
 import * as echarts from "echarts/core";
 import SelectedRange from "@/assets/icons/legend/selected-range.svg";
 import CurrentPrice from "@/assets/icons/legend/current-price.svg";
 import LiquidityDistribution from "@/assets/icons/legend/liquidity-distribution.svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { sqrtPriceX96ToPrice } from "@/lib/math";
+import { ammAddress } from "@/lib/addresses";
+import { createChartData } from "@/lib/chartData";
+import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { useRouter } from "next/navigation";
 import { useHotkeys } from "react-hotkeys-hook";
 import { AnimatePresence, motion } from "framer-motion";
@@ -36,219 +40,9 @@ import Index from "@/components/Slider";
 import { erc20Abi } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-
-const data = [
-  {
-    name: "Page A",
-    date: new Date(),
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    date: subDays(new Date(), 1),
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page D",
-    date: subDays(new Date(), 3),
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    date: subDays(new Date(), 4),
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 5),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 6),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page C",
-    date: subDays(new Date(), 2),
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 5),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 6),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page C",
-    date: subDays(new Date(), 2),
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page H",
-    date: subDays(new Date(), 7),
-    uv: 3490,
-    pv: 4300,
-    amt: 2400,
-  },
-  {
-    name: "Page A",
-    date: subDays(new Date(), 8),
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    date: subDays(new Date(), 9),
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page C",
-    date: subDays(new Date(), 10),
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page D",
-    date: subDays(new Date(), 11),
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    date: subDays(new Date(), 12),
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 13),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 14),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page H",
-    date: subDays(new Date(), 15),
-    uv: 3490,
-    pv: 4300,
-    amt: 2400,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 13),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 14),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page H",
-    date: subDays(new Date(), 15),
-    uv: 3490,
-    pv: 4300,
-    amt: 2400,
-  },
-  {
-    name: "Page A",
-    date: subDays(new Date(), 16),
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    date: subDays(new Date(), 17),
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page C",
-    date: subDays(new Date(), 18),
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page D",
-    date: subDays(new Date(), 19),
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    date: subDays(new Date(), 20),
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    date: subDays(new Date(), 21),
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    date: subDays(new Date(), 22),
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-  {
-    name: "Page H",
-    date: subDays(new Date(), 23),
-    uv: 3490,
-    pv: 4300,
-    amt: 2400,
-  },
-];
+import { graphql, useFragment } from "@/gql";
+import { useGraphql } from "@/hooks/useGraphql";
+import { usdFormat } from "@/lib/usdFormat";
 
 const colorGradient = new echarts.graphic.LinearGradient(
   0,
@@ -269,6 +63,13 @@ interface StakeFormProps {
   poolId?: string;
 }
 
+const StakeFormFragment = graphql(`
+  fragment StakeFormFragment on SeawaterPool {
+    address
+    earnedFeesAPRFUSDC
+  }
+`);
+
 export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
   const [feeTier, setFeeTier] = useState<"auto" | "manual">("auto");
 
@@ -280,18 +81,42 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     token0,
     token0Amount,
     setToken0Amount,
+    token1,
+    token1Amount,
+    setToken1Amount,
+    tickLower,
+    tickUpper,
+    setTickLower,
+    setTickUpper,
   } = useStakeStore();
+
+  const [priceLower, setPriceLower] = useState("");
+  const [priceUpper, setPriceUpper] = useState("");
+
+  // Parse the price lower and upper, and set the ticks properly.
+
+  const { data } = useGraphql();
+
+  const poolsData = useFragment(StakeFormFragment, data?.pools);
+  const poolData = poolsData?.find((pool) => pool.address === poolId);
+
+  const showMockData = useFeatureFlag("ui show demo data");
 
   const router = useRouter();
 
   useHotkeys("esc", () => router.back());
 
-  const showManualFees = useFeatureFlag("show manual fees");
+  const showManualFees = useFeatureFlag("ui show manual fees");
+  const showFeeTier = useFeatureFlag("ui show fee tier");
+  const showDynamicFeesPopup = useFeatureFlag("ui show optimising fee route");
+  const showSingleToken = useFeatureFlag("ui show single token stake");
+  const showCampaignBanner = useFeatureFlag("ui show campaign banner");
+
   const onSubmit = () => {
     if (mode === "new") {
       router.push("/stake/pool/create/confirm");
     } else {
-      router.push(`/stake/pool/${poolId}/confirm-liquidity`);
+      router.push(`/stake/pool/confirm-liquidity?id=${poolId}`);
     }
   };
 
@@ -303,15 +128,36 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     "full-range" | "auto" | "custom"
   >("full-range");
 
+  // Price of the current pool
+  const { data: poolSqrtPriceX96 } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "sqrtPriceX96",
+    args: [token0.address],
+  });
+
+  const tokenPrice = poolSqrtPriceX96
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
+    : 0n;
+
+  // Current tick of the pool
+  const { data: curTick } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "curTick",
+    args: [token0.address],
+  });
+
+  // in this context, token0 is actually token1. It's converted to token1
+  // when we use it.
+
   // token0 hooks
-  const { data: token0Deicmals, error } = useSimulateContract({
+  const { data: token0Decimals, error } = useSimulateContract({
     address: token0.address,
     abi: erc20Abi,
     // @ts-expect-error
     functionName: "decimals",
   });
-
-  console.log(error);
 
   const { data: token0Balance } = useSimulateContract({
     address: token0.address,
@@ -321,6 +167,20 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     // @ts-expect-error
     args: [address as Hash],
   });
+
+  // The tick spacing will determine how granular the graph is.
+  const { data: tickSpacing } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "curTick",
+    args: [token0.address],
+  });
+
+  const autoFeeTierRef = useRef();
+  const manualFeeTierRef = useRef();
+
+  // @TODO: use the graph data for this
+  const chartData = createChartData([1000n]);
 
   const chartOptions = useMemo(() => {
     return {
@@ -356,7 +216,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
       },
       xAxis: {
         type: "category",
-        data: data.map((d) => format(d.date, "P")),
+        data: chartData.map((d) => format(d.date, "P")),
         show: false,
         axisPointer: {
           label: {
@@ -375,7 +235,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
       },
       series: [
         {
-          data: data.map((d) => d.pv),
+          data: chartData.map((d) => d.pv),
           type: "bar",
           barWidth: "90%", // Adjust bar width (can be in pixels e.g., '20px')
           barGap: "5%",
@@ -430,7 +290,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
   return (
     <div className="z-10 flex flex-col items-center">
       <div className="w-[318px] md:w-[392px]">
-        <CampaignBanner />
+        {showCampaignBanner && <CampaignBanner />}
       </div>
 
       <div className="mt-[23px] flex flex-col gap-[5px] md:gap-[7px]">
@@ -454,7 +314,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               </Badge>
             </div>
 
-            {mode === "existing" && (
+            {showSingleToken && mode === "existing" && (
               <div className="absolute right-0 top-[-15px]">
                 <Menu
                   id={"tokens"}
@@ -527,16 +387,18 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
             </div>
 
             <div className="mt-[5px] flex w-full flex-row items-center justify-between">
-              <div className="text-2xs md:text-gray-1">$1,025.23</div>
+              <div className="text-2xs md:text-gray-1">
+                ${tokenPrice.toString()}
+              </div>
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
-                {token0Balance && token0Deicmals && (
+                {token0Balance && token0Decimals && (
                   <>
                     <div>
                       Balance:{" "}
                       {(
                         (token0Balance.result as unknown as bigint) /
-                        BigInt(10 ** token0Deicmals.result)
+                        BigInt(10 ** token0Decimals.result)
                       ).toString()}
                     </div>
                     <div
@@ -545,7 +407,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
                         setToken0Amount(
                           (
                             (token0Balance.result as unknown as bigint) /
-                            BigInt(10 ** token0Deicmals.result)
+                            BigInt(10 ** token0Decimals.result)
                           ).toString(),
                         )
                       }
@@ -574,7 +436,13 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               </div>
 
               <div className="mt-[7px] flex w-full flex-row items-center justify-between">
-                <div className="text-2xl">0.87</div>
+                <Input
+                  className="-ml-2 border-0 bg-black pl-2 text-2xl"
+                  autoFocus
+                  variant={"no-ring"}
+                  value={token1Amount}
+                  onChange={(e) => setToken1Amount(e.target.value)}
+                />
 
                 <Badge
                   variant="outline"
@@ -587,7 +455,9 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
               </div>
 
               <div className="mt-[5px] flex w-full flex-row items-center justify-between">
-                <div className="text-2xs md:text-gray-1">$1,024.82</div>
+                <div className="text-2xs md:text-gray-1">
+                  ${tokenPrice.toString()}
+                </div>
 
                 <div className="text-3xs md:text-2xs">Balance: 0.5</div>
               </div>
@@ -610,123 +480,130 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
           y: 100,
         }}
       >
-        <div className="mt-[12px] flex w-[318px] flex-row items-center justify-between md:w-[392px]">
-          <div className="text-3xs md:text-2xs">Fee Tier</div>
+        {showFeeTier && (
+          <div className="mt-[12px] flex w-[318px] flex-row items-center justify-between md:w-[392px]">
+            <div className="text-3xs md:text-2xs">Fee Tier</div>
 
-          <SegmentedControl
-            variant={"secondary"}
-            className={cn("h-[26px] rounded-lg bg-black text-3xs md:text-2xs", {
-              hidden: !showManualFees,
-            })}
-            callback={(val) => setFeeTier(val)}
-            segments={[
-              {
-                label: "Auto",
-                value: "auto" as const,
-                ref: useRef(),
-              },
-              {
-                label: "Manual",
-                value: "manual" as const,
-                ref: useRef(),
-              },
-            ]}
-          />
-        </div>
+            <SegmentedControl
+              variant={"secondary"}
+              className={cn(
+                "h-[26px] rounded-lg bg-black text-3xs md:text-2xs",
+                {
+                  hidden: !showManualFees,
+                },
+              )}
+              callback={(val) => setFeeTier(val)}
+              segments={[
+                {
+                  label: "Auto",
+                  value: "auto" as const,
+                  ref: autoFeeTierRef,
+                },
+                {
+                  label: "Manual",
+                  value: "manual" as const,
+                  ref: manualFeeTierRef,
+                },
+              ]}
+            />
+          </div>
+        )}
 
-        <AnimatePresence initial={false} mode="popLayout">
-          {feeTier === "auto" && (
-            <motion.div
-              key={"auto"}
-              initial={{ x: -320, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -320, opacity: 0 }}
-              className="shine mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between rounded-lg px-[22px] py-[15px] md:h-[69px] md:w-[392px]"
-            >
-              <div className="flex flex-col items-center gap-[3px]">
-                <div className="iridescent-text text-xs font-medium md:text-sm">
-                  0 ~ 0.3%
-                </div>
-                <Badge
-                  variant="iridescent"
-                  className="h-[10px] px-[7px] text-4xs font-normal md:h-[12px] md:text-3xs"
-                >
-                  Fee Percentage
-                </Badge>
-              </div>
-
-              <div className="iridescent-text w-[200px] text-3xs md:w-[247px] md:text-2xs">
-                The protocol automatically adjust your fees in order to maximise
-                rewards and reduce impermanent loss
-              </div>
-            </motion.div>
-          )}
-          {feeTier === "manual" && (
-            <motion.div
-              key={"manual"}
-              initial={{ x: 320, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 320, opacity: 0 }}
-            >
-              <RadioGroup.Root
-                className="mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between gap-[5px] rounded-lg md:h-[69px] md:w-[392px]"
-                defaultValue="0.05"
+        {showDynamicFeesPopup && (
+          <AnimatePresence initial={false} mode="popLayout">
+            {feeTier === "auto" && (
+              <motion.div
+                key={"auto"}
+                initial={{ x: -320, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -320, opacity: 0 }}
+                className="shine mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between rounded-lg px-[22px] py-[15px] md:h-[69px] md:w-[392px]"
               >
-                <RadioGroup.Item
-                  value="0.01"
-                  className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
-                >
-                  <div className="text-2xs font-medium md:text-xs">0.01%</div>
-                  <div className="text-center text-3xs text-gray-2 ">
-                    Best for Very <br /> Stable Pairs
+                <div className="flex flex-col items-center gap-[3px]">
+                  <div className="iridescent-text text-xs font-medium md:text-sm">
+                    0 ~ 0.3%
                   </div>
-                  <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
-                    (0% popularity)
-                  </div>
-                </RadioGroup.Item>
+                  <Badge
+                    variant="iridescent"
+                    className="h-[10px] px-[7px] text-4xs font-normal md:h-[12px] md:text-3xs"
+                  >
+                    Fee Percentage
+                  </Badge>
+                </div>
 
-                <RadioGroup.Item
-                  value={"0.05"}
-                  className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                <div className="iridescent-text w-[200px] text-3xs md:w-[247px] md:text-2xs">
+                  The protocol automatically adjust your fees in order to
+                  maximise rewards and reduce impermanent loss
+                </div>
+              </motion.div>
+            )}
+            {feeTier === "manual" && (
+              <motion.div
+                key={"manual"}
+                initial={{ x: 320, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 320, opacity: 0 }}
+              >
+                <RadioGroup.Root
+                  className="mt-[12px] flex h-[60px] w-[318px] flex-row items-center justify-between gap-[5px] rounded-lg md:h-[69px] md:w-[392px]"
+                  defaultValue="0.05"
                 >
-                  <div className="text-2xs font-medium md:text-xs">0.05%</div>
-                  <div className="text-center text-3xs text-gray-2 ">
-                    Best for <br /> Stable Pairs
-                  </div>
-                  <div className="iridescent rounded bg-[#D8D8D8] px-1 text-4xs text-black md:text-3xs">
-                    (99% popularity)
-                  </div>
-                </RadioGroup.Item>
+                  <RadioGroup.Item
+                    value="0.01"
+                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                  >
+                    <div className="text-2xs font-medium md:text-xs">0.01%</div>
+                    <div className="text-center text-3xs text-gray-2 ">
+                      Best for Very <br /> Stable Pairs
+                    </div>
+                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                      (0% popularity)
+                    </div>
+                  </RadioGroup.Item>
 
-                <RadioGroup.Item
-                  value={"0.10"}
-                  className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
-                >
-                  <div className="text-2xs font-medium md:text-xs">0.10%</div>
-                  <div className="text-center text-3xs text-gray-2 ">
-                    Best for <br /> Stable Pairs
-                  </div>
-                  <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
-                    (0% popularity)
-                  </div>
-                </RadioGroup.Item>
+                  <RadioGroup.Item
+                    value={"0.05"}
+                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                  >
+                    <div className="text-2xs font-medium md:text-xs">0.05%</div>
+                    <div className="text-center text-3xs text-gray-2 ">
+                      Best for <br /> Stable Pairs
+                    </div>
+                    <div className="iridescent rounded bg-[#D8D8D8] px-1 text-4xs text-black md:text-3xs">
+                      (99% popularity)
+                    </div>
+                  </RadioGroup.Item>
 
-                <RadioGroup.Item
-                  value={"0.15"}
-                  className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
-                >
-                  <div className="text-2xs font-medium md:text-xs">0.15%</div>
-                  <div className="text-center text-3xs text-gray-2 ">
-                    Best for <br /> Stable Pairs
-                  </div>
-                  <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
-                    (0% popularity)
-                  </div>
-                </RadioGroup.Item>
-              </RadioGroup.Root>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                  <RadioGroup.Item
+                    value={"0.10"}
+                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                  >
+                    <div className="text-2xs font-medium md:text-xs">0.10%</div>
+                    <div className="text-center text-3xs text-gray-2 ">
+                      Best for <br /> Stable Pairs
+                    </div>
+                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                      (0% popularity)
+                    </div>
+                  </RadioGroup.Item>
+
+                  <RadioGroup.Item
+                    value={"0.15"}
+                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                  >
+                    <div className="text-2xs font-medium md:text-xs">0.15%</div>
+                    <div className="text-center text-3xs text-gray-2 ">
+                      Best for <br /> Stable Pairs
+                    </div>
+                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                      (0% popularity)
+                    </div>
+                  </RadioGroup.Item>
+                </RadioGroup.Root>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
 
         <div className="mt-[20px] h-[212px] w-[318px] rounded-lg bg-black px-[20px] py-[11px] text-white md:h-[248px] md:w-[392px]">
           <div className="flex w-full flex-row items-center justify-between">
@@ -759,21 +636,25 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
           <div className="mt-[22px] flex flex-row items-center justify-between px-[5px] md:mt-[24px] md:w-[270px]">
             <div className="flex flex-col">
               <div className="text-3xs text-gray-2 md:text-2xs">Low Price</div>
-              <div className={"border-b border-white text-2xs md:text-base"}>
-                780.28123
-              </div>
+              <Input
+                className="border-b border-white text-2xs md:text-base"
+                value={priceLower}
+                onChange={(e) => setPriceLower(e.target.value)}
+              />
               <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
-                <Ethereum className="invert" /> USDC per ETH
+                <Ethereum className="invert" /> fUSDC per {token0.name}
               </div>
             </div>
 
             <div className="flex flex-col">
               <div className="text-3xs text-gray-2 md:text-2xs">High Price</div>
-              <div className={"border-b border-white text-2xs md:text-base"}>
-                ∞
-              </div>
+              <Input
+                className="border-b border-white text-2xs md:text-base"
+                value={priceUpper}
+                onChange={(e) => setPriceUpper(e.target.value)}
+              />
               <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
-                <Ethereum className="invert" /> USDC per ETH
+                <Ethereum className="invert" /> fUSDC per {token0.name}
               </div>
             </div>
           </div>
@@ -906,7 +787,11 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
                     <Token />
                     <Token className={"-ml-1"} />
                     <Token className={"-ml-1 mr-1"} />
-                    <div className="iridescent-text">$6.11 - $33.12</div>
+                    <div className="iridescent-text">
+                      {showMockData
+                        ? "$6.11 - $33.12"
+                        : `${usdFormat(parseFloat(poolData?.earnedFeesAPRFUSDC[0] ?? "0") ?? 0)} - ${usdFormat(parseFloat(poolData?.earnedFeesAPRFUSDC[1] ?? "0") ?? 0)}`}
+                    </div>
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent
@@ -944,7 +829,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
                     </div>
                     <div className={"flex flex-col items-center"}>
                       <Token className={"size-[15px]"} />
-                      <div>ETH</div>
+                      <div>{token0.name}</div>
                     </div>
                   </div>
                 </TooltipContent>
