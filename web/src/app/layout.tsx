@@ -55,6 +55,7 @@ const inter = Inter({
   weight: ["400", "500"],
 });
 
+// force the static export to fetch data from the server
 export const dynamic = "force-static";
 
 export default async function RootLayout({
