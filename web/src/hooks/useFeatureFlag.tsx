@@ -62,6 +62,7 @@ export interface FeatureFlags {
  */
 export const useFeatureFlag = <T extends keyof FeatureFlags>(
   featureFlag: T,
+  skipOverride = false,
 ): FeatureFlags[T] => {
   const override = useFeatureFlagOverride((s) => s.override);
   const featureFlagOverride = useFeatureFlagOverride((s) => s.featureFlags);
@@ -79,6 +80,7 @@ export const useFeatureFlag = <T extends keyof FeatureFlags>(
    * Otherwise, return the value from the API.
    */
   return useMemo(() => {
+    if (skipOverride) return data?.[featureFlag];
     if (override) return featureFlagOverride[featureFlag];
     return data?.[featureFlag];
   }, [override, featureFlagOverride, data, featureFlag]);
