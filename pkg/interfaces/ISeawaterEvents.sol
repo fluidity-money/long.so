@@ -20,7 +20,7 @@ interface ISeawaterEvents {
 
     /// @notice emitted when a position is burned
     /// @param id the id of the position being burned
-    //// @param owner the user the owned the position
+    /// @param owner the user the owned the position
     event BurnPosition(
         uint256 indexed id,
         address indexed owner
@@ -29,7 +29,7 @@ interface ISeawaterEvents {
     /// @notice emitted when a position changes owners
     /// @param from the original owner of the position
     /// @param to the new owner of the position
-    /// @param id the id of the position being transfered
+    /// @param id the id of the position being transferred
     event TransferPosition(
         address indexed from,
         address indexed to,
@@ -45,9 +45,9 @@ interface ISeawaterEvents {
     );
 
     /// @notice emitted when a liquidity provider collects the fees associated with a position
-    /// @param id the id of the position who's liquidity is being collected
+    /// @param id the id of the position whose liquidity is being collected
     /// @param pool the address of the pool the position is associated with
-    /// @param to the receipient of the fees
+    /// @param to the recipient of the fees
     /// @param amount0 the amount of token0 being collected
     /// @param amount1 the amount of token1 being collected
     event CollectFees(
@@ -63,7 +63,8 @@ interface ISeawaterEvents {
     /// @notice emitted when a new pool is created
     /// @param token the token0 the pool is associated with (where token1 is a fluid token)
     /// @param fee the fee being used for this pool
-    /// @param tickSpacing in the pool
+    /// @param decimals the decimals for the token
+    /// @param tickSpacing the tick spacing for the pool
     event NewPool(
         address indexed token,
         uint32 indexed fee,
