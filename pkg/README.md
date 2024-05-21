@@ -1,6 +1,20 @@
 
 # Long Tail contracts
 
+Long Tail is Arbitrum's cheapest and most rewarding AMM.
+
+## Deployments
+
+[Deployment addresses](DEPLOYMENT.md)
+
+## Security
+
+[Security instructions](SECURITY.md)
+
+## Contributors
+
+[Contributors](CONTRIBUTORS.md)
+
 ## Building
 
 Superposition AMM is a diamond-like contract, with the frontend to access
