@@ -12,7 +12,13 @@ import { useAccount } from "wagmi";
  */
 export const graphqlQuery = graphql(`
   query AllData($address: String!) {
+    getWallet(address: $address) {
+      # add wallet fragments here
+      ...MyPositionsWalletFragment
+    }
+
     pools {
+      # used for the pool selector
       address
 
       swapsForUser(address: $address) {
