@@ -9,7 +9,7 @@ import { graphql } from "@/gql";
  * Fragments are used to fetch only the data we need. They are
  * configured in the components that use the data.
  */
-const graphqlQuery = graphql(`
+export const graphqlQuery = graphql(`
   query AllData {
     pools {
       ...SwapProPoolFragment
