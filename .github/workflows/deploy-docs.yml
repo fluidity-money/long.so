@@ -4,41 +4,12 @@ on:
   push:
     branches:
       - development
-      - feat/doc
-#    paths:
-#      - 'pkg/seawater/**'
-
-#on:
-#  push:
-#    branches:
-#      - development
-#  pull_request:
-#    branches:
-#      - development
+    paths:
+      - 'pkg/seawater/**'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Install Foundry toolchain
-        run: |
-          wget https://github.com/foundry-rs/foundry/releases/download/nightly-a470d635cfcdce68609e9dc5762a3584351bacc1/foundry_nightly_linux_amd64.tar.gz
-          tar -xzf foundry_nightly_linux_amd64.tar.gz
-          sudo mv forge /usr/local/bin/
-
-      - name: Generate documentation
-        run: |
-          cd pkg
-          forge doc
-
   deploy:
-#    if: github.event_name == 'push' && github.ref == 'refs/heads/development'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/development'
     runs-on: ubuntu-latest
     needs: build
 
