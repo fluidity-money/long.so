@@ -3,7 +3,6 @@ import { Metadata } from "next";
 import Superposition from "@/assets/icons/superposition.svg";
 import { MobileNetworkSelection } from "@/app/_layout/MobileNetworkSelection";
 import { DemoData } from "@/app/_layout/DemoData";
-import { FaucetDropdown } from "@/app/_layout/FaucetDropdown";
 import { NetworkSelection } from "@/app/_layout/NetworkSelection";
 import { ConnectWalletButton } from "@/app/_layout/ConnectWalletButton";
 import { NavigationMenu } from "@/app/_layout/NavigationMenu";
@@ -92,7 +91,6 @@ export default async function RootLayout({
                   <DemoData />
                 </div>
                 <div className="flex flex-row items-center gap-4">
-                  <FaucetDropdown />
                   <NetworkSelection />
                   <ConnectWalletButton />
                 </div>
@@ -107,7 +105,7 @@ export default async function RootLayout({
 
           <footer className="w-full self-end p-8">
             <div className="flex flex-row justify-between">
-              <div>
+              <small>
                 <a
                   rel="noopener noreferrer"
                   target="_blank"
@@ -115,8 +113,8 @@ export default async function RootLayout({
                 >
                   Audits
                 </a>
-              </div>
-              <div>
+              </small>
+              <small>
                 <a
                   rel="noopener noreferrer"
                   target="_blank"
@@ -124,7 +122,7 @@ export default async function RootLayout({
                 >
                   Commit {gitHash}
                 </a>
-              </div>
+              </small>
             </div>
           </footer>
         </body>
