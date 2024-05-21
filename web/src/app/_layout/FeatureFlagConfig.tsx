@@ -39,7 +39,7 @@ export const FeatureFlagConfig = () => {
   });
 
   const showFeatureFlagsPanel =
-    useFeatureFlag("ui show feature flags panel", true) ||
+    useFeatureFlag("ui show feature flags panel", false) ||
     process.env.NODE_ENV === "development";
 
   if (!showFeatureFlagsPanel) return null;
