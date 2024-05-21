@@ -71,8 +71,15 @@ export const AllPoolsFragment = graphql(`
         }
       }
     }
-    liquidityOverTime {
+    tvlOverTime {
       daily
+    }
+    liquidityOverTime {
+      daily {
+        fusdc {
+          valueScaled
+        }
+      }
     }
     liquidityIncentives {
       valueUsd

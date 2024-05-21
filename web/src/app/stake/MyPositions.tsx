@@ -20,6 +20,25 @@ import SegmentedControl from "@/components/ui/segmented-control";
 import { useAccount } from "wagmi";
 import { mockMyPositions } from "@/demoData/myPositions";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { graphql, useFragment } from "@/gql";
+import { useGraphql } from "@/hooks/useGraphql";
+import { fUSDC } from "@/config/tokens";
+
+const MyPositionsWalletFragment = graphql(`
+  fragment MyPositionsWalletFragment on Wallet {
+    id
+    positions {
+      id
+      pool {
+        token {
+          name
+          address
+          symbol
+        }
+      }
+    }
+  }
+`);
 
 export const MyPositions = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
@@ -32,11 +51,30 @@ export const MyPositions = () => {
 
   const showDemoData = useFeatureFlag("ui show demo data");
 
-  const pools = useMemo(() => {
+  const { data } = useGraphql();
+
+  const walletData = useFragment(MyPositionsWalletFragment, data?.getWallet);
+
+  const pools = useMemo((): Pool[] | undefined => {
     if (showDemoData && address) return mockMyPositions;
-    // TODO: add in graphql call once data is available
-    return [];
-  }, [showDemoData, address]);
+
+    return walletData?.positions?.map((position) => ({
+      id: position.id,
+      duration: 0,
+      tokens: [
+        fUSDC,
+        {
+          name: position.pool.token.name,
+          address: position.pool.token.address,
+          symbol: position.pool.token.symbol,
+        },
+      ],
+      staked: 0,
+      totalYield: 0,
+    }));
+  }, [showDemoData, address, walletData]);
+
+  console.log(pools);
 
   return (
     <motion.div
@@ -84,14 +122,14 @@ export const MyPositions = () => {
           "h-[300px]": expanded,
         })}
       >
-        {pools.length === 0 ? (
+        {!pools || pools?.length === 0 ? (
           <div className="flex min-h-[149px] flex-col items-center justify-center">
             <div className="text-2xs">
               Your active staked positions will appear here.
             </div>
           </div>
         ) : displayMode === "list" ? (
-          <MyPositionsTable columns={columns} data={pools} />
+          pools && <MyPositionsTable columns={columns} data={pools} />
         ) : (
           <motion.div
             layout
@@ -99,7 +137,7 @@ export const MyPositions = () => {
               "mb-4 flex-wrap": expanded,
             })}
           >
-            {pools.map((pool) => (
+            {pools?.map((pool) => (
               <motion.div
                 layout
                 key={pool.id}
@@ -149,7 +187,7 @@ export const MyPositions = () => {
         )}
       </div>
 
-      {pools.length > 0 && (
+      {pools && pools.length > 0 && (
         <div className="flex flex-col items-center md:hidden">
           <Button
             variant="link"
@@ -173,7 +211,7 @@ export const MyPositions = () => {
       )}
 
       <div className="flex max-w-full flex-row gap-2">
-        {pools.length > 0 && (
+        {pools && pools.length > 0 && (
           <div className="flex flex-1 flex-col items-center">
             <Button
               className="w-full text-3xs text-black md:text-xs"

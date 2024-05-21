@@ -99,7 +99,7 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
           // reformat pool data to match expected graph data
           ?.map((d) => ({
             date: new Date(d.timestamp),
-            value: parseFloat(d.fusdc.valueUnscaled),
+            value: parseFloat(d.fusdc.valueUsd),
           }))
       );
     }

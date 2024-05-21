@@ -37,19 +37,13 @@ export const SwapProPoolFragment = graphql(`
       daily {
         timestamp
         fusdc {
-          # TODO: uncomment this when the data is available
-          # valueUsd
-          # TODO: this is returning hex values, not sure what it is
-          valueUnscaled
+          valueUsd
         }
       }
       monthly {
         timestamp
         fusdc {
-          # TODO: uncomment this when the data is available
-          # valueUsd
-          # TODO: this is returning hex values, not sure what it is
-          valueUnscaled
+          valueUsd
         }
       }
     }

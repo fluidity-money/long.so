@@ -10,6 +10,11 @@ import { NavigationMenu } from "@/app/_layout/NavigationMenu";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { FeatureFlagConfig } from "@/app/_layout/FeatureFlagConfig";
+import { useQueryClient } from "@tanstack/react-query";
+import request from "graphql-request";
+import { graphqlEndpoint } from "@/config/graphqlEndpoint";
+import { graphqlQuery } from "@/hooks/useGraphql";
+import PopulateQueryCache from "@/app/PopulateQueryCache";
 
 const title = "Long Tail AMM";
 
@@ -29,7 +34,7 @@ export const metadata: Metadata = {
     siteId: "",
     creator: "@superpositionso",
     creatorId: "",
-    images: [image]
+    images: [image],
   },
   openGraph: {
     title: "Long Tail AMM",
@@ -50,15 +55,28 @@ const inter = Inter({
   weight: ["400", "500"],
 });
 
-export default function RootLayout({
+// force the static export to fetch data from the server
+export const dynamic = "force-static";
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const gitHash = process.env.GIT_HASH;
+
+  // make server-side requests for pre-fetching data
+  const data = await request(graphqlEndpoint, graphqlQuery, { address: "" });
+
+  const featuresDataRequest = await fetch(
+    "https://features.long.so/features.json",
+  );
+  const featuresData = await featuresDataRequest.json();
+
   return (
     <html lang="en">
       <Provider>
+        <PopulateQueryCache data={data} featuresData={featuresData} />
         <body
           className={cn("flex min-h-screen flex-col bg-white", inter.className)}
         >
