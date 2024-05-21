@@ -17,11 +17,30 @@ import { useGraphql } from "@/hooks/useGraphql";
 import { graphql, useFragment } from "@/gql";
 import { SwapProPoolFragment } from "@/components/SwapPro/SwapProPoolFragment";
 import { useMemo } from "react";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 const variants = {
   hidden: { opacity: 0, width: 0 },
   visible: { opacity: 1, width: "auto" },
 };
+
+const SwapProTransactionsFragment = graphql(`
+  fragment SwapProTransactionsFragment on SeawaterSwap {
+    timestamp
+    amountIn {
+      valueScaled
+      token {
+        symbol
+      }
+    }
+    amountOut {
+      valueScaled
+      token {
+        symbol
+      }
+    }
+  }
+`);
 
 export const SwapPro = ({
   override,
@@ -49,11 +68,59 @@ export const SwapPro = ({
     () =>
       pools?.find(
         (pool) =>
-          pool.token.address.toLowerCase() === token0.address.toLowerCase() ||
-          pool.token.address.toLowerCase() === token1.address.toLowerCase(),
+          pool.address.toLowerCase() === token0.address.toLowerCase() ||
+          pool.address.toLowerCase() === token1.address.toLowerCase(),
       ),
     [pools, token0.address, token1.address],
   );
+
+  // find the selected pool for the transactions data
+  const transactionsPool = useMemo(
+    () => data?.pools?.find((pool) => pool.address === pool?.address),
+    [data?.pools, pool?.address],
+  );
+
+  const transactions = useFragment(
+    SwapProTransactionsFragment,
+    transactionsPool?.swapsForUser,
+  );
+
+  const showMockData = useFeatureFlag("ui show demo data");
+
+  const transactionData = useMemo((): Transaction[] | undefined => {
+    if (showMockData)
+      return [
+        {
+          id: "1",
+          value: 100,
+          rewards: 200,
+          time: new Date("2023-10-10T14:48:00.000+09:00"),
+          amountFrom: 30.2,
+          amountTo: 0.0001,
+        },
+        {
+          id: "2",
+          value: 300,
+          rewards: 20,
+          time: new Date("2023-10-10T16:32:00.000+09:00"),
+          amountFrom: 30.2,
+          amountTo: 0.0001,
+        },
+      ] as Transaction[];
+
+    return transactions?.map((transaction) => {
+      return {
+        id: transaction.timestamp.toString(),
+        value: parseFloat(transaction.amountIn.valueScaled),
+        rewards: 0,
+        time: new Date(transaction.timestamp * 1000),
+        amountFrom: parseFloat(transaction.amountIn.valueScaled),
+        amountTo: parseFloat(transaction.amountOut.valueScaled),
+      };
+    });
+  }, []);
+
+  console.log(transactions);
 
   return (
     <motion.div
@@ -129,29 +196,9 @@ export const SwapPro = ({
           </div>
         </div>
 
-        <DataTable
-          columns={columns}
-          data={
-            [
-              {
-                id: "1",
-                value: 100,
-                rewards: 200,
-                time: new Date("2023-10-10T14:48:00.000+09:00"),
-                amountFrom: 30.2,
-                amountTo: 0.0001,
-              },
-              {
-                id: "2",
-                value: 300,
-                rewards: 20,
-                time: new Date("2023-10-10T16:32:00.000+09:00"),
-                amountFrom: 30.2,
-                amountTo: 0.0001,
-              },
-            ] as Transaction[]
-          }
-        />
+        {transactionData && (
+          <DataTable columns={columns} data={transactionData} />
+        )}
       </div>
     </motion.div>
   );

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import request from "graphql-request";
 import { graphqlEndpoint } from "@/config/graphqlEndpoint";
 import { graphql } from "@/gql";
+import { useAccount } from "wagmi";
 
 /**
  * The main GraphQL query to fetch all data.
@@ -10,8 +11,16 @@ import { graphql } from "@/gql";
  * configured in the components that use the data.
  */
 export const graphqlQuery = graphql(`
-  query AllData {
+  query AllData($address: String!) {
     pools {
+      address
+
+      swapsForUser(address: $address) {
+        # add transaction fragments here
+        ...SwapProTransactionsFragment
+      }
+
+      # add general fragments here
       ...SwapProPoolFragment
       ...AllPoolsFragment
       ...SelectPrimeAssetFragment
@@ -26,8 +35,12 @@ export const graphqlQuery = graphql(`
 /**
  * Fetch all data from the GraphQL endpoint.
  */
-export const useGraphql = () =>
-  useQuery({
+export const useGraphql = () => {
+  const { address } = useAccount();
+
+  return useQuery({
     queryKey: ["graphql"],
-    queryFn: () => request(graphqlEndpoint, graphqlQuery),
+    queryFn: () =>
+      request(graphqlEndpoint, graphqlQuery, { address: address ?? "" }),
   });
+};

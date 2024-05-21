@@ -66,7 +66,7 @@ export default async function RootLayout({
   const gitHash = process.env.GIT_HASH;
 
   // make server-side requests for pre-fetching data
-  const data = await request(graphqlEndpoint, graphqlQuery);
+  const data = await request(graphqlEndpoint, graphqlQuery, { address: "" });
 
   const featuresDataRequest = await fetch(
     "https://features.long.so/features.json",
