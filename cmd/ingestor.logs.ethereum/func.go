@@ -156,13 +156,13 @@ func IngestWebsocket(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAdd
 }
 
 func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) error {
-	handleLogCallback(seawaterAddr, l, func(t string, a any) {
+	handleLogCallback(seawaterAddr, l, func(t string, a any) error {
 		// Use the database connection as the callback to insert this log.
-		databaseInsertLog(db, t, a)
+		return databaseInsertLog(db, t, a)
 	})
 	return nil
 }
-func handleLogCallback(seawaterAddr ethCommon.Address, l ethTypes.Log, cb func(table string, l any)) error {
+func handleLogCallback(seawaterAddr ethCommon.Address, l ethTypes.Log, cb func(table string, l any) error) error {
 	var topic1, topic2, topic3 ethCommon.Hash
 	topic0 := l.Topics[0]
 	if len(l.Topics) > 1 {
@@ -284,17 +284,17 @@ func handleLogCallback(seawaterAddr ethCommon.Address, l ethTypes.Log, cb func(t
 		}
 	}
 	setEventFields(&a, blockHash, transactionHash, blockNumber, emitterAddr.String())
-	cb(table, a)
-	return nil
+	return cb(table, a)
 }
 
-func databaseInsertLog(db *gorm.DB, table string, a any) {
+func databaseInsertLog(db *gorm.DB, table string, a any) error {
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(a); err != nil {
-		log.Fatalf("encoding block header: %v", err)
+		return fmt.Errorf("encoding block header: %v", err)
 	}
 
 	if err := db.Table(table).Omit("createdBy").Create(a).Error; err != nil {
-		log.Fatalf("inserting log: %v", err)
+		return fmt.Errorf("inserting log: %v", err)
 	}
+	return nil
 }
