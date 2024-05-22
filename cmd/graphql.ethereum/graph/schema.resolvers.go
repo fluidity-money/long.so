@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"log/slog"
 	"math/big"
+	"strconv"
+	"time"
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
@@ -89,11 +91,6 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	return "", nil // TODO
 }
 
-// SetVolumeYieldPriceAndTVLForLastHour is the resolver for the setVolumeYieldPriceAndTVLForLastHour field.
-func (r *mutationResolver) SetVolumeYieldPriceAndTVLForLastHour(ctx context.Context) (*string, error) {
-	return nil, nil // TODO
-}
-
 // Pools is the resolver for the pools field.
 func (r *queryResolver) Pools(ctx context.Context) (pools []seawater.Pool, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
@@ -106,30 +103,30 @@ func (r *queryResolver) Pools(ctx context.Context) (pools []seawater.Pool, err e
 }
 
 // GetPool is the resolver for the getPool field.
-func (r *queryResolver) GetPool(ctx context.Context, address string) (pool *seawater.Pool, err error) {
+func (r *queryResolver) GetPool(ctx context.Context, token string) (pool *seawater.Pool, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
 		r.F.On(features.FeatureMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
-		pool = MockGetPool(address)
+		pool = MockGetPool(token)
 		return
 	}
-	err = r.DB.Table("events_seawater_newpool").Where("token = ?", address).Scan(&pool).Error
+	err = r.DB.Table("events_seawater_newpool").Where("token = ?", token).Scan(&pool).Error
 	return
 }
 
 // GetPoolPositions is the resolver for the getPoolPositions field.
-func (r *queryResolver) GetPoolPositions(ctx context.Context, address string) (positions []seawater.Position, err error) {
+func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string) (positions []seawater.Position, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
 		r.F.On(features.FeatureMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
-		positions = MockGetPoolPositions(address)
+		positions = MockGetPoolPositions(pool)
 		return
 	}
-	err = r.DB.Table("seawater_active_positions_1").Where("pool = ?", address).Scan(&positions).Error
+	err = r.DB.Table("seawater_active_positions_1").Where("pool = ?", pool).Scan(&positions).Error
 	return
 }
 
@@ -433,18 +430,18 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 }
 
 // PositionsForUser is the resolver for the positionsForUser field.
-func (r *seawaterPoolResolver) PositionsForUser(ctx context.Context, obj *seawater.Pool, address string) (positions []seawater.Position, err error) {
+func (r *seawaterPoolResolver) PositionsForUser(ctx context.Context, obj *seawater.Pool, wallet string) (positions []seawater.Position, err error) {
 	if obj == nil {
 		return nil, fmt.Errorf("empty pool")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
 		MockDelay(r.F)
-		positions = MockGetPoolPositions(address)
+		positions = MockGetPoolPositions(wallet)
 		return
 	}
 	err = r.DB.Table("seawater_active_positions_1").
-		Where("pool = ? and owner = ?", obj.Token, address).
-		Scan(positions).
+		Where("pool = ? and owner = ?", obj.Token, wallet).
+		Scan(&positions).
 		Error
 	return
 }
@@ -523,19 +520,19 @@ func (r *seawaterPositionResolver) Pool(ctx context.Context, obj *seawater.Posit
 }
 
 // Lower is the resolver for the lower field.
-func (r *seawaterPositionResolver) Lower(ctx context.Context, obj *seawater.Position) (string, error) {
+func (r *seawaterPositionResolver) Lower(ctx context.Context, obj *seawater.Position) (int, error) {
 	if obj == nil {
-		return "", fmt.Errorf("no position obj")
+		return 0, fmt.Errorf("no position obj")
 	}
-	return obj.Lower.String(), nil
+	return int(obj.Lower.Int64()), nil
 }
 
 // Upper is the resolver for the upper field.
-func (r *seawaterPositionResolver) Upper(ctx context.Context, obj *seawater.Position) (string, error) {
+func (r *seawaterPositionResolver) Upper(ctx context.Context, obj *seawater.Position) (int, error) {
 	if obj == nil {
-		return "", fmt.Errorf("no position obj")
+		return 0, fmt.Errorf("no position obj")
 	}
-	return obj.Upper.String(), nil
+	return int(obj.Upper.Int64()), nil
 }
 
 // Liquidity is the resolver for the liquidity field.
@@ -593,21 +590,8 @@ func (r *walletResolver) Address(ctx context.Context, obj *model.Wallet) (string
 	return obj.Address.String(), nil
 }
 
-// Balances is the resolver for the balances field.
-func (r *walletResolver) Balances(ctx context.Context, obj *model.Wallet) ([]model.TokenBalance, error) {
-	return nil, nil // TODO
-}
-
-// Positions is the resolver for the positions field.
-func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet) ([]seawater.Position, error) {
-	return nil, nil // TODO
-}
-
 // Amount returns AmountResolver implementation.
 func (r *Resolver) Amount() AmountResolver { return &amountResolver{r} }
-
-// Mutation returns MutationResolver implementation.
-func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
