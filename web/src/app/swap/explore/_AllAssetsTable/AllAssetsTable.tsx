@@ -29,11 +29,14 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { rankItem } from "@tanstack/match-sorter-utils";
+import { useSwapStore } from "@/stores/useSwapStore";
+import { useRouter } from "next/navigation";
 
 interface AllPoolsTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   children?: React.ReactNode;
+  token: "0" | "1";
 }
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
@@ -62,6 +65,7 @@ export function AllAssetsTable<TData, TValue>({
   columns,
   data,
   children,
+  token,
 }: AllPoolsTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState("");
 
@@ -79,6 +83,10 @@ export function AllAssetsTable<TData, TValue>({
     globalFilterFn: fuzzyFilter,
     getFilteredRowModel: getFilteredRowModel(),
   });
+
+  const { setToken1, setToken0 } = useSwapStore();
+
+  const router = useRouter();
 
   return (
     <div>
@@ -147,7 +155,15 @@ export function AllAssetsTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                className=" border-b-0 text-[10px] hover:bg-black md:text-xs"
+                className=" cursor-pointer border-b-0 text-[10px] hover:bg-black md:text-xs"
+                onClick={() => {
+                  if ((token = "0")) {
+                    setToken0(row.original.token);
+                  } else {
+                    setToken1(row.original.token);
+                  }
+                  router.back();
+                }}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id} className="h-8 p-0">

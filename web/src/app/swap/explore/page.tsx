@@ -33,11 +33,11 @@ const SwapExploreFragment = graphql(`
 const ExplorePage = () => {
   const router = useRouter();
 
-  const { setToken1 } = useSwapStore();
+  const { setToken1, setToken0 } = useSwapStore();
 
   const searchParams = useSearchParams();
 
-  const token = searchParams.get("token");
+  const token = searchParams.get("token") as "0" | "1";
 
   const { data, isLoading } = useGraphql();
 
@@ -85,7 +85,7 @@ const ExplorePage = () => {
         </div>
 
         <div className={"mt-[16px] px-[10px]"}>
-          <AllAssetsTable columns={columns} data={allAssetsData}>
+          <AllAssetsTable columns={columns} data={allAssetsData} token={token}>
             <div className={"mt-[24px]"}>
               <div className={"text-[10px] md:text-[12px]"}>
                 Highest Rewarders
@@ -107,6 +107,8 @@ const ExplorePage = () => {
                     onClick={() => {
                       if (token === "1") {
                         setToken1(rewarder.token);
+                      } else {
+                        setToken0(rewarder.token);
                       }
 
                       router.back();
