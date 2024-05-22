@@ -3,15 +3,60 @@ import SegmentedControl from "@/components/ui/segmented-control";
 import { DataTable } from "@/components/InventoryContent/DataTable";
 import { columns as yieldColumns } from "@/components/InventoryContent/columns";
 import { yieldData } from "@/components/InventoryContent/data/yieldData";
-import { myPositionsData } from "@/components/InventoryContent/data/myPositionsData";
-import { useRef, useState } from "react";
+import { myPositionsData as mockMyPositionsData } from "@/components/InventoryContent/data/myPositionsData";
+import { useMemo, useRef, useState } from "react";
 import { MyYieldUnclaimed } from "@/components/InventoryContent/MyYieldUnclaimed";
 import { Position } from "@/components/InventoryContent/Position";
+import { graphql, useFragment } from "@/gql";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { useGraphql } from "@/hooks/useGraphql";
+import { nanoid } from "nanoid";
+
+const MyPositionsInventoryWalletFragment = graphql(`
+  fragment MyPositionsInventoryWalletFragment on Wallet {
+    id
+    positions {
+      id
+      pool {
+        token {
+          name
+          address
+          symbol
+        }
+      }
+    }
+  }
+`);
 
 export const PoolsTabContent = () => {
   const [yieldType, setYieldType] = useState<
     "unclaimed" | "all" | "historical"
   >("unclaimed");
+
+  const showMockData = useFeatureFlag("ui show demo data");
+
+  const { data } = useGraphql();
+
+  const walletData = useFragment(
+    MyPositionsInventoryWalletFragment,
+    data?.getWallet,
+  );
+
+  const myPositionsData = useMemo(() => {
+    if (showMockData) {
+      return mockMyPositionsData;
+    }
+
+    return (
+      walletData?.positions?.map((position) => ({
+        id: position.id,
+        pool: position.pool.token.name,
+        yield: 0,
+        position: "$0",
+        liquidityRange: "0k - 0k",
+      })) ?? []
+    );
+  }, [showMockData]);
 
   return (
     <div className={"flex flex-col items-center"}>

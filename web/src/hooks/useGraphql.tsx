@@ -15,6 +15,7 @@ export const graphqlQuery = graphql(`
     getWallet(address: $address) {
       # add wallet fragments here
       ...MyPositionsWalletFragment
+      ...MyPositionsInventoryWalletFragment
     }
 
     pools {
