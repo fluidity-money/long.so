@@ -166,15 +166,26 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string) (positi
 }
 
 // GetWallet is the resolver for the getWallet field.
-func (r *queryResolver) GetWallet(ctx context.Context, address string) (*model.Wallet, error) {
+func (r *queryResolver) GetWallet(ctx context.Context, address string) (wallet *model.Wallet, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
 		r.F.On(features.FeatureMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
-		return &model.Wallet{types.AddressFromString(address)}, nil
+		return &model.Wallet{Address: types.AddressFromString(address)}, nil
 	}
-	return nil, nil // TODO
+	positions, err := r.GetPositions(ctx, address)
+	if err != nil {
+		return
+	}
+	// TODO fetch balances
+	var balances []model.Amount
+	wallet = &model.Wallet{
+		Positions: positions,
+		Address:   types.AddressFromString(address),
+		Balances:  balances,
+	}
+	return
 }
 
 // GetSwaps is the resolver for the getSwaps field.
@@ -200,13 +211,21 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string) (swa
 }
 
 // TickLower is the resolver for the tickLower field.
-func (r *seawaterLiquidityResolver) TickLower(ctx context.Context, obj *model.SeawaterLiquidity) (int, error) {
-	panic(fmt.Errorf("not implemented: TickLower - tickLower"))
+func (r *seawaterLiquidityResolver) TickLower(ctx context.Context, obj *model.SeawaterLiquidity) (tick int, err error) {
+	if obj == nil {
+		return 0, fmt.Errorf("no pool obj")
+	}
+	tick, err = strconv.Atoi(obj.TickLower)
+	return
 }
 
 // TickUpper is the resolver for the tickUpper field.
-func (r *seawaterLiquidityResolver) TickUpper(ctx context.Context, obj *model.SeawaterLiquidity) (int, error) {
-	panic(fmt.Errorf("not implemented: TickUpper - tickUpper"))
+func (r *seawaterLiquidityResolver) TickUpper(ctx context.Context, obj *model.SeawaterLiquidity) (tick int, err error) {
+	if obj == nil {
+		return 0, fmt.Errorf("no pool obj")
+	}
+	tick, err = strconv.Atoi(obj.TickUpper)
+	return
 }
 
 // ID is the resolver for the id field.
@@ -516,7 +535,11 @@ func (r *seawaterPositionResolver) Owner(ctx context.Context, obj *seawater.Posi
 	if obj == nil {
 		return model.Wallet{}, fmt.Errorf("no position obj")
 	}
-	return model.Wallet{obj.Owner}, nil
+	wallet, err := r.Query().GetWallet(ctx, obj.Owner.String())
+	if err != nil {
+		return model.Wallet{}, err
+	}
+	return *wallet, nil
 }
 
 // Pool is the resolver for the pool field.
@@ -549,12 +572,31 @@ func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *seawater.
 	return model.PairAmount{}, nil // TODO
 }
 
+// Pool is the resolver for the pool field.
+func (r *seawaterSwapResolver) Pool(ctx context.Context, obj *model.SeawaterSwap) (seawater.Pool, error) {
+	var token string
+	if obj.TokenIn == r.C.FusdcAddr {
+		token = obj.TokenOut.String()
+	} else {
+		token = obj.TokenIn.String()
+	}
+	pool, err := r.Query().GetPool(ctx, token)
+	if err != nil {
+		return seawater.Pool{}, err
+	}
+	return *pool, nil
+}
+
 // Sender is the resolver for the sender field.
 func (r *seawaterSwapResolver) Sender(ctx context.Context, obj *model.SeawaterSwap) (model.Wallet, error) {
 	if obj == nil {
 		return model.Wallet{}, fmt.Errorf("empty swap")
 	}
-	return model.Wallet{obj.Sender}, nil
+	wallet, err := r.Query().GetWallet(ctx, obj.Sender.String())
+	if err != nil {
+		return model.Wallet{}, err
+	}
+	return *wallet, nil
 }
 
 // AmountIn is the resolver for the amountIn field.
