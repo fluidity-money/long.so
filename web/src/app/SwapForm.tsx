@@ -38,6 +38,7 @@ import { LoaderIcon } from "lucide-react";
 import { graphql, useFragment } from "@/gql";
 import { useGraphql } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
+import { useToast } from "@/components/ui/use-toast";
 
 const SwapFormFragment = graphql(`
   fragment SwapFormFragment on SeawaterPool {
@@ -57,6 +58,8 @@ export const SwapForm = () => {
   const [breakdownHidden, setBreakdownHidden] = useState(true);
 
   const { setWelcome, welcome, hovering, setHovering } = useWelcomeStore();
+
+  const toast = useToast();
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -213,15 +216,21 @@ export const SwapForm = () => {
     reset: resetSwap,
   } = useWriteContract();
 
-  console.log(approvalError);
-  console.log(swapError);
-
   /**
    * Approve the AMM to spend the token
    *
    * Step 1.
    */
   const onSubmit = () => {
+    if (!token0Amount || token0Amount === "") {
+      toast.toast({
+        variant: "destructive",
+        title: "Invalid amount",
+        description: "Please enter a valid amount",
+      });
+      return;
+    }
+
     if (!allowanceData?.result || allowanceData.result === BigInt(0)) {
       console.log("approving");
       writeContractApproval({
