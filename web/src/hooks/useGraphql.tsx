@@ -24,6 +24,7 @@ export const graphqlQuery = graphql(`
       swapsForUser(address: $address) {
         # add transaction fragments here
         ...SwapProTransactionsFragment
+        ...TradeTabTransactionsFragment
       }
 
       # add general fragments here

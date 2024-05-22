@@ -9,12 +9,187 @@ import {
 } from "@/components/ui/select";
 import ReactECharts from "echarts-for-react";
 import { traderRewardsData } from "@/components/InventoryContent/data/traderRewardsData";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { TransactionHistoryTable } from "@/app/_TransactionHistoryTable/TransactionHistoryTable";
-import { columns } from "@/app/_TransactionHistoryTable/columns";
-import { transactionHistoryData } from "@/components/InventoryContent/data/transactionHistoryData";
+import {
+  columns,
+  TransactionHistory,
+} from "@/app/_TransactionHistoryTable/columns";
+import { transactionHistoryData as mockTransactionHistoryData } from "@/components/InventoryContent/data/transactionHistoryData";
+import { graphql, useFragment } from "@/gql";
+import { useGraphql } from "@/hooks/useGraphql";
+import { useMemo, useState } from "react";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import Ethereum from "@/assets/icons/ethereum.svg";
+import Token from "@/assets/icons/token.svg";
+import { groupBy, map, orderBy, sortBy, sumBy } from "lodash";
+import { usdFormat } from "@/lib/usdFormat";
+
+const durationToDays = {
+  "7D": 7,
+  "1M": 30,
+  "6M": 182,
+  "1Y": 365,
+  ALL: 365,
+};
+
+const TradeTabTransactionsFragment = graphql(`
+  fragment TradeTabTransactionsFragment on SeawaterSwap {
+    timestamp
+    amountIn {
+      token {
+        symbol
+      }
+      valueScaled
+    }
+    amountOut {
+      token {
+        symbol
+      }
+      valueScaled
+    }
+  }
+`);
 
 export const TradeTabContent = () => {
+  const { data } = useGraphql();
+
+  /**
+   * All transactions for a user
+   */
+  const transactions = useMemo(
+    () =>
+      data?.pools.flatMap((pool) => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks -- not technically a hook
+        return useFragment(TradeTabTransactionsFragment, pool.swapsForUser);
+      }) ?? [],
+    [data],
+  );
+
+  const showMockData = useFeatureFlag("ui show demo data");
+
+  /**
+   * The transaction history data to display.
+   */
+  const transactionHistoryData = useMemo(():
+    | TransactionHistory[]
+    | undefined => {
+    // show mock data if the feature flag is enabled
+    if (showMockData) return mockTransactionHistoryData;
+
+    return orderBy(
+      // reformat the data to match the TransactionHistory interface
+      transactions?.map(
+        (transaction) =>
+          ({
+            id: transaction.timestamp.toString(),
+            date: new Date(transaction.timestamp * 1000),
+            // TODO: get reward value
+            rewards: 0,
+            amountIn: parseFloat(transaction.amountIn.valueScaled),
+            amountOut: parseFloat(transaction.amountOut.valueScaled),
+            tokens: [
+              {
+                // one of these values will be an empty string
+                name: transaction.amountIn.token.symbol || "fUSDC",
+                icon: transaction.amountIn.token.symbol ? (
+                  <Ethereum className={"invert"} />
+                ) : (
+                  <Token />
+                ),
+              },
+              {
+                name: transaction.amountOut.token.symbol || "fUSDC",
+                icon: transaction.amountOut.token.symbol ? (
+                  <Ethereum className={"invert"} />
+                ) : (
+                  <Token />
+                ),
+              },
+            ],
+          }) satisfies TransactionHistory & {
+            amountIn: number;
+            amountOut: number;
+          },
+      ),
+      "date",
+      "desc",
+    );
+  }, [showMockData, transactions]);
+
+  /**
+   * The sum of all rewards from all transactions.
+   */
+  const totalTradeRewards = useMemo(
+    () => sumBy(transactionHistoryData, "rewards"),
+    [transactionHistoryData],
+  );
+
+  console.log("transactions", transactions);
+
+  const [duration, setDuration] = useState<"7D" | "1M" | "6M" | "1Y" | "ALL">(
+    "7D",
+  );
+
+  /**
+   * The data to display in the graph.
+   */
+  const graphData = useMemo(() => {
+    // if the feature flag is enabled show mock data
+    if (showMockData) return traderRewardsData;
+
+    // otherwise, we need to calculate the data
+
+    // group transactions into days
+    const groupedTransactions = groupBy(transactionHistoryData, (transaction) =>
+      startOfDay(transaction.date),
+    );
+
+    // sum each day's rewards
+    const summedRewards = map(groupedTransactions, (transactions, date) => ({
+      date: new Date(date),
+      value: sumBy(transactions, "amountIn"), // TODO: replace with rewards
+    }));
+
+    // sort by date
+    const sortedRewards = sortBy(summedRewards, "date");
+
+    // we need to add in missing dates
+    // get the first and last dates
+    const allDatesWithData = sortedRewards.map((d) => d.date);
+    // first date
+    const firstDate = allDatesWithData[0];
+    // last date
+    const lastDate = allDatesWithData[allDatesWithData.length - 1];
+
+    // get all dates between the first and last date
+    const allDates = [];
+    let currentDate = firstDate;
+    while (currentDate <= lastDate) {
+      allDates.push(currentDate);
+      currentDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
+    }
+
+    // add in missing dates
+    const allRewards = allDates.map((date) => {
+      // find the reward for this date
+      const reward = sortedRewards.find(
+        (r) => r.date.getTime() === date.getTime(),
+      );
+
+      // if no reward for this date, return 0
+      return {
+        date,
+        value: reward?.value || 0,
+      };
+    });
+
+    // return the data for the duration
+    let slicedData = allRewards.reverse().slice(0, durationToDays[duration]);
+
+    return slicedData;
+  }, [showMockData, transactionHistoryData, duration]);
+
   return (
     <div className="mt-[34px] flex flex-col items-center ">
       <div className={"text-[14px] font-medium "}>My Total Trade Rewards</div>
@@ -23,7 +198,7 @@ export const TradeTabContent = () => {
         variant={"iridescent"}
         className={"mt-[12px] text-[30px] font-medium"}
       >
-        $1,337
+        {usdFormat(totalTradeRewards)}
       </Badge>
 
       <div className="mt-[19px] w-[223px] text-center text-[10px] font-normal text-neutral-400 md:mt-[28px]">
@@ -32,20 +207,33 @@ export const TradeTabContent = () => {
 
       <div className="mt-[42px] flex w-full flex-row items-center justify-between">
         <div className="text-[10px] font-medium">Trader Rewards Over Time</div>
+        {/* only on desktop */}
         <DurationSegmentedControl
           variant={"secondary"}
           className={"hidden text-[10px] md:flex"}
+          callback={(val) => setDuration(val)}
         />
+        {/* only on mobile */}
         <Select>
           <SelectTrigger className="w-[90px] border-0 bg-transparent text-right text-[10px] md:hidden">
             <SelectValue defaultValue={"7D"} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="7D">7 Days</SelectItem>
-            <SelectItem value="1M">1 Month</SelectItem>
-            <SelectItem value="6M">6 Months</SelectItem>
-            <SelectItem value="1Y">1 Year</SelectItem>
-            <SelectItem value="ALL">All Time</SelectItem>
+            <SelectItem value="7D" onSelect={() => setDuration("7D")}>
+              7 Days
+            </SelectItem>
+            <SelectItem value="1M" onSelect={() => setDuration("1M")}>
+              1 Month
+            </SelectItem>
+            <SelectItem value="6M" onSelect={() => setDuration("6M")}>
+              6 Months
+            </SelectItem>
+            <SelectItem value="1Y" onSelect={() => setDuration("1Y")}>
+              1 Year
+            </SelectItem>
+            <SelectItem value="ALL" onSelect={() => setDuration("ALL")}>
+              All Time
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -80,7 +268,7 @@ export const TradeTabContent = () => {
           },
           xAxis: {
             type: "category",
-            data: traderRewardsData.map((d) => format(d.date, "P")),
+            data: graphData?.map((d) => format(d.date, "P")),
             show: false,
             axisPointer: {
               label: {
@@ -100,7 +288,7 @@ export const TradeTabContent = () => {
           series: [
             {
               type: "bar",
-              data: traderRewardsData.map((d) => d.uv),
+              data: graphData?.map((d) => d.value),
               itemStyle: {
                 color: "#EBEBEB",
               },
@@ -119,10 +307,12 @@ export const TradeTabContent = () => {
         My Transaction History
       </div>
 
-      <TransactionHistoryTable
-        columns={columns}
-        data={transactionHistoryData}
-      />
+      {transactionHistoryData && (
+        <TransactionHistoryTable
+          columns={columns}
+          data={transactionHistoryData}
+        />
+      )}
     </div>
   );
 };
