@@ -13,7 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { output as faucet } from "@/lib/abi/IFaucet";
-import { tokens } from "@/config/tokens";
 import { faucetAddress } from "@/lib/addresses";
 import { erc20Abi, Hash } from "viem";
 
@@ -27,7 +26,6 @@ const FaucetPage = () => {
     abi: faucet.abi,
     // @ts-expect-error
     functionName: "isMember",
-    // @ts-expect-error
     args: [address as Hash],
   });
 
@@ -39,7 +37,7 @@ const FaucetPage = () => {
       return;
     }
 
-    const hash = writeContract({
+    const hash = await writeContract({
       address: faucetAddress,
       abi: faucet.abi,
       functionName: "claimAmount",
@@ -59,12 +57,7 @@ const FaucetPage = () => {
         <h1 className={"w-full text-xs"}>Faucet</h1>
         <p>Request a random amount of test tokens ($FLY stakers only)</p>
         <img src="https://static.long.so/fly-stakers.jpg" />
-        <Button
-          className={"w-full"}
-          variant={"secondary"}
-          onClick={onClick}
-          disabled={!isStaker}
-        >
+        <Button className={"w-full"} variant={"secondary"} onClick={onClick} disabled={!isStaker}>
           Request
         </Button>
       </div>

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Token, tokens } from "@/config/tokens";
+import { Token, DefaultToken, fUSDC } from "@/config/tokens";
 import { MIN_TICK, MAX_TICK } from "@/lib/math";
 
 interface StakeStore {
@@ -27,10 +27,10 @@ export const useStakeStore = create<StakeStore>((set) => ({
   multiSingleToken: "multi",
   setMultiSingleToken: (multiSingleToken) => set({ multiSingleToken }),
 
-  token0: tokens[1],
+  token0: DefaultToken,
   setToken0: (token0) => set({ token0 }),
 
-  token1: tokens[0],
+  token1: fUSDC,
   setToken1: (token1) => set({ token1 }),
 
   token0Amount: "",

@@ -1,6 +1,6 @@
-import { tokens } from "@/config/tokens";
+import { mockTokens } from "@/config/tokens";
 
-export const mockSwapExploreAssets = tokens.map((token) => ({
+export const mockSwapExploreAssets = mockTokens.map((token) => ({
   symbol: token.symbol,
   address: token.address,
   name: token.name,

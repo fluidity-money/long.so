@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Token, tokens } from "@/config/tokens";
+import { Token, fUSDC, DefaultToken } from "@/config/tokens";
 
 interface SwapStore {
   token0: Token;
@@ -17,8 +17,8 @@ interface SwapStore {
 }
 
 export const useSwapStore = create<SwapStore>((set) => ({
-  token0: tokens[0],
-  token1: tokens[1],
+  token0: fUSDC,
+  token1: DefaultToken,
 
   setToken0: (token) => set({ token0: token }),
   setToken1: (token) => set({ token1: token }),

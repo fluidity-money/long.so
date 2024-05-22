@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import IridescentToken from "@/assets/icons/token-iridescent.svg";
 import { AllAssetsTable } from "@/app/swap/explore/_AllAssetsTable/AllAssetsTable";
 import { columns } from "@/app/swap/explore/_AllAssetsTable/columns";
-import { Token, tokens } from "@/config/tokens";
+import { Token } from "@/config/tokens";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";

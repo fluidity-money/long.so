@@ -18,9 +18,7 @@ type Query {
   ): SeawaterPool
 
   """
-  getPoolPositions using the address of the pool involved.
-
-  Very cached. Should not be used. The getPoolPositionsForOwner is better.
+  Get pool positions using the address of the pool involved.
   """
   getPoolPositions(
     """
@@ -30,9 +28,7 @@ type Query {
   ): [SeawaterPosition!]
 
   """
-  getPosition that's owned by any pool using it's ID, based on what's known to the database.
-
-  Skips the cache for the most part.
+  Get positions that're owned by any pool using it's ID, based on what's known to the database.
   """
   getPosition(
     """

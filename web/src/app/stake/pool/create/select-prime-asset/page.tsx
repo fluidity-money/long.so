@@ -16,22 +16,12 @@ import {
   Pool,
 } from "@/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/columns";
 import { nanoid } from "nanoid";
-import { fUSDC, tokens } from "../../../../../config/tokens";
+import { Token, fUSDC } from "@/config/tokens";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { Hash } from "viem";
 import { usdFormat } from "@/lib/usdFormat";
 import { graphql, useFragment } from "@/gql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-
-const mockData: Pool[] = [
-  {
-    APR: 170.23,
-    volume: "$100k",
-    duration: 150,
-    id: nanoid(),
-    tokens: [tokens[0], tokens[1]],
-  },
-];
 
 const SelectPrimeAssetFragment = graphql(`
   fragment SelectPrimeAssetFragment on SeawaterPool {
@@ -62,11 +52,26 @@ const SelectPrimeAsset = () => {
   const { data, isLoading } = useGraphqlGlobal();
 
   const poolsData = useFragment(SelectPrimeAssetFragment, data?.pools);
+
+  const tokens: Token[] = poolsData ? poolsData?.map((pool) => ({
+    name: pool.token.name,
+    symbol: pool.token.symbol,
+    address: pool.token.address as Hash,
+  })) : [];
+
   /**
    * Reformat our data to match the table columns
    */
   const pools = useMemo((): Pool[] => {
-    if (showMockData) return mockData;
+    if (showMockData) return [
+      {
+        APR: 170.23,
+        volume: "$100k",
+        duration: 150,
+        id: nanoid(),
+        tokens: [tokens[0], tokens[1]],
+      },
+    ];
 
     if (isLoading || !poolsData) return [];
 
