@@ -12,6 +12,7 @@ CREATE TABLE seawater_swaps_1_return(
     token_in_decimals INTEGER NOT NULL
 );
 
+-- TODO ideally this should be a (materialized) view, which would require constant lookup of fUSDC address/decimals
 CREATE FUNCTION seawater_swaps_1(fusdcAddress VARCHAR, fusdcDecimals INTEGER)
 RETURNS SETOF seawater_swaps_1_return
 LANGUAGE SQL

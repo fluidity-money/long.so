@@ -104,10 +104,11 @@ CREATE MATERIALIZED VIEW seawater_pool_swap_volume_hourly_1 AS
 		combined.hourly_interval AS hourly_interval,
 		new_pool.decimals,
 		CAST(SUM(fusdc_volume) AS HUGEINT) AS fusdc_volume_unscaled,
-		SUM(fusdc_volume) AS fusdc_volume_scaled,
+		-- TODO assumes 6 decimals for fUSDC
+		SUM(fusdc_volume / (10 ^ 6)) AS fusdc_volume_scaled,
 		SUM(tokena_volume) AS tokena_volume_unscaled,
 		SUM(tokena_volume) / (10 ^ new_pool.decimals) AS tokena_volume_scaled,
-		SUM(tokena_volume / (10 ^ new_pool.decimals) * checkpoint.price),
+		SUM(tokena_volume / (10 ^ new_pool.decimals) * checkpoint.price)
 	FROM (
 		SELECT pool, hourly_interval, fusdc_volume, tokena_volume
 		FROM seawater_pool_swap2_volume_hourly_1
