@@ -10,7 +10,6 @@ import { Position } from "@/components/InventoryContent/Position";
 import { graphql, useFragment } from "@/gql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useGraphql } from "@/hooks/useGraphql";
-import { nanoid } from "nanoid";
 
 const MyPositionsInventoryWalletFragment = graphql(`
   fragment MyPositionsInventoryWalletFragment on Wallet {
