@@ -101,7 +101,7 @@ func (r *queryResolver) Pools(ctx context.Context) (pools []seawater.Pool, err e
 		pools = MockSeawaterPools()
 		return
 	}
-	err = r.DB.Table("seawater_active_positions_1").Scan(pools).Error
+	err = r.DB.Table("events_seawater_newpool").Scan(&pools).Error
 	return pools, err
 }
 
@@ -115,7 +115,7 @@ func (r *queryResolver) GetPool(ctx context.Context, address string) (pool *seaw
 		pool = MockGetPool(address)
 		return
 	}
-	err = r.DB.Table("events_seawater_newpool").Where("token = ?", address).Scan(pool).Error
+	err = r.DB.Table("events_seawater_newpool").Where("token = ?", address).Scan(&pool).Error
 	return
 }
 
@@ -129,7 +129,7 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, address string) (p
 		positions = MockGetPoolPositions(address)
 		return
 	}
-	err = r.DB.Table("seawater_active_positions_1").Where("pool = ?", address).Scan(positions).Error
+	err = r.DB.Table("seawater_active_positions_1").Where("pool = ?", address).Scan(&positions).Error
 	return
 }
 
@@ -147,7 +147,7 @@ func (r *queryResolver) GetPosition(ctx context.Context, id string) (position *s
 	if err != nil {
 		return nil, fmt.Errorf("bad id: %v", err)
 	}
-	err = r.DB.Table("seawater_positions_1").Where("pos_id = ?", i).Scan(position).Error
+	err = r.DB.Table("seawater_positions_1").Where("pos_id = ?", i).Scan(&position).Error
 	return
 }
 
@@ -163,7 +163,7 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string) (positi
 	}
 	err = r.DB.Table("seawater_active_positions_1").
 		Where("owner = ?", wallet).
-		Scan(positions).
+		Scan(&positions).
 		Error
 	return
 }
@@ -428,7 +428,7 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 		positions = MockGetPoolPositions(obj.Token.String())
 		return
 	}
-	err = r.DB.Table("seawater_positions_1").Where("pool = ?", obj.Token).Scan(positions).Error
+	err = r.DB.Table("seawater_positions_1").Where("pool = ?", obj.Token).Scan(&positions).Error
 	return
 }
 
