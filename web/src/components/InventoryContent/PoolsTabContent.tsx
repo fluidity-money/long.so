@@ -9,7 +9,7 @@ import { MyYieldUnclaimed } from "@/components/InventoryContent/MyYieldUnclaimed
 import { Position } from "@/components/InventoryContent/Position";
 import { graphql, useFragment } from "@/gql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-import { useGraphql } from "@/hooks/useGraphql";
+import { useGraphqlUser } from "@/hooks/useGraphql";
 
 const MyPositionsInventoryWalletFragment = graphql(`
   fragment MyPositionsInventoryWalletFragment on Wallet {
@@ -34,7 +34,7 @@ export const PoolsTabContent = () => {
 
   const showMockData = useFeatureFlag("ui show demo data");
 
-  const { data } = useGraphql();
+  const { data } = useGraphqlUser();
 
   const walletData = useFragment(
     MyPositionsInventoryWalletFragment,

@@ -17,7 +17,7 @@ import {
 } from "@/app/_TransactionHistoryTable/columns";
 import { transactionHistoryData as mockTransactionHistoryData } from "@/components/InventoryContent/data/transactionHistoryData";
 import { graphql, useFragment } from "@/gql";
-import { useGraphql } from "@/hooks/useGraphql";
+import { useGraphqlUser } from "@/hooks/useGraphql";
 import { useMemo, useState } from "react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import Ethereum from "@/assets/icons/ethereum.svg";
@@ -52,18 +52,14 @@ const TradeTabTransactionsFragment = graphql(`
 `);
 
 export const TradeTabContent = () => {
-  const { data } = useGraphql();
+  const { data } = useGraphqlUser();
 
   /**
    * All transactions for a user
    */
-  const transactions = useMemo(
-    () =>
-      data?.pools.flatMap((pool) => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks -- not technically a hook
-        return useFragment(TradeTabTransactionsFragment, pool.swapsForUser);
-      }) ?? [],
-    [data],
+  const transactions = useFragment(
+    TradeTabTransactionsFragment,
+    data?.getSwapsForUser
   );
 
   const showMockData = useFeatureFlag("ui show demo data");

@@ -12,7 +12,7 @@ import { FeatureFlagConfig } from "@/app/_layout/FeatureFlagConfig";
 import { useQueryClient } from "@tanstack/react-query";
 import request from "graphql-request";
 import { graphqlEndpoint } from "@/config/graphqlEndpoint";
-import { graphqlQuery } from "@/hooks/useGraphql";
+import { graphqlQueryGlobal } from "@/hooks/useGraphql";
 import PopulateQueryCache from "@/app/PopulateQueryCache";
 
 const title = "Long Tail AMM";
@@ -64,8 +64,11 @@ export default async function RootLayout({
 }) {
   const gitHash = process.env.GIT_HASH;
 
+  if (!graphqlEndpoint)
+    throw new Error("NEXT_PUBLIC_LONGTAIL_GRAPHQL_URL not set!");
+
   // make server-side requests for pre-fetching data
-  const data = await request(graphqlEndpoint, graphqlQuery, { address: "" });
+  const data = await request(graphqlEndpoint, graphqlQueryGlobal);
 
   const featuresDataRequest = await fetch(
     "https://features.long.so/features.json",

@@ -5,28 +5,18 @@ import { graphql } from "@/gql";
 import { useAccount } from "wagmi";
 
 /**
- * The main GraphQL query to fetch all data.
+ * The main GraphQL query to fetch all data. The global query that should be run and
+ * refreshed. This should include any high cost pool-specific requests where possible,
+ * since behind the scenes this should be reloaded and cached with swr without downtime.
  *
- * Fragments are used to fetch only the data we need. They are
- * configured in the components that use the data.
+ * Fragments are used to fetch only the data we need. They are configured in the
+ * components that use the data.
  */
-export const graphqlQuery = graphql(`
-  query AllData($address: String!) {
-    getWallet(address: $address) {
-      # add wallet fragments here
-      ...MyPositionsWalletFragment
-      ...MyPositionsInventoryWalletFragment
-    }
-
+export const graphqlQueryGlobal = graphql(`
+  query AllData {
     pools {
       # used for the pool selector
       address
-
-      swapsForUser(address: $address) {
-        # add transaction fragments here
-        ...SwapProTransactionsFragment
-        ...TradeTabTransactionsFragment
-      }
 
       # add general fragments here
       ...SwapProPoolFragment
@@ -41,14 +31,50 @@ export const graphqlQuery = graphql(`
 `);
 
 /**
- * Fetch all data from the GraphQL endpoint.
+ * The user-specific GraphQL query that's hard to cache. Done on a per-user basis, and
+ * loaded once the user connects their wallet.
  */
-export const useGraphql = () => {
+export const graphqlQueryUser = graphql(`
+  query ForUser($wallet: String!) {
+    getSwapsForUser(wallet: $wallet) {
+      # add transaction fragments here
+      ...SwapProTransactionsFragment
+      ...TradeTabTransactionsFragment
+    }
+
+    getWallet(address: $wallet) {
+      # add wallet fragments here
+      ...MyPositionsWalletFragment
+      ...MyPositionsInventoryWalletFragment
+    }
+  }
+`);
+
+/**
+ * Fetch all data from the global GraphQL endpoint.
+ */
+export const useGraphqlGlobal = () => {
+  if (!graphqlEndpoint)
+    throw new Error("NEXT_PUBLIC_LONGTAIL_GRAPHQL_URL not set!");
+
+  return useQuery({
+    queryKey: ["graphql"],
+    queryFn: () =>
+      request(graphqlEndpoint!, graphqlQueryGlobal),
+  });
+};
+
+export const useGraphqlUser = () => {
+  if (!graphqlEndpoint)
+    throw new Error("NEXT_PUBLIC_LONGTAIL_GRAPHQL_URL not set!");
+
   const { address } = useAccount();
+
+  // TODO needs to be replaced with an empty instance of this
 
   return useQuery({
     queryKey: ["graphql", address ?? ""],
     queryFn: () =>
-      request(graphqlEndpoint, graphqlQuery, { address: address ?? "" }),
+      request(graphqlEndpoint!, graphqlQueryUser, { wallet: address ?? "" })
   });
 };

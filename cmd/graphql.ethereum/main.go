@@ -4,8 +4,8 @@ package main
 
 import (
 	"log"
-	"os"
 	"net/http"
+	"os"
 
 	"github.com/fluidity-money/long.so/lib/config"
 	"github.com/fluidity-money/long.so/lib/features"
@@ -34,6 +34,16 @@ const (
 	EnvListenAddr = "SPN_LISTEN_ADDR"
 )
 
+type corsMiddleware struct {
+	srv *handler.Server
+}
+
+func (m corsMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	m.srv.ServeHTTP(w, r)
+}
+
 func main() {
 	config := config.Get()
 	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
@@ -55,7 +65,7 @@ func main() {
 			C:    config,
 		},
 	}))
-	http.Handle("/", srv)
+	http.Handle("/", corsMiddleware{srv})
 	http.Handle("/playground", playground.Handler("Long Tail playground", "/"))
 	switch typ := os.Getenv(EnvBackendType); typ {
 	case "lambda":

@@ -19,7 +19,7 @@ import Pickaxe from "@/assets/icons/iridescent-pickaxe-2.svg";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { mockAllPools } from "@/demoData/allPools";
 import { LoaderIcon } from "lucide-react";
-import { useGraphql } from "@/hooks/useGraphql";
+import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { sum } from "lodash";
 import { graphql, useFragment } from "@/gql";
 
@@ -93,7 +93,7 @@ export const AllPoolsFragment = graphql(`
 export const AllPools = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
 
-  const { data, isLoading } = useGraphql();
+  const { data, isLoading } = useGraphqlGlobal();
 
   const poolsData = useFragment(AllPoolsFragment, data?.pools);
 

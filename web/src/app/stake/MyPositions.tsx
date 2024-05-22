@@ -21,7 +21,7 @@ import { useAccount } from "wagmi";
 import { mockMyPositions } from "@/demoData/myPositions";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
-import { useGraphql } from "@/hooks/useGraphql";
+import { useGraphqlUser } from "@/hooks/useGraphql";
 import { fUSDC } from "@/config/tokens";
 
 const MyPositionsWalletFragment = graphql(`
@@ -51,7 +51,7 @@ export const MyPositions = () => {
 
   const showDemoData = useFeatureFlag("ui show demo data");
 
-  const { data } = useGraphql();
+  const { data } = useGraphqlUser();
 
   const walletData = useFragment(MyPositionsWalletFragment, data?.getWallet);
 

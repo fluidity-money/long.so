@@ -13,7 +13,7 @@ import { Graph } from "@/components/SwapPro/SwapProGraph";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { columns, Transaction } from "@/app/_DataTable/columns";
 import { DataTable } from "@/app/_DataTable/DataTable";
-import { useGraphql } from "@/hooks/useGraphql";
+import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
 import { graphql, useFragment } from "@/gql";
 import { SwapProPoolFragment } from "@/components/SwapPro/SwapProPoolFragment";
 import { useMemo } from "react";
@@ -58,31 +58,28 @@ export const SwapPro = ({
 
   const isOpen = override || (!welcome && (swapPro || isLtSm));
 
-  const { data, isLoading } = useGraphql();
+  const { data: dataGlobal, isLoading: isLoadingGlobal } = useGraphqlGlobal();
 
-  // all pools
-  const pools = useFragment(SwapProPoolFragment, data?.pools);
+  const { data: dataUser, isLoading: isLoadingUser } = useGraphqlUser();
+
+  const isLoading = isLoadingUser || isLoadingGlobal;
 
   // the selected pool
   const pool = useMemo(
     () =>
-      pools?.find(
+      dataGlobal?.pools?.find(
         (pool) =>
           pool.address.toLowerCase() === token0.address.toLowerCase() ||
           pool.address.toLowerCase() === token1.address.toLowerCase(),
       ),
-    [pools, token0.address, token1.address],
+    [dataGlobal?.pools, token0.address, token1.address],
   );
 
-  // find the selected pool for the transactions data
-  const transactionsPool = useMemo(
-    () => data?.pools?.find((pool) => pool.address === pool?.address),
-    [data?.pools, pool?.address],
-  );
+  const poolSwapPro = useFragment(SwapProPoolFragment, pool);
 
   const transactions = useFragment(
     SwapProTransactionsFragment,
-    transactionsPool?.swapsForUser,
+    dataUser?.getSwapsForUser,
   );
 
   const showMockData = useFeatureFlag("ui show demo data");
@@ -160,7 +157,7 @@ export const SwapPro = ({
           </TypographyH3>
         )}
 
-        <Graph pool={pool} />
+        {poolSwapPro && <Graph pool={poolSwapPro} />}
 
         <div className="hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:flex">
           <div>

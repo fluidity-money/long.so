@@ -7,4 +7,7 @@ const (
 
 	// DefaultPaginationPollWait to wait between polls.
 	DefaultPaginationPollWait = 15 // Seconds
+
+	// DefaultFusdcDecimals to use as the default for the base asset
+	DefaultFusdcDecimals = 6
 )

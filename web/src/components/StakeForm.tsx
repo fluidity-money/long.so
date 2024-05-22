@@ -41,7 +41,7 @@ import { erc20Abi } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
-import { useGraphql } from "@/hooks/useGraphql";
+import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 
 const colorGradient = new echarts.graphic.LinearGradient(
@@ -95,7 +95,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
   // Parse the price lower and upper, and set the ticks properly.
 
-  const { data } = useGraphql();
+  const { data } = useGraphqlGlobal();
 
   const poolsData = useFragment(StakeFormFragment, data?.pools);
   const poolData = poolsData?.find((pool) => pool.address === poolId);

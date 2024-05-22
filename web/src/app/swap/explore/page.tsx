@@ -10,7 +10,7 @@ import { columns } from "@/app/swap/explore/_AllAssetsTable/columns";
 import { Token, tokens } from "@/config/tokens";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { graphql, useFragment } from "@/gql";
-import { useGraphql } from "@/hooks/useGraphql";
+import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useMemo } from "react";
 import { Hash } from "viem";
@@ -39,7 +39,7 @@ const ExplorePage = () => {
 
   const token = searchParams.get("token") as "0" | "1";
 
-  const { data, isLoading } = useGraphql();
+  const { data, isLoading } = useGraphqlGlobal();
 
   const tokensData = useFragment(SwapExploreFragment, data?.pools);
 

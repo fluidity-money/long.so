@@ -2,7 +2,7 @@ import type { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: "https://testnet-graph.long.so/",
+  schema: process.env.LONGTAIL_GRAPHQL_SCHEMA,
   documents: ["src/**/*.tsx", "src/**/*.ts"],
   ignoreNoDocuments: true, // for better experience with the watcher
   generates: {

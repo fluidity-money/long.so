@@ -14,7 +14,7 @@ import ReactECharts from "echarts-for-react";
 import Link from "next/link";
 import { useEffect } from "react";
 import { graphql, useFragment } from "@/gql";
-import { useGraphql } from "@/hooks/useGraphql";
+import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usdFormat } from "@/lib/usdFormat";
 
@@ -49,7 +49,7 @@ export default function PoolPage() {
   const params = useSearchParams();
   const id = params.get("id");
 
-  const { data } = useGraphql();
+  const { data } = useGraphqlGlobal();
   const allPoolsData = useFragment(ManagePoolFragment, data?.pools);
 
   const poolData = allPoolsData?.find((pool) => pool.id === id);

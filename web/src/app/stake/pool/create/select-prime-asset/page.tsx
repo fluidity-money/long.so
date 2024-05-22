@@ -17,7 +17,7 @@ import {
 } from "@/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/columns";
 import { nanoid } from "nanoid";
 import { fUSDC, tokens } from "../../../../../config/tokens";
-import { useGraphql } from "@/hooks/useGraphql";
+import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { Hash } from "viem";
 import { usdFormat } from "@/lib/usdFormat";
 import { graphql, useFragment } from "@/gql";
@@ -59,7 +59,7 @@ const SelectPrimeAsset = () => {
 
   const showMockData = useFeatureFlag("ui show demo data");
 
-  const { data, isLoading } = useGraphql();
+  const { data, isLoading } = useGraphqlGlobal();
 
   const poolsData = useFragment(SelectPrimeAssetFragment, data?.pools);
   /**

@@ -49,8 +49,8 @@ var (
 		"0x65dfe41220c438bf069bbce9eb66b087fe65db36": {
 			TransactionHash: "",             // TODO
 			BlockNumber:     types.Number{}, // TODO
-			Token:                  types.AddressFromString("0x65dfe41220c438bf069bbce9eb66b087fe65db36"),
-			Fee:                    types.NumberFromBig(new(big.Int).SetInt64(0)),
+			Token:           types.AddressFromString("0x65dfe41220c438bf069bbce9eb66b087fe65db36"),
+			Fee:             types.NumberFromBig(new(big.Int).SetInt64(0)),
 		},
 	}
 
@@ -58,11 +58,11 @@ var (
 		"0x65dfe41220c438bf069bbce9eb66b087fe65db36": {{
 			TransactionHash: "",             // TODO
 			BlockNumber:     types.Number{}, // TODO
-			Id:                     types.EmptyNumber(),
-			Owner:                  types.AddressFromString("0xdca670597bcc35e11200fe07d9191a33a73850b9"),
-			Pool:                   types.AddressFromString("0x65dfe41220c438bf069bbce9eb66b087fe65db36"),
-			Lower:                  types.EmptyNumber(), // TODO
-			Upper:                  types.EmptyNumber(), // TODO
+			Id:              types.EmptyNumber(),
+			Owner:           types.AddressFromString("0xdca670597bcc35e11200fe07d9191a33a73850b9"),
+			Pool:            types.AddressFromString("0x65dfe41220c438bf069bbce9eb66b087fe65db36"),
+			Lower:           types.EmptyNumber(), // TODO
+			Upper:           types.EmptyNumber(), // TODO
 		}},
 	}
 )
@@ -291,31 +291,17 @@ func MockLiquidity(fusdc, token types.Address) (liquidity []model.SeawaterLiquid
 	tickSpread := 5000
 	startingTick := MinTick
 	maxTick := MaxTick
-	now := int(time.Now().Unix())
 	for i := startingTick; i < maxTick; i += int(tickSpread) {
 		tickLower := strconv.Itoa(i)
 		tickUpper := strconv.Itoa(i + tickSpread)
-		fusdcAmt, _ := rand.Int(rand.Reader, MaxMockedVolume)
-		token1Amt, _ := rand.Int(rand.Reader, MaxMockedVolume)
+		price, _ := rand.Int(rand.Reader, MaxMockedPrice)
+		volume, _ := rand.Int(rand.Reader, MaxMockedVolume)
 		liquidity = append(liquidity, model.SeawaterLiquidity{
 			ID:        fmt.Sprintf("tick:%v:%v", tickLower, tickUpper),
 			TickLower: tickLower,
 			TickUpper: tickUpper,
-			Amount: model.PairAmount{
-				Timestamp: now,
-				Fusdc: model.Amount{
-					Token:         fusdc,
-					Decimals:      6,
-					Timestamp:     now, // This should be safe
-					ValueUnscaled: types.UnscaledNumberFromBig(fusdcAmt),
-				},
-				Token1: model.Amount{
-					Token:         token,
-					Decimals:      18,
-					Timestamp:     now,
-					ValueUnscaled: types.UnscaledNumberFromBig(token1Amt),
-				},
-			},
+			Price:     price.String(),  // Okay to have as a normal string. Supposed to be a float.
+			Liquidity: volume.String(), // Same as price.
 		})
 	}
 	return

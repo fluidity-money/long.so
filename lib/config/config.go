@@ -9,7 +9,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
 	_ "github.com/fluidity-money/long.so/lib/setup"
 	"github.com/fluidity-money/long.so/lib/types"
 )
@@ -51,20 +50,6 @@ func Get() C {
 	if fusdcAddr == "" {
 		log.Fatal("SPN_FUSDC_ADDR not set")
 	}
-	var fusdcDecimals int
-	fusdcDecimals_ := os.Getenv("SPN_FUSDC_DECIMALS")
-	if fusdcDecimals_ == "" {
-		log.Fatal("SPN_FUSDC_DECIMALS not set")
-	}
-	i, err := strconv.ParseInt(fusdcDecimals_, 10, 32)
-	if err != nil {
-		log.Fatalf(
-			"failed to parse fUSDC decimals, string is %#v: %v",
-			fusdcDecimals_,
-			err,
-		)
-	}
-	fusdcDecimals = int(i)
 
 	/* Ingestor-specific configuration. */
 	ingestorShouldPoll := os.Getenv("SPN_INGESTOR_SHOULD_POLL") != ""
@@ -110,7 +95,7 @@ func Get() C {
 		TimescaleUrl:  timescaleUrl,
 		SeawaterAddr:  types.AddressFromString(seawaterAddr),
 		FusdcAddr:     types.AddressFromString(fusdcAddr),
-		FusdcDecimals: fusdcDecimals,
+		FusdcDecimals: DefaultFusdcDecimals,
 
 		IngestorShouldPoll: ingestorShouldPoll,
 		IngestorPagination: ingestorPagination,

@@ -7,10 +7,8 @@ package graph
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"math/big"
 	"strconv"
-	"time"
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
@@ -59,7 +57,6 @@ func (r *amountResolver) ValueScaled(ctx context.Context, obj *model.Amount) (st
 		return "", fmt.Errorf("empty amount")
 	}
 	amt := obj.ValueUnscaled
-	slog.Info("value scaled", "obj decimals", obj.Decimals)
 	return amt.ScaleStr(obj.Decimals), nil
 }
 
@@ -77,14 +74,12 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 		dividedAmt := value.Scale(obj.Decimals) //value / (10 ** decimals)
 		switch obj.Token {
 		case r.C.FusdcAddr:
-			slog.Info("features mocked graph value fusdc", "value", value, "divided", dividedAmt)
 			// 4 decimals
 			return fmt.Sprintf("%0.4f", dividedAmt), nil
 		default:
 			//value / (10 ** decimals) * 0.04
 			x := new(big.Float).Set(dividedAmt)
 			x.Quo(dividedAmt, new(big.Float).SetFloat64(0.04))
-			slog.Info("features mocked graph value usd non fusdc", "value", value, "divided", dividedAmt, "x", x)
 			return fmt.Sprintf("%0.4f", x), nil
 		}
 	}
@@ -174,16 +169,8 @@ func (r *queryResolver) GetWallet(ctx context.Context, address string) (wallet *
 		})
 		return &model.Wallet{Address: types.AddressFromString(address)}, nil
 	}
-	positions, err := r.GetPositions(ctx, address)
-	if err != nil {
-		return
-	}
-	// TODO fetch balances
-	var balances []model.Amount
 	wallet = &model.Wallet{
-		Positions: positions,
-		Address:   types.AddressFromString(address),
-		Balances:  balances,
+		Address: types.AddressFromString(address),
 	}
 	return
 }
@@ -192,10 +179,17 @@ func (r *queryResolver) GetWallet(ctx context.Context, address string) (wallet *
 func (r *queryResolver) GetSwaps(ctx context.Context, pool string) (swaps []model.SeawaterSwap, err error) {
 	if r.F.Is(features.FeatureMockGraph) {
 		MockDelay(r.F)
-		swaps = MockSwaps(r.C.FusdcAddr, 150, types.AddressFromString(pool))
+		swaps = MockSwaps(r.C.FusdcAddr, 150, "0x65dfe41220c438bf069bbce9eb66b087fe65db36")
 		return
 	}
-	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?)", r.C.FusdcAddr, r.C.FusdcDecimals).Where("token_in = ?", pool).Or("token_out = ?", pool).Scan(&swaps).Error
+	err = r.DB.Raw(
+		"SELECT * FROM seawater_swaps_1(?, ?)",
+		r.C.FusdcAddr,
+		r.C.FusdcDecimals,
+	).
+		Where("token_in = ?", pool).
+		Or("token_out = ?", pool).
+		Scan(&swaps).Error
 	return
 }
 
@@ -509,7 +503,11 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool) (s
 		swaps = MockSwaps(r.C.FusdcAddr, 150, obj.Token)
 		return
 	}
-	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?)", r.C.FusdcAddr, r.C.FusdcDecimals).Where("token_in = ?", obj.Token).Or("token_out = ?", obj.Token).Scan(&swaps).Error
+	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?)", r.C.FusdcAddr, r.C.FusdcDecimals).
+		Where("token_in = ?", obj.Token).
+		Or("token_out = ?", obj.Token).
+		Scan(&swaps).
+		Error
 	return
 }
 
@@ -641,6 +639,16 @@ func (r *walletResolver) Address(ctx context.Context, obj *model.Wallet) (string
 	return obj.Address.String(), nil
 }
 
+// Balances is the resolver for the balances field.
+func (r *walletResolver) Balances(ctx context.Context, obj *model.Wallet) ([]model.Amount, error) {
+	return nil, nil // TODO
+}
+
+// Positions is the resolver for the positions field.
+func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet) ([]seawater.Position, error) {
+	return nil, nil // TODO
+}
+
 // Amount returns AmountResolver implementation.
 func (r *Resolver) Amount() AmountResolver { return &amountResolver{r} }
 
@@ -665,7 +673,6 @@ func (r *Resolver) SeawaterSwap() SeawaterSwapResolver { return &seawaterSwapRes
 func (r *Resolver) Wallet() WalletResolver { return &walletResolver{r} }
 
 type amountResolver struct{ *Resolver }
-type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type seawaterLiquidityResolver struct{ *Resolver }
 type seawaterPoolResolver struct{ *Resolver }

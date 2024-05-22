@@ -36,7 +36,7 @@ import { Success } from "@/components/sequence/Success";
 import { Fail } from "@/components/sequence/Fail";
 import { LoaderIcon } from "lucide-react";
 import { graphql, useFragment } from "@/gql";
-import { useGraphql } from "@/hooks/useGraphql";
+import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -82,7 +82,7 @@ export const SwapForm = () => {
     setToken0Amount,
     setToken1Amount,
   } = useSwapStore();
-  const { data } = useGraphql();
+  const { data } = useGraphqlGlobal();
 
   const poolsData = useFragment(SwapFormFragment, data?.pools);
 
