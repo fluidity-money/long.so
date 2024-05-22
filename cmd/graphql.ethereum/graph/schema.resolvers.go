@@ -184,12 +184,29 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string) (swaps []mode
 		swaps = MockSwaps(r.C.FusdcAddr, 150, types.AddressFromString(pool))
 		return
 	}
-	return nil, nil // TODO
+	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?)", r.C.FusdcAddr, r.C.FusdcDecimals).Where("token_in = ?", pool).Or("token_out = ?", pool).Scan(&swaps).Error
+	return
 }
 
-// Positions is the resolver for the positions field.
-func (r *seawaterLiquidityResolver) Positions(ctx context.Context, obj *model.SeawaterLiquidity) ([]seawater.Position, error) {
-	panic(fmt.Errorf("not implemented: Positions - positions"))
+// GetSwapsForUser is the resolver for the getSwapsForUser field.
+func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string) (swaps []model.SeawaterSwap, err error) {
+	if r.F.Is(features.FeatureMockGraph) {
+		MockDelay(r.F)
+		swaps = MockSwaps(r.C.FusdcAddr, 150, types.AddressFromString(wallet))
+		return
+	}
+	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?)", r.C.FusdcAddr, r.C.FusdcDecimals).Where("sender = ?", wallet).Scan(&swaps).Error
+	return
+}
+
+// TickLower is the resolver for the tickLower field.
+func (r *seawaterLiquidityResolver) TickLower(ctx context.Context, obj *model.SeawaterLiquidity) (int, error) {
+	panic(fmt.Errorf("not implemented: TickLower - tickLower"))
+}
+
+// TickUpper is the resolver for the tickUpper field.
+func (r *seawaterLiquidityResolver) TickUpper(ctx context.Context, obj *model.SeawaterLiquidity) (int, error) {
+	panic(fmt.Errorf("not implemented: TickUpper - tickUpper"))
 }
 
 // ID is the resolver for the id field.
@@ -210,7 +227,10 @@ func (r *seawaterPoolResolver) Address(ctx context.Context, obj *seawater.Pool) 
 
 // TickSpacing is the resolver for the tickSpacing field.
 func (r *seawaterPoolResolver) TickSpacing(ctx context.Context, obj *seawater.Pool) (string, error) {
-	panic(fmt.Errorf("not implemented: TickSpacing - tickSpacing"))
+	if obj == nil {
+		return "", fmt.Errorf("no pool obj")
+	}
+	return strconv.Itoa(int(obj.TickSpacing)), nil
 }
 
 // Token is the resolver for the token field.
@@ -332,7 +352,8 @@ func (r *seawaterPoolResolver) LiquidityOverTime(ctx context.Context, obj *seawa
 }
 
 // TvlOverTime is the resolver for the tvlOverTime field.
-func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Pool) (tvl model.TvlOverTime, err error) {	if obj == nil {
+func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Pool) (tvl model.TvlOverTime, err error) {
+	if obj == nil {
 		return tvl, fmt.Errorf("pool empty")
 	}
 	if r.F.Is(features.FeatureMockGraph) {
@@ -469,20 +490,8 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool) (s
 		swaps = MockSwaps(r.C.FusdcAddr, 150, obj.Token)
 		return
 	}
-	return nil, nil // TODO
-}
-
-// SwapsForUser is the resolver for the swapsForUser field.
-func (r *seawaterPoolResolver) SwapsForUser(ctx context.Context, obj *seawater.Pool, address string) (swaps []model.SeawaterSwap, err error) {
-	if obj == nil {
-		return nil, fmt.Errorf("empty pool")
-	}
-	if r.F.Is(features.FeatureMockGraph) {
-		MockDelay(r.F)
-		swaps = MockSwaps(r.C.FusdcAddr, 150, "0x65dfe41220c438bf069bbce9eb66b087fe65db36")
-		return
-	}
-	return nil, nil // TODO
+	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?)", r.C.FusdcAddr, r.C.FusdcDecimals).Where("token_in = ?", obj.Token).Or("token_out = ?", obj.Token).Scan(&swaps).Error
+	return
 }
 
 // ID is the resolver for the id field.
