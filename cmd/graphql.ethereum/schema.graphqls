@@ -485,6 +485,11 @@ type Token {
   name: String!
 
   """
+  Image of the token that's stored on a URL somewhere. Loaded from the browser.
+  """
+  image: String!
+
+  """
   Total supply of the token, in the form of hex.
   """
   totalSupply: String!

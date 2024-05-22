@@ -1,9 +1,6 @@
 name: Snyk Vulnerability Scan
 
 on:
-  push:
-    branches:
-      - development
   pull_request:
     branches:
       - development

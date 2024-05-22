@@ -140,6 +140,7 @@ type ComplexityRoot struct {
 		Address     func(childComplexity int) int
 		Decimals    func(childComplexity int) int
 		ID          func(childComplexity int) int
+		Image       func(childComplexity int) int
 		Name        func(childComplexity int) int
 		Symbol      func(childComplexity int) int
 		TotalSupply func(childComplexity int) int
@@ -716,6 +717,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Token.ID(childComplexity), true
 
+	case "Token.image":
+		if e.complexity.Token.Image == nil {
+			break
+		}
+
+		return e.complexity.Token.Image(childComplexity), true
+
 	case "Token.name":
 		if e.complexity.Token.Name == nil {
 			break
@@ -930,9 +938,7 @@ type Query {
   ): SeawaterPool
 
   """
-  getPoolPositions using the address of the pool involved.
-
-  Very cached. Should not be used. The getPoolPositionsForOwner is better.
+  Get pool positions using the address of the pool involved.
   """
   getPoolPositions(
     """
@@ -942,9 +948,7 @@ type Query {
   ): [SeawaterPosition!]
 
   """
-  getPosition that's owned by any pool using it's ID, based on what's known to the database.
-
-  Skips the cache for the most part.
+  Get positions that're owned by any pool using it's ID, based on what's known to the database.
   """
   getPosition(
     """
@@ -976,7 +980,7 @@ type Query {
   ): Wallet
 
   """
-  getSwaps made using a pool. Safe to use to get up to date information on swaps going
+  Get swaps made using a pool. Safe to use to get up to date information on swaps going
   through the UI.
   """
   getSwaps(
@@ -1401,6 +1405,11 @@ type Token {
   name: String!
 
   """
+  Image of the token that's stored on a URL somewhere. Loaded from the browser.
+  """
+  image: String!
+
+  """
   Total supply of the token, in the form of hex.
   """
   totalSupply: String!
@@ -1656,6 +1665,8 @@ func (ec *executionContext) fieldContext_Amount_token(_ context.Context, field g
 				return ec.fieldContext_Token_address(ctx, field)
 			case "name":
 				return ec.fieldContext_Token_name(ctx, field)
+			case "image":
+				return ec.fieldContext_Token_image(ctx, field)
 			case "totalSupply":
 				return ec.fieldContext_Token_totalSupply(ctx, field)
 			case "decimals":
@@ -3343,6 +3354,8 @@ func (ec *executionContext) fieldContext_SeawaterPool_token(_ context.Context, f
 				return ec.fieldContext_Token_address(ctx, field)
 			case "name":
 				return ec.fieldContext_Token_name(ctx, field)
+			case "image":
+				return ec.fieldContext_Token_image(ctx, field)
 			case "totalSupply":
 				return ec.fieldContext_Token_totalSupply(ctx, field)
 			case "decimals":
@@ -4931,6 +4944,50 @@ func (ec *executionContext) _Token_name(ctx context.Context, field graphql.Colle
 }
 
 func (ec *executionContext) fieldContext_Token_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Token",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Token_image(ctx context.Context, field graphql.CollectedField, obj *model.Token) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Token_image(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Image, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Token_image(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Token",
 		Field:      field,
@@ -9310,6 +9367,11 @@ func (ec *executionContext) _Token(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "name":
 			out.Values[i] = ec._Token_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "image":
+			out.Values[i] = ec._Token_image(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
