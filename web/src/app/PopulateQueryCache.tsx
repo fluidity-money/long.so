@@ -17,7 +17,7 @@ export default function PopulateQueryCache({
 }) {
   useEffect(() => {
     // using the same query key as in useGraphql.tsx
-    queryClient.setQueryData(["graphql"], data);
+    queryClient.setQueryData(["graphql", ""], data);
   }, [data]);
 
   useEffect(() => {

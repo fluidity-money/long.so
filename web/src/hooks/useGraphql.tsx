@@ -45,7 +45,7 @@ export const useGraphql = () => {
   const { address } = useAccount();
 
   return useQuery({
-    queryKey: ["graphql"],
+    queryKey: ["graphql", address ?? ""],
     queryFn: () =>
       request(graphqlEndpoint, graphqlQuery, { address: address ?? "" }),
   });

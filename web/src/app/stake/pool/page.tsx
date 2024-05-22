@@ -27,10 +27,10 @@ const ManagePoolFragment = graphql(`
       name
     }
     liquidityIncentives {
-      valueScaled # TODO: we want a percentage here
+      valueScaled
     }
     superIncentives {
-      valueScaled # TODO: we want a percentage here
+      valueScaled
     }
     utilityIncentives {
       amountGivenOut
