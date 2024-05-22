@@ -156,6 +156,13 @@ func IngestWebsocket(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAdd
 }
 
 func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) error {
+	handleLogCallback(seawaterAddr, l, func(t string, a any) {
+		// Use the database connection as the callback to insert this log.
+		databaseInsertLog(db, t, a)
+	})
+	return nil
+}
+func handleLogCallback(seawaterAddr ethCommon.Address, l ethTypes.Log, cb func(table string, l any)) error {
 	var topic1, topic2, topic3 ethCommon.Hash
 	topic0 := l.Topics[0]
 	if len(l.Topics) > 1 {
@@ -277,7 +284,7 @@ func handleLog(db *gorm.DB, seawaterAddr ethCommon.Address, l ethTypes.Log) erro
 		}
 	}
 	setEventFields(&a, blockHash, transactionHash, blockNumber, emitterAddr.String())
-	databaseInsertLog(db, table, a)
+	cb(table, a)
 	return nil
 }
 

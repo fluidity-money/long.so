@@ -213,9 +213,9 @@ func hashToNumber(h ethCommon.Hash) types.Number {
 
 func hashToAddr(h ethCommon.Hash) types.Address {
 	v := ethCommon.BytesToAddress(h.Bytes())
-	return types.Address(v.String())
+	return types.AddressFromString(v.String())
 }
 
 func ethAddrToAddr(a ethCommon.Address) types.Address {
-	return types.Address(a.String())
+	return types.AddressFromString(a.String())
 }
