@@ -83,7 +83,27 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 			return fmt.Sprintf("%0.4f", x), nil
 		}
 	}
-	return "", nil // TODO
+	pool, err := r.Query().GetPool(ctx, obj.Token.String())
+	if err != nil {
+		return "", err
+	}
+	price, err := r.SeawaterPool().Price(ctx, pool)
+	if err != nil {
+		return "", err
+	}
+	value := obj.ValueUnscaled
+	dividedAmt := value.Scale(obj.Decimals) //value / (10 ** decimals)
+	switch obj.Token {
+	case r.C.FusdcAddr:
+		// 4 decimals
+		return fmt.Sprintf("%0.4f", dividedAmt), nil
+	default:
+		//value / (10 ** decimals) * price
+		x := new(big.Float).Set(dividedAmt)
+		priceFloat, _ := new(big.Float).SetString(price) 
+		x.Quo(dividedAmt, priceFloat)
+		return fmt.Sprintf("%0.4f", x), nil
+	}
 }
 
 // Pools is the resolver for the pools field.
