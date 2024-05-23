@@ -36,12 +36,13 @@ interface ISeawaterEvents {
         uint256 indexed id
     );
 
-    /// @notice emitted when the liquidity in a position is changed
-    /// @param id the id of the position being changed
-    /// @param delta the change in liquidity being applied
+    /// @notice emitted when the liquidity in a position is changed.
+    /// @param token0, negative if given to the user. Positive if sent to the contract.
+    /// @param token1 that was taken or given to the contract.
     event UpdatePositionLiquidity(
         uint256 indexed id,
-        int128 delta
+        int256 token0,
+        int256 token1
     );
 
     /// @notice emitted when a liquidity provider collects the fees associated with a position

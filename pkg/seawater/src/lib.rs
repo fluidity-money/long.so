@@ -623,7 +623,11 @@ impl Pools {
             erc20::take(FUSDC_ADDR, token_1.abs_pos()?, permit_1)?;
         }
 
-        evm::log(events::UpdatePositionLiquidity { id, delta });
+        evm::log(events::UpdatePositionLiquidity {
+          id: id,
+          token0: token_0,
+          token1: token_1
+        });
 
         Ok((token_0, token_1))
     }
