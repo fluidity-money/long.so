@@ -26,6 +26,7 @@ const FaucetPage = () => {
     abi: faucet.abi,
     // @ts-expect-error
     functionName: "isMember",
+    // @ts-expect-error
     args: [address as Hash],
   });
 
