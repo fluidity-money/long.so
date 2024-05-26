@@ -18,9 +18,9 @@ jobs:
 
       - name: Install Foundry toolchain
         run: |
-          wget https://github.com/foundry-rs/foundry/releases/download/nightly-a470d635cfcdce68609e9dc5762a3584351bacc1/foundry_nightly_linux_amd64.tar.gz
+          wget https://github.com/foundry-rs/foundry/releases/download/nightly/foundry_nightly_linux_amd64.tar.gz
           tar -xzf foundry_nightly_linux_amd64.tar.gz
-          sudo mv forge /usr/local/bin/
+          sudo mv forge /usr/local/bin
 
       - name: Setup mdBook
         uses: peaceiris/actions-mdbook@v2
