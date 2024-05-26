@@ -223,37 +223,37 @@ func handleLogCallback(seawaterAddr ethCommon.Address, l ethTypes.Log, cb func(t
 	case seawater.TopicMintPosition:
 		a, err = seawater.UnpackMintPosition(topic1, topic2, topic3, data)
 		logEvent("MintPosition")
-		table = "events_seawater_mintPosition"
+		table = "events_seawater_mintposition"
 
 	case seawater.TopicBurnPosition:
 		a, err = seawater.UnpackBurnPosition(topic1, topic2, data)
 		logEvent("BurnPosition")
-		table = "events_seawater_burnPosition"
+		table = "events_seawater_burnposition"
 
 	case seawater.TopicTransferPosition:
 		a, err = seawater.UnpackTransferPosition(topic1, topic2, topic3, data)
 		logEvent("TransferPosition")
-		table = "events_seawater_transferPosition"
+		table = "events_seawater_transferposition"
 
 	case seawater.TopicUpdatePositionLiquidity:
 		a, err = seawater.UnpackUpdatePositionLiquidity(topic1, topic2, data)
 		logEvent("UpdatePositionLiquidity")
-		table = "events_seawater_updatePositionLiquidity"
+		table = "events_seawater_updatepositionliquidity"
 
 	case seawater.TopicCollectFees:
 		a, err = seawater.UnpackCollectFees(topic1, topic2, topic3, data)
 		logEvent("CollectFees")
-		table = "events_seawater_collectFees"
+		table = "events_seawater_collectfees"
 
 	case seawater.TopicNewPool:
 		a, err = seawater.UnpackNewPool(topic1, topic2, topic3, data)
 		logEvent("NewPool")
-		table = "events_seawater_newPool"
+		table = "events_seawater_newpool"
 
 	case seawater.TopicCollectProtocolFees:
 		a, err = seawater.UnpackCollectProtocolFees(topic1, topic2, data)
 		logEvent("CollectProtocolFees")
-		table = "events_seawater_collectProtocolFees"
+		table = "events_seawater_collectprotocolfees"
 
 	case seawater.TopicSwap2:
 		a, err = seawater.UnpackSwap2(topic1, topic2, topic3, data)

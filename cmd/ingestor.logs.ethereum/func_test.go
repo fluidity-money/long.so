@@ -36,7 +36,7 @@ func TestHandleLogCallbackNewPool(t *testing.T) {
 	var l ethTypes.Log
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
 	handleLogCallback(seawaterAddr, l, func(table string, a any) error {
-		assert.Equalf(t, "events_seawater_newPool", table, "table not equal")
+		assert.Equalf(t, "events_seawater_newpool", table, "table not equal")
 		// This test is captured in a unit test, so we can focus on just testing
 		// this one field.
 		newPool, ok := a.(*seawater.NewPool)
