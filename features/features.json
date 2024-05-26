@@ -2,7 +2,7 @@
 	"ui show feature flags panel": false,
 	"ui show demo data": false,
 	"ui show superloop": false,
-	"graphql mock demo data": true,
+	"graphql mock demo data": false,
 	"graphql mock demo data should delay": true,
 	"ui show fee tier": false,
 	"ui show optimising fee route": false,

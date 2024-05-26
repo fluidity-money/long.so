@@ -6,7 +6,7 @@ export type Token = {
 
 export const fUSDC: Token = {
   name: "fUSDC",
-  address: "0x0fFC26C47FeD8C54AF2f0872cc51d79D173730a8",
+  address: "0xA8EA92c819463EFbEdDFB670FEfC881A480f0115",
   symbol: "fUSDC",
 };
 
