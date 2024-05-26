@@ -5,7 +5,7 @@ on:
     branches:
       - development
     paths:
-      - 'pkg/seawater/**'
+      - 'pkg/**'
 
 jobs:
   deploy:
