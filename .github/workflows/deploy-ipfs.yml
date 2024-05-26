@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - development
+    paths:
+      - 'web/**'
 
 jobs:
   deploy-to-ipfs:
