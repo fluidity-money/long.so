@@ -27,3 +27,4 @@ docker
 docs-out/
 
 tsconfig.tsbuildinfo
+yarn.lock
