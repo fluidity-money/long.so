@@ -11,6 +11,7 @@ fs_permissions = [
 [doc]
 out = "docs-out"
 title = "Long Tail AMM contracts docs"
+repository = "https://github.com/fluidity-money/long.so"
 
 revert-strings = "debug"
 

@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 
 import "../sol/Faucet.sol";
 
-import "../interfaces/IERC20.sol";
+import "../sol/IERC20.sol";
 
 contract TestFaucet is Test {
     Faucet faucet;

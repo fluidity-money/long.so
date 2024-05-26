@@ -1,8 +1,8 @@
 // SPDX-Identifier: MIT
 pragma solidity 0.8.16;
 
-import "../interfaces/IFaucet.sol";
-import "../interfaces/IERC20.sol";
+import "./IFaucet.sol";
+import "./IERC20.sol";
 
 import "forge-std/console.sol";
 

@@ -25,10 +25,16 @@ jobs:
           tar -xzf foundry_nightly_linux_amd64.tar.gz
           sudo mv forge /usr/local/bin/
 
+      - name: Setup mdBook
+        uses: peaceiris/actions-mdbook@v2
+        with:
+          mdbook-version: '0.4.10'
+          # mdbook-version: 'latest'
+
       - name: Generate documentation
         run: |
           cd pkg
-          forge doc
+          forge doc -b
 
       - name: Deploy to GitHub Pages
         env:

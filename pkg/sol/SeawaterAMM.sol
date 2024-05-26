@@ -1,8 +1,8 @@
 // SPDX-Identifier: MIT
 pragma solidity 0.8.16;
 
-import "../interfaces/ISeawaterExecutors.sol";
-import "../interfaces/ISeawaterAMM.sol";
+import "./ISeawaterExecutors.sol";
+import "./ISeawaterAMM.sol";
 
 // slots to store proxy data in
 // these are calculated as keccak()-1 to avoid collisions

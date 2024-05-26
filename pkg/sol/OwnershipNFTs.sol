@@ -1,9 +1,9 @@
 // SPDX-Identifier: MIT
 pragma solidity 0.8.16;
 
-import "../interfaces/IERC721Metadata.sol";
-import "../interfaces/IERC721TokenReceiver.sol";
-import "../interfaces/ISeawaterOwnership.sol";
+import "./IERC721Metadata.sol";
+import "./IERC721TokenReceiver.sol";
+import "./ISeawaterOwnership.sol";
 
 /*
  * OwnershipNFTs is a simple interface for tracking ownership of

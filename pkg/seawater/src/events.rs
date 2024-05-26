@@ -2,6 +2,6 @@
 
 use stylus_sdk::alloy_sol_types::sol;
 
-sol!("../interfaces/ISeawaterEvents.sol");
+sol!("../sol/ISeawaterEvents.sol");
 
 pub use ISeawaterEvents::*;
