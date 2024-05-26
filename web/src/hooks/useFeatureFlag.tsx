@@ -52,6 +52,16 @@ export interface FeatureFlags {
    * Show the campaign banner with information like a countdown.
    */
   "ui show campaign banner": boolean;
+
+  /**
+   * Show the rewards claimed for users to see.
+   */
+  "ui show rewards claimed": boolean;
+
+  /**
+   * Show the incentives screen in the staking page.
+   */
+  "ui show incentives": boolean;
 }
 
 /**

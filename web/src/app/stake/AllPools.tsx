@@ -98,6 +98,8 @@ export const AllPools = () => {
   const poolsData = useFragment(AllPoolsFragment, data?.pools);
 
   const showDemoData = useFeatureFlag("ui show demo data");
+  const showRewardsClaimed = useFeatureFlag("ui show rewards claimed");
+  const showIncentives = useFeatureFlag("ui show incentives");
 
   const pools = useMemo(() => {
     if (showDemoData) return mockAllPools;
@@ -157,29 +159,33 @@ export const AllPools = () => {
 
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">Incentives</div>
-              <div className="text-2xl md:text-3xl">
-                {showDemoData
-                  ? "200k"
-                  : // sum the liquidity and super incentives of all pools
-                    usdFormat(
-                      sum(
-                        poolsData?.map(
-                          (pool) =>
-                            parseFloat(pool.liquidityIncentives.valueUsd) +
-                            parseFloat(pool.superIncentives.valueUsd),
+              {showIncentives && (
+                <div className="text-2xl md:text-3xl">
+                  {showDemoData
+                    ? "200k"
+                    : // sum the liquidity and super incentives of all pools
+                      usdFormat(
+                        sum(
+                          poolsData?.map(
+                            (pool) =>
+                              parseFloat(pool.liquidityIncentives.valueUsd) +
+                              parseFloat(pool.superIncentives.valueUsd),
+                          ),
                         ),
-                      ),
-                    )}
-              </div>
+                      )}
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">Rewards Claimed</div>
-              <div className="text-2xl md:text-3xl">
-                {/* TODO: not sure where to get this from */}
-                {showDemoData ? "59.1K" : 0}
+              {showRewardsClaimed && (
+                <div className="text-2xl md:text-3xl">
+                  {/* TODO: not sure where to get this from */}
+                  {showDemoData ? "59.1K" : 0}
+                </div>
+              )}
               </div>
-            </div>
           </div>
 
           <div className="flex flex-1 flex-row justify-center gap-4">

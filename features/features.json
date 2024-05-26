@@ -6,5 +6,7 @@
 	"graphql mock demo data should delay": true,
 	"ui show fee tier": false,
 	"ui show optimising fee route": false,
-	"ui show campaign banner": false
+	"ui show campaign banner": false,
+	"ui show rewards claimed": false,
+	"ui show incentives": false
 }
