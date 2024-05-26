@@ -3,7 +3,7 @@
 	"ui show demo data": false,
 	"ui show superloop": false,
 	"graphql mock demo data": false,
-	"graphql mock demo data should delay": true,
+	"graphql mock demo data should delay": false,
 	"ui show fee tier": false,
 	"ui show optimising fee route": false,
 	"ui show campaign banner": false,

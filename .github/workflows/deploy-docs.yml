@@ -33,14 +33,16 @@ jobs:
           cd pkg
           forge doc -b
 
-      - name: Deploy to GitHub Pages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          cd pkg/docs-out/book
-          git init
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add .
-          git commit -m 'Deploy documentation'
-          git push --force --quiet "https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:gh-pages
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_TOKEN }}
+          # update
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # update
+          projectName: ${{ secrets.CLOUDFLARE_DOCS_PROJECT_NAME }}
+          directory: out
+          # to enable Github Deployments
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+          workingDirectory: pkg/docs-out/book
