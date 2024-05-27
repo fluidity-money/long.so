@@ -9,5 +9,6 @@
 	"ui show campaign banner": false,
 	"ui show rewards claimed": false,
 	"ui show incentives": false,
-	"show stake apy": false
+	"ui show stake apy": false,
+	"ui show my transactions": false
 }

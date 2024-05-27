@@ -84,6 +84,7 @@ export const SwapPro = ({
 
   const showMockData = useFeatureFlag("ui show demo data");
   const showStakeApy = useFeatureFlag("ui show stake apy");
+  const showMyTransactions = useFeatureFlag("ui show my transactions");
 
   const transactionData = useMemo((): Transaction[] | undefined => {
     if (showMockData)
@@ -185,12 +186,14 @@ export const SwapPro = ({
         <div className="mt-[35px]">
           <div className="flex w-full flex-row items-center justify-between">
             <h3 className="text-sm">Transaction History</h3>
-            <div>
-              <span className="cursor-pointer text-sm underline">
-                My Transactions
-              </span>{" "}
-              {"->"}
-            </div>
+            {showMyTransactions && (
+              <div>
+                <span className="cursor-pointer text-sm underline">
+                  My Transactions
+                </span>{" "}
+                {"->"}
+              </div>
+            )}
           </div>
         </div>
 

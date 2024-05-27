@@ -67,6 +67,11 @@ export interface FeatureFlags {
    * Show the Stake APY in the stake tabs.
    */
   "ui show stake apy": boolean;
+
+  /**
+   * Show the my transactions option.
+   */
+  "ui show my transactions": boolean;
 }
 
 /**
