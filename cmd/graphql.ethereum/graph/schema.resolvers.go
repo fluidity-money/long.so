@@ -325,23 +325,20 @@ func (r *seawaterPoolResolver) Price(ctx context.Context, obj *seawater.Pool) (s
 		}
 		return daily[0], nil
 	}
-	var result struct {
-		FinalTick types.Number `json:"final_tick"`
-	}
+	var result model.PriceResult
 	err := r.DB.Table("seawater_final_ticks_1").Where("pool = ?", obj.Token).Limit(1).Scan(&result).Error
 	if err != nil {
 		return "", err
 	}
-	// p(i)) = 1.0001^i * 10**(fUSDC decimals - pool decimals)
-	tick, _ := result.FinalTick.Float64()
-	base := float64(10001) / 10000
-	decimals := math.Pow10(r.C.FusdcDecimals - int(obj.Decimals))
-	price := math.Pow(base, tick) * decimals
-	return fmt.Sprintf("%0.4f", price), nil
+	return result.Price(r.C.FusdcDecimals, int(obj.Decimals)), nil
 }
 
 // PriceOverTime is the resolver for the priceOverTime field.
 func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.Pool) (price model.PriceOverTime, err error) {
+	var (
+		maxDays   = 31
+		maxMonths = 12
+	)
 	if obj == nil {
 		return price, fmt.Errorf("pool empty")
 	}
@@ -350,17 +347,32 @@ func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.
 			MockDelay(r.F)
 			return nil
 		})
-		daily, _, _, err := MockPriceOverTime(31, r.C.FusdcAddr, obj.Token)
+		daily, _, _, err := MockPriceOverTime(maxDays, r.C.FusdcAddr, obj.Token)
 		if err != nil {
 			return price, err
 		}
-		monthly, _, _, err := MockPriceOverTime(12, r.C.FusdcAddr, obj.Token)
+		monthly, _, _, err := MockPriceOverTime(maxMonths, r.C.FusdcAddr, obj.Token)
 		if err != nil {
 			return price, err
 		}
 		return model.PriceOverTime{daily, monthly}, nil
 	}
-	return price, nil // TODO
+	var daily, monthly []model.PriceResult
+	err = r.DB.Table("seawater_final_ticks_daily_1").Where("pool = ?", obj.Token).Limit(maxDays).Scan(&daily).Error
+	if err != nil {
+		return
+	}
+	err = r.DB.Table("seawater_final_ticks_monthly_1").Where("pool = ?", obj.Token).Limit(maxMonths).Scan(&monthly).Error
+	if err != nil {
+		return
+	}
+	for _, d := range daily {
+		price.Daily = append(price.Daily, d.Price(r.C.FusdcDecimals, int(obj.Decimals)))
+	}
+	for _, m := range monthly {
+		price.Monthly = append(price.Monthly, m.Price(r.C.FusdcDecimals, int(obj.Decimals)))
+	}
+	return price, nil
 }
 
 // VolumeOverTime is the resolver for the volumeOverTime field.

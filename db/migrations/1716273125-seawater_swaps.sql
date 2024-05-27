@@ -84,6 +84,34 @@ FROM (
     SELECT final_tick1 AS final_tick, created_by, to_ AS pool 
     FROM events_seawater_swap2
 ) AS swaps 
-ORDER BY created_by DESC 
+ORDER BY created_by DESC;
+
+CREATE VIEW seawater_final_ticks_daily_1 AS
+SELECT
+    -- TODO it may make sense to average this over the day.
+    LAST(final_tick, created_by) AS final_tick,
+    pool,
+    time_bucket('1 day', created_by) AS day
+FROM
+    seawater_final_ticks_1
+GROUP BY
+    pool,
+    day
+ORDER BY
+    day DESC;
+
+CREATE VIEW seawater_final_ticks_monthly_1 AS
+SELECT
+    -- TODO it may make sense to average this over the month.
+    LAST(final_tick, created_by) AS final_tick,
+    pool,
+    time_bucket('1 month', created_by) AS month
+FROM
+    seawater_final_ticks_1
+GROUP BY
+    pool,
+    month 
+ORDER BY
+    month DESC;
 
 -- migrate:down
