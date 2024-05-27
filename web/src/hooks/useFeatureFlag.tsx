@@ -62,6 +62,11 @@ export interface FeatureFlags {
    * Show the incentives screen in the staking page.
    */
   "ui show incentives": boolean;
+
+  /**
+   * Show the Stake APY in the stake tabs.
+   */
+  "ui show stake apy": boolean;
 }
 
 /**

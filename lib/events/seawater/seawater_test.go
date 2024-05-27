@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUnpackMintPosition(t *testing.T) {
+func TestUnpackMintPosition1(t *testing.T) {
 	var (
 		topic1 = ethCommon.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000")
 		topic2 = ethCommon.HexToHash("0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5")
@@ -43,6 +43,43 @@ func TestUnpackMintPosition(t *testing.T) {
 	)
 	assert.Equal(t,
 		types.NumberFromInt64(50108),
+		p.Upper,
+		"upper not equal",
+	)
+}
+
+func TestMintPosition2(t *testing.T) {
+	var (
+		topic1 = ethCommon.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000")
+		topic2 = ethCommon.HexToHash("0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5")
+		topic3 = ethCommon.HexToHash("0x000000000000000000000000e984f758f362d255bd96601929970cef9ff19dd7")
+	)
+	d, err := hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d89e8")
+	if err != nil {
+		t.Fatalf("failed to decode string: %v", err)
+	}
+	p, err := UnpackMintPosition(topic1, topic2, topic3, d)
+	if err != nil {
+		t.Fatalf("unpack mint position: %v", err)
+	}
+	assert.Equalf(t, types.EmptyNumber(), p.PosId, "id was not zero")
+	assert.Equalf(t,
+		types.AddressFromString("0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5"),
+		p.Owner,
+		"address not equal",
+	)
+	assert.Equalf(t,
+		types.AddressFromString("0xe984f758f362d255bd96601929970cef9ff19dd7"),
+		p.Pool,
+		"pool not equal",
+	)
+	assert.Equal(t,
+		types.NumberFromInt64(0),
+		p.Lower,
+		"lower not equal",
+	)
+	assert.Equal(t,
+		types.NumberFromInt64(887272),
 		p.Upper,
 		"upper not equal",
 	)

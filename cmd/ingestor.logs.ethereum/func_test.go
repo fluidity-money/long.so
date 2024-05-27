@@ -49,3 +49,40 @@ func TestHandleLogCallbackNewPool(t *testing.T) {
 		return nil
 	})
 }
+
+func TestHandleLogCallbackMintPosition(t *testing.T) {
+	// Test the new pool handling code.
+	seawaterAddr := ethCommon.HexToAddress("0x40e659f4eB2fdA398ce0860aFB74701d4977E530")
+	s := strings.NewReader(`
+{
+	"address": "0x40e659f4eb2fda398ce0860afb74701d4977e530",
+	"blockHash": "0x79fd90d0e9893ecf19863fe5efa73c46d4901fcd4047666f12c7cbdf70689b6f",
+	"blockNumber": "0x32",
+	"data": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d89e8",
+	"logIndex": "0x0",
+	"removed": false,
+	"topics": [
+		"0x7b0f5059c07211d90c2400fc99ac93e0e56db5168afa91f60d178bb6dc1c73f0",
+		"0x0000000000000000000000000000000000000000000000000000000000000000",
+		"0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
+		"0x000000000000000000000000e984f758f362d255bd96601929970cef9ff19dd7"
+	],
+	"transactionHash": "0x20757f5e66e75ba065a02ce052fcd2fa7d51f0ce71487da172cc6b37c286fd75",
+	"transactionIndex": "0x1"
+}`)
+	var l ethTypes.Log
+	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
+	handleLogCallback(seawaterAddr, l, func(table string, a any) error {
+		assert.Equalf(t, "events_seawater_mintposition", table, "table not equal")
+		// This test is captured in a unit test, so we can focus on just testing
+		// this one field.
+		newPool, ok := a.(*seawater.MintPosition)
+		assert.Truef(t, ok, "MintPosition type coercion not true")
+		assert.Equalf(t,
+			types.AddressFromString("0xFEb6034FC7dF27dF18a3a6baD5Fb94C0D3dCb6d5"),
+			newPool.Owner,
+			"token not equal",
+		)
+		return nil
+	})
+}

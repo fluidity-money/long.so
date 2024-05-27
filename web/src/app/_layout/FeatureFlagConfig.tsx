@@ -26,6 +26,7 @@ const featureFlagsLabels: { key: keyof FeatureFlags; label: string }[] = [
   { key: "ui show campaign banner", label: "UI Show Campaign Banner" },
   { key: "ui show rewards claimed", label: "UI Show Rewards Claimed" },
   { key: "ui show incentives", label: "UI Show Incentives" },
+  { key: "ui show stake apy", label: "UI Show Stake APY"},
 ];
 
 export const FeatureFlagConfig = () => {

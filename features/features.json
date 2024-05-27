@@ -8,5 +8,6 @@
 	"ui show optimising fee route": false,
 	"ui show campaign banner": false,
 	"ui show rewards claimed": false,
-	"ui show incentives": false
+	"ui show incentives": false,
+	"show stake apy": false
 }
