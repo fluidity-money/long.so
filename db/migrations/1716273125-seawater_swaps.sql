@@ -70,4 +70,20 @@ LEFT JOIN events_seawater_newpool toPool
 	ON swaps.token_out = toPool.token;
 $$;
 
+-- Retrieve the most recent ticks in each pool for swap1, swap2 from, and swap2 to. Intended to be filtered like
+-- WHERE pool = ? LIMIT 1 to find the most recent tick 
+CREATE VIEW seawater_final_ticks_1 AS
+SELECT * 
+FROM (
+    SELECT final_tick, created_by, pool 
+    FROM events_seawater_swap1 
+    UNION ALL 
+    SELECT final_tick0 AS final_tick, created_by, from_ AS pool 
+    FROM events_seawater_swap2 
+    UNION ALL 
+    SELECT final_tick1 AS final_tick, created_by, to_ AS pool 
+    FROM events_seawater_swap2
+) AS swaps 
+ORDER BY created_by DESC 
+
 -- migrate:down

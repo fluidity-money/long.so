@@ -7,6 +7,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"math"
 	"math/big"
 	"strconv"
 	"time"
@@ -324,8 +325,19 @@ func (r *seawaterPoolResolver) Price(ctx context.Context, obj *seawater.Pool) (s
 		}
 		return daily[0], nil
 	}
-	// TODO
-	return "0", nil
+	var result struct {
+		FinalTick types.Number `json:"final_tick"`
+	}
+	err := r.DB.Table("seawater_final_ticks_1").Where("pool = ?", obj.Token).Limit(1).Scan(&result).Error
+	if err != nil {
+		return "", err
+	}
+	// p(i)) = 1.0001^i * 10**(fUSDC decimals - pool decimals)
+	tick, _ := result.FinalTick.Float64()
+	base := float64(10001) / 10000
+	decimals := math.Pow10(r.C.FusdcDecimals - int(obj.Decimals))
+	price := math.Pow(base, tick) * decimals
+	return fmt.Sprintf("%0.4f", price), nil
 }
 
 // PriceOverTime is the resolver for the priceOverTime field.
