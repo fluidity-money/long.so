@@ -61,14 +61,24 @@ func NumberFromString(v string) (*Number, error) {
 	n := NumberFromBig(i)
 	return &n, nil
 }
+
 // String the Number, printing its hex
 func (u Number) String() string {
+	if u.Int == nil {
+		return "0"
+	}
 	return u.Int.Text(16)
 }
 func (u Number) Big() *big.Int {
+	if u.Int == nil {
+		return big.NewInt(0)
+	}
 	return new(big.Int).Set(u.Int)
 }
 func (u Number) Value() (sqlDriver.Value, error) {
+	if u.Int == nil {
+		return nil, nil
+	}
 	// Use the underlying Int String method to get an actual number.
 	return u.Int.String(), nil
 }
