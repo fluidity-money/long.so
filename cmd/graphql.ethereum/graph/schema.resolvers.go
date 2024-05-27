@@ -299,6 +299,7 @@ func (r *seawaterPoolResolver) Token(ctx context.Context, obj *seawater.Pool) (t
 		return t, fmt.Errorf("erc20 at %#v: %v", obj.Token, err)
 	}
 	return model.Token{
+		Address:     obj.Token.String(),
 		Name:        name,
 		Symbol:      symbol,
 		TotalSupply: totalSupply.String(),
@@ -324,7 +325,7 @@ func (r *seawaterPoolResolver) Price(ctx context.Context, obj *seawater.Pool) (s
 		return daily[0], nil
 	}
 	// TODO
-	return "", nil
+	return "0", nil
 }
 
 // PriceOverTime is the resolver for the priceOverTime field.
