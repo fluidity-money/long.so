@@ -19,12 +19,11 @@ func TestDecodeErc20Details(t *testing.T) {
 		t.Fatalf("failed to unpack aggregate: %v", err)
 	}
 	t.Logf("multicall unpack data: %v", i)
-	name, symbol, totalSupply, decimals, err := decodeErc20Details(i[1])
+	name, symbol, totalSupply, err := decodeErc20Details(i[1])
 	if err != nil {
 		t.Fatalf("failed to unpack erc20 decimals: %v", err)
 	}
 	assert.Equal(t, "Fluidity", name)
 	assert.Equal(t, "FLY", symbol)
 	assert.Equal(t, new(big.Int).SetInt64(1000000000000000), totalSupply.Int)
-	assert.Equal(t, uint8(6), decimals)
 }

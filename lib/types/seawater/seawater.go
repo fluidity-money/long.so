@@ -14,7 +14,8 @@ type Pool struct {
 	BlockNumber     types.Number  `json:"blockNumber"`
 	Token           types.Address `json:"token"`
 	Fee             types.Number  `json:"fee"`
-	TickSpacing uint8 `json:"tickSpacing"`
+	Decimals        uint8         `json:"decimals"`
+	TickSpacing     uint8         `json:"tickSpacing"`
 }
 
 // Position is set by seawater_active_positions_1

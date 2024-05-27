@@ -16,7 +16,7 @@ import (
 )
 
 // multicallAddr from the default web config multicall (testnet only!)
-var multicallAddr = ethCommon.HexToAddress("0x42aaE78422EF3e8E6d0D88e58E25CA7C7Ecb9D5a")
+var multicallAddr = ethCommon.HexToAddress("0x1cAE7315c6E1dd217982317F2d1399e76F4BD994")
 
 var (
 	//go:embed erc20.json
@@ -30,7 +30,7 @@ var (
 	multicallAbi, _ = ethAbi.JSON(bytes.NewReader(multicallAbiBytes))
 )
 
-func GetErc20Details(ctx context.Context, c *ethclient.Client, addr_ types.Address) (name string, symbol string, totalSupply types.UnscaledNumber, decimals uint8, err error) {
+func GetErc20Details(ctx context.Context, c *ethclient.Client, addr_ types.Address) (name string, symbol string, totalSupply types.UnscaledNumber,  err error) {
 	if !ethCommon.IsHexAddress(addr_.String()) {
 		err = fmt.Errorf("bad erc20 address: %v", err)
 		return
@@ -49,10 +49,6 @@ func GetErc20Details(ctx context.Context, c *ethclient.Client, addr_ types.Addre
 	if err != nil {
 		return
 	}
-	decimalsCd, err := erc20Abi.Pack("decimals")
-	if err != nil {
-		return
-	}
 	symbolCd, err := erc20Abi.Pack("symbol")
 	if err != nil {
 		return
@@ -65,7 +61,6 @@ func GetErc20Details(ctx context.Context, c *ethclient.Client, addr_ types.Addre
 		{addr, nameCd},
 		{addr, symbolCd},
 		{addr, totalSupplyCd},
-		{addr, decimalsCd},
 	})
 	if err != nil {
 		return
@@ -73,7 +68,7 @@ func GetErc20Details(ctx context.Context, c *ethclient.Client, addr_ types.Addre
 	return decodeErc20Details(i[1])
 }
 
-func decodeErc20Details(i any) (name string, symbol string, totalSupply types.UnscaledNumber, decimals uint8, err error) {
+func decodeErc20Details(i any) (name string, symbol string, totalSupply types.UnscaledNumber, err error) {
 	b, ok := i.([][]byte)
 	if !ok {
 		err = fmt.Errorf("bad multicall data: %T", i)
@@ -105,13 +100,5 @@ func decodeErc20Details(i any) (name string, symbol string, totalSupply types.Un
 		return
 	}
 	totalSupply = types.UnscaledNumberFromBig(totalSupply_)
-	decimals_, err := erc20Abi.Unpack("decimals", b[3])
-	if err != nil {
-		return
-	}
-	if decimals, ok = decimals_[0].(uint8); !ok {
-		err = fmt.Errorf("bad decimals: %T", decimals_)
-		return
-	}
 	return
 }

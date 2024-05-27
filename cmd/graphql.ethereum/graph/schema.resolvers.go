@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math/big"
 	"strconv"
+	"time"
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
@@ -16,6 +17,8 @@ import (
 	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
 )
+
+var FloatZero = new(big.Float)
 
 // Token is the resolver for the token field.
 func (r *amountResolver) Token(ctx context.Context, obj *model.Amount) (model.Token, error) {
@@ -26,20 +29,20 @@ func (r *amountResolver) Token(ctx context.Context, obj *model.Amount) (model.To
 		MockDelay(r.F)
 		return MockToken(obj.Token.String())
 	}
-	name, symbol, totalSupply, decimals, err := erc20.GetErc20Details(
+	name, symbol, totalSupply, err := erc20.GetErc20Details(
 		ctx,
 		r.Geth,
 		obj.Token,
 	)
 	if err != nil {
-		return model.Token{}, fmt.Errorf("erc20: %v", err)
+		return model.Token{}, fmt.Errorf("erc20 token %#v: %v", obj.Token, err)
 	}
 	return model.Token{
 		Address:     obj.Token.String(),
 		Name:        name,
 		Symbol:      symbol,
 		TotalSupply: totalSupply.String(),
-		Decimals:    int(decimals),
+		Decimals:    obj.Decimals,
 	}, nil
 }
 
@@ -100,7 +103,16 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	default:
 		//value / (10 ** decimals) * price
 		x := new(big.Float).Set(dividedAmt)
-		priceFloat, _ := new(big.Float).SetString(price) 
+		if price == "" {
+			return "0", nil // Empty price.
+		}
+		priceFloat, ok := new(big.Float).SetString(price)
+		if !ok {
+			return "", fmt.Errorf("failed to set string: %#v", price)
+		}
+		if priceFloat.Cmp(FloatZero) == 0 { // Price is also empty (0).
+			return "0", nil
+		}
 		x.Quo(dividedAmt, priceFloat)
 		return fmt.Sprintf("%0.4f", x), nil
 	}
@@ -278,19 +290,19 @@ func (r *seawaterPoolResolver) Token(ctx context.Context, obj *seawater.Pool) (t
 		})
 		return MockToken(obj.Token.String())
 	}
-	name, symbol, totalSupply, decimals, err := erc20.GetErc20Details(
+	name, symbol, totalSupply, err := erc20.GetErc20Details(
 		ctx,
 		r.Geth,
 		obj.Token,
 	)
 	if err != nil {
-		return t, fmt.Errorf("erc20: %v", err)
+		return t, fmt.Errorf("erc20 at %#v: %v", obj.Token, err)
 	}
 	return model.Token{
 		Name:        name,
 		Symbol:      symbol,
 		TotalSupply: totalSupply.String(),
-		Decimals:    int(decimals),
+		Decimals:    int(obj.Decimals),
 	}, nil
 }
 
@@ -449,6 +461,12 @@ func (r *seawaterPoolResolver) LiquidityIncentives(ctx context.Context, obj *sea
 		MockDelay(r.F)
 		return MockAmount(), nil
 	}
+	amount = model.Amount{
+		Token:         obj.Token,
+		Decimals:      int(obj.Decimals),
+		Timestamp:     int(time.Now().Unix()),
+		ValueUnscaled: types.EmptyUnscaledNumber(),
+	}
 	return amount, nil // TODO
 }
 
@@ -460,6 +478,12 @@ func (r *seawaterPoolResolver) SuperIncentives(ctx context.Context, obj *seawate
 	if r.F.Is(features.FeatureMockGraph) {
 		MockDelay(r.F)
 		return MockAmount(), nil
+	}
+	amount = model.Amount{
+		Token:         obj.Token,
+		Decimals:      int(obj.Decimals),
+		Timestamp:     int(time.Now().Unix()),
+		ValueUnscaled: types.EmptyUnscaledNumber(),
 	}
 	return amount, nil // TODO
 }
