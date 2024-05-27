@@ -89,6 +89,7 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 		log.Fatalf("failed to filter logs: %v", err)
 	}
 	err = db.Transaction(func(db *gorm.DB) error {
+		wasChanged := false
 		biggestBlockNo := from
 		for _, l := range logs {
 			if err := handleLog(db, seawaterAddr, l); err != nil {
@@ -97,14 +98,17 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 			isBigger := biggestBlockNo < l.BlockNumber
 			if isBigger {
 				biggestBlockNo = l.BlockNumber
+				wasChanged = true
 			}
 		}
 		if err != nil {
 			return err
 		}
 		// Update checkpoint here.
-		if err := updateCheckpoint(db, biggestBlockNo); err != nil {
-			return fmt.Errorf("failed to update a checkpoint: %v", err)
+		if wasChanged {
+			if err := updateCheckpoint(db, biggestBlockNo); err != nil {
+				return fmt.Errorf("failed to update a checkpoint: %v", err)
+			}
 		}
 		return nil
 	})
