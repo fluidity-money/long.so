@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - development
+    paths:
+      - 'pkg/**'
+      - 'web/**'
+      - 'cmd/**'
+      - 'lib/**'
+      - 'go.*'
   pull_request:
     branches:
       - development
