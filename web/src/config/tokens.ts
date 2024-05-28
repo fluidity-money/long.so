@@ -11,9 +11,9 @@ export const fUSDC: Token = {
 };
 
 export const DefaultToken: Token = {
-  name: "",
-  address: "0x0000000000000000000000000000000000000000",
-  symbol: "",
+  name: "SWG",
+  address: "0xe984f758f362d255bd96601929970cef9ff19dd7",
+  symbol: "S",
 };
 
 export const mockTokens: Token[] = [DefaultToken];
