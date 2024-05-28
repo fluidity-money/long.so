@@ -334,7 +334,7 @@ func (r *seawaterPoolResolver) Price(ctx context.Context, obj *seawater.Pool) (s
 
 // PriceOverTime is the resolver for the priceOverTime field.
 func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.Pool) (price model.PriceOverTime, err error) {
-	var (
+	const (
 		maxDays   = 31
 		maxMonths = 12
 	)
@@ -376,6 +376,10 @@ func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.
 
 // VolumeOverTime is the resolver for the volumeOverTime field.
 func (r *seawaterPoolResolver) VolumeOverTime(ctx context.Context, obj *seawater.Pool) (vol model.VolumeOverTime, err error) {
+	const (
+		maxDays   = 31
+		maxMonths = 12
+	)
 	if obj == nil {
 		return vol, fmt.Errorf("pool empty")
 	}
@@ -403,11 +407,11 @@ func (r *seawaterPoolResolver) VolumeOverTime(ctx context.Context, obj *seawater
 		FusdcValueUnscaled  types.UnscaledNumber
 		Token1ValueUnscaled types.UnscaledNumber
 	}
-	err = r.DB.Table("seawater_pool_swap_volume_daily_1").Scan(&dailyResults).Error
+	err = r.DB.Table("seawater_pool_swap_volume_daily_1").Where("token1_token = ?", obj.Token).Limit(maxDays).Scan(&dailyResults).Error
 	if err != nil {
 		return
 	}
-	err = r.DB.Table("seawater_pool_swap_volume_monthly_1").Scan(&monthlyResults).Error
+	err = r.DB.Table("seawater_pool_swap_volume_monthly_1").Where("token1_token = ?", obj.Token).Limit(maxMonths).Scan(&monthlyResults).Error
 	if err != nil {
 		return
 	}
