@@ -472,7 +472,37 @@ func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Po
 		}
 		return model.TvlOverTime{daily, monthly}, nil
 	}
-	return tvl, nil // TODO
+	volumeOverTime, err := r.VolumeOverTime(ctx, obj)
+	if err != nil {
+		return
+	}
+	priceOverTime, err := r.PriceOverTime(ctx, obj)
+	if err != nil {
+		return
+	}
+	for i, v := range volumeOverTime.Daily {
+		var (
+			dailyTvl string
+			price    = priceOverTime.Daily[i]
+		)
+		dailyTvl, err = v.Token1.UsdValue(price, r.C.FusdcAddr)
+		if err != nil {
+			return
+		}
+		tvl.Daily = append(tvl.Daily, dailyTvl)
+	}
+	for i, v := range volumeOverTime.Monthly {
+		var (
+			monthlyTvl string
+			price      = priceOverTime.Monthly[i]
+		)
+		monthlyTvl, err = v.Token1.UsdValue(price, r.C.FusdcAddr)
+		if err != nil {
+			return
+		}
+		tvl.Monthly = append(tvl.Monthly, monthlyTvl)
+	}
+	return tvl, nil
 }
 
 // YieldOverTime is the resolver for the yieldOverTime field.
