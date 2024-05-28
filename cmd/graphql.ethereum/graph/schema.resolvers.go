@@ -589,7 +589,9 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 		positions = MockGetPoolPositions(obj.Token.String())
 		return
 	}
-	err = r.DB.Table("seawater_positions_1").Where("pool = ?", obj.Token).Scan(&positions).Error
+	err = r.DB.Table("seawater_positions_1").
+		Where("pool = ?", obj.Token).
+		Scan(&positions).Error
 	return
 }
 
@@ -767,6 +769,16 @@ func (r *walletResolver) Address(ctx context.Context, obj *model.Wallet) (string
 		return "", fmt.Errorf("no token")
 	}
 	return obj.Address.String(), nil
+}
+
+// Balances is the resolver for the balances field.
+func (r *walletResolver) Balances(ctx context.Context, obj *model.Wallet) ([]model.Amount, error) {
+	panic(fmt.Errorf("not implemented: Balances - balances"))
+}
+
+// Positions is the resolver for the positions field.
+func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet) ([]seawater.Position, error) {
+	panic(fmt.Errorf("not implemented: Positions - positions"))
 }
 
 // Amount returns AmountResolver implementation.

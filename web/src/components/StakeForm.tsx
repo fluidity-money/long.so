@@ -84,14 +84,13 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     token1,
     token1Amount,
     setToken1Amount,
+    priceLower,
+    priceUpper,
     tickLower,
     tickUpper,
-    setTickLower,
-    setTickUpper,
+    setPriceLower,
+    setPriceUpper,
   } = useStakeStore();
-
-  const [priceLower, setPriceLower] = useState("");
-  const [priceUpper, setPriceUpper] = useState("");
 
   // Parse the price lower and upper, and set the ticks properly.
 

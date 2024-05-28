@@ -5,6 +5,8 @@ export const MAX_TICK = -MIN_TICK;
 
 export const MIN_SQRT_RATIO = 4295128739n;
 
+export const MAX_SQRT_RATIO = 1461446703485210103287273052203988822378723970342n;
+
 export const POSSIBLE_TICKS = -MIN_TICK + MAX_TICK;
 
 export const Q96 = 2n ** 96n;
@@ -42,7 +44,9 @@ export const getSqrtRatioAtTick = (tick: bigint): bigint => {
 };
 
 export const getTickAtSqrtRatio = (sqrtPriceX96: bigint): number => {
-  // TODO check if max size is past the current value
+  if (sqrtPriceX96 < MIN_SQRT_RATIO || sqrtPriceX96 > MAX_SQRT_RATIO)
+    throw new Error("sqrt ratio out of range");
+
   let ratio = sqrtPriceX96 << 32n;
   let r = ratio;
   let msb = 0n;
