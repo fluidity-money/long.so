@@ -194,8 +194,7 @@ export const AllPools = () => {
               <div className="text-3xs md:text-2xs">Rewards Claimed</div>
               {showRewardsClaimed && (
                 <div className="text-2xl md:text-3xl">
-                  {/* TODO: not sure where to get this from */}
-                  {showDemoData ? "59.1K" : 0}
+                  {showDemoData ? "59.1K" : "-"}
                 </div>
               )}
               </div>

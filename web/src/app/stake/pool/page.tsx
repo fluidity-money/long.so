@@ -55,6 +55,15 @@ export default function PoolPage() {
   const poolData = allPoolsData?.find((pool) => pool.id === id);
 
   const showMockData = useFeatureFlag("ui show demo data");
+  const showBoostIncentives = useFeatureFlag("ui show boost incentives");
+  const showUtilityIncentives = useFeatureFlag("ui show utility incentives");
+  const showLiquidityIncentives = useFeatureFlag("ui show liquidity incentives");
+  const showSuperIncentives = useFeatureFlag("ui show super incentives");
+  const showLiveUtilityRewards = useFeatureFlag("ui show live utility rewards");
+  const showTokensGivenOut = useFeatureFlag("ui show tokens given out");
+  const showClaimYield = useFeatureFlag("ui show claim yield");
+  const showPoolRewardRange = useFeatureFlag("ui show pool reward range");
+  const showEarnedFeesApr = useFeatureFlag("ui show earned fees apr");
 
   /**
    * Redirect to the stake page if the id is not present
@@ -107,20 +116,22 @@ export default function PoolPage() {
                   </Badge>
                 </div>
 
-                <div className="flex flex-col items-end gap-1">
-                  <Badge className="iridescent flex h-4 w-[93px] flex-row pl-0.5 text-black md:w-[132px]">
-                    <div className="flex flex-row">
-                      <Token className={"size-[14px]"} />
-                      <Token className={"ml-[-5px] size-[14px]"} />
-                      <Token className={"ml-[-5px] size-[14px]"} />
-                    </div>
-                    <div className="text-nowrap text-4xs font-medium md:text-2xs">
-                      Live Utility Rewards
-                    </div>
-                  </Badge>
+                {showLiveUtilityRewards && (
+                  <div className="flex flex-col items-end gap-1">
+                    <Badge className="iridescent flex h-4 w-[93px] flex-row pl-0.5 text-black md:w-[132px]">
+                      <div className="flex flex-row">
+                        <Token className={"size-[14px]"} />
+                        <Token className={"ml-[-5px] size-[14px]"} />
+                        <Token className={"ml-[-5px] size-[14px]"} />
+                      </div>
+                      <div className="text-nowrap text-4xs font-medium md:text-2xs">
+                        Live Utility Rewards
+                      </div>
+                    </Badge>
 
-                  <p className="text-3xs">5days | 24hrs | 30min</p>
-                </div>
+                    <p className="text-3xs">5days | 24hrs | 30min</p>
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-col gap-8 p-4">
@@ -170,145 +181,160 @@ export default function PoolPage() {
                     </div>
                   </div>
 
-                  <div>
-                    <Button
-                      variant="secondary"
-                      className="h-[19px] w-[75px] px-[27px] py-[5px] md:h-[22px] md:w-[92px]"
-                      size="sm"
-                    >
-                      <div className="text-3xs">Claim Yield</div>
-                    </Button>
-                  </div>
+                  {showClaimYield && (
+                    <div>
+                      <Button
+                        variant="secondary"
+                        className="h-[19px] w-[75px] px-[27px] py-[5px] md:h-[22px] md:w-[92px]"
+                        size="sm"
+                      >
+                        <div className="text-3xs">Claim Yield</div>
+                      </Button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-[7px]">
-                  <div className="flex flex-row justify-between">
-                    <div className="text-xs">Pool Reward Range</div>
+                  {showPoolRewardRange && (
+                    <div className="flex flex-row justify-between">
+                      <div className="text-xs">Pool Reward Range</div>
 
-                    <div className="text-xs">
-                      {/* TODO: get pool reward range */}
-                      {showMockData ? 40 : 0}% ~{" "}
-                      <span className="font-bold">
-                        {showMockData ? 100 : 0}%
-                      </span>
+                      <div className="text-xs">
+                        {/* TODO: get pool reward range */}
+                        {showMockData ? 40 : 0}% ~{" "}
+                        <span className="font-bold">
+                          {showMockData ? 100 : 0}%
+                        </span>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="p-2">
-                    <div className="flex flex-row justify-between text-2xs">
-                      <div>Earned Fees APR</div>
+                    {showEarnedFeesApr && (
+                      <div className="flex flex-row justify-between text-2xs">
+                        <div>Earned Fees APR</div>
 
-                      <div className="flex flex-row items-center gap-2">
-                        <Token size="small" />
-                        <div>
-                          {/* TODO: this data is not a range */}
-                          {showMockData ? 1 : poolData?.earnedFeesAPRFUSDC}% ~{" "}
-                          {showMockData ? 5 : poolData?.earnedFeesAPRFUSDC}%
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-row justify-between text-2xs">
-                      <div>Liquidity Incentives</div>
-
-                      <div className="flex flex-row items-center gap-2">
-                        <Token size="small" />
-                        <div className="z-20 -ml-3">
+                        <div className="flex flex-row items-center gap-2">
                           <Token size="small" />
-                        </div>
-                        <div>
-                          {/* TODO: is the liquidity incentives value a percentage? data is not a range */}
-                          {showMockData
-                            ? 15
-                            : poolData?.liquidityIncentives.valueScaled}
-                          % ~{" "}
-                          {showMockData
-                            ? 25
-                            : poolData?.liquidityIncentives.valueScaled}
-                          %
+                          <div>
+                            {/* TODO: this data is not a range */}
+                            {showMockData ? 1 : poolData?.earnedFeesAPRFUSDC}% ~{" "}
+                            {showMockData ? 5 : poolData?.earnedFeesAPRFUSDC}%
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
 
+                    {showLiquidityIncentives && (
+                      <div className="flex flex-row justify-between text-2xs">
+                        <div>Liquidity Incentives</div>
+
+                        <div className="flex flex-row items-center gap-2">
+                          <Token size="small" />
+                          <div className="z-20 -ml-3">
+                            <Token size="small" />
+                          </div>
+                          <div>
+                            {/* TODO: is the liquidity incentives value a percentage? data is not a range */}
+                            {showMockData
+                              ? 15
+                              : poolData?.liquidityIncentives.valueScaled}
+                            % ~{" "}
+                            {showMockData
+                              ? 25
+                              : poolData?.liquidityIncentives.valueScaled}
+                            %
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {showSuperIncentives && (
+                      <div className="flex flex-row justify-between text-2xs">
+                        <div>Super Incentives</div>
+
+                        <div className="flex flex-row items-center gap-2">
+                          <Token size="small" />
+                          <div>
+                            {showMockData
+                              ? 20
+                              : poolData?.superIncentives.valueScaled}
+                            % ~{" "}
+                            {showMockData
+                              ? 30
+                              : poolData?.superIncentives.valueScaled}
+                            %
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {showUtilityIncentives && (
                     <div className="flex flex-row justify-between text-2xs">
-                      <div>Super Incentives</div>
+                      <div>Utility Incentives</div>
 
                       <div className="flex flex-row items-center gap-2">
                         <Token size="small" />
                         <div>
-                          {/* TODO: is the super incentives value a percentage? data is not a range */}
-                          {showMockData
-                            ? 20
-                            : poolData?.superIncentives.valueScaled}
-                          % ~{" "}
-                          {showMockData
-                            ? 30
-                            : poolData?.superIncentives.valueScaled}
-                          %
+                          {/* TODO: get utility incentives percentage range */}
+                          {showMockData ? 20 : 0}% ~ {showMockData ? 30 : 0}%
                         </div>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="flex flex-row justify-between text-2xs">
-                    <div>Utility Incentives</div>
-
-                    <div className="flex flex-row items-center gap-2">
-                      <Token size="small" />
-                      <div>
-                        {/* TODO: get utility incentives percentage range */}
-                        {showMockData ? 20 : 0}% ~ {showMockData ? 30 : 0}%
-                      </div>
-                    </div>
-                  </div>
+                  )}
 
                   <div className="flex flex-row items-center justify-start gap-[10px] text-sm">
                     <div className="mt-[6px] h-[25px] w-0.5 bg-white" />
 
-                    <div className="flex flex-col gap-1">
-                      <div className="text-3xs">
-                        {showMockData
-                          ? 200
-                          : poolData?.utilityIncentives[0]?.amountGivenOut ?? 0}
-                        /
-                        {showMockData
-                          ? "1,000"
-                          : poolData?.utilityIncentives[0]?.maximumAmount ??
-                            0}{" "}
-                        tokens given out
+                    {showTokensGivenOut && (
+                      <div className="flex flex-col gap-1">
+                        <div className="text-3xs">
+                          {showMockData
+                            ? 200
+                            : poolData?.utilityIncentives[0]?.amountGivenOut ?? 0}
+                          /
+                          {showMockData
+                            ? "1,000"
+                            : poolData?.utilityIncentives[0]?.maximumAmount ??
+                              0}{" "}
+                          tokens given out
+                        </div>
+                        <Line
+                          percent={
+                            showMockData
+                              ? 20
+                              : parseFloat(
+                                  poolData?.utilityIncentives[0]
+                                    ?.amountGivenOut ?? "0",
+                                ) /
+                                parseFloat(
+                                  poolData?.utilityIncentives[0]?.maximumAmount ??
+                                    "0",
+                                )
+                          }
+                          strokeColor="#EBEBEB"
+                          strokeWidth={4}
+                          className="rounded-full border border-white"
+                          trailWidth={0}
+                          trailColor="#1E1E1E"
+                        />
                       </div>
-                      <Line
-                        percent={
-                          showMockData
-                            ? 20
-                            : parseFloat(
-                                poolData?.utilityIncentives[0]
-                                  ?.amountGivenOut ?? "0",
-                              ) /
-                              parseFloat(
-                                poolData?.utilityIncentives[0]?.maximumAmount ??
-                                  "0",
-                              )
-                        }
-                        strokeColor="#EBEBEB"
-                        strokeWidth={4}
-                        className="rounded-full border border-white"
-                        trailWidth={0}
-                        trailColor="#1E1E1E"
-                      />
-                    </div>
+                    )}
 
                     <div className="flex flex-1" />
 
-                    <div>
-                      <Button
-                        variant="secondary"
-                        className="iridescent h-[19.24px] w-[102.15px] px-4 py-0.5 md:px-8 md:text-base"
-                        size="sm"
-                      >
-                        <div className="text-2xs ">Boost Incentives</div>
-                      </Button>
-                    </div>
+                    {showBoostIncentives && (
+                      <div>
+                        <Button
+                          variant="secondary"
+                          className="iridescent h-[19.24px] w-[102.15px] px-4 py-0.5 md:px-8 md:text-base"
+                          size="sm"
+                        >
+                          <div className="text-2xs ">Boost Incentives</div>
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

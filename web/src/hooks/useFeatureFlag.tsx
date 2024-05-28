@@ -64,6 +64,11 @@ export interface FeatureFlags {
   "ui show incentives": boolean;
 
   /**
+   * Show specifically liquidity incentives.
+   */
+  "ui show liquidity incentives": boolean;
+
+  /**
    * Show the Stake APY in the stake tabs.
    */
   "ui show stake apy": boolean;
@@ -77,6 +82,46 @@ export interface FeatureFlags {
    * Show the trade rewards.
    */
   "ui show trade rewards": boolean;
+
+  /**
+   * Show the boost incentives button.
+   */
+  "ui show boost incentives": boolean;
+
+  /**
+   * Show the utility incentives.
+   */
+  "ui show utility incentives": boolean;
+
+  /**
+   * Show the super incentives.
+   */
+  "ui show super incentives": boolean;
+
+  /**
+   * Show live utility rewards.
+   */
+  "ui show live utility rewards": boolean;
+
+  /**
+   * Show tokens given out.
+   */
+  "ui show tokens given out": boolean;
+
+  /**
+   * Show the pool reward range.
+   */
+  "ui show pool reward range": boolean;
+
+  /**
+   * Show claim yield button.
+   */
+  "ui show claim yield": boolean;
+
+  /**
+   * Show the earned fees APR in the specific pool stake page.
+   */
+  "ui show earned fees apr": boolean;
 }
 
 /**
