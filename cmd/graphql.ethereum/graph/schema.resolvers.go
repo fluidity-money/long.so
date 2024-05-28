@@ -18,8 +18,6 @@ import (
 	"github.com/fluidity-money/long.so/lib/types/seawater"
 )
 
-var FloatZero = new(big.Float)
-
 // Token is the resolver for the token field.
 func (r *amountResolver) Token(ctx context.Context, obj *model.Amount) (model.Token, error) {
 	if obj == nil {
@@ -94,28 +92,7 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	if err != nil {
 		return "", err
 	}
-	value := obj.ValueUnscaled
-	dividedAmt := value.Scale(obj.Decimals) //value / (10 ** decimals)
-	switch obj.Token {
-	case r.C.FusdcAddr:
-		// 4 decimals
-		return fmt.Sprintf("%0.4f", dividedAmt), nil
-	default:
-		//value / (10 ** decimals) * price
-		x := new(big.Float).Set(dividedAmt)
-		if price == "" {
-			return "0", nil // Empty price.
-		}
-		priceFloat, ok := new(big.Float).SetString(price)
-		if !ok {
-			return "", fmt.Errorf("failed to set string: %#v", price)
-		}
-		if priceFloat.Cmp(FloatZero) == 0 { // Price is also empty (0).
-			return "0", nil
-		}
-		x.Quo(dividedAmt, priceFloat)
-		return fmt.Sprintf("%0.4f", x), nil
-	}
+	return obj.UsdValue(price, r.C.FusdcAddr)
 }
 
 // Pools is the resolver for the pools field.
