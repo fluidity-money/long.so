@@ -760,7 +760,7 @@ func (r *walletResolver) ID(ctx context.Context, obj *model.Wallet) (string, err
 	if obj == nil {
 		return "", fmt.Errorf("no wallet obj")
 	}
-	return "wallet" + obj.Address.String(), nil
+	return "wallet:" + obj.Address.String(), nil
 }
 
 // Address is the resolver for the address field.
@@ -777,8 +777,20 @@ func (r *walletResolver) Balances(ctx context.Context, obj *model.Wallet) ([]mod
 }
 
 // Positions is the resolver for the positions field.
-func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet) ([]seawater.Position, error) {
-	panic(fmt.Errorf("not implemented: Positions - positions"))
+func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet) (positions []seawater.Position, err error) {
+	if obj == nil {
+		return nil, fmt.Errorf("empty wallet")
+	}
+	if r.F.Is(features.FeatureMockGraph) {
+		MockDelay(r.F)
+		positions = MockGetPoolPositions(obj.Address.String())
+		return
+	}
+	err = r.DB.Table("seawater_active_positions_1").
+		Where("owner = ?", obj.Address).
+		Scan(&positions).
+		Error
+	return
 }
 
 // Amount returns AmountResolver implementation.
