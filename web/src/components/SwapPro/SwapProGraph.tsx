@@ -138,7 +138,7 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
           <div>
             <div className="text-sm md:hidden">
               {/* this text is only shown on mobile */}
-              fUSDC/ETH {startCase(activeGraphType)}
+              fUSDC/{pool?.token?.address} {startCase(activeGraphType)}
             </div>
           </div>
 
@@ -208,7 +208,7 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
             }}
           />
 
-          <div className="text-2xs">5th October 2023</div>
+          <div className="text-2xs">{new Date().toString()}</div>
         </div>
       </div>
     </>

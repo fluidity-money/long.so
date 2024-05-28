@@ -214,7 +214,10 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string) (swa
 		swaps = MockSwaps(r.C.FusdcAddr, 150, types.AddressFromString(wallet))
 		return
 	}
-	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?)", r.C.FusdcAddr, r.C.FusdcDecimals).Where("sender = ?", wallet).Scan(&swaps).Error
+	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?)", r.C.FusdcAddr, r.C.FusdcDecimals).
+		Where("sender = ?", wallet).
+		Scan(&swaps).
+		Error
 	return
 }
 
