@@ -88,7 +88,7 @@ export default async function RootLayout({
             <div className="flex w-full flex-col gap-8">
               <div className="flex flex-row items-start justify-between">
                 <div className="flex flex-row items-center gap-4">
-                  <Superposition height={34} width={34} />
+                  <a href="/"><Superposition height={34} width={34} /></a>
                   <MobileNetworkSelection />
                   <FeatureFlagConfig />
                   <DemoData />

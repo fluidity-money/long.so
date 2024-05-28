@@ -7,11 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 export const AllPoolsFilter = () => {
   const [newPools, setNewPools] = useState(false);
   const [boostedPools, setBoostedPools] = useState(false);
   const [myAssets, setMyAssets] = useState(false);
+
+  const showPoolFilters = useFeatureFlag("ui show pool filters");
+
+  if (!showPoolFilters) return <></>;
 
   return (
     <div className="flex flex-col gap-2">

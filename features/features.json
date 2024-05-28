@@ -20,5 +20,6 @@
 	"ui show superloop": false,
 	"ui show tokens given out": false,
 	"ui show trade rewards": false,
-	"ui show utility incentives": false
+	"ui show utility incentives": false,
+	"ui show pool filters": false
 }

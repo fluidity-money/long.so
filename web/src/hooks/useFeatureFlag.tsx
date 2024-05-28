@@ -122,6 +122,11 @@ export interface FeatureFlags {
    * Show the earned fees APR in the specific pool stake page.
    */
   "ui show earned fees apr": boolean;
+
+  /**
+   * Allow users to filter for pools they want.
+   */
+  "ui show pool filters": boolean;
 }
 
 /**
