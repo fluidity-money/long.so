@@ -313,7 +313,7 @@ func (r *seawaterPoolResolver) Price(ctx context.Context, obj *seawater.Pool) (s
 		Error
 	switch err {
 	case gorm.ErrRecordNotFound:
-		return "0", err
+		return "0", nil
 	case nil:
 		return result.Price(r.C.FusdcDecimals, int(obj.Decimals)), nil
 	default:
