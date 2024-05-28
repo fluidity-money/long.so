@@ -769,16 +769,6 @@ func (r *walletResolver) Address(ctx context.Context, obj *model.Wallet) (string
 	return obj.Address.String(), nil
 }
 
-// Balances is the resolver for the balances field.
-func (r *walletResolver) Balances(ctx context.Context, obj *model.Wallet) ([]model.Amount, error) {
-	return nil, nil // TODO
-}
-
-// Positions is the resolver for the positions field.
-func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet) ([]seawater.Position, error) {
-	return nil, nil // TODO
-}
-
 // Amount returns AmountResolver implementation.
 func (r *Resolver) Amount() AmountResolver { return &amountResolver{r} }
 
