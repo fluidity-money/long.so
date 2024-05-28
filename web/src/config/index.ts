@@ -23,7 +23,7 @@ export const config = defaultWagmiConfig({
   chains,
   projectId,
   transports: {
-    [arbitrumStylusTestnet.id]: http("https://rpc-stylus-4.t.conduit-stg.xyz"),
+    [arbitrumStylusTestnet.id]: http("https://testnet-rpc.superposition.so"),
   },
   metadata,
   ssr: true,
