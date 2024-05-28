@@ -2,13 +2,14 @@
 	"ui show feature flags panel": false,
 	"ui show demo data": true,
 	"ui show superloop": false,
-	"graphql mock demo data": false,
-	"graphql mock demo data should delay": false,
 	"ui show fee tier": false,
 	"ui show optimising fee route": false,
 	"ui show campaign banner": false,
 	"ui show rewards claimed": false,
 	"ui show incentives": false,
 	"ui show stake apy": false,
-	"ui show my transactions": false
+	"ui show my transactions": false,
+	"ui show trade rewards": false,
+	"graphql mock demo data": false,
+	"graphql mock demo data should delay": false
 }

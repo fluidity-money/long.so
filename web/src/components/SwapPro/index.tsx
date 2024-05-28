@@ -85,6 +85,7 @@ export const SwapPro = ({
   const showMockData = useFeatureFlag("ui show demo data");
   const showStakeApy = useFeatureFlag("ui show stake apy");
   const showMyTransactions = useFeatureFlag("ui show my transactions");
+  const showTradeRewards = useFeatureFlag("ui show trade rewards");
 
   const transactionData = useMemo((): Transaction[] | undefined => {
     if (showMockData)
@@ -174,12 +175,12 @@ export const SwapPro = ({
 
           <div>
             <p className="text-2xs">Stake APY</p>
-            {showStakeApy && (<p className="text-xl">1.62%</p>)}
+            <p className="text-xl">{showStakeApy ? "1.62%" : "-"}</p>
           </div>
 
           <div>
             <p className="text-2xs">24H Trade Rewards</p>
-            <p className="text-xl">$300.56</p>
+            <p className="text-xl">{showTradeRewards ? "$300.56" : "-"}</p>
           </div>
         </div>
 

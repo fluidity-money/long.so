@@ -72,6 +72,11 @@ export interface FeatureFlags {
    * Show the my transactions option.
    */
   "ui show my transactions": boolean;
+
+  /**
+   * Show the trade rewards.
+   */
+  "ui show trade rewards": boolean;
 }
 
 /**
