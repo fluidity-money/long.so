@@ -4,7 +4,7 @@
 	"ui show boost incentives": false,
 	"ui show campaign banner": false,
 	"ui show claim yield": false,
-	"ui show demo data": true,
+	"ui show demo data": false,
 	"ui show earned fees apr": false,
 	"ui show feature flags panel": false,
 	"ui show fee tier": false,
