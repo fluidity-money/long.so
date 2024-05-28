@@ -128,6 +128,30 @@ CREATE MATERIALIZED VIEW seawater_pool_swap_volume_hourly_1 AS
 		new_pool.decimals
 	ORDER BY hourly_interval;
 
+CREATE MATERIALIZED VIEW seawater_pool_swap_volume_daily_1 AS
+SELECT
+	FLOOR(EXTRACT(EPOCH FROM NOW())) AS timestamp, 
+	pool AS token1_token,
+	SUM(fusdc_volume_unscaled) AS fusdc_value_unscaled, 
+	SUM(tokena_volume_unscaled) AS token1_value_unscaled,
+	decimals AS token1_decimals, 
+	time_bucket('1 day', hourly_interval) AS interval_timestamp
+FROM seawater_pool_swap_volume_hourly_1
+GROUP BY interval_timestamp, token1_token, token1_decimals
+ORDER BY interval_timestamp DESC;
+
+CREATE MATERIALIZED VIEW seawater_pool_swap_volume_monthly_1 AS
+SELECT
+	FLOOR(EXTRACT(EPOCH FROM NOW())) AS timestamp, 
+	pool AS token1_token,
+	SUM(fusdc_volume_unscaled) AS fusdc_value_unscaled, 
+	SUM(tokena_volume_unscaled) AS token1_value_unscaled,
+	decimals AS token1_decimals, 
+	time_bucket('1 month', hourly_interval) AS interval_timestamp
+FROM seawater_pool_swap_volume_hourly_1
+GROUP BY interval_timestamp, token1_token, token1_decimals
+ORDER BY interval_timestamp DESC;
+
 -- This would make use of triggers to keep the materialized views up to date, but Postgres doesn't support triggers on materialized views. Instead, schedule regular updates with pg_cron
 CREATE OR REPLACE FUNCTION refresh_swap_price_volume_views()
 RETURNS VOID LANGUAGE PLPGSQL
@@ -136,6 +160,8 @@ BEGIN
 	REFRESH MATERIALIZED VIEW seawater_pool_swap2_price_hourly_1;
 	REFRESH MATERIALIZED VIEW seawater_swaps_average_price_hourly_1;
 	REFRESH MATERIALIZED VIEW seawater_pool_swap_volume_hourly_1;
+	REFRESH MATERIALIZED VIEW seawater_pool_swap_volume_daily_1;
+	REFRESH MATERIALIZED VIEW seawater_pool_swap_volume_monthly_1;
 END $$;
 
 SELECT cron.schedule('refresh-swap-price-volume', '*/30 * * * *', $$SELECT refresh_swap_price_volume_views()$$);

@@ -7,7 +7,6 @@ package graph
 import (
 	"context"
 	"fmt"
-	"math"
 	"math/big"
 	"strconv"
 	"time"
@@ -395,7 +394,58 @@ func (r *seawaterPoolResolver) VolumeOverTime(ctx context.Context, obj *seawater
 		}
 		return model.VolumeOverTime{daily, monthly}, nil
 	}
-	return vol, nil // TODO
+	var dailyResults, monthlyResults []struct {
+		Token1Token    types.Address
+		Token1Decimals int
+		Timestamp      int
+		// DailyTimestamp or MonthlyTimestamp
+		IntervalTimestamp   time.Time
+		FusdcValueUnscaled  types.UnscaledNumber
+		Token1ValueUnscaled types.UnscaledNumber
+	}
+	err = r.DB.Table("seawater_pool_swap_volume_daily_1").Scan(&dailyResults).Error
+	if err != nil {
+		return
+	}
+	err = r.DB.Table("seawater_pool_swap_volume_monthly_1").Scan(&monthlyResults).Error
+	if err != nil {
+		return
+	}
+	for _, d := range dailyResults {
+		vol.Daily = append(vol.Daily, model.PairAmount{
+			Timestamp: d.Timestamp,
+			Fusdc: model.Amount{
+				Token:         r.C.FusdcAddr,
+				Decimals:      r.C.FusdcDecimals,
+				Timestamp:     int(d.IntervalTimestamp.Unix()),
+				ValueUnscaled: d.FusdcValueUnscaled,
+			},
+			Token1: model.Amount{
+				Token:         d.Token1Token,
+				Decimals:      d.Token1Decimals,
+				Timestamp:     int(d.IntervalTimestamp.Unix()),
+				ValueUnscaled: d.Token1ValueUnscaled,
+			},
+		})
+	}
+	for _, m := range monthlyResults {
+		vol.Monthly = append(vol.Monthly, model.PairAmount{
+			Timestamp: m.Timestamp,
+			Fusdc: model.Amount{
+				Token:         r.C.FusdcAddr,
+				Decimals:      r.C.FusdcDecimals,
+				Timestamp:     int(m.IntervalTimestamp.Unix()),
+				ValueUnscaled: m.FusdcValueUnscaled,
+			},
+			Token1: model.Amount{
+				Token:         m.Token1Token,
+				Decimals:      m.Token1Decimals,
+				Timestamp:     int(m.IntervalTimestamp.Unix()),
+				ValueUnscaled: m.Token1ValueUnscaled,
+			},
+		})
+	}
+	return vol, nil
 }
 
 // LiquidityOverTime is the resolver for the liquidityOverTime field.
