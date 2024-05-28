@@ -84,6 +84,9 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 			return fmt.Sprintf("%0.4f", x), nil
 		}
 	}
+	if obj.ValueUnscaled.Cmp(types.EmptyUnscaledNumber().Int) == 0 {
+		return "0", nil
+	}
 	pool, err := r.Query().GetPool(ctx, obj.Token.String())
 	if err != nil {
 		return "", err
