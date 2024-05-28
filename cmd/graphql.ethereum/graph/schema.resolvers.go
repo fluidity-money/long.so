@@ -16,6 +16,8 @@ import (
 	"github.com/fluidity-money/long.so/lib/features"
 	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
+
+	"gorm.io/gorm"
 )
 
 // Token is the resolver for the token field.
@@ -305,11 +307,18 @@ func (r *seawaterPoolResolver) Price(ctx context.Context, obj *seawater.Pool) (s
 		return daily[0], nil
 	}
 	var result model.PriceResult
-	err := r.DB.Table("seawater_final_ticks_1").Where("pool = ?", obj.Token).Limit(1).Scan(&result).Error
-	if err != nil {
+	err := r.DB.Table("seawater_final_ticks_1").
+		Where("pool = ?", obj.Token).
+		First(&result).
+		Error
+	switch err {
+	case gorm.ErrRecordNotFound:
+		return "0", err
+	case nil:
+		return result.Price(r.C.FusdcDecimals, int(obj.Decimals)), nil
+	default:
 		return "", err
 	}
-	return result.Price(r.C.FusdcDecimals, int(obj.Decimals)), nil
 }
 
 // PriceOverTime is the resolver for the priceOverTime field.
