@@ -1,18 +1,18 @@
 package erc20
 
 import (
-	"context"
 	"bytes"
-	"math/big"
+	"context"
 	_ "embed"
 	"fmt"
+	"math/big"
 
 	"github.com/fluidity-money/long.so/lib/types"
 
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/ethclient"
 	ethAbiBind "github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 // multicallAddr from the default web config multicall (testnet only!)
@@ -30,7 +30,7 @@ var (
 	multicallAbi, _ = ethAbi.JSON(bytes.NewReader(multicallAbiBytes))
 )
 
-func GetErc20Details(ctx context.Context, c *ethclient.Client, addr_ types.Address) (name string, symbol string, totalSupply types.UnscaledNumber,  err error) {
+func GetErc20Details(ctx context.Context, c *ethclient.Client, addr_ types.Address) (name string, symbol string, totalSupply types.UnscaledNumber, err error) {
 	if !ethCommon.IsHexAddress(addr_.String()) {
 		err = fmt.Errorf("bad erc20 address: %v", err)
 		return
@@ -95,7 +95,7 @@ func decodeErc20Details(i any) (name string, symbol string, totalSupply types.Un
 		return
 	}
 	totalSupply_, ok := totalSupply__[0].(*big.Int)
-	if  !ok {
+	if !ok {
 		err = fmt.Errorf("bad totalSupply: %T", totalSupply_)
 		return
 	}

@@ -10,8 +10,8 @@ import (
 )
 
 type Resolver struct {
-	DB     *gorm.DB     // db used to look up any fields that are missing from a request.
-	F      features.F  // features to have enabled when requested
+	DB   *gorm.DB          // db used to look up any fields that are missing from a request.
+	F    features.F        // features to have enabled when requested
 	Geth *ethclient.Client // needed to do lookups with geth
-	C config.C    // config for connecting to the right endpoints
+	C    config.C          // config for connecting to the right endpoints
 }
