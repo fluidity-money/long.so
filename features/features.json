@@ -3,6 +3,7 @@
 	"graphql mock demo data should delay": false,
 	"ui show boost incentives": false,
 	"ui show campaign banner": false,
+	"ui show claim all yield": false,
 	"ui show claim yield": false,
 	"ui show demo data": false,
 	"ui show earned fees apr": false,
@@ -13,6 +14,7 @@
 	"ui show live utility rewards": false,
 	"ui show my transactions": false,
 	"ui show optimising fee route": false,
+	"ui show pool filters": false,
 	"ui show pool reward range": false,
 	"ui show rewards claimed": false,
 	"ui show stake apy": false,
@@ -21,5 +23,5 @@
 	"ui show tokens given out": false,
 	"ui show trade rewards": false,
 	"ui show utility incentives": false,
-	"ui show pool filters": false
+	"ui show yield over time": false
 }

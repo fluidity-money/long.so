@@ -33,6 +33,7 @@ const Stake = () => {
   const { address } = useAccount();
 
   const showCampaignBanner = useFeatureFlag("ui show campaign banner");
+  const showYieldOverTime = useFeatureFlag("ui show yield over time");
 
   if (welcome) return <WelcomeModal />;
 
@@ -65,7 +66,7 @@ const Stake = () => {
           </div>
 
           {/* this doesn't show on mobile */}
-          {address && (
+          {address && showYieldOverTime && (
             <motion.div
               initial={{ opacity: 0, x: 100 }}
               animate={{ opacity: 1, x: 0 }}

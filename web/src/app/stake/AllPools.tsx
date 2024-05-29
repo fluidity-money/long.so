@@ -144,6 +144,9 @@ export const AllPools = () => {
   );
   }, [showDemoData, poolsData]);
 
+  const poolTvlSummed =
+    sum(poolsData?.map((pool) => pool.tvlOverTime.daily[0]));
+
   return (
     <div className="flex w-full flex-col items-center">
       <div className="mt-4 flex w-full max-w-screen-lg flex-col gap-4">
@@ -164,40 +167,35 @@ export const AllPools = () => {
                 {showDemoData
                   ? "12.1M"
                   : // sum the tvl of all pools, assume the first daily value is the current value
-                    usdFormat(
-                      sum(poolsData?.map((pool) => pool.tvlOverTime.daily[0])),
-                    )}
+                    usdFormat(poolTvlSummed ? poolTvlSummed : 0)
+                  }
               </div>
             </div>
 
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">Incentives</div>
-              {showIncentives && (
-                <div className="text-2xl md:text-3xl">
-                  {showDemoData
-                    ? "200k"
-                    : // sum the liquidity and super incentives of all pools
-                      usdFormat(
-                        sum(
-                          poolsData?.map(
-                            (pool) =>
-                              parseFloat(pool.liquidityIncentives.valueUsd) +
-                              parseFloat(pool.superIncentives.valueUsd),
-                          ),
+              <div className="text-2xl md:text-3xl">
+                {!showIncentives ? "-" : showDemoData
+                  ? "200k"
+                  : // sum the liquidity and super incentives of all pools
+                    usdFormat(
+                      sum(
+                        poolsData?.map(
+                          (pool) =>
+                            parseFloat(pool.liquidityIncentives.valueUsd) +
+                            parseFloat(pool.superIncentives.valueUsd),
                         ),
-                      )}
-                </div>
-              )}
+                      ),
+                )}
+              </div>
             </div>
 
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">Rewards Claimed</div>
-              {showRewardsClaimed && (
-                <div className="text-2xl md:text-3xl">
-                  {showDemoData ? "59.1K" : "-"}
-                </div>
-              )}
+              <div className="text-2xl md:text-3xl">
+                {showRewardsClaimed ? "59.1K" : "-"}
               </div>
+            </div>
           </div>
 
           <div className="flex flex-1 flex-row justify-center gap-4">

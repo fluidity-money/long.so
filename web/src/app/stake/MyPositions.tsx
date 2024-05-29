@@ -50,6 +50,7 @@ export const MyPositions = () => {
   const { address } = useAccount();
 
   const showDemoData = useFeatureFlag("ui show demo data");
+  const showClaimAllYield = useFeatureFlag("ui show claim all yield");
 
   const { data } = useGraphqlUser();
 
@@ -211,7 +212,7 @@ export const MyPositions = () => {
       )}
 
       <div className="flex max-w-full flex-row gap-2">
-        {pools && pools.length > 0 && (
+        {pools && showClaimAllYield && pools.length > 0 && (
           <div className="flex flex-1 flex-col items-center">
             <Button
               className="w-full text-3xs text-black md:text-xs"

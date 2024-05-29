@@ -127,6 +127,16 @@ export interface FeatureFlags {
    * Allow users to filter for pools they want.
    */
   "ui show pool filters": boolean;
+
+  /**
+   * Show yield over time display for users.
+   */
+  "ui show yield over time": boolean;
+
+  /**
+   * Show claim all yield button, and functionality.
+   */
+  "ui show claim all yield": boolean;
 }
 
 /**

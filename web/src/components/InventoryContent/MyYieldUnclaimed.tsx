@@ -4,12 +4,15 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useStakeWelcomeBackStore } from "@/stores/useStakeWelcomeBackStore";
 import { useInventorySheet } from "@/stores/useInventorySheet";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 export const MyYieldUnclaimed = () => {
   const router = useRouter();
 
   const { setYieldBreakdown } = useStakeWelcomeBackStore();
   const { setIsOpen } = useInventorySheet();
+
+  const showClaimAllYield = useFeatureFlag("ui show claim all yield");
 
   return (
     <div className="flex flex-col items-center">
@@ -57,16 +60,18 @@ export const MyYieldUnclaimed = () => {
         </div>
       </div>
 
-      <Button
-        className={"mt-[17px] w-full"}
-        onClick={() => {
-          setYieldBreakdown(true);
-          setIsOpen(false);
-          router.push("/stake");
-        }}
-      >
-        <div className={"iridescent-text text-[10px]"}>Claim All Yield</div>
-      </Button>
+      {showClaimAllYield && (
+        <Button
+          className={"mt-[17px] w-full"}
+          onClick={() => {
+            setYieldBreakdown(true);
+            setIsOpen(false);
+            router.push("/stake");
+          }}
+        >
+          <div className={"iridescent-text text-[10px]"}>Claim All Yield</div>
+        </Button>
+      )}
 
       <Badge
         className={"-mt-1.5 h-[12px] gap-1 border border-black px-1 text-[7px]"}
