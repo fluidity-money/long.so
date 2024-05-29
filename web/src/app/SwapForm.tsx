@@ -81,7 +81,7 @@ export const SwapForm = () => {
     token0AmountRaw,
     token1Amount,
     setToken0Amount,
-    setToken1Amount,
+    setToken1AmountRaw,
   } = useSwapStore();
   const { data } = useGraphqlGlobal();
 
@@ -186,8 +186,8 @@ export const SwapForm = () => {
 
   // update the token1 amount when the quote amount changes
   useEffect(() => {
-    setToken1Amount(quoteAmount.toString());
-  }, [quoteAmount, setToken1Amount]);
+    setToken1AmountRaw(quoteAmount.toString());
+  }, [quoteAmount, setToken1AmountRaw]);
 
   const { open } = useWeb3Modal();
 
