@@ -16,7 +16,7 @@ export const arbitrumStylusTestnet = {
   blockExplorers: {
     default: {
       name: "CatScan",
-      url: "https://testnet-explorer.superpositionso",
+      url: "https://testnet-explorer.superposition.so",
     },
   },
 };
