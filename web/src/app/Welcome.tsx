@@ -41,7 +41,9 @@ export const Welcome = () => {
               <div className="group h-[35px] rounded-full border border-black p-3 transition-[height] hover:h-[60px] hover:bg-black hover:text-white ">
                 <div className="flex h-full w-[320px] flex-col items-center justify-center gap-1 group-hover:w-[365px]">
                   <div className="text-sm group-hover:text-base">
-                    ⛽️💰 Gas Rebates and Negative Fees for traders
+                    <a href="https://docs.superposition.so/superposition-testnet/super-layer/super-assets" rel="noopener noreferrer" target="_blank">
+                      ⛽️💰 Gas Rebates and Negative Fees for traders
+                    </a>
                   </div>
                   <div className="hidden text-xs text-gray-1 group-hover:inline-flex">
                     Less Gas, More Cash.{" "}
@@ -60,7 +62,13 @@ export const Welcome = () => {
                         className={"size-[18px] group-hover:size-[24px]"}
                       />
                     </div>
-                    $29,123 Trader Rewards available on every swap
+                    <a
+                      href="https://docs.superposition.so/superposition-testnet/super-layer/universal-shared-liquidity/longtail-amm-specs"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      $29,123 Trader Rewards available on every swap
+                    </a>
                   </div>
                   <div className="hidden text-xs text-gray-1 group-hover:inline-flex ">
                     Get rewarded for every transaction you make.{" "}
@@ -76,7 +84,13 @@ export const Welcome = () => {
               <div className="group h-[35px] rounded-full border border-black p-1 px-3 transition-[height] hover:h-[60px] hover:bg-black hover:text-white ">
                 <div className="flex h-full w-[305px] flex-col items-center justify-center gap-1 group-hover:w-[350px]">
                   <div className="text-sm group-hover:text-base">
-                    🔺🚀️ Earn Higher Revenue with Utility Booster
+                    <a
+                      href="https://docs.superposition.so/superposition-testnet/super-layer/universal-shared-liquidity/longtail-amm-specs"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      Earn Higher Revenue with Utility Booster
+                    </a>
                   </div>
                   <div className="hidden text-xs text-gray-1 group-hover:inline-flex">
                     Earn easy and earn big.{" "}
