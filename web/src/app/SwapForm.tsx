@@ -78,6 +78,7 @@ export const SwapForm = () => {
     token1,
     flipTokens,
     token0Amount,
+    token0AmountRaw,
     token1Amount,
     setToken0Amount,
     setToken1Amount,
@@ -159,7 +160,7 @@ export const SwapForm = () => {
       args: [
         poolAddress,
         token1.address === fUSDC.address,
-        BigInt(parseFloat(token0Amount || "0") * 10 ** 18),
+        BigInt(token0AmountRaw ?? 0),
         maxUint256,
       ],
       // since this is intended to throw an error, we want to disable retries
@@ -409,7 +410,7 @@ export const SwapForm = () => {
                   variant={"no-ring"}
                   placeholder={welcome ? "1024.82" : undefined}
                   value={token0Amount}
-                  onChange={(e) => setToken0Amount(e.target.value)}
+                  onChange={(e) => setToken0Amount(e.target.value, (token0Balance?.result as unknown as bigint).toString())}
                 />
 
                 <Link href={"/swap/explore?token=0"}>
