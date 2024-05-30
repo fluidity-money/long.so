@@ -174,7 +174,6 @@ export const SwapForm = () => {
       },
     });
 
-    // from, to, amount, minout
   const { error: quote2Error, isLoading: quote2IsLoading } =
     useSimulateContract({
       address: ammAddress,
@@ -470,7 +469,7 @@ export const SwapForm = () => {
                       ).toString()}
                     </div>
                   )}
-                  <div className={"cursor-pointer underline"}>Max</div>
+                  <div onClick={setMaxBalance} className={"cursor-pointer underline"}>Max</div>
                 </div>
               </div>
             </motion.div>
