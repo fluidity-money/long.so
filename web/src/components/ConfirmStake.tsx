@@ -37,6 +37,7 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
   const token0 = useStakeStore((s) => s.token0);
   const token1 = useStakeStore((s) => s.token1);
   const token0Amount = useStakeStore((s) => s.token0Amount);
+  const token1Amount = useStakeStore((s) => s.token1Amount);
 
   // if no token or no token amount redirect to the stake form
   useEffect(() => {
@@ -211,7 +212,11 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
 
   // step 1 pending
   if (isMintPending || (mintData && result?.isPending)) {
-    return <Confirm text={"Stake"} />;
+    return <Confirm 
+      text={"Stake"} 
+      fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}} 
+      toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}} 
+    />;
   }
 
   // step 2 pending
@@ -245,7 +250,11 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
     isUpdatePositionPending ||
     (updatePositionData && updatePositionResult?.isPending)
   ) {
-    return <Confirm text={"Stake"} />;
+    return <Confirm 
+      text={"Stake"} 
+      fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}} 
+      toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}} 
+    />;
   }
 
   // success

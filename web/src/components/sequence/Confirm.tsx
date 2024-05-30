@@ -9,9 +9,17 @@ import { useRouter } from "next/navigation";
 
 interface ConfirmProps {
   text?: string;
+  fromAsset: {
+    amount: string;
+    symbol: string
+  }
+  toAsset: {
+    amount: string;
+    symbol: string
+  }
 }
 
-export default function Confirm({ text = "Swap" }: ConfirmProps) {
+export default function Confirm({ text = "Swap", fromAsset, toAsset }: ConfirmProps) {
   const router = useRouter();
   return (
     <div className="flex flex-col items-center">
@@ -38,9 +46,9 @@ export default function Confirm({ text = "Swap" }: ConfirmProps) {
         </div>
         <div className="mt-[13px] flex flex-row items-center gap-1 text-2xs md:mt-[29px]">
           <Token />
-          <div>1321.67 USDC {"->"}</div>
+          <div>{fromAsset.amount} {fromAsset.symbol} {"->"}</div>
           <Token />
-          <div>0.7 ETH</div>
+          <div>{toAsset.amount} {toAsset.symbol}</div>
         </div>
         <div className="mt-[12px] cursor-pointer text-3xs underline md:hidden">
           View transaction on Explorer

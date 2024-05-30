@@ -335,7 +335,11 @@ export const SwapForm = () => {
   }
 
   if (isSwapPending || (swapData && !swapResult.data)) {
-    return <Confirm text={"Swap"} />;
+    return <Confirm
+      text={"Swap"} 
+      fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}} 
+      toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}} 
+      />;
   }
 
   // success
@@ -574,7 +578,7 @@ export const SwapForm = () => {
                   hidden: breakdownHidden,
                 })}
               >
-                1024.82 fUSDC = 0.87 ETH
+                {token0Amount} {token0.symbol} = {quoteIsLoading ? "??" : token1Amount} {token1.symbol}
               </div>
 
               <div className={"cursor-pointer text-[10px] md:text-[12px]"}>
