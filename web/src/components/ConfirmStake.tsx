@@ -13,8 +13,8 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import { output } from "@/lib/abi/ISeawaterAMM";
-import { encodeTick } from "@/lib/math";
+import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
+import { encodeTick, sqrtPriceX96ToPrice } from "@/lib/math";
 import { useEffect, useCallback } from "react";
 import { erc20Abi, Hash, hexToBigInt, maxUint256 } from "viem";
 import { ammAddress } from "@/lib/addresses";
@@ -33,11 +33,27 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
 
   const { address } = useAccount();
 
-  const multiSingleToken = useStakeStore((s) => s.multiSingleToken);
-  const token0 = useStakeStore((s) => s.token0);
-  const token1 = useStakeStore((s) => s.token1);
-  const token0Amount = useStakeStore((s) => s.token0Amount);
-  const token1Amount = useStakeStore((s) => s.token1Amount);
+  const {
+    token0,
+    token1,
+    token0Amount,
+    token0AmountRaw,
+    token1Amount,
+    token1AmountRaw,
+    multiSingleToken
+  } = useStakeStore()
+
+  // Price of the current pool
+  const { data: poolSqrtPriceX96 } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "sqrtPriceX96",
+    args: [token0.address],
+  });
+
+  const tokenPrice = poolSqrtPriceX96
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
+    : 0n;
 
   // if no token or no token amount redirect to the stake form
   useEffect(() => {
@@ -102,7 +118,7 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
   const createPosition = () =>
     writeContractMint({
       address: ammAddress,
-      abi: output.abi,
+      abi: seawaterContract.abi,
       functionName: "mintPosition",
       args: [token0.address, encodeTick(50), encodeTick(100)],
     });
@@ -117,13 +133,13 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
 
   const updatePosition = useCallback(
     (id: bigint) => {
-      const delta = BigInt(parseFloat(token0Amount) * 10 ** 18);
+      const delta = token0AmountRaw
 
       writeContractUpdatePosition({
         address: ammAddress,
-        abi: output.abi,
+        abi: seawaterContract.abi,
         functionName: "updatePosition",
-        args: [token0.address, id, delta],
+        args: [token0.address, id, BigInt(delta)],
       });
     },
     [writeContractUpdatePosition, token0Amount, token0],
@@ -317,7 +333,7 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
             </span>
           </div>
           <div className="mt-[4px] text-2xl font-medium md:text-3xl">
-            $1,433.35
+            ${Number(token1Amount) + (Number(token0Amount) * Number(tokenPrice))}
           </div>
           <div className="mt-[4px] text-3xs font-medium text-gray-2 md:text-2xs">
             The amount is split into{" "}
@@ -400,7 +416,7 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
             <Ethereum className={"invert"} /> {token0Amount}
           </div>
-          <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">= $?</div>
+          <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">= ${Number(token0Amount) * Number(tokenPrice)}</div>
         </div>
 
         <div
@@ -410,10 +426,10 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
         >
           <div className="text-3xs font-medium md:text-2xs">ƒUSDC</div>
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
-            <Ethereum className={"invert"} /> 100,230,989.00
+            <Ethereum className={"invert"} /> {token1Amount}
           </div>
           <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">
-            = $350.00
+            = ${token1Amount}
           </div>
         </div>
 

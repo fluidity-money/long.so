@@ -43,6 +43,7 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
+import { fUSDC } from "@/config/tokens";
 
 const colorGradient = new echarts.graphic.LinearGradient(
   0,
@@ -158,8 +159,24 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     functionName: "decimals",
   });
 
+  const { data: token1Decimals, /*error*/ } = useSimulateContract({
+    address: token1.address,
+    abi: erc20Abi,
+    // @ts-expect-error
+    functionName: "decimals",
+  });
+
   const { data: token0Balance } = useSimulateContract({
     address: token0.address,
+    abi: erc20Abi,
+    // @ts-expect-error I don't know why but this needs to use useSimulateContract instead of useReadContract which breaks all the types
+    functionName: "balanceOf",
+    // @ts-expect-error
+    args: [address as Hash],
+  });
+
+  const { data: token1Balance } = useSimulateContract({
+    address: token1.address,
     abi: erc20Abi,
     // @ts-expect-error I don't know why but this needs to use useSimulateContract instead of useReadContract which breaks all the types
     functionName: "balanceOf",
@@ -244,15 +261,15 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
             // Border configuration
             ...(liquidityRangeType === "custom"
               ? {
-                  borderColor: "#EBEBEB", // Border color
-                  borderWidth: 1, // Border width
-                  borderType: "dashed", // Border type
-                }
+                borderColor: "#EBEBEB", // Border color
+                borderWidth: 1, // Border width
+                borderType: "dashed", // Border type
+              }
               : {
-                  borderColor: "#1E1E1E", // Border color
-                  borderWidth: 1, // Border width
-                  borderType: "solid", // Border type
-                }),
+                borderColor: "#1E1E1E", // Border color
+                borderWidth: 1, // Border width
+                borderType: "solid", // Border type
+              }),
           },
         },
       ],
@@ -387,34 +404,35 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
             <div className="mt-[5px] flex w-full flex-row items-center justify-between">
               <div className="text-2xs md:text-gray-1">
-                ${tokenPrice.toString()}
+                ${token0.address === fUSDC.address ? token0Amount : Number(token0Amount) * Number(tokenPrice)}
               </div>
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
-                {token0Balance && token0Decimals && (
-                  <>
-                    <div>
-                      Balance:{" "}
-                      {(
-                        (token0Balance.result as unknown as bigint) /
-                        BigInt(10 ** token0Decimals.result)
-                      ).toString()}
-                    </div>
-                    <div
-                      className="cursor-pointer underline"
-                      onClick={() =>
-                        setToken0Amount(
-                          (
-                            (token0Balance.result as unknown as bigint) /
-                            BigInt(10 ** token0Decimals.result)
-                          ).toString(),
-                        )
-                      }
-                    >
-                      Max
-                    </div>
-                  </>
-                )}
+                {
+                  token0Balance && token0Decimals && (
+                    <>
+                      <div>
+                        Balance:{" "}
+                        {(
+                          (token0Balance.result as unknown as bigint) /
+                          BigInt(10 ** token0Decimals.result)
+                        ).toString()}
+                      </div>
+                      <div
+                        className="cursor-pointer underline"
+                        onClick={() =>
+                          setToken0Amount(
+                            (
+                              (token0Balance.result as unknown as bigint) /
+                              BigInt(10 ** token0Decimals.result)
+                            ).toString(),
+                          )
+                        }
+                      >
+                        Max
+                      </div>
+                    </>
+                  )}
               </div>
             </div>
           </motion.div>
@@ -455,10 +473,35 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
               <div className="mt-[5px] flex w-full flex-row items-center justify-between">
                 <div className="text-2xs md:text-gray-1">
-                  ${tokenPrice.toString()}
+                  ${token1.address === fUSDC.address ? token1Amount : Number(token1Amount) * Number(tokenPrice)}
+                </div>
+                <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
+                  {token1Balance && token1Decimals && (
+                    <>
+                      <div>
+                        Balance:{" "}
+                        {(
+                          (token1Balance?.result as unknown as bigint) /
+                          BigInt(10 ** (token1Decimals?.result ?? 0))
+                        ).toString()}
+                      </div>
+                      <div
+                        className="cursor-pointer underline"
+                        onClick={() =>
+                          setToken1Amount(
+                            (
+                              (token1Balance?.result as unknown as bigint) /
+                              BigInt(10 ** (token1Decimals?.result ?? 0))
+                            ).toString(),
+                          )
+                        }
+                      >
+                        Max
+                      </div>
+                    </>
+                  )}
                 </div>
 
-                <div className="text-3xs md:text-2xs">Balance: 0.5</div>
               </div>
             </motion.div>
           )}
