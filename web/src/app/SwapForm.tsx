@@ -103,6 +103,9 @@ export const SwapForm = () => {
   // asset, into the other.
   const isSwappingBaseAsset = token0.address === fUSDC.address;
 
+  // the user is currently swapping between fUSDC and another asset, in either direction.
+  const isSwap1 = isSwappingBaseAsset || token1.address === fUSDC.address;
+
   // the pool currently in use's price
   const poolAddress = isSwappingBaseAsset ? token1!.address : token0.address;
 
@@ -170,19 +173,39 @@ export const SwapForm = () => {
       },
     });
 
+    // from, to, amount, minout
+  const { error: quote2Error, isLoading: quote2IsLoading } =
+    useSimulateContract({
+      address: ammAddress,
+      abi: seawaterContract.abi,
+      functionName: "quote2",
+      args: [
+        token0.address,
+        token1.address,
+        BigInt(token0AmountRaw ?? 0),
+        // TODO minout
+        0n,
+      ],
+      // since this is intended to throw an error, we want to disable retries
+      query: {
+        retry: false,
+        retryOnMount: false,
+      },
+    });
+
   /**
    * Parse the quote amount from the error message
-   *
-   * TODO: add support for quote2
    */
-  const quoteAmount = useMemo(() => {
+  const [quoteAmount, quoteIsLoading] = useMemo(() => {
+    const quoteError = isSwap1 ? quote1Error : quote2Error
+    const quoteIsLoading = isSwap1 ? quote1IsLoading : quote2IsLoading
     const [, quoteAmountString] =
-      quote1Error?.message.match(
+      quoteError?.message.match(
         /reverted with the following reason:\n(.+)\n/,
       ) || [];
 
-    return BigInt(quoteAmountString ?? 0);
-  }, [quote1Error]);
+    return [BigInt(quoteAmountString ?? 0), quoteIsLoading];
+  }, [isSwap1, quote1Error, quote1IsLoading, quote2Error, quote2IsLoading]);
 
   // update the token1 amount when the quote amount changes
   useEffect(() => {
@@ -259,14 +282,14 @@ export const SwapForm = () => {
         address: ammAddress,
         abi: seawaterContract.abi,
         functionName: "swap",
-        args: [token1.address, false, BigInt(token0Amount ?? 0), maxUint256],
+        args: [token1.address, false, BigInt(token0AmountRaw ?? 0), maxUint256],
       });
     } else if (token1.address === fUSDC.address) {
       writeContractSwap({
         address: ammAddress,
         abi: seawaterContract.abi,
         functionName: "swap",
-        args: [token0.address, true, BigInt(token0Amount ?? 0), maxUint256],
+        args: [token0.address, true, BigInt(token0AmountRaw ?? 0), maxUint256],
       });
     } else {
       // if both of the assets aren't fusdc, use swap2
@@ -277,7 +300,7 @@ export const SwapForm = () => {
         args: [
           token0.address,
           token1.address,
-          BigInt(token0Amount ?? 0),
+          BigInt(token0AmountRaw ?? 0),
           BigInt(0),
         ],
       });
@@ -485,7 +508,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-2xl"}>
-                  {quote1IsLoading ? (
+                  {quoteIsLoading ? (
                     <LoaderIcon className="animate-spin" />
                   ) : (
                     token1Amount
