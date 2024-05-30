@@ -81,6 +81,7 @@ export const SwapForm = () => {
     token0AmountRaw,
     token1Amount,
     setToken0Amount,
+    setToken0AmountRaw,
     setToken1AmountRaw,
   } = useSwapStore();
   const { data } = useGraphqlGlobal();
@@ -211,6 +212,8 @@ export const SwapForm = () => {
   useEffect(() => {
     setToken1AmountRaw(quoteAmount.toString());
   }, [quoteAmount, setToken1AmountRaw]);
+
+   const setMaxBalance = () => setToken0AmountRaw(token0Balance?.value.toString() ?? token0Amount ?? "0")
 
   const { open } = useWeb3Modal();
 
@@ -450,7 +453,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${tokenPrice.toString()}
+                  ${token0.address === fUSDC.address ? "1" : tokenPrice.toString()}
                 </div>
 
                 <div
@@ -529,7 +532,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${tokenPrice.toString()}
+                  ${token1.address === fUSDC.address ? "1" : tokenPrice.toString()}
                 </div>
 
                 <div
