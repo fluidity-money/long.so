@@ -134,10 +134,10 @@ export const getTickAtSqrtRatio = (sqrtPriceX96: bigint): number => {
 
   let logSqrt10001 = log2 * 255738958999603826347141n;
 
-  let tickLow =
-    (logSqrt10001 - 3402992956809132418596140100660247210n) >> 128n;
-  let tickHigh =
-    (logSqrt10001 + 291339464771989622907027621153398088495n) >> 128n;
+  const tickLow =
+    ((logSqrt10001 - 3402992956809132418596140100660247210n) >> 128n) & 0xFFFFFFFFn;
+  const tickHigh =
+    ((logSqrt10001 + 291339464771989622907027621153398088495n) >> 128n) & 0xFFFFFFFFn;
 
   let tick = (() => {
     if (tickLow == tickHigh) return tickLow;

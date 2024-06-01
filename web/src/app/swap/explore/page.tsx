@@ -25,6 +25,7 @@ const SwapExploreFragment = graphql(`
       name
       symbol
       address
+      decimals
     }
     price
   }
@@ -60,6 +61,7 @@ const ExplorePage = () => {
           address: token.token.address as Hash,
           name: token.token.name,
           symbol: token.token.symbol,
+          decimals: token.token.decimals
         } satisfies Token,
       })) ?? []
     );

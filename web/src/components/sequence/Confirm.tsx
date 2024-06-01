@@ -7,7 +7,7 @@ import Token from "@/assets/icons/token.svg";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 
-interface ConfirmProps {
+export interface ConfirmProps {
   text?: string;
   fromAsset: {
     amount: string;

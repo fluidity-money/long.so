@@ -37,6 +37,7 @@ const SelectPrimeAssetFragment = graphql(`
       name
       symbol
       address
+      decimals
     }
   }
 `);
@@ -57,6 +58,7 @@ const SelectPrimeAsset = () => {
     name: pool.token.name,
     symbol: pool.token.symbol,
     address: pool.token.address as Hash,
+    decimals: pool.token.decimals
   })) : [];
 
   /**
@@ -88,6 +90,7 @@ const SelectPrimeAsset = () => {
           name: pool.token.name,
           symbol: pool.token.symbol,
           address: pool.token.address as Hash,
+          decimals: pool.token.decimals
         },
         // assume the second token is always fUSDC
         fUSDC,

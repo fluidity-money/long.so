@@ -212,7 +212,8 @@ export const SwapForm = () => {
     setToken1AmountRaw(quoteAmount.toString());
   }, [quoteAmount, setToken1AmountRaw]);
 
-   const setMaxBalance = () => setToken0AmountRaw(token0Balance?.value.toString() ?? token0Amount ?? "0")
+   const setMaxBalance = () =>
+     setToken0AmountRaw(token0Balance?.toString() ?? token0Amount ?? "0")
 
   const { open } = useWeb3Modal();
 
@@ -336,9 +337,9 @@ export const SwapForm = () => {
 
   if (isSwapPending || (swapData && !swapResult.data)) {
     return <Confirm
-      text={"Swap"} 
-      fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}} 
-      toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}} 
+      text={"Swap"}
+      fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}}
+      toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}}
       />;
   }
 
