@@ -82,9 +82,11 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     token0,
     token0Amount,
     setToken0Amount,
+    setToken0AmountRaw,
     token1,
     token1Amount,
     setToken1Amount,
+    setToken1AmountRaw,
     priceLower,
     priceUpper,
     tickLower,
@@ -163,8 +165,8 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
   const setMaxBalance = (token: TokenType) => {
     token.address === token0.address ?
-      setToken0Amount(token0Balance?.value.toString() ?? token0Amount ?? "0") :
-      setToken1Amount(token1Balance?.value.toString() ?? token1Amount ?? "0")
+      setToken0AmountRaw(token0Balance?.value.toString() ?? token0Amount ?? "0") :
+      setToken1AmountRaw(token1Balance?.value.toString() ?? token1Amount ?? "0")
   }
 
   // The tick spacing will determine how granular the graph is.
