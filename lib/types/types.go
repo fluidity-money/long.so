@@ -132,6 +132,10 @@ func UnscaledNumberFromBig(v *big.Int) UnscaledNumber {
 	i := new(big.Int).Set(v)
 	return UnscaledNumber{i}
 }
+func UnscaledNumberFromInt64(v int64) UnscaledNumber {
+	i := new(big.Int).SetInt64(v)
+	return UnscaledNumber{i}
+}
 func UnscaledNumberFromString(v string) (*UnscaledNumber, error) {
 	i, ok := new(big.Int).SetString(v, 16)
 	if !ok {
@@ -212,8 +216,4 @@ func (d Data) Value() (sqlDriver.Value, error) {
 }
 func (d Data) Bytes() ([]byte, error) {
 	return hex.DecodeString(strings.TrimPrefix(string(d), "0x"))
-}
-
-func UnscaledNumberFromBigInt(b *big.Int) UnscaledNumber {
-	return UnscaledNumber{b}
 }

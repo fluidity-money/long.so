@@ -123,10 +123,45 @@ func TestUnpackCollectProtocolFees(t *testing.T) {
 
 }
 
-func TestUnpackSwap2(t *testing.T) {
-
-}
+func TestUnpackSwap2(t *testing.T) {}
 
 func TestUnpackSwap1(t *testing.T) {
-
+	var (
+		topic1 = ethCommon.HexToHash("0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5")
+		topic2 = ethCommon.HexToHash("0x000000000000000000000000e984f758f362d255bd96601929970cef9ff19dd7")
+	)
+	d, err := hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000064000000000000000000000000000000000000000000000000000000000000a9fe")
+	if err != nil {
+		t.Fatalf("failed to decode string: %v", err)
+	}
+	s, err := UnpackSwap1(topic1, topic2, d)
+	if err != nil {
+		t.Fatalf("unpack mint position: %v", err)
+	}
+	assert.Equalf(t,
+		types.AddressFromString("0xFEb6034FC7dF27dF18a3a6baD5Fb94C0D3dCb6d5"),
+		s.User,
+		"token not equal",
+	)
+	assert.Equalf(t,
+		types.AddressFromString("0xe984f758F362D255Bd96601929970Cef9Ff19dD7"),
+		s.Pool,
+		"pool not equal",
+	)
+	assert.Falsef(t, s.ZeroForOne, "zeroforone incorrect")
+	assert.Equalf(t,
+		types.UnscaledNumberFromInt64(1),
+		s.Amount0,
+		"amount0 not equal",
+	)
+	assert.Equalf(t,
+		types.UnscaledNumberFromInt64(100),
+		s.Amount1,
+		"amount1 not equal",
+	)
+	assert.Equalf(t,
+		types.NumberFromInt64(43518),
+		s.FinalTick,
+		"final tick not equal",
+	)
 }

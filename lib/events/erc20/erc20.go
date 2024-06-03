@@ -36,7 +36,7 @@ func UnpackTransfer(topic1, topic2 ethCommon.Hash, d []byte) (*Transfer, error) 
 	return &Transfer{
 		Sender:    hashToAddr(topic1),
 		Recipient: hashToAddr(topic2),
-		Value:     types.UnscaledNumberFromBigInt(amount),
+		Value:     types.UnscaledNumberFromBig(amount),
 	}, nil
 }
 
