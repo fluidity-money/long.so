@@ -12,12 +12,16 @@ import { useSwapStore } from "@/stores/useSwapStore";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Hash } from "viem";
 import {
   mockHighestRewarders,
   mockSwapExploreAssets,
 } from "@/demoData/swapExploreAssets";
+import { getBalance } from "wagmi/actions";
+import { useAccount } from "wagmi";
+import { config } from "@/config";
+import { getFormattedStringFromTokenAmount } from "@/lib/amounts";
 
 const SwapExploreFragment = graphql(`
   fragment SwapExploreFragment on SeawaterPool {
@@ -36,6 +40,8 @@ const ExplorePage = () => {
 
   const { setToken1, setToken0 } = useSwapStore();
 
+  const { address } = useAccount()
+
   const searchParams = useSearchParams();
 
   const token = searchParams.get("token") as "0" | "1";
@@ -46,26 +52,47 @@ const ExplorePage = () => {
 
   const showMockData = useFeatureFlag("ui show demo data");
 
+  const [tokenBalances, setTokenBalances] = useState<Array<{ amount: number, amountUSD: number }>>([])
+
+  useEffect(() => {
+    (async () => {
+      if (!tokensData || !address)
+        return
+
+      const balances = await Promise.all(tokensData.map(async (token) => {
+        const { value } = await getBalance(config, {
+          address,
+          token: token.token.address as `0x${string}`,
+        })
+        const amount = Number(getFormattedStringFromTokenAmount(value.toString(), token.token.decimals))
+        const amountUSD = amount * Number(token.price)
+        return { amount, amountUSD }
+      }
+      ))
+      setTokenBalances(balances)
+    })()
+  }, [tokensData])
+
   const allAssetsData = useMemo(() => {
     if (showMockData) return mockSwapExploreAssets;
 
     // reformat the data to match the columns
     return (
-      tokensData?.map((token) => ({
+      tokensData?.map((token, i) => ({
         symbol: token.token.symbol,
         address: token.token.address,
         name: token.token.name,
-        amount: 0,
-        amountUSD: 0, // TODO: calculate using token.price
+        amount: tokenBalances[i]?.amount ?? 0,
+        amountUSD: tokenBalances[i]?.amountUSD ?? 0,
         token: {
           address: token.token.address as Hash,
           name: token.token.name,
           symbol: token.token.symbol,
-          decimals: token.token.decimals
+          decimals: token.token.decimals,
         } satisfies Token,
       })) ?? []
     );
-  }, [showMockData, tokensData]);
+  }, [showMockData, tokensData, tokenBalances]);
 
   return (
     <div className={"flex flex-col items-center overflow-y-auto"}>
