@@ -6,7 +6,7 @@ export const arbitrumStylusTestnet = {
   nativeCurrency: { name: "Superposition", symbol: "SPN", decimals: 18 },
   contracts: {
     multicall3: {
-      address: "0x69B6eb359E3f9CE04078B96249aFceA1809A350f" as const,
+      address: "0x37Bc0f77FCf51318B2ceb9447002913f7CFb599d" as const,
     },
   },
   rpcUrls: {
