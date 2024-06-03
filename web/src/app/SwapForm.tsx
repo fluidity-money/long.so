@@ -435,7 +435,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${token0.address === fUSDC.address ? "1" : tokenPrice.toString()}
+                  ${token0.address === fUSDC.address ? token0Amount : Number(token0Amount) * Number(tokenPrice)}
                 </div>
 
                 <div
@@ -511,7 +511,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${token1.address === fUSDC.address ? "1" : tokenPrice.toString()}
+                  ${token1.address === fUSDC.address ? token1Amount : Number(token1Amount) * Number(tokenPrice)}
                 </div>
 
                 <div
