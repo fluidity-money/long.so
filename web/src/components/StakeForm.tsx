@@ -43,7 +43,7 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
-import { fUSDC } from "@/config/tokens";
+import { Token as TokenType, fUSDC } from "@/config/tokens";
 
 const colorGradient = new echarts.graphic.LinearGradient(
   0,
@@ -151,38 +151,21 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
   // in this context, token0 is actually token1. It's converted to token1
   // when we use it.
 
-  // token0 hooks
-  const { data: token0Decimals, error } = useSimulateContract({
-    address: token0.address,
-    abi: erc20Abi,
-    // @ts-expect-error
-    functionName: "decimals",
-  });
+  const { data: token0Balance } = useBalance({
+    address,
+    token: token0.address,
+  })
 
-  const { data: token1Decimals, /*error*/ } = useSimulateContract({
-    address: token1.address,
-    abi: erc20Abi,
-    // @ts-expect-error
-    functionName: "decimals",
-  });
+  const { data: token1Balance } = useBalance({
+    address,
+    token: token1.address,
+  })
 
-  const { data: token0Balance } = useSimulateContract({
-    address: token0.address,
-    abi: erc20Abi,
-    // @ts-expect-error I don't know why but this needs to use useSimulateContract instead of useReadContract which breaks all the types
-    functionName: "balanceOf",
-    // @ts-expect-error
-    args: [address as Hash],
-  });
-
-  const { data: token1Balance } = useSimulateContract({
-    address: token1.address,
-    abi: erc20Abi,
-    // @ts-expect-error I don't know why but this needs to use useSimulateContract instead of useReadContract which breaks all the types
-    functionName: "balanceOf",
-    // @ts-expect-error
-    args: [address as Hash],
-  });
+  const setMaxBalance = (token: TokenType) => {
+    token.address === token0.address ?
+      setToken0Amount(token0Balance?.value.toString() ?? token0Amount ?? "0") :
+      setToken1Amount(token1Balance?.value.toString() ?? token1Amount ?? "0")
+  }
 
   // The tick spacing will determine how granular the graph is.
   const { data: tickSpacing } = useSimulateContract({
@@ -409,25 +392,15 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
                 {
-                  token0Balance && token0Decimals && (
+                  token0Balance && (
                     <>
                       <div>
                         Balance:{" "}
-                        {(
-                          (token0Balance.result as unknown as bigint) /
-                          BigInt(10 ** token0Decimals.result)
-                        ).toString()}
+                        {(token0Balance.formatted)}
                       </div>
                       <div
                         className="cursor-pointer underline"
-                        onClick={() =>
-                          setToken0Amount(
-                            (
-                              (token0Balance.result as unknown as bigint) /
-                              BigInt(10 ** token0Decimals.result)
-                            ).toString(),
-                          )
-                        }
+                        onClick={() => setMaxBalance(token0)}
                       >
                         Max
                       </div>
@@ -476,25 +449,15 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
                   ${token1.address === fUSDC.address ? token1Amount : Number(token1Amount) * Number(tokenPrice)}
                 </div>
                 <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
-                  {token1Balance && token1Decimals && (
+                  {token1Balance && (
                     <>
                       <div>
                         Balance:{" "}
-                        {(
-                          (token1Balance?.result as unknown as bigint) /
-                          BigInt(10 ** (token1Decimals?.result ?? 0))
-                        ).toString()}
+                        {token1Balance.formatted}
                       </div>
                       <div
                         className="cursor-pointer underline"
-                        onClick={() =>
-                          setToken1Amount(
-                            (
-                              (token1Balance?.result as unknown as bigint) /
-                              BigInt(10 ** (token1Decimals?.result ?? 0))
-                            ).toString(),
-                          )
-                        }
+                        onClick={() => setMaxBalance(token1)}
                       >
                         Max
                       </div>

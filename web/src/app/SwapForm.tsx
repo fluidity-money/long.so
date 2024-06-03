@@ -20,6 +20,7 @@ import { useSwapStore } from "@/stores/useSwapStore";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import {
   useAccount,
+  useBalance,
   useSimulateContract,
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -122,39 +123,15 @@ export const SwapForm = () => {
     ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
     : 0n;
 
-  // token0 hooks
-  const { data: token0Decimals /* error */ } = useSimulateContract({
-    address: token0.address,
-    abi: erc20Abi,
-    // @ts-expect-error
-    functionName: "decimals",
-  });
+  const { data: token0Balance } = useBalance({
+    address,
+    token: token0.address,
+  })
 
-  const { data: token0Balance } = useSimulateContract({
-    address: token0.address,
-    abi: erc20Abi,
-    // @ts-expect-error I don't know why but this needs to use useSimulateContract instead of useReadContract which breaks all the types
-    functionName: "balanceOf",
-    // @ts-expect-error
-    args: [address as Hash],
-  });
-
-  // token1 hooks
-  const { data: token1Decimals } = useSimulateContract({
-    address: token1.address,
-    abi: erc20Abi,
-    // @ts-expect-error
-    functionName: "decimals",
-  });
-
-  const { data: token1Balance } = useSimulateContract({
-    address: token1.address,
-    abi: erc20Abi,
-    // @ts-expect-error
-    functionName: "balanceOf",
-    // @ts-expect-error
-    args: [address as Hash],
-  });
+  const { data: token1Balance } = useBalance({
+    address,
+    token: token1.address,
+  })
 
   const { error: quote1Error, isLoading: quote1IsLoading } =
     useSimulateContract({
@@ -212,8 +189,9 @@ export const SwapForm = () => {
     setToken1AmountRaw(quoteAmount.toString());
   }, [quoteAmount, setToken1AmountRaw]);
 
-   const setMaxBalance = () =>
-     setToken0AmountRaw(token0Balance?.toString() ?? token0Amount ?? "0")
+  const setMaxBalance = () => {
+    setToken0AmountRaw(token0Balance?.value.toString() ?? token0Amount ?? "0")
+  }
 
   const { open } = useWeb3Modal();
 
@@ -440,7 +418,7 @@ export const SwapForm = () => {
                   variant={"no-ring"}
                   placeholder={welcome ? "1024.82" : undefined}
                   value={token0Amount}
-                  onChange={(e) => setToken0Amount(e.target.value, (token0Balance?.result as unknown as bigint).toString())}
+                  onChange={(e) => setToken0Amount(e.target.value, token0Balance?.value.toString())}
                 />
 
                 <Link href={"/swap/explore?token=0"}>
@@ -465,13 +443,10 @@ export const SwapForm = () => {
                     "flex flex-row gap-[17px] text-[8px] md:text-[10px]"
                   }
                 >
-                  {token0Balance && token0Decimals && (
+                  {token0Balance && (
                     <div>
                       Balance:{" "}
-                      {(
-                        (token0Balance.result as unknown as bigint) /
-                        BigInt(10 ** token0Decimals.result)
-                      ).toString()}
+                      {token0Balance.formatted}
                     </div>
                   )}
                   <div onClick={setMaxBalance} className={"cursor-pointer underline"}>Max</div>
@@ -544,13 +519,10 @@ export const SwapForm = () => {
                     "flex flex-row gap-[17px] text-[8px] md:text-[10px]"
                   }
                 >
-                  {token1Balance && token1Decimals && (
+                  {token1Balance && (
                     <div>
                       Balance:{" "}
-                      {(
-                        (token1Balance.result as unknown as bigint) /
-                        BigInt(10 ** token1Decimals.result)
-                      ).toString()}
+                      {token1Balance.formatted}
                     </div>
                   )}
                 </div>
