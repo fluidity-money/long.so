@@ -186,7 +186,7 @@ export const SwapForm = () => {
 
   // update the token1 amount when the quote amount changes
   useEffect(() => {
-    setToken1AmountRaw(quoteAmount.toString());
+    setToken1AmountRaw(quoteAmount.toString() ?? "0");
   }, [quoteAmount, setToken1AmountRaw]);
 
   const setMaxBalance = () => {
