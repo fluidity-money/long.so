@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 export default function CreatePoolPage() {
   const params = useSearchParams()
   const positionId = params.get("positionId")
+  const poolId = params.get("id")
 
-  return <StakeForm mode="existing" positionId={positionId ?? ""} />;
+  return <StakeForm mode="existing" poolId={poolId ?? ""} positionId={positionId ?? ""} />;
 }

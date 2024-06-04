@@ -138,7 +138,7 @@ export default function PoolPage() {
               <div className="flex flex-col gap-8 p-4">
                 <div className="flex flex-row gap-2">
                   <Link
-                    href={`/stake/pool/add-liquidity?positionId=${positionId}`}
+                    href={`/stake/pool/add-liquidity?id=${id}&positionId=${positionId}`}
                     legacyBehavior
                   >
                     <Button
