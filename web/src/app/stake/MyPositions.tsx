@@ -60,7 +60,7 @@ export const MyPositions = () => {
     if (showDemoData && address) return mockMyPositions;
 
     return walletData?.positions?.map((position) => ({
-      id: position.id,
+      id: position.pool.token.address,
       duration: 0,
       tokens: [
         fUSDC,
