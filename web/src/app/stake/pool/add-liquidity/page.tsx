@@ -1,10 +1,11 @@
 "use client";
 
 import { StakeForm } from "@/components/StakeForm";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 export default function CreatePoolPage() {
-  const params = useParams();
+  const params = useSearchParams()
+  const positionId = params.get("positionId")
 
-  return <StakeForm mode="existing" poolId={params.id as string} />;
+  return <StakeForm mode="existing" positionId={positionId ?? ""} />;
 }

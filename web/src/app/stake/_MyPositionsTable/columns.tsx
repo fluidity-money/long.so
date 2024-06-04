@@ -10,8 +10,10 @@ export type Token = {
   name: string;
 };
 
+// this is a misnomer - it represents a position and its corresponding pool
 export type Pool = {
   id: string;
+  positionId: string;
   tokens: [Token, Token];
   duration: number;
   staked: number;

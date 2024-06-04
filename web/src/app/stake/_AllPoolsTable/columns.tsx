@@ -30,7 +30,7 @@ export const columns: ColumnDef<Pool>[] = [
     header: "Pair",
     cell: ({ row }) => {
       return (
-        <Link href={`/stake/pool?id=${row.original.id}`}>
+        <Link href={`/stake/pool/create`}>
           <Badge className="h-[35.61px] cursor-pointer gap-1 pl-1 text-2xs md:text-xs">
             <div className={"flex flex-row items-center"}>
               <Token className={"size-[25px]"} />
@@ -144,7 +144,7 @@ export const columns: ColumnDef<Pool>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex flex-row gap-2 group-hover:invert">
-          <Link href={`/stake/pool/add-liquidity?id=${row.original.id}`}>
+          <Link href={`/stake/pool/create`}>
             <Button size="sm" className="h-[29px] text-2xs md:text-xs">
               +
             </Button>

@@ -61,7 +61,8 @@ const colorGradient = new echarts.graphic.LinearGradient(
 
 interface StakeFormProps {
   mode: "new" | "existing";
-  poolId?: string;
+  poolId: string;
+  positionId?: string;
 }
 
 const StakeFormFragment = graphql(`
@@ -71,7 +72,7 @@ const StakeFormFragment = graphql(`
   }
 `);
 
-export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
+export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const [feeTier, setFeeTier] = useState<"auto" | "manual">("auto");
 
   const [breakdownHidden, setBreakdownHidden] = useState(true);
@@ -118,7 +119,7 @@ export const StakeForm = ({ mode, poolId }: StakeFormProps) => {
     if (mode === "new") {
       router.push("/stake/pool/create/confirm");
     } else {
-      router.push(`/stake/pool/confirm-liquidity?id=${poolId}`);
+      router.push(`/stake/pool/confirm-liquidity?positionId=${positionId}`);
     }
   };
 

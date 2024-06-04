@@ -24,11 +24,15 @@ import { EnableSpending } from "@/components/sequence/EnableSpending";
 import { Fail } from "@/components/sequence/Fail";
 import { Success } from "@/components/sequence/Success";
 
-interface ConfirmStakeProps {
-  mode: "new" | "existing";
-}
+type ConfirmStakeProps = {
+  mode: "new"
+  positionId?: never,
+} | {
+  mode: "existing",
+  positionId: string,
+};
 
-export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
+export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const router = useRouter();
 
   const { address } = useAccount();
@@ -515,7 +519,7 @@ export const ConfirmStake = ({ mode }: ConfirmStakeProps) => {
           <Button
             variant={"secondary"}
             className="w-full max-w-[350px]"
-            onClick={() => createPosition()}
+            onClick={() => {mode === "new" ? createPosition() : updatePosition(BigInt(positionId))}}
           >
             Confirm Stake
           </Button>

@@ -63,7 +63,7 @@ export function MyPositionsTable<TData, TValue>({
                 data-state={row.getIsSelected() && "selected"}
                 className="cursor-pointer border-b-0"
                 onClick={() =>
-                  router.push(`/stake/pool?id=${(row.original as any).id}`)
+                  router.push(`/stake/pool?id=${(row.original as any).id}&positionId=${(row.original as any).positionId}`)
                 }
               >
                 {row.getVisibleCells().map((cell) => (

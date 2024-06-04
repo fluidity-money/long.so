@@ -48,6 +48,7 @@ export default function PoolPage() {
   // get the id from the query params
   const params = useSearchParams();
   const id = params.get("id");
+  const positionId = params.get("positionId")
 
   const { data } = useGraphqlGlobal();
   const allPoolsData = useFragment(ManagePoolFragment, data?.pools);
@@ -137,7 +138,7 @@ export default function PoolPage() {
               <div className="flex flex-col gap-8 p-4">
                 <div className="flex flex-row gap-2">
                   <Link
-                    href={`/stake/pool/add-liquidity?id=${id}`}
+                    href={`/stake/pool/add-liquidity?positionId=${positionId}`}
                     legacyBehavior
                   >
                     <Button
