@@ -69,6 +69,7 @@ export const SwapForm = () => {
   const showSuperloopPopover = useFeatureFlag("ui show superloop");
   const showCampaignBanner = useFeatureFlag("ui show campaign banner");
   const showMockData = useFeatureFlag("ui show demo data");
+  const showSwapBreakdown = useFeatureFlag("ui show swap breakdown")
 
   useEffect(() => {
     if (!welcome) {
@@ -587,17 +588,19 @@ export const SwapForm = () => {
                   onClick={() => setBreakdownHidden((v) => !v)}
                   className="flex cursor-pointer flex-row"
                 >
-                  {breakdownHidden ? (
-                    <>
-                      <div className="underline">See breakdown</div>
-                      <div className="ml-1">{"->"}</div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="underline">Hide breakdown</div>
-                      <div className="ml-1 rotate-90">{"<-"}</div>
-                    </>
-                  )}
+                  {showSwapBreakdown ?
+                    breakdownHidden ? (
+                      <>
+                        <div className="underline">See breakdown</div>
+                        <div className="ml-1">{"->"}</div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="underline">Hide breakdown</div>
+                        <div className="ml-1 rotate-90">{"<-"}</div>
+                      </>
+                    ) : <></>
+                  }
                 </div>
               </div>
             </div>

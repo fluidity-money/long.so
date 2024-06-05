@@ -142,6 +142,11 @@ export interface FeatureFlags {
    * Show pools tab in inventory drawer.
    */
   "ui show pools tab": boolean;
+
+  /**
+   * Show breakdown of fees, rewards, and route in the swap form.
+   */
+  "ui show swap breakdown": boolean;
 }
 
 /**
