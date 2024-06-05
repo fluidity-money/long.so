@@ -37,7 +37,8 @@ const featureFlagsLabels: { key: keyof FeatureFlags; label: string }[] = [
   { key: "ui show pool reward range", label: "UI Pool Reward Range"},
   { key: "ui show claim yield", label: "UI Show Claim Yield"},
   { key: "ui show earned fees apr", label: "UI Show Earned Fees Apr"},
-  { key: "ui show pool filters", label: "UI Show Pool Filters"}
+  { key: "ui show pool filters", label: "UI Show Pool Filters"},
+  { key: "ui show pools tab", label: "UI Show Pools Tab"}
 ];
 
 export const FeatureFlagConfig = () => {

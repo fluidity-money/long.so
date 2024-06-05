@@ -23,5 +23,6 @@
 	"ui show tokens given out": false,
 	"ui show trade rewards": false,
 	"ui show utility incentives": false,
-	"ui show yield over time": false
+	"ui show yield over time": false,
+	"ui show pools tab": false,
 }

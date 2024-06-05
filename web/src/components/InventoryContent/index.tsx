@@ -9,9 +9,12 @@ import { InventoryHeader } from "@/components/InventoryContent/InventoryHeader";
 import { cn } from "@/lib/utils";
 import { useInventorySettings } from "@/components/InventoryContent/useInventorySettings";
 import { InventorySettings } from "@/components/InventoryContent/InventorySettings";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 export const InventoryContent = () => {
   const [content, setContent] = useState<"pools" | "trade">("trade");
+
+  const showPoolsTab = useFeatureFlag("ui show pools tab");
 
   const settings = useInventorySettings((s) => s.settings);
 
@@ -37,11 +40,12 @@ export const InventoryContent = () => {
                 value: "trade" as const,
                 ref: useRef(),
               },
-              {
-                label: "Pools",
-                value: "pools" as const,
-                ref: useRef(),
-              },
+              ...showPoolsTab ?
+                [{
+                  label: "Pools",
+                  value: "pools" as const,
+                  ref: useRef(),
+                }] : [],
             ]}
           />
         </div>

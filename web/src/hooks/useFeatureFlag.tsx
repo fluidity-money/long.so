@@ -137,6 +137,11 @@ export interface FeatureFlags {
    * Show claim all yield button, and functionality.
    */
   "ui show claim all yield": boolean;
+
+  /**
+   * Show pools tab in inventory drawer.
+   */
+  "ui show pools tab": boolean;
 }
 
 /**
