@@ -24,8 +24,9 @@ import {
   useSimulateContract,
   useWaitForTransactionReceipt,
   useWriteContract,
+  useClient,
 } from "wagmi";
-import { erc20Abi, Hash, maxUint256 } from "viem";
+import { erc20Abi, formatEther, Hash, maxUint256 } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import LightweightERC20 from "@/lib/abi/LightweightERC20";
 import { ammAddress } from "@/lib/addresses";
@@ -40,6 +41,7 @@ import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 import { useToast } from "@/components/ui/use-toast";
+import { estimateContractGas } from "viem/actions";
 
 const SwapFormFragment = graphql(`
   fragment SwapFormFragment on SeawaterPool {
@@ -151,6 +153,28 @@ export const SwapForm = () => {
       },
     });
 
+  const client = useClient()
+
+  // TODO this is in ETH(/SPN), not USD
+  const [estimatedGas, setEstimatedGas] = useState(0n)
+  useEffect(() => {
+    (async () => {
+      if (!client || !address)
+        return
+      try {
+        const estimatedGas = await estimateContractGas(client, {
+          ...swapOptions,
+          // Typescript doesn't support strongly typing this with destructuring
+          // https://github.com/microsoft/TypeScript/issues/46680
+          // @ts-expect-error
+          args: swapOptions.args,
+          account: address,
+        })
+        setEstimatedGas(estimatedGas)
+      } catch { }
+    })()
+  }, [client, token1, token0AmountRaw])
+
   const { error: quote2Error, isLoading: quote2IsLoading } =
     useSimulateContract({
       address: ammAddress,
@@ -254,27 +278,25 @@ export const SwapForm = () => {
     hash: approvalData,
   });
 
-  const performSwap = useCallback(() => {
-    console.log("performing swap");
-
-    // if one of the assets is fusdc, use swap1
+  const swapOptions = useMemo(() => {
     if (isSwappingBaseAsset) {
-      writeContractSwap({
+      // if one of the assets is fusdc, use swap1
+      return {
         address: ammAddress,
         abi: seawaterContract.abi,
         functionName: "swap",
         args: [token1.address, false, BigInt(token0AmountRaw ?? 0), maxUint256],
-      });
+      } as const
     } else if (token1.address === fUSDC.address) {
-      writeContractSwap({
+      return {
         address: ammAddress,
         abi: seawaterContract.abi,
         functionName: "swap",
         args: [token0.address, true, BigInt(token0AmountRaw ?? 0), maxUint256],
-      });
+      } as const
     } else {
       // if both of the assets aren't fusdc, use swap2
-      writeContractSwap({
+      return {
         address: ammAddress,
         abi: seawaterContract.abi,
         functionName: "swap2ExactIn",
@@ -284,15 +306,21 @@ export const SwapForm = () => {
           BigInt(token0AmountRaw ?? 0),
           BigInt(0),
         ],
-      });
+      } as const
     }
-  }, [
-    token0Amount,
-    token0.address,
-    token1.address,
-    writeContractSwap,
-    isSwappingBaseAsset,
-  ]);
+  }, [isSwappingBaseAsset, token0Amount, token0.address, token1.address])
+
+  const performSwap = useCallback(() => {
+    console.log("performing swap");
+
+    writeContractSwap({
+      ...swapOptions,
+      // Typescript doesn't support strongly typing this with destructuring
+      // https://github.com/microsoft/TypeScript/issues/46680
+      // @ts-expect-error
+      args: swapOptions.args
+    })
+  }, [swapOptions, writeContractSwap]);
 
   const swapResult = useWaitForTransactionReceipt({
     hash: swapData,
@@ -316,9 +344,9 @@ export const SwapForm = () => {
   if (isSwapPending || (swapData && !swapResult.data)) {
     return <Confirm
       text={"Swap"}
-      fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}}
-      toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}}
-      />;
+      fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+      toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+    />;
   }
 
   // success
@@ -543,7 +571,7 @@ export const SwapForm = () => {
                 )}
               >
                 <Gas />
-                <div>$3.40</div>
+                <div>{formatEther(estimatedGas)} SPN</div>
               </div>
 
               <div
@@ -586,7 +614,7 @@ export const SwapForm = () => {
               <div className={"flex flex-row justify-between"}>
                 <div>Fees</div>
                 <div className={"flex flex-row items-center gap-1"}>
-                  <Gas /> $0.10
+                  <Gas /> {formatEther(estimatedGas)} SPN
                 </div>
               </div>
               <div className={"flex flex-row justify-between"}>
