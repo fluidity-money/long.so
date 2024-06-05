@@ -109,13 +109,13 @@ export const AllPools = () => {
       const volume = (() => {
         if (pool.volumeOverTime.daily.length > 0)
           return parseFloat(
-            pool.volumeOverTime.daily[0].fusdc.valueScaled
+            pool.volumeOverTime.daily?.[0].fusdc.valueScaled ?? 0
           );
         return 0;
       })();
       const totalValueLocked = (() => {
         if (pool.tvlOverTime.daily.length > 0)
-          return parseFloat(pool.tvlOverTime.daily[0]);
+          return parseFloat(pool.tvlOverTime.daily[0] ?? 0);
         return 0
       })();
       return {

@@ -81,7 +81,7 @@ const SelectPrimeAsset = () => {
       id: pool.address,
       // assume the first token is always the main token
       volume: usdFormat(
-        parseFloat(pool.volumeOverTime.daily[0].fusdc.valueUsd),
+        parseFloat(pool.volumeOverTime.daily[0]?.fusdc.valueUsd ?? 0),
       ),
       APR: 0, // TODO: calculate APR
       duration: 0, // TODO: get duration
