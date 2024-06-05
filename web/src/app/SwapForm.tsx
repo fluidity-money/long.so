@@ -85,6 +85,7 @@ export const SwapForm = () => {
     token0AmountRaw,
     token1Amount,
     setToken0Amount,
+    setToken1Amount,
     setToken0AmountRaw,
     setToken1AmountRaw,
   } = useSwapStore();
@@ -356,6 +357,8 @@ export const SwapForm = () => {
     return (
       <Success
         onDone={() => {
+          setToken0Amount("0");
+          setToken1Amount("0");
           resetApproval();
           resetSwap();
           swapResult.refetch();
