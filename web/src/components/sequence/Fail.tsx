@@ -51,7 +51,9 @@ export const Fail = ({ text, transactionHash, onDone }: FailProps) => {
         {transactionHash && chain?.blockExplorers?.default && (
           <a
             className="mt-[12px] cursor-pointer text-3xs underline md:mt-[26px]"
-            href={`${chain.blockExplorers.default.url}tx/${transactionHash}`}
+            rel="noopener noreferrer"
+            target="_blank"
+            href={`${chain.blockExplorers.default.url}/tx/${transactionHash}`}
           >
             View transaction on Explorer
           </a>

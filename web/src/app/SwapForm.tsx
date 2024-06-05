@@ -347,6 +347,7 @@ export const SwapForm = () => {
       text={"Swap"}
       fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
       toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+      transactionHash={swapData}
     />;
   }
 
@@ -359,6 +360,7 @@ export const SwapForm = () => {
           resetSwap();
           swapResult.refetch();
         }}
+        transactionHash={swapData}
       />
     );
   }

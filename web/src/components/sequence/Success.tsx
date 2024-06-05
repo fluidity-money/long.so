@@ -4,13 +4,20 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useChainId, useChains } from "wagmi";
 
 interface SuccessProps {
+  transactionHash?: string;
   onDone?: () => void;
 }
 
-export const Success = ({ onDone }: SuccessProps) => {
+export const Success = ({ transactionHash, onDone }: SuccessProps) => {
   const router = useRouter();
+  const chains = useChains();
+  const chainId = useChainId();
+  console.log("TX HAS", transactionHash)
+
+  const chain = chains.find((chain) => chain.id === chainId);
 
   return (
     <div className="flex flex-col items-center">
@@ -41,7 +48,16 @@ export const Success = ({ onDone }: SuccessProps) => {
           Succesfully Swapped USDC {"->"} ETH
         </div>
         <div className="mt-[12px] cursor-pointer text-3xs underline md:mt-[26px]">
-          View transaction on Explorer
+          {transactionHash && chain?.blockExplorers?.default && (
+            <a
+              className="mt-[12px] cursor-pointer text-3xs underline md:mt-[26px]"
+              rel="noopener noreferrer"
+              target="_blank"
+              href={`${chain.blockExplorers.default.url}/tx/${transactionHash}`}
+            >
+              View transaction on Explorer
+            </a>
+          )}
         </div>
         <div className="w-full md:p-2">
           <Button

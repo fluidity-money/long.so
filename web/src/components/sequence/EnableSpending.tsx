@@ -48,7 +48,9 @@ export const EnableSpending = ({
         {transactionHash && chain?.blockExplorers?.default && (
           <a
             className="mt-[22px] cursor-pointer text-3xs underline"
-            href={`${chain.blockExplorers.default.url}tx/${transactionHash}`}
+            rel="noopener noreferrer"
+            target="_blank"
+            href={`${chain.blockExplorers.default.url}/tx/${transactionHash}`}
           >
             View transaction on {chain.blockExplorers.default.name}
           </a>

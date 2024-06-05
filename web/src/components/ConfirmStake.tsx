@@ -146,7 +146,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
         args: [token0.address, id, BigInt(delta)],
       });
     },
-    [writeContractUpdatePosition, token0Amount, token0],
+    [writeContractUpdatePosition, token0AmountRaw, token0],
   );
 
   /**
@@ -236,6 +236,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
       text={"Stake"} 
       fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}} 
       toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}} 
+      transactionHash={mintData}
     />;
   }
 
@@ -274,12 +275,13 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
       text={"Stake"} 
       fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}} 
       toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}} 
+      transactionHash={updatePositionData}
     />;
   }
 
   // success
   if (updatePositionResult.data) {
-    return <Success />;
+    return <Success transactionHash={updatePositionResult.data.transactionHash}/>;
   }
 
   // error

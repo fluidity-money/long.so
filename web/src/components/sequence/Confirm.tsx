@@ -6,6 +6,7 @@ import Image from "next/image";
 import Token from "@/assets/icons/token.svg";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useChainId, useChains } from "wagmi";
 
 export interface ConfirmProps {
   text?: string;
@@ -17,10 +18,16 @@ export interface ConfirmProps {
     amount: string;
     symbol: string
   }
+  transactionHash?: string;
 }
 
-export default function Confirm({ text = "Swap", fromAsset, toAsset }: ConfirmProps) {
+export default function Confirm({ text = "Swap", transactionHash, fromAsset, toAsset }: ConfirmProps) {
   const router = useRouter();
+  const chains = useChains();
+  const chainId = useChainId();
+
+  const chain = chains.find((chain) => chain.id === chainId);
+
   return (
     <div className="flex flex-col items-center">
       <motion.div
@@ -51,7 +58,16 @@ export default function Confirm({ text = "Swap", fromAsset, toAsset }: ConfirmPr
           <div>{toAsset.amount} {toAsset.symbol}</div>
         </div>
         <div className="mt-[12px] cursor-pointer text-3xs underline md:hidden">
-          View transaction on Explorer
+          {transactionHash && chain?.blockExplorers?.default && (
+            <a
+              className="mt-[12px] cursor-pointer text-3xs underline md:mt-[26px]"
+              rel="noopener noreferrer"
+              target="_blank"
+              href={`${chain.blockExplorers.default.url}/tx/${transactionHash}`}
+            >
+              View transaction on Explorer
+            </a>
+          )}
         </div>
         <Circles
           className={"mt-[30px] h-[5.357px] w-[36.357px] md:mt-[40px]"}
