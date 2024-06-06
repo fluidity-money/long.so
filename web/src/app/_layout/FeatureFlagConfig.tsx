@@ -12,7 +12,7 @@ import { Flag, LoaderIcon } from "lucide-react";
 import { FeatureFlags, useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useQuery } from "@tanstack/react-query";
 
-type FeatureFlagKey = Exclude<keyof FeatureFlags, 'graphql mock demo data'>
+type FeatureFlagKey = Exclude<keyof FeatureFlags, `graphql${string}`>
 
 const featureFlagsLabels: { [K in FeatureFlagKey]: string } = {
   "ui show demo data": "UI Show Demo Data",
