@@ -1,6 +1,6 @@
 import { Provider } from "@/app/Provider";
 import { Metadata } from "next";
-import Superposition from "@/assets/icons/superposition.svg";
+import LongTail from "@/assets/icons/long-tail.svg";
 import { MobileNetworkSelection } from "@/app/_layout/MobileNetworkSelection";
 import { DemoData } from "@/app/_layout/DemoData";
 import { NetworkSelection } from "@/app/_layout/NetworkSelection";
@@ -88,7 +88,7 @@ export default async function RootLayout({
               <div className="flex w-full flex-col gap-8">
                 <div className="flex flex-row items-start justify-between">
                   <div className="flex flex-row items-center gap-4">
-                    <a href="/"><Superposition height={34} width={34} /></a>
+                    <a href="/"><LongTail height={34} width={34} /></a>
                     <MobileNetworkSelection />
                     <FeatureFlagConfig />
                     <DemoData />
