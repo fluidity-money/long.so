@@ -91,6 +91,22 @@ export const SwapForm = () => {
   } = useSwapStore();
   const { data } = useGraphqlGlobal();
 
+  const [token0AmountFloat, token1AmountFloat] = useMemo(() => {
+    const token1Float = parseFloat(token1Amount ?? "0")
+    if (token0Amount === "." || token0Amount === "")
+      return [0, token1Float]
+
+    const token0Float = parseFloat(token0Amount ?? "0")
+    return [token0Float, token1Float]
+  }, [token0Amount, token1Amount])
+
+  // priceRatio is the amount of token0 worth 1 token1 for the current swap inputs
+  const priceRatio = useMemo(() => {
+    if (token1AmountFloat === 0)
+      return 0
+    return token0AmountFloat / token1AmountFloat
+  }, [token0AmountFloat, token1AmountFloat])
+
   const poolsData = useFragment(SwapFormFragment, data?.pools);
 
   const poolData = useMemo(() => {
@@ -310,7 +326,7 @@ export const SwapForm = () => {
         ],
       } as const
     }
-  }, [isSwappingBaseAsset, token0Amount, token0.address, token1.address])
+  }, [isSwappingBaseAsset, token0AmountRaw, token0.address, token1.address])
 
   const performSwap = useCallback(() => {
     console.log("performing swap");
@@ -469,7 +485,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${token0.address === fUSDC.address ? token0Amount : Number(token0Amount) * Number(tokenPrice)}
+                  ${token0.address === fUSDC.address ? token0AmountFloat : token0AmountFloat * Number(tokenPrice)}
                 </div>
 
                 <div
@@ -545,7 +561,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${token1.address === fUSDC.address ? token1Amount : Number(token1Amount) * Number(tokenPrice)}
+                  ${token1.address === fUSDC.address ? token1AmountFloat : token1AmountFloat * Number(tokenPrice)}
                 </div>
 
                 <div
@@ -585,7 +601,7 @@ export const SwapForm = () => {
                   hidden: breakdownHidden,
                 })}
               >
-                {token0Amount} {token0.symbol} = {quoteIsLoading ? "??" : token1Amount} {token1.symbol}
+                {priceRatio} {token0.symbol} ≈ {token1AmountFloat === 0 ? "0" : "1"} {token1.symbol}
               </div>
 
               <div className={"cursor-pointer text-[10px] md:text-[12px]"}>
