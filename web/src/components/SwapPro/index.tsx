@@ -118,9 +118,7 @@ export const SwapPro = ({
         amountTo: parseFloat(transaction.amountOut.valueScaled),
       };
     });
-  }, []);
-
-  console.log(transactions);
+  }, [showMockData]);
 
   return (
     <motion.div

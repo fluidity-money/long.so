@@ -35,9 +35,9 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
 
   const showMockData = useFeatureFlag("ui show demo data");
 
-  const graphData = useMemo(() => {
+  const [graphData, graphHeader] = useMemo(() => {
     // if the feature flag is enabled show mock data
-    if (showMockData) return swapProGraphMockData;
+    if (showMockData) return [swapProGraphMockData, "$12.05"];
 
     // if the duration is 7D or 1M
     let durationKey: "daily" | "monthly" = "daily";
@@ -57,13 +57,18 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
         slicedData = slicedData?.slice(0, durationToDays[duration]);
       }
 
+      const last = slicedData?.at(-1)
+      const header = parseFloat(last?.fusdc.valueUsd ?? "0") + parseFloat(last?.token1.valueUsd ?? "0")
+
       return (
-        slicedData
+        [slicedData
           // reformat pool data to match expected graph data
           ?.map((d) => ({
             date: new Date(d.timestamp),
             value: parseFloat(d.fusdc.valueUsd),
-          }))
+          })),
+        "$" + header,
+        ]
       );
     }
 
@@ -75,14 +80,19 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
         slicedData = slicedData?.slice(0, durationToDays[duration]);
       }
 
+      const last = slicedData?.at(-1)
+      const header = parseFloat(last ?? "0")
+
       return (
-        slicedData
+        [slicedData
           // reformat pool data to match expected graph data
           ?.map((d, i) => ({
             // TODO: assume that the first value is the most recent (yesterday)
             date: subDays(new Date(), i),
             value: parseFloat(d),
-          }))
+          })),
+        "$" + header
+        ]
       );
     }
 
@@ -94,13 +104,19 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
         slicedData = slicedData?.slice(0, durationToDays[duration]);
       }
 
+      const last = slicedData?.at(-1)
+      // TODO - should liquidity include token1 value as well?
+      const header = parseFloat(last?.fusdc.valueUsd ?? "0")
+
       return (
-        slicedData
+        [slicedData
           // reformat pool data to match expected graph data
           ?.map((d) => ({
             date: new Date(d.timestamp),
             value: parseFloat(d.fusdc.valueUsd),
-          }))
+          })),
+        "$" + header
+        ]
       );
     }
 
@@ -144,8 +160,7 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
 
           <DurationSegmentedControl callback={(val) => setDuration(val)} />
         </div>
-        <TypographyH2 className="border-b-0">$12.05</TypographyH2>
-
+        <TypographyH2 className="border-b-0">{graphHeader}</TypographyH2> :
         <div className="flex flex-col gap-2">
           <ReactECharts
             opts={{
