@@ -8,39 +8,41 @@ import {
 import { useFeatureFlagOverride } from "@/hooks/useFeatureFlagOverride";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Flag, LoaderIcon, Settings } from "lucide-react";
+import { Flag, LoaderIcon } from "lucide-react";
 import { FeatureFlags, useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useQuery } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
 
-const featureFlagsLabels: { key: keyof FeatureFlags; label: string }[] = [
-  { key: "ui show demo data", label: "UI Show Demo Data" },
-  { key: "ui show manual fees", label: "UI Show Manual Fees" },
-  { key: "ui show superloop", label: "UI Show Superloop" },
-  { key: "ui show fee tier", label: "UI Show Fee Tier" },
-  {
-    key: "ui show optimising fee route",
-    label: "UI Show Optimising Fee Route",
-  },
-  { key: "ui show single token stake", label: "UI Show Single Token Stake" },
-  { key: "ui show campaign banner", label: "UI Show Campaign Banner" },
-  { key: "ui show rewards claimed", label: "UI Show Rewards Claimed" },
-  { key: "ui show incentives", label: "UI Show Incentives" },
-  { key: "ui show stake apy", label: "UI Show Stake APY"},
-  { key: "ui show my transactions", label: "UI Show My Transactions"},
-  { key: "ui show trade rewards", label: "UI Show Trade Rewards"},
-  { key: "ui show boost incentives", label: "UI Show Boost Incentives"},
-  { key: "ui show liquidity incentives", label: "UI Show Liquidity Incentives"},
-  { key: "ui show utility incentives", label: "UI Show Utility Incentives"},
-  { key: "ui show live utility rewards", label: "UI Show Live Utility Rewards"},
-  { key: "ui show super incentives", label: "UI Super Incentives"},
-  { key: "ui show pool reward range", label: "UI Pool Reward Range"},
-  { key: "ui show claim yield", label: "UI Show Claim Yield"},
-  { key: "ui show earned fees apr", label: "UI Show Earned Fees Apr"},
-  { key: "ui show pool filters", label: "UI Show Pool Filters"},
-  { key: "ui show pools tab", label: "UI Show Pools Tab"},
-  { key: "ui show swap breakdown", label: "UI Show Swap Breakdown"}
-];
+type FeatureFlagKey = Exclude<keyof FeatureFlags, 'graphql mock demo data'>
+
+const featureFlagsLabels: { [K in FeatureFlagKey]: string } = {
+  "ui show demo data": "UI Show Demo Data",
+  "ui show manual fees": "UI Show Manual Fees",
+  "ui show feature flags panel": "UI Show Feature Flags Panel",
+  "ui show superloop": "UI Show Superloop",
+  "ui show fee tier": "UI Show Fee Tier",
+  "ui show optimising fee route": "UI Show Optimising Fee Route",
+  "ui show single token stake": "UI Show Single Token Stake",
+  "ui show campaign banner": "UI Show Campaign Banner",
+  "ui show rewards claimed": "UI Show Rewards Claimed",
+  "ui show incentives": "UI Show Incentives",
+  "ui show stake apy": "UI Show Stake APY",
+  "ui show my transactions": "UI Show My Transactions",
+  "ui show trade rewards": "UI Show Trade Rewards",
+  "ui show boost incentives": "UI Show Boost Incentives",
+  "ui show liquidity incentives": "UI Show Liquidity Incentives",
+  "ui show utility incentives": "UI Show Utility Incentives",
+  "ui show live utility rewards": "UI Show Live Utility Rewards",
+  "ui show super incentives": "UI Super Incentives",
+  "ui show pool reward range": "UI Pool Reward Range",
+  "ui show claim yield": "UI Show Claim Yield",
+  "ui show claim all yield": "UI Show Claim All Yield",
+  "ui show yield over time": "UI Show Yield Over Time",
+  "ui show earned fees apr": "UI Show Earned Fees Apr",
+  "ui show pool filters": "UI Show Pool Filters",
+  "ui show pools tab": "UI Show Pools Tab",
+  "ui show swap breakdown": "UI Show Swap Breakdown",
+  "ui show tokens given out": "UI Show Tokens Given Out",
+};
 
 export const FeatureFlagConfig = () => {
   const { featureFlags, setFeatureFlagOverride, override, setOverride } =
@@ -92,7 +94,7 @@ export const FeatureFlagConfig = () => {
             <Switch checked={override} onCheckedChange={setOverride} />
           </div>
 
-          {featureFlagsLabels.map(({ key, label }) => (
+          {(Object.entries(featureFlagsLabels) as [FeatureFlagKey, string][]).map(([key, label]) => (
             <div
               className={"flex flex-row items-center justify-between"}
               key={key}
