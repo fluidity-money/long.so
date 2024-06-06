@@ -65,7 +65,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
 
   setToken0Amount: (amount, balance) => {
     set(({ token0, token0Amount, setToken0AmountRaw }) => {
-      const validNumber = !isNaN(Number(amount)) || amount === "."
+      const validNumber = !amount.includes(" ") && !isNaN(Number(amount)) || amount === "."
       try {
         const amountRaw = getTokenAmountFromFormattedString(amount, token0.decimals)
         const balanceRaw = getTokenAmountFromFormattedString(balance ?? "", token0.decimals)
@@ -79,7 +79,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
   },
   setToken1Amount: (amount, balance) => {
     set(({ token1, token1Amount, setToken1AmountRaw }) => {
-      const validNumber = !isNaN(Number(amount)) || amount === "."
+      const validNumber = !amount.includes(" ") && !isNaN(Number(amount)) || amount === "."
       try {
         const amountRaw = getTokenAmountFromFormattedString(amount, token1.decimals)
         const balanceRaw = getTokenAmountFromFormattedString(balance ?? "", token1.decimals)
