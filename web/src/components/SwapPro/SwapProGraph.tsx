@@ -160,7 +160,7 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
 
           <DurationSegmentedControl callback={(val) => setDuration(val)} />
         </div>
-        <TypographyH2 className="border-b-0">{graphHeader}</TypographyH2> :
+        <TypographyH2 className="border-b-0">{graphHeader}</TypographyH2>
         <div className="flex flex-col gap-2">
           <ReactECharts
             opts={{
