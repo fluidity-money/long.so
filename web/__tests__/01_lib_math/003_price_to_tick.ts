@@ -1016,7 +1016,7 @@ describe("Liquidity math", () => {
       [1301091893697408960609149657797796681096301696380n,884947]
     ];
     for (const [ratio, result] of list) {
-      expect(getTickAtSqrtRatio(ratio)).toEqual(result);
+      expect(getTickAtSqrtRatio(BigInt(ratio))).toEqual(result);
     }
   });
 });
