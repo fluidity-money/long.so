@@ -101,16 +101,26 @@ export const useStakeStore = create<StakeStore>((set) => ({
   setPriceLower: (price) => {
     // Make a best effort to convert the number to a sqrt price, then to a tick.
     const priceN = Number(price);
-    const tick = getTickAtSqrtRatio(encodeSqrtPrice(priceN));
-    console.log("tick", tick);
+    let tick = 0;
+    try {
+      const newTick = getTickAtSqrtRatio(encodeSqrtPrice(priceN));
+      tick = newTick;
+      console.log("lower tick", tick);
+    } catch {
+    }
     set({
       tickLower: tick,
       priceLower: price
     });
   },
   setPriceUpper: (price) => {
-    const priceN = Number(price);
-    const tick = getTickAtSqrtRatio(encodeSqrtPrice(priceN));
+    const priceN = Number(price);    let tick = 0;
+    try {
+      const newTick = getTickAtSqrtRatio(encodeSqrtPrice(priceN));
+      tick = newTick;
+      console.log("upper tick", tick);
+    } catch {
+    }
     set({
       tickUpper: tick,
       priceUpper: price
