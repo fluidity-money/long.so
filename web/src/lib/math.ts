@@ -143,9 +143,7 @@ export const getTickAtSqrtRatio = (sqrtPriceX96: bigint): number => {
   const x = r >> 128n;
   log2 |= (x << 50n);
 
-
   let logSqrt10001 = log2 * 255738958999603826347141n;
-
 
   const tickLow =
     lowInt32((logSqrt10001 - 3402992956809132418596140100660247210n) >> 128n);
@@ -162,7 +160,6 @@ export const getTickAtSqrtRatio = (sqrtPriceX96: bigint): number => {
 }
 
 const lowInt32 = (n: bigint) => {
-  console.log("n", n);
   const b = new ArrayBuffer(4);
   const d = new DataView(b);
   d.setUint32(0, Number(n & 0xFFFFFFFFn), true);
