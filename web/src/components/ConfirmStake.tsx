@@ -28,7 +28,7 @@ type ConfirmStakeProps = {
   mode: "new"
   positionId?: never,
 } | {
-  mode: "existing",
+  mode: "existing" | "new",
   positionId: string | null,
 };
 
