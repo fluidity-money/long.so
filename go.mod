@@ -3,7 +3,7 @@ module github.com/fluidity-money/long.so
 go 1.21.1
 
 require (
-	github.com/99designs/gqlgen v0.17.47
+	github.com/99designs/gqlgen v0.17.48
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/ethereum/go-ethereum v1.14.3
