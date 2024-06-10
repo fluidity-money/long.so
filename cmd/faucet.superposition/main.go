@@ -107,7 +107,7 @@ func main() {
 
 func init() {
 	var stakers []string
-	if err := json.Unmarshal(StakersBytes, stakers); err != nil {
+	if err := json.Unmarshal(StakersBytes, &stakers); err != nil {
 		panic(err)
 	}
 	Stakers = make(map[string]bool, len(stakers))

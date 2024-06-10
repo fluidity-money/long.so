@@ -12,17 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fluidity-money/long.so/lib/features"
-
 	ethCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/fluidity-money/long.so/lib/features"
 )
-
-// reWallet address to use to filter for addresses requesting from the faucet.
-var reWallet = regexp.MustCompile("(0x)?[A-Z0-9a-z]{0,40}")
-
-// TimeToLive on requests from the end user's perspective before jumping
-// out.
-const TimeToLive = 15 * time.Second
 
 // RequestTokens is the resolver for the requestTokens field.
 func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (string, error) {
@@ -85,7 +77,26 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 	return "", nil
 }
 
+// Healthcheck is the resolver for the healthcheck field.
+func (r *queryResolver) Healthcheck(ctx context.Context) (int, error) {
+	return 0, nil // TODO
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
+// Query returns QueryResolver implementation.
+func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
+
 type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+var reWallet = regexp.MustCompile("(0x)?[A-Z0-9a-z]{0,40}")
+
+const TimeToLive = 15 * time.Second

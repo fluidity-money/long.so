@@ -7,3 +7,10 @@ type Mutation {
   """
   requestTokens(wallet: String!): String!
 }
+
+type Query {
+  """
+  Request a healthcheck status update, including whatever's on the internal queue.
+  """
+  healthcheck: Int!
+}
