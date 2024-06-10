@@ -1,4 +1,5 @@
 {
+	"faucet stakers only": true,
 	"graphql mock demo data": false,
 	"graphql mock demo data should delay": false,
 	"ui show boost incentives": false,
@@ -16,14 +17,14 @@
 	"ui show optimising fee route": false,
 	"ui show pool filters": false,
 	"ui show pool reward range": false,
+	"ui show pools tab": false,
 	"ui show rewards claimed": false,
 	"ui show stake apy": false,
 	"ui show super incentives": false,
 	"ui show superloop": false,
+	"ui show swap breakdown": false
 	"ui show tokens given out": false,
 	"ui show trade rewards": false,
 	"ui show utility incentives": false,
 	"ui show yield over time": false,
-	"ui show pools tab": false,
-	"ui show swap breakdown": false
 }

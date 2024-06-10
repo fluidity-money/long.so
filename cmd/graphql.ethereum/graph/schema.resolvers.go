@@ -24,7 +24,7 @@ func (r *amountResolver) Token(ctx context.Context, obj *model.Amount) (model.To
 	if obj == nil {
 		return model.Token{}, fmt.Errorf("empty amount")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		return MockToken(obj.Token.String())
 	}
@@ -67,7 +67,7 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	if obj == nil {
 		return "", fmt.Errorf("empty amount")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		// If we're mocking the graph, then we take the uncaled
 		// amount, and we simply divide it by 1e6, then we divide
@@ -128,7 +128,7 @@ func (r *queryResolver) Fusdc(ctx context.Context) (t model.Token, err error) {
 
 // Pools is the resolver for the pools field.
 func (r *queryResolver) Pools(ctx context.Context) (pools []seawater.Pool, err error) {
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		pools = MockSeawaterPools()
 		return
@@ -139,8 +139,8 @@ func (r *queryResolver) Pools(ctx context.Context) (pools []seawater.Pool, err e
 
 // GetPool is the resolver for the getPool field.
 func (r *queryResolver) GetPool(ctx context.Context, token string) (pool *seawater.Pool, err error) {
-	if r.F.Is(features.FeatureMockGraph) {
-		r.F.On(features.FeatureMockGraphDataDelay, func() error {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
+		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
@@ -156,8 +156,8 @@ func (r *queryResolver) GetPool(ctx context.Context, token string) (pool *seawat
 
 // GetPoolPositions is the resolver for the getPoolPositions field.
 func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string) (positions []seawater.Position, err error) {
-	if r.F.Is(features.FeatureMockGraph) {
-		r.F.On(features.FeatureMockGraphDataDelay, func() error {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
+		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
@@ -170,8 +170,8 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string) (posi
 
 // GetPosition is the resolver for the getPosition field.
 func (r *queryResolver) GetPosition(ctx context.Context, id string) (position *seawater.Position, err error) {
-	if r.F.Is(features.FeatureMockGraph) {
-		r.F.On(features.FeatureMockGraphDataDelay, func() error {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
+		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
@@ -188,8 +188,8 @@ func (r *queryResolver) GetPosition(ctx context.Context, id string) (position *s
 
 // GetPositions is the resolver for the getPositions field.
 func (r *queryResolver) GetPositions(ctx context.Context, wallet string) (positions []seawater.Position, err error) {
-	if r.F.Is(features.FeatureMockGraph) {
-		r.F.On(features.FeatureMockGraphDataDelay, func() error {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
+		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
@@ -205,8 +205,8 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string) (positi
 
 // GetWallet is the resolver for the getWallet field.
 func (r *queryResolver) GetWallet(ctx context.Context, address string) (wallet *model.Wallet, err error) {
-	if r.F.Is(features.FeatureMockGraph) {
-		r.F.On(features.FeatureMockGraphDataDelay, func() error {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
+		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
@@ -220,7 +220,7 @@ func (r *queryResolver) GetWallet(ctx context.Context, address string) (wallet *
 
 // GetSwaps is the resolver for the getSwaps field.
 func (r *queryResolver) GetSwaps(ctx context.Context, pool string) (swaps []model.SeawaterSwap, err error) {
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		swaps = MockSwaps(r.C.FusdcAddr, 150, "0x65dfe41220c438bf069bbce9eb66b087fe65db36")
 		return
@@ -238,7 +238,7 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string) (swaps []mode
 
 // GetSwapsForUser is the resolver for the getSwapsForUser field.
 func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string) (swaps []model.SeawaterSwap, err error) {
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		swaps = MockSwaps(r.C.FusdcAddr, 150, types.AddressFromString(wallet))
 		return
@@ -297,8 +297,8 @@ func (r *seawaterPoolResolver) Token(ctx context.Context, obj *seawater.Pool) (t
 	if obj == nil {
 		return t, fmt.Errorf("no pool obj")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
-		r.F.On(features.FeatureMockGraphDataDelay, func() error {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
+		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
@@ -327,8 +327,8 @@ func (r *seawaterPoolResolver) Price(ctx context.Context, obj *seawater.Pool) (s
 	if obj == nil {
 		return "", fmt.Errorf("empty pool")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
-		r.F.On(features.FeatureMockGraphDataDelay, func() error {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
+		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
@@ -362,8 +362,8 @@ func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.
 	if obj == nil {
 		return price, fmt.Errorf("pool empty")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
-		r.F.On(features.FeatureMockGraphDataDelay, func() error {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
+		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
@@ -404,8 +404,8 @@ func (r *seawaterPoolResolver) VolumeOverTime(ctx context.Context, obj *seawater
 	if obj == nil {
 		return vol, fmt.Errorf("pool empty")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
-		r.F.On(features.FeatureMockGraphDataDelay, func() error {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
+		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
@@ -484,8 +484,8 @@ func (r *seawaterPoolResolver) LiquidityOverTime(ctx context.Context, obj *seawa
 	if obj == nil {
 		return liq, fmt.Errorf("pool empty")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
-		r.F.On(features.FeatureMockGraphDataDelay, func() error {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
+		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
@@ -507,8 +507,8 @@ func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Po
 	if obj == nil {
 		return tvl, fmt.Errorf("pool empty")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
-		r.F.On(features.FeatureMockGraphDataDelay, func() error {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
+		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
@@ -560,7 +560,7 @@ func (r *seawaterPoolResolver) YieldOverTime(ctx context.Context, obj *seawater.
 	if obj == nil {
 		return yield, fmt.Errorf("pool empty")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		daily, _, _, err := MockVolumeOverTime(31, r.C.FusdcAddr, obj.Token)
 		if err != nil {
@@ -574,7 +574,7 @@ func (r *seawaterPoolResolver) YieldOverTime(ctx context.Context, obj *seawater.
 
 // EarnedFeesAprfusdc is the resolver for the earnedFeesAPRFUSDC field.
 func (r *seawaterPoolResolver) EarnedFeesAprfusdc(ctx context.Context, obj *seawater.Pool) ([]string, error) {
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		return []string{"0", "0.15"}, nil
 	}
 	return nil, nil // TODO
@@ -582,7 +582,7 @@ func (r *seawaterPoolResolver) EarnedFeesAprfusdc(ctx context.Context, obj *seaw
 
 // EarnedFeesAPRToken1 is the resolver for the earnedFeesAPRToken1 field.
 func (r *seawaterPoolResolver) EarnedFeesAPRToken1(ctx context.Context, obj *seawater.Pool) ([]string, error) {
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		return []string{"0", "0.15"}, nil
 	}
 	return nil, nil // TODO
@@ -593,7 +593,7 @@ func (r *seawaterPoolResolver) LiquidityIncentives(ctx context.Context, obj *sea
 	if obj == nil {
 		return amount, fmt.Errorf("empty pool")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		return MockAmount(), nil
 	}
@@ -611,7 +611,7 @@ func (r *seawaterPoolResolver) SuperIncentives(ctx context.Context, obj *seawate
 	if obj == nil {
 		return amount, fmt.Errorf("empty pool")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		return MockAmount(), nil
 	}
@@ -634,7 +634,7 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 	if obj == nil {
 		return nil, fmt.Errorf("no pool obj")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		positions = MockGetPoolPositions(obj.Token.String())
 		return
@@ -650,7 +650,7 @@ func (r *seawaterPoolResolver) PositionsForUser(ctx context.Context, obj *seawat
 	if obj == nil {
 		return nil, fmt.Errorf("empty pool")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		positions = MockGetPoolPositions(wallet)
 		return
@@ -667,7 +667,7 @@ func (r *seawaterPoolResolver) Liquidity(ctx context.Context, obj *seawater.Pool
 	if obj == nil {
 		return nil, fmt.Errorf("empty pool")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		liquidity = MockLiquidity(r.C.FusdcAddr, obj.Token)
 		return
@@ -680,7 +680,7 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool) (s
 	if obj == nil {
 		return nil, fmt.Errorf("empty pool")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		swaps = MockSwaps(r.C.FusdcAddr, 150, obj.Token)
 		return
@@ -831,7 +831,7 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet) (posi
 	if obj == nil {
 		return nil, fmt.Errorf("empty wallet")
 	}
-	if r.F.Is(features.FeatureMockGraph) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		positions = MockGetPoolPositions(obj.Address.String())
 		return

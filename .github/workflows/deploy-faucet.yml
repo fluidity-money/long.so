@@ -1,11 +1,11 @@
-name: Deploy GraphQL Lambda
+name: Deploy Faucet Lambda
 
 on:
   push:
     branches:
       - development
     paths:
-      - 'cmd/graphql.ethereum/**'
+      - 'cmd/faucet.superposition/**'
 
 jobs:
   deploy:
@@ -44,7 +44,7 @@ jobs:
 
       - name: Build lambda zip
         run: |
-          cd cmd/graphql.ethereum
+          cd cmd/faucet.superposition
           make lambda
 
       - name: Deploy to AWS Lambda
@@ -53,5 +53,5 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ap-southeast-2
         run: |
-          aws lambda update-function-code --function-name graphql-ethereum \
-          --zip-file fileb://cmd/graphql.ethereum/bootstrap.zip >&2 >/dev/null
+          aws lambda update-function-code --function-name faucet-superposition \
+          --zip-file fileb://cmd/faucet.superposition/bootstrap.zip >&2 >/dev/null

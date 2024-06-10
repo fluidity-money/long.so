@@ -3,10 +3,6 @@ src = "sol"
 out = "out"
 libs = ["lib"]
 via_ir = true
-fs_permissions = [
-	{ access = "read", path = "./test/FaucetTest.bin"},
-	{ access = "read", path = "./config/stakers.json"}
-]
 
 [doc]
 out = "docs-out"

@@ -1,0 +1,15 @@
+[
+	{
+		"type": "function",
+		"name": "sendTo",
+		"inputs": [
+			{
+				"name": "_requests",
+				"type": "address[]",
+				"internalType": "address[]"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	}
+]
