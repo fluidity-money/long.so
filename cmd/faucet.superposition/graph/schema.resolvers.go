@@ -16,11 +16,24 @@ import (
 	"github.com/fluidity-money/long.so/lib/features"
 )
 
+// reWallet to use to validate the wallet address before continuing with verification.
+var reWallet = regexp.MustCompile("(0x)?[A-Z0-9a-z]{0,40}")
+
+// TimeToLive on the request before sending a customised failure.
+const TimeToLive = 10 * time.Second
+
 // RequestTokens is the resolver for the requestTokens field.
 func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (string, error) {
 	// Get the user's IP address to prevent them from spamming this
 	// incase our rate limiting is skipped somehow (it's good to be cautious.)
 	ipAddr := ctx.Value("X-Forwarded-For")
+	if enabled := r.F.Is(features.FeatureFaucetEnabled); !enabled {
+		slog.Error("faucet is currently disabled",
+			"ip addr", ipAddr,
+			"submitted query", wallet,
+		)
+		return "", fmt.Errorf("faucet disabled")
+	}
 	// Make sure the wallet they've given is actually valid.
 	if !reWallet.MatchString(wallet) {
 		slog.Error("bad wallet request",
@@ -90,13 +103,3 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//     it when you're done.
-//   - You have helper methods in this file. Move them out to keep these resolver files clean.
-var reWallet = regexp.MustCompile("(0x)?[A-Z0-9a-z]{0,40}")
-
-const TimeToLive = 15 * time.Second

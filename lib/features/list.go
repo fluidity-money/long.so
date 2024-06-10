@@ -17,4 +17,7 @@ const (
 	// FeatureFaucetStakersOnly to gate access to the faucet to the
 	// list of stakers in the JSON blob in config/stakers.json.
 	FeatureFaucetStakersOnly = "faucet stakers only"
+
+	// FeatureFaucetEnabled is allowed to be used.
+	FeatureFaucetEnabled = "faucet enabled"
 )
