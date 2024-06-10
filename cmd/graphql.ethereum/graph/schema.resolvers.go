@@ -88,6 +88,11 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	if obj.ValueUnscaled.Cmp(types.EmptyUnscaledNumber().Int) == 0 {
 		return "0", nil
 	}
+	// If the pool is the fUSDC address, then we can just skip the
+	// lookup here and report $1 (assuming we maintain the peg.)
+	if obj.Token == r.C.FusdcAddr {
+		return "1.0", nil
+	}
 	pool, err := r.Query().GetPool(ctx, obj.Token.String())
 	if err != nil {
 		return "", err
