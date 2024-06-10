@@ -71,12 +71,16 @@ func main() {
 		log.Fatalf("geth open: %v", err)
 	}
 	defer geth.Close()
+	// Start the sender in another Go routine to send batch requests
+	// out of the SPN (gas) token.
+	queue := RunSender()
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
 			DB:      db,
 			F:       features.Get(),
 			Geth:    geth,
 			C:       config,
+			Queue: queue,
 			Stakers: Stakers,
 		},
 	}))

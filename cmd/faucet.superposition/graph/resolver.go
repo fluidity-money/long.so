@@ -16,7 +16,7 @@ type (
 		F       features.F        // features to have enabled when requested
 		Geth    *ethclient.Client // needed to do lookups with geth
 		C       config.C          // config for connecting to the right endpoints
-		Queue   chan FaucetReq    // queue for faucet requests
+		Queue   chan<- FaucetReq    // queue for faucet requests
 		Stakers map[string]bool   // stakers list to support to filter Ethereum addresses on. (read-only)
 	}
 
