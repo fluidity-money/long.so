@@ -78,6 +78,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		Fusdc            func(childComplexity int) int
 		GetPool          func(childComplexity int, token string) int
 		GetPoolPositions func(childComplexity int, pool string) int
 		GetPosition      func(childComplexity int, id string) int
@@ -182,6 +183,7 @@ type AmountResolver interface {
 	ValueUsd(ctx context.Context, obj *model.Amount) (string, error)
 }
 type QueryResolver interface {
+	Fusdc(ctx context.Context) (model.Token, error)
 	Pools(ctx context.Context) ([]seawater.Pool, error)
 	GetPool(ctx context.Context, token string) (*seawater.Pool, error)
 	GetPoolPositions(ctx context.Context, pool string) ([]seawater.Position, error)
@@ -347,6 +349,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PriceOverTime.Monthly(childComplexity), true
+
+	case "Query.fusdc":
+		if e.complexity.Query.Fusdc == nil {
+			break
+		}
+
+		return e.complexity.Query.Fusdc(childComplexity), true
 
 	case "Query.getPool":
 		if e.complexity.Query.GetPool == nil {
@@ -920,6 +929,11 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var sources = []*ast.Source{
 	{Name: "../schema.graphqls", Input: `
 type Query {
+  """
+  fUSDC address that's supported by the AMM.
+  """
+  fusdc: Token!
+
   """
   Pools available in the AMM.
   """
@@ -2247,6 +2261,66 @@ func (ec *executionContext) fieldContext_PriceOverTime_monthly(_ context.Context
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_fusdc(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_fusdc(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Fusdc(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.Token)
+	fc.Result = res
+	return ec.marshalNToken2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐToken(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_fusdc(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Token_id(ctx, field)
+			case "address":
+				return ec.fieldContext_Token_address(ctx, field)
+			case "name":
+				return ec.fieldContext_Token_name(ctx, field)
+			case "image":
+				return ec.fieldContext_Token_image(ctx, field)
+			case "totalSupply":
+				return ec.fieldContext_Token_totalSupply(ctx, field)
+			case "decimals":
+				return ec.fieldContext_Token_decimals(ctx, field)
+			case "symbol":
+				return ec.fieldContext_Token_symbol(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Token", field.Name)
 		},
 	}
 	return fc, nil
@@ -7844,6 +7918,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "fusdc":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_fusdc(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "pools":
 			field := field
 

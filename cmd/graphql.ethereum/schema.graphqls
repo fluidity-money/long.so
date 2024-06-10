@@ -1,6 +1,11 @@
 
 type Query {
   """
+  fUSDC address that's supported by the AMM.
+  """
+  fusdc: Token!
+
+  """
   Pools available in the AMM.
   """
   pools: [SeawaterPool!]!
