@@ -8,16 +8,12 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"regexp"
 	"strings"
 	"time"
 
 	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/fluidity-money/long.so/lib/features"
 )
-
-// reWallet to use to validate the wallet address before continuing with verification.
-var reWallet = regexp.MustCompile("(0x)?[A-Z0-9a-z]{0,40}")
 
 // TimeToLive on the request before sending a customised failure.
 const TimeToLive = 10 * time.Second
@@ -39,7 +35,7 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 		"wallet", wallet,
 	)
 	// Make sure the wallet they've given is actually valid.
-	if !reWallet.MatchString(wallet) {
+	if validWallet := IsValidWallet(wallet); !validWallet {
 		slog.Error("bad wallet request",
 			"ip addr", ipAddr,
 			"submitted query", wallet,
@@ -54,10 +50,6 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 			)
 			return "", fmt.Errorf("not staker")
 		}
-	}
-	// As a precaution, now we can check using the go-ethereum codebase for this.
-	if isEthAddr := ethCommon.IsHexAddress(wallet); !isEthAddr {
-		return "", fmt.Errorf("bad wallet")
 	}
 	// Get the local queue, assuming the concurrency on this Lambda(?) is limited.
 	resp := make(chan error)
