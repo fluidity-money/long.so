@@ -42,7 +42,7 @@ CREATE TABLE events_seawater_mintPosition (
 );
 
 CREATE UNIQUE INDEX ON events_seawater_mintPosition (pos_id);
-CREATE UNIQUE INDEX ON events_seawater_mintPosition (owner, pool);
+CREATE INDEX ON events_seawater_mintPosition (owner, pool);
 
 CREATE TABLE events_seawater_transferPosition (
 	id SERIAL PRIMARY KEY,

@@ -70,7 +70,7 @@ type (
 	Swap1 struct {
 		events.Event
 
-		User       types.Address        `json:"user_"`
+		User       types.Address        `json:"user_" gorm:"column:user_"`
 		Pool       types.Address        `json:"pool_"`
 		ZeroForOne bool                 `json:"zeroForOne"`
 		Amount0    types.UnscaledNumber `json:"amount0"`

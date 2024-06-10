@@ -29,13 +29,15 @@ type ConfirmStakeProps = {
   positionId?: never,
 } | {
   mode: "existing",
-  positionId: string,
+  positionId: string | null,
 };
 
 export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const router = useRouter();
 
   const { address } = useAccount();
+
+  if (!positionId) throw new Error("bad position id");
 
   const {
     token0,
@@ -232,10 +234,10 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
 
   // step 1 pending
   if (isMintPending || (mintData && result?.isPending)) {
-    return <Confirm 
-      text={"Stake"} 
-      fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}} 
-      toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}} 
+    return <Confirm
+      text={"Stake"}
+      fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}}
+      toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}}
       transactionHash={mintData}
     />;
   }
@@ -271,10 +273,10 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     isUpdatePositionPending ||
     (updatePositionData && updatePositionResult?.isPending)
   ) {
-    return <Confirm 
-      text={"Stake"} 
-      fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}} 
-      toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}} 
+    return <Confirm
+      text={"Stake"}
+      fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}}
+      toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}}
       transactionHash={updatePositionData}
     />;
   }
