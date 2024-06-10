@@ -2,7 +2,7 @@
 
 CREATE TABLE seawater_swaps_1_return(
     id INTEGER NOT NULL,
-    timestamp INTEGER NOT NULL,
+    timestamp HUGEINT NOT NULL,
     sender VARCHAR NOT NULL,
     token_in VARCHAR NOT NULL,
     token_out VARCHAR NOT NULL,
