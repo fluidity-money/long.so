@@ -22,9 +22,9 @@
 	"ui show stake apy": false,
 	"ui show super incentives": false,
 	"ui show superloop": false,
-	"ui show swap breakdown": false
+	"ui show swap breakdown": false,
 	"ui show tokens given out": false,
 	"ui show trade rewards": false,
 	"ui show utility incentives": false,
-	"ui show yield over time": false,
+	"ui show yield over time": false
 }

@@ -16,6 +16,12 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Test the JSON is well-formed
+        uses: sergeysova/jq-action@v2
+        id: version
+        with:
+          cmd: 'jq . features/features.json >/dev/null'
+
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
