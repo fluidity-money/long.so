@@ -6,7 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.48
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
-	github.com/ethereum/go-ethereum v1.14.3
+	github.com/ethereum/go-ethereum v1.14.5
 	github.com/lib/pq v1.10.9
 	github.com/stretchr/testify v1.9.0
 	github.com/vektah/gqlparser/v2 v2.5.12
@@ -52,6 +52,7 @@ require (
 	github.com/xrash/smetrics v0.0.0-20240312152122-5f08fbb34913 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
+	golang.org/x/exp v0.0.0-20240112132812-db7319d0e0e3 // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
