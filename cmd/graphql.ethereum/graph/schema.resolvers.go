@@ -93,6 +93,9 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	if err != nil {
 		return "", err
 	}
+	if pool == nil {
+		return "", fmt.Errorf("not able to find pool with addr %#v", obj.Token)
+	}
 	price, err := r.SeawaterPool().Price(ctx, pool)
 	if err != nil {
 		return "", err
