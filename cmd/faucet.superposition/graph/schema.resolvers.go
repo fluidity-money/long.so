@@ -34,6 +34,10 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 		)
 		return "", fmt.Errorf("faucet disabled")
 	}
+	slog.Debug("handled request to send some tokens",
+		"ip addr", ipAddr,
+		"wallet", wallet,
+	)
 	// Make sure the wallet they've given is actually valid.
 	if !reWallet.MatchString(wallet) {
 		slog.Error("bad wallet request",
