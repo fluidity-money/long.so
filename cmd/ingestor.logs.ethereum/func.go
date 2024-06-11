@@ -297,7 +297,7 @@ func databaseInsertLog(db *gorm.DB, table string, a any) error {
 		return fmt.Errorf("encoding block header: %v", err)
 	}
 
-	if err := db.Table(table).Omit("createdBy").Create(a).Error; err != nil {
+	if err := db.Table(table).Omit("CreatedBy").Create(a).Error; err != nil {
 		return fmt.Errorf("inserting log: %v", err)
 	}
 	return nil
