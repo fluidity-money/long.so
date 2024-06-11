@@ -16,7 +16,8 @@ contract Faucet is IFaucet {
     /// @dev emergency council to use to "rescue" the funds at any point.
     address immutable EMERGENCY_COUNCIL;
 
-    uint256 constant MAX_ETH = 1e12;
+    /// @dev MIN_ETH to send out to users.
+    uint256 constant MIN_ETH = 1e12;
 
     constructor(address _operator, address _emergencyCouncil) {
         OPERATOR = _operator;
@@ -27,8 +28,7 @@ contract Faucet is IFaucet {
         require(msg.sender == OPERATOR, "only operator");
         for (uint i = 0; i < _requests.length; ++i) {
             address recipient = _requests[i];
-            uint256 randomAmount =
-                uint256(keccak256(abi.encodePacked(recipient, block.timestamp, i))) % MAX_ETH;
+            uint256 randomAmount = MIN_ETH;
             payable(recipient).transfer(randomAmount);
         }
     }
