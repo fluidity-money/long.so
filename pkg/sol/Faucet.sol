@@ -28,8 +28,7 @@ contract Faucet is IFaucet {
         require(msg.sender == OPERATOR, "only operator");
         for (uint i = 0; i < _requests.length; ++i) {
             address recipient = _requests[i];
-            uint256 randomAmount = MIN_ETH;
-            payable(recipient).transfer(randomAmount);
+            payable(recipient).transfer(MIN_ETH);
         }
     }
 
