@@ -24,6 +24,7 @@ contract Faucet is IFaucet {
         EMERGENCY_COUNCIL = _emergencyCouncil;
     }
 
+    /// @inheritdoc IFaucet
     function sendTo(address[] calldata _requests) external {
         require(msg.sender == operator_, "only operator");
         for (uint i = 0; i < _requests.length; ++i) {

@@ -22,12 +22,6 @@ jobs:
           tar -xzf foundry_nightly_linux_amd64.tar.gz
           sudo mv forge /usr/local/bin
 
-      - name: Setup mdBook
-        uses: peaceiris/actions-mdbook@v2
-        with:
-          mdbook-version: '0.4.10'
-          # mdbook-version: 'latest'
-
       - name: Generate documentation
         run: |
           cd pkg
@@ -41,7 +35,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           # update
           projectName: ${{ secrets.CLOUDFLARE_DOCS_PROJECT_NAME }}
-          directory: out
+          directory: .
           # to enable Github Deployments
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           branch: main
