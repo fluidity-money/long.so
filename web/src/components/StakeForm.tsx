@@ -44,6 +44,7 @@ import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 import { Token as TokenType, fUSDC } from "@/config/tokens";
+import { getFormattedPriceFromAmount } from "@/lib/amounts";
 
 const colorGradient = new echarts.graphic.LinearGradient(
   0,
@@ -390,7 +391,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
             <div className="mt-[5px] flex w-full flex-row items-center justify-between">
               <div className="text-2xs md:text-gray-1">
-                ${token0.address === fUSDC.address ? token0Amount : Number(token0Amount) * Number(tokenPrice)}
+                ${token0.address === fUSDC.address ? token0Amount : getFormattedPriceFromAmount(token0Amount, tokenPrice, token0.decimals, token1.decimals)}
               </div>
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
@@ -449,7 +450,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
               <div className="mt-[5px] flex w-full flex-row items-center justify-between">
                 <div className="text-2xs md:text-gray-1">
-                  ${token1.address === fUSDC.address ? token1Amount : Number(token1Amount) * Number(tokenPrice)}
+                  ${token1.address === fUSDC.address ? token1Amount : getFormattedPriceFromAmount(token1Amount, tokenPrice, token1.decimals, token0.decimals)}
                 </div>
                 <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
                   {token1Balance && (

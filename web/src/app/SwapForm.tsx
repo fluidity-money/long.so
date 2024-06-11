@@ -42,6 +42,7 @@ import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 import { useToast } from "@/components/ui/use-toast";
 import { estimateContractGas } from "viem/actions";
+import { getFormattedPriceFromAmount } from "@/lib/amounts";
 
 const SwapFormFragment = graphql(`
   fragment SwapFormFragment on SeawaterPool {
@@ -485,7 +486,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${token0.address === fUSDC.address ? token0AmountFloat : token0AmountFloat * Number(tokenPrice)}
+                  ${token0.address === fUSDC.address ? token0AmountFloat : getFormattedPriceFromAmount(token0AmountFloat.toString(), tokenPrice, token0.decimals, token1.decimals)}
                 </div>
 
                 <div
@@ -561,7 +562,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${token1.address === fUSDC.address ? token1AmountFloat : token1AmountFloat * Number(tokenPrice)}
+                  ${token1.address === fUSDC.address ? token1AmountFloat : getFormattedPriceFromAmount(token1AmountFloat.toString(), tokenPrice, token1.decimals, token0.decimals)}
                 </div>
 
                 <div

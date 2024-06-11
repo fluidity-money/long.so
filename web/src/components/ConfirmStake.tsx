@@ -23,6 +23,7 @@ import Confirm from "@/components/sequence/Confirm";
 import { EnableSpending } from "@/components/sequence/EnableSpending";
 import { Fail } from "@/components/sequence/Fail";
 import { Success } from "@/components/sequence/Success";
+import { getFormattedPriceFromAmount } from "@/lib/amounts";
 
 type ConfirmStakeProps = {
   mode: "new"
@@ -341,7 +342,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
             </span>
           </div>
           <div className="mt-[4px] text-2xl font-medium md:text-3xl">
-            ${Number(token1Amount) + (Number(token0Amount) * Number(tokenPrice))}
+            ${getFormattedPriceFromAmount(token0Amount, tokenPrice, token0.decimals, token1.decimals) + Number(token1Amount)}
           </div>
           <div className="mt-[4px] text-3xs font-medium text-gray-2 md:text-2xs">
             The amount is split into{" "}
@@ -424,7 +425,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
             <Ethereum className={"invert"} /> {token0Amount}
           </div>
-          <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">= ${Number(token0Amount) * Number(tokenPrice)}</div>
+          <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">= ${getFormattedPriceFromAmount(token0Amount, tokenPrice, token0.decimals, token1.decimals)}</div>
         </div>
 
         <div

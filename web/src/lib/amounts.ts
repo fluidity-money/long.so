@@ -60,8 +60,20 @@ const getTokenAmountFromFormattedString = (amount: string, decimals: number): bi
   return wholeBig + decimalsBig
 }
 
+/**
+ * @description scale a formatted amount string by the price of the pool
+ * @param amount - formatted string
+ * @param price - the pool price as obtained from sqrtPriceX96 then converted to a price
+ * @param decimals0 - the decimals of the non-fUSDC token
+ * @param decimals1 - the decimals of fUSDC
+ * @returns the scaled price amount in USD
+ */
+const getFormattedPriceFromAmount = (amount: string, price: string | bigint, decimals0: number, decimals1: number): number =>
+  Number(amount) * Number(price) * 10 ** (decimals0 - decimals1)
+
 export {
-    getFormattedStringFromTokenAmount,
-    getTokenAmountFromFormattedString,
+  getFormattedStringFromTokenAmount,
+  getTokenAmountFromFormattedString,
+  getFormattedPriceFromAmount
 }
 
