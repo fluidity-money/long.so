@@ -45,6 +45,8 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     token0AmountRaw,
     token1Amount,
     token1AmountRaw,
+    tickLower,
+    tickUpper,
     multiSingleToken
   } = useStakeStore()
 
@@ -120,13 +122,16 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
    *
    * Step 1. Mint a new position
    */
-  const createPosition = () =>
+  const createPosition = () => {
+    if (!tickLower || !tickUpper)
+      return
     writeContractMint({
       address: ammAddress,
       abi: seawaterContract.abi,
       functionName: "mintPosition",
-      args: [token0.address, encodeTick(50), encodeTick(100)],
+      args: [token0.address, encodeTick(tickLower), encodeTick(tickUpper)],
     });
+  }
 
   // wait for the mintPosition transaction to complete
   const result = useWaitForTransactionReceipt({
@@ -138,16 +143,17 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
 
   const updatePosition = useCallback(
     (id: bigint) => {
-      const delta = token0AmountRaw
+      // TODO why do i have to scale this up by 10??
+      const delta = BigInt(token0AmountRaw) * 10n
 
       writeContractUpdatePosition({
         address: ammAddress,
         abi: seawaterContract.abi,
         functionName: "updatePosition",
-        args: [token0.address, id, BigInt(delta)],
+        args: [token0.address, id, delta],
       });
     },
-    [writeContractUpdatePosition, token0AmountRaw, token0],
+    [writeContractUpdatePosition, token0AmountRaw, token0, token0Amount, token1Amount, token1AmountRaw],
   );
 
   /**
@@ -235,8 +241,8 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   if (isMintPending || (mintData && result?.isPending)) {
     return <Confirm
       text={"Stake"}
-      fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}}
-      toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}}
+      fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+      toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
       transactionHash={mintData}
     />;
   }
@@ -274,15 +280,15 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   ) {
     return <Confirm
       text={"Stake"}
-      fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}}
-      toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}}
+      fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+      toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
       transactionHash={updatePositionData}
     />;
   }
 
   // success
   if (updatePositionResult.data) {
-    return <Success transactionHash={updatePositionResult.data.transactionHash}/>;
+    return <Success transactionHash={updatePositionResult.data.transactionHash} />;
   }
 
   // error
@@ -522,7 +528,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
           <Button
             variant={"secondary"}
             className="w-full max-w-[350px]"
-            onClick={() => {mode === "new" ? createPosition() : updatePosition(BigInt(positionId))}}
+            onClick={() => { mode === "new" ? createPosition() : updatePosition(BigInt(positionId)) }}
           >
             Confirm Stake
           </Button>
