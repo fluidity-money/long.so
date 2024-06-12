@@ -9,7 +9,7 @@ require (
 	github.com/ethereum/go-ethereum v1.14.5
 	github.com/lib/pq v1.10.9
 	github.com/stretchr/testify v1.9.0
-	github.com/vektah/gqlparser/v2 v2.5.12
+	github.com/vektah/gqlparser/v2 v2.5.14
 	gorm.io/driver/postgres v1.5.7
 	gorm.io/gorm v1.25.10
 )
