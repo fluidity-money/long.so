@@ -749,7 +749,64 @@ func (r *seawaterPositionResolver) Upper(ctx context.Context, obj *seawater.Posi
 
 // Liquidity is the resolver for the liquidity field.
 func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *seawater.Position) (model.PairAmount, error) {
-	return model.PairAmount{}, nil // TODO
+	if obj == nil {
+		return model.PairAmount{}, fmt.Errorf("no position obj")
+	}
+
+	var result model.PriceResult
+	err := r.DB.Table("seawater_final_ticks_1").
+		Where("pool = ?", obj.Pool).
+		First(&result).
+		Error
+
+	if err != nil {
+		return model.PairAmount{}, err
+	}
+
+	var (
+		tickLow     = obj.Lower
+		tickHigh    = obj.Upper
+		currentTick = result.FinalTick
+
+		fusdcAmount, token1Amount types.UnscaledNumber
+	)
+
+	// range is [low, high)
+	belowRange := currentTick.Cmp(tickLow.Int) == -1
+	aboveRange := currentTick.Cmp(tickHigh.Int) <= 0
+
+	timestamp := int(time.Now().Unix())
+
+	pool, err := r.Query().GetPool(ctx, obj.Pool.String())
+	if err != nil {
+		return model.PairAmount{}, err
+	}
+
+	switch true {
+	case belowRange:
+		// TODO set fusdcAmount, token1Amount
+	case aboveRange:
+		// TODO set fusdcAmount, token1Amount
+	// within range
+	default:
+		// TODO set fusdcAmount, token1Amount
+	}
+
+	return model.PairAmount{
+		Timestamp: timestamp,
+		Fusdc: model.Amount{
+			Token:         r.C.FusdcAddr,
+			Decimals:      r.C.FusdcDecimals,
+			Timestamp:     timestamp,
+			ValueUnscaled: fusdcAmount,
+		},
+		Token1: model.Amount{
+			Token:         pool.Token,
+			Decimals:      int(pool.Decimals),
+			Timestamp:     timestamp,
+			ValueUnscaled: token1Amount,
+		},
+	}, nil
 }
 
 // Pool is the resolver for the pool field.
