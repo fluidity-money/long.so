@@ -29,16 +29,14 @@ type ConfirmStakeProps = {
   mode: "new"
   positionId?: never,
 } | {
-  mode: "existing" | "new",
-  positionId: string | null,
+  mode: "existing",
+  positionId: string,
 };
 
 export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const router = useRouter();
 
   const { address } = useAccount();
-
-  if (!positionId) throw new Error("bad position id");
 
   const {
     token0,

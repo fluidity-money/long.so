@@ -60,11 +60,13 @@ const colorGradient = new echarts.graphic.LinearGradient(
   ],
 );
 
-interface StakeFormProps {
-  mode: "new" | "existing";
-  poolId: string;
-  positionId?: string;
-}
+type StakeFormProps = { poolId: string } & ({
+  mode: "new"
+  positionId?: never,
+} | {
+  mode: "existing",
+  positionId: string,
+});
 
 const StakeFormFragment = graphql(`
   fragment StakeFormFragment on SeawaterPool {

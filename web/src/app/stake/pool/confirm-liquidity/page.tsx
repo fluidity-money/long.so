@@ -7,5 +7,5 @@ export default function ConfirmAddLiquidity() {
   const params = useSearchParams()
   const positionId = params.get("positionId")
 
-  return <ConfirmStake mode="existing" positionId={positionId} />;
+  return <ConfirmStake mode="existing" positionId={positionId ?? ""} />;
 }
