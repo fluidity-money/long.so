@@ -1,6 +1,9 @@
 // a formatted amount is a human-readable value, such as 1.445 or 20
 // a token amount is a raw amount scaled by a token's decimals, such as 1445000 or 20000000
 
+import { getSqrtRatioAtTick, sqrtPriceX96ToPrice } from "./math"
+import { usdFormat } from "./usdFormat"
+
 /**
  * @description convert a bigint formatted amount to a token amount 
  * @param amount - formatted amount
@@ -20,7 +23,7 @@ const getFormattedStringFromTokenAmount = (amount: string, decimals: number) => 
   // slice around potential decimal place
   const a = amount.slice(0, -decimals)
   let b = amount.slice(-decimals)
- 
+
   // if b is only 0s, amount is either 0 or a
   // if 0, a is '' => 0
   // if a, b is 000000 => a
@@ -71,9 +74,14 @@ const getTokenAmountFromFormattedString = (amount: string, decimals: number): bi
 const getFormattedPriceFromAmount = (amount: string, price: string | bigint, decimals0: number, decimals1: number): number =>
   Number(amount) * Number(price) * 10 ** (decimals0 - decimals1)
 
+// convert a tick to a formatted price, scaled by decimals
+const getFormattedPriceFromTick = (tick: number, decimals: number) =>
+  usdFormat(Number(sqrtPriceX96ToPrice(getSqrtRatioAtTick(BigInt(tick)))) * 10 ** (decimals))
+
 export {
   getFormattedStringFromTokenAmount,
   getTokenAmountFromFormattedString,
-  getFormattedPriceFromAmount
+  getFormattedPriceFromAmount,
+  getFormattedPriceFromTick,
 }
 

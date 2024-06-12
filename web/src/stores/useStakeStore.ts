@@ -4,7 +4,8 @@ import {
   MIN_TICK,
   MAX_TICK,
   getTickAtSqrtRatio,
-  encodeSqrtPrice } from "@/lib/math";
+  encodeSqrtPrice
+} from "@/lib/math";
 import { getFormattedStringFromTokenAmount, getTokenAmountFromFormattedString } from "@/lib/amounts";
 
 interface StakeStore {
@@ -36,6 +37,10 @@ interface StakeStore {
   priceLower: string;
   priceUpper: string;
 
+  priceLowerRaw: string;
+  priceUpperRaw: string;
+
+  // parse and set from a display amount
   setPriceLower: (tick: string) => void;
   setPriceUpper: (tick: string) => void;
 }
@@ -95,35 +100,41 @@ export const useStakeStore = create<StakeStore>((set) => ({
   tickLower: MIN_TICK,
   tickUpper: MAX_TICK,
 
+  priceLowerRaw: "0",
+  priceUpperRaw: "0",
+
   priceLower: "0",
   priceUpper: "0",
 
   setPriceLower: (price) => {
     // Make a best effort to convert the number to a sqrt price, then to a tick.
-    const priceN = Number(price);
+    const rawPrice = getTokenAmountFromFormattedString(price, fUSDC.decimals)
+    const priceN = Number(rawPrice);
     let tick = 0;
     try {
       const newTick = getTickAtSqrtRatio(encodeSqrtPrice(priceN));
       tick = newTick;
       console.log("lower tick", tick);
-    } catch {
-    }
+    } catch { }
     set({
       tickLower: tick,
-      priceLower: price
+      priceLowerRaw: rawPrice.toString(),
+      priceLower: price,
     });
   },
   setPriceUpper: (price) => {
-    const priceN = Number(price);    let tick = 0;
+    const rawPrice = getTokenAmountFromFormattedString(price, fUSDC.decimals)
+    const priceN = Number(rawPrice);
+    let tick = 0;
     try {
       const newTick = getTickAtSqrtRatio(encodeSqrtPrice(priceN));
       tick = newTick;
       console.log("upper tick", tick);
-    } catch {
-    }
+    } catch { }
     set({
       tickUpper: tick,
-      priceUpper: price
+      priceUpperRaw: rawPrice.toString(),
+      priceUpper: price,
     });
   },
 }));

@@ -85,16 +85,16 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     setMultiSingleToken,
     token0,
     token0Amount,
+    token0AmountRaw,
     setToken0Amount,
     setToken0AmountRaw,
     token1,
     token1Amount,
+    token1AmountRaw,
     setToken1Amount,
     setToken1AmountRaw,
     priceLower,
     priceUpper,
-    tickLower,
-    tickUpper,
     setPriceLower,
     setPriceUpper,
   } = useStakeStore();
@@ -153,6 +153,21 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     functionName: "curTick",
     args: [token0.address],
   });
+
+  const [quotedToken, setQuotedToken] = useState<'token0' | 'token1'>('token0')
+  const quoteTokenAmount = (value: string, quotedToken: 'token0' | 'token1') => {
+    quotedToken === 'token0'
+      ? setToken0Amount(value)
+      : setToken1Amount(value)
+    setQuotedToken(quotedToken)
+  }
+
+  useEffect(() => {
+    if (quotedToken === 'token0')
+      setToken1AmountRaw((BigInt(token0AmountRaw) * tokenPrice).toString())
+    else
+      setToken0AmountRaw((BigInt(token1AmountRaw) / tokenPrice).toString())
+  }, [token0AmountRaw, token1AmountRaw, tokenPrice, quotedToken])
 
   // in this context, token0 is actually token1. It's converted to token1
   // when we use it.
@@ -373,7 +388,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 autoFocus
                 variant={"no-ring"}
                 value={token0Amount}
-                onChange={(e) => setToken0Amount(e.target.value)}
+                onChange={(e) => quoteTokenAmount(e.target.value, 'token0')}
               />
 
               <Link
@@ -437,7 +452,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   autoFocus
                   variant={"no-ring"}
                   value={token1Amount}
-                  onChange={(e) => setToken1Amount(e.target.value)}
+                  onChange={(e) => quoteTokenAmount(e.target.value, 'token1')}
                 />
 
                 <Badge
