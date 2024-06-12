@@ -1,8 +1,11 @@
 package graph
 
 import (
+	"context"
+	"fmt"
 	"regexp"
 
+	"github.com/ethereum/go-ethereum/ethclient"
 	ethCommon "github.com/ethereum/go-ethereum/common"
 )
 
@@ -14,4 +17,14 @@ func IsValidWallet(a string) bool {
 		return false
 	}
 	return ethCommon.IsHexAddress(a)
+}
+
+// IsContract test by checking the contract size with Geth to see if it's greater than 0.
+func IsContract(c *ethclient.Client, ctx context.Context, a ethCommon.Address) (bool, error) {
+	b, err := c.CodeAt(ctx, a, nil)
+	if err != nil {
+		return false, fmt.Errorf("bad code at: %v", err)
+	}
+	isContract := len(b) > 0
+	return isContract, nil
 }

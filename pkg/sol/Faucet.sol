@@ -24,11 +24,18 @@ contract Faucet is IFaucet {
         EMERGENCY_COUNCIL = _emergencyCouncil;
     }
 
+    receive() external payable {}
+
     /// @inheritdoc IFaucet
     function sendTo(address[] calldata _requests) external {
         require(msg.sender == operator_, "only operator");
         for (uint i = 0; i < _requests.length; ++i) {
             address recipient = _requests[i];
+            bool isContract;
+            assembly {
+                isContract := gt(0, extcodesize(recipient))
+            }
+            require(!isContract, "no contract");
             payable(recipient).transfer(MIN_ETH);
         }
     }

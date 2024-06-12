@@ -6,6 +6,7 @@ import (
 	"context"
 	_ "embed"
 	"encoding/json"
+	"crypto/ecdsa"
 	"log"
 	"net/http"
 	"os"
@@ -20,6 +21,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 
 	"github.com/ethereum/go-ethereum/ethclient"
+	ethCrypto "github.com/ethereum/go-ethereum/crypto"
+	ethCommon "github.com/ethereum/go-ethereum/common"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -33,6 +36,12 @@ import (
 var StakersBytes []byte
 
 const (
+	// EnvFaucetAddr to use as the address for the faucet.
+	EnvFaucetAddr = "SPN_FAUCET_ADDR"
+
+	// EnvPrivateKey is the hex-encoded private key used to call the faucet.
+	EnvPrivateKey = "SPN_PRIVATE_KEY"
+
 	// EnvBackendType to use to listen the server with, (http|lambda).
 	EnvBackendType = "SPN_LISTEN_BACKEND"
 
@@ -66,14 +75,30 @@ func main() {
 	if err != nil {
 		log.Fatalf("database open: %v", err)
 	}
+	// Get the private key to use to make transactions to the faucet with later.
+	key_ := os.Getenv(EnvPrivateKey)
+	if key_ == "" {
+		log.Fatalf("%#v unset", EnvPrivateKey)
+	}
+	key, err := ethCrypto.HexToECDSA(key_)
+	if err != nil {
+		log.Fatalf("private key: %v", err)
+	}
+	faucetAddr := ethCommon.HexToAddress(os.Getenv(EnvFaucetAddr))
+	senderAddr := ethCrypto.PubkeyToAddress(key.Public().(ecdsa.PublicKey))
 	geth, err := ethclient.Dial(config.GethUrl)
 	if err != nil {
 		log.Fatalf("geth open: %v", err)
 	}
 	defer geth.Close()
+	// Get the chain id for sending out requests to the faucet.
+	chainId, err := geth.ChainID(context.Background())
+	if err != nil {
+		log.Fatalf("chain id: %v", err)
+	}
 	// Start the sender in another Go routine to send batch requests
 	// out of the SPN (gas) token.
-	queue := RunSender()
+	queue := RunSender(config, geth, chainId, key, senderAddr, faucetAddr)
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
 			DB:      db,

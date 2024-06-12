@@ -42,6 +42,7 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 		)
 		return "", fmt.Errorf("bad wallet")
 	}
+	// Test if the user's included in our staking support.
 	if r.F.Is(features.FeatureFaucetStakersOnly) {
 		if ok := r.Stakers[strings.ToLower(wallet)]; !ok {
 			slog.Error("user who is not a staker requested tokens",
@@ -51,10 +52,28 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 			return "", fmt.Errorf("not staker")
 		}
 	}
+	// We don't want to send to contracts. Test the codesize before doing anything.
+	addr := ethCommon.HexToAddress(wallet) // We need this for the batch sending.
+	isContract, err := IsContract(r.Geth, ctx, addr)
+	if err != nil {
+		slog.Error("failure to request codesize",
+			"ip addr", ipAddr,
+			"submitted query", wallet,
+			"err", err,
+		)
+		return "", fmt.Errorf("error")
+	}
+	if isContract {
+		slog.Error("requested contract recipient",
+			"ip addr", ipAddr,
+			"submitted query", wallet,
+		)
+		return "", fmt.Errorf("no contracts")
+	}
 	// Get the local queue, assuming the concurrency on this Lambda(?) is limited.
 	resp := make(chan error)
 	r.Queue <- FaucetReq{
-		Addr: ethCommon.HexToAddress(wallet),
+		Addr: addr,
 		Resp: resp,
 	}
 	// Send back to the user the status on this once we're done.
