@@ -138,9 +138,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   useEffect(() => {
     if (liquidityRangeType === "full-range") {
-      // TODO set to price of min/max tick
-      setPriceLower("-100")
-      setPriceLower("100")
+      // lower price is 1 base fUSDC (0.000001)
+      setPriceLower(`0.${"0".repeat(token1.decimals - 1)}1`)
+      // upper price is max tick adjusted for decimals
+      setPriceUpper(BigInt(1.0001 ** MAX_TICK * 10 ** -fUSDC.decimals).toString())
     }
     else if (liquidityRangeType === "auto") {
       // TODO determine auto price
