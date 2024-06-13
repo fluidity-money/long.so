@@ -95,6 +95,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     setToken1AmountRaw,
     priceLower,
     priceUpper,
+    tickLower,
+    priceLowerRaw,
     setPriceLower,
     setPriceUpper,
   } = useStakeStore();
@@ -133,6 +135,21 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const [liquidityRangeType, setLiquidityRangeType] = useState<
     "full-range" | "auto" | "custom"
   >("full-range");
+
+  useEffect(() => {
+    if (liquidityRangeType === "full-range") {
+      // TODO set to price of min/max tick
+      setPriceLower("-100")
+      setPriceLower("100")
+    }
+    else if (liquidityRangeType === "auto") {
+      // TODO determine auto price
+      setPriceLower("-100")
+      setPriceLower("100")
+    } else {
+
+    }
+  }, [liquidityRangeType])
 
   // Price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
