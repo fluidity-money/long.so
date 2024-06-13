@@ -123,13 +123,13 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
    * Step 1. Mint a new position
    */
   const createPosition = () => {
-    if (!tickLower || !tickUpper)
+    if (tickLower === undefined || tickUpper === undefined || tickLower >= tickUpper)
       return
     writeContractMint({
       address: ammAddress,
       abi: seawaterContract.abi,
       functionName: "mintPosition",
-      args: [token0.address, encodeTick(tickLower), encodeTick(tickUpper)],
+      args: [token0.address, tickLower, tickUpper],
     });
   }
 

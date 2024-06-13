@@ -644,6 +644,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   label: "Full Range",
                   value: "full-range",
                   ref: useRef(),
+                  disabled: mode === "existing",
                 },
                 {
                   label: "Auto",
@@ -666,6 +667,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               <div className="text-3xs text-gray-2 md:text-2xs">Low Price</div>
               <Input
                 className="border-b border-white text-2xs md:text-base"
+                disabled={liquidityRangeType !== "custom" || mode === "existing"}
                 value={priceLower}
                 onChange={(e) => setPriceLower(e.target.value)}
               />
@@ -678,6 +680,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               <div className="text-3xs text-gray-2 md:text-2xs">High Price</div>
               <Input
                 className="border-b border-white text-2xs md:text-base"
+                disabled={liquidityRangeType !== "custom" || mode === "existing"}
                 value={priceUpper}
                 onChange={(e) => setPriceUpper(e.target.value)}
               />
