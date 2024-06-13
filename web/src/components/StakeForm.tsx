@@ -649,11 +649,13 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   label: "Auto",
                   value: "auto",
                   ref: useRef(),
+                  disabled: true,
                 },
                 {
                   label: "Custom",
                   value: "custom",
                   ref: useRef(),
+                  disabled: true,
                 },
               ]}
             />
@@ -697,7 +699,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               }}
               ref={chartRef}
               onChartReady={(chart) => {
-                if (liquidityRangeType === "custom") {
+                if (liquidityRangeType === "full-range") {
                   chart.dispatchAction({
                     type: "brush",
                     areas: [
