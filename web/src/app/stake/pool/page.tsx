@@ -243,9 +243,9 @@ export default function PoolPage() {
                   <div className="flex flex-1 flex-col">
                     <div className="text-3xs md:text-2xs">Current Position Range</div>
                     <div className="text-xl md:text-2xl">
-                      {getFormattedPriceFromTick(lowerTick ?? 0, fUSDC.decimals - (poolData?.token.decimals ?? 0))}
+                      {getFormattedPriceFromTick(lowerTick ?? 0, fUSDC.decimals)}
                       -
-                      {getFormattedPriceFromTick(upperTick ?? 0, fUSDC.decimals - (poolData?.token.decimals ?? 0))}
+                      {getFormattedPriceFromTick(upperTick ?? 0, fUSDC.decimals)}
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col">

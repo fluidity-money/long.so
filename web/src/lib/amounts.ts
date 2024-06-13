@@ -76,7 +76,7 @@ const getFormattedPriceFromAmount = (amount: string, price: string | bigint, dec
 
 // convert a tick to a formatted price, scaled by decimals
 const getFormattedPriceFromTick = (tick: number, decimals: number) =>
-  usdFormat(Number(sqrtPriceX96ToPrice(getSqrtRatioAtTick(BigInt(tick)))) * 10 ** (decimals))
+  usdFormat(Number(sqrtPriceX96ToPrice(getSqrtRatioAtTick(BigInt(tick)))) * 10 ** -decimals)
 
 export {
   getFormattedStringFromTokenAmount,
