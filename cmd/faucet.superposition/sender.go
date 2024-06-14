@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"log/slog"
 	"math/big"
+	"math/rand"
 	"time"
 
 	"github.com/fluidity-money/long.so/cmd/faucet.superposition/graph"
@@ -15,7 +16,7 @@ import (
 )
 
 // BufferDuration to reuse to buffer requests to the faucet in.
-const BufferDuration = 5 * time.Second
+const BufferDuration = 4 * time.Second
 
 type SendFaucetFunc func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...ethCommon.Address) (hash *ethCommon.Hash, err error)
 
@@ -23,7 +24,7 @@ type SendFaucetFunc func(ctx context.Context, c *ethclient.Client, o *ethAbiBind
 func RunSender(c *ethclient.Client, chainId *big.Int, key *ecdsa.PrivateKey, senderAddr, faucetAddr ethCommon.Address, sendTokens SendFaucetFunc) chan<- graph.FaucetReq {
 	reqs := make(chan graph.FaucetReq)
 	go func() {
-		t := time.NewTicker(BufferDuration)
+		t := time.NewTicker(BufferDuration + randSecs())
 		buf := make([]graph.FaucetReq, 10)
 		i := 0
 		for {
@@ -80,9 +81,14 @@ func RunSender(c *ethclient.Client, chainId *big.Int, key *ecdsa.PrivateKey, sen
 					b.Resp <- err
 				}
 				i = 0
-				t.Reset(BufferDuration) // So there's no time lost in the ticker.
+				t.Reset(BufferDuration + randSecs()) // So there's no time lost in the ticker.
 			}
 		}
 	}()
 	return reqs
+}
+
+// randSecs for some extra fault tolerance in buffering this
+func randSecs() time.Duration {
+	return time.Duration(rand.Intn(3))
 }
