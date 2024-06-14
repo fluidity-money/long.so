@@ -53,5 +53,5 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ap-southeast-2
         run: |
-          aws lambda update-function-code --function-name faucet-superposition \
+          aws lambda update-function-code --function-name superposition-faucet \
           --zip-file fileb://cmd/faucet.superposition/bootstrap.zip >&2 >/dev/null
