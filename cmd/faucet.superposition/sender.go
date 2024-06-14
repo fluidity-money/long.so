@@ -20,7 +20,7 @@ const BufferDuration = 5 * time.Second
 type SendFaucetFunc func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...ethCommon.Address) (hash *ethCommon.Hash, err error)
 
 // RunSender, by creating a repeating timer of 5 seconds for the cache window, accumulating requests, then sending out tokens requested on demand. Takes the private key for the sender
-func RunSender(c *ethclient.Client, chainId *big.Int, key *ecdsa.PrivateKey, faucetAddr, senderAddr ethCommon.Address, sendTokens SendFaucetFunc) chan<- graph.FaucetReq {
+func RunSender(c *ethclient.Client, chainId *big.Int, key *ecdsa.PrivateKey, senderAddr, faucetAddr ethCommon.Address, sendTokens SendFaucetFunc) chan<- graph.FaucetReq {
 	reqs := make(chan graph.FaucetReq)
 	go func() {
 		t := time.NewTicker(BufferDuration)

@@ -86,7 +86,8 @@ func main() {
 		log.Fatalf("private key: %v", err)
 	}
 	faucetAddr := ethCommon.HexToAddress(os.Getenv(EnvFaucetAddr))
-	senderAddr := ethCrypto.PubkeyToAddress(key.Public().(ecdsa.PublicKey))
+	senderPub, _ := key.Public().(*ecdsa.PublicKey) // Should be fine.
+	senderAddr := ethCrypto.PubkeyToAddress(*senderPub)
 	geth, err := ethclient.Dial(config.GethUrl)
 	if err != nil {
 		log.Fatalf("geth open: %v", err)
