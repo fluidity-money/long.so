@@ -15,6 +15,7 @@ import (
 	"github.com/fluidity-money/long.so/lib/features"
 	_ "github.com/fluidity-money/long.so/lib/setup"
 
+	"github.com/fluidity-money/long.so/cmd/faucet.superposition/lib/faucet"
 	"github.com/fluidity-money/long.so/cmd/faucet.superposition/graph"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -98,7 +99,7 @@ func main() {
 	}
 	// Start the sender in another Go routine to send batch requests
 	// out of the SPN (gas) token.
-	queue := RunSender(config, geth, chainId, key, senderAddr, faucetAddr)
+	queue := RunSender(geth, chainId, key, senderAddr, faucetAddr, faucet.SendFaucet)
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
 			DB:      db,

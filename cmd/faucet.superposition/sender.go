@@ -7,10 +7,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/fluidity-money/long.so/lib/config"
-
 	"github.com/fluidity-money/long.so/cmd/faucet.superposition/graph"
-	"github.com/fluidity-money/long.so/cmd/faucet.superposition/lib/faucet"
 
 	ethAbiBind "github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethCommon "github.com/ethereum/go-ethereum/common"
@@ -20,8 +17,10 @@ import (
 // BufferDuration to reuse to buffer requests to the faucet in.
 const BufferDuration = 5 * time.Second
 
+type SendFaucetFunc func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...ethCommon.Address) (hash *ethCommon.Hash, err error)
+
 // RunSender, by creating a repeating timer of 5 seconds for the cache window, accumulating requests, then sending out tokens requested on demand. Takes the private key for the sender
-func RunSender(config config.C, c *ethclient.Client, chainId *big.Int, key *ecdsa.PrivateKey, faucetAddr, senderAddr ethCommon.Address) chan<- graph.FaucetReq {
+func RunSender(c *ethclient.Client, chainId *big.Int, key *ecdsa.PrivateKey, faucetAddr, senderAddr ethCommon.Address, sendTokens SendFaucetFunc) chan<- graph.FaucetReq {
 	reqs := make(chan graph.FaucetReq)
 	go func() {
 		t := time.NewTicker(BufferDuration)
@@ -30,7 +29,7 @@ func RunSender(config config.C, c *ethclient.Client, chainId *big.Int, key *ecds
 		for {
 			select {
 			case a := <-reqs:
-				if len(buf) > i {
+				if i > len(buf) {
 					buf = append(buf, a)
 					i++
 				} else {
@@ -42,13 +41,13 @@ func RunSender(config config.C, c *ethclient.Client, chainId *big.Int, key *ecds
 				if i == 0 {
 					continue
 				}
-				addrs := make([]ethCommon.Address, i+1)
+				addrs := make([]ethCommon.Address, i)
 				for x, a := range buf[:i] {
 					addrs[x] = a.Addr
 				}
 				o, err := ethAbiBind.NewKeyedTransactorWithChainID(key, chainId)
 				if err != nil {
-					for _, b := range buf {
+					for _, b := range buf[:i] {
 						b.Resp <- err
 					}
 					slog.Error("failed to create keyed transactor with chain id",
@@ -57,7 +56,7 @@ func RunSender(config config.C, c *ethclient.Client, chainId *big.Int, key *ecds
 					continue
 				}
 				// Start to send out the staked amounts, and log the hash.
-				hash, err := faucet.SendFaucet(
+				hash, err := sendTokens(
 					context.Background(),
 					c,
 					o,
@@ -74,7 +73,10 @@ func RunSender(config config.C, c *ethclient.Client, chainId *big.Int, key *ecds
 					"addrs", addrs,
 					"err?", err,
 				)
-				for _, b := range buf {
+				// Send responses to the connected
+				// buffers, making sure to only send to
+				// the ones that we set up.
+				for _, b := range buf[:i] {
 					b.Resp <- err
 				}
 				i = 0
