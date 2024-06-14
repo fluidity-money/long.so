@@ -11,8 +11,11 @@ import (
 	"strings"
 	"time"
 
-	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/fluidity-money/long.so/lib/features"
+
+	"github.com/fluidity-money/long.so/cmd/faucet.superposition/lib/faucet"
+
+	ethCommon "github.com/ethereum/go-ethereum/common"
 )
 
 // TimeToLive on the request before sending a customised failure.
@@ -22,7 +25,7 @@ const TimeToLive = 10 * time.Second
 func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (string, error) {
 	// Get the user's IP address to prevent them from spamming this
 	// incase our rate limiting is skipped somehow (it's good to be cautious.)
-	ipAddr := ctx.Value("X-Forwarded-For")
+	ipAddr, _ := ctx.Value("X-Forwarded-For").(string)
 	if enabled := r.F.Is(features.FeatureFaucetEnabled); !enabled {
 		slog.Error("faucet is currently disabled",
 			"ip addr", ipAddr,
@@ -51,6 +54,47 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 			)
 			return "", fmt.Errorf("not staker")
 		}
+	}
+	// Check if the user is within the window to make requests.
+	// Checks if there are any rows that exceed a 5 hour addition to
+	// the updated time to see if they're within that window.
+	attempts, err := r.DB.
+		Raw("SELECT 1 FROM faucet_requests WHERE (addr = ? OR ip_addr = ?) AND updated_by + INTERVAL '5 hours' > CURRENT_TIMESTAMP", wallet, ipAddr).
+		Rows()
+	if err != nil {
+		slog.Error("failure to get attempts",
+			"ip addr", ipAddr,
+			"submitted wallet", wallet,
+			"err", err,
+		)
+		return "", fmt.Errorf("internal error")
+	}
+	defer attempts.Close()
+	if attempts.Next() { // If this happens, then we got a row that's bad.
+		slog.Error("too many requests made",
+			"ip addr", ipAddr,
+			"submitted wallet", wallet,
+			"err", err,
+		)
+		return "", fmt.Errorf("too many requests")
+	}
+	// Mark that the request was serviced so we don't double up.
+	err = r.DB.
+		Table("faucet_requests").
+		Create(faucet.FaucetRequest{
+			Addr:      wallet,
+			IpAddr:    ipAddr,
+			CreatedBy: time.Now(),
+			UpdatedBy: time.Now(),
+		}).
+		Error
+	if err != nil {
+		slog.Error("failed to upsert a faucet request",
+			"ip addr", ipAddr,
+			"submitted wallet", wallet,
+			"err", err,
+		)
+		return "", fmt.Errorf("internal error")
 	}
 	// We don't want to send to contracts. Test the codesize before doing anything.
 	addr := ethCommon.HexToAddress(wallet) // We need this for the batch sending.
@@ -97,11 +141,6 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 			return "", fmt.Errorf("error sending")
 		}
 	}
-	// Mark that we had success in the database. If worst case
-	// scenario, and somewhere in this process we fail, the user will
-	// get more if they request again. This is not the end of the
-	// world for us.
-	//TODO
 	return "", nil
 }
 
