@@ -1,6 +1,6 @@
 {
 	"faucet stakers only": true,
-	"faucet is enabled": true,
+	"faucet enabled": true,
 	"graphql mock demo data": false,
 	"graphql mock demo data should delay": false,
 	"ui show boost incentives": false,
