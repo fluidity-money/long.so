@@ -9,8 +9,11 @@ const Resolution = 96
 // GetAmountsForLiq with sqrtRatioX96 being the first tick boundary, and
 // sqrtRatioAX96 being the second. liq being the amount of liquidity in
 // the position.
-func GetAmountsForLiq(sqrtRatioX96, sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount0 *big.Int, amount1 *big.Int) {
-	var sqrtRatio0X96, sqrtRatio1X96 *big.Int
+func GetAmountsForLiq(sqrtRatioX96, sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount0 *big.Rat, amount1 *big.Rat) {
+	var (
+		sqrtRatio0X96 = sqrtRatioAX96
+		sqrtRatio1X96 = sqrtRatioBX96
+	)
 	//if sqrtRatioAX96 > sqrtRatioBX96
 	if sqrtRatioAX96.Cmp(sqrtRatioBX96) > 0 {
 		sqrtRatio0X96 = sqrtRatioBX96
@@ -19,20 +22,23 @@ func GetAmountsForLiq(sqrtRatioX96, sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) 
 	//if sqrtRatioX96 <= sqrtRatio0X96
 	if sqrtRatioX96.Cmp(sqrtRatio0X96) <= 0 {
 		amount0 = GetAmount0ForLiq(sqrtRatio0X96, sqrtRatio1X96, liq)
-		amount1 = new(big.Int)
-	//if sqrtRatioX96 < sqrtRatio1X96
+		amount1 = new(big.Rat)
+		//if sqrtRatioX96 < sqrtRatio1X96
 	} else if sqrtRatioX96.Cmp(sqrtRatio1X96) < 0 {
 		amount0 = GetAmount0ForLiq(sqrtRatioX96, sqrtRatio1X96, liq)
 		amount1 = GetAmount1ForLiq(sqrtRatio1X96, sqrtRatioX96, liq)
 	} else {
-		amount0 = new(big.Int)
+		amount0 = new(big.Rat)
 		amount1 = GetAmount1ForLiq(sqrtRatio0X96, sqrtRatio1X96, liq)
 	}
 	return
 }
 
-func GetAmount0ForLiq(sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount0 *big.Int) {
-	var sqrtRatio0X96, sqrtRatio1X96 *big.Int
+func GetAmount0ForLiq(sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount0 *big.Rat) {
+	var (
+		sqrtRatio0X96 = sqrtRatioAX96
+		sqrtRatio1X96 = sqrtRatioBX96
+	)
 	//if sqrtRatioAX96 > sqrtRatioBX96
 	if sqrtRatioAX96.Cmp(sqrtRatioBX96) > 0 {
 		sqrtRatio0X96 = sqrtRatioBX96
@@ -42,20 +48,22 @@ func GetAmount0ForLiq(sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount0 *big.
 	sqrtDiff := new(big.Int).Sub(sqrtRatio1X96, sqrtRatio0X96)
 	res := new(big.Int).Mul(lsl, sqrtDiff)
 	num := new(big.Int).Quo(res, sqrtRatio1X96)
-	amount0 = new(big.Int).Quo(num, sqrtRatio0X96)
+	amount0 = new(big.Rat).Quo(new(big.Rat).SetInt(num), new(big.Rat).SetInt(sqrtRatio0X96))
 	return
 }
 
-func GetAmount1ForLiq(sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount1 *big.Int) {
-	var sqrtRatio0X96, sqrtRatio1X96 *big.Int
+func GetAmount1ForLiq(sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount1 *big.Rat) {
+	var (
+		sqrtRatio0X96 = sqrtRatioAX96
+		sqrtRatio1X96 = sqrtRatioBX96
+	)
 	//if sqrtRatioAX96 > sqrtRatioBX96
 	if sqrtRatioAX96.Cmp(sqrtRatioBX96) > 0 {
 		sqrtRatio0X96 = sqrtRatioBX96
 		sqrtRatio1X96 = sqrtRatioAX96
 	}
-	sqrtDiff := new(big.Int).Sub(sqrtRatio1X96, sqrtRatio0X96)
-	res := new(big.Int).Mul(liq, sqrtDiff)
-	amount1 = new(big.Int).Quo(res, Q96)
+	sqrtDiff := new(big.Rat).Sub(new(big.Rat).SetInt(sqrtRatio1X96), new(big.Rat).SetInt(sqrtRatio0X96))
+	res := new(big.Rat).Mul(new(big.Rat).SetInt(liq), sqrtDiff)
+	amount1 = new(big.Rat).Quo(res, new(big.Rat).SetInt(Q96))
 	return
 }
-

@@ -90,5 +90,5 @@ func RunSender(c *ethclient.Client, chainId *big.Int, key *ecdsa.PrivateKey, sen
 
 // randSecs for some extra fault tolerance in buffering this
 func randSecs() time.Duration {
-	return time.Duration(rand.Intn(3))
+	return time.Duration(rand.Intn(3)) * time.Second
 }
