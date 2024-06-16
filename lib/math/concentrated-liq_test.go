@@ -5,8 +5,8 @@
 package math
 
 import (
-	"testing"
 	"math/big"
+	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -71,5 +71,14 @@ func TestGetAmountsForLiqPriceAbove(t *testing.T) {
 		new(big.Rat).SetInt64(200).FloatString(0), // 199 rounded up
 		amount1.FloatString(0),
 		"amount1 not equal",
+	)
+}
+
+func TestGetSqrtRatioAtTick(t *testing.T) {
+	assert.Equalf(t,
+		// 79426470787362580746886972461
+		new(big.Int).SetBits([]big.Word{0x6976f1080c4042d, 0x100a40969}).Text(10),
+		GetSqrtRatioAtTick(new(big.Int).SetInt64(50)).Text(10),
+		"tick not correct",
 	)
 }

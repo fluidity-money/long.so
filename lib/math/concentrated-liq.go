@@ -7,7 +7,7 @@ var (
 	Zero = new(big.Int).SetInt64(0)
 )
 
-var Q96, _ = new(big.Int).SetString("79228162514264337593543950336", 10)
+var Q96 = new(big.Int).SetBits([]big.Word{0, 0x100000000})
 
 const Resolution = 96
 
@@ -75,11 +75,12 @@ func GetAmount1ForLiq(sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount1 *big.
 
 func GetSqrtRatioAtTick(t *big.Int) *big.Int {
 	absTick := new(big.Int).Abs(t)
+	ratio := new(big.Int).SetBits([]big.Word{0x59a46990580e213a, 0xfff97272373d4132})
 	res := new(big.Int).And(absTick, One)
-	ratio := new(big.Int).SetBits([]big.Word{0xfff97272373d4132, 0x59a46990580e213a})
 	//if res != 0
 	if res.Cmp(Zero) != 0 {
-		res = new(big.Int).Set(ratio)
+		//340265354078544963557816517032075149313
+		res.SetBits([]big.Word{0xaa2d162d1a594001, 0xfffcb933bd6fad37})
 	} else {
 		res.Lsh(One, 128)
 	}
@@ -97,9 +98,9 @@ func GetSqrtRatioAtTick(t *big.Int) *big.Int {
 	}
 	//if t > 0
 	if t.Cmp(Zero) > 0 {
-		// Max uint256
 		x := new(big.Int).Lsh(One, 256)
 		x.Sub(x, One)
+		// res / max(uint256).max
 		res.Quo(x, res)
 	}
 	res.Rsh(res, 32)
