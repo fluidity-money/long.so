@@ -7,6 +7,21 @@ var (
 	Zero = new(big.Int).SetInt64(0)
 )
 
+var (
+	// MinTick that could be used in the tick range.
+	MinTick = new(big.Int).SetInt64(-887272)
+
+	// MaxTick that could be used.
+	MaxTick = new(big.Int).SetInt64(887272)
+
+	// MinSqrtRatio (price) that could be set.
+	MinSqrtRatio = new(big.Int).SetInt64(4295128739)
+
+	// MaxSqrtRatio that could be used as price data.
+	//1461446703485210103287273052203988822378723970342n
+	MaxSqrtRatio = new(big.Int).SetBits([]big.Word{0x5d951d5263988d26, 0xefd1fc6a50648849, 0xfffd8963})
+)
+
 var Q96 = new(big.Int).SetBits([]big.Word{0, 0x100000000})
 
 const Resolution = 96

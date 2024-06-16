@@ -75,10 +75,47 @@ func TestGetAmountsForLiqPriceAbove(t *testing.T) {
 }
 
 func TestGetSqrtRatioAtTick(t *testing.T) {
-	assert.Equalf(t,
-		// 79426470787362580746886972461
+	assert.Equal(t,
+		//79426470787362580746886972461
 		new(big.Int).SetBits([]big.Word{0x6976f1080c4042d, 0x100a40969}).Text(10),
 		GetSqrtRatioAtTick(new(big.Int).SetInt64(50)).Text(10),
-		"tick not correct",
+	)
+	assert.Equal(t,
+		// 79625275426524748796330556128
+		new(big.Int).SetBits([]big.Word{0x1c17ddb45ce0bae0, 0x101487bee}).Text(10),
+		GetSqrtRatioAtTick(new(big.Int).SetInt64(100)).Text(10),
+	)
+	assert.Equal(t,
+		//80224679980005306637834519095
+		new(big.Int).SetBits([]big.Word{0x10558cdf8c440237, 0x103384cc8}).Text(10),
+		GetSqrtRatioAtTick(new(big.Int).SetInt64(250)).Text(10),
+	)
+	assert.Equal(t,
+		//81233731461783161732293370115
+		new(big.Int).SetBits([]big.Word{0x7f9ba68649faa103, 0x1067af7be}).Text(10),
+		GetSqrtRatioAtTick(new(big.Int).SetInt64(500)).Text(10),
+	)
+	assert.Equal(t,
+		//83290069058676223003182343270
+		new(big.Int).SetBits([]big.Word{0xfe8561359d69a466, 0x10d1fee2a}).Text(10),
+		GetSqrtRatioAtTick(new(big.Int).SetInt64(1000)).Text(10),
+	)
+	assert.Equal(t,
+		//89776708723587163891445672585
+		new(big.Int).SetBits([]big.Word{0xd5e8608ce87a2a89, 0x122158d8b}).Text(10),
+		GetSqrtRatioAtTick(new(big.Int).SetInt64(2500)).Text(10),
+	)
+	assert.Equal(t,
+		//92049301871182272007977902845
+		new(big.Int).SetBits([]big.Word{0x39b9cdb1686122fd, 0x1296d65dd}).Text(10),
+		GetSqrtRatioAtTick(new(big.Int).SetInt64(3000)).Text(10),
+	)
+	assert.Equal(t,
+		MinSqrtRatio.Text(10),
+		GetSqrtRatioAtTick(MinTick).Text(10),
+	)
+	assert.Equal(t,
+		MaxSqrtRatio.Text(10),
+		GetSqrtRatioAtTick(MaxTick).Text(10),
 	)
 }

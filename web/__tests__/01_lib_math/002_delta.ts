@@ -1,5 +1,11 @@
 
-import { getSqrtRatioAtTick, MIN_TICK, MIN_SQRT_RATIO } from "@/lib/math";
+import {
+  getSqrtRatioAtTick,
+  MIN_TICK,
+  MIN_SQRT_RATIO,
+  MAX_TICK,
+  MAX_SQRT_RATIO
+} from "@/lib/math";
 
 describe("Liquidity math", () => {
   it("Should get the sqrt ratio at a tick correctly", () => {
@@ -12,5 +18,6 @@ describe("Liquidity math", () => {
     expect(getSqrtRatioAtTick(2500n)).toEqual(89776708723587163891445672585n);
     expect(getSqrtRatioAtTick(3000n)).toEqual(92049301871182272007977902845n);
     expect(getSqrtRatioAtTick(BigInt(MIN_TICK))).toEqual(MIN_SQRT_RATIO);
+    expect(getSqrtRatioAtTick(BigInt(MAX_TICK))).toEqual(MAX_SQRT_RATIO);
   });
 });
