@@ -37,9 +37,11 @@ type (
 		Error  any    `json:"error"`
 	}
 
+	// posResp that's also given to gorm to be used with a custom
+	// function that does a left join during insertion.
 	posResp struct {
-		pool            types.Address
-		position, delta types.Number
+		Pool            types.Address
+		Pos, Delta types.Number
 	}
 )
 

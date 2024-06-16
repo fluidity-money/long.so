@@ -6,7 +6,7 @@
 
 -- swap1_price_hourly_1 requires a single join, so it can be a continuous aggregate
 CREATE MATERIALIZED VIEW seawater_pool_swap1_price_hourly_1 WITH (
-	timescaledb.continuous, 
+	timescaledb.continuous,
 	timescaledb.materialized_only = false
 ) AS
 	SELECT
@@ -130,11 +130,11 @@ CREATE MATERIALIZED VIEW seawater_pool_swap_volume_hourly_1 AS
 
 CREATE MATERIALIZED VIEW seawater_pool_swap_volume_daily_1 AS
 SELECT
-	FLOOR(EXTRACT(EPOCH FROM NOW())) AS timestamp, 
+	FLOOR(EXTRACT(EPOCH FROM NOW())) AS timestamp,
 	pool AS token1_token,
-	SUM(fusdc_volume_unscaled) AS fusdc_value_unscaled, 
+	SUM(fusdc_volume_unscaled) AS fusdc_value_unscaled,
 	SUM(tokena_volume_unscaled) AS token1_value_unscaled,
-	decimals AS token1_decimals, 
+	decimals AS token1_decimals,
 	time_bucket('1 day', hourly_interval) AS interval_timestamp
 FROM seawater_pool_swap_volume_hourly_1
 GROUP BY interval_timestamp, token1_token, token1_decimals
@@ -142,18 +142,18 @@ ORDER BY interval_timestamp DESC;
 
 CREATE MATERIALIZED VIEW seawater_pool_swap_volume_monthly_1 AS
 SELECT
-	FLOOR(EXTRACT(EPOCH FROM NOW())) AS timestamp, 
+	FLOOR(EXTRACT(EPOCH FROM NOW())) AS timestamp,
 	pool AS token1_token,
-	SUM(fusdc_volume_unscaled) AS fusdc_value_unscaled, 
+	SUM(fusdc_volume_unscaled) AS fusdc_value_unscaled,
 	SUM(tokena_volume_unscaled) AS token1_value_unscaled,
-	decimals AS token1_decimals, 
+	decimals AS token1_decimals,
 	time_bucket('1 month', hourly_interval) AS interval_timestamp
 FROM seawater_pool_swap_volume_hourly_1
 GROUP BY interval_timestamp, token1_token, token1_decimals
 ORDER BY interval_timestamp DESC;
 
 -- This would make use of triggers to keep the materialized views up to date, but Postgres doesn't support triggers on materialized views. Instead, schedule regular updates with pg_cron
-CREATE OR REPLACE FUNCTION refresh_swap_price_volume_views()
+CREATE FUNCTION refresh_swap_price_volume_views()
 RETURNS VOID LANGUAGE PLPGSQL
 AS $$
 BEGIN

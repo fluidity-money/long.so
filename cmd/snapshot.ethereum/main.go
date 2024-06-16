@@ -31,7 +31,10 @@ func main() {
 		time.Sleep((WaitSecs * time.Second) + randSecs())
 		// Get every active position in the database, including the pools.
 		var positions []seawater.Position
-		err := db.Table("seawater_active_positions_1").Scan(&positions).Error
+		err := db.Table("seawater_active_positions_1").
+			Select("pos_id", "pool", "tick_lower", "tick_upper").
+			Scan(&positions).
+			Error
 		if err != nil {
 			log.Fatalf("seawater positions scan: %v", err)
 		}

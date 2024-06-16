@@ -1,3 +1,6 @@
+// Tests mainly the good case including the decoding without the negative
+// case.
+
 package main
 
 import (
@@ -67,9 +70,9 @@ func TestReqPositionsSinglePosition(t *testing.T) {
 	})
 	assert.Nilf(t, err, "req positions errored")
 	expected := []posResp{{
-		pool:     p.Pool,
-		position: p.Id,
-		delta:    types.NumberFromInt64(152841813),
+		Pool:     p.Pool,
+		Pos: p.Id,
+		Delta:    types.NumberFromInt64(152841813),
 	}}
 	assert.Equal(t, expected, r)
 }
@@ -122,15 +125,15 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 	}
 	expectedDelta := new(big.Int).SetInt64(152841813)
 	for _, r := range posResps {
-		p, ok := xs[r.position.String()]
+		p, ok := xs[r.Pos.String()]
 		if !ok {
-			t.Fatalf("bad id number: %v", r.position)
+			t.Fatalf("bad id number: %v", r.Pos)
 		}
-		if p.Pool != r.pool {
-			t.Fatalf("bad pool: %v", r.pool)
+		if p.Pool != r.Pool {
+			t.Fatalf("bad pool: %v", r.Pool)
 		}
-		if r.delta.Big().Cmp(expectedDelta) != 0 {
-			t.Fatalf("bad delta; %v", r.delta)
+		if r.Delta.Big().Cmp(expectedDelta) != 0 {
+			t.Fatalf("bad delta; %v", r.Delta)
 		}
 	}
 	assert.Nilf(t, err, "failed")
