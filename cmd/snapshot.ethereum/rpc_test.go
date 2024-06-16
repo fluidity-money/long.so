@@ -31,8 +31,9 @@ func TestGetSlot(t *testing.T) {
 
 func TestReqPositionsErr(t *testing.T) {
 	// Test that we're handling errors correctly.
-	var p seawater.Position
-	d := packRpcData("", p)
+	d := packRpcPosData("", map[string]seawater.Position{
+		"": {},
+	})
 	ctx := context.TODO()
 	_, err := reqPositions(ctx, "", d, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
 		var buf bytes.Buffer
@@ -53,7 +54,7 @@ func TestReqPositionsSinglePosition(t *testing.T) {
 		Id:   types.NumberFromInt64(10),
 		Pool: types.AddressFromString("0xe984f758f362d255bd96601929970cef9ff19dd7"),
 	}
-	d := packRpcData("", p)
+	d := packRpcPosData("", map[string]seawater.Position{"": p})
 	id := encodeId(p.Pool, p.Id)
 	pool, posId, ok := decodeId(id)
 	assert.Equalf(t, p.Pool, pool, "pool not decoded")
@@ -70,9 +71,9 @@ func TestReqPositionsSinglePosition(t *testing.T) {
 	})
 	assert.Nilf(t, err, "req positions errored")
 	expected := []posResp{{
-		Pool:     p.Pool,
-		Pos: p.Id,
-		Delta:    types.NumberFromInt64(152841813),
+		Pool:  p.Pool,
+		Pos:   p.Id,
+		Delta: types.NumberFromInt64(152841813),
 	}}
 	assert.Equal(t, expected, r)
 }
@@ -80,8 +81,8 @@ func TestReqPositionsSinglePosition(t *testing.T) {
 func TestReqPositionsHundredThousandPositions(t *testing.T) {
 	// Test if the request function can handle a single position.
 	ctx := context.TODO()
-	positions := make([]seawater.Position, 100_000)
-	for i := range positions {
+	positions := make(map[string]seawater.Position, 100_000)
+	for i := 0; i < 100_000; i++ {
 		p := seawater.Position{ // Only these fields are used.
 			Id:   types.NumberFromInt64(int64(i)),
 			Pool: types.AddressFromString("0xe984f758f362d255bd96601929970cef9ff19dd7"),
@@ -91,12 +92,12 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 		assert.Equalf(t, p.Pool, pool, "pool not decoded")
 		assert.Equalf(t, &p.Id, posId, "id not decoded")
 		assert.Truef(t, ok, "decode id function not working")
-		positions[i] = p
+		positions[p.Id.String()] = p
 	}
-	d := packRpcData("", positions...)
-	resps := make([]rpcResp, 100_000)
-	for i, p := range positions {
-		resps[i] = rpcResp{
+	d := packRpcPosData("", positions)
+	resps := make(map[string]rpcResp, 100_000)
+	for _, p := range positions {
+		resps[p.Id.String()] = rpcResp{
 			Id:     encodeId(p.Pool, p.Id),
 			Result: "0x00000000000000000000000000000000000000000000000000000000091c2e55",
 			Error:  nil,
@@ -118,14 +119,9 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 		_ = json.NewEncoder(&buf).Encode(resps)
 		return io.NopCloser(&buf), nil
 	})
-	// Create a map instead of sorting (since it's easier and I'm lazy.)
-	xs := make(map[string]seawater.Position, len(positions))
-	for _, p := range positions {
-		xs[p.Id.String()] = p
-	}
 	expectedDelta := new(big.Int).SetInt64(152841813)
 	for _, r := range posResps {
-		p, ok := xs[r.Pos.String()]
+		p, ok := positions[r.Pos.String()]
 		if !ok {
 			t.Fatalf("bad id number: %v", r.Pos)
 		}
@@ -142,18 +138,19 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 func TestReqPositionsHundredThousandErrors(t *testing.T) {
 	// Test if the request function can handle a single position.
 	ctx := context.TODO()
-	positions := make([]seawater.Position, 100_000)
-	for i := range positions {
+	positions := make(map[string]seawater.Position, 100_000)
+	for i := 0; i < 100_000; i++ {
+		id := types.NumberFromInt64(int64(i))
 		p := seawater.Position{ // Only these fields are used.
-			Id:   types.NumberFromInt64(int64(i)),
+			Id:   id,
 			Pool: types.AddressFromString("0xe984f758f362d255bd96601929970cef9ff19dd7"),
 		}
-		positions[i] = p
+		positions[id.String()] = p
 	}
-	d := packRpcData("", positions...)
-	resps := make([]rpcResp, 100_000)
-	for i, p := range positions {
-		resps[i] = rpcResp{
+	d := packRpcPosData("", positions)
+	resps := make(map[string]rpcResp, 100_000)
+	for _, p := range positions {
+		resps[p.Id.String()] = rpcResp{
 			Id:     encodeId(p.Pool, p.Id),
 			Result: "0x00000000000000000000000000000000000000000000000000000000091c2e55",
 			Error:  nil,
@@ -163,7 +160,7 @@ func TestReqPositionsHundredThousandErrors(t *testing.T) {
 		// Decode the data to see which transactions are being sent.
 		var buf bytes.Buffer
 		_ = json.NewEncoder(&buf).Encode([]rpcResp{{
-			Error:  []string{
+			Error: []string{
 				"error happened",
 			},
 		}})

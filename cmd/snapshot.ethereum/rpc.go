@@ -45,12 +45,13 @@ type (
 	}
 )
 
-// packRpcData by concatenating the pool address with the position id, so
+// packRpcPosData by concatenating the pool address with the position id, so
 // we can quickly unpack it later. Assumes poolAddr, and ammAddr, are
 // correctly formatted (0x[A-Za-z0-9]{40}).
-func packRpcData(ammAddr string, positions ...seawater.Position) (req []rpcReq) {
+func packRpcPosData(ammAddr string, positions map[string]seawater.Position) (req []rpcReq) {
 	req = make([]rpcReq, len(positions))
-	for i, p := range positions {
+	i := 0
+	for _, p := range positions {
 		s := getCalldata(p.Pool, p.Id)
 		req[i] = rpcReq{
 			JsonRpc: "2.0",
@@ -59,6 +60,7 @@ func packRpcData(ammAddr string, positions ...seawater.Position) (req []rpcReq) 
 			// TODO make the offset
 			Params: []string{ammAddr, s, "latest"},
 		}
+		i++
 	}
 	return
 }
