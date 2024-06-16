@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"math/big"
 	"testing"
 
 	"github.com/fluidity-money/long.so/lib/types"
@@ -98,14 +99,13 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 			Error:  nil,
 		}
 	}
-	_, err := reqPositions(ctx, "", d, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
+	posResps, err := reqPositions(ctx, "", d, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
 		// Decode the data to see which transactions are being sent.
 		var buf bytes.Buffer
 		var reqs []rpcReq
 		_ = json.NewDecoder(r).Decode(&reqs)
 		resps := make([]rpcResp, len(reqs))
 		for i, r := range reqs {
-			t.Logf("id %v", r.Id)
 			resps[i] = rpcResp{
 				Id:     r.Id,
 				Result: "0x00000000000000000000000000000000000000000000000000000000091c2e55",
@@ -115,5 +115,57 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 		_ = json.NewEncoder(&buf).Encode(resps)
 		return io.NopCloser(&buf), nil
 	})
+	// Create a map instead of sorting (since it's easier and I'm lazy.)
+	xs := make(map[string]seawater.Position, len(positions))
+	for _, p := range positions {
+		xs[p.Id.String()] = p
+	}
+	expectedDelta := new(big.Int).SetInt64(152841813)
+	for _, r := range posResps {
+		p, ok := xs[r.position.String()]
+		if !ok {
+			t.Fatalf("bad id number: %v", r.position)
+		}
+		if p.Pool != r.pool {
+			t.Fatalf("bad pool: %v", r.pool)
+		}
+		if r.delta.Big().Cmp(expectedDelta) != 0 {
+			t.Fatalf("bad delta; %v", r.delta)
+		}
+	}
 	assert.Nilf(t, err, "failed")
+}
+
+func TestReqPositionsHundredThousandErrors(t *testing.T) {
+	// Test if the request function can handle a single position.
+	ctx := context.TODO()
+	positions := make([]seawater.Position, 100_000)
+	for i := range positions {
+		p := seawater.Position{ // Only these fields are used.
+			Id:   types.NumberFromInt64(int64(i)),
+			Pool: types.AddressFromString("0xe984f758f362d255bd96601929970cef9ff19dd7"),
+		}
+		positions[i] = p
+	}
+	d := packRpcData("", positions...)
+	resps := make([]rpcResp, 100_000)
+	for i, p := range positions {
+		resps[i] = rpcResp{
+			Id:     encodeId(p.Pool, p.Id),
+			Result: "0x00000000000000000000000000000000000000000000000000000000091c2e55",
+			Error:  nil,
+		}
+	}
+	posResps, err := reqPositions(ctx, "", d, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
+		// Decode the data to see which transactions are being sent.
+		var buf bytes.Buffer
+		_ = json.NewEncoder(&buf).Encode([]rpcResp{{
+			Error:  []string{
+				"error happened",
+			},
+		}})
+		return io.NopCloser(&buf), nil
+	})
+	assert.Errorf(t, err, "should've errored")
+	assert.Nilf(t, posResps, "returned responses anyway")
 }
