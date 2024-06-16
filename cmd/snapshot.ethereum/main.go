@@ -1,12 +1,18 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
+	"io"
 	"log"
 	"math/rand"
+	"net/http"
 	"time"
+	"context"
 
-	_ "github.com/fluidity-money/long.so/lib/setup"
 	"github.com/fluidity-money/long.so/lib/config"
+	_ "github.com/fluidity-money/long.so/lib/setup"
+	"github.com/fluidity-money/long.so/lib/types/seawater"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -30,26 +36,19 @@ func main() {
 			log.Fatalf("seawater positions scan: %v", err)
 		}
 		// Pack the RPC data to be batched using storage slot lookups.
-		d := packRpcData(positions)
+		d := packRpcData(config.SeawaterAddr.String(), positions...)
 		// Request from the RPC the batched lookup of this data.
 		// Makes multiple requests if the request size exceeds the current restriction.
-		r, err := requestPositions(positions)
+		r, err := reqPositions(context.Background(), "TODO", d, httpPost)
 		if err != nil {
 			log.Fatalf("positions request: %v", err)
 		}
-		// Reconcile the IDs from the request with the IDs from
-		// the positions. Since we can optionally send a string
-		// ID, this simplifies the implementation. But we should
-		// test if there's a ID that's left over that wasn't
-		// checked, an blow the entire thing up if that's the
-		// case.
-		if ok := checkAllPosReturned(positions, r); !ok {
-			log.Fatalf("failed to retrieve all positions: %v", err)
-		}
 		// Store the positions in the database. Also include
 		// position information to simplify queries on the
-		// database later.
-		if err := storePositions(positions, r); err != nil {
+		// database later. Uses a specialised database function
+		// which also left joins information on the position from the
+		// positions table to reduce the time to look things up.
+		if err := storePositions(r); err != nil {
 			log.Fatalf("store positions: %v", err)
 		}
 	}
@@ -57,4 +56,23 @@ func main() {
 
 func randSecs() time.Duration {
 	return time.Duration(rand.Intn(3)) * time.Second
+}
+
+func httpPost(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
+	resp, err := http.Post(url, "application/json", r)
+	if err != nil {
+		return nil, err
+	}
+	switch s := resp.StatusCode; s {
+	case http.StatusOK:
+		// Do nothing
+	default:
+		var buf bytes.Buffer
+		defer resp.Body.Close()
+		if _, err := buf.ReadFrom(resp.Body); err != nil {
+			return nil, fmt.Errorf("bad resp drain: %v", err)
+		}
+		return nil, fmt.Errorf("bad resp status %#v: %v", buf.String(), s)
+	}
+	return resp.Body, nil
 }

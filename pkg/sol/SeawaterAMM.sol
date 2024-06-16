@@ -6,15 +6,29 @@ import "./ISeawaterAMM.sol";
 
 // slots to store proxy data in
 // these are calculated as keccak()-1 to avoid collisions
+
+/// @dev 0xb27456616f8c77c635d3551b8179f6887795e920c5c4421a6fa3c3c76fc90fa8
 bytes32 constant EXECUTOR_SWAP_SLOT = bytes32(uint256(keccak256("seawater.impl.swap")) - 1);
+
+/// @dev 0x70879b7e5737e63f52eca3402c644a487e49ffeb7d78b75e54b18301a4f376ac
 bytes32 constant EXECUTOR_SWAP_PERMIT2_SLOT = bytes32(uint256(keccak256("seawater.impl.swap_permit2")) - 1);
+
+/// @dev 0x031aae58aa658a4a607141f8a509c1b56789f013acaf58a8e12eb86456e099e4
 bytes32 constant EXECUTOR_QUOTE_SLOT = bytes32(uint256(keccak256("seawater.impl.quote")) - 1);
+
+/// @dev 0x75711a1f12071de4ad9b405fd0234f84fcd9d494050d3a5169de3ad4fd942476
 bytes32 constant EXECUTOR_POSITION_SLOT = bytes32(uint256(keccak256("seawater.impl.position")) - 1);
+
+/// @dev 0x81e9c7c70971b5eb969cec21a82e6deed42e7c6736e0e83ced66d72297d9f1d7
 bytes32 constant EXECUTOR_UPDATE_POSITION_SLOT = bytes32(uint256(keccak256("seawater.impl.update_position")) - 1);
+
+/// @dev 0x344c13190645d452a52856ca1efc42b3609893d92b93219c8820b76f3aa11288
 bytes32 constant EXECUTOR_ADMIN_SLOT = bytes32(uint256(keccak256("seawater.impl.admin")) - 1);
+
+/// @dev 0xa77145850668b2edbbe1c458388a99e3dca3d62b8335520225dc4d03b2e2bfe0
 bytes32 constant EXECUTOR_FALLBACK_SLOT = bytes32(uint256(keccak256("seawater.impl.fallback")) - 1);
 
-//0xdfd6b2a695a9a2448c8c317669015a93e35dd154c29d011b7d533ae1dcabc1d5
+// @dev 0xdfd6b2a695a9a2448c8c317669015a93e35dd154c29d011b7d533ae1dcabc1d5
 bytes32 constant PROXY_ADMIN_SLOT = bytes32(uint256(keccak256("seawater.role.proxy.admin")) - 1);
 
 // seawater admin / nft admin are stored in normal storage slots
