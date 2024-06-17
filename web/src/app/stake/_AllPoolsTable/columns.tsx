@@ -22,6 +22,7 @@ export type Pool = {
   annualPercentageYield: number;
   claimable: boolean;
   boosted?: boolean;
+  liquidityRange: [string, string]
 };
 
 export const columns: ColumnDef<Pool>[] = [

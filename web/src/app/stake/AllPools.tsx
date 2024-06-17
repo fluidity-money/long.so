@@ -23,7 +23,7 @@ import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { sum } from "lodash";
 import { graphql, useFragment } from "@/gql";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { getFormattedPriceFromTick } from "@/lib/amounts";
 
 const DisplayModeMenu = ({
   setDisplayMode,
@@ -65,6 +65,7 @@ export const AllPoolsFragment = graphql(`
     address
     token {
       name
+      decimals
     }
     volumeOverTime {
       daily {
@@ -88,6 +89,10 @@ export const AllPoolsFragment = graphql(`
     }
     superIncentives {
       valueUsd
+    }
+    positions {
+      lower
+      upper
     }
   }
 `);
@@ -122,6 +127,14 @@ export const AllPools = () => {
           return parseFloat(pool.tvlOverTime.daily[0] ?? 0);
         return 0
       })();
+
+      const liquidityRange = pool.positions.reduce(([min, max], position) => [
+        position.lower < min ? position.lower : min,
+        position.upper > max ? position.upper : max
+      ], [0, 0]).map(tick =>
+        getFormattedPriceFromTick(tick, pool.token.decimals)
+      ) as [string, string];
+
       return {
         id: pool.address,
         tokens: [
@@ -138,6 +151,7 @@ export const AllPools = () => {
         rewards:
           parseFloat(pool.liquidityIncentives.valueUsd) +
           parseFloat(pool.superIncentives.valueUsd),
+        liquidityRange,
         // TODO: I don't know where to get the following info from
         boosted: false,
         fees: 0,
@@ -295,7 +309,7 @@ export const AllPools = () => {
                     <div className={"text-[10px] text-neutral-400"}>Amount</div>
                     <div className={"flex flex-row items-center gap-1 text-xs"}>
                       <Position className={"invert"} />
-                      $10.1k
+                      {usdFormat(pool.volume)}
                     </div>
                   </div>
                   <div className={"flex flex-col"}>
@@ -309,7 +323,7 @@ export const AllPools = () => {
                         ●
                       </div>
                     </div>
-                    <div className={"text-xs"}>3.10k -3.98k</div>
+                    <div className={"text-xs"}>{pool.liquidityRange[0]}-{pool.liquidityRange[1]}</div>
                   </div>
                 </div>
 
