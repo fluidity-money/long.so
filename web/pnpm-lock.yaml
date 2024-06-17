@@ -141,8 +141,8 @@ dependencies:
     specifier: 14.2.3
     version: 14.2.3(@babel/core@7.24.5)(react-dom@18.2.0)(react@18.2.0)(sass@1.69.3)
   rc-progress:
-    specifier: ^3.5.1
-    version: 3.5.1(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^4.0.0
+    version: 4.0.0(react-dom@18.2.0)(react@18.2.0)
   react:
     specifier: 18.2.0
     version: 18.2.0
@@ -18404,8 +18404,8 @@ packages:
       unpipe: 1.0.0
     dev: true
 
-  /rc-progress@3.5.1(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-V6Amx6SbLRwPin/oD+k1vbPrO8+9Qf8zW1T8A7o83HdNafEVvAxPV5YsgtKFP+Ud5HghLj33zKOcEHrcrUGkfw==}
+  /rc-progress@4.0.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-oofVMMafOCokIUIBnZLNcOZFsABaUw8PPrf1/y0ZBvKZNpOiu5h4AO9vv11Sw0p4Hb3D0yGWuEattcQGtNJ/aw==}
     peerDependencies:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
