@@ -26,7 +26,7 @@ func Get() C {
 	if gethUrl == "" {
 		log.Fatal("SPN_GETH_URL not set")
 	}
-	timescaleUrl := strings.ToLower(os.Getenv("SPN_TIMESCALE"))
+	timescaleUrl := os.Getenv("SPN_TIMESCALE")
 	if timescaleUrl == "" {
 		log.Fatal("SPN_TIMESCALE not set")
 	}
