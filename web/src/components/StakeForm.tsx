@@ -190,21 +190,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     args: [token0.address],
   });
 
-  const [quotedToken, setQuotedToken] = useState<'token0' | 'token1'>('token0')
-  const quoteTokenAmount = (value: string, quotedToken: 'token0' | 'token1') => {
-    quotedToken === 'token0'
-      ? setToken0Amount(value)
-      : setToken1Amount(value)
-    setQuotedToken(quotedToken)
-  }
-
-  useEffect(() => {
-    if (quotedToken === 'token0')
-      setToken1AmountRaw((BigInt(token0AmountRaw) * tokenPrice).toString())
-    else
-      setToken0AmountRaw((BigInt(token1AmountRaw) / tokenPrice).toString())
-  }, [token0AmountRaw, token1AmountRaw, tokenPrice, quotedToken])
-
   // in this context, token0 is actually token1. It's converted to token1
   // when we use it.
 
@@ -217,6 +202,29 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     address,
     token: token1.address,
   })
+
+  const [quotedToken, setQuotedToken] = useState<'token0' | 'token1'>('token0')
+  const quoteTokenAmount = (value: string, quotedToken: 'token0' | 'token1') => {
+    quotedToken === 'token0'
+      ? setToken0Amount(value, token0Balance?.value.toString())
+      : setToken1Amount(value, token1Balance?.value.toString())
+    setQuotedToken(quotedToken)
+  }
+
+  useEffect(() => {
+    if (quotedToken === 'token0') {
+      const newToken1Amount = (BigInt(token0AmountRaw) * tokenPrice)
+      if (token1Balance?.value && newToken1Amount > token1Balance.value)
+        return
+      setToken1AmountRaw(newToken1Amount.toString())
+    }
+    else {
+      const newToken0Amount = (BigInt(token1AmountRaw) / tokenPrice)
+      if (token0Balance?.value && newToken0Amount > token0Balance.value)
+        return
+      setToken0AmountRaw(newToken0Amount.toString())
+    }
+  }, [token0AmountRaw, token1AmountRaw, tokenPrice, quotedToken])
 
   const setMaxBalance = (token: TokenType) => {
     token.address === token0.address ?
