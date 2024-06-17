@@ -58,6 +58,10 @@ export const useSwapStore = create<SwapStore>((set) => ({
   setToken0Amount: (amount, balance) => {
     set(({ token0, token0Amount, setToken0AmountRaw }) => {
       const validNumber = !amount.includes(" ") && !isNaN(Number(amount)) || amount === "."
+      // update display amount if `amount` is valid as a display number
+      if (!validNumber)
+        return { token0Amount }
+
       try {
         const amountRaw = getTokenAmountFromFormattedString(amount, token0.decimals)
         const balanceRaw = getTokenAmountFromFormattedString(balance ?? "", token0.decimals)
@@ -65,13 +69,15 @@ export const useSwapStore = create<SwapStore>((set) => ({
         if (!balance || amountRaw <= balanceRaw)
           setToken0AmountRaw(amountRaw.toString())
       } catch { }
-      // update display amount if `amount` is valid as a display number
-      return { token0Amount: validNumber ? amount : token0Amount }
+      return { token0Amount: amount }
     })
   },
   setToken1Amount: (amount, balance) => {
     set(({ token1, token1Amount, setToken1AmountRaw }) => {
       const validNumber = !amount.includes(" ") && !isNaN(Number(amount)) || amount === "."
+      // update display amount if `amount` is valid as a display number
+      if (!validNumber)
+        return { token1Amount }
       try {
         const amountRaw = getTokenAmountFromFormattedString(amount, token1.decimals)
         const balanceRaw = getTokenAmountFromFormattedString(balance ?? "", token1.decimals)
@@ -79,8 +85,7 @@ export const useSwapStore = create<SwapStore>((set) => ({
         if (!balance || amountRaw <= balanceRaw)
           setToken1AmountRaw(amountRaw.toString())
       } catch { }
-      // update display amount if `amount` is valid as a display number
-      return { token1Amount: validNumber ? amount : token1Amount }
+      return { token1Amount: amount }
     })
   },
 }));
