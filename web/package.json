@@ -85,7 +85,7 @@
     "@graphql-codegen/client-preset": "4.2.5",
     "@graphql-eslint/eslint-plugin": "^3.20.1",
     "@parcel/watcher": "^2.4.1",
-    "@storybook/addon-essentials": "^7.6.17",
+    "@storybook/addon-essentials": "^8.1.9",
     "@storybook/addon-interactions": "^7.6.17",
     "@storybook/addon-links": "^7.6.17",
     "@storybook/addon-onboarding": "^8.1.9",
