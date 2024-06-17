@@ -763,7 +763,7 @@ func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *seawater.
 		return model.PairAmount{}, err
 	}
 	var pool seawater.Pool
-	err = r.DB.Table("events_seawater_newPool").
+	err = r.DB.Table("events_seawater_newpool").
 		Select("decimals").
 		First(&pool).
 		Error
