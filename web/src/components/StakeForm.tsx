@@ -15,7 +15,7 @@ import CurrentPrice from "@/assets/icons/legend/current-price.svg";
 import LiquidityDistribution from "@/assets/icons/legend/liquidity-distribution.svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { sqrtPriceX96ToPrice } from "@/lib/math";
+import { MAX_TICK, sqrtPriceX96ToPrice } from "@/lib/math";
 import { ammAddress } from "@/lib/addresses";
 import { createChartData } from "@/lib/chartData";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
@@ -43,7 +43,7 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
-import { Token as TokenType, fUSDC } from "@/config/tokens";
+import { Token as TokenType, fUSDC, getTokenFromAddress } from "@/config/tokens";
 import { getFormattedPriceFromAmount } from "@/lib/amounts";
 
 const colorGradient = new echarts.graphic.LinearGradient(
@@ -84,11 +84,13 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     multiSingleToken,
     setMultiSingleToken,
     token0,
+    setToken0,
     token0Amount,
     token0AmountRaw,
     setToken0Amount,
     setToken0AmountRaw,
     token1,
+    setToken1,
     token1Amount,
     token1AmountRaw,
     setToken1Amount,
@@ -100,6 +102,22 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     setPriceLower,
     setPriceUpper,
   } = useStakeStore();
+
+
+  // poolId should override tokens if we are redirected
+  useEffect(() => {
+    if (!poolId)
+      return
+    if (token0.address !== poolId && token1.address !== poolId) {
+      const poolToken = getTokenFromAddress(poolId)
+      if (!poolToken) {
+        router.push("/stake")
+        return;
+      }
+      setToken0(poolToken)
+      setToken1(fUSDC)
+    }
+  }, [])
 
   // Parse the price lower and upper, and set the ticks properly.
 
