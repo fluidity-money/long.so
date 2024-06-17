@@ -30,3 +30,16 @@ type Position struct {
 	Lower           types.Number  `json:"lower"`
 	Upper           types.Number  `json:"upper"`
 }
+
+// PositionSnapshot taken from snapshot_positions_log_1. Used to service
+// liquidity queries.
+type PositionSnapshot struct {
+	PosId     types.Number         `json:"pos_id"`
+	UpdatedBy time.Time            `json:"updated_by"`
+	Owner     types.Address        `json:"owner"`
+	Pool      types.Address        `json:"pool"`
+	Lower     types.Number         `json:"lower"`
+	Upper     types.Number         `json:"upper"`
+	Amount0   types.UnscaledNumber `json:"amount0"`
+	Amount1   types.UnscaledNumber `json:"amount1"`
+}

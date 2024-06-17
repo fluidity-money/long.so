@@ -1,9 +1,8 @@
 -- migrate:up
 
--- The latest for everything, so we can quickly use it to get the liquidity in pools.
 CREATE TABLE snapshot_positions_latest_1 (
 	id SERIAL PRIMARY KEY,
-	created_by TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+	updated_by TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 
 	-- Taken from a left join.
 	pos_id HUGEINT NOT NULL,
@@ -17,7 +16,6 @@ CREATE TABLE snapshot_positions_latest_1 (
 	amount1 HUGEINT NOT NULL
 );
 
--- The rolling log for historical data reasons.
 CREATE TABLE snapshot_positions_log_1 (
 	id SERIAL PRIMARY KEY,
 	created_by TIMESTAMP WITHOUT TIME ZONE NOT NULL,

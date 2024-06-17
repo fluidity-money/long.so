@@ -754,59 +754,36 @@ func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *seawater.
 	if obj == nil {
 		return model.PairAmount{}, fmt.Errorf("no position obj")
 	}
-
-	var result model.PriceResult
-	err := r.DB.Table("seawater_final_ticks_1").
-		Where("pool = ?", obj.Pool).
-		First(&result).
+	var res seawater.PositionSnapshot
+	err := r.DB.Table("snapshot_positions_latest_1").
+		Where("pos_id = ?", obj.Id).
+		First(&res).
 		Error
-
 	if err != nil {
 		return model.PairAmount{}, err
 	}
-
-	var (
-		tickLow     = obj.Lower
-		tickHigh    = obj.Upper
-		currentTick = result.FinalTick
-
-		fusdcAmount, token1Amount types.UnscaledNumber
-	)
-
-	// range is [low, high)
-	belowRange := currentTick.Cmp(tickLow.Int) == -1
-	aboveRange := currentTick.Cmp(tickHigh.Int) <= 0
-
-	timestamp := int(time.Now().Unix())
-
-	pool, err := r.Query().GetPool(ctx, obj.Pool.String())
+	var pool seawater.Pool
+	err = r.DB.Table("events_seawater_newPool").
+		Select("decimals").
+		First(&pool).
+		Error
 	if err != nil {
 		return model.PairAmount{}, err
 	}
-
-	switch true {
-	case belowRange:
-		// TODO set fusdcAmount, token1Amount
-	case aboveRange:
-		// TODO set fusdcAmount, token1Amount
-	// within range
-	default:
-		// TODO set fusdcAmount, token1Amount
-	}
-
+	ts := int(res.UpdatedBy.Unix())
 	return model.PairAmount{
-		Timestamp: timestamp,
+		Timestamp: ts,
 		Fusdc: model.Amount{
 			Token:         r.C.FusdcAddr,
 			Decimals:      r.C.FusdcDecimals,
-			Timestamp:     timestamp,
-			ValueUnscaled: fusdcAmount,
+			Timestamp:     ts,
+			ValueUnscaled: res.Amount0,
 		},
 		Token1: model.Amount{
-			Token:         pool.Token,
+			Token:         obj.Pool,
 			Decimals:      int(pool.Decimals),
-			Timestamp:     timestamp,
-			ValueUnscaled: token1Amount,
+			Timestamp:     ts,
+			ValueUnscaled: res.Amount1,
 		},
 	}, nil
 }
