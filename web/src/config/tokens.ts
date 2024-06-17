@@ -7,7 +7,7 @@ export type Token = {
 
 export const fUSDC: Token = {
   name: "fUSDC",
-  address: "0xA8EA92c819463EFbEdDFB670FEfC881A480f0115",
+  address: "0xa8ea92c819463efbeddfb670fefc881a480f0115",
   symbol: "fUSDC",
   decimals: 6,
 };
@@ -18,5 +18,13 @@ export const DefaultToken: Token = {
   symbol: "S",
   decimals: 18,
 };
+
+const allTokens: Token[] = [
+  fUSDC,
+  DefaultToken,
+];
+
+export const getTokenFromAddress = (address_: string): Token | undefined =>
+  allTokens.find(({ address }) => address === address_)
 
 export const mockTokens: Token[] = [DefaultToken];

@@ -47,6 +47,9 @@ export const graphqlQueryUser = graphql(`
       ...MyPositionsWalletFragment
       ...MyPositionsInventoryWalletFragment
     }
+    getPositions(wallet: $wallet) {
+      ...PositionsFragment
+    }
   }
 `);
 

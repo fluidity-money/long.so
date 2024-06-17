@@ -12,11 +12,14 @@ import { motion } from "framer-motion";
 import { format, subDays } from "date-fns";
 import ReactECharts from "echarts-for-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usdFormat } from "@/lib/usdFormat";
+import { fUSDC } from "@/config/tokens";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getFormattedPriceFromTick } from "@/lib/amounts";
 
 const ManagePoolFragment = graphql(`
   fragment ManagePoolFragment on SeawaterPool {
@@ -25,6 +28,7 @@ const ManagePoolFragment = graphql(`
     token {
       symbol
       name
+      decimals
     }
     liquidityIncentives {
       valueScaled
@@ -37,6 +41,11 @@ const ManagePoolFragment = graphql(`
       maximumAmount
     }
     earnedFeesAPRFUSDC
+    positions {
+      positionId
+      lower
+      upper
+    }
   }
 `);
 
@@ -48,12 +57,32 @@ export default function PoolPage() {
   // get the id from the query params
   const params = useSearchParams();
   const id = params.get("id");
-  const positionId = params.get("positionId")
+  const positionIdParam = params.get("positionId")
 
   const { data } = useGraphqlGlobal();
   const allPoolsData = useFragment(ManagePoolFragment, data?.pools);
 
   const poolData = allPoolsData?.find((pool) => pool.id === id);
+
+  // positionId_ is the internal position ID, used to look up a position to actually use and display
+  const [positionId_, setPositionId_] = useState<number | undefined>()
+
+  // position is the currently selected position based on
+  // the internal ID and query parameters
+  const position = useMemo(() => {
+    if (positionId_ !== undefined)
+      return poolData?.positions?.find(p => p.positionId === positionId_.toString())
+    if (positionIdParam)
+      return poolData?.positions?.find(p => p.positionId === positionIdParam.toString())
+    return poolData?.positions?.[0]
+  }, [poolData, positionId_, positionIdParam])
+
+  const { positionId, upper: upperTick, lower: lowerTick } = position || {}
+
+  // TODO fetch total pool liquidity in query
+  const poolBalance = useMemo(() => (
+    0
+  ), [poolData])
 
   const showMockData = useFeatureFlag("ui show demo data");
   const showBoostIncentives = useFeatureFlag("ui show boost incentives");
@@ -137,30 +166,46 @@ export default function PoolPage() {
 
               <div className="flex flex-col gap-8 p-4">
                 <div className="flex flex-row gap-2">
-                  <Link
-                    href={`/stake/pool/add-liquidity?id=${id}&positionId=${positionId}`}
-                    legacyBehavior
-                  >
-                    <Button
-                      variant="secondary"
-                      className="flex-1 text-3xs md:text-2xs"
-                      size="sm"
+                  {!position ?
+                    <Link
+                      href={`/stake/pool/create?id=${id}`}
+                      legacyBehavior
                     >
-                      + Add Liquidity
-                    </Button>
-                  </Link>
-                  <Link
-                    href={`/stake/pool/withdraw-liquidity?id=${id}`}
-                    legacyBehavior
-                  >
-                    <Button
-                      variant="secondary"
-                      className="flex-1 text-3xs md:text-2xs"
-                      size="sm"
-                    >
-                      - Withdraw Liquidity
-                    </Button>
-                  </Link>
+                      <Button
+                        variant="secondary"
+                        className="flex-1 text-3xs md:text-2xs"
+                        size="sm"
+                      >
+                        + Create New Position
+                      </Button>
+                    </Link> :
+                    <>
+                      <Link
+                        href={`/stake/pool/add-liquidity?id=${id}&positionId=${positionId}`}
+                        legacyBehavior
+                      >
+                        <Button
+                          variant="secondary"
+                          className="flex-1 text-3xs md:text-2xs"
+                          size="sm"
+                        >
+                          + Add Liquidity
+                        </Button>
+                      </Link>
+                      <Link
+                        href={`/stake/pool/withdraw-liquidity?positionId=${positionId}`}
+                        legacyBehavior
+                      >
+                        <Button
+                          variant="secondary"
+                          className="flex-1 text-3xs md:text-2xs"
+                          size="sm"
+                        >
+                          - Withdraw Liquidity
+                        </Button>
+                      </Link>
+                    </>
+                  }
                 </div>
 
                 <div className="flex flex-row gap-2">
@@ -168,7 +213,7 @@ export default function PoolPage() {
                     <div className="text-3xs md:text-2xs">My Pool Balance</div>
                     <div className="text-xl md:text-2xl">
                       {/* TODO: get my pool balance */}
-                      {showMockData ? "$190,301" : usdFormat(0)}
+                      {showMockData ? "$190,301" : usdFormat(poolBalance)}
                     </div>
                   </div>
 
@@ -193,6 +238,41 @@ export default function PoolPage() {
                       </Button>
                     </div>
                   )}
+                </div>
+                <div className="flex flex-row gap-2">
+                  <div className="flex flex-1 flex-col">
+                    <div className="text-3xs md:text-2xs">Current Position Range</div>
+                    <div className="text-xl md:text-2xl">
+                      {getFormattedPriceFromTick(lowerTick ?? 0, fUSDC.decimals)}
+                      -
+                      {getFormattedPriceFromTick(upperTick ?? 0, fUSDC.decimals)}
+                    </div>
+                  </div>
+                  <div className="flex flex-1 flex-col">
+                    <div className="text-3xs md:text-2xs">Current Position Balance</div>
+                    <div className="text-xl md:text-2xl">
+                      {/* TODO position liquidity */}
+                      {usdFormat(0)}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-row gap-2">
+                  <div className="flex flex-1 flex-col">
+                    <div className="text-3xs md:text-2xs">Select Position</div>
+                    <Select value={positionId} onValueChange={value => setPositionId_(Number(value))} defaultValue={position?.positionId}>
+                      <SelectTrigger className="h-6 w-auto border-0 bg-black p-0 text-[12px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {poolData?.positions.map(position => (
+                          <SelectItem
+                            key={position.positionId}
+                            value={position.positionId}
+                          >{position.positionId}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-[7px]">
@@ -298,7 +378,7 @@ export default function PoolPage() {
                           {showMockData
                             ? "1,000"
                             : poolData?.utilityIncentives[0]?.maximumAmount ??
-                              0}{" "}
+                            0}{" "}
                           tokens given out
                         </div>
                         <Line
@@ -306,13 +386,13 @@ export default function PoolPage() {
                             showMockData
                               ? 20
                               : parseFloat(
-                                  poolData?.utilityIncentives[0]
-                                    ?.amountGivenOut ?? "0",
-                                ) /
-                                parseFloat(
-                                  poolData?.utilityIncentives[0]?.maximumAmount ??
-                                    "0",
-                                )
+                                poolData?.utilityIncentives[0]
+                                  ?.amountGivenOut ?? "0",
+                              ) /
+                              parseFloat(
+                                poolData?.utilityIncentives[0]?.maximumAmount ??
+                                "0",
+                              )
                           }
                           strokeColor="#EBEBEB"
                           strokeWidth={4}

@@ -3,14 +3,21 @@
 package features
 
 const (
-	// FeatureMockGraph by sending mocked data instead of database data.
-	FeatureMockGraph = "graphql mock demo data"
+	// FeatureGraphqlMockGraph by sending mocked data instead of database data.
+	FeatureGraphqlMockGraph = "graphql mock demo data"
 
-	// FeatureMockGraphDelay by delaying the display of the mocked data.
-	FeatureMockGraphDataDelay = "graphql mock demo data delay"
+	// FeatureGraphqlMockGraphDelay by delaying the display of the mocked data.
+	FeatureGraphqlMockGraphDataDelay = "graphql mock demo data delay"
 
-	// FeaturePollRpc using the ingestor. Useful in environments
+	// FeatureIngestorPollRpc using the ingestor. Useful in environments
 	// where websocket access is inconsistent or unavailable. Does so with
 	// a (by default) 15 second delay, with checkpointing done in the database.
-	FeaturePollRpc  = "ingestor poll rpc"
+	FeatureIngestorPollRpc  = "ingestor poll rpc"
+
+	// FeatureFaucetStakersOnly to gate access to the faucet to the
+	// list of stakers in the JSON blob in config/stakers.json.
+	FeatureFaucetStakersOnly = "faucet stakers only"
+
+	// FeatureFaucetEnabled is allowed to be used.
+	FeatureFaucetEnabled = "faucet enabled"
 )

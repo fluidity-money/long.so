@@ -9,6 +9,8 @@ export const MAX_SQRT_RATIO = 1461446703485210103287273052203988822378723970342n
 
 export const POSSIBLE_TICKS = -MIN_TICK + MAX_TICK;
 
+const MAX_UINT256 = (1n << 256n) - 1n;
+
 export const Q96 = 2n ** 96n;
 
 export const encodeTick = (price: number): number => {
@@ -16,6 +18,8 @@ export const encodeTick = (price: number): number => {
   return Math.floor(Math.log(price) / Math.log(1.0001));
 };
 
+// encodeSqrtPrice, generating slightly off results compared to the
+// approach in the code. okay for the frontend though.
 export const encodeSqrtPrice = (price: number): bigint => {
   return BigInt(Math.sqrt(price) * 2 ** 96);
 };
@@ -41,6 +45,12 @@ export const getSqrtRatioAtTick = (tick: bigint): bigint => {
   result >>= 32n;
   if (result % (1n << 32n) != 0n) result++;
   return result;
+};
+
+const overflowingMulUint256 = (x: bigint, y: bigint) => {
+  let v = x * y;
+  if (v > MAX_UINT256) return v & MAX_UINT256;
+  return v;
 };
 
 export const getTickAtSqrtRatio = (sqrtPriceX96: bigint): number => {
@@ -118,15 +128,16 @@ export const getTickAtSqrtRatio = (sqrtPriceX96: bigint): number => {
   }
 
   let log2 = (msb - 128n) << 64n;
+
   for (let i = 63n; i >= 51n; i--) {
-    r *= r;
+    r = overflowingMulUint256(r, r);
     r >>= 127n;
     const x = r >> 128n;
     log2 |= (x << i);
-    r >>= f;
+    r >>= x;
   }
 
-  r *= r;
+  r = overflowingMulUint256(r, r);
   r >>= 127n;
 
   const x = r >> 128n;
@@ -135,9 +146,9 @@ export const getTickAtSqrtRatio = (sqrtPriceX96: bigint): number => {
   let logSqrt10001 = log2 * 255738958999603826347141n;
 
   const tickLow =
-    ((logSqrt10001 - 3402992956809132418596140100660247210n) >> 128n) & 0xFFFFFFFFn;
+    lowInt32((logSqrt10001 - 3402992956809132418596140100660247210n) >> 128n);
   const tickHigh =
-    ((logSqrt10001 + 291339464771989622907027621153398088495n) >> 128n) & 0xFFFFFFFFn;
+    lowInt32((logSqrt10001 + 291339464771989622907027621153398088495n) >> 128n);
 
   let tick = (() => {
     if (tickLow == tickHigh) return tickLow;
@@ -147,6 +158,13 @@ export const getTickAtSqrtRatio = (sqrtPriceX96: bigint): number => {
 
   return Number(tick);
 }
+
+const lowInt32 = (n: bigint) => {
+  const b = new ArrayBuffer(4);
+  const d = new DataView(b);
+  d.setUint32(0, Number(n & 0xFFFFFFFFn), true);
+  return BigInt(d.getInt32(0, true));
+};
 
 const bigAbs = (n: bigint) => (n < BigInt(0) ? -n : n);
 

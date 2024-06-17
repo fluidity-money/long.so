@@ -23,6 +23,7 @@ import Confirm from "@/components/sequence/Confirm";
 import { EnableSpending } from "@/components/sequence/EnableSpending";
 import { Fail } from "@/components/sequence/Fail";
 import { Success } from "@/components/sequence/Success";
+import { getFormattedPriceFromAmount } from "@/lib/amounts";
 
 type ConfirmStakeProps = {
   mode: "new"
@@ -44,6 +45,8 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     token0AmountRaw,
     token1Amount,
     token1AmountRaw,
+    tickLower,
+    tickUpper,
     multiSingleToken
   } = useStakeStore()
 
@@ -119,13 +122,16 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
    *
    * Step 1. Mint a new position
    */
-  const createPosition = () =>
+  const createPosition = () => {
+    if (tickLower === undefined || tickUpper === undefined || tickLower >= tickUpper)
+      return
     writeContractMint({
       address: ammAddress,
       abi: seawaterContract.abi,
       functionName: "mintPosition",
-      args: [token0.address, encodeTick(50), encodeTick(100)],
+      args: [token0.address, tickLower, tickUpper],
     });
+  }
 
   // wait for the mintPosition transaction to complete
   const result = useWaitForTransactionReceipt({
@@ -137,16 +143,17 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
 
   const updatePosition = useCallback(
     (id: bigint) => {
-      const delta = token0AmountRaw
+      // TODO why do i have to scale this up by 10??
+      const delta = BigInt(token0AmountRaw) * 10n
 
       writeContractUpdatePosition({
         address: ammAddress,
         abi: seawaterContract.abi,
         functionName: "updatePosition",
-        args: [token0.address, id, BigInt(delta)],
+        args: [token0.address, id, delta],
       });
     },
-    [writeContractUpdatePosition, token0AmountRaw, token0],
+    [writeContractUpdatePosition, token0AmountRaw, token0, token0Amount, token1Amount, token1AmountRaw],
   );
 
   /**
@@ -232,10 +239,10 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
 
   // step 1 pending
   if (isMintPending || (mintData && result?.isPending)) {
-    return <Confirm 
-      text={"Stake"} 
-      fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}} 
-      toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}} 
+    return <Confirm
+      text={"Stake"}
+      fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+      toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
       transactionHash={mintData}
     />;
   }
@@ -271,17 +278,17 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     isUpdatePositionPending ||
     (updatePositionData && updatePositionResult?.isPending)
   ) {
-    return <Confirm 
-      text={"Stake"} 
-      fromAsset={{symbol: token0.symbol, amount: token0Amount ?? "0"}} 
-      toAsset={{symbol: token1.symbol, amount: token1Amount ?? "0"}} 
+    return <Confirm
+      text={"Stake"}
+      fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+      toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
       transactionHash={updatePositionData}
     />;
   }
 
   // success
   if (updatePositionResult.data) {
-    return <Success transactionHash={updatePositionResult.data.transactionHash}/>;
+    return <Success transactionHash={updatePositionResult.data.transactionHash} />;
   }
 
   // error
@@ -339,7 +346,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
             </span>
           </div>
           <div className="mt-[4px] text-2xl font-medium md:text-3xl">
-            ${Number(token1Amount) + (Number(token0Amount) * Number(tokenPrice))}
+            ${getFormattedPriceFromAmount(token0Amount, tokenPrice, token0.decimals, token1.decimals) + Number(token1Amount)}
           </div>
           <div className="mt-[4px] text-3xs font-medium text-gray-2 md:text-2xs">
             The amount is split into{" "}
@@ -422,7 +429,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
             <Ethereum className={"invert"} /> {token0Amount}
           </div>
-          <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">= ${Number(token0Amount) * Number(tokenPrice)}</div>
+          <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">= ${getFormattedPriceFromAmount(token0Amount, tokenPrice, token0.decimals, token1.decimals)}</div>
         </div>
 
         <div
@@ -521,7 +528,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
           <Button
             variant={"secondary"}
             className="w-full max-w-[350px]"
-            onClick={() => {mode === "new" ? createPosition() : updatePosition(BigInt(positionId))}}
+            onClick={() => { mode === "new" ? createPosition() : updatePosition(BigInt(positionId)) }}
           >
             Confirm Stake
           </Button>

@@ -1,4 +1,4 @@
-name: Deploy Lambda
+name: Deploy GraphQL Lambda
 
 on:
   push:

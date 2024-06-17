@@ -48,6 +48,7 @@ func main() {
 	config := config.Get()
 	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
 		DisableAutomaticPing: true,
+		Logger: gormLogger.Default.LogMode(gormLogger.Silent),
 	})
 	if err != nil {
 		log.Fatalf("database open: %v", err)

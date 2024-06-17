@@ -41,10 +41,10 @@ var FilterTopics = [][]ethCommon.Hash{{ // Matches any of these in the first top
 // Entry function, using the database to determine if polling should be
 // used exclusively to receive logs, polling only for catchup, or
 // exclusively websockets.
-func Entry(f features.F, config config.C, c *ethclient.Client, db *gorm.DB) {
+func Entry(f features.F, config config.C, shouldPoll bool, ingestorPagination uint64, pollWait int, c *ethclient.Client, db *gorm.DB) {
 	seawaterAddr := ethCommon.HexToAddress(config.SeawaterAddr.String())
-	if config.IngestorShouldPoll {
-		IngestPolling(f, c, db, config.IngestorPagination, config.IngestorPollWait, seawaterAddr)
+	if shouldPoll {
+		IngestPolling(f, c, db, ingestorPagination, pollWait, seawaterAddr)
 	} else {
 		IngestWebsocket(f, c, db, seawaterAddr)
 	}
@@ -296,8 +296,7 @@ func databaseInsertLog(db *gorm.DB, table string, a any) error {
 	if err := json.NewEncoder(&buf).Encode(a); err != nil {
 		return fmt.Errorf("encoding block header: %v", err)
 	}
-
-	if err := db.Table(table).Omit("createdBy").Create(a).Error; err != nil {
+	if err := db.Table(table).Omit("CreatedBy").Create(a).Error; err != nil {
 		return fmt.Errorf("inserting log: %v", err)
 	}
 	return nil

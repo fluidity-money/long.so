@@ -19,6 +19,7 @@ export interface Segment<T extends string> {
   label: React.ReactNode;
   value: T;
   ref: React.MutableRefObject<any>;
+  disabled?: boolean
 }
 
 export interface SegmentedControlProps<T extends string>
@@ -69,7 +70,7 @@ const SegmentedControl = <T extends string>({
       ref={controlRef}
     >
       <div className={cn(segmentedControlVariants({ variant }))}>
-        {segments?.map((item: any, i: number) => (
+        {segments?.map((item: Segment<T>, i: number) => (
           <div
             key={item.value}
             className={"relative z-10 w-full text-center"}
@@ -79,17 +80,18 @@ const SegmentedControl = <T extends string>({
               type="radio"
               value={item.value}
               id={`${name}-${item.value}`}
+              disabled={item.disabled}
               onChange={() => onInputChange(item.value, i)}
               checked={i === activeIndex}
               name={name}
               className={
-                "absolute inset-0 m-0 size-full cursor-pointer opacity-0"
+                cn("cursor-pointer disabled:cursor-not-allowed absolute inset-0 m-0 size-full opacity-0")
               }
             />
             <label
               id={`${name}-${item.value}`}
               className={cn(
-                "mx-[6px] block cursor-pointer text-nowrap font-medium transition-colors",
+                `mx-[6px] block text-nowrap font-medium transition-colors ${item.disabled ? "text-gray-500" : ""}`,
                 {
                   invert: i === activeIndex,
                 },

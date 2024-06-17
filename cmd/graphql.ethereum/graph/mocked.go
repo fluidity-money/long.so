@@ -268,7 +268,7 @@ func MockSwaps(fusdc types.Address, amount int, pool types.Address) (swaps []mod
 
 // MockDelay for a random amount up to 5 seconds.
 func MockDelay(f features.F) {
-	f.On(features.FeatureMockGraphDataDelay, func() error {
+	f.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 		d, _ := rand.Int(rand.Reader, Five)
 		time.Sleep(time.Duration(d.Int64()) * time.Second)
 		return nil

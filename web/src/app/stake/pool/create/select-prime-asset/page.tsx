@@ -1,13 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import Search from "@/assets/icons/Search.svg";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { SelectPrimeAssetTable } from "@/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/SelectPrimeAssetTable";
@@ -16,7 +14,7 @@ import {
   Pool,
 } from "@/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/columns";
 import { nanoid } from "nanoid";
-import { Token, fUSDC } from "@/config/tokens";
+import { DefaultToken, Token, fUSDC } from "@/config/tokens";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { Hash } from "viem";
 import { usdFormat } from "@/lib/usdFormat";
@@ -71,7 +69,13 @@ const SelectPrimeAsset = () => {
         volume: "$100k",
         duration: 150,
         id: nanoid(),
-        tokens: [tokens[0], tokens[1]],
+        tokens: [DefaultToken, fUSDC],
+        token0Name: DefaultToken.name,
+        token0Symbol: DefaultToken.symbol,
+        token0Address: DefaultToken.address,
+        token1Name: fUSDC.name,
+        token1Symbol: fUSDC.symbol,
+        token1Address: fUSDC.address,
       },
     ];
 
@@ -95,6 +99,12 @@ const SelectPrimeAsset = () => {
         // assume the second token is always fUSDC
         fUSDC,
       ],
+      token0Name: pool.token.name,
+      token0Symbol: pool.token.symbol,
+      token0Address: pool.token.address,
+      token1Name: fUSDC.name,
+      token1Symbol: fUSDC.symbol,
+      token1Address: fUSDC.address,
     }));
   }, [isLoading, poolsData, showMockData]);
 
@@ -130,63 +140,48 @@ const SelectPrimeAsset = () => {
           </div>
         </div>
 
-        <div>
-          <div className={"text-[10px]"}>All Pools</div>
-
-          <div className={"mt-[11px] text-[8px]"}>Filter</div>
-
-          <div className="flex flex-row items-center border-b border-white pl-2">
-            <Search className="size-4" />
-            <Input
-              variant="no-ring"
-              className="h-8 w-[350px] border-0 bg-transparent text-xs"
-              placeholder="Search for tokens by name, symbol, or contract address."
-            />
-          </div>
-
-          <div className={"mt-[9px] flex flex-row gap-2"}>
-            <Badge
-              variant={"secondary"}
-              className={cn("h-4 py-0 pl-0", {
-                "bg-black text-white hover:bg-black/80": !boostedPools,
-              })}
-            >
-              <Switch
-                id={"boosted-pools"}
-                className={cn("my-0 -ml-2 scale-50", {
-                  invert: boostedPools,
+        <div className={"mt-[20px] flex flex-1"}>
+          <SelectPrimeAssetTable columns={columns} data={pools} >
+            <div className={"mt-[9px] flex flex-row gap-2"}>
+              <Badge
+                variant={"secondary"}
+                className={cn("h-4 py-0 pl-0", {
+                  "bg-black text-white hover:bg-black/80": !boostedPools,
                 })}
-                checked={boostedPools}
-                onCheckedChange={setBoostedPools}
-              />
-              <Label htmlFor={"boosted-pools"} className="text-2xs">
-                Boosted Pools
-              </Label>
-            </Badge>
+              >
+                <Switch
+                  id={"boosted-pools"}
+                  className={cn("my-0 -ml-2 scale-50", {
+                    invert: boostedPools,
+                  })}
+                  checked={boostedPools}
+                  onCheckedChange={setBoostedPools}
+                />
+                <Label htmlFor={"boosted-pools"} className="text-2xs">
+                  Boosted Pools
+                </Label>
+              </Badge>
 
-            <Badge
-              variant={"secondary"}
-              className={cn("h-4 py-0 pl-0", {
-                "bg-black text-white hover:bg-black/80": !myAssets,
-              })}
-            >
-              <Switch
-                id={"my-assets"}
-                className={cn("my-0 -ml-2 scale-50", {
-                  invert: myAssets,
+              <Badge
+                variant={"secondary"}
+                className={cn("h-4 py-0 pl-0", {
+                  "bg-black text-white hover:bg-black/80": !myAssets,
                 })}
-                checked={myAssets}
-                onCheckedChange={setMyAssets}
-              />
-              <Label htmlFor={"my-assets"} className="text-2xs">
-                My Assets
-              </Label>
-            </Badge>
-          </div>
-        </div>
-
-        <div className={"mt-[20px] flex flex-1 overflow-y-auto"}>
-          <SelectPrimeAssetTable columns={columns} data={pools} />
+              >
+                <Switch
+                  id={"my-assets"}
+                  className={cn("my-0 -ml-2 scale-50", {
+                    invert: myAssets,
+                  })}
+                  checked={myAssets}
+                  onCheckedChange={setMyAssets}
+                />
+                <Label htmlFor={"my-assets"} className="text-2xs">
+                  My Assets
+                </Label>
+              </Badge>
+            </div>
+          </SelectPrimeAssetTable>
         </div>
 
         <Button

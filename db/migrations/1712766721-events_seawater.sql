@@ -41,8 +41,8 @@ CREATE TABLE events_seawater_mintPosition (
 	upper BIGINT NOT NULL
 );
 
-CREATE UNIQUE INDEX ON events_seawater_mintPosition (pos_id);
-CREATE UNIQUE INDEX ON events_seawater_mintPosition (owner, pool);
+CREATE INDEX ON events_seawater_mintPosition (pos_id, pool);
+CREATE INDEX ON events_seawater_mintPosition (owner, pool);
 
 CREATE TABLE events_seawater_transferPosition (
 	id SERIAL PRIMARY KEY,
@@ -106,7 +106,7 @@ CREATE TABLE events_seawater_newPool (
 
 	token ADDRESS NOT NULL,
 	fee INTEGER NOT NULL,
-	decimals INTEGER NOT NULL,
+	decimals HUGEINT NOT NULL,
 	tick_spacing INTEGER NOT NULL
 );
 

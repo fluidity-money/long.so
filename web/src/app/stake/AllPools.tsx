@@ -22,6 +22,8 @@ import { LoaderIcon } from "lucide-react";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { sum } from "lodash";
 import { graphql, useFragment } from "@/gql";
+import { useRouter } from "next/navigation";
+import { getFormattedPriceFromTick } from "@/lib/amounts";
 
 const DisplayModeMenu = ({
   setDisplayMode,
@@ -63,6 +65,7 @@ export const AllPoolsFragment = graphql(`
     address
     token {
       name
+      decimals
     }
     volumeOverTime {
       daily {
@@ -87,6 +90,10 @@ export const AllPoolsFragment = graphql(`
     superIncentives {
       valueUsd
     }
+    positions {
+      lower
+      upper
+    }
   }
 `);
 
@@ -94,6 +101,8 @@ export const AllPools = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
 
   const { data, isLoading } = useGraphqlGlobal();
+
+  const router = useRouter()
 
   const poolsData = useFragment(AllPoolsFragment, data?.pools);
 
@@ -118,6 +127,14 @@ export const AllPools = () => {
           return parseFloat(pool.tvlOverTime.daily[0] ?? 0);
         return 0
       })();
+
+      const liquidityRange = pool.positions.reduce(([min, max], position) => [
+        position.lower < min ? position.lower : min,
+        position.upper > max ? position.upper : max
+      ], [0, 0]).map(tick =>
+        getFormattedPriceFromTick(tick, pool.token.decimals)
+      ) as [string, string];
+
       return {
         id: pool.address,
         tokens: [
@@ -134,6 +151,7 @@ export const AllPools = () => {
         rewards:
           parseFloat(pool.liquidityIncentives.valueUsd) +
           parseFloat(pool.superIncentives.valueUsd),
+        liquidityRange,
         // TODO: I don't know where to get the following info from
         boosted: false,
         fees: 0,
@@ -141,7 +159,7 @@ export const AllPools = () => {
         annualPercentageYield: 0,
       }
     }
-  );
+    );
   }, [showDemoData, poolsData]);
 
   const poolTvlSummed =
@@ -167,8 +185,8 @@ export const AllPools = () => {
                 {showDemoData
                   ? "12.1M"
                   : // sum the tvl of all pools, assume the first daily value is the current value
-                    usdFormat(poolTvlSummed ? poolTvlSummed : 0)
-                  }
+                  usdFormat(poolTvlSummed ? poolTvlSummed : 0)
+                }
               </div>
             </div>
 
@@ -178,15 +196,15 @@ export const AllPools = () => {
                 {!showIncentives ? "-" : showDemoData
                   ? "200k"
                   : // sum the liquidity and super incentives of all pools
-                    usdFormat(
-                      sum(
-                        poolsData?.map(
-                          (pool) =>
-                            parseFloat(pool.liquidityIncentives.valueUsd) +
-                            parseFloat(pool.superIncentives.valueUsd),
-                        ),
+                  usdFormat(
+                    sum(
+                      poolsData?.map(
+                        (pool) =>
+                          parseFloat(pool.liquidityIncentives.valueUsd) +
+                          parseFloat(pool.superIncentives.valueUsd),
                       ),
-                )}
+                    ),
+                  )}
               </div>
             </div>
 
@@ -291,7 +309,7 @@ export const AllPools = () => {
                     <div className={"text-[10px] text-neutral-400"}>Amount</div>
                     <div className={"flex flex-row items-center gap-1 text-xs"}>
                       <Position className={"invert"} />
-                      $10.1k
+                      {usdFormat(pool.volume)}
                     </div>
                   </div>
                   <div className={"flex flex-col"}>
@@ -305,12 +323,13 @@ export const AllPools = () => {
                         ●
                       </div>
                     </div>
-                    <div className={"text-xs"}>3.10k -3.98k</div>
+                    <div className={"text-xs"}>{pool.liquidityRange[0]}-{pool.liquidityRange[1]}</div>
                   </div>
                 </div>
 
                 <div className={"mt-[10px] flex flex-row gap-2 px-2"}>
                   <Button
+                    onClick={() => router.push(`/stake/pool?id=${pool.id}`)}
                     variant={"secondary"}
                     size={"sm"}
                     className={"flex h-[23px] flex-1 text-[9px]"}
@@ -318,6 +337,7 @@ export const AllPools = () => {
                     View Pool
                   </Button>
                   <Button
+                    onClick={() => router.push(`/stake/pool/create?id=${pool.id}`)}
                     variant={"secondary"}
                     size={"sm"}
                     className={"h-[23px] text-[9px]"}

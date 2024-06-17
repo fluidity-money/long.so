@@ -107,4 +107,5 @@ clean:
 		cache \
 		target \
 		out \
-		docker
+		docker \
+		docs-out
