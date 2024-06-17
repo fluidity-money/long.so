@@ -6,6 +6,7 @@ package config
 import (
 	"log"
 	"os"
+	"strings"
 
 	_ "github.com/fluidity-money/long.so/lib/setup"
 	"github.com/fluidity-money/long.so/lib/types"
@@ -25,15 +26,15 @@ func Get() C {
 	if gethUrl == "" {
 		log.Fatal("SPN_GETH_URL not set")
 	}
-	timescaleUrl := os.Getenv("SPN_TIMESCALE")
+	timescaleUrl := strings.ToLower(os.Getenv("SPN_TIMESCALE"))
 	if timescaleUrl == "" {
 		log.Fatal("SPN_TIMESCALE not set")
 	}
-	seawaterAddr := os.Getenv("SPN_SEAWATER_ADDR")
+	seawaterAddr := strings.ToLower(os.Getenv("SPN_SEAWATER_ADDR"))
 	if seawaterAddr == "" {
 		log.Fatal("SPN_SEAWATER_ADDR not set")
 	}
-	fusdcAddr := os.Getenv("SPN_FUSDC_ADDR")
+	fusdcAddr := strings.ToLower(os.Getenv("SPN_FUSDC_ADDR"))
 	if fusdcAddr == "" {
 		log.Fatal("SPN_FUSDC_ADDR not set")
 	}

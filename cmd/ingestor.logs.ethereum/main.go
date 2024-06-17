@@ -15,6 +15,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gormLogger "gorm.io/gorm/logger"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -36,7 +37,9 @@ const (
 
 func main() {
 	config := config.Get()
-	db, err := gorm.Open(postgres.Open(config.TimescaleUrl))
+	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
+		Logger: gormLogger.Default.LogMode(gormLogger.Silent),
+	})
 	if err != nil {
 		log.Fatalf("opening postgres: %v", err)
 	}

@@ -2,12 +2,12 @@ package main
 
 import (
 	"bytes"
-	"strings"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
-	"encoding/hex"
+	"strings"
 
 	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
@@ -17,7 +17,7 @@ import (
 
 const (
 	// BatchLimit to get from the server before using multiple batches.
-	BatchLimit = 1500
+	BatchLimit = 1000
 
 	// WorkerCount of simultaneous requests that can be made max.
 	WorkerCount = 100
@@ -28,7 +28,7 @@ type (
 		JsonRpc string   `json:"jsonrpc"`
 		Id      string   `json:"id"`
 		Method  string   `json:"method"`
-		Params  []string `json:"params"`
+		Params  []any `json:"params"`
 	}
 
 	rpcResp struct {
@@ -40,7 +40,7 @@ type (
 	// posResp that's also given to gorm to be used with a custom
 	// function that does a left join during insertion.
 	posResp struct {
-		Pool            types.Address
+		Pool       types.Address
 		Pos, Delta types.Number
 	}
 )
@@ -56,9 +56,15 @@ func packRpcPosData(ammAddr string, positions map[string]seawater.Position) (req
 		req[i] = rpcReq{
 			JsonRpc: "2.0",
 			Id:      encodeId(p.Pool, p.Id),
-			Method:  "eth_getStorageAt",
+			Method:  "eth_call",
 			// TODO make the offset
-			Params: []string{ammAddr, s, "latest"},
+			Params: []any{
+				map[string]string{
+					"to":   ammAddr,
+					"data": s,
+				},
+				"latest",
+			},
 		}
 		i++
 	}
@@ -115,6 +121,10 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 						return
 					}
 					for _, p := range resps {
+						if err := p.Error; err != nil {
+							chanErrs <- fmt.Errorf("error reported: %v", err)
+							return
+						}
 						// Decode the response data, and decode the ID.
 						pool, position, ok := decodeId(p.Id)
 						if !ok {
@@ -123,7 +133,7 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 						}
 						delta, err := types.NumberFromString(strings.TrimPrefix(p.Result, "0x"))
 						if err != nil {
-							chanErrs <- fmt.Errorf("unpacking delta: %#v: %v", p.Result, err)
+							chanErrs <- fmt.Errorf("unpacking delta: %#v: %v", p, err)
 							return
 						}
 						r := posResp{

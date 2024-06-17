@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"math/big"
-	"math/rand"
 	"net/http"
-	"time"
 
 	"github.com/fluidity-money/long.so/lib/config"
 	"github.com/fluidity-money/long.so/lib/math"
@@ -19,10 +18,8 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gormLogger "gorm.io/gorm/logger"
 )
-
-// WaitSecs to wait before checking each position again.
-const WaitSecs = 5
 
 // PoolDetails retrieved from seawater_final_ticks_decimals_1
 type PoolDetails struct {
@@ -34,79 +31,90 @@ type PoolDetails struct {
 
 func main() {
 	config := config.Get()
-	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), nil)
+	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
+		Logger: gormLogger.Default.LogMode(gormLogger.Silent),
+	})
 	if err != nil {
 		log.Fatalf("database open: %v", err)
 	}
-	for {
-		time.Sleep((WaitSecs * time.Second) + randSecs())
-		// Get every active position in the database, including the pools.
-		var positions []seawater.Position
-		err := db.Table("seawater_active_positions_1").
-			Select("pos_id", "pool", "tick_lower", "tick_upper").
-			Scan(&positions).
-			Error
-		if err != nil {
-			log.Fatalf("seawater positions scan: %v", err)
-		}
-		var poolDetails []PoolDetails
-		// Get the decimals for each unique pool.
-		err = db.Table("seawater_final_ticks_decimals_1").
-			Select("final_tick", "pool", "decimals").
-			Scan(&poolDetails).
-			Error
-		if err != nil {
-			log.Fatalf("scan positions: %v", err)
-		}
-		poolMap := make(map[string]PoolDetails, len(poolDetails))
-		for _, p := range poolDetails {
-			poolMap[p.Pool.String()] = PoolDetails{
-				Pool:      p.Pool,
-				FinalTick: p.FinalTick,
-				Decimals:  p.Decimals,
-				curPrice:  math.GetSqrtRatioAtTick(p.FinalTick.Big()),
-			}
-		}
-		// Store the positions in a map so we can reconcile the results together easier.
-		positionMap := make(map[string]seawater.Position, len(positions))
-		// Make a separate RPC lookup for the current price of each pool.
-		// Pack the RPC data to be batched using storage slot lookups.
-		d := packRpcPosData(config.SeawaterAddr.String(), positionMap)
-		// Request from the RPC the batched lookup of this data.
-		// Makes multiple requests if the request size exceeds the current restriction.
-		resps, err := reqPositions(context.Background(), config.GethUrl, d, httpPost)
-		if err != nil {
-			log.Fatalf("positions request: %v", err)
-		}
-		var (
-			ids      = make([]types.Number, len(positions))
-			amount0s = make([]types.UnscaledNumber, len(positions))
-			amount1s = make([]types.UnscaledNumber, len(positions))
-		)
-		for i, r := range resps {
-			poolAddr := r.Pool.String()
-			amount0Rat, amount1Rat := math.GetAmountsForLiq(
-				poolMap[poolAddr].curPrice, // The current sqrt ratio
-				positionMap[r.Pos.String()].Lower.Big(),
-				positionMap[r.Pos.String()].Upper.Big(),
-				r.Delta.Big(),
-			)
-			var (
-				amount0 = mulRatToInt(amount0Rat, poolMap[poolAddr].Decimals)
-				amount1 = mulRatToInt(amount1Rat, poolMap[poolAddr].Decimals)
-			)
-			ids[i] = r.Pos
-			amount0s[i] = types.UnscaledNumberFromBig(amount0)
-			amount1s[i] = types.UnscaledNumberFromBig(amount1)
-		}
-		if err := storePositions(db, ids, amount0s, amount1s); err != nil {
-			log.Fatalf("store positions: %v", err)
+	slog.Debug("about to make another lookup")
+	// Get every active position in the database, including the pools.
+	var positions []seawater.Position
+	err = db.Table("seawater_active_positions_1").
+		Select("pos_id", "pool", "lower", "upper").
+		Scan(&positions).
+		Error
+	if err != nil {
+		log.Fatalf("seawater positions scan: %v", err)
+	}
+	slog.Debug("positions we're about to scan", "positions", positions)
+	var poolDetails []PoolDetails
+	// Get the decimals for each unique pool.
+	err = db.Table("seawater_final_ticks_decimals_1").
+		Select("final_tick", "pool", "decimals").
+		Scan(&poolDetails).
+		Error
+	if err != nil {
+		log.Fatalf("scan positions: %v", err)
+	}
+	slog.Debug("pools we're about to scan", "pools", poolDetails)
+	poolMap := make(map[string]PoolDetails, len(poolDetails))
+	for _, p := range poolDetails {
+		poolMap[p.Pool.String()] = PoolDetails{
+			Pool:      p.Pool,
+			FinalTick: p.FinalTick,
+			Decimals:  p.Decimals,
+			curPrice:  math.GetSqrtRatioAtTick(p.FinalTick.Big()),
 		}
 	}
-}
-
-func randSecs() time.Duration {
-	return time.Duration(rand.Intn(3)) * time.Second
+	// Store the positions in a map so we can reconcile the results together easier.
+	positionMap := make(map[string]seawater.Position, len(positions))
+	for _, p := range positions {
+		positionMap[p.Id.String()] = p
+	}
+	// Make a separate RPC lookup for the current price of each pool.
+	// Pack the RPC data to be batched using storage slot lookups.
+	d := packRpcPosData(config.SeawaterAddr.String(), positionMap)
+	slog.Debug("packed rpc data", "data", d)
+	// Request from the RPC the batched lookup of this data.
+	// Makes multiple requests if the request size exceeds the current restriction.
+	resps, err := reqPositions(context.Background(), config.GethUrl, d, httpPost)
+	if err != nil {
+		log.Fatalf("positions request: %v", err)
+	}
+	var (
+		ids      = make([]string, len(positions))
+		amount0s = make([]string, len(positions))
+		amount1s = make([]string, len(positions))
+	)
+	for i, r := range resps {
+		poolAddr := r.Pool.String()
+		amount0Rat, amount1Rat := math.GetAmountsForLiq(
+			poolMap[poolAddr].curPrice, // The current sqrt ratio
+			positionMap[r.Pos.String()].Lower.Big(),
+			positionMap[r.Pos.String()].Upper.Big(),
+			r.Delta.Big(),
+		)
+		var (
+			amount0 = mulRatToInt(amount0Rat, poolMap[poolAddr].Decimals)
+			amount1 = mulRatToInt(amount1Rat, poolMap[poolAddr].Decimals)
+		)
+		slog.Debug("amount 0 rat",
+			"id", r.Pool,
+			"amount0", amount0Rat,
+			"amount1", amount1Rat,
+			"amount0", amount0,
+			"amount1", amount1,
+			"delta", r.Delta,
+			"lower", positionMap[r.Pos.String()].Lower,
+		)
+		ids[i] = r.Pos.String()
+		amount0s[i] = amount0.String()
+		amount1s[i] = amount1.String()
+	}
+	if err := storePositions(db, ids, amount0s, amount1s); err != nil {
+		log.Fatalf("store positions: %v", err)
+	}
 }
 
 func httpPost(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
