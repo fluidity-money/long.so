@@ -22,6 +22,8 @@ import { LoaderIcon } from "lucide-react";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { sum } from "lodash";
 import { graphql, useFragment } from "@/gql";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const DisplayModeMenu = ({
   setDisplayMode,
@@ -95,6 +97,8 @@ export const AllPools = () => {
 
   const { data, isLoading } = useGraphqlGlobal();
 
+  const router = useRouter()
+
   const poolsData = useFragment(AllPoolsFragment, data?.pools);
 
   const showDemoData = useFeatureFlag("ui show demo data");
@@ -141,7 +145,7 @@ export const AllPools = () => {
         annualPercentageYield: 0,
       }
     }
-  );
+    );
   }, [showDemoData, poolsData]);
 
   const poolTvlSummed =
@@ -167,8 +171,8 @@ export const AllPools = () => {
                 {showDemoData
                   ? "12.1M"
                   : // sum the tvl of all pools, assume the first daily value is the current value
-                    usdFormat(poolTvlSummed ? poolTvlSummed : 0)
-                  }
+                  usdFormat(poolTvlSummed ? poolTvlSummed : 0)
+                }
               </div>
             </div>
 
@@ -178,15 +182,15 @@ export const AllPools = () => {
                 {!showIncentives ? "-" : showDemoData
                   ? "200k"
                   : // sum the liquidity and super incentives of all pools
-                    usdFormat(
-                      sum(
-                        poolsData?.map(
-                          (pool) =>
-                            parseFloat(pool.liquidityIncentives.valueUsd) +
-                            parseFloat(pool.superIncentives.valueUsd),
-                        ),
+                  usdFormat(
+                    sum(
+                      poolsData?.map(
+                        (pool) =>
+                          parseFloat(pool.liquidityIncentives.valueUsd) +
+                          parseFloat(pool.superIncentives.valueUsd),
                       ),
-                )}
+                    ),
+                  )}
               </div>
             </div>
 
@@ -311,6 +315,7 @@ export const AllPools = () => {
 
                 <div className={"mt-[10px] flex flex-row gap-2 px-2"}>
                   <Button
+                    onClick={() => router.push(`/stake/pool?id=${pool.id}`)}
                     variant={"secondary"}
                     size={"sm"}
                     className={"flex h-[23px] flex-1 text-[9px]"}
@@ -318,6 +323,7 @@ export const AllPools = () => {
                     View Pool
                   </Button>
                   <Button
+                    onClick={() => router.push(`/stake/pool/create?id=${pool.id}`)}
                     variant={"secondary"}
                     size={"sm"}
                     className={"h-[23px] text-[9px]"}

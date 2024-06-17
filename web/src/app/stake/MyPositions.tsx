@@ -145,7 +145,7 @@ export const MyPositions = () => {
                 layout
                 key={pool.id}
                 className="flex h-[83px] w-[77px] cursor-pointer flex-col items-center rounded-xl border border-white p-2 md:h-[120px] md:min-w-[111px] md:gap-1"
-                onClick={() => router.push(`/stake/pool?id=${pool.id}`)}
+                onClick={() => router.push(`/stake/pool?id=${pool.id}&positionId=${pool.positionId}`)}
               >
                 <div className="flex w-full flex-row">
                   <div className="size-1 rounded-full bg-red-500 md:size-2" />
@@ -176,13 +176,13 @@ export const MyPositions = () => {
                     No Yield Yet
                   </div>
                 </div>
-
                 <Badge
+                  onClick={() => router.push(`/stake/pool?id=${pool.id}&positionId=${pool.positionId}`)}
                   variant="secondary"
                   className="mt-[5px] h-6 w-full justify-center gap-1 text-nowrap p-0 px-1 text-2xs"
                 >
                   <Position className={"size-[6px] md:size-[10px]"} />
-                  <div className="text-4xs md:text-3xs">$20 Position</div>
+                  <div className="text-4xs md:text-3xs">{usdFormat(pool.staked)} Position</div>
                 </Badge>
               </motion.div>
             ))}
