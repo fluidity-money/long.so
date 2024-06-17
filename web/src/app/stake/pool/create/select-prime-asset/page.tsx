@@ -14,7 +14,7 @@ import {
   Pool,
 } from "@/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/columns";
 import { nanoid } from "nanoid";
-import { Token, fUSDC } from "@/config/tokens";
+import { DefaultToken, Token, fUSDC } from "@/config/tokens";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { Hash } from "viem";
 import { usdFormat } from "@/lib/usdFormat";
@@ -69,13 +69,13 @@ const SelectPrimeAsset = () => {
         volume: "$100k",
         duration: 150,
         id: nanoid(),
-        tokens: [tokens[0], tokens[1]],
-        token0Name: tokens[0].name,
-        token0Symbol: tokens[0].symbol,
-        token0Address: tokens[0].address,
-        token1Name: tokens[1].name,
-        token1Symbol: tokens[1].symbol,
-        token1Address: tokens[1].address,
+        tokens: [DefaultToken, fUSDC],
+        token0Name: DefaultToken.name,
+        token0Symbol: DefaultToken.symbol,
+        token0Address: DefaultToken.address,
+        token1Name: fUSDC.name,
+        token1Symbol: fUSDC.symbol,
+        token1Address: fUSDC.address,
       },
     ];
 
