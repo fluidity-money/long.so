@@ -9,6 +9,13 @@ export type Pool = {
   duration: number;
   APR: number;
   volume: string;
+  // include these columns to enable search filtering
+  token0Address: string;
+  token0Symbol: string;
+  token0Name: string;
+  token1Address: string;
+  token1Symbol: string;
+  token1Name: string;
 };
 
 export const columns: ColumnDef<Pool>[] = [
@@ -48,6 +55,55 @@ export const columns: ColumnDef<Pool>[] = [
     header: "Boost",
     cell: ({ row }) => {
       return `${row.original.duration} mins`;
+    },
+  },
+  {
+    accessorKey: "address",
+    header: "Address",
+    cell: ({ row }) => {
+      return row.original.id;
+    },
+  },
+  {
+    accessorKey: "token0Symbol",
+    header: "Token 0 Symbol",
+    cell: ({ row }) => {
+      return row.original.tokens[0].symbol;
+    },
+  },
+  {
+    accessorKey: "token0Name",
+    header: "Token 0 Name",
+    cell: ({ row }) => {
+      return row.original.tokens[0].name;
+    },
+  },
+  {
+    accessorKey: "token0Address",
+    header: "Token 0 Address",
+    cell: ({ row }) => {
+      return row.original.tokens[0].address;
+    },
+  },
+  {
+    accessorKey: "token1Symbol",
+    header: "Token 1 Symbol",
+    cell: ({ row }) => {
+      return row.original.tokens[1].symbol;
+    },
+  },
+  {
+    accessorKey: "token1Name",
+    header: "Token 1 Name",
+    cell: ({ row }) => {
+      return row.original.tokens[1].name;
+    },
+  },
+  {
+    accessorKey: "token1Address",
+    header: "Token 1 Address",
+    cell: ({ row }) => {
+      return row.original.tokens[1].address;
     },
   },
 ];

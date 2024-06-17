@@ -157,7 +157,7 @@ export function AllAssetsTable<TData, TValue>({
                 data-state={row.getIsSelected() && "selected"}
                 className=" cursor-pointer border-b-0 text-[10px] hover:bg-black md:text-xs"
                 onClick={() => {
-                  if ((token = "0")) {
+                  if ((token === "0")) {
                     setToken0(row.original.token);
                   } else {
                     setToken1(row.original.token);
