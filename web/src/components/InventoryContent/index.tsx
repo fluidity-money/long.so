@@ -17,7 +17,8 @@ export const InventoryContent = () => {
   const showPoolsTab = useFeatureFlag("ui show pools tab");
 
   const settings = useInventorySettings((s) => s.settings);
-
+  const tradesRef = useRef();
+  const poolsRef = useRef();
   return (
     <div className="flex flex-col items-center">
       <InventoryHeader />
@@ -38,14 +39,17 @@ export const InventoryContent = () => {
               {
                 label: "Trades",
                 value: "trade" as const,
-                ref: useRef(),
+                ref: tradesRef,
               },
-              ...showPoolsTab ?
-                [{
-                  label: "Pools",
-                  value: "pools" as const,
-                  ref: useRef(),
-                }] : [],
+              ...(showPoolsTab
+                ? [
+                    {
+                      label: "Pools",
+                      value: "pools" as const,
+                      ref: poolsRef,
+                    },
+                  ]
+                : []),
             ]}
           />
         </div>
