@@ -435,19 +435,29 @@ impl StoragePool {
     }
 
     /// Gets the current pool price.
-    pub fn get_sqrt_price(&self) -> U256 { self.sqrt_price.get() }
+    pub fn get_sqrt_price(&self) -> U256 {
+        self.sqrt_price.get()
+    }
 
     /// Get the current tick.
-    pub fn get_cur_tick(&self) -> I32 { self.cur_tick.get() }
+    pub fn get_cur_tick(&self) -> I32 {
+        self.cur_tick.get()
+    }
 
     /// Get the tick spacing for the pool given.
-    pub fn get_tick_spacing(&self) -> U8 { self.tick_spacing.get() }
+    pub fn get_tick_spacing(&self) -> U8 {
+        self.tick_spacing.get()
+    }
 
     /// Get the global fee growth for token0.
-    pub fn get_fee_growth_global_0(&self) -> U256 { self.fee_growth_global_0.get() }
+    pub fn get_fee_growth_global_0(&self) -> U256 {
+        self.fee_growth_global_0.get()
+    }
 
     /// Get the current fee growth for token1 (fUSDC.)
-    pub fn get_fee_growth_global_1(&self) -> U256 { self.fee_growth_global_1.get() }
+    pub fn get_fee_growth_global_1(&self) -> U256 {
+        self.fee_growth_global_1.get()
+    }
 
     /// Enables or disables the pool.
     pub fn set_enabled(&mut self, enabled: bool) {
@@ -458,14 +468,14 @@ impl StoragePool {
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 impl test_utils::StorageNew for StoragePool {
     fn new(i: U256, v: u8) -> Self {
-      unsafe { <Self as stylus_sdk::storage::StorageType>::new(i, v) }
+        unsafe { <Self as stylus_sdk::storage::StorageType>::new(i, v) }
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::{test_utils};
+    use crate::test_utils;
     use ruint_macro::uint;
 
     #[test]
@@ -497,9 +507,7 @@ mod test {
 
             let id = uint!(2_U256);
 
-            storage
-                .create_position(id, -874753, -662914)
-                .unwrap();
+            storage.create_position(id, -874753, -662914).unwrap();
 
             assert_eq!(
                 storage.update_position(id, 24703680000000000000000),
@@ -564,5 +572,177 @@ mod test {
 
             Ok(())
         })
+    }
+
+    #[test]
+    fn test_pool_init_state() -> Result<(), Revert> {
+        test_utils::with_storage::<_, StoragePool, _>(|pool| {
+            let price = test_utils::encode_sqrt_price(100, 1);
+
+            pool.init(
+                price, // price
+                2,
+                1,
+                u128::MAX,
+            )?;
+
+            assert_eq!(pool.enabled.get(), true);
+            assert_eq!(pool.sqrt_price.get(), price);
+
+            assert_eq!(
+                pool.cur_tick.get(),
+                I32::lib(&tick_math::get_tick_at_sqrt_ratio(price)?)
+            );
+
+            assert_eq!(pool.fee.get(), U32::lib(&2));
+
+            assert_eq!(pool.tick_spacing.get(), U8::lib(&1));
+
+            assert_eq!(pool.max_liquidity_per_tick.get(), U128::lib(&u128::MAX));
+
+            Ok(())
+        })
+    }
+
+    #[test]
+    fn test_pool_init_reverts() -> Result<(), Revert> {
+        test_utils::with_storage::<_, StoragePool, _>(|storage| {
+            match storage.init(uint!(1_U256), 0, 0, 0_u128) {
+                Err(r) => assert_eq!(Error::R.to_string(), String::from_utf8(r).unwrap()),
+                _ => panic!("expected R"),
+            }
+
+            match storage.init(test_utils::encode_sqrt_price(100, 1), 0, 1, u128::MAX) {
+                Err(r) => assert_eq!(
+                    Error::PoolAlreadyInitialised.to_string(),
+                    String::from_utf8(r).unwrap()
+                ),
+                _ => panic!("expected PoolAlreadyInitialised"),
+            }
+            Ok(())
+        })
+    }
+
+    #[test]
+    fn test_pool_position_create() -> Result<(), Revert> {
+        test_utils::with_storage::<_, StoragePool, _>(|pool| {
+            let id = uint!(2_U256);
+            let low = tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(50, 1))?;
+            let up = tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(150, 1))?;
+
+            match pool.create_position(id, low, up) {
+                Err(r) => assert_eq!(
+                    Error::PoolDisabled.to_string(),
+                    String::from_utf8(r).unwrap()
+                ),
+                _ => panic!("expected PoolDisabled"),
+            }
+
+            pool.init(
+                test_utils::encode_sqrt_price(100, 1), // price
+                0,
+                1,
+                u128::MAX,
+            )?;
+
+            pool.create_position(id, low, up)?;
+
+            let position_saved = pool.positions.positions.get(id);
+
+            assert_eq!(position_saved.lower.get().as_i32(), low);
+            assert_eq!(position_saved.upper.get().as_i32(), up);
+
+            Ok(())
+        })
+    }
+
+    #[test]
+    fn test_pool_update_position_reverts() {
+        test_utils::with_storage::<_, StoragePool, _>(|pool| {
+            pool.init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
+                .unwrap();
+
+            let id = uint!(2_U256);
+
+            pool.create_position(id, tick_math::get_min_tick(1), tick_math::get_max_tick(1))
+                .unwrap();
+
+            pool.set_enabled(false);
+
+            match pool.update_position(id, 3161) {
+                Err(r) => assert_eq!(
+                    Error::PoolDisabled.to_string(),
+                    String::from_utf8(r).unwrap()
+                ),
+                _ => panic!("expected PoolDisabled"),
+            }
+
+            match pool.update_position(id, 0) {
+                Err(r) => assert_eq!(
+                    Error::PoolDisabled.to_string(),
+                    String::from_utf8(r).unwrap()
+                ),
+                _ => panic!("expected PoolDisabled"),
+            }
+
+            pool.set_enabled(true);
+
+
+            match pool.update_position(uint!(3_U256), 3161){
+                Ok(_) => panic!("Add revert on non-existent position"),
+                Err(_) => todo!(""),
+            };
+        });
+    }
+    #[test]
+    fn test_pool_update_position_parametric() {
+        let prices = [
+            [1,1],
+            [1, 3],
+            [1, 1_000_000],
+            [3,1],
+            [3,5],
+            [1_000_000, 1],
+        ];
+
+
+        let tick_spacing = [
+            1,100,1000, 1_000_000
+        ];
+
+        let fee = 300;
+
+        let deltas = [
+            1_000_000,
+            1000,
+            333,
+            0,
+            -333,
+            -1000,
+            -1_000_000,
+        ];
+
+        for price in prices.iter(){
+            for tick in tick_spacing.iter(){
+                for delta in deltas.iter(){
+                test_utils::with_storage::<_, StoragePool, _>(|pool| {
+                    pool.init(test_utils::encode_sqrt_price(price[0], price[1]), fee, *tick as u8, u128::MAX)
+                        .unwrap();
+
+                    let id = uint!(2_U256);
+
+                    pool.create_position(id, tick_math::get_min_tick(*tick as u8), tick_math::get_max_tick(*tick as u8))
+                        .unwrap();
+                    
+                        pool.update_position(id, *delta);
+                    // assert_eq!(
+                    //     pool.update_position(id, *delta),
+                    //     Ok((I256::unchecked_from(9996), I256::unchecked_from(1000))),
+                    // );
+                });
+            }
+        }
+        }
+        
     }
 }

@@ -10,5 +10,8 @@ pkg/*.rlib
 /web/.env
 *.zip
 
+# IDE
+.vscode/
+
 .DS_Store
 +Errors
