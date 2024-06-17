@@ -48,4 +48,32 @@ BEGIN
 	END LOOP;
 END $$;
 
+CREATE VIEW seawater_final_ticks_decimals_1 AS
+	WITH latest_swaps AS (
+		SELECT
+			final_tick,
+			created_by,
+			pool,
+			ROW_NUMBER() OVER (PARTITION BY pool ORDER BY created_by DESC) AS rn
+		FROM (
+			SELECT final_tick, created_by, pool
+			FROM events_seawater_swap1
+			UNION ALL
+			SELECT final_tick0 AS final_tick, created_by, from_ AS pool
+			FROM events_seawater_swap2
+			UNION ALL
+			SELECT final_tick1 AS final_tick, created_by, to_ AS pool
+			FROM events_seawater_swap2
+		) AS swaps
+	)
+	SELECT
+		ls.final_tick,
+		ls.created_by,
+		ls.pool,
+		ep.decimals
+	FROM latest_swaps ls
+	LEFT JOIN events_seawater_newPool ep ON ls.pool = ep.token
+	WHERE ls.rn = 1
+	ORDER BY ls.created_by DESC;
+
 -- migrate:down

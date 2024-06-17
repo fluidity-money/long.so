@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/big"
 	"math/rand"
 	"net/http"
 	"time"
@@ -13,8 +14,8 @@ import (
 	"github.com/fluidity-money/long.so/lib/config"
 	"github.com/fluidity-money/long.so/lib/math"
 	_ "github.com/fluidity-money/long.so/lib/setup"
-	"github.com/fluidity-money/long.so/lib/types/seawater"
 	"github.com/fluidity-money/long.so/lib/types"
+	"github.com/fluidity-money/long.so/lib/types/seawater"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -22,6 +23,14 @@ import (
 
 // WaitSecs to wait before checking each position again.
 const WaitSecs = 5
+
+// PoolDetails retrieved from seawater_final_ticks_decimals_1
+type PoolDetails struct {
+	Pool      types.Address
+	FinalTick types.Number
+	Decimals  uint8
+	curPrice  *big.Int // Set inside this program
+}
 
 func main() {
 	config := config.Get()
@@ -40,7 +49,24 @@ func main() {
 		if err != nil {
 			log.Fatalf("seawater positions scan: %v", err)
 		}
+		var poolDetails []PoolDetails
 		// Get the decimals for each unique pool.
+		err = db.Table("seawater_final_ticks_decimals_1").
+			Select("final_tick", "pool", "decimals").
+			Scan(&poolDetails).
+			Error
+		if err != nil {
+			log.Fatalf("scan positions: %v", err)
+		}
+		poolMap := make(map[string]PoolDetails, len(poolDetails))
+		for _, p := range poolDetails {
+			poolMap[p.Pool.String()] = PoolDetails{
+				Pool:      p.Pool,
+				FinalTick: p.FinalTick,
+				Decimals:  p.Decimals,
+				curPrice:  math.GetSqrtRatioAtTick(p.FinalTick.Big()),
+			}
+		}
 		// Store the positions in a map so we can reconcile the results together easier.
 		positionMap := make(map[string]seawater.Position, len(positions))
 		// Make a separate RPC lookup for the current price of each pool.
@@ -58,21 +84,22 @@ func main() {
 			amount1s = make([]types.UnscaledNumber, len(positions))
 		)
 		for i, r := range resps {
+			poolAddr := r.Pool.String()
 			amount0Rat, amount1Rat := math.GetAmountsForLiq(
-				pools[r.Pool].curSqrtRatio,
+				poolMap[poolAddr].curPrice, // The current sqrt ratio
 				positionMap[r.Pos.String()].Lower.Big(),
 				positionMap[r.Pos.String()].Upper.Big(),
 				r.Delta.Big(),
 			)
 			var (
-				amount0 = mulRatToInt(amount0Rat, tokens[r.Pool].decimals)
-				amount1 = mulRatToInt(amount1Rat, tokens[r.Pool].decimals)
+				amount0 = mulRatToInt(amount0Rat, poolMap[poolAddr].Decimals)
+				amount1 = mulRatToInt(amount1Rat, poolMap[poolAddr].Decimals)
 			)
-			ids[i] = r.Id
-			amount0s[i] = amount0
-			amount1s[i] = amount1
+			ids[i] = r.Pos
+			amount0s[i] = types.UnscaledNumberFromBig(amount0)
+			amount1s[i] = types.UnscaledNumberFromBig(amount1)
 		}
-		if err := storePositions(ids, amount1s, amount1s); err != nil {
+		if err := storePositions(db, ids, amount0s, amount1s); err != nil {
 			log.Fatalf("store positions: %v", err)
 		}
 	}
@@ -99,4 +126,12 @@ func httpPost(url string, contentType string, r io.Reader) (io.ReadCloser, error
 		return nil, fmt.Errorf("bad resp status %#v: %v", buf.String(), s)
 	}
 	return resp.Body, nil
+}
+
+func mulRatToInt(x *big.Rat, d uint8) *big.Int {
+	y := new(big.Int).SetInt64(10)
+	y.Exp(y, new(big.Int).SetInt64(int64(d)), nil)
+	r := new(big.Rat).Mul(x, new(big.Rat).SetInt(y))
+	i := new(big.Int).Quo(r.Num(), r.Denom())
+	return i
 }
