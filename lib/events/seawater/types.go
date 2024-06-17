@@ -5,6 +5,7 @@ import (
 	"github.com/fluidity-money/long.so/lib/types"
 )
 
+// Types derived from the events that we store in the database.
 type (
 	MintPosition struct {
 		events.Event
@@ -91,3 +92,15 @@ type (
 		FinalTick1  types.Number         `json:"finalTick1"`
 	}
 )
+
+// PositionSnapshot taken from snapshot_positions_log_1. Used to service
+// liquidity queries.
+type PositionSnapshot struct {
+	PosId   types.Number         `json:"pos_id"`
+	Owner   types.Address        `json:"owner"`
+	Pool    types.Address        `json:"pool"`
+	Lower   types.Number         `json:"lower"`
+	Upper   types.Number         `json:"upper"`
+	Amount0 types.UnscaledNumber `json:"amount0"`
+	Amount1 types.UnscaledNumber `json:"amount1"`
+}

@@ -27,6 +27,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gormLogger "gorm.io/gorm/logger"
 
 	"github.com/aws/aws-lambda-go/lambda"
 
@@ -72,6 +73,7 @@ func main() {
 	config := config.Get()
 	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
 		DisableAutomaticPing: true,
+		Logger: gormLogger.Default.LogMode(gormLogger.Silent),
 	})
 	if err != nil {
 		log.Fatalf("database open: %v", err)

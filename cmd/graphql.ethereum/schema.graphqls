@@ -298,9 +298,9 @@ type SeawaterLiquidity {
   price: String!
 
   """
-  USD value of the liquidity in this range.
+  USD value of the liquidity in this range. Implemented as amount0 + (amount1 * price).
   """
-  liquidity: String! # usd volume of token1's asset
+  liquidity: String!
 }
 
 """

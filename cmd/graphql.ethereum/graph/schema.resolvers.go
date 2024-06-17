@@ -672,6 +672,8 @@ func (r *seawaterPoolResolver) Liquidity(ctx context.Context, obj *seawater.Pool
 		liquidity = MockLiquidity(r.C.FusdcAddr, obj.Token)
 		return
 	}
+	// Group all the positions data from the most recent snapshot,
+	// and make sure it's sorted. Then send that to the UI.
 	return nil, nil // TODO
 }
 
