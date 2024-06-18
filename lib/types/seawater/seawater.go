@@ -43,3 +43,14 @@ type PositionSnapshot struct {
 	Amount0   types.UnscaledNumber `json:"amount0"`
 	Amount1   types.UnscaledNumber `json:"amount1"`
 }
+
+// LiquidityGroup taken from seawater_liquidity_groups_1. Used to service
+// the graph display of liquidity ranges.
+type LiquidityGroup struct {
+	Pool              types.Address        `json:"pool"`
+	Decimals          uint8                `json:"decimals"`
+	Tick              types.Number         `json:"tick"`
+	NextTick          types.Number         `json:"next_tick"`
+	CumulativeAmount0 types.UnscaledNumber `json:"cumulative_amount_0"`
+	CumulativeAmount1 types.UnscaledNumber `json:"cumulative_amount_1"`
+}

@@ -5,6 +5,8 @@ import "math/big"
 var (
 	One  = new(big.Int).SetInt64(1)
 	Zero = new(big.Int).SetInt64(0)
+
+	Two192 = new(big.Rat).SetInt(new(big.Int).SetBits([]big.Word{0, 0, 0, 1}))
 )
 
 var (
@@ -125,4 +127,11 @@ func GetSqrtRatioAtTick(t *big.Int) *big.Int {
 		res.Add(res, One)
 	}
 	return res
+}
+
+func GetPriceAtSqrtRatio(x *big.Int) *big.Rat {
+	r := new(big.Rat).SetInt(x)
+	r.Mul(r, r)
+	r.Quo(r, Two192)
+	return r
 }

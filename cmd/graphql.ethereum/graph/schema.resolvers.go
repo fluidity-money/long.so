@@ -14,10 +14,17 @@ import (
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
 	"github.com/fluidity-money/long.so/lib/features"
+	"github.com/fluidity-money/long.so/lib/math"
 	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
 	"gorm.io/gorm"
 )
+
+// FiveThousand to do some math with to get the price of the tick range by
+// taking half the tick that's the tick range.
+var FiveThousand = new(big.Int).SetInt64(500)
+
+var Ten = new(big.Int).SetInt64(10)
 
 // Token is the resolver for the token field.
 func (r *amountResolver) Token(ctx context.Context, obj *model.Amount) (model.Token, error) {
@@ -680,9 +687,48 @@ func (r *seawaterPoolResolver) Liquidity(ctx context.Context, obj *seawater.Pool
 		liquidity = MockLiquidity(r.C.FusdcAddr, obj.Token)
 		return
 	}
+	var groups []seawater.LiquidityGroup
+	err = r.DB.Table("seawater_liquidity_groups_1").
+		Where("pool = ?", obj.Token).
+		Scan(&groups).
+		Error
+	if err != nil {
+		return nil, err
+	}
+	//10 ** decimals
+	fusdcDecimals_ := new(big.Int).SetInt64(int64(r.C.FusdcDecimals))
+	fusdcDecimals_.Exp(Ten, fusdcDecimals_, nil)
+	fusdcDecimals := new(big.Rat).SetInt(fusdcDecimals_)
+	liquidity = make([]model.SeawaterLiquidity, len(groups))
+	for i, g := range groups {
+		// Take the average of the two ticks. We can simply add
+		// half the big tick (5000) to the lowest tick.
+		tick := g.Tick.Big()
+		tick.Add(tick, FiveThousand)
+		ratio := math.GetSqrtRatioAtTick(tick)
+		price := math.GetPriceAtSqrtRatio(ratio)
+		// Use the price data to get the USD value of token1, and
+		// add token0 to it, assuming it maintains peg. This is
+		// the price of the asset.
+		liq := new(big.Rat).SetInt(g.CumulativeAmount0.Big())
+		liq.Quo(liq, fusdcDecimals)
+		usdAmt1 := new(big.Rat).SetInt(g.CumulativeAmount1.Big())
+		d := new(big.Int).SetInt64(int64(g.Decimals))
+		d.Exp(Ten, d, nil)
+		usdAmt1.Quo(usdAmt1, new(big.Rat).SetInt(d))
+		usdAmt1.Mul(usdAmt1, price)
+		liq.Add(liq, usdAmt1)
+		liquidity[i] = model.SeawaterLiquidity{
+			ID: "", // TODO
+			TickLower: g.Tick.String(),
+			TickUpper: g.NextTick.String(),
+			Price: price.FloatString(5),
+			Liquidity: liq.FloatString(5),
+		}
+	}
 	// Group all the positions data from the most recent snapshot,
 	// and make sure it's sorted. Then send that to the UI.
-	return nil, nil // TODO
+	return
 }
 
 // Swaps is the resolver for the swaps field.

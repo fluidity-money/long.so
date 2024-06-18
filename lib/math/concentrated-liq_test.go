@@ -119,3 +119,7 @@ func TestGetSqrtRatioAtTick(t *testing.T) {
 		GetSqrtRatioAtTick(MaxTick).Text(10),
 	)
 }
+
+func TestGetPriceAtSqrtRatio(t *testing.T) {
+	t.Fatal("unimplemented")
+}

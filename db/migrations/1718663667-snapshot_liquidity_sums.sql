@@ -36,12 +36,14 @@ CREATE VIEW seawater_liquidity_groups_1 AS
 	)
 	SELECT
 		pool,
+		np.decimals,
 		tick,
 		next_tick,
 		cumulative_amount0,
 		cumulative_amount1
 	FROM
 		cumulative_amounts
+	LEFT JOIN events_seawater_newPool np ON np.token = pool
 	WHERE
 		cumulative_amount0 > 0 OR cumulative_amount1 > 0
 	ORDER BY
