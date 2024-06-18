@@ -14,7 +14,7 @@ import {
   useWriteContract,
 } from "wagmi";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
-import { encodeTick, sqrtPriceX96ToPrice } from "@/lib/math";
+import { getLiquidityForAmounts } from "@/lib/math";
 import { useEffect, useCallback } from "react";
 import { erc20Abi, Hash, hexToBigInt, maxUint256 } from "viem";
 import { ammAddress } from "@/lib/addresses";
@@ -88,6 +88,14 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     args: [address as Hash, ammAddress],
   });
 
+  // Current tick of the pool
+  const { data: curTick } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "curTick",
+    args: [token0.address],
+  }); 0
+
   // set up write contract hooks
   const {
     writeContract: writeContractMint,
@@ -143,8 +151,17 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
 
   const updatePosition = useCallback(
     (id: bigint) => {
-      // TODO why do i have to scale this up by 10??
-      const delta = BigInt(token0AmountRaw) * 10n
+      if (!curTick || tickLower === undefined || tickUpper === undefined) {
+        return
+      }
+
+      const delta = getLiquidityForAmounts(
+        curTick.result,
+        BigInt(tickLower),
+        BigInt(tickUpper),
+        BigInt(token0AmountRaw),
+        BigInt(token1AmountRaw)
+      );
 
       writeContractUpdatePosition({
         address: ammAddress,

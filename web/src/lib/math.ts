@@ -185,7 +185,7 @@ export const getLiquidityForAmount0 = (
   return (amount0 * intermediate) / (sqrtRatioBX96 - sqrtRatioAX96);
 };
 
-const getLiquidityForAmount1 = (
+export const getLiquidityForAmount1 = (
   lowerTick: bigint,
   upperTick: bigint,
   amount1: bigint
@@ -201,7 +201,7 @@ const getLiquidityForAmount1 = (
   return (amount1 * Q96) / (sqrtRatioBX96 - sqrtRatioAX96);
 };
 
-const getLiquidityForAmounts = (
+export const getLiquidityForAmounts = (
   tick: bigint,
   lowerTick: bigint,
   upperTick: bigint,

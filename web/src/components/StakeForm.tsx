@@ -97,8 +97,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     setToken1AmountRaw,
     priceLower,
     priceUpper,
-    tickLower,
-    priceLowerRaw,
     setPriceLower,
     setPriceUpper,
   } = useStakeStore();
@@ -181,14 +179,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const tokenPrice = poolSqrtPriceX96
     ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
     : 0n;
-
-  // Current tick of the pool
-  const { data: curTick } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
-    functionName: "curTick",
-    args: [token0.address],
-  });
 
   // in this context, token0 is actually token1. It's converted to token1
   // when we use it.
