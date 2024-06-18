@@ -31,7 +31,7 @@ func IsUserStaker(wallet string) (bool, error) {
 		return false, fmt.Errorf("nothing returned from data")
 	}
 	var isStaker bool
-	staker := stakerInfo[0]["staker"]
+	staker := stakerInfo[0]["points"]
 	v, ok := staker.(int)
 	if !ok {
 		return false, fmt.Errorf("bad type conversion: %T", staker)

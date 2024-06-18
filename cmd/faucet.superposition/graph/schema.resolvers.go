@@ -52,7 +52,7 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 				"ip addr", ipAddr,
 				"submitted wallet", wallet,
 			)
-			return "", fmt.Errorf("error requesting")
+			return "", fmt.Errorf("error requesting: %v", err)
 		}
 		if !ok {
 			slog.Error("non staker requested spn airdrop",
