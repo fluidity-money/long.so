@@ -45,6 +45,14 @@ const ManagePoolFragment = graphql(`
       positionId
       lower
       upper
+      liquidity {
+        fusdc {
+          valueUsd
+        }
+        token1 {
+          valueUsd
+        }
+      }
     }
   }
 `);
@@ -79,10 +87,21 @@ export default function PoolPage() {
 
   const { positionId, upper: upperTick, lower: lowerTick } = position || {}
 
-  // TODO fetch total pool liquidity in query
   const poolBalance = useMemo(() => (
-    0
-  ), [poolData])
+    usdFormat(poolData ?
+      poolData.positions.reduce((total, { liquidity: { fusdc, token1 } }) =>
+        total + parseFloat(fusdc.valueUsd) + parseFloat(token1.valueUsd),
+        0) :
+      0
+    )), [poolData])
+
+  const positionBalance = useMemo(() => (
+    usdFormat(
+      position ?
+        parseFloat(position.liquidity.fusdc.valueUsd) + parseFloat(position.liquidity.token1.valueUsd) :
+        0
+    )
+  ), [position])
 
   const showMockData = useFeatureFlag("ui show demo data");
   const showBoostIncentives = useFeatureFlag("ui show boost incentives");
@@ -213,7 +232,7 @@ export default function PoolPage() {
                     <div className="text-3xs md:text-2xs">My Pool Balance</div>
                     <div className="text-xl md:text-2xl">
                       {/* TODO: get my pool balance */}
-                      {showMockData ? "$190,301" : usdFormat(poolBalance)}
+                      {showMockData ? "$190,301" : poolBalance}
                     </div>
                   </div>
 
@@ -252,7 +271,7 @@ export default function PoolPage() {
                     <div className="text-3xs md:text-2xs">Current Position Balance</div>
                     <div className="text-xl md:text-2xl">
                       {/* TODO position liquidity */}
-                      {usdFormat(0)}
+                      {positionBalance}
                     </div>
                   </div>
                 </div>
