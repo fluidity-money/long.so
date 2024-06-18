@@ -164,7 +164,10 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string) (posi
 		positions = MockGetPoolPositions(pool)
 		return
 	}
-	err = r.DB.Table("seawater_active_positions_1").Where("pool = ?", pool).Scan(&positions).Error
+	err = r.DB.Table("seawater_active_positions_1").
+		Where("pool = ?", pool).
+		Scan(&positions).
+		Error
 	return
 }
 
@@ -178,7 +181,7 @@ func (r *queryResolver) GetPosition(ctx context.Context, id string) (position *s
 		position = MockGetPosition(id)
 		return
 	}
-	i, err := types.NumberFromString(id)
+	i, err := types.NumberFromBase10(id)
 	if err != nil {
 		return nil, fmt.Errorf("bad id: %v", err)
 	}
@@ -639,9 +642,10 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 		positions = MockGetPoolPositions(obj.Token.String())
 		return
 	}
-	err = r.DB.Table("seawater_positions_1").
+	err = r.DB.Table("seawater_active_positions_1").
 		Where("pool = ?", obj.Token).
-		Scan(&positions).Error
+		Scan(&positions).
+		Error
 	return
 }
 
@@ -760,15 +764,16 @@ func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *seawater.
 		First(&res).
 		Error
 	if err != nil {
-		return model.PairAmount{}, err
+		return model.PairAmount{}, fmt.Errorf("position id: %#v: %v", obj.Id, err)
 	}
 	var pool seawater.Pool
 	err = r.DB.Table("events_seawater_newpool").
 		Select("decimals").
+		Where("token = ?", obj.Pool).
 		First(&pool).
 		Error
 	if err != nil {
-		return model.PairAmount{}, err
+		return model.PairAmount{}, fmt.Errorf("finding new pool: %v", err)
 	}
 	ts := int(res.UpdatedBy.Unix())
 	return model.PairAmount{

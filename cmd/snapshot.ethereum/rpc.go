@@ -131,7 +131,7 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 							chanErrs <- fmt.Errorf("unpacking id: %#v", p.Id)
 							return
 						}
-						delta, err := types.NumberFromString(strings.TrimPrefix(p.Result, "0x"))
+						delta, err := types.NumberFromHex(strings.TrimPrefix(p.Result, "0x"))
 						if err != nil {
 							chanErrs <- fmt.Errorf("unpacking delta: %#v: %v", p, err)
 							return
@@ -214,14 +214,14 @@ func decodeId(x string) (pool types.Address, id *types.Number, ok bool) {
 	}
 	pool = types.AddressFromString(x[:42])
 	var err error
-	if id, err = types.NumberFromString(x[42:]); err != nil {
+	if id, err = types.NumberFromHex(x[42:]); err != nil {
 		return "", nil, false
 	}
 	return pool, id, true
 }
 
 func encodeId(pool types.Address, id types.Number) string {
-	return pool.String() + id.String()
+	return pool.String() + id.Hex()
 }
 
 func getCalldata(pool types.Address, posId types.Number) string {

@@ -278,7 +278,7 @@ func MockDelay(f features.F) {
 func MockAmount() model.Amount {
 	ta := "0x65dfe41220c438bf069bbce9eb66b087fe65db36"
 	t := Tokens[ta]
-	ts, _ := types.UnscaledNumberFromString("17592186044416") // 100000000000
+	ts, _ := types.UnscaledNumberFromHex("17592186044416") // 100000000000
 	return model.Amount{
 		Token:         types.AddressFromString(ta),
 		Decimals:      t.Decimals,

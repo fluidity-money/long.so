@@ -53,7 +53,15 @@ func NumberFromUint64(v uint64) Number {
 	i := new(big.Int).SetUint64(v)
 	return Number{i}
 }
-func NumberFromString(v string) (*Number, error) {
+func NumberFromBase10(v string) (*Number, error) {
+	i, ok := new(big.Int).SetString(v, 10)
+	if !ok {
+		return nil, fmt.Errorf("bad string")
+	}
+	n := NumberFromBig(i)
+	return &n, nil
+}
+func NumberFromHex(v string) (*Number, error) {
 	i, ok := new(big.Int).SetString(v, 16)
 	if !ok {
 		return nil, fmt.Errorf("bad string")
@@ -61,13 +69,18 @@ func NumberFromString(v string) (*Number, error) {
 	n := NumberFromBig(i)
 	return &n, nil
 }
-
-// String the Number, printing its hex
-func (u Number) String() string {
+func (u Number) Hex() string {
 	if u.Int == nil {
 		return "0"
 	}
 	return u.Int.Text(16)
+}
+// String the Number, printing its base10
+func (u Number) String() string {
+	if u.Int == nil {
+		return "0"
+	}
+	return u.Int.Text(10)
 }
 func (u Number) Big() *big.Int {
 	if u.Int == nil {
@@ -88,9 +101,9 @@ func (int *Number) Scan(v interface{}) error {
 	if v == nil {
 		return nil
 	}
-	switch v.(type) {
+	switch c := v.(type) {
 	case string:
-		int_, err := NumberFromString(v.(string))
+		int_, err := NumberFromBase10(v.(string))
 		if err != nil {
 			return fmt.Errorf(
 				"failed to scan string! %v",
@@ -99,21 +112,11 @@ func (int *Number) Scan(v interface{}) error {
 		}
 		*int = *int_
 	case int64:
-		n := NumberFromInt64(v.(int64))
+		n := NumberFromInt64(c)
 		*int = n
 	case uint64:
-		n := NumberFromUint64(v.(uint64))
+		n := NumberFromUint64(c)
 		*int = n
-	case []uint8:
-		uint8 := v.([]uint8)
-		int_, err := NumberFromString(string(uint8))
-		if err != nil {
-			return fmt.Errorf(
-				"failed to scan uint8[] using the NumberFromString function! %v",
-				err,
-			)
-		}
-		*int = *int_
 	default:
 		return fmt.Errorf(
 			"failed to scan type %T content %v into the Number type!",
@@ -136,7 +139,15 @@ func UnscaledNumberFromInt64(v int64) UnscaledNumber {
 	i := new(big.Int).SetInt64(v)
 	return UnscaledNumber{i}
 }
-func UnscaledNumberFromString(v string) (*UnscaledNumber, error) {
+func UnscaledNumberFromBase10(v string) (*UnscaledNumber, error) {
+	i, ok := new(big.Int).SetString(v, 10)
+	if !ok {
+		return nil, fmt.Errorf("bad string")
+	}
+	n := UnscaledNumberFromBig(i)
+	return &n, nil
+}
+func UnscaledNumberFromHex(v string) (*UnscaledNumber, error) {
 	i, ok := new(big.Int).SetString(v, 16)
 	if !ok {
 		return nil, fmt.Errorf("bad string")
@@ -144,9 +155,12 @@ func UnscaledNumberFromString(v string) (*UnscaledNumber, error) {
 	n := UnscaledNumberFromBig(i)
 	return &n, nil
 }
-// String the UnscaledNumber, printing its hex
-func (u UnscaledNumber) String() string {
+func (u UnscaledNumber) Hex() string {
 	return u.Int.Text(16)
+}
+// String the UnscaledNumber, printing its base 10 form
+func (u UnscaledNumber) String() string {
+	return u.Int.Text(10)
 }
 func (u UnscaledNumber) Big() *big.Int {
 	return new(big.Int).Set(u.Int)
