@@ -2,9 +2,10 @@ package graph
 
 import (
 	"encoding/json"
-	"net/http"
-	"strings"
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
 )
 
 // UrlModeratorsGraph to ask whether a user is currently staking and their
@@ -32,9 +33,10 @@ func IsUserStaker(wallet string) (bool, error) {
 	}
 	var isStaker bool
 	staker := stakerInfo[0]["points"]
-	v, ok := staker.(int)
-	if !ok {
-		return false, fmt.Errorf("bad type conversion: %T", staker)
+	s, _ := staker.(string)
+	v, err := strconv.Atoi(s)
+	if err != nil {
+		return false, fmt.Errorf("bad type conversion to int: %#v: %v", staker, err)
 	}
 	isStaker = v > StakerCutoff
 	return isStaker, nil
