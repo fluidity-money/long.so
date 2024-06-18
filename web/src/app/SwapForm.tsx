@@ -144,12 +144,12 @@ export const SwapForm = () => {
     ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
     : 0n;
 
-  const { data: token0Balance } = useBalance({
+  const { data: token0Balance, refetch: refetchToken0Balance } = useBalance({
     address,
     token: token0.address,
   })
 
-  const { data: token1Balance } = useBalance({
+  const { data: token1Balance, refetch: refetchToken1Balance } = useBalance({
     address,
     token: token1.address,
   })
@@ -371,6 +371,11 @@ export const SwapForm = () => {
 
   // success
   if (swapResult.data) {
+    // Manually refetch balances of each token.
+    // This is only necessary because there is no ConfirmSwap, as in staking,
+    // so this component doesn't remount when a swap is made
+    refetchToken0Balance()
+    refetchToken1Balance()
     return (
       <Success
         onDone={() => {
