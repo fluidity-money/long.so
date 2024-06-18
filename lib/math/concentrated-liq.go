@@ -41,15 +41,18 @@ func GetAmountsForLiq(sqrtRatioX96, sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) 
 		sqrtRatio0X96 = sqrtRatioBX96
 		sqrtRatio1X96 = sqrtRatioAX96
 	}
+	switch {
 	//if sqrtRatioX96 <= sqrtRatio0X96
-	if sqrtRatioX96.Cmp(sqrtRatio0X96) <= 0 {
+	case sqrtRatioX96.Cmp(sqrtRatio0X96) <= 0:
 		amount0 = GetAmount0ForLiq(sqrtRatio0X96, sqrtRatio1X96, liq)
 		amount1 = new(big.Rat)
-		//if sqrtRatioX96 < sqrtRatio1X96
-	} else if sqrtRatioX96.Cmp(sqrtRatio1X96) < 0 {
+
+	//if sqrtRatioX96 < sqrtRatio1X96
+	case sqrtRatioX96.Cmp(sqrtRatio1X96) < 0:
 		amount0 = GetAmount0ForLiq(sqrtRatioX96, sqrtRatio1X96, liq)
 		amount1 = GetAmount1ForLiq(sqrtRatio1X96, sqrtRatioX96, liq)
-	} else {
+
+	default:
 		amount0 = new(big.Rat)
 		amount1 = GetAmount1ForLiq(sqrtRatio0X96, sqrtRatio1X96, liq)
 	}

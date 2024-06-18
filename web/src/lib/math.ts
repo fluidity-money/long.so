@@ -233,3 +233,73 @@ export const getLiquidityForAmounts = (
     return getLiquidityForAmount1(lowerTick, upperTick, amount1);
   }
 };
+
+export const getAmount0ForLiquidity = (
+  sqrtRatioAX96: bigint,
+  sqrtRatioBX96: bigint,
+  liquidity: bigint
+): bigint => {
+  let sqrtRatio0X96 = sqrtRatioAX96;
+  let sqrtRatio1X96 = sqrtRatioBX96;
+  if (sqrtRatioAX96 > sqrtRatioBX96) {
+    sqrtRatio0X96 = sqrtRatioBX96
+    sqrtRatio1X96 = sqrtRatioAX96
+  }
+  return 0n;
+};
+
+export const getAmount1ForLiquidity = (
+  sqrtRatioAX96: bigint,
+  sqrtRatioBX96: bigint,
+  liquidity: bigint
+): bigint => {
+  let sqrtRatio0X96 = sqrtRatioAX96;
+  let sqrtRatio1X96 = sqrtRatioBX96;
+  if (sqrtRatioAX96 > sqrtRatioBX96) {
+    sqrtRatio0X96 = sqrtRatioBX96
+    sqrtRatio1X96 = sqrtRatioAX96
+  }
+  return 0n;
+};
+
+export const getAmountsForLiquidity = (
+  sqrtRatioX96: bigint,
+  sqrtRatioAX96: bigint,
+  sqrtRatioBX96: bigint,
+  liquidity: bigint
+): [bigint, bigint] => {
+  let sqrtRatio0X96 = sqrtRatioAX96;
+  let sqrtRatio1X96 = sqrtRatioBX96;
+  if (sqrtRatioAX96 > sqrtRatioBX96) {
+    sqrtRatio0X96 = sqrtRatioBX96
+    sqrtRatio1X96 = sqrtRatioAX96
+  }
+  if (sqrtRatioX96 <= sqrtRatio0X96) {
+    const amount0 = getAmount0ForLiquidity(
+      sqrtRatio0X96,
+      sqrtRatio1X96,
+      liquidity
+    );
+    return [amount0, 0n];
+  } else if (sqrtRatioX96 < sqrtRatio1X96) {
+    const amount0 = getAmount0ForLiquidity(
+      sqrtRatioX96,
+      sqrtRatio1X96,
+      liquidity
+    );
+    const amount1 = getAmount1ForLiquidity(
+      sqrtRatio1X96,
+      sqrtRatioX96,
+      liquidity
+    );
+    return [amount0, amount1];
+  } else {
+    const amount0 = 0n;
+    const amount1 = getAmount1ForLiquidity(
+      sqrtRatio0X96,
+      sqrtRatio1X96,
+      liquidity
+    );
+    return [amount0, amount1];
+  }
+};
