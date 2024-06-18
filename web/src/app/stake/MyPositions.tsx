@@ -28,12 +28,14 @@ const MyPositionsWalletFragment = graphql(`
   fragment MyPositionsWalletFragment on Wallet {
     id
     positions {
-      positionId
-      pool {
-        token {
-          name
-          address
-          symbol
+      positions {
+        positionId
+        pool {
+          token {
+            name
+            address
+            symbol
+          }
         }
       }
     }
@@ -60,7 +62,7 @@ export const MyPositions = () => {
   const pools = useMemo((): Pool[] | undefined => {
     if (showDemoData && address) return mockMyPositions;
 
-    return walletData?.positions?.map((position) => ({
+    return walletData?.positions?.positions?.map((position) => ({
       positionId: position.positionId,
       id: position.pool.token.address,
       duration: 0,

@@ -24,7 +24,7 @@ type Position struct {
 	BlockHash       types.Hash    `json:"blockHash"`
 	TransactionHash types.Hash    `json:"transactionHash"`
 	BlockNumber     types.Number  `json:"blockNumber"`
-	Id              types.Number  `json:"id" gorm:"column:pos_id"` // ID name might cause issues with gorm
+	Id              int           `json:"id" gorm:"column:pos_id"` // ID name might cause issues with gorm
 	Owner           types.Address `json:"owner"`
 	Pool            types.Address `json:"pool"`
 	Lower           types.Number  `json:"lower"`
@@ -34,7 +34,7 @@ type Position struct {
 // PositionSnapshot taken from snapshot_positions_log_1. Used to service
 // liquidity queries.
 type PositionSnapshot struct {
-	PosId     types.Number         `json:"pos_id"`
+	PosId     int                  `json:"pos_id"`
 	UpdatedBy time.Time            `json:"updated_by"`
 	Owner     types.Address        `json:"owner"`
 	Pool      types.Address        `json:"pool"`

@@ -79,7 +79,7 @@ export const SwapPro = ({
 
   const transactions = useFragment(
     SwapProTransactionsFragment,
-    dataUser?.getSwapsForUser,
+    dataUser?.getSwapsForUser.swaps,
   );
 
   const showMockData = useFeatureFlag("ui show demo data");

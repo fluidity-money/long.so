@@ -58,7 +58,7 @@ var (
 		"0x65dfe41220c438bf069bbce9eb66b087fe65db36": {{
 			TransactionHash: "",             // TODO
 			BlockNumber:     types.Number{}, // TODO
-			Id:              types.EmptyNumber(),
+			Id:              0,
 			Owner:           types.AddressFromString("0xdca670597bcc35e11200fe07d9191a33a73850b9"),
 			Pool:            types.AddressFromString("0x65dfe41220c438bf069bbce9eb66b087fe65db36"),
 			Lower:           types.EmptyNumber(), // TODO
@@ -82,15 +82,23 @@ func MockGetPool(address string) (pool *seawater.Pool) {
 	return &x
 }
 
-func MockGetPoolPositions(address string) (positions []seawater.Position) {
-	return Positions[address]
+func MockGetPoolPositions(address types.Address) (positions model.SeawaterPositions) {
+	a := address // Copy so we don't keep alive the scope above.
+	return model.SeawaterPositions{
+		From: 0,
+		To:   0,
+		Pool: &a,
+		// Wallet is unset here so we don't filter on it.
+		Wallet:    nil,
+		Positions: Positions[address.String()],
+	}
 }
 
-func MockGetPosition(id string) (position *seawater.Position) {
+func MockGetPosition(id int) (position *seawater.Position) {
 L:
 	for _, ps := range Positions {
 		for _, p := range ps {
-			if p.Id.String() == id {
+			if p.Id == id {
 				x := p
 				position = &x
 				break L
@@ -211,12 +219,12 @@ func MockToken(address string) (model.Token, error) {
 	return Tokens[address], nil
 }
 
-func MockSwaps(fusdc types.Address, amount int, pool types.Address) (swaps []model.SeawaterSwap) {
+func MockSwaps(fusdc types.Address, amount int, pool types.Address) model.SeawaterSwaps {
 	// Picks 150 random swaps, then sorts them according to the
 	// timestamp (with all transactions being made less than a month ago randomly chosen.)
 	// Assumes 6 as the decimals for fUSDC, and that the pool address is one that supports the
 	// currently focused token.
-	swaps = make([]model.SeawaterSwap, amount)
+	swaps := make([]model.SeawaterSwap, amount)
 	now := time.Now()
 	secsSinceLastMonth := new(big.Int).SetInt64(2678400) // 31 days in seconds
 	tokenA := types.AddressFromString("0x65dfe41220c438bf069bbce9eb66b087fe65db36")
@@ -263,7 +271,16 @@ func MockSwaps(fusdc types.Address, amount int, pool types.Address) (swaps []mod
 			return 0
 		}
 	})
-	return
+	p := pool
+	pagination := model.SeawaterSwaps{
+		From: 0,
+		To:   amount,
+		Pool: &p,
+		// Wallet set to nil to make this about pools.
+		Wallet: nil,
+		Swaps:  swaps,
+	}
+	return pagination
 }
 
 // MockDelay for a random amount up to 5 seconds.

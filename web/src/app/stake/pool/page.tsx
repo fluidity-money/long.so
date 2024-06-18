@@ -42,15 +42,17 @@ const ManagePoolFragment = graphql(`
     }
     earnedFeesAPRFUSDC
     positions {
-      positionId
-      lower
-      upper
-      liquidity {
-        fusdc {
-          valueUsd
-        }
-        token1 {
-          valueUsd
+      positions {
+        positionId
+        lower
+        upper
+        liquidity {
+          fusdc {
+            valueUsd
+          }
+          token1 {
+            valueUsd
+          }
         }
       }
     }
@@ -65,7 +67,7 @@ export default function PoolPage() {
   // get the id from the query params
   const params = useSearchParams();
   const id = params.get("id");
-  const positionIdParam = params.get("positionId")
+  const positionIdParam = Number(params.get("positionId"));
 
   const { data } = useGraphqlGlobal();
   const allPoolsData = useFragment(ManagePoolFragment, data?.pools);
@@ -79,17 +81,17 @@ export default function PoolPage() {
   // the internal ID and query parameters
   const position = useMemo(() => {
     if (positionId_ !== undefined)
-      return poolData?.positions?.find(p => p.positionId === positionId_.toString())
+      return poolData?.positions?.positions.find(p => p.positionId === positionId_)
     if (positionIdParam)
-      return poolData?.positions?.find(p => p.positionId === positionIdParam.toString())
-    return poolData?.positions?.[0]
+      return poolData?.positions?.positions.find(p => p.positionId === positionIdParam)
+    return poolData?.positions?.positions[0]
   }, [poolData, positionId_, positionIdParam])
 
   const { positionId, upper: upperTick, lower: lowerTick } = position || {}
 
   const poolBalance = useMemo(() => (
     usdFormat(poolData ?
-      poolData.positions.reduce((total, { liquidity: { fusdc, token1 } }) =>
+      poolData.positions.positions.reduce((total, { liquidity: { fusdc, token1 } }) =>
         total + parseFloat(fusdc.valueUsd) + parseFloat(token1.valueUsd),
         0) :
       0
@@ -278,15 +280,15 @@ export default function PoolPage() {
                 <div className="flex flex-row gap-2">
                   <div className="flex flex-1 flex-col">
                     <div className="text-3xs md:text-2xs">Select Position</div>
-                    <Select value={positionId} onValueChange={value => setPositionId_(Number(value))} defaultValue={position?.positionId}>
+                    <Select value={`${positionId}`} onValueChange={value => setPositionId_(Number(value))} defaultValue={`${position?.positionId}`}>
                       <SelectTrigger className="h-6 w-auto border-0 bg-black p-0 text-[12px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {poolData?.positions.map(position => (
+                        {poolData?.positions.positions.map(position => (
                           <SelectItem
-                            key={position.positionId}
-                            value={position.positionId}
+                            key={`${position.positionId}`}
+                            value={`${position.positionId}`}
                           >{position.positionId}</SelectItem>
                         ))}
                       </SelectContent>

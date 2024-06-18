@@ -29,8 +29,16 @@ type Query {
     """
     Pool address to scan for.
     """
-    pool: String!
-  ): [SeawaterPosition!]
+    pool: String!,
+    """
+    How many records to return from the query.
+    """
+    first: Int,
+    """
+    Where to start after based on the position id.
+    """
+    after: Int
+  ): SeawaterPositions!
 
   """
   Get positions that're owned by any pool using it's ID, based on what's known to the database.
@@ -39,7 +47,7 @@ type Query {
     """
     Position ID to look up for when finding this position.
     """
-    id: String!
+    id: Int!
   ): SeawaterPosition
 
   """
@@ -49,8 +57,16 @@ type Query {
     """
     Wallet of the user to position owner to look up.
     """
-    wallet: String!
-  ): [SeawaterPosition!]!
+    wallet: String!,
+    """
+    How many records to return from the query.
+    """
+    first: Int,
+    """
+    Where to start after based on the position id.
+    """
+    after: Int
+  ): SeawaterPositions!
 
   """
   Get wallet information based on information including balances. SHOULD NOT be used to get
@@ -72,8 +88,16 @@ type Query {
     """
     Pool to scan for swaps from.
     """
-    pool: String!
-  ): [SeawaterSwap!]
+    pool: String!,
+    """
+    How many records to return from the query.
+    """
+    first: Int,
+    """
+    Where to start after based on the position id.
+    """
+    after: Int
+  ): SeawaterSwaps!
 
   """
   getSwapsForUser by the user across every pool we track.
@@ -82,8 +106,16 @@ type Query {
     """
     Wallet of the pool owner to scan for.
     """
-    wallet: String!
-  ): [SeawaterSwap!]!
+    wallet: String!,
+    """
+    How many records to return from the query.
+    """
+    first: Int,
+    """
+    Where to start after based on the position id.
+    """
+    after: Int
+  ): SeawaterSwaps!
 }
 
 """
@@ -170,12 +202,12 @@ type SeawaterPool {
   """
   Positions available in this pool.
   """
-  positions: [SeawaterPosition!]!
+  positions(first: Int, after: Int): SeawaterPositions!
 
   """
   Positions available in this pool, that were created by the wallet given.
   """
-  positionsForUser(wallet: String!): [SeawaterPosition!]!
+  positionsForUser(wallet: String!, first: Int, after: Int): SeawaterPositions!
 
   """
   Liquidity available in a pool, with only 20 elements being returned encompassing the
@@ -186,7 +218,44 @@ type SeawaterPool {
   """
   Swaps that were made using this pool.
   """
+  swaps(first: Int, after: Int): SeawaterSwaps!
+}
+
+"""
+Pagination-friendly way to quickly receive swaps made somewhere. Knows internally where it
+came from, where it's at with pagination with the position ids.
+"""
+type SeawaterSwaps {
+  pool: SeawaterPool!
   swaps: [SeawaterSwap!]!
+  next(
+    """
+    The number of fields to display from the beginning of the latest history.
+    """
+    first: Int!,
+    """
+    Where to start, if paginating, after a position id that was loaded before.
+    """
+    after: Int!
+  ): SeawaterSwaps!
+}
+
+"""
+Pagination-friendly way of viewing the current state of the positions available in a pool.
+"""
+type SeawaterPositions {
+  pool: SeawaterPool!
+  positions: [SeawaterPosition!]!
+  next(
+    """
+    The number of fields to display from the beginning of the latest history.
+    """
+    first: Int!,
+    """
+    Where to start, if paginating, after an ID that was loaded before.
+    """
+    after: Int!
+  ): SeawaterPositions!
 }
 
 """
@@ -314,9 +383,9 @@ type SeawaterPosition {
   id: ID!
 
   """
-  Position Id in the contract of the user's position that they own. Represented as hex.
+  Position Id in the contract of the user's position that they own. Used for a cursor.
   """
-  positionId: String!
+  positionId: Int!
 
   """
   Owner of the position. A wallet address.
@@ -467,7 +536,7 @@ type Wallet {
   """
   Positions opened by the user in the AMM.
   """
-  positions: [SeawaterPosition!]
+  positions(first: Int, after: Int): SeawaterPositions!
 }
 
 """

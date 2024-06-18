@@ -26,6 +26,8 @@ var (
 	MaxSqrtRatio = new(big.Int).SetBits([]big.Word{0x5d951d5263988d26, 0xefd1fc6a50648849, 0xfffd8963})
 )
 
+// Q96 to use for some math operations
+//79228162514264337593543950336
 var Q96 = new(big.Int).SetBits([]big.Word{0, 0x100000000})
 
 // GetAmountsForLiq with sqrtRatioX96 being the first tick boundary, and

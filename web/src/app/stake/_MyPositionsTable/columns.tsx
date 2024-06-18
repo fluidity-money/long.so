@@ -13,7 +13,7 @@ export type Token = {
 // this is a misnomer - it represents a position and its corresponding pool
 export type Pool = {
   id: string;
-  positionId: string;
+  positionId: number;
   tokens: [Token, Token];
   duration: number;
   staked: number;

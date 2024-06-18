@@ -65,7 +65,7 @@ type StakeFormProps = { poolId: string } & ({
   positionId?: never,
 } | {
   mode: "existing",
-  positionId: string,
+  positionId: number,
 });
 
 const StakeFormFragment = graphql(`

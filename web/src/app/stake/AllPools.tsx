@@ -91,8 +91,10 @@ export const AllPoolsFragment = graphql(`
       valueUsd
     }
     positions {
-      lower
-      upper
+      positions {
+        lower
+        upper
+      }
     }
   }
 `);
@@ -128,7 +130,7 @@ export const AllPools = () => {
         return 0
       })();
 
-      const liquidityRange = pool.positions.reduce(([min, max], position) => [
+      const liquidityRange = pool.positions.positions.reduce(([min, max], position) => [
         position.lower < min ? position.lower : min,
         position.upper > max ? position.upper : max
       ], [0, 0]).map(tick =>

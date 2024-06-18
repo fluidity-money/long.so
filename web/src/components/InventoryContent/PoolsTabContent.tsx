@@ -15,12 +15,14 @@ const MyPositionsInventoryWalletFragment = graphql(`
   fragment MyPositionsInventoryWalletFragment on Wallet {
     id
     positions {
-      id
-      pool {
-        token {
-          name
-          address
-          symbol
+      positions {
+        id
+        pool {
+          token {
+            name
+            address
+            symbol
+          }
         }
       }
     }
@@ -47,7 +49,7 @@ export const PoolsTabContent = () => {
     }
 
     return (
-      walletData?.positions?.map((position) => ({
+      walletData?.positions?.positions.map((position) => ({
         id: position.id,
         pool: position.pool.token.name,
         yield: 0,

@@ -30,7 +30,7 @@ type ConfirmStakeProps = {
   positionId?: never,
 } | {
   mode: "existing",
-  positionId: string,
+  positionId: number,
 };
 
 export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
