@@ -6,6 +6,8 @@ var (
 	One  = new(big.Int).SetInt64(1)
 	Zero = new(big.Int).SetInt64(0)
 
+	// Two192 for some calculations (2 ** 192)
+	//6277101735386680763835789423207666416102355444464034512896
 	Two192 = new(big.Rat).SetInt(new(big.Int).SetBits([]big.Word{0, 0, 0, 1}))
 )
 
@@ -25,8 +27,6 @@ var (
 )
 
 var Q96 = new(big.Int).SetBits([]big.Word{0, 0x100000000})
-
-const Resolution = 96
 
 // GetAmountsForLiq with sqrtRatioX96 being the first tick boundary, and
 // sqrtRatioAX96 being the second. liq being the amount of liquidity in
@@ -69,11 +69,15 @@ func GetAmount0ForLiq(sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount0 *big.
 		sqrtRatio0X96 = sqrtRatioBX96
 		sqrtRatio1X96 = sqrtRatioAX96
 	}
-	lsl := new(big.Int).Lsh(liq, Resolution)
+	lsl := new(big.Int).Lsh(liq, 96)
 	sqrtDiff := new(big.Int).Sub(sqrtRatio1X96, sqrtRatio0X96)
 	res := new(big.Int).Mul(lsl, sqrtDiff)
 	num := new(big.Int).Quo(res, sqrtRatio1X96)
-	amount0 = new(big.Rat).Quo(new(big.Rat).SetInt(num), new(big.Rat).SetInt(sqrtRatio0X96))
+	//num / sqrtRatio0X96
+	amount0 = new(big.Rat).Quo(
+		new(big.Rat).SetInt(num),
+		new(big.Rat).SetInt(sqrtRatio0X96),
+	)
 	return
 }
 
@@ -87,7 +91,11 @@ func GetAmount1ForLiq(sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount1 *big.
 		sqrtRatio0X96 = sqrtRatioBX96
 		sqrtRatio1X96 = sqrtRatioAX96
 	}
-	sqrtDiff := new(big.Rat).Sub(new(big.Rat).SetInt(sqrtRatio1X96), new(big.Rat).SetInt(sqrtRatio0X96))
+	//sqrtRatio1X96 - sqrtRatio0X96
+	sqrtDiff := new(big.Rat).Sub(
+		new(big.Rat).SetInt(sqrtRatio1X96),
+		new(big.Rat).SetInt(sqrtRatio0X96),
+	)
 	res := new(big.Rat).Mul(new(big.Rat).SetInt(liq), sqrtDiff)
 	amount1 = new(big.Rat).Quo(res, new(big.Rat).SetInt(Q96))
 	return

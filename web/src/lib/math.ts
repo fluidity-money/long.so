@@ -245,7 +245,11 @@ export const getAmount0ForLiquidity = (
     sqrtRatio0X96 = sqrtRatioBX96
     sqrtRatio1X96 = sqrtRatioAX96
   }
-  return 0n;
+  const lsl = liquidity << 96n;
+  const sqrtDiff = sqrtRatio1X96 - sqrtRatio0X96;
+  const res = lsl * sqrtDiff;
+  const num = res * sqrtRatio1X96;
+  return num / sqrtRatio0X96;
 };
 
 export const getAmount1ForLiquidity = (
@@ -259,7 +263,10 @@ export const getAmount1ForLiquidity = (
     sqrtRatio0X96 = sqrtRatioBX96
     sqrtRatio1X96 = sqrtRatioAX96
   }
-  return 0n;
+  const sqrtDiff = sqrtRatio1X96 - sqrtRatio0X96;
+  const res = liquidity * sqrtDiff;
+  const amount1 = res * 79228162514264337593543950336n;
+  return amount1;
 };
 
 export const getAmountsForLiquidity = (

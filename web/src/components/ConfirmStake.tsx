@@ -14,7 +14,7 @@ import {
   useWriteContract,
 } from "wagmi";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
-import { getLiquidityForAmounts } from "@/lib/math";
+import { sqrtPriceX96ToPrice, getLiquidityForAmounts } from "@/lib/math";
 import { useEffect, useCallback } from "react";
 import { erc20Abi, Hash, hexToBigInt, maxUint256 } from "viem";
 import { ammAddress } from "@/lib/addresses";
