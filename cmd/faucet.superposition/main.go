@@ -5,7 +5,6 @@ package main
 import (
 	"context"
 	_ "embed"
-	"encoding/json"
 	"crypto/ecdsa"
 	"log"
 	"net/http"
@@ -33,9 +32,6 @@ import (
 
 	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
 )
-
-//go:embed stakers.json
-var StakersBytes []byte
 
 const (
 	// EnvFaucetAddr to use as the address for the faucet.
@@ -65,9 +61,6 @@ func (m requestMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := context.WithValue(r.Context(), XForwardedFor, ipAddr)
 	m.srv.ServeHTTP(w, r.WithContext(ctx))
 }
-
-// Stakers map created from stakers.json (that should be provided dring build-time.)
-var Stakers map[string]bool
 
 func main() {
 	config := config.Get()
@@ -110,7 +103,6 @@ func main() {
 			Geth:    geth,
 			C:       config,
 			Queue: queue,
-			Stakers: Stakers,
 		},
 	}))
 	// Add a custom transport so we can access the requesting IP address in a context.
@@ -131,16 +123,5 @@ func main() {
 			"unexpected listen type: %#v, use either (lambda|http) for SPN_LISTEN_BACKEND",
 			typ,
 		)
-	}
-}
-
-func init() {
-	var stakers []string
-	if err := json.Unmarshal(StakersBytes, &stakers); err != nil {
-		panic(err)
-	}
-	Stakers = make(map[string]bool, len(stakers))
-	for _, s := range stakers {
-		Stakers[s] = true
 	}
 }

@@ -1,6 +1,4 @@
 
-EXTRA_FILES := stakers.json
-
 include ../golang.mk
 
 .PHONY: lambda

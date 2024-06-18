@@ -17,7 +17,6 @@ type (
 		Geth    *ethclient.Client // needed to do lookups with geth
 		C       config.C          // config for connecting to the right endpoints
 		Queue   chan<- FaucetReq    // queue for faucet requests
-		Stakers map[string]bool   // stakers list to support to filter Ethereum addresses on. (read-only)
 	}
 
 	// FaucetReq to an IP address given, assuming they passed the

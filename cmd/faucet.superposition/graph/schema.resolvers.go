@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"strings"
 	"time"
 
 	"github.com/fluidity-money/long.so/lib/features"
@@ -47,8 +46,16 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 	}
 	// Test if the user's included in our staking support.
 	if r.F.Is(features.FeatureFaucetStakersOnly) {
-		if ok := r.Stakers[strings.ToLower(wallet)]; !ok {
-			slog.Error("user who is not a staker requested tokens",
+		ok, err := IsUserStaker(wallet)
+		if err != nil {
+			slog.Error("error requesting whether the user is a staker",
+				"ip addr", ipAddr,
+				"submitted wallet", wallet,
+			)
+			return "", fmt.Errorf("error requesting")
+		}
+		if !ok {
+			slog.Error("non staker requested spn airdrop",
 				"ip addr", ipAddr,
 				"submitted wallet", wallet,
 			)

@@ -719,10 +719,10 @@ func (r *seawaterPoolResolver) Liquidity(ctx context.Context, obj *seawater.Pool
 		usdAmt1.Mul(usdAmt1, price)
 		liq.Add(liq, usdAmt1)
 		liquidity[i] = model.SeawaterLiquidity{
-			ID: "", // TODO
+			ID:        "", // TODO
 			TickLower: g.Tick.String(),
 			TickUpper: g.NextTick.String(),
-			Price: price.FloatString(5),
+			Price:     price.FloatString(5),
 			Liquidity: liq.FloatString(5),
 		}
 	}
