@@ -140,17 +140,17 @@ func (r *queryResolver) Pools(ctx context.Context) (pools []seawater.Pool, err e
 
 // GetPool is the resolver for the getPool field.
 func (r *queryResolver) GetPool(ctx context.Context, token string) (pool *seawater.Pool, err error) {
-	token = types.AddressFromString(token).String()
+	tokenAddress := types.AddressFromString(token)
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
-		pool = MockGetPool(token)
+		pool = MockGetPool(tokenAddress.String())
 		return
 	}
 	err = r.DB.Table("events_seawater_newpool").
-		Where("token = ?", token).
+		Where("token = ?", tokenAddress).
 		Scan(&pool).
 		Error
 	return
@@ -264,7 +264,7 @@ func (r *queryResolver) GetWallet(ctx context.Context, address string) (wallet *
 
 // GetSwaps is the resolver for the getSwaps field.
 func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, after *int) (swaps model.SeawaterSwaps, err error) {
-	pool = types.AddressFromString(pool).String()
+	poolAddress := types.AddressFromString(pool)
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		swaps = MockSwaps(r.C.FusdcAddr, 150, "0x65dfe41220c438bf069bbce9eb66b087fe65db36")
@@ -275,8 +275,8 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 	).
-		Where("token_in = ?", pool).
-		Or("token_out = ?", pool).
+		Where("token_in = ?", poolAddress).
+		Or("token_out = ?", poolAddress).
 		Scan(&swaps).Error
 	return
 }
@@ -290,7 +290,7 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 		return
 	}
 	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?)", r.C.FusdcAddr, r.C.FusdcDecimals).
-		Where("sender = ?", walletAddress.String()).
+		Where("sender = ?", walletAddress).
 		Scan(&swaps).
 		Error
 	return
