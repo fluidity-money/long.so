@@ -15,7 +15,7 @@ const UrlModeratorsGraph = "https://moderators.fluidity.money/"
 const StakerCutoff = 10_000
 
 func IsUserStaker(wallet string) (bool, error) {
-	buf := strings.NewReader(fmt.Sprintf(`{"query":"query {\n  getStakingInformation(addresses: [\n    \"%v\"\n  ]) {\n    staked\n  }\n}"}`, wallet))
+	buf := strings.NewReader(fmt.Sprintf(`{"query":"query {\n  getStakingInformation(addresses: [\n    \"%v\"\n  ]) {\n    points\n  }\n}"}`, wallet))
 	resp, err := http.Post(UrlModeratorsGraph, "application/json", buf)
 	if err != nil {
 		return false, err
