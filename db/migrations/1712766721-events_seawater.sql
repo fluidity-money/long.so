@@ -110,7 +110,7 @@ CREATE TABLE events_seawater_newPool (
 	tick_spacing INTEGER NOT NULL
 );
 
-CREATE INDEX ON events_seawater_newPool (token);
+CREATE UNIQUE INDEX ON events_seawater_newPool (token);
 
 CREATE TABLE events_seawater_collectProtocolFees (
 	id SERIAL PRIMARY KEY,
