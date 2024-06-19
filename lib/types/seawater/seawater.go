@@ -56,8 +56,9 @@ type LiquidityGroup struct {
 }
 
 // SnapshotPositionsLatestDecimalsGroup taken from
-// snapshot_positions_latest_decimals_grouped_1. Used to service requests
-// for the summated amounts in the positions request.
+// snapshot_positions_latest_decimals_grouped_1, or from
+// snapshot_positions_latest_decimals_grouped_user_1_return. Used to
+// service requests for the summated amounts in the positions request.
 type SnapshotPositionsLatestDecimalsGroup struct {
 	Pool              types.Address        `json:"pool"`
 	Decimals          uint8                `json:"decimals"`

@@ -978,37 +978,43 @@ func (r *seawaterPositionsResolver) Sum(ctx context.Context, obj *model.Seawater
 		return nil, fmt.Errorf("empty positions")
 	}
 	// Try to figure out whether we're servicing a per-wallet request, or a per-pool request.
+	var results []seawater.SnapshotPositionsLatestDecimalsGroup
+	stmt := r.DB
 	switch {
 	case obj.Pool != nil:
-		var results []seawater.SnapshotPositionsLatestDecimalsGroup
-		err := r.DB.Table("snapshot_positions_latest_decimals_grouped_1").
-			Where("pool = ?", obj.Pool).
-			Scan(&results).
-			Error
-		if err != nil {
-			return nil, err
-		}
-		amounts = make([]model.PairAmount, len(results))
-		now := int(time.Now().Unix())
-		for i, res := range results {
-			amounts[i] = model.PairAmount{
-				Timestamp: now,
-				Fusdc: model.Amount{
-					Token:         r.C.FusdcAddr,
-					Decimals:      r.C.FusdcDecimals,
-					Timestamp:     now,
-					ValueUnscaled: res.CumulativeAmount0,
-				},
-				Token1: model.Amount{
-					Token:         res.Pool,
-					Decimals:      int(res.Decimals),
-					Timestamp:     now,
-					ValueUnscaled: res.CumulativeAmount1,
-				},
-			}
-		}
+		stmt = stmt.
+			Table("snapshot_positions_latest_decimals_grouped_1").
+			Where("pool = ?", obj.Pool)
+	case obj.Wallet != nil:
+		stmt = stmt.
+			Raw(
+				"SELECT * FROM snapshot_positions_latest_decimals_grouped_user_1(?)",
+				obj.Wallet,
+			)
 	default:
-		return nil, fmt.Errorf("unimplemented") // TODO
+		return nil, fmt.Errorf("not supported. obj.Wallet and obj.Pool nil")
+	}
+	if err := stmt.Scan(&results).Error; err != nil {
+		return nil, err
+	}
+	amounts = make([]model.PairAmount, len(results))
+	now := int(time.Now().Unix())
+	for i, res := range results {
+		amounts[i] = model.PairAmount{
+			Timestamp: now,
+			Fusdc: model.Amount{
+				Token:         r.C.FusdcAddr,
+				Decimals:      r.C.FusdcDecimals,
+				Timestamp:     now,
+				ValueUnscaled: res.CumulativeAmount0,
+			},
+			Token1: model.Amount{
+				Token:         res.Pool,
+				Decimals:      int(res.Decimals),
+				Timestamp:     now,
+				ValueUnscaled: res.CumulativeAmount1,
+			},
+		}
 	}
 	return
 }
