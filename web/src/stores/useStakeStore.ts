@@ -4,7 +4,9 @@ import {
   MIN_TICK,
   MAX_TICK,
   getTickAtSqrtRatio,
-  encodeSqrtPrice
+  encodeSqrtPrice,
+  getTokenAmountsNumeric,
+  getSqrtRatioAtTick
 } from "@/lib/math";
 import { getFormattedStringFromTokenAmount, getTokenAmountFromFormattedString } from "@/lib/amounts";
 
@@ -34,11 +36,18 @@ interface StakeStore {
   tickLower: number | undefined;
   tickUpper: number | undefined;
 
+  setTickLower: (tick: number) => void;
+  setTickUpper: (tick: number) => void;
+
+  // raw internal value
+  delta: bigint;
+
+  // input field
+  deltaDisplay: string;
+  setDelta: (value: string, tick: bigint) => void;
+
   priceLower: string;
   priceUpper: string;
-
-  priceLowerRaw: string;
-  priceUpperRaw: string;
 
   // parse and set from a display amount
   setPriceLower: (tick: string) => void;
@@ -46,7 +55,7 @@ interface StakeStore {
 }
 
 export const useStakeStore = create<StakeStore>((set) => ({
-  multiSingleToken: "multi",
+  multiSingleToken: "multi" as const,
   setMultiSingleToken: (multiSingleToken) => set({ multiSingleToken }),
 
   token0: DefaultToken,
@@ -104,8 +113,33 @@ export const useStakeStore = create<StakeStore>((set) => ({
   tickLower: MIN_TICK,
   tickUpper: MAX_TICK,
 
-  priceLowerRaw: "0",
-  priceUpperRaw: "0",
+  setTickLower: (tick) => set({ tickLower: tick }),
+  setTickUpper: (tick) => set({ tickUpper: tick }),
+
+  delta: 0n,
+  deltaDisplay: "0",
+  setDelta: (liquidity, tick) => {
+    // always set the display value for input components
+    set({ deltaDisplay: liquidity })
+    set(({ tickLower, tickUpper, setToken0AmountRaw, setToken1AmountRaw }) => {
+      if (tickLower === undefined || tickUpper === undefined)
+        return {}
+      // try to derive the new delta and token amounts
+      try {
+        const delta = BigInt(liquidity)
+        const [amount0, amount1] = getTokenAmountsNumeric(
+          Number(delta),
+          Number(getSqrtRatioAtTick(tick)),
+          tickLower,
+          tickUpper,
+        )
+        setToken0AmountRaw(amount0.toString())
+        setToken1AmountRaw(amount1.toString())
+        return { delta }
+      } catch { }
+      return {}
+    })
+  },
 
   priceLower: "0",
   priceUpper: "0",
@@ -126,7 +160,6 @@ export const useStakeStore = create<StakeStore>((set) => ({
     } catch { }
     set({
       tickLower: tick,
-      priceLowerRaw: rawPrice.toString(),
       priceLower: price,
     });
   },
@@ -146,8 +179,8 @@ export const useStakeStore = create<StakeStore>((set) => ({
     } catch { }
     set({
       tickUpper: tick,
-      priceUpperRaw: rawPrice.toString(),
       priceUpper: price,
     });
   },
-}));
+}
+));
