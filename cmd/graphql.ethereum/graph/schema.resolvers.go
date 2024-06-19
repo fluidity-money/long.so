@@ -992,7 +992,7 @@ func (r *seawaterPositionsResolver) Sum(ctx context.Context, obj *model.Seawater
 				obj.Wallet,
 			)
 	default:
-		return nil, fmt.Errorf("not supported. obj.Wallet and obj.Pool nil")
+		return nil, nil // Assume the query above didn't find any wallets.
 	}
 	if err := stmt.Scan(&results).Error; err != nil {
 		return nil, err
