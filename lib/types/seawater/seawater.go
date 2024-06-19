@@ -54,3 +54,13 @@ type LiquidityGroup struct {
 	CumulativeAmount0 types.UnscaledNumber `json:"cumulative_amount_0"`
 	CumulativeAmount1 types.UnscaledNumber `json:"cumulative_amount_1"`
 }
+
+// SnapshotPositionsLatestDecimalsGroup taken from
+// snapshot_positions_latest_decimals_grouped_1. Used to service requests
+// for the summated amounts in the positions request.
+type SnapshotPositionsLatestDecimalsGroup struct {
+	Pool              types.Address        `json:"pool"`
+	Decimals          uint8                `json:"decimals"`
+	CumulativeAmount0 types.UnscaledNumber `json:"cumulative_amount_0"`
+	CumulativeAmount1 types.UnscaledNumber `json:"cumulative_amount_1"`
+}

@@ -261,9 +261,9 @@ type SeawaterPositions {
 
   """
   The maximum returned by the underlying original query for this data if it's possible to
-  collect.
+  collect for fUSDC and the other token, done per unique token.
   """
-  sum: String
+  sum: [PairAmount!]
 
   next(
     """

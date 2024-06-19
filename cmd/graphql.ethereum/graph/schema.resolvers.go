@@ -973,8 +973,44 @@ func (r *seawaterPositionsResolver) Wallet(ctx context.Context, obj *model.Seawa
 }
 
 // Sum is the resolver for the sum field.
-func (r *seawaterPositionsResolver) Sum(ctx context.Context, obj *model.SeawaterPositions) (*string, error) {
-	panic(fmt.Errorf("not implemented: Sum - sum"))
+func (r *seawaterPositionsResolver) Sum(ctx context.Context, obj *model.SeawaterPositions) (amounts []model.PairAmount, err error) {
+	if obj == nil {
+		return nil, fmt.Errorf("empty positions")
+	}
+	// Try to figure out whether we're servicing a per-wallet request, or a per-pool request.
+	switch {
+	case obj.Pool != nil:
+		var results []seawater.SnapshotPositionsLatestDecimalsGroup
+		err := r.DB.Table("snapshot_positions_latest_decimals_grouped_1").
+			Where("pool = ?", obj.Pool).
+			Scan(&results).
+			Error
+		if err != nil {
+			return nil, err
+		}
+		amounts = make([]model.PairAmount, len(results))
+		now := int(time.Now().Unix())
+		for i, res := range results {
+			amounts[i] = model.PairAmount{
+				Timestamp: now,
+				Fusdc: model.Amount{
+					Token:         r.C.FusdcAddr,
+					Decimals:      r.C.FusdcDecimals,
+					Timestamp:     now,
+					ValueUnscaled: res.CumulativeAmount0,
+				},
+				Token1: model.Amount{
+					Token:         res.Pool,
+					Decimals:      int(res.Decimals),
+					Timestamp:     now,
+					ValueUnscaled: res.CumulativeAmount1,
+				},
+			}
+		}
+	default:
+		return nil, fmt.Errorf("unimplemented") // TODO
+	}
+	return
 }
 
 // Next is the resolver for the next field.

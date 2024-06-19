@@ -247,7 +247,7 @@ type SeawaterPositionsResolver interface {
 	Pool(ctx context.Context, obj *model.SeawaterPositions) (*seawater.Pool, error)
 	Wallet(ctx context.Context, obj *model.SeawaterPositions) (*model.Wallet, error)
 
-	Sum(ctx context.Context, obj *model.SeawaterPositions) (*string, error)
+	Sum(ctx context.Context, obj *model.SeawaterPositions) ([]model.PairAmount, error)
 	Next(ctx context.Context, obj *model.SeawaterPositions, first int, after int) (model.SeawaterPositions, error)
 }
 type SeawaterSwapResolver interface {
@@ -1299,9 +1299,9 @@ type SeawaterPositions {
 
   """
   The maximum returned by the underlying original query for this data if it's possible to
-  collect.
+  collect for fUSDC and the other token, done per unique token.
   """
-  sum: String
+  sum: [PairAmount!]
 
   next(
     """
@@ -5222,9 +5222,9 @@ func (ec *executionContext) _SeawaterPositions_sum(ctx context.Context, field gr
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.([]model.PairAmount)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOPairAmount2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmountᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_SeawaterPositions_sum(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5234,7 +5234,15 @@ func (ec *executionContext) fieldContext_SeawaterPositions_sum(_ context.Context
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "timestamp":
+				return ec.fieldContext_PairAmount_timestamp(ctx, field)
+			case "fusdc":
+				return ec.fieldContext_PairAmount_fusdc(ctx, field)
+			case "token1":
+				return ec.fieldContext_PairAmount_token1(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PairAmount", field.Name)
 		},
 	}
 	return fc, nil
@@ -12157,6 +12165,53 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	}
 	res := graphql.MarshalInt(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOPairAmount2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmountᚄ(ctx context.Context, sel ast.SelectionSet, v []model.PairAmount) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPairAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmount(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalOSeawaterPool2ᚖgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋlibᚋtypesᚋseawaterᚐPool(ctx context.Context, sel ast.SelectionSet, v *seawater.Pool) graphql.Marshaler {
