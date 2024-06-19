@@ -902,7 +902,14 @@ func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *seawater.
 
 // Pool is the resolver for the pool field.
 func (r *seawaterPositionsResolver) Pool(ctx context.Context, obj *model.SeawaterPositions) (seawater.Pool, error) {
-	panic(fmt.Errorf("not implemented: Pool - pool"))
+	if obj == nil || obj.Pool == nil {
+		return seawater.Pool{}, fmt.Errorf("empty pool")
+	}
+	pool, err := r.Query().GetPool(ctx, obj.Pool.String())
+	if err != nil {
+		return seawater.Pool{}, err
+	}
+	return *pool, nil
 }
 
 // Next is the resolver for the next field.
@@ -965,7 +972,14 @@ func (r *seawaterSwapResolver) AmountOut(ctx context.Context, obj *model.Seawate
 
 // Pool is the resolver for the pool field.
 func (r *seawaterSwapsResolver) Pool(ctx context.Context, obj *model.SeawaterSwaps) (seawater.Pool, error) {
-	panic(fmt.Errorf("not implemented: Pool - pool"))
+	if obj == nil || obj.Pool == nil {
+		return seawater.Pool{}, fmt.Errorf("empty pool")
+	}
+	pool, err := r.Query().GetPool(ctx, obj.Pool.String())
+	if err != nil {
+		return seawater.Pool{}, err
+	}
+	return *pool, nil
 }
 
 // Next is the resolver for the next field.
