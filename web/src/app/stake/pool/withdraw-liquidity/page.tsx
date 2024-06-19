@@ -203,7 +203,7 @@ export default function WithdrawLiquidity() {
               variant={"no-ring"}
               value={deltaDisplay}
               onChange={(e) => {
-                setDelta(e.target.value, curTick)
+                setDelta(e.target.value, curTick, positionLiquidity?.result ?? 0n)
               }} />
           </div>
 

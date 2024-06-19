@@ -44,7 +44,7 @@ interface StakeStore {
 
   // input field
   deltaDisplay: string;
-  setDelta: (value: string, tick: bigint) => void;
+  setDelta: (value: string, tick: bigint, max?: bigint) => void;
 
   priceLower: string;
   priceUpper: string;
@@ -55,7 +55,7 @@ interface StakeStore {
 }
 
 export const useStakeStore = create<StakeStore>((set) => ({
-  multiSingleToken: "multi" as const,
+  multiSingleToken: "multi",
   setMultiSingleToken: (multiSingleToken) => set({ multiSingleToken }),
 
   token0: DefaultToken,
@@ -118,7 +118,11 @@ export const useStakeStore = create<StakeStore>((set) => ({
 
   delta: 0n,
   deltaDisplay: "0",
-  setDelta: (liquidity, tick) => {
+  setDelta: (liquidity, tick, max) => {
+    const validNumber = !liquidity.includes(" ") && !isNaN(Number(liquidity))
+    // update display amount if `amount` is valid as a display number
+    if (!validNumber)
+      return
     // always set the display value for input components
     set({ deltaDisplay: liquidity })
     set(({ tickLower, tickUpper, setToken0AmountRaw, setToken1AmountRaw }) => {
@@ -133,9 +137,11 @@ export const useStakeStore = create<StakeStore>((set) => ({
           tickLower,
           tickUpper,
         )
-        setToken0AmountRaw(amount0.toString())
-        setToken1AmountRaw(amount1.toString())
-        return { delta }
+        if (!max || BigInt(liquidity) <= max) {
+          setToken0AmountRaw(amount0.toString())
+          setToken1AmountRaw(amount1.toString())
+          return { delta }
+        }
       } catch { }
       return {}
     })
