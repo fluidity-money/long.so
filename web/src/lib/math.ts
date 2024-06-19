@@ -72,7 +72,7 @@ export const getTickAtSqrtRatio = (sqrtPriceX96: bigint): number => {
     f = 0n;
   }
   msb |= f;
-  r  >>= f;
+  r >>= f;
 
   if (r > 0xFFFFFFFFn) {
     f = 1n << 5n;
@@ -117,7 +117,7 @@ export const getTickAtSqrtRatio = (sqrtPriceX96: bigint): number => {
   if (r > 0x1n) {
     f = 1n;
   } else {
-   f = 0n;
+    f = 0n;
   }
   msb |= f;
 
@@ -177,8 +177,9 @@ export const getLiquidityForAmount0 = (
   let sqrtRatioBX96 = getSqrtRatioAtTick(upperTick);
 
   if (sqrtRatioAX96 > sqrtRatioBX96) {
+    const sqrtRatioAX96_ = sqrtRatioAX96;
     sqrtRatioAX96 = sqrtRatioBX96;
-    sqrtRatioBX96 = sqrtRatioAX96;
+    sqrtRatioBX96 = sqrtRatioAX96_;
   }
 
   const intermediate = (sqrtRatioAX96 * sqrtRatioBX96) / Q96;
@@ -194,8 +195,9 @@ export const getLiquidityForAmount1 = (
   let sqrtRatioBX96 = getSqrtRatioAtTick(upperTick);
 
   if (sqrtRatioAX96 > sqrtRatioBX96) {
+    const sqrtRatioAX96_ = sqrtRatioAX96;
     sqrtRatioAX96 = sqrtRatioBX96;
-    sqrtRatioBX96 = sqrtRatioAX96;
+    sqrtRatioBX96 = sqrtRatioAX96_;
   }
 
   return (amount1 * Q96) / (sqrtRatioBX96 - sqrtRatioAX96);
@@ -214,13 +216,14 @@ export const getLiquidityForAmounts = (
   const sqrtRatioX96 = getSqrtRatioAtTick(tick);
 
   if (sqrtRatioAX96 > sqrtRatioBX96) {
+    const sqrtRatioAX96_ = sqrtRatioAX96;
     sqrtRatioAX96 = sqrtRatioBX96;
-    sqrtRatioBX96 = sqrtRatioAX96;
+    sqrtRatioBX96 = sqrtRatioAX96_;
   }
 
-  if (sqrtRatioAX96 > sqrtRatioX96) {
+  if (sqrtRatioX96 <= sqrtRatioAX96) {
     return getLiquidityForAmount0(lowerTick, upperTick, amount0);
-  } else if (sqrtRatioBX96 > sqrtRatioAX96) {
+  } else if (sqrtRatioX96 < sqrtRatioBX96) {
     const liquidity0 = getLiquidityForAmount0(tick, upperTick, amount0);
     const liquidity1 = getLiquidityForAmount1(lowerTick, tick, amount1);
 
@@ -248,7 +251,7 @@ export const getAmount0ForLiquidity = (
   const lsl = liquidity << 96n;
   const sqrtDiff = sqrtRatio1X96 - sqrtRatio0X96;
   const res = lsl * sqrtDiff;
-  const num = res * sqrtRatio1X96;
+  const num = res / sqrtRatio1X96;
   return num / sqrtRatio0X96;
 };
 
@@ -265,7 +268,7 @@ export const getAmount1ForLiquidity = (
   }
   const sqrtDiff = sqrtRatio1X96 - sqrtRatio0X96;
   const res = liquidity * sqrtDiff;
-  const amount1 = res * 79228162514264337593543950336n;
+  const amount1 = res / Q96;
   return amount1;
 };
 
