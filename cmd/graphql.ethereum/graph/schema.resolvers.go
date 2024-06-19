@@ -94,18 +94,21 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	if obj.Token == r.C.FusdcAddr {
 		return "1.0", nil
 	}
-	pool, err := r.Query().GetPool(ctx, obj.Token.String())
+	// Use the final tick function to get the row.
+	var finalTick struct {
+		FinalTick types.Number
+	}
+	err := r.DB.Table("seawater_final_ticks_1").
+		Select("final_tick").
+		Where("pool = ?", obj.Token).
+		First(&finalTick).
+		Error
 	if err != nil {
 		return "", err
 	}
-	if pool == nil {
-		return "", fmt.Errorf("not able to find pool with addr %#v", obj.Token)
-	}
-	price, err := r.SeawaterPool().Price(ctx, pool)
-	if err != nil {
-		return "", err
-	}
-	return obj.UsdValue(price, r.C.FusdcAddr)
+	sqrtPrice := math.GetSqrtRatioAtTick(finalTick.FinalTick.Big())
+	price := math.GetPriceAtSqrtRatio(sqrtPrice)
+	return price.FloatString(5), nil
 }
 
 // Fusdc is the resolver for the fusdc field.
@@ -790,18 +793,31 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 	if obj == nil {
 		return swaps, fmt.Errorf("empty pool")
 	}
+	if first == nil {
+		fst := 10
+		first = &fst
+	}
+	if after == nil {
+		aft := 0
+		after = &aft
+	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		swaps = MockSwaps(r.C.FusdcAddr, 150, obj.Token)
 		return
 	}
 	// DB.RAW doesn't support chaining
-	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?) WHERE token_in = ? OR token_out = ?",
+	err = r.DB.Raw(
+		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND id > ? ORDER BY id LIMIT ?",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		obj.Token,
 		obj.Token,
-	).Scan(&swaps.Swaps).Error
+		*after,
+		*first,
+	).
+		Scan(&swaps.Swaps).
+		Error
 	swaps.Pool = &obj.Token
 	return
 }
