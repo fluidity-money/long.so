@@ -277,7 +277,7 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 	).
 		Where("token_in = ?", poolAddress).
 		Or("token_out = ?", poolAddress).
-		Scan(&swaps).Error
+		Scan(&swaps.Swaps).Error
 	return
 }
 
@@ -291,7 +291,7 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 	}
 	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?)", r.C.FusdcAddr, r.C.FusdcDecimals).
 		Where("sender = ?", walletAddress).
-		Scan(&swaps).
+		Scan(&swaps.Swaps).
 		Error
 	return
 }
@@ -801,7 +801,7 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?)", r.C.FusdcAddr, r.C.FusdcDecimals).
 		Where("token_in = ?", obj.Token).
 		Or("token_out = ?", obj.Token).
-		Scan(&swaps).
+		Scan(&swaps.Swaps).
 		Error
 	return
 }
