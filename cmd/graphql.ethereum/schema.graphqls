@@ -244,8 +244,27 @@ type SeawaterSwaps {
 Pagination-friendly way of viewing the current state of the positions available in a pool.
 """
 type SeawaterPositions {
-  pool: SeawaterPool!
+  """
+  The specific pool (if any) that's responsible for the responses here.
+  """
+  pool: SeawaterPool
+
+  """
+  The specific wallet (if any) that's associated with the positions here.
+  """
+  wallet: Wallet
+
+  """
+  The positions associated with this data.
+  """
   positions: [SeawaterPosition!]!
+
+  """
+  The maximum returned by the underlying original query for this data if it's possible to
+  collect.
+  """
+  sum: String
+
   next(
     """
     The number of fields to display from the beginning of the latest history.
@@ -564,7 +583,7 @@ type Token {
   image: String!
 
   """
-  Total supply of the token, in the form of hex.
+  Total supply of the token, in the form of base10.
   """
   totalSupply: String!
 

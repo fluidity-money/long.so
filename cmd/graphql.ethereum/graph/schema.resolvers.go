@@ -943,15 +943,38 @@ func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *seawater.
 }
 
 // Pool is the resolver for the pool field.
-func (r *seawaterPositionsResolver) Pool(ctx context.Context, obj *model.SeawaterPositions) (seawater.Pool, error) {
-	if obj == nil || obj.Pool == nil {
-		return seawater.Pool{}, fmt.Errorf("empty pool")
+func (r *seawaterPositionsResolver) Pool(ctx context.Context, obj *model.SeawaterPositions) (*seawater.Pool, error) {
+	if obj == nil {
+		return nil, fmt.Errorf("empty positions")
+	}
+	if obj.Pool == nil {
+		return nil, nil
 	}
 	pool, err := r.Query().GetPool(ctx, obj.Pool.String())
 	if err != nil {
-		return seawater.Pool{}, err
+		return nil, err
 	}
-	return *pool, nil
+	return pool, nil
+}
+
+// Wallet is the resolver for the wallet field.
+func (r *seawaterPositionsResolver) Wallet(ctx context.Context, obj *model.SeawaterPositions) (*model.Wallet, error) {
+	if obj == nil {
+		return nil, fmt.Errorf("empty positions")
+	}
+	if obj.Wallet == nil {
+		return nil, nil
+	}
+	wallet, err := r.Query().GetWallet(ctx, obj.Wallet.String())
+	if err != nil {
+		return nil, err
+	}
+	return wallet, nil
+}
+
+// Sum is the resolver for the sum field.
+func (r *seawaterPositionsResolver) Sum(ctx context.Context, obj *model.SeawaterPositions) (*string, error) {
+	panic(fmt.Errorf("not implemented: Sum - sum"))
 }
 
 // Next is the resolver for the next field.
