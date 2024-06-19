@@ -1098,8 +1098,56 @@ func (r *seawaterSwapsResolver) Wallet(ctx context.Context, obj *model.SeawaterS
 }
 
 // Sum is the resolver for the sum field.
-func (r *seawaterSwapsResolver) Sum(ctx context.Context, obj *model.SeawaterSwaps) ([]model.PairAmount, error) {
-	panic(fmt.Errorf("not implemented: Sum - sum"))
+func (r *seawaterSwapsResolver) Sum(ctx context.Context, obj *model.SeawaterSwaps) (amounts []model.PairAmount, err error) {
+	if obj == nil {
+		return nil, fmt.Errorf("empty swaps")
+	}
+	// Try to figure out whether we're servicing a per-wallet request, or a per-pool request.
+	var results []seawater.SwapsDecimalsGroup
+	stmt := r.DB
+	switch {
+	case obj.Pool != nil:
+		stmt = stmt.
+			Raw(
+				"SELECT * FROM swaps_decimals_pool_group_1(?,?,?)",
+				r.C.FusdcAddr,
+				r.C.FusdcDecimals,
+				*obj.Pool,
+			)
+	case obj.Wallet != nil:
+		stmt = stmt.
+			Raw(
+				"SELECT * FROM swaps_decimals_wallet_group_1(?,?,?)",
+				r.C.FusdcAddr,
+				r.C.FusdcDecimals,
+				*obj.Wallet,
+			)
+	default:
+		return nil, nil // Assume the query above didn't find any responses.
+	}
+	if err := stmt.Scan(&results).Error; err != nil {
+		return nil, err
+	}
+	amounts = make([]model.PairAmount, len(results))
+	now := int(time.Now().Unix())
+	for i, res := range results {
+		amounts[i] = model.PairAmount{
+			Timestamp: now,
+			Fusdc: model.Amount{
+				Token:         r.C.FusdcAddr,
+				Decimals:      r.C.FusdcDecimals,
+				Timestamp:     now,
+				ValueUnscaled: res.CumulativeAmount0,
+			},
+			Token1: model.Amount{
+				Token:         res.Pool,
+				Decimals:      int(res.Decimals),
+				Timestamp:     now,
+				ValueUnscaled: res.CumulativeAmount1,
+			},
+		}
+	}
+	return
 }
 
 // Next is the resolver for the next field.

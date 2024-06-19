@@ -65,3 +65,13 @@ type SnapshotPositionsLatestDecimalsGroup struct {
 	CumulativeAmount0 types.UnscaledNumber `json:"cumulative_amount_0"`
 	CumulativeAmount1 types.UnscaledNumber `json:"cumulative_amount_1"`
 }
+
+// SwapsDecimalsGroup taken from the swaps_decimals_pool_group_1 and
+// swaps_decimals_user_group_1. Used to service requests for summations
+// of the volume of swaps made.
+type SwapsDecimalsGroup struct {
+	Pool              types.Address        `json:"pool"`
+	Decimals          uint8                `json:"decimals"`
+	CumulativeAmount0 types.UnscaledNumber `json:"cumulative_amount_0"`
+	CumulativeAmount1 types.UnscaledNumber `json:"cumulative_amount_1"`
+}
