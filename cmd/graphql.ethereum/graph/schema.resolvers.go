@@ -264,18 +264,31 @@ func (r *queryResolver) GetWallet(ctx context.Context, address string) (wallet *
 // GetSwaps is the resolver for the getSwaps field.
 func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, after *int) (swaps model.SeawaterSwaps, err error) {
 	poolAddress := types.AddressFromString(pool)
+	if first == nil {
+		fst := 10
+		first = &fst
+	}
+	if after == nil {
+		aft := 0
+		after = &aft
+	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		swaps = MockSwaps(r.C.FusdcAddr, 150, "0x65dfe41220c438bf069bbce9eb66b087fe65db36")
 		return
 	}
 	// DB.RAW doesn't support chaining
-	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?) WHERE token_in = ? OR token_out = ?",
+	err = r.DB.Raw(
+		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND id > ? ORDER BY id LIMIT ?",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		poolAddress,
 		poolAddress,
-	).Scan(&swaps.Swaps).Error
+		*after,
+		*first,
+	).
+		Scan(&swaps.Swaps).
+		Error
 	swaps.Pool = &poolAddress
 	return
 }
@@ -283,17 +296,30 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 // GetSwapsForUser is the resolver for the getSwapsForUser field.
 func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, first *int, after *int) (swaps model.SeawaterSwaps, err error) {
 	walletAddress := types.AddressFromString(wallet)
+	if first == nil {
+		fst := 10
+		first = &fst
+	}
+	if after == nil {
+		aft := 0
+		after = &aft
+	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
 		swaps = MockSwaps(r.C.FusdcAddr, 150, walletAddress)
 		return
 	}
 	// DB.RAW doesn't support chaining
-	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?) WHERE sender = ?",
+	err = r.DB.Raw(
+		"SELECT * FROM seawater_swaps_1(?, ?) WHERE sender = ? AND id > ? ORDER BY id LIMIT ?",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		walletAddress,
-	).Scan(&swaps.Swaps).Error
+		*after,
+		*first,
+	).
+		Scan(&swaps.Swaps).
+		Error
 	swaps.Wallet = &walletAddress
 	return
 }
