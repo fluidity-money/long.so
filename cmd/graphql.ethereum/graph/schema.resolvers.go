@@ -212,7 +212,7 @@ func (r *queryResolver) GetPosition(ctx context.Context, id int) (position *seaw
 func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *int, after *int) (positions model.SeawaterPositions, err error) {
 	w := types.AddressFromString(wallet)
 	if first == nil {
-		fst := 50
+		fst := 10
 		first = &fst
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
@@ -1014,7 +1014,7 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 		return positions, fmt.Errorf("empty wallet")
 	}
 	if first == nil {
-		fst := 50
+		fst := 10
 		first = &fst
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
