@@ -48,10 +48,10 @@ export const graphqlQueryUser = graphql(`
       # add wallet fragments here
       ...MyPositionsWalletFragment
       ...MyPositionsInventoryWalletFragment
+      ...PositionsFragment
     }
   }
 `);
-
 /**
  * Fetch all data from the global GraphQL endpoint.
  */

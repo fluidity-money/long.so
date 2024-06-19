@@ -6,18 +6,146 @@ import Ethereum from "@/assets/icons/ethereum.svg";
 import { Badge } from "@/components/ui/badge";
 import Token from "@/assets/icons/token.svg";
 import { Button } from "@/components/ui/button";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import Slider from "@/components/Slider";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
+import { useStakeStore } from "@/stores/useStakeStore";
+import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
+import { useAccount, useSimulateContract } from "wagmi";
+import { graphql, useFragment } from "@/gql";
+import { useGraphqlUser } from "@/hooks/useGraphql";
+import { useEffect, useMemo, useState } from "react";
+import { usdFormat } from "@/lib/usdFormat";
+import { ammAddress } from "@/lib/addresses";
+import { sqrtPriceX96ToPrice } from "@/lib/math";
+
+const PositionsFragment = graphql(`
+fragment PositionsFragment on Wallet {
+  positions {
+    positions {
+      positionId
+      lower
+      upper
+      owner {
+        address
+      }
+      liquidity {
+        fusdc {
+          valueUsd
+          valueScaled
+        }
+        token1 {
+          valueUsd
+          valueScaled
+        }
+      }
+    }
+  }
+}
+`);
 
 export default function WithdrawLiquidity() {
   const router = useRouter();
-  const params = useParams();
+  const params = useSearchParams();
+
+  const positionId = params.get("positionId")
+  if (!positionId) {
+    router.back();
+  }
+
+  const { address } = useAccount()
+
+  const {
+    token0,
+    token0Amount,
+    token1,
+    token1Amount,
+    setTickLower,
+    setTickUpper,
+    setDelta,
+    deltaDisplay,
+  } = useStakeStore()
+
+  // Current tick of the pool
+  const { data: { result: curTick } = { result: 0n } } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "curTick",
+    args: [token0.address],
+  });
+
+  // Current liquidity of the position
+  const { data: positionLiquidity } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: 'positionLiquidity',
+    args: [token0.address, BigInt(positionId ?? 0)]
+  })
+
+  const { data: poolSqrtPriceX96 } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "sqrtPriceX96",
+    args: [token0.address],
+  });
+
+  const tokenPrice = poolSqrtPriceX96
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
+    : 0n;
+
+  const { data } = useGraphqlUser();
+
+  const positionsData = useFragment(PositionsFragment, data?.getWallet?.positions.positions);
+  const position = positionsData?.find(p => p.positionId.toString() === positionId && p.owner.address === address?.toLowerCase())
+  const { upper: upperTick, lower: lowerTick } = position || {}
+
+  // update ticks in stakeStore based on the current position
+  useEffect(() => {
+    if (lowerTick === undefined || upperTick === undefined)
+      return
+    setTickLower(lowerTick)
+    setTickUpper(upperTick)
+  }, [position])
+
+  const positionBalance = positionLiquidity?.result ?? 0n
+
+  const deltaUsd = useMemo(() => {
+    if (!token0Amount || !token1Amount)
+      return "$0.00"
+    const decimalAdjust = 10 ** (token0.decimals - token1.decimals);
+    const token0AmountScaled = Number(token0Amount) * Number(tokenPrice) * decimalAdjust
+    return usdFormat(token0AmountScaled + parseFloat(token1Amount))
+  }, [token0Amount, token1Amount])
+
+  // set the delta to delta/denom
+  const setDeltaOverDenom = (denom: bigint) => setDelta((positionBalance / denom).toString(), curTick)
+  const setMaxBalance = () => setDeltaOverDenom(1n)
+
+  // TODO when clicking on a selected balance, should it unselect and set to 0?
+  const [balancePercent, setBalancePercent] = useState('')
+  const handleBalancePercentButton = (percentString: string) => {
+    setBalancePercent(percentString);
+    switch (percentString) {
+      case "25%":
+        setDeltaOverDenom(4n);
+        break;
+      case "50%":
+        setDeltaOverDenom(2n);
+        break;
+      case "75%":
+        // 50% + 25%
+        setDelta(((positionBalance / 4n) + (positionBalance / 2n)).toString(), curTick)
+        break;
+      case "100%":
+        setMaxBalance();
+        break;
+    }
+  }
 
   const onSubmit = () => {
-    router.push(`/stake/pool/${params.id}/confirm-withdraw`);
+    router.push(`/stake/pool/confirm-withdraw?positionId=${positionId}`)
   };
 
   return (
@@ -34,7 +162,7 @@ export default function WithdrawLiquidity() {
               className="-ml-2 h-[30px] w-[124px] justify-between border-[3px] bg-black pl-px text-white"
             >
               <Token className="size-[25px] invert" />
-              ƒUSDC - ETH
+              {token0.symbol} - {token1.symbol}
             </Badge>
           </div>
 
@@ -64,28 +192,35 @@ export default function WithdrawLiquidity() {
             <Badge variant={"outline"} className={"h-[27px] pl-0.5"}>
               <Token className={"size-[22px]"} />
               <div className="text-nowrap text-sm font-semibold text-white">
-                ƒUSDC x ETH
+                {token0.symbol} x {token1.symbol}
               </div>
               <ArrowDown />
             </Badge>
 
             <Input
               className="border-0 bg-black pr-0 text-right text-2xl font-medium"
-              placeholder={"0.00375"}
-            />
+              placeholder={"0"}
+              variant={"no-ring"}
+              value={deltaDisplay}
+              onChange={(e) => {
+                setDelta(e.target.value, curTick)
+              }} />
           </div>
 
           <div className={"flex flex-row justify-between md:mt-[8px]"}>
             <div className={"text-2xs"}>
-              Balance: 0.015{" "}
-              <span className="cursor-pointer underline">Max</span>
+              Balance: {positionBalance.toString()}{" "}
+              <span onClick={setMaxBalance} className="cursor-pointer underline">Max</span>
             </div>
 
-            <div className={"text-2xs"}>$2,498.79</div>
+            <div className={"text-2xs"}>{deltaUsd}</div>
           </div>
 
           <div className="mt-[20px] md:mt-[25px]">
-            <RadioGroup.Root>
+            <RadioGroup.Root
+              value={balancePercent}
+              onValueChange={v => handleBalancePercentButton(v)}
+            >
               <div className="flex flex-row gap-[6px]">
                 <RadioGroup.Item
                   value={"25%"}
