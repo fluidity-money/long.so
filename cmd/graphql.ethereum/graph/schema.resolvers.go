@@ -227,7 +227,7 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *
 		return
 	}
 	stmt := r.DB.Table("seawater_active_positions_1").
-		Where("owner = ?", wallet).
+		Where("owner = ?", w).
 		Limit(*first).
 		Order("created_by desc")
 	if after != nil {
@@ -992,7 +992,7 @@ func (r *seawaterPositionsResolver) Sum(ctx context.Context, obj *model.Seawater
 				obj.Wallet,
 			)
 	default:
-		return nil, nil // Assume the query above didn't find any wallets.
+		return nil, nil // Assume the query above didn't find any responses.
 	}
 	if err := stmt.Scan(&results).Error; err != nil {
 		return nil, err
