@@ -179,11 +179,9 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first
 		stmt = stmt.Where("pos_id > ?", *after)
 	}
 	var pos []seawater.Position
-	if err := stmt.Scan(&pos).Error; err != nil {
+	if err := stmt.Scan(&pos).Error; err != nil || pos == nil {
 		return positions, err
 	}
-	// We should always get something from gorm here, or it errors if
-	// it can't find rows. So we can safely take the last item.
 	positions = model.SeawaterPositions{
 		From:      pos[0].Id,
 		To:        pos[len(pos)-1].Id,
@@ -233,11 +231,9 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *
 		stmt = stmt.Where("pos_id < ?", *after)
 	}
 	var pos []seawater.Position
-	if err := stmt.Scan(&pos).Error; err != nil {
+	if err := stmt.Scan(&pos).Error; err != nil || pos == nil {
 		return positions, err
 	}
-	// We should always get something from gorm here, or it errors if
-	// it can't find rows. So we can safely take the last item.
 	positions = model.SeawaterPositions{
 		From:      pos[0].Id,
 		To:        pos[len(pos)-1].Id,
@@ -704,12 +700,10 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 		stmt = stmt.Where("pos_id < ?", *after)
 	}
 	var pos []seawater.Position
-	if err := stmt.Scan(&pos).Error; err != nil {
+	if err := stmt.Scan(&pos).Error; err != nil || pos == nil {
 		return positions, err
 	}
 	p := obj.Token
-	// We should always get something from gorm here, or it errors if
-	// it can't find rows. So we can safely take the last item.
 	positions = model.SeawaterPositions{
 		From:      pos[0].Id,
 		To:        pos[len(pos)-1].Id,
@@ -1039,12 +1033,10 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 		stmt = stmt.Where("pos_id > ?", *after)
 	}
 	var pos []seawater.Position
-	if err := stmt.Scan(&pos).Error; err != nil {
+	if err := stmt.Scan(&pos).Error; err != nil || pos == nil {
 		return positions, err
 	}
 	w := obj.Address
-	// We should always get something from gorm here, or it errors if
-	// it can't find rows. So we can safely take the last item.
 	positions = model.SeawaterPositions{
 		From:      pos[0].Id,
 		To:        pos[len(pos)-1].Id,
