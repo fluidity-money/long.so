@@ -296,7 +296,7 @@ export type SeawaterPositions = {
 
 /** Pagination-friendly way of viewing the current state of the positions available in a pool. */
 export type SeawaterPositionsNextArgs = {
-  first: Scalars['Int']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** Swap that was made by a user. */
@@ -337,7 +337,7 @@ export type SeawaterSwaps = {
  * came from, where it's at with pagination with the position ids.
  */
 export type SeawaterSwapsNextArgs = {
-  first: Scalars['Int']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** Token that's available to trade via the AMM. */
