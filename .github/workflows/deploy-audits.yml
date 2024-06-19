@@ -18,8 +18,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-    with:
-        lfs: 'true'
+        with:
+          lfs: 'true'
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
