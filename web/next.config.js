@@ -3,7 +3,7 @@ const childProcess = require("child_process");
 const { withSentryConfig } = require("@sentry/nextjs");
 
 const gitHash =
-  childProcess.execSync("git rev-parse HEAD").toString().trim();
+  childProcess.execSync("git rev-parse --short HEAD").toString().trim();
 
 module.exports = withSentryConfig(
   /** @type {import("next").NextConfig} */
