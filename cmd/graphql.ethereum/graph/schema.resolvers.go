@@ -270,14 +270,13 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 		swaps = MockSwaps(r.C.FusdcAddr, 150, "0x65dfe41220c438bf069bbce9eb66b087fe65db36")
 		return
 	}
-	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?)",
+	// DB.RAW doesn't support chaining
+	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?) WHERE token_in = ? OR token_out = ?",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
-	).
-		Where("token_in = ?", poolAddress).
-		Or("token_out = ?", poolAddress).
-		Scan(&swaps.Swaps).Error
+		poolAddress,
+		poolAddress,
+	).Scan(&swaps.Swaps).Error
 	swaps.Pool = &poolAddress
 	return
 }
@@ -290,10 +289,12 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 		swaps = MockSwaps(r.C.FusdcAddr, 150, walletAddress)
 		return
 	}
-	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?)", r.C.FusdcAddr, r.C.FusdcDecimals).
-		Where("sender = ?", walletAddress).
-		Scan(&swaps.Swaps).
-		Error
+	// DB.RAW doesn't support chaining
+	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?) WHERE sender = ?",
+		r.C.FusdcAddr,
+		r.C.FusdcDecimals,
+		walletAddress,
+	).Scan(&swaps.Swaps).Error
 	swaps.Wallet = &walletAddress
 	return
 }
@@ -800,11 +801,13 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 		swaps = MockSwaps(r.C.FusdcAddr, 150, obj.Token)
 		return
 	}
-	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?)", r.C.FusdcAddr, r.C.FusdcDecimals).
-		Where("token_in = ?", obj.Token).
-		Or("token_out = ?", obj.Token).
-		Scan(&swaps.Swaps).
-		Error
+	// DB.RAW doesn't support chaining
+	err = r.DB.Raw("SELECT * FROM seawater_swaps_1(?, ?) WHERE token_in = ? OR token_out = ?",
+		r.C.FusdcAddr,
+		r.C.FusdcDecimals,
+		obj.Token,
+		obj.Token,
+	).Scan(&swaps.Swaps).Error
 	swaps.Pool = &obj.Token
 	return
 }
