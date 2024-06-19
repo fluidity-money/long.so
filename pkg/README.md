@@ -23,6 +23,7 @@ Long Tail is Arbitrum's cheapest and most rewarding AMM.
 | fUSDC                     | 0xA8EA92c819463EFbEdDFB670FEfC881A480f0115 |
 | WETH                      | 0xde104342B32BCa03ec995f999181f7Cf1fFc04d7 |
 | USDC                      | 0x6437fdc89cED41941b97A9f1f8992D88718C81c5 |
+| WSPN                      | 0x22b9fa698b68bBA071B513959794E9a47d19214c |
 
 ## Security
 

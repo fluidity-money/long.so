@@ -61,7 +61,6 @@ func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagin
 		if err != nil {
 			log.Fatalf("failed to get the last block checkpoint: %v", err)
 		}
-		from++ // Add 1 so we can start from the next block.
 		to := from + ingestorPagination
 		slog.Info("latest block checkpoint",
 			"from", from,
@@ -80,7 +79,6 @@ func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagin
 // provided is a HTTP client. Also updates the underlying last block it
 // saw into the database checkpoints. Fatals if something goes wrong.
 func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAddr ethCommon.Address, from, to uint64) {
-	from++ // Increase the starting block by 1 so we always get the next block.
 	logs, err := c.FilterLogs(context.Background(), ethereum.FilterQuery{
 		FromBlock: new(big.Int).SetUint64(from),
 		ToBlock:   new(big.Int).SetUint64(to),
