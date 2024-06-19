@@ -178,5 +178,11 @@ export const useFeatureFlag = <T extends keyof FeatureFlags>(
     if (skipOverride) return data?.[featureFlag];
     if (override) return featureFlagOverride[featureFlag];
     return data?.[featureFlag];
-  }, [override, featureFlagOverride, data, featureFlag]);
+  }, [
+    skipOverride,
+    override,
+    featureFlagOverride,
+    data,
+    featureFlag
+  ]);
 };

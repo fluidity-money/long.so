@@ -57,7 +57,7 @@ export const PoolsTabContent = () => {
         liquidityRange: "0k - 0k",
       })) ?? []
     );
-  }, [showMockData]);
+  }, [walletData?.positions?.positions, showMockData]);
 
   return (
     <div className={"flex flex-col items-center"}>

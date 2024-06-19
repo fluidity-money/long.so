@@ -174,6 +174,38 @@ export const SwapForm = () => {
 
   const client = useClient()
 
+  const swapOptions = useMemo(() => {
+    if (isSwappingBaseAsset) {
+      // if one of the assets is fusdc, use swap1
+      return {
+        address: ammAddress,
+        abi: seawaterContract.abi,
+        functionName: "swap",
+        args: [token1.address, false, BigInt(token0AmountRaw ?? 0), maxUint256],
+      } as const
+    } else if (token1.address === fUSDC.address) {
+      return {
+        address: ammAddress,
+        abi: seawaterContract.abi,
+        functionName: "swap",
+        args: [token0.address, true, BigInt(token0AmountRaw ?? 0), maxUint256],
+      } as const
+    } else {
+      // if both of the assets aren't fusdc, use swap2
+      return {
+        address: ammAddress,
+        abi: seawaterContract.abi,
+        functionName: "swap2ExactIn",
+        args: [
+          token0.address,
+          token1.address,
+          BigInt(token0AmountRaw ?? 0),
+          BigInt(0),
+        ],
+      } as const
+    }
+  }, [isSwappingBaseAsset, token0AmountRaw, token0.address, token1.address])
+
   // TODO this is in ETH(/SPN), not USD
   const [estimatedGas, setEstimatedGas] = useState(0n)
   useEffect(() => {
@@ -192,7 +224,7 @@ export const SwapForm = () => {
         setEstimatedGas(estimatedGas)
       } catch { }
     })()
-  }, [client, token1, token0AmountRaw])
+  }, [address, client, token1, token0AmountRaw, swapOptions])
 
   const { error: quote2Error, isLoading: quote2IsLoading } =
     useSimulateContract({
@@ -296,38 +328,6 @@ export const SwapForm = () => {
   const approvalResult = useWaitForTransactionReceipt({
     hash: approvalData,
   });
-
-  const swapOptions = useMemo(() => {
-    if (isSwappingBaseAsset) {
-      // if one of the assets is fusdc, use swap1
-      return {
-        address: ammAddress,
-        abi: seawaterContract.abi,
-        functionName: "swap",
-        args: [token1.address, false, BigInt(token0AmountRaw ?? 0), maxUint256],
-      } as const
-    } else if (token1.address === fUSDC.address) {
-      return {
-        address: ammAddress,
-        abi: seawaterContract.abi,
-        functionName: "swap",
-        args: [token0.address, true, BigInt(token0AmountRaw ?? 0), maxUint256],
-      } as const
-    } else {
-      // if both of the assets aren't fusdc, use swap2
-      return {
-        address: ammAddress,
-        abi: seawaterContract.abi,
-        functionName: "swap2ExactIn",
-        args: [
-          token0.address,
-          token1.address,
-          BigInt(token0AmountRaw ?? 0),
-          BigInt(0),
-        ],
-      } as const
-    }
-  }, [isSwappingBaseAsset, token0AmountRaw, token0.address, token1.address])
 
   const performSwap = useCallback(() => {
     console.log("performing swap");

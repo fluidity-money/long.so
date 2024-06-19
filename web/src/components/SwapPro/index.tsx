@@ -15,7 +15,6 @@ import { columns, Transaction } from "@/app/_DataTable/columns";
 import { DataTable } from "@/app/_DataTable/DataTable";
 import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
 import { graphql, useFragment } from "@/gql";
-import { SwapProTransactionsFragmentFragment } from "@/gql/graphql";
 import { SwapProPoolFragment } from "@/components/SwapPro/SwapProPoolFragment";
 import { useMemo } from "react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
@@ -78,14 +77,9 @@ export const SwapPro = ({
 
   const poolSwapPro = useFragment(SwapProPoolFragment, pool);
 
-  const swapsForUserFragment = dataUser?.getSwapsForUser;
-
-  let transactions: readonly SwapProTransactionsFragmentFragment[] = [];
-
-  if (swapsForUserFragment)
-    transactions = useFragment(
+  const transactions = useFragment(
       SwapProTransactionsFragment,
-      swapsForUserFragment.swaps,
+      dataUser?.getSwapsForUser?.swaps,
     );
 
   const showMockData = useFeatureFlag("ui show demo data");
@@ -124,7 +118,7 @@ export const SwapPro = ({
         amountTo: parseFloat(transaction.amountOut.valueScaled),
       };
     });
-  }, [showMockData]);
+  }, [transactions, showMockData]);
 
   return (
     <motion.div

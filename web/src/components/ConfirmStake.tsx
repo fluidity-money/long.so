@@ -170,7 +170,15 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
         args: [token0.address, id, delta],
       });
     },
-    [writeContractUpdatePosition, token0AmountRaw, token0, token0Amount, token1Amount, token1AmountRaw],
+    [
+      writeContractUpdatePosition,
+      token0AmountRaw,
+      token0,
+      token1AmountRaw,
+      curTick,
+      tickLower,
+      tickUpper
+    ],
   );
 
   /**

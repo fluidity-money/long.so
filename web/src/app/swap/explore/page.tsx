@@ -53,7 +53,10 @@ const ExplorePage = () => {
   // fUSDC can be queried through GraphQL but it
   // still won't contain price, so create it manually
   const fUSDCData = { token: fUSDC, price: "1" } satisfies SwapExploreFragmentFragment
-  const tokensData = [fUSDCData, ...(tokensData_ ?? [])]
+  const tokensData = useMemo(
+    () => [fUSDCData, ...(tokensData_ ?? [])],
+    [fUSDCData, tokensData_]
+  );
 
   const showMockData = useFeatureFlag("ui show demo data");
 
@@ -76,7 +79,7 @@ const ExplorePage = () => {
       ))
       setTokenBalances(balances)
     })()
-  }, [tokensData])
+  }, [address, tokensData])
 
   const allAssetsData = useMemo(() => {
     if (showMockData) return mockSwapExploreAssets;

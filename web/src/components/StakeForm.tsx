@@ -115,7 +115,13 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       setToken0(poolToken)
       setToken1(fUSDC)
     }
-  }, [])
+  }, [
+    poolId,
+    setToken0,
+    setToken1,
+    token0.address,
+    token1.address
+  ])
 
   // Parse the price lower and upper, and set the ticks properly.
 
@@ -166,7 +172,12 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     } else {
 
     }
-  }, [liquidityRangeType])
+  }, [
+    setPriceLower,
+    setPriceUpper,
+    token1.decimals,
+    liquidityRangeType
+  ])
 
   // Price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
@@ -214,7 +225,16 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         return
       setToken0AmountRaw(newToken0Amount.toString())
     }
-  }, [token0AmountRaw, token1AmountRaw, tokenPrice, quotedToken])
+  }, [
+    setToken0AmountRaw,
+    setToken1AmountRaw,
+    token0Balance?.value,
+    token1Balance?.value,
+    token0AmountRaw,
+    token1AmountRaw,
+    tokenPrice,
+    quotedToken
+  ]);
 
   const setMaxBalance = (token: TokenType) => {
     token.address === token0.address ?
@@ -312,7 +332,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         },
       ],
     };
-  }, [liquidityRangeType]);
+  }, [
+    chartData,
+    liquidityRangeType
+  ]);
 
   useEffect(() => {
     if (chartRef.current) {
