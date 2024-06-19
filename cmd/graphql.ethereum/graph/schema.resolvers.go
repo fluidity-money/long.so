@@ -1020,7 +1020,7 @@ func (r *seawaterPositionsResolver) Sum(ctx context.Context, obj *model.Seawater
 }
 
 // Next is the resolver for the next field.
-func (r *seawaterPositionsResolver) Next(ctx context.Context, obj *model.SeawaterPositions, first int) (model.SeawaterPositions, error) {
+func (r *seawaterPositionsResolver) Next(ctx context.Context, obj *model.SeawaterPositions, first *int) (model.SeawaterPositions, error) {
 	panic(fmt.Errorf("not implemented: Next - next"))
 }
 
@@ -1103,7 +1103,7 @@ func (r *seawaterSwapsResolver) Sum(ctx context.Context, obj *model.SeawaterSwap
 }
 
 // Next is the resolver for the next field.
-func (r *seawaterSwapsResolver) Next(ctx context.Context, obj *model.SeawaterSwaps, first int) (model.SeawaterSwaps, error) {
+func (r *seawaterSwapsResolver) Next(ctx context.Context, obj *model.SeawaterSwaps, first *int) (model.SeawaterSwaps, error) {
 	panic(fmt.Errorf("not implemented: Next - next"))
 }
 

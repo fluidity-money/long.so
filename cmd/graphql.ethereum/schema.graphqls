@@ -250,7 +250,7 @@ type SeawaterSwaps {
     """
     The number fields to display from the current page.
     """
-    first: Int!
+    first: Int
   ): SeawaterSwaps!
 }
 
@@ -283,7 +283,7 @@ type SeawaterPositions {
     """
     The next number of fields to display from the current position.
     """
-    first: Int!
+    first: Int
   ): SeawaterPositions!
 }
 

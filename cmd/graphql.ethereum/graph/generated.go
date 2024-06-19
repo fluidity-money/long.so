@@ -132,7 +132,7 @@ type ComplexityRoot struct {
 	}
 
 	SeawaterPositions struct {
-		Next      func(childComplexity int, first int) int
+		Next      func(childComplexity int, first *int) int
 		Pool      func(childComplexity int) int
 		Positions func(childComplexity int) int
 		Sum       func(childComplexity int) int
@@ -148,7 +148,7 @@ type ComplexityRoot struct {
 	}
 
 	SeawaterSwaps struct {
-		Next   func(childComplexity int, first int) int
+		Next   func(childComplexity int, first *int) int
 		Pool   func(childComplexity int) int
 		Sum    func(childComplexity int) int
 		Swaps  func(childComplexity int) int
@@ -250,7 +250,7 @@ type SeawaterPositionsResolver interface {
 	Wallet(ctx context.Context, obj *model.SeawaterPositions) (*model.Wallet, error)
 
 	Sum(ctx context.Context, obj *model.SeawaterPositions) ([]model.PairAmount, error)
-	Next(ctx context.Context, obj *model.SeawaterPositions, first int) (model.SeawaterPositions, error)
+	Next(ctx context.Context, obj *model.SeawaterPositions, first *int) (model.SeawaterPositions, error)
 }
 type SeawaterSwapResolver interface {
 	Pool(ctx context.Context, obj *model.SeawaterSwap) (seawater.Pool, error)
@@ -263,7 +263,7 @@ type SeawaterSwapsResolver interface {
 	Wallet(ctx context.Context, obj *model.SeawaterSwaps) (*model.Wallet, error)
 	Sum(ctx context.Context, obj *model.SeawaterSwaps) ([]model.PairAmount, error)
 
-	Next(ctx context.Context, obj *model.SeawaterSwaps, first int) (model.SeawaterSwaps, error)
+	Next(ctx context.Context, obj *model.SeawaterSwaps, first *int) (model.SeawaterSwaps, error)
 }
 type WalletResolver interface {
 	ID(ctx context.Context, obj *model.Wallet) (string, error)
@@ -722,7 +722,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.SeawaterPositions.Next(childComplexity, args["first"].(int)), true
+		return e.complexity.SeawaterPositions.Next(childComplexity, args["first"].(*int)), true
 
 	case "SeawaterPositions.pool":
 		if e.complexity.SeawaterPositions.Pool == nil {
@@ -797,7 +797,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.SeawaterSwaps.Next(childComplexity, args["first"].(int)), true
+		return e.complexity.SeawaterSwaps.Next(childComplexity, args["first"].(*int)), true
 
 	case "SeawaterSwaps.pool":
 		if e.complexity.SeawaterSwaps.Pool == nil {
@@ -1306,7 +1306,7 @@ type SeawaterSwaps {
     """
     The number fields to display from the current page.
     """
-    first: Int!
+    first: Int
   ): SeawaterSwaps!
 }
 
@@ -1339,7 +1339,7 @@ type SeawaterPositions {
     """
     The next number of fields to display from the current position.
     """
-    first: Int!
+    first: Int
   ): SeawaterPositions!
 }
 
@@ -1962,10 +1962,10 @@ func (ec *executionContext) field_SeawaterPool_swaps_args(ctx context.Context, r
 func (ec *executionContext) field_SeawaterPositions_next_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int
+	var arg0 *int
 	if tmp, ok := rawArgs["first"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1977,10 +1977,10 @@ func (ec *executionContext) field_SeawaterPositions_next_args(ctx context.Contex
 func (ec *executionContext) field_SeawaterSwaps_next_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int
+	var arg0 *int
 	if tmp, ok := rawArgs["first"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5284,7 +5284,7 @@ func (ec *executionContext) _SeawaterPositions_next(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.SeawaterPositions().Next(rctx, obj, fc.Args["first"].(int))
+		return ec.resolvers.SeawaterPositions().Next(rctx, obj, fc.Args["first"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5886,7 +5886,7 @@ func (ec *executionContext) _SeawaterSwaps_next(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.SeawaterSwaps().Next(rctx, obj, fc.Args["first"].(int))
+		return ec.resolvers.SeawaterSwaps().Next(rctx, obj, fc.Args["first"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
