@@ -11,6 +11,8 @@ on:
       - development
     paths:
       - 'static/**'
+    with:
+        lfs: 'true'
 
 jobs:
   deploy-static:
@@ -18,6 +20,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
