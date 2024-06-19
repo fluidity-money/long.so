@@ -97,8 +97,8 @@ export default function WithdrawLiquidity() {
 
   const { data } = useGraphqlUser();
 
-  const positionsData = useFragment(PositionsFragment, data?.getWallet?.positions.positions);
-  const position = positionsData?.find(p => p.positionId.toString() === positionId && p.owner.address === address?.toLowerCase())
+  const positionsData = useFragment(PositionsFragment, data?.getWallet);
+  const position = positionsData?.positions?.positions.find(p => p.positionId.toString() === positionId && p.owner.address === address?.toLowerCase())
   const { upper: upperTick, lower: lowerTick } = position || {}
 
   // update ticks in stakeStore based on the current position

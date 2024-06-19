@@ -280,14 +280,22 @@ export type SeawaterPosition = {
 export type SeawaterPositions = {
   __typename?: 'SeawaterPositions';
   next: SeawaterPositions;
-  pool: SeawaterPool;
+  /** The specific pool (if any) that's responsible for the responses here. */
+  pool?: Maybe<SeawaterPool>;
+  /** The positions associated with this data. */
   positions: Array<SeawaterPosition>;
+  /**
+   * The maximum returned by the underlying original query for this data if it's possible to
+   * collect for fUSDC and the other token, done per unique token.
+   */
+  sum?: Maybe<Array<PairAmount>>;
+  /** The specific wallet (if any) that's associated with the positions here. */
+  wallet?: Maybe<Wallet>;
 };
 
 
 /** Pagination-friendly way of viewing the current state of the positions available in a pool. */
 export type SeawaterPositionsNextArgs = {
-  after: Scalars['Int']['input'];
   first: Scalars['Int']['input'];
 };
 
@@ -313,8 +321,14 @@ export type SeawaterSwap = {
 export type SeawaterSwaps = {
   __typename?: 'SeawaterSwaps';
   next: SeawaterSwaps;
-  pool: SeawaterPool;
+  /** The pool associated with this query, if any. */
+  pool?: Maybe<SeawaterPool>;
+  /** The sum of these value in these swaps per unique pool, if possible to collect. */
+  sum?: Maybe<Array<PairAmount>>;
+  /** The swaps that was returned in this page. */
   swaps: Array<SeawaterSwap>;
+  /** The wallet associated with this query, if any. */
+  wallet?: Maybe<Wallet>;
 };
 
 
@@ -323,7 +337,6 @@ export type SeawaterSwaps = {
  * came from, where it's at with pagination with the position ids.
  */
 export type SeawaterSwapsNextArgs = {
-  after: Scalars['Int']['input'];
   first: Scalars['Int']['input'];
 };
 
@@ -342,7 +355,7 @@ export type Token = {
   name: Scalars['String']['output'];
   /** Symbol of the token. */
   symbol: Scalars['String']['output'];
-  /** Total supply of the token, in the form of hex. */
+  /** Total supply of the token, in the form of base10. */
   totalSupply: Scalars['String']['output'];
 };
 

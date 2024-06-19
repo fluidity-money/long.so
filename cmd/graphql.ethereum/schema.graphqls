@@ -226,17 +226,31 @@ Pagination-friendly way to quickly receive swaps made somewhere. Knows internall
 came from, where it's at with pagination with the position ids.
 """
 type SeawaterSwaps {
-  pool: SeawaterPool!
+  """
+  The pool associated with this query, if any.
+  """
+  pool: SeawaterPool
+
+  """
+  The wallet associated with this query, if any.
+  """
+  wallet: Wallet
+
+  """
+  The sum of these value in these swaps per unique pool, if possible to collect.
+  """
+  sum: [PairAmount!]
+
+  """
+  The swaps that was returned in this page.
+  """
   swaps: [SeawaterSwap!]!
+
   next(
     """
-    The number of fields to display from the beginning of the latest history.
+    The number fields to display from the current page.
     """
-    first: Int!,
-    """
-    Where to start, if paginating, after a position id that was loaded before.
-    """
-    after: Int!
+    first: Int!
   ): SeawaterSwaps!
 }
 
@@ -267,13 +281,9 @@ type SeawaterPositions {
 
   next(
     """
-    The number of fields to display from the beginning of the latest history.
+    The next number of fields to display from the current position.
     """
-    first: Int!,
-    """
-    Where to start, if paginating, after an ID that was loaded before.
-    """
-    after: Int!
+    first: Int!
   ): SeawaterPositions!
 }
 
