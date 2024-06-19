@@ -20,7 +20,7 @@ import (
 func TestGetSlot(t *testing.T) {
 	s := getCalldata(
 		types.AddressFromString("0xe984f758f362d255bd96601929970cef9ff19dd7"),
-		types.NumberFromInt64(0),
+		0,
 	)
 	assert.Equal(t,
 		"0xe759c465000000000000000000000000e984f758f362d255bd96601929970cef9ff19dd70000000000000000000000000000000000000000000000000000000000000000",
@@ -31,8 +31,8 @@ func TestGetSlot(t *testing.T) {
 
 func TestReqPositionsErr(t *testing.T) {
 	// Test that we're handling errors correctly.
-	d := packRpcPosData("", map[string]seawater.Position{
-		"": {},
+	d := packRpcPosData("", map[int]seawater.Position{
+		0: {},
 	})
 	ctx := context.TODO()
 	_, err := reqPositions(ctx, "", d, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
@@ -51,14 +51,14 @@ func TestReqPositionsSinglePosition(t *testing.T) {
 	// Test if the request function can handle a single position.
 	ctx := context.TODO()
 	p := seawater.Position{ // Only these fields are used.
-		Id:   types.NumberFromInt64(10),
+		Id:   10,
 		Pool: types.AddressFromString("0xe984f758f362d255bd96601929970cef9ff19dd7"),
 	}
-	d := packRpcPosData("", map[string]seawater.Position{"": p})
+	d := packRpcPosData("", map[int]seawater.Position{0: p})
 	id := encodeId(p.Pool, p.Id)
 	pool, posId, ok := decodeId(id)
 	assert.Equalf(t, p.Pool, pool, "pool not decoded")
-	assert.Equalf(t, &p.Id, posId, "id not decoded")
+	assert.Equalf(t, p.Id, posId, "id not decoded")
 	assert.Truef(t, ok, "decode id function not working")
 	r, err := reqPositions(ctx, "", d, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
 		var buf bytes.Buffer
@@ -81,10 +81,10 @@ func TestReqPositionsSinglePosition(t *testing.T) {
 func TestReqPositionsHundredThousandPositions(t *testing.T) {
 	// Test if the request function can handle a single position.
 	ctx := context.TODO()
-	positions := make(map[string]seawater.Position, 100_000)
+	positions := make(map[int]seawater.Position, 100_000)
 	for i := 0; i < 100_000; i++ {
 		p := seawater.Position{ // Only these fields are used.
-			Id:   types.NumberFromInt64(int64(i)),
+			Id:   i,
 			Pool: types.AddressFromString("0xe984f758f362d255bd96601929970cef9ff19dd7"),
 		}
 		id := encodeId(p.Pool, p.Id)
@@ -92,12 +92,12 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 		assert.Equalf(t, p.Pool, pool, "pool not decoded")
 		assert.Equalf(t, &p.Id, posId, "id not decoded")
 		assert.Truef(t, ok, "decode id function not working")
-		positions[p.Id.String()] = p
+		positions[p.Id] = p
 	}
 	d := packRpcPosData("", positions)
-	resps := make(map[string]rpcResp, 100_000)
+	resps := make(map[int]rpcResp, 100_000)
 	for _, p := range positions {
-		resps[p.Id.String()] = rpcResp{
+		resps[p.Id] = rpcResp{
 			Id:     encodeId(p.Pool, p.Id),
 			Result: "0x00000000000000000000000000000000000000000000000000000000091c2e55",
 			Error:  nil,
@@ -121,7 +121,7 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 	})
 	expectedDelta := new(big.Int).SetInt64(152841813)
 	for _, r := range posResps {
-		p, ok := positions[r.Pos.String()]
+		p, ok := positions[r.Pos]
 		if !ok {
 			t.Fatalf("bad id number: %v", r.Pos)
 		}
@@ -138,19 +138,18 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 func TestReqPositionsHundredThousandErrors(t *testing.T) {
 	// Test if the request function can handle a single position.
 	ctx := context.TODO()
-	positions := make(map[string]seawater.Position, 100_000)
+	positions := make(map[int]seawater.Position, 100_000)
 	for i := 0; i < 100_000; i++ {
-		id := types.NumberFromInt64(int64(i))
 		p := seawater.Position{ // Only these fields are used.
-			Id:   id,
+			Id:   i,
 			Pool: types.AddressFromString("0xe984f758f362d255bd96601929970cef9ff19dd7"),
 		}
-		positions[id.String()] = p
+		positions[i] = p
 	}
 	d := packRpcPosData("", positions)
-	resps := make(map[string]rpcResp, 100_000)
+	resps := make(map[int]rpcResp, 100_000)
 	for _, p := range positions {
-		resps[p.Id.String()] = rpcResp{
+		resps[p.Id] = rpcResp{
 			Id:     encodeId(p.Pool, p.Id),
 			Result: "0x00000000000000000000000000000000000000000000000000000000091c2e55",
 			Error:  nil,

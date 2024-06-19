@@ -68,9 +68,9 @@ func main() {
 		}
 	}
 	// Store the positions in a map so we can reconcile the results together easier.
-	positionMap := make(map[string]seawater.Position, len(positions))
+	positionMap := make(map[int]seawater.Position, len(positions))
 	for _, p := range positions {
-		positionMap[p.Id.String()] = p
+		positionMap[p.Id] = p
 	}
 	// Make a separate RPC lookup for the current price of each pool.
 	// Pack the RPC data to be batched using storage slot lookups.
@@ -83,7 +83,7 @@ func main() {
 		log.Fatalf("positions request: %v", err)
 	}
 	var (
-		ids      = make([]string, len(positions))
+		ids      = make([]int, len(positions))
 		amount0s = make([]string, len(positions))
 		amount1s = make([]string, len(positions))
 	)
@@ -91,8 +91,8 @@ func main() {
 		poolAddr := r.Pool.String()
 		amount0Rat, amount1Rat := math.GetAmountsForLiq(
 			poolMap[poolAddr].curPrice, // The current sqrt ratio
-			positionMap[r.Pos.String()].Lower.Big(),
-			positionMap[r.Pos.String()].Upper.Big(),
+			positionMap[r.Pos].Lower.Big(),
+			positionMap[r.Pos].Upper.Big(),
 			r.Delta.Big(),
 		)
 		var (
@@ -106,9 +106,9 @@ func main() {
 			"amount0", amount0,
 			"amount1", amount1,
 			"delta", r.Delta,
-			"lower", positionMap[r.Pos.String()].Lower,
+			"lower", positionMap[r.Pos].Lower,
 		)
-		ids[i] = r.Pos.String()
+		ids[i] = r.Pos
 		amount0s[i] = amount0.String()
 		amount1s[i] = amount1.String()
 	}
