@@ -14,12 +14,13 @@ import ReactECharts from "echarts-for-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { graphql, useFragment } from "@/gql";
-import { useGraphqlGlobal } from "@/hooks/useGraphql";
+import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usdFormat } from "@/lib/usdFormat";
 import { fUSDC } from "@/config/tokens";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getFormattedPriceFromTick } from "@/lib/amounts";
+import { PositionsFragment } from "./withdraw-liquidity/page";
 
 const ManagePoolFragment = graphql(`
   fragment ManagePoolFragment on SeawaterPool {
@@ -41,21 +42,6 @@ const ManagePoolFragment = graphql(`
       maximumAmount
     }
     earnedFeesAPRFUSDC
-    positions {
-      positions {
-        positionId
-        lower
-        upper
-        liquidity {
-          fusdc {
-            valueUsd
-          }
-          token1 {
-            valueUsd
-          }
-        }
-      }
-    }
   }
 `);
 
@@ -69,8 +55,10 @@ export default function PoolPage() {
   const id = params.get("id");
   const positionIdParam = Number(params.get("positionId"));
 
-  const { data } = useGraphqlGlobal();
-  const allPoolsData = useFragment(ManagePoolFragment, data?.pools);
+  const { data: globalData } = useGraphqlGlobal();
+  const { data: userData } = useGraphqlUser();
+  const allPoolsData = useFragment(ManagePoolFragment, globalData?.pools);
+  const positionsData = useFragment(PositionsFragment, userData?.getWallet)
 
   const poolData = allPoolsData?.find((pool) => pool.id === id);
 
@@ -81,21 +69,21 @@ export default function PoolPage() {
   // the internal ID and query parameters
   const position = useMemo(() => {
     if (positionId_ !== undefined)
-      return poolData?.positions?.positions.find(p => p.positionId === positionId_)
+      return positionsData?.positions?.positions.find(p => p.positionId === positionId_)
     if (positionIdParam)
-      return poolData?.positions?.positions.find(p => p.positionId === positionIdParam)
-    return poolData?.positions?.positions[0]
+      return positionsData?.positions?.positions.find(p => p.positionId === positionIdParam)
+    return positionsData?.positions?.positions[0]
   }, [poolData, positionId_, positionIdParam])
 
   const { positionId, upper: upperTick, lower: lowerTick } = position || {}
 
   const poolBalance = useMemo(() => (
-    usdFormat(poolData ?
-      poolData.positions.positions.reduce((total, { liquidity: { fusdc, token1 } }) =>
+    usdFormat(positionsData ?
+      positionsData.positions.positions.reduce((total, { liquidity: { fusdc, token1 } }) =>
         total + parseFloat(fusdc.valueUsd) + parseFloat(token1.valueUsd),
         0) :
       0
-    )), [poolData])
+    )), [positionsData])
 
   const positionBalance = useMemo(() => (
     usdFormat(
@@ -285,7 +273,7 @@ export default function PoolPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {poolData?.positions.positions.map(position => (
+                        {positionsData?.positions.positions.map(position => (
                           <SelectItem
                             key={`${position.positionId}`}
                             value={`${position.positionId}`}
