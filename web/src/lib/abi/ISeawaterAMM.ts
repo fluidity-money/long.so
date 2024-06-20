@@ -132,8 +132,8 @@ export const output = {
       "outputs": [
         {
           "name": "",
-          "type": "uint256",
-          "internalType": "uint256"
+          "type": "int32",
+          "internalType": "int32"
         }
       ],
       "stateMutability": "nonpayable"

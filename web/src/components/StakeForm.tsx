@@ -218,12 +218,13 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   }
 
   // The tick spacing will determine how granular the graph is.
-  const { data: curTick } = useSimulateContract({
+  const { data: curTickNum } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
     functionName: "curTick",
     args: [token0.address],
   });
+  const curTick = useMemo(() => ({ result: BigInt(curTickNum?.result ?? 0) }), [curTickNum]);
 
   const [liquidityRangeType, setLiquidityRangeType] = useState<
     "full-range" | "auto" | "custom"

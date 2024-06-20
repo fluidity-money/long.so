@@ -89,12 +89,13 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   });
 
   // Current tick of the pool
-  const { data: curTick } = useSimulateContract({
+  const { data: curTickNum } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
     functionName: "curTick",
     args: [token0.address],
-  }); 0
+  });
+  const curTick = { result: BigInt(curTickNum?.result ?? 0) }
 
   // set up write contract hooks
   const {
@@ -160,7 +161,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
         BigInt(tickLower),
         BigInt(tickUpper),
         BigInt(token0AmountRaw),
-        BigInt(token1AmountRaw)
+        BigInt(token1AmountRaw),
       );
 
       writeContractUpdatePosition({

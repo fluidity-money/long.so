@@ -69,12 +69,13 @@ export default function WithdrawLiquidity() {
   } = useStakeStore()
 
   // Current tick of the pool
-  const { data: { result: curTick } = { result: 0n } } = useSimulateContract({
+  const { data: { result: curTickNum } = { result: 0 } } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
     functionName: "curTick",
     args: [token0.address],
   });
+  const curTick = BigInt(curTickNum)
 
   // Current liquidity of the position
   const { data: positionLiquidity } = useSimulateContract({
