@@ -147,6 +147,11 @@ export interface FeatureFlags {
    * Show breakdown of fees, rewards, and route in the swap form.
    */
   "ui show swap breakdown": boolean;
+
+  /**
+   * Show liquidity range visualiser in the stake form
+   */
+  "ui show liquidity visualiser": boolean;
 }
 
 /**

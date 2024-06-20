@@ -158,6 +158,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const showDynamicFeesPopup = useFeatureFlag("ui show optimising fee route");
   const showSingleToken = useFeatureFlag("ui show single token stake");
   const showCampaignBanner = useFeatureFlag("ui show campaign banner");
+  const showLiquidityVisualiser = useFeatureFlag("ui show liquidity visualiser")
 
   const onSubmit = () => {
     if (mode === "new") {
@@ -797,7 +798,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             </div>
           </div>
 
-          <div className="mt-[22px]">
+          {showLiquidityVisualiser && <div className="mt-[22px]">
             <div className="text-3xs text-gray-2 md:text-2xs">Visualiser</div>
             <ReactECharts
               className="mt-1"
@@ -836,7 +837,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 <LiquidityDistribution /> Liquidity Distribution
               </div>
             </div>
-          </div>
+          </div> }
         </div>
 
         <div className="mt-[21px] flex w-[318px] flex-row justify-end md:w-[392px]">
