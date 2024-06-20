@@ -92,7 +92,7 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	// If the pool is the fUSDC address, then we can just skip the
 	// lookup here and report $1 (assuming we maintain the peg.)
 	if obj.Token == r.C.FusdcAddr {
-		return "1.0", nil
+		return obj.ValueUnscaled.ScaleStr(5), nil
 	}
 	// Use the final tick function to get the row.
 	var finalTick struct {
