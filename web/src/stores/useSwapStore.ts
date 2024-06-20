@@ -19,8 +19,8 @@ interface SwapStore {
   token1Amount?: string;
 
   // parse and set from a display amount
-  setToken0Amount: (amount: string, balance?: string) => void;
-  setToken1Amount: (amount: string, balance?: string) => void;
+  setToken0Amount: (amount: string, balanceRaw?: string) => void;
+  setToken1Amount: (amount: string, balanceRaw?: string) => void;
 
   setToken0AmountRaw: (amountRaw: string) => void;
   setToken1AmountRaw: (amountRaw: string) => void;
@@ -55,7 +55,7 @@ export const useSwapStore = create<SwapStore>((set) => ({
     token1Amount: getFormattedStringFromTokenAmount(amountRaw, token1.decimals),
   })),
 
-  setToken0Amount: (amount, balance) => {
+  setToken0Amount: (amount, balanceRaw) => {
     set(({ token0, token0Amount, setToken0AmountRaw }) => {
       const validNumber = !amount.includes(" ") && !isNaN(Number(amount)) || amount === "."
       // update display amount if `amount` is valid as a display number
@@ -64,15 +64,14 @@ export const useSwapStore = create<SwapStore>((set) => ({
 
       try {
         const amountRaw = getTokenAmountFromFormattedString(amount, token0.decimals)
-        const balanceRaw = getTokenAmountFromFormattedString(balance ?? "", token0.decimals)
         // update raw amount if it doesn't exceed balance
-        if (!balance || amountRaw <= balanceRaw)
+        if (!balanceRaw || amountRaw <= BigInt(balanceRaw))
           setToken0AmountRaw(amountRaw.toString())
       } catch { }
       return { token0Amount: amount }
     })
   },
-  setToken1Amount: (amount, balance) => {
+  setToken1Amount: (amount, balanceRaw) => {
     set(({ token1, token1Amount, setToken1AmountRaw }) => {
       const validNumber = !amount.includes(" ") && !isNaN(Number(amount)) || amount === "."
       // update display amount if `amount` is valid as a display number
@@ -80,9 +79,8 @@ export const useSwapStore = create<SwapStore>((set) => ({
         return { token1Amount }
       try {
         const amountRaw = getTokenAmountFromFormattedString(amount, token1.decimals)
-        const balanceRaw = getTokenAmountFromFormattedString(balance ?? "", token1.decimals)
         // update raw amount if it doesn't exceed balance
-        if (!balance || amountRaw <= balanceRaw)
+        if (!balanceRaw || amountRaw <= BigInt(balanceRaw))
           setToken1AmountRaw(amountRaw.toString())
       } catch { }
       return { token1Amount: amount }
