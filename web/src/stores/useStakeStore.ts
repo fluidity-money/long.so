@@ -162,7 +162,6 @@ export const useStakeStore = create<StakeStore>((set) => ({
     try {
       const newTick = getTickAtSqrtRatio(encodeSqrtPrice(priceN));
       tick = newTick;
-      console.log("lower tick", tick);
     } catch { }
     set({
       tickLower: tick,
@@ -181,7 +180,6 @@ export const useStakeStore = create<StakeStore>((set) => ({
     try {
       const newTick = getTickAtSqrtRatio(encodeSqrtPrice(priceN));
       tick = newTick;
-      console.log("upper tick", tick);
     } catch { }
     set({
       tickUpper: tick,

@@ -154,31 +154,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   const chartRef = useRef<ReactECharts>(null);
 
-  const [liquidityRangeType, setLiquidityRangeType] = useState<
-    "full-range" | "auto" | "custom"
-  >("full-range");
-
-  useEffect(() => {
-    if (liquidityRangeType === "full-range") {
-      // lower price is 1 base fUSDC (0.000001)
-      setPriceLower(`0.${"0".repeat(token1.decimals - 1)}1`)
-      // upper price is max tick adjusted for decimals
-      setPriceUpper(BigInt(1.0001 ** MAX_TICK * 10 ** -fUSDC.decimals).toString())
-    }
-    else if (liquidityRangeType === "auto") {
-      // TODO determine auto price
-      setPriceLower("-100")
-      setPriceLower("100")
-    } else {
-
-    }
-  }, [
-    setPriceLower,
-    setPriceUpper,
-    token1.decimals,
-    liquidityRangeType
-  ])
-
   // Price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
@@ -243,12 +218,41 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   }
 
   // The tick spacing will determine how granular the graph is.
-  const { data: tickSpacing } = useSimulateContract({
+  const { data: curTick } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
     functionName: "curTick",
     args: [token0.address],
   });
+
+  const [liquidityRangeType, setLiquidityRangeType] = useState<
+    "full-range" | "auto" | "custom"
+  >("auto");
+
+  useEffect(() => {
+    if (liquidityRangeType === "full-range") {
+      // lower price is 1 base fUSDC (0.000001)
+      setPriceLower(`0.${"0".repeat(token1.decimals - 1)}1`)
+      // upper price is max tick adjusted for decimals
+      setPriceUpper(BigInt(1.0001 ** MAX_TICK * 10 ** -fUSDC.decimals).toString())
+    }
+    else if (liquidityRangeType === "auto") {
+      if (!curTick)
+        return
+      // auto sets the price range to +-10% of the current tick
+      const priceAtTick = 1.0001 ** Number(curTick.result)
+      const priceLower = (priceAtTick * 0.9).toFixed(fUSDC.decimals)
+      const priceHigher = (priceAtTick * 1.1).toFixed(fUSDC.decimals)
+      setPriceLower(priceLower)
+      setPriceUpper(priceHigher)
+    }
+  }, [
+    curTick,
+    setPriceLower,
+    setPriceUpper,
+    token1.decimals,
+    liquidityRangeType
+  ])
 
   const autoFeeTierRef = useRef();
   const manualFeeTierRef = useRef();
@@ -696,6 +700,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               variant={"secondary"}
               className={"text-3xs md:text-2xs"}
               callback={(val) => setLiquidityRangeType(val)}
+              // default to auto
+              defaultIndex={1}
               segments={[
                 {
                   label: "Full Range",
@@ -707,13 +713,13 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   label: "Auto",
                   value: "auto",
                   ref: useRef(),
-                  disabled: true,
+                  disabled: mode === "existing",
                 },
                 {
                   label: "Custom",
                   value: "custom",
                   ref: useRef(),
-                  disabled: true,
+                  disabled: mode === "existing",
                 },
               ]}
             />
