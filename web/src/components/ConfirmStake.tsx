@@ -15,7 +15,7 @@ import {
 } from "wagmi";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { sqrtPriceX96ToPrice, getLiquidityForAmounts } from "@/lib/math";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { erc20Abi, Hash, hexToBigInt, maxUint256 } from "viem";
 import { ammAddress } from "@/lib/addresses";
 import LightweightERC20 from "@/lib/abi/LightweightERC20";
@@ -47,7 +47,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     token1AmountRaw,
     tickLower,
     tickUpper,
-    multiSingleToken
+    multiSingleToken,
   } = useStakeStore()
 
   // Price of the current pool
@@ -126,6 +126,16 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   console.log(updatePositionError);
   console.log(mintData);
 
+  const delta = useMemo(() =>
+    (!curTick || tickLower === undefined || tickUpper === undefined) ? 0n :
+      getLiquidityForAmounts(
+        curTick.result,
+        BigInt(tickLower),
+        BigInt(tickUpper),
+        BigInt(token0AmountRaw),
+        BigInt(token1AmountRaw),
+      ), [curTick, tickLower, tickUpper, token0AmountRaw, token1AmountRaw]);
+
   /**
    * Create a new position in the AMM.
    *
@@ -152,18 +162,6 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
 
   const updatePosition = useCallback(
     (id: bigint) => {
-      if (!curTick || tickLower === undefined || tickUpper === undefined) {
-        return
-      }
-
-      const delta = getLiquidityForAmounts(
-        curTick.result,
-        BigInt(tickLower),
-        BigInt(tickUpper),
-        BigInt(token0AmountRaw),
-        BigInt(token1AmountRaw),
-      );
-
       writeContractUpdatePosition({
         address: ammAddress,
         abi: seawaterContract.abi,
@@ -173,12 +171,8 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     },
     [
       writeContractUpdatePosition,
-      token0AmountRaw,
+      delta,
       token0,
-      token1AmountRaw,
-      curTick,
-      tickLower,
-      tickUpper
     ],
   );
 
