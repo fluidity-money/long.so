@@ -15,7 +15,7 @@ pub const fn selector(name: &[u8]) -> [u8; 4] {
 
 /// Extracts a 256 bit word from a data stream, returning the word and the remaining data.
 pub fn take_word(data: &[u8]) -> (&[u8; 32], &[u8]) {
-    data.split_first_chunk::<32>()?
+    data.split_first_chunk::<32>().unwrap()
 }
 
 macro_rules! gen_parse {

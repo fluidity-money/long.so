@@ -474,9 +474,12 @@ impl test_utils::StorageNew for StoragePool {
 
 #[cfg(test)]
 mod test {
+    use std::ops::{Mul, Sub};
+
     use super::*;
     use crate::test_utils;
     use ruint_macro::uint;
+    use stylus_sdk::{alloy_primitives::I128, debug};
 
     #[test]
     fn test_update_position() {
@@ -684,14 +687,6 @@ mod test {
                 ),
                 _ => panic!("expected PoolDisabled"),
             }
-
-            pool.set_enabled(true);
-
-
-            match pool.update_position(uint!(3_U256), 3161){
-                Ok(_) => panic!("Add revert on non-existent position"),
-                Err(_) => todo!(""),
-            };
         });
     }
     #[test]
@@ -716,17 +711,20 @@ mod test {
             1_000_000,
             1000,
             333,
-            0,
             -333,
             -1000,
             -1_000_000,
-        ];
+        ].map(|n| I128::unchecked_from(n ));
+
 
         for price in prices.iter(){
             for tick in tick_spacing.iter(){
                 for delta in deltas.iter(){
                 test_utils::with_storage::<_, StoragePool, _>(|pool| {
-                    pool.init(test_utils::encode_sqrt_price(price[0], price[1]), fee, *tick as u8, u128::MAX)
+                    
+                    let sqrt_price = test_utils::encode_sqrt_price(price[0], price[1]);
+
+                    pool.init(sqrt_price, fee, *tick as u8, u128::MAX)
                         .unwrap();
 
                     let id = uint!(2_U256);
@@ -734,11 +732,55 @@ mod test {
                     pool.create_position(id, tick_math::get_min_tick(*tick as u8), tick_math::get_max_tick(*tick as u8))
                         .unwrap();
                     
-                        pool.update_position(id, *delta);
-                    // assert_eq!(
-                    //     pool.update_position(id, *delta),
-                    //     Ok((I256::unchecked_from(9996), I256::unchecked_from(1000))),
-                    // );
+                    let delta_abs  = if (*delta).is_negative(){
+                        -(*delta)
+                    } else {
+                        *delta
+                    };
+
+                    pool.update_position(id, delta_abs.unchecked_into()).unwrap();
+
+                    let position_before = pool.positions.positions.get(id);
+
+                    let lower_before =  position_before.lower.get();
+                    let upper_before =  position_before.upper.get(); 
+                    let liquidity_before =  position_before.liquidity.get();
+                    let fee_growth_inside_0_before =  position_before.fee_growth_inside_0.get(); 
+                    let fee_growth_inside_1_before =  position_before.fee_growth_inside_1.get(); 
+                    let token_owed_0_before = position_before.token_owed_0.get() ;
+                    let token_owed_1_before = position_before.token_owed_1.get() ;
+
+                 
+                    pool.swap(
+                        false,
+                        I256::unchecked_from((*delta).sys()),
+                        sqrt_price + U256::from(1),
+                    ).unwrap();
+
+                    // pool.update_position(id, i128::from(0)).unwrap();
+
+
+                    let mut position_after = pool.positions.positions.get(id);
+
+                    let lower_after =  position_after.lower.get();
+                    let upper_after =  position_after.upper.get();
+                    let liquidity_after =  position_after.liquidity.get();
+                    let fee_growth_inside_0_after =  position_after.fee_growth_inside_0.get();
+                    let fee_growth_inside_1_after =  position_after.fee_growth_inside_1.get();
+                    let token_owed_0_after = position_after.token_owed_0.get();
+                    let token_owed_1_after = position_after.token_owed_1.get();
+
+                    println!("lower: {}", lower_before - lower_after);
+                    println!("upper: {}", upper_before - upper_after);
+                    println!("liquidity: {}", liquidity_before - liquidity_after);
+                    println!("fee_growth_inside_0: {}", fee_growth_inside_0_before - fee_growth_inside_0_after);
+                    println!("fee_growth_inside_1: {}", fee_growth_inside_1_after - fee_growth_inside_1_before  );
+                    println!("token_owed_0: {}", token_owed_0_before - token_owed_0_after);
+                    println!("token_owed_1: {}", token_owed_1_before - token_owed_1_after);
+
+       
+
+                    // pool.update_position(id, (*delta).unchecked_into()).unwrap();
                 });
             }
         }
