@@ -145,7 +145,7 @@ interface ISeawaterExecutorPosition {
     /// @notice gets the currently used tick of the pool
     /// @param pool to get from
     /// @return the current active tick in the pool
-    function curTick(address pool) external returns (uint256);
+    function curTick(address pool) external returns (int32);
 
     /// @notice gets the fee growth for token 0
     /// @param pool to get from
