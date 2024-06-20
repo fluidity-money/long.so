@@ -48,6 +48,10 @@ const getFormattedStringFromTokenAmount = (amount: string, decimals: number) => 
  * @returns the raw token amount
  */
 const getTokenAmountFromFormattedString = (amount: string, decimals: number): bigint => {
+  // assume containing e indicates an exponential value
+  if (amount.includes('e')) {
+    return BigInt(Number(amount).toLocaleString('fullwide', { useGrouping: false }))
+  }
   const [whole, dec] = amount.split('.')
 
   // covert the whole portion to a token amount
@@ -66,19 +70,34 @@ const getTokenAmountFromFormattedString = (amount: string, decimals: number): bi
 /**
  * @description scale a formatted amount string by the price of the pool
  * @param amount - formatted string
- * @param price - the pool price as obtained from sqrtPriceX96 then converted to a price
+ * @param price - the pool price as a regular number, scaled up by 18 decimals
  * @param decimals0 - the decimals of the non-fUSDC token
  * @param decimals1 - the decimals of fUSDC
  * @returns the scaled price amount in USD
  */
 const getFormattedPriceFromAmount = (amount: string, price: string | bigint, decimals0: number, decimals1: number): number =>
-  Number(amount) * Number(price) * 10 ** (decimals0 - decimals1)
+  Number(amount) * Number(price) * 10 ** (decimals0 - decimals1 - 18)
 
 // convert a tick to a formatted price, scaled by decimals
 const getFormattedPriceFromTick = (tick: number, decimals: number) => {
-  const formattedPrice = usdFormat(Number(sqrtPriceX96ToPrice(getSqrtRatioAtTick(BigInt(tick)))) * 10 ** -decimals)
+  const ratio = getSqrtRatioAtTick(BigInt(tick))
+  const priceUnscaled = Number(sqrtPriceX96ToPrice(ratio))
+  // adjust for decimals, and for 18 digits of price precision
+  const scale = 10 ** -(decimals + 18)
+  const formattedPrice = usdFormat(priceUnscaled * scale)
   // display '∞ ' if the price is greater than $10e18 after scaling
-  return  formattedPrice.length > 20 ? '∞ ' : formattedPrice
+  return formattedPrice.length > 20 ? '∞ ' : formattedPrice
+}
+
+// get the amount of token1Unscaled, given the price and amount of token0Unscaled.
+// mul sets the operation to scale up token0Unscaled by tokenPrice18 (assumes token0Unscaled is the base token)
+// div sets the operation to divide token0Unscaled by tokenPrice18 (assumes token0Unscaled is the other token)
+const getTokenAmountFromRawAmountAndPrice = (token0Unscaled: bigint, tokenPrice18: bigint, dec0: bigint, dec1: bigint, op: 'mul' | 'div'): bigint => {
+  const num = token0Unscaled * 10n ** dec0;
+  const dec = dec1 <= dec0 ? (18n - dec1) + dec0 : dec0;
+  return op === 'mul' ?
+    num * tokenPrice18 / 10n ** (dec + dec1) :
+    num / tokenPrice18
 }
 
 export {
@@ -86,5 +105,6 @@ export {
   getTokenAmountFromFormattedString,
   getFormattedPriceFromAmount,
   getFormattedPriceFromTick,
+  getTokenAmountFromRawAmountAndPrice,
 }
 

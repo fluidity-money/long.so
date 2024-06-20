@@ -30,6 +30,5 @@ describe("Liquidity math", () => {
       encodeSqrtPrice(1.1),                // sqrtRatioBX96
       2148n                                // liquidity
     );
-    console.log("amount0", amount0);
   });
 });

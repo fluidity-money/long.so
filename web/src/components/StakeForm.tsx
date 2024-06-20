@@ -15,7 +15,7 @@ import CurrentPrice from "@/assets/icons/legend/current-price.svg";
 import LiquidityDistribution from "@/assets/icons/legend/liquidity-distribution.svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MAX_TICK, sqrtPriceX96ToPrice } from "@/lib/math";
+import { MAX_TICK, getSqrtRatioAtTick, sqrtPriceX96ToPrice } from "@/lib/math";
 import { ammAddress } from "@/lib/addresses";
 import { createChartData } from "@/lib/chartData";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
@@ -41,10 +41,10 @@ import { erc20Abi } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
-import { useGraphqlGlobal } from "@/hooks/useGraphql";
+import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 import { Token as TokenType, fUSDC, getTokenFromAddress } from "@/config/tokens";
-import { getFormattedPriceFromAmount } from "@/lib/amounts";
+import { getFormattedPriceFromAmount, getTokenAmountFromRawAmountAndPrice } from "@/lib/amounts";
 
 const colorGradient = new echarts.graphic.LinearGradient(
   0,
@@ -75,6 +75,18 @@ const StakeFormFragment = graphql(`
   }
 `);
 
+const PositionsFragment = graphql(`
+fragment DepositPositionsFragment on Wallet {
+  positions {
+    positions {
+      positionId
+      lower
+      upper
+    }
+  }
+}
+`);
+
 export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const [feeTier, setFeeTier] = useState<"auto" | "manual">("auto");
 
@@ -99,6 +111,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     priceUpper,
     setPriceLower,
     setPriceUpper,
+    setTickLower,
+    setTickUpper,
   } = useStakeStore();
 
 
@@ -126,9 +140,12 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   // Parse the price lower and upper, and set the ticks properly.
 
   const { data } = useGraphqlGlobal();
+  const { data: userData } = useGraphqlUser();
 
   const poolsData = useFragment(StakeFormFragment, data?.pools);
   const poolData = poolsData?.find((pool) => pool.address === poolId);
+  const positionData_ = useFragment(PositionsFragment, userData?.getWallet)
+  const positionData = positionData_?.positions.positions.find(p => p.positionId === positionId)
 
   const showMockData = useFeatureFlag("ui show demo data");
 
@@ -189,13 +206,25 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   useEffect(() => {
     if (quotedToken === 'token0') {
-      const newToken1Amount = (BigInt(token0AmountRaw) * tokenPrice)
+      const newToken1Amount = getTokenAmountFromRawAmountAndPrice(
+        BigInt(token0AmountRaw),
+        tokenPrice,
+        BigInt(token0.decimals),
+        BigInt(token1.decimals),
+        'mul'
+      )
       if (token1Balance?.value && newToken1Amount > token1Balance.value)
         return
       setToken1AmountRaw(newToken1Amount.toString())
     }
     else {
-      const newToken0Amount = (BigInt(token1AmountRaw) / tokenPrice)
+      const newToken0Amount = getTokenAmountFromRawAmountAndPrice(
+        BigInt(token1AmountRaw),
+        tokenPrice,
+        BigInt(token0.decimals),
+        BigInt(token1.decimals),
+        'div'
+      );
       if (token0Balance?.value && newToken0Amount > token0Balance.value)
         return
       setToken0AmountRaw(newToken0Amount.toString())
@@ -230,12 +259,24 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     "full-range" | "auto" | "custom"
   >("auto");
 
+  // TODO these could all be more precise
   useEffect(() => {
+    // set the ticks to the existing ticks of the pool
+    if (mode === "existing") {
+      const lower = positionData?.lower ?? 0
+      const upper = positionData?.upper ?? 0
+      const priceLower = lower === 0 ? "0" : (1.0001 ** lower).toFixed(fUSDC.decimals)
+      const priceHigher = (1.0001 ** upper).toFixed(fUSDC.decimals)
+      setPriceLower(priceLower)
+      setPriceUpper(priceHigher)
+      return
+    }
+
     if (liquidityRangeType === "full-range") {
       // lower price is 1 base fUSDC (0.000001)
       setPriceLower(`0.${"0".repeat(token1.decimals - 1)}1`)
-      // upper price is max tick adjusted for decimals
-      setPriceUpper(BigInt(1.0001 ** MAX_TICK * 10 ** -fUSDC.decimals).toString())
+      // upper price is max tick
+      setPriceUpper(String(1.0001 ** MAX_TICK))
     }
     else if (liquidityRangeType === "auto") {
       if (!curTick)
@@ -248,7 +289,9 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       setPriceUpper(priceHigher)
     }
   }, [
+    mode,
     curTick,
+    positionData,
     setPriceLower,
     setPriceUpper,
     token1.decimals,

@@ -115,7 +115,7 @@ export default function WithdrawLiquidity() {
   const deltaUsd = useMemo(() => {
     if (!token0Amount || !token1Amount)
       return "$0.00"
-    const decimalAdjust = 10 ** (token0.decimals - token1.decimals);
+    const decimalAdjust = 10 ** (token0.decimals - token1.decimals - 18);
     const token0AmountScaled = Number(token0Amount) * Number(tokenPrice) * decimalAdjust
     return usdFormat(token0AmountScaled + parseFloat(token1Amount))
   }, [token0Amount, token1Amount])

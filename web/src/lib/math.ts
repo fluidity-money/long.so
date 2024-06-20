@@ -24,8 +24,14 @@ export const encodeSqrtPrice = (price: number): bigint => {
   return BigInt(Math.sqrt(price) * 2 ** 96);
 };
 
-export const sqrtPriceX96ToPrice = (sqrtPriceX96: bigint): bigint =>
-	(sqrtPriceX96 / Q96) ** 2n;
+// convert a sqrtPriceX96 to a price in 18 digits of precision
+// to then be adjusted and converted via token decimals.
+export const sqrtPriceX96ToPrice = (sqrtPriceX96: bigint): bigint => {
+	const sqrtPrice = sqrtPriceX96 ** 2n;
+	const decimals = 10n ** 18n;
+	const price = sqrtPrice * decimals / (1n << 192n);
+	return price;
+};
 
 export const getSqrtRatioAtTick = (tick: bigint): bigint => {
 	// the implementation of this function is more or less identical to the
