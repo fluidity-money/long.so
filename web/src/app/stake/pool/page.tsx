@@ -83,7 +83,10 @@ export default function PoolPage() {
   const { data: userData } = useGraphqlUser();
   const allPoolsData = useFragment(ManagePoolFragment, globalData?.pools);
   const positionsData_ = useFragment(PositionsFragment, userData?.getWallet)
-  const positionsData = useMemo(() => positionsData_?.positions.positions.filter(p => p.pool.address === id), [positionsData_])
+  const positionsData = useMemo(() =>
+    positionsData_?.positions.positions.filter(p => p.pool.address === id),
+    [id, positionsData_]
+  );
 
 
   const {

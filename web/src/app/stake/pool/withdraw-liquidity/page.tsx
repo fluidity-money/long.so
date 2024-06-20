@@ -51,9 +51,10 @@ export default function WithdrawLiquidity() {
   const params = useSearchParams();
 
   const positionId = params.get("positionId")
-  if (!positionId) {
-    router.back();
-  }
+
+  useEffect(() => {
+    if (!positionId && typeof window !== undefined) router.back();
+  }, [positionId, router]);
 
   const { address } = useAccount()
 

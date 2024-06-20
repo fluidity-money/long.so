@@ -42,7 +42,7 @@ export default function ConfirmWithdrawLiquidity() {
         args: [token0.address, id, delta],
       });
     },
-    [writeContractUpdatePosition, token0AmountRaw, token0],
+    [delta, writeContractUpdatePosition, token0AmountRaw, token0],
   );
 
   // price of the current pool
