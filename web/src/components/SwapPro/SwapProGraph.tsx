@@ -64,7 +64,7 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
         [slicedData
           // reformat pool data to match expected graph data
           ?.map((d) => ({
-            date: new Date(d.timestamp),
+            date: new Date(d.timestamp * 1000),
             value: parseFloat(d.fusdc.valueUsd),
           })),
         "$" + header,
@@ -112,7 +112,7 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
         [slicedData
           // reformat pool data to match expected graph data
           ?.map((d) => ({
-            date: new Date(d.timestamp),
+            date: new Date(d.timestamp * 1000),
             value: parseFloat(d.fusdc.valueUsd),
           })),
         "$" + header
