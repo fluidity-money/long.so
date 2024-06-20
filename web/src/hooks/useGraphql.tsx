@@ -49,6 +49,7 @@ export const graphqlQueryUser = graphql(`
       ...MyPositionsWalletFragment
       ...MyPositionsInventoryWalletFragment
       ...PositionsFragment
+      ...WithdrawPositionsFragment
     }
   }
 `);

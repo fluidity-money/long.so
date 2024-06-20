@@ -22,7 +22,7 @@ import { ammAddress } from "@/lib/addresses";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 
 const PositionsFragment = graphql(`
-fragment PositionsFragment on Wallet {
+fragment WithdrawPositionsFragment on Wallet {
   positions {
     positions {
       positionId
@@ -98,7 +98,7 @@ export default function WithdrawLiquidity() {
   const { data } = useGraphqlUser();
 
   const positionsData = useFragment(PositionsFragment, data?.getWallet);
-  const position = positionsData?.positions?.positions.find(p => p.positionId.toString() === positionId && p.owner.address === address?.toLowerCase())
+  const position = positionsData?.positions.positions.find(p => p.positionId.toString() === positionId && p.owner.address === address?.toLowerCase())
   const { upper: upperTick, lower: lowerTick } = position || {}
 
   // update ticks in stakeStore based on the current position

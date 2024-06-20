@@ -17,10 +17,11 @@ import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usdFormat } from "@/lib/usdFormat";
-import { fUSDC } from "@/config/tokens";
+import { fUSDC, getTokenFromAddress } from "@/config/tokens";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getFormattedPriceFromTick } from "@/lib/amounts";
-import { PositionsFragment } from "./withdraw-liquidity/page";
+import { useStakeStore } from "@/stores/useStakeStore";
+import { useSwapStore } from "@/stores/useSwapStore";
 
 const ManagePoolFragment = graphql(`
   fragment ManagePoolFragment on SeawaterPool {
@@ -45,6 +46,29 @@ const ManagePoolFragment = graphql(`
   }
 `);
 
+const PositionsFragment = graphql(`
+fragment PositionsFragment on Wallet {
+  positions {
+    positions {
+      positionId
+      pool {
+        address
+      }
+      lower
+      upper
+      liquidity {
+        fusdc {
+          valueUsd
+        }
+        token1 {
+          valueUsd
+        }
+      }
+    }
+  }
+}
+`);
+
 export default function PoolPage() {
   const router = useRouter();
 
@@ -58,7 +82,35 @@ export default function PoolPage() {
   const { data: globalData } = useGraphqlGlobal();
   const { data: userData } = useGraphqlUser();
   const allPoolsData = useFragment(ManagePoolFragment, globalData?.pools);
-  const positionsData = useFragment(PositionsFragment, userData?.getWallet)
+  const positionsData_ = useFragment(PositionsFragment, userData?.getWallet)
+  const positionsData = useMemo(() => positionsData_?.positions.positions.filter(p => p.pool.address === id), [positionsData_])
+
+
+  const {
+    token0,
+    token1,
+    setToken0,
+    setToken1,
+  } = useStakeStore()
+
+  const {
+    setToken0: setToken0Swap,
+    setToken1: setToken1Swap,
+  } = useSwapStore();
+
+  useEffect(() => {
+    if (!id)
+      return
+    const token = getTokenFromAddress(id)
+    if (!token)
+      return
+    // Graph is rendered by SwapPro, which uses the swap store
+    // So we have to set both of these.
+    setToken0(token)
+    setToken1(fUSDC)
+    setToken0Swap(token)
+    setToken1Swap(fUSDC)
+  }, [id])
 
   const poolData = allPoolsData?.find((pool) => pool.id === id);
 
@@ -69,17 +121,17 @@ export default function PoolPage() {
   // the internal ID and query parameters
   const position = useMemo(() => {
     if (positionId_ !== undefined)
-      return positionsData?.positions?.positions.find(p => p.positionId === positionId_)
+      return positionsData?.find(p => p.positionId === positionId_)
     if (positionIdParam)
-      return positionsData?.positions?.positions.find(p => p.positionId === positionIdParam)
-    return positionsData?.positions?.positions[0]
+      return positionsData?.find(p => p.positionId === positionIdParam)
+    return positionsData?.[0]
   }, [poolData, positionId_, positionIdParam])
 
   const { positionId, upper: upperTick, lower: lowerTick } = position || {}
 
   const poolBalance = useMemo(() => (
     usdFormat(positionsData ?
-      positionsData.positions.positions.reduce((total, { liquidity: { fusdc, token1 } }) =>
+      positionsData.reduce((total, { liquidity: { fusdc, token1 } }) =>
         total + parseFloat(fusdc.valueUsd) + parseFloat(token1.valueUsd),
         0) :
       0
@@ -273,7 +325,7 @@ export default function PoolPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {positionsData?.positions.positions.map(position => (
+                        {positionsData?.map(position => (
                           <SelectItem
                             key={`${position.positionId}`}
                             value={`${position.positionId}`}
