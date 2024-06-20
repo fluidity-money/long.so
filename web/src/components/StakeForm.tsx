@@ -144,8 +144,14 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   const poolsData = useFragment(StakeFormFragment, data?.pools);
   const poolData = poolsData?.find((pool) => pool.address === poolId);
+
   const positionData_ = useFragment(PositionsFragment, userData?.getWallet)
-  const positionData = positionData_?.positions.positions.find(p => p.positionId === positionId)
+  const positionData = null;
+
+  const { upper: upperTick, lower: lowerTick } = positionData || {
+    upper: 0,
+    lower: 0
+  };
 
   const showMockData = useFeatureFlag("ui show demo data");
 
@@ -264,10 +270,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   useEffect(() => {
     // set the ticks to the existing ticks of the pool
     if (mode === "existing") {
-      const lower = positionData?.lower ?? 0
-      const upper = positionData?.upper ?? 0
-      const priceLower = lower === 0 ? "0" : (1.0001 ** lower).toFixed(fUSDC.decimals)
-      const priceHigher = (1.0001 ** upper).toFixed(fUSDC.decimals)
+      const priceLower = lowerTick === 0 ? "0" : (1.0001 ** lowerTick).toFixed(fUSDC.decimals)
+      const priceHigher = (1.0001 ** upperTick).toFixed(fUSDC.decimals)
       setPriceLower(priceLower)
       setPriceUpper(priceHigher)
       return
