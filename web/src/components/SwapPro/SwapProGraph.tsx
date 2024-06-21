@@ -154,7 +154,7 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
           <div>
             <div className="text-sm md:hidden">
               {/* this text is only shown on mobile */}
-              fUSDC/{pool?.token?.address} {startCase(activeGraphType)}
+              fUSDC/{pool?.token?.symbol} {startCase(activeGraphType)}
             </div>
           </div>
 

@@ -8,6 +8,7 @@ export const SwapProPoolFragment = graphql(`
     address
     token {
       address
+      symbol
     }
     priceOverTime {
       daily
