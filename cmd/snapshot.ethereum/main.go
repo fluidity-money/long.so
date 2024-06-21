@@ -119,6 +119,10 @@ func main() {
 		amount0s[i] = amount0.String()
 		amount1s[i] = amount1.String()
 	}
+	if len(ids) == 0 {
+		slog.Info("no positions found")
+		return
+	}
 	if err := storePositions(db, ids, amount0s, amount1s); err != nil {
 		log.Fatalf("store positions: %v", err)
 	}
