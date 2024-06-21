@@ -21,6 +21,7 @@ func Pulse() {
 		slog.Debug("skipping request to send message to heartbeat url")
 		return
 	}
+	slog.Debug("sending a heartbeat message")
 	resp, err := http.Get(u)
 	if err != nil {
 		slog.Error("error reporting to heartbeat", "err", err)
