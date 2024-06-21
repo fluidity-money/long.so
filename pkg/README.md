@@ -13,7 +13,7 @@ Long Tail is Arbitrum's cheapest and most rewarding AMM.
 
 |       Deployment name     |              Deployment address            |
 |---------------------------|--------------------------------------------|
-| Long Tail AMM             | 0x40e659f4eB2fdA398ce0860aFB74701d4977E530 |
+| Long Tail AMM             | 0x839c5cf32d9Bc2CD46027691d2941410251ED557 |
 | Long Tail NFT manager     | 0xC96F6A050382d4aA73fd91f7A4D02aB8E5654338 |
 
 #### Useful testing token deployments
