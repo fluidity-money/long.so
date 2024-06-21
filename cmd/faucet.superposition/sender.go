@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/fluidity-money/long.so/cmd/faucet.superposition/graph"
+	"github.com/fluidity-money/long.so/cmd/faucet.superposition/lib/faucet"
 
 	ethAbiBind "github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethCommon "github.com/ethereum/go-ethereum/common"
@@ -18,7 +19,15 @@ import (
 // BufferDuration to reuse to buffer requests to the faucet in.
 const BufferDuration = 4 * time.Second
 
-type SendFaucetFunc func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...ethCommon.Address) (hash *ethCommon.Hash, err error)
+var (
+	// NonstakerSPNAmount to send when they request the faucet as a non-staker.
+	NonstakerSPNAmount = new(big.Int).SetInt64(1e18)
+	// StakerSPNAmount to send to FLY stakers.
+	//1e18
+	StakerSPNAmount, _ = new(big.Int).SetString("100000000000000000000", 10)
+)
+
+type SendFaucetFunc func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...faucet.FaucetReq) (hash *ethCommon.Hash, err error)
 
 // RunSender, by creating a repeating timer of 5 seconds for the cache window, accumulating requests, then sending out tokens requested on demand. Takes the private key for the sender
 func RunSender(c *ethclient.Client, chainId *big.Int, key *ecdsa.PrivateKey, senderAddr, faucetAddr ethCommon.Address, sendTokens SendFaucetFunc) chan<- graph.FaucetReq {
@@ -42,9 +51,18 @@ func RunSender(c *ethclient.Client, chainId *big.Int, key *ecdsa.PrivateKey, sen
 				if i == 0 {
 					continue
 				}
-				addrs := make([]ethCommon.Address, i)
+				faucetReqs := make([]faucet.FaucetReq, i)
 				for x, a := range buf[:i] {
-					addrs[x] = a.Addr
+					var amount *big.Int
+					if a.IsStaker {
+						amount = StakerSPNAmount
+					} else {
+						amount = NonstakerSPNAmount
+					}
+					faucetReqs[x] = faucet.FaucetReq{
+						Recipient: a.Addr,
+						Amount:    amount,
+					}
 				}
 				o, err := ethAbiBind.NewKeyedTransactorWithChainID(key, chainId)
 				if err != nil {
@@ -63,7 +81,7 @@ func RunSender(c *ethclient.Client, chainId *big.Int, key *ecdsa.PrivateKey, sen
 					o,
 					faucetAddr,
 					senderAddr,
-					addrs...,
+					faucetReqs...,
 				)
 				if err != nil {
 					slog.Error("failed to send with faucet", "err", err)
@@ -71,7 +89,7 @@ func RunSender(c *ethclient.Client, chainId *big.Int, key *ecdsa.PrivateKey, sen
 				slog.Info("sent faucet amounts",
 					"hash", hash,
 					"size", len(buf),
-					"addrs", addrs,
+					"faucet reqs", faucetReqs,
 					"err?", err,
 				)
 				// Send responses to the connected

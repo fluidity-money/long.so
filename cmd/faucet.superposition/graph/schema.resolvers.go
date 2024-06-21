@@ -44,23 +44,22 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 		)
 		return "", fmt.Errorf("bad wallet")
 	}
-	// Test if the user's included in our staking support.
-	if r.F.Is(features.FeatureFaucetStakersOnly) {
-		ok, err := IsUserStaker(wallet)
-		if err != nil {
-			slog.Error("error requesting whether the user is a staker",
-				"ip addr", ipAddr,
-				"submitted wallet", wallet,
-			)
-			return "", fmt.Errorf("error requesting: %v", err)
-		}
-		if !ok {
-			slog.Error("non staker requested spn airdrop",
-				"ip addr", ipAddr,
-				"submitted wallet", wallet,
-			)
-			return "", fmt.Errorf("not staker")
-		}
+	// Check if they're a staker for their bonus.
+	isFlyStaker, err := IsUserStaker(wallet)
+	if err != nil {
+		slog.Error("error requesting whether the user is a staker",
+			"ip addr", ipAddr,
+			"submitted wallet", wallet,
+		)
+		return "", fmt.Errorf("error requesting: %v", err)
+	}
+	// If the user is not a fly staker, kick them out if this feature is enabled.
+	if r.F.Is(features.FeatureFaucetStakersOnly) && !isFlyStaker {
+		slog.Error("non staker requested spn airdrop",
+			"ip addr", ipAddr,
+			"submitted wallet", wallet,
+		)
+		return "", fmt.Errorf("not staker")
 	}
 	// Check if the user is within the window to make requests.
 	// Checks if there are any rows that exceed a 5 hour addition to
@@ -124,8 +123,9 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 	// Get the local queue, assuming the concurrency on this Lambda(?) is limited.
 	resp := make(chan error)
 	r.Queue <- FaucetReq{
-		Addr: addr,
-		Resp: resp,
+		Addr:     addr,
+		IsStaker: isFlyStaker,
+		Resp:     resp,
 	}
 	// Send back to the user the status on this once we're done.
 	// Assuming the throughput on the chain is good enough. Have a

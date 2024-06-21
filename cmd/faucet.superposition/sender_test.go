@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/fluidity-money/long.so/cmd/faucet.superposition/graph"
+	"github.com/fluidity-money/long.so/cmd/faucet.superposition/lib/faucet"
 
 	ethAbiBind "github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethCommon "github.com/ethereum/go-ethereum/common"
@@ -19,28 +20,30 @@ import (
 func TestFaucetThreeAddresses(t *testing.T) {
 	// In a window of 3 seconds, send a request each second, then
 	// hopefully they all get batched and sent out.
-	expected := []ethCommon.Address{
-		h2a("0x6221a9c005f6e47eb398fd867784cacfdcfff4e7"),
-		h2a("0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5"),
-		h2a("0x0000000000000000000000000000000000000000"),
+	H := new(big.Int).SetInt64(100)
+	H.Exp(H, new(big.Int).SetInt64(1e18), nil)
+	expected := []faucet.FaucetReq{
+		{h2a("0x6221a9c005f6e47eb398fd867784cacfdcfff4e7"), H},
+		{h2a("0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5"), H},
+		{h2a("0x0000000000000000000000000000000000000000"), H},
 	}
 	var (
 		faucetAddr = h2a("0x6221a9c005f6e47eb398fd867784cacfdcfff4e7")
 		senderAddr = h2a("0x0000000000000000000000000000000000000000")
 	)
-	d := make(chan []ethCommon.Address)
+	d := make(chan []faucet.FaucetReq)
 	chainId := new(big.Int).SetInt64(0)
 	k, err := ethCrypto.GenerateKey()
 	assert.Nilf(t, err, "failed to create key")
 	a := time.NewTimer(6 * time.Second)
-	c := RunSender(nil, chainId, k, faucetAddr, senderAddr, func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...ethCommon.Address) (hash *ethCommon.Hash, err error) {
+	c := RunSender(nil, chainId, k, faucetAddr, senderAddr, func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...faucet.FaucetReq) (hash *ethCommon.Hash, err error) {
 		d <- addrs
 		return nil, nil
 	})
 	errs := make(chan error)
 	for _, a := range expected {
 		time.Sleep(1 * time.Second)
-		c <- graph.FaucetReq{a, errs}
+		c <- graph.FaucetReq{a.Recipient, true, errs}
 	}
 	t.Log("sent through faucet requests")
 	// Go through all the attempts we sent out, and make sure they're not errors.
@@ -60,7 +63,7 @@ func TestFaucetThreeAddresses(t *testing.T) {
 	// Test that the buffer is now empty by sending a single address.
 	// It's not likely that we'll have a timer related issue here so
 	// we can give up checking the time involved.
-	c <- graph.FaucetReq{expected[0], errs}
+	c <- graph.FaucetReq{expected[0].Recipient, true, errs}
 	assert.Equalf(t, expected[:1], <-d, "second run inconsistent")
 	assert.Nilf(t, <-errs, "final faucet req has errors")
 }

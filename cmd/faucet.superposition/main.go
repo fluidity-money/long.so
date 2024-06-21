@@ -4,8 +4,8 @@ package main
 
 import (
 	"context"
-	_ "embed"
 	"crypto/ecdsa"
+	_ "embed"
 	"log"
 	"net/http"
 	"os"
@@ -14,15 +14,15 @@ import (
 	"github.com/fluidity-money/long.so/lib/features"
 	_ "github.com/fluidity-money/long.so/lib/setup"
 
-	"github.com/fluidity-money/long.so/cmd/faucet.superposition/lib/faucet"
 	"github.com/fluidity-money/long.so/cmd/faucet.superposition/graph"
+	"github.com/fluidity-money/long.so/cmd/faucet.superposition/lib/faucet"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 
-	"github.com/ethereum/go-ethereum/ethclient"
-	ethCrypto "github.com/ethereum/go-ethereum/crypto"
 	ethCommon "github.com/ethereum/go-ethereum/common"
+	ethCrypto "github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -66,7 +66,7 @@ func main() {
 	config := config.Get()
 	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
 		DisableAutomaticPing: true,
-		Logger: gormLogger.Default.LogMode(gormLogger.Silent),
+		Logger:               gormLogger.Default.LogMode(gormLogger.Silent),
 	})
 	if err != nil {
 		log.Fatalf("database open: %v", err)
@@ -98,10 +98,10 @@ func main() {
 	queue := RunSender(geth, chainId, key, senderAddr, faucetAddr, faucet.SendFaucet)
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
-			DB:      db,
-			F:       features.Get(),
-			Geth:    geth,
-			C:       config,
+			DB:    db,
+			F:     features.Get(),
+			Geth:  geth,
+			C:     config,
 			Queue: queue,
 		},
 	}))

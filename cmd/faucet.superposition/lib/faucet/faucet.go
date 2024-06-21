@@ -2,6 +2,7 @@ package faucet
 
 import (
 	"bytes"
+	"math/big"
 	"context"
 	_ "embed"
 
@@ -17,9 +18,14 @@ var abiBytes []byte
 
 var abi, _ = ethAbi.JSON(bytes.NewReader(abiBytes))
 
+type FaucetReq struct {
+	Recipient ethCommon.Address `abi:"recipient"`
+	Amount    *big.Int          `abi:"amount"`
+}
+
 // SendFaucet to multiple addresses, allowing the contract to randomly
 // choose how much to send.
-func SendFaucet(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...ethCommon.Address) (hash *ethCommon.Hash, err error) {
+func SendFaucet(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...FaucetReq) (hash *ethCommon.Hash, err error) {
 	bc := ethAbiBind.NewBoundContract(faucet, abi, c, c, c)
 	d, err := abi.Pack("sendTo", addrs)
 	if err != nil {
