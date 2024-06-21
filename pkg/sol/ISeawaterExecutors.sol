@@ -147,6 +147,11 @@ interface ISeawaterExecutorPosition {
     /// @return the current active tick in the pool
     function curTick(address pool) external returns (int32);
 
+    /// @notice gets the tick spacing of the pool
+    /// @param pool to get from
+    /// @return the tick spacing of the pool
+    function tickSpacing(address pool) external returns (uint8);
+
     /// @notice gets the fee growth for token 0
     /// @param pool to get from
     /// @return the fee growth for the other token
