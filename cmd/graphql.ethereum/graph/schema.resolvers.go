@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
+	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib"
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
 	"github.com/fluidity-money/long.so/lib/features"
 	"github.com/fluidity-money/long.so/lib/math"
@@ -216,7 +217,7 @@ func (r *queryResolver) GetPosition(ctx context.Context, id int) (position *seaw
 func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *int, after *int) (positions model.SeawaterPositions, err error) {
 	w := types.AddressFromString(wallet)
 	if first == nil {
-		fst := 10
+		fst := lib.PaginationBatchSize
 		first = &fst
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
@@ -266,7 +267,7 @@ func (r *queryResolver) GetWallet(ctx context.Context, address string) (wallet *
 func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, after *int) (swaps model.SeawaterSwaps, err error) {
 	poolAddress := types.AddressFromString(pool)
 	if first == nil {
-		fst := 10
+		fst := lib.PaginationBatchSize
 		first = &fst
 	}
 	if after == nil {
@@ -298,7 +299,7 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, first *int, after *int) (swaps model.SeawaterSwaps, err error) {
 	walletAddress := types.AddressFromString(wallet)
 	if first == nil {
-		fst := 10
+		fst := lib.PaginationBatchSize
 		first = &fst
 	}
 	if after == nil {
@@ -821,7 +822,7 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 		return swaps, fmt.Errorf("empty pool")
 	}
 	if first == nil {
-		fst := 10
+		fst := lib.PaginationBatchSize
 		first = &fst
 	}
 	if after == nil {
@@ -1203,7 +1204,7 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 		return positions, fmt.Errorf("empty wallet")
 	}
 	if first == nil {
-		fst := 10
+		fst := lib.PaginationBatchSize
 		first = &fst
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
