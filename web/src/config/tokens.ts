@@ -12,13 +12,6 @@ export const fUSDC: Token = {
   decimals: 6,
 };
 
-export const DefaultToken: Token = {
-  name: "SWG",
-  address: "0xe984f758f362d255bd96601929970cef9ff19dd7",
-  symbol: "S",
-  decimals: 18,
-};
-
 export const USDC: Token = {
   name: "USD Coin",
   address: "0x6437fdc89ced41941b97a9f1f8992d88718c81c5",
@@ -42,11 +35,12 @@ export const WSPN: Token = {
 
 const allTokens: Token[] = [
   fUSDC,
-  DefaultToken,
   USDC,
   WSPN,
   WETH,
 ];
+
+export const DefaultToken = USDC;
 
 export const getTokenFromAddress = (address_: string): Token | undefined =>
   allTokens.find(({ address }) => address === address_)
