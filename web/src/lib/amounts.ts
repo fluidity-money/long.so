@@ -75,7 +75,7 @@ const getTokenAmountFromFormattedString = (amount: string, decimals: number): bi
  * @returns the scaled price amount in USD
  */
 const getFormattedPriceFromAmount = (amount: string, price: string | bigint, decimalsFusdc: number): number =>
-  Number(amount) * (Number(price)) * 10 ** decimalsFusdc
+  Number(amount) * Number(price) / 10 ** decimalsFusdc
 
 // convert a tick to a formatted price, scaled by decimals
 const getFormattedPriceFromTick = (tick: number, decimals: number) => {
