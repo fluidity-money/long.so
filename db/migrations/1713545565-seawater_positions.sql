@@ -24,6 +24,4 @@ CREATE VIEW seawater_active_positions_1 AS
 	)
 ;
 
-CREATE UNIQUE INDEX ON seawater_active_positions_1 (pos_id);
-
 -- migrate:down

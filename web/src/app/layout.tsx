@@ -1,6 +1,7 @@
 import { Provider } from "@/app/Provider";
 import { Metadata } from "next";
 import LongTail from "@/assets/icons/long-tail.svg";
+import Discord from "@/assets/icons/discord.svg";
 import { MobileNetworkSelection } from "@/app/_layout/MobileNetworkSelection";
 import { DemoData } from "@/app/_layout/DemoData";
 import { FaucetDropdown } from "@/app/_layout/FaucetDropdown";
@@ -110,15 +111,25 @@ export default async function RootLayout({
 
             <footer className="w-full self-end p-8">
               <div className="flex flex-row justify-between">
-                <small>
-                  <a
-                    rel="noopener noreferrer"
-                    target="_blank"
-                    href="https://github.com/fluidity-money/long.so/tree/development/audits"
-                  >
-                    Audits
+                <div className="grid grid-cols-1 gap-x-[10px]">
+                  <small>
+                    <a href="https://x.com/superpositionso">
+                      𝕏
+                    </a>
+                  </small>
+                  <a href="https://discord.gg/swag">
+                    <Discord />
                   </a>
-                </small>
+                  <small>
+                    <a
+                      rel="noopener noreferrer"
+                      target="_blank"
+                      href="https://github.com/fluidity-money/long.so/tree/development/audits"
+                    >
+                      Audits
+                    </a>
+                  </small>
+                </div>
                 <small>
                   <a
                     rel="noopener noreferrer"
