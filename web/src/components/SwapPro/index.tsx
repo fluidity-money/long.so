@@ -13,8 +13,8 @@ import { Graph } from "@/components/SwapPro/SwapProGraph";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { columns, Transaction } from "@/app/_DataTable/columns";
 import { DataTable } from "@/app/_DataTable/DataTable";
-import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
-import { graphql, useFragment } from "@/gql";
+import { useGraphqlGlobal } from "@/hooks/useGraphql";
+import { useFragment } from "@/gql";
 import { SwapProPoolFragment } from "@/components/SwapPro/SwapProPoolFragment";
 import { useMemo } from "react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
@@ -23,24 +23,6 @@ const variants = {
   hidden: { opacity: 0, width: 0 },
   visible: { opacity: 1, width: "auto" },
 };
-
-const SwapProTransactionsFragment = graphql(`
-  fragment SwapProTransactionsFragment on SeawaterSwap {
-    timestamp
-    amountIn {
-      valueScaled
-      token {
-        symbol
-      }
-    }
-    amountOut {
-      valueScaled
-      token {
-        symbol
-      }
-    }
-  }
-`);
 
 export const SwapPro = ({
   override,
@@ -60,9 +42,7 @@ export const SwapPro = ({
 
   const { data: dataGlobal, isLoading: isLoadingGlobal } = useGraphqlGlobal();
 
-  const { data: dataUser, isLoading: isLoadingUser } = useGraphqlUser();
-
-  const isLoading = isLoadingUser || isLoadingGlobal;
+  const isLoading = isLoadingGlobal;
 
   // the selected pool
   const pool = useMemo(
@@ -77,10 +57,7 @@ export const SwapPro = ({
 
   const poolSwapPro = useFragment(SwapProPoolFragment, pool);
 
-  const transactions = useFragment(
-      SwapProTransactionsFragment,
-      dataUser?.getSwapsForUser?.swaps,
-    );
+  const transactions = poolSwapPro?.swaps.swaps
 
   const showMockData = useFeatureFlag("ui show demo data");
   const showStakeApy = useFeatureFlag("ui show stake apy");

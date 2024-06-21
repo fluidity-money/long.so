@@ -39,7 +39,6 @@ export const graphqlQueryUser = graphql(`
     getSwapsForUser(wallet: $wallet, first: 10) {
       swaps {
         # add transaction fragments here
-        ...SwapProTransactionsFragment
         ...TradeTabTransactionsFragment
       }
     }

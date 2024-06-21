@@ -48,5 +48,22 @@ export const SwapProPoolFragment = graphql(`
         }
       }
     }
+    swaps {
+      swaps {
+        timestamp
+        amountIn {
+          valueScaled
+          token {
+            symbol
+          }
+        }
+        amountOut {
+          valueScaled
+          token {
+            symbol
+          }
+        }
+      }
+    }
   }
 `);
