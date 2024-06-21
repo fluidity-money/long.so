@@ -14,7 +14,7 @@ import {
   useWriteContract,
 } from "wagmi";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
-import { sqrtPriceX96ToPrice, getLiquidityForAmounts } from "@/lib/math";
+import { sqrtPriceX96ToPrice, getLiquidityForAmounts, MAX_TICK, MIN_TICK, snapTickToSpacing } from "@/lib/math";
 import { useEffect, useCallback, useMemo } from "react";
 import { erc20Abi, Hash, hexToBigInt, maxUint256 } from "viem";
 import { ammAddress } from "@/lib/addresses";
@@ -97,6 +97,13 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   });
   const curTick = { result: BigInt(curTickNum?.result ?? 0) }
 
+  const { data: tickSpacing } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "tickSpacing",
+    args: [token0.address],
+  });
+
   // set up write contract hooks
   const {
     writeContract: writeContractMint,
@@ -142,13 +149,20 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
    * Step 1. Mint a new position
    */
   const createPosition = () => {
-    if (tickLower === undefined || tickUpper === undefined || tickLower >= tickUpper)
+    if (tickLower === undefined || tickUpper === undefined || tickLower >= tickUpper || !tickSpacing)
       return
+
+    const { result: spacing } = tickSpacing;
+
+    // snap ticks to spacing
+    const lower = snapTickToSpacing(tickLower, spacing)
+    const upper = snapTickToSpacing(tickUpper, spacing)
+
     writeContractMint({
       address: ammAddress,
       abi: seawaterContract.abi,
       functionName: "mintPosition",
-      args: [token0.address, tickLower, tickUpper],
+      args: [token0.address, lower, upper],
     });
   }
 

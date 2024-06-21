@@ -18,10 +18,19 @@ export const encodeTick = (price: number): number => {
 	return Math.floor(Math.log(price) / Math.log(1.0001));
 };
 
+export const snapTickToSpacing = (tick: number, spacing: number): number => {
+	const t = Math.round(tick / spacing) * spacing;
+	if (t > MAX_TICK)
+		return Math.floor(tick / spacing) * spacing;
+	if (t < MIN_TICK)
+		return Math.ceil(tick / spacing) * spacing;
+	return t
+}
+
 // encodeSqrtPrice, generating slightly off results compared to the
 // approach in the code. okay for the frontend though.
 export const encodeSqrtPrice = (price: number): bigint => {
-  return BigInt(Math.sqrt(price) * 2 ** 96);
+	return BigInt(Math.sqrt(price) * 2 ** 96);
 };
 
 // convert a sqrtPriceX96 to a price in 18 digits of precision
