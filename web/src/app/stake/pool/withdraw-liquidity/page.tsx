@@ -20,6 +20,7 @@ import { useEffect, useMemo, useState } from "react";
 import { usdFormat } from "@/lib/usdFormat";
 import { ammAddress } from "@/lib/addresses";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
+import { fUSDC } from "@/config/tokens";
 
 const PositionsFragment = graphql(`
 fragment WithdrawPositionsFragment on Wallet {
@@ -116,8 +117,7 @@ export default function WithdrawLiquidity() {
   const deltaUsd = useMemo(() => {
     if (!token0Amount || !token1Amount)
       return "$0.00"
-    const decimalAdjust = 10 ** (token0.decimals - token1.decimals - 18);
-    const token0AmountScaled = Number(token0Amount) * Number(tokenPrice) * decimalAdjust
+    const token0AmountScaled = Number(token0Amount) * Number(tokenPrice) * 10 ** fUSDC.decimals;
     return usdFormat(token0AmountScaled + parseFloat(token1Amount))
   }, [token0Amount, token1Amount])
 

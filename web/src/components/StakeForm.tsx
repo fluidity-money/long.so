@@ -287,11 +287,14 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       if (!curTick)
         return
       // auto sets the price range to +-10% of the current tick
-      const priceAtTick = 1.0001 ** Number(curTick.result)
-      const priceLower = (priceAtTick * 0.9).toFixed(fUSDC.decimals)
-      const priceHigher = (priceAtTick * 1.1).toFixed(fUSDC.decimals)
+      const priceAtTick = sqrtPriceX96ToPrice(getSqrtRatioAtTick(curTick.result))
+      const diff = priceAtTick / 10n
+      const pu = priceAtTick + diff
+      const pl = priceAtTick - diff
+      const priceLower = (Number(pl) / 10 ** fUSDC.decimals).toFixed(fUSDC.decimals)
+      const priceUpper = (Number(pu) / 10 ** fUSDC.decimals).toFixed(fUSDC.decimals)
       setPriceLower(priceLower)
-      setPriceUpper(priceHigher)
+      setPriceUpper(priceUpper)
     }
   }, [
     mode,
@@ -518,7 +521,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
             <div className="mt-[5px] flex w-full flex-row items-center justify-between">
               <div className="text-2xs md:text-gray-1">
-                ${token0.address === fUSDC.address ? token0Amount : getFormattedPriceFromAmount(token0Amount, tokenPrice, token0.decimals, token1.decimals)}
+                ${token0.address === fUSDC.address ? token0Amount : getFormattedPriceFromAmount(token0Amount, tokenPrice, fUSDC.decimals)}
               </div>
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
@@ -577,7 +580,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
               <div className="mt-[5px] flex w-full flex-row items-center justify-between">
                 <div className="text-2xs md:text-gray-1">
-                  ${token1.address === fUSDC.address ? token1Amount : getFormattedPriceFromAmount(token1Amount, tokenPrice, token1.decimals, token0.decimals)}
+                  ${token1.address === fUSDC.address ? token1Amount : getFormattedPriceFromAmount(token1Amount, tokenPrice, fUSDC.decimals)}
                 </div>
                 <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
                   {token1Balance && (
@@ -841,7 +844,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 <LiquidityDistribution /> Liquidity Distribution
               </div>
             </div>
-          </div> }
+          </div>}
         </div>
 
         <div className="mt-[21px] flex w-[318px] flex-row justify-end md:w-[392px]">

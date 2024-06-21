@@ -70,13 +70,12 @@ const getTokenAmountFromFormattedString = (amount: string, decimals: number): bi
 /**
  * @description scale a formatted amount string by the price of the pool
  * @param amount - formatted string
- * @param price - the pool price as a regular number, scaled up by 18 decimals
- * @param decimals0 - the decimals of the non-fUSDC token
- * @param decimals1 - the decimals of fUSDC
+ * @param price - the pool price as a regular number, scaled up by fUSDC decimals
+ * @param decimalsFusdc - the decimals of fUSDC
  * @returns the scaled price amount in USD
  */
-const getFormattedPriceFromAmount = (amount: string, price: string | bigint, decimals0: number, decimals1: number): number =>
-  Number(amount) * Number(price) * 10 ** (decimals0 - decimals1 - 18)
+const getFormattedPriceFromAmount = (amount: string, price: string | bigint, decimalsFusdc: number): number =>
+  Number(amount) * (Number(price)) * 10 ** decimalsFusdc
 
 // convert a tick to a formatted price, scaled by decimals
 const getFormattedPriceFromTick = (tick: number, decimals: number) => {
