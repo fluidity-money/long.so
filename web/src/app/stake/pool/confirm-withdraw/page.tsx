@@ -6,10 +6,13 @@ import { useStakeStore } from "@/stores/useStakeStore";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
-import { useSimulateContract, useWriteContract } from "wagmi";
+import { useSimulateContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { fUSDC } from "@/config/tokens";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { getFormattedPriceFromAmount } from "@/lib/amounts";
+import Confirm from "@/components/sequence/Confirm";
+import { Success } from "@/components/sequence/Success";
+import { Fail } from "@/components/sequence/Fail";
 
 export default function ConfirmWithdrawLiquidity() {
   const router = useRouter();
@@ -32,6 +35,10 @@ export default function ConfirmWithdrawLiquidity() {
     error: updatePositionError,
     isPending: isUpdatePositionPending,
   } = useWriteContract();
+
+  const updatePositionResult = useWaitForTransactionReceipt({
+    hash: updatePositionData,
+  });
 
   const updatePosition = useCallback(
     (id: bigint) => {
@@ -56,6 +63,28 @@ export default function ConfirmWithdrawLiquidity() {
   const tokenPrice = poolSqrtPriceX96
     ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
     : 0n;
+
+  // step 1 pending
+  if (isUpdatePositionPending || (updatePositionData && updatePositionResult?.isPending)) {
+    return <Confirm
+      text={"Withdrawal"}
+      fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+      toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+      transactionHash={updatePositionData}
+    />;
+  }
+
+  // success
+  if (updatePositionResult.data) {
+    return <Success transactionHash={updatePositionResult.data.transactionHash} />;
+  }
+
+  // error
+  if (
+    updatePositionError
+  ) {
+    return <Fail text={(updatePositionError as any)?.shortMessage} />;
+  }
 
 
   return (
