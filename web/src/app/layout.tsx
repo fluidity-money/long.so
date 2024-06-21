@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import LongTail from "@/assets/icons/long-tail.svg";
 import { MobileNetworkSelection } from "@/app/_layout/MobileNetworkSelection";
 import { DemoData } from "@/app/_layout/DemoData";
+import { FaucetDropdown } from "@/app/_layout/FaucetDropdown";
 import { NetworkSelection } from "@/app/_layout/NetworkSelection";
 import { ConnectWalletButton } from "@/app/_layout/ConnectWalletButton";
 import { NavigationMenu } from "@/app/_layout/NavigationMenu";
@@ -94,6 +95,7 @@ export default async function RootLayout({
                     <DemoData />
                   </div>
                   <div className="flex flex-row items-center gap-4">
+                   <FaucetDropdown />
                     <NetworkSelection />
                     <ConnectWalletButton />
                   </div>

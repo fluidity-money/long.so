@@ -38,16 +38,26 @@ export const FaucetDropdown = () => {
             "-mt-2 flex w-[--radix-dropdown-menu-trigger-width] flex-col gap-0.5 rounded-2xl rounded-t-none border border-t-0 border-black bg-black p-2 text-xs text-white",
           )}
         >
-          <a href={"https://bwarelabs.com/faucets/arbitrum-stylus-testnet"}>
+          <a rel="noopener noreferrer" target="_blank" href="https://faucet.superposition.so">
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
-              Ether
+              SPN faucet
             </DropdownMenu.Item>
           </a>
-          <Link href={"/faucet"}>
+          <a rel="noopener noreferrer" target="_blank" href="https://wspn.long.so">
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
-              FLY staker tokens
+              Create WSPN
             </DropdownMenu.Item>
-          </Link>
+          </a>
+          <a rel="noopener noreferrer" target="_blank" href="https://sepolia.arbiscan.io/address/0x980b62da83eff3d4576c647993b0c1d7faf17c73#writeProxyContract">
+            <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
+              Arbitrum Sepolia Create WETH
+            </DropdownMenu.Item>
+          </a>
+          <a rel="noopener noreferrer" target="_blank" href="https://faucet.circle.com/">
+            <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
+              Arbitrum Sepolia USDC faucet
+            </DropdownMenu.Item>
+          </a>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
