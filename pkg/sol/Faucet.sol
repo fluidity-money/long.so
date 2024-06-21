@@ -16,9 +16,6 @@ contract Faucet is IFaucet {
     /// @dev emergency council to use to "rescue" the funds at any point.
     address immutable EMERGENCY_COUNCIL;
 
-    /// @dev MIN_ETH to send out to users.
-    uint256 constant MIN_ETH = 1e12;
-
     constructor(address _operator, address _emergencyCouncil) {
         operator_ = _operator;
         EMERGENCY_COUNCIL = _emergencyCouncil;
@@ -27,16 +24,16 @@ contract Faucet is IFaucet {
     receive() external payable {}
 
     /// @inheritdoc IFaucet
-    function sendTo(address[] calldata _requests) external {
+    function sendTo(FaucetReq[] calldata _requests) external {
         require(msg.sender == operator_, "only operator");
         for (uint i = 0; i < _requests.length; ++i) {
-            address recipient = _requests[i];
+            address recipient = _requests[i].recipient;
             bool isContract;
             assembly {
-                isContract := gt(0, extcodesize(recipient))
+                isContract := gt(extcodesize(recipient), 0)
             }
             require(!isContract, "no contract");
-            payable(recipient).transfer(MIN_ETH);
+            payable(recipient).transfer(_requests[i].amount);
         }
     }
 
