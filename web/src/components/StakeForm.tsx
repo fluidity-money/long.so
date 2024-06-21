@@ -146,7 +146,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const poolData = poolsData?.find((pool) => pool.address === poolId);
 
   const positionData_ = useFragment(PositionsFragment, userData?.getWallet)
-  const positionData = null;
+  const positionData = positionData_?.positions.positions.find(p => p.positionId === positionId)
 
   const { upper: upperTick, lower: lowerTick } = positionData || {
     upper: 0,

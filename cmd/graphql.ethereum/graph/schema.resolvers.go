@@ -1183,7 +1183,7 @@ func (r *walletResolver) ID(ctx context.Context, obj *model.Wallet) (string, err
 		return "", fmt.Errorf("no wallet obj")
 	}
 	return "wallet:" + obj.Address.String(), nil
-}
+} 
 
 // Address is the resolver for the address field.
 func (r *walletResolver) Address(ctx context.Context, obj *model.Wallet) (string, error) {
