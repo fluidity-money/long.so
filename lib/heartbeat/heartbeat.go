@@ -34,7 +34,9 @@ func init() {
 	if s == "" {
 		slog.Info("heartbeat imported, but empty env", "env", EnvHeartbeatUrl)
 	}
-	for {
-		urls <- s
-	}
+	go func() {
+		for {
+			urls <- s
+		}
+	}()
 }
