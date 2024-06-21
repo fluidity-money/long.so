@@ -34,14 +34,9 @@ var Q96 = new(big.Int).SetBits([]big.Word{0, 0x100000000})
 // sqrtRatioAX96 being the second. liq being the amount of liquidity in
 // the position.
 func GetAmountsForLiq(sqrtRatioX96, sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount0 *big.Rat, amount1 *big.Rat) {
-	if sqrtRatioX96 == nil {
-		sqrtRatioX96 = new(big.Int) // 0
-	}
-	if sqrtRatioAX96 == nil {
-		sqrtRatioAX96 = new(big.Int) // 0
-	}
-	if sqrtRatioBX96 == nil {
-		sqrtRatioBX96 = new(big.Int) // 0
+	switch { // If anything is nil, then we return 0.
+	case sqrtRatioX96 == nil, sqrtRatioAX96 == nil, sqrtRatioBX96 == nil, liq == nil:
+		return new(big.Rat), new(big.Rat) // 0, 0
 	}
 	var (
 		sqrtRatio0X96 = sqrtRatioAX96
@@ -71,11 +66,9 @@ func GetAmountsForLiq(sqrtRatioX96, sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) 
 }
 
 func GetAmount0ForLiq(sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount0 *big.Rat) {
-	if sqrtRatioAX96 == nil {
-		sqrtRatioAX96 = new(big.Int) // 0
-	}
-	if sqrtRatioBX96 == nil {
-		sqrtRatioBX96 = new(big.Int) // 0
+	switch { // If anything is nil, then we return 0.
+	case sqrtRatioAX96 == nil, sqrtRatioBX96 == nil, liq == nil:
+		return new(big.Rat) // 0
 	}
 	var (
 		sqrtRatio0X96 = sqrtRatioAX96
@@ -99,14 +92,9 @@ func GetAmount0ForLiq(sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount0 *big.
 }
 
 func GetAmount1ForLiq(sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount1 *big.Rat) {
-	if sqrtRatioAX96 == nil {
-		sqrtRatioAX96 = new(big.Int) // 0
-	}
-	if sqrtRatioBX96 == nil {
-		sqrtRatioBX96 = new(big.Int) // 0
-	}
-	if sqrtRatioBX96 == nil {
-		sqrtRatioBX96 = new(big.Int) // 0
+	switch { // If anything is nil, then we return 0.
+	case sqrtRatioAX96 == nil, sqrtRatioBX96 == nil, liq == nil:
+		return new(big.Rat) // 0
 	}
 	var (
 		sqrtRatio0X96 = sqrtRatioAX96
