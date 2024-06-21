@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 	"strconv"
@@ -907,16 +908,8 @@ func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *seawater.
 	if obj == nil {
 		return model.PairAmount{}, fmt.Errorf("no position obj")
 	}
-	var res seawater.PositionSnapshot
-	err := r.DB.Table("snapshot_positions_latest_1").
-		Where("pos_id = ?", obj.Id).
-		First(&res).
-		Error
-	if err != nil {
-		return model.PairAmount{}, fmt.Errorf("position id: %#v: %v", obj.Id, err)
-	}
 	var pool seawater.Pool
-	err = r.DB.Table("events_seawater_newpool").
+	err := r.DB.Table("events_seawater_newpool").
 		Select("decimals").
 		Where("token = ?", obj.Pool).
 		First(&pool).
@@ -924,7 +917,35 @@ func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *seawater.
 	if err != nil {
 		return model.PairAmount{}, fmt.Errorf("finding new pool: %v", err)
 	}
+	var res seawater.PositionSnapshot
+	err = r.DB.Table("snapshot_positions_latest_1").
+		Where("pos_id = ?", obj.Id).
+		First(&res).
+		Error
 	ts := int(res.UpdatedBy.Unix())
+	switch {
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		// We didn't find a pair amount! Return nothing.
+		return model.PairAmount{
+			Timestamp: ts,
+			Fusdc: model.Amount{
+				Token:         r.C.FusdcAddr,
+				Decimals:      r.C.FusdcDecimals,
+				Timestamp:     ts,
+				ValueUnscaled: types.EmptyUnscaledNumber(),
+			},
+			Token1: model.Amount{
+				Token:         obj.Pool,
+				Decimals:      int(pool.Decimals),
+				Timestamp:     ts,
+				ValueUnscaled: types.EmptyUnscaledNumber(),
+			},
+		}, nil
+	case err == nil:
+		// Do nothing. The good path!
+	default:
+		return model.PairAmount{}, fmt.Errorf("position id: %#v: %v", obj.Id, err)
+	}
 	return model.PairAmount{
 		Timestamp: ts,
 		Fusdc: model.Amount{

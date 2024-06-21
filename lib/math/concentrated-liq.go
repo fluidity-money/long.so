@@ -27,13 +27,22 @@ var (
 )
 
 // Q96 to use for some math operations
-//79228162514264337593543950336
+// 79228162514264337593543950336
 var Q96 = new(big.Int).SetBits([]big.Word{0, 0x100000000})
 
 // GetAmountsForLiq with sqrtRatioX96 being the first tick boundary, and
 // sqrtRatioAX96 being the second. liq being the amount of liquidity in
 // the position.
 func GetAmountsForLiq(sqrtRatioX96, sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount0 *big.Rat, amount1 *big.Rat) {
+	if sqrtRatioX96 == nil {
+		sqrtRatioX96 = new(big.Int) // 0
+	}
+	if sqrtRatioAX96 == nil {
+		sqrtRatioAX96 = new(big.Int) // 0
+	}
+	if sqrtRatioBX96 == nil {
+		sqrtRatioBX96 = new(big.Int) // 0
+	}
 	var (
 		sqrtRatio0X96 = sqrtRatioAX96
 		sqrtRatio1X96 = sqrtRatioBX96
@@ -62,6 +71,12 @@ func GetAmountsForLiq(sqrtRatioX96, sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) 
 }
 
 func GetAmount0ForLiq(sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount0 *big.Rat) {
+	if sqrtRatioAX96 == nil {
+		sqrtRatioAX96 = new(big.Int) // 0
+	}
+	if sqrtRatioBX96 == nil {
+		sqrtRatioBX96 = new(big.Int) // 0
+	}
 	var (
 		sqrtRatio0X96 = sqrtRatioAX96
 		sqrtRatio1X96 = sqrtRatioBX96
@@ -84,6 +99,15 @@ func GetAmount0ForLiq(sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount0 *big.
 }
 
 func GetAmount1ForLiq(sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) (amount1 *big.Rat) {
+	if sqrtRatioAX96 == nil {
+		sqrtRatioAX96 = new(big.Int) // 0
+	}
+	if sqrtRatioBX96 == nil {
+		sqrtRatioBX96 = new(big.Int) // 0
+	}
+	if sqrtRatioBX96 == nil {
+		sqrtRatioBX96 = new(big.Int) // 0
+	}
 	var (
 		sqrtRatio0X96 = sqrtRatioAX96
 		sqrtRatio1X96 = sqrtRatioBX96

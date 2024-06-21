@@ -123,3 +123,24 @@ func TestGetSqrtRatioAtTick(t *testing.T) {
 func TestGetPriceAtSqrtRatio(t *testing.T) {
 	t.Fatal("unimplemented")
 }
+
+func TestGetAmountsForLiqDontBlowUpOnNilSqrtPriceX96(t *testing.T) {
+	sqrtPriceAX96 := encodePriceSqrt(99, 110)
+	sqrtPriceBX96 := encodePriceSqrt(100, 110)
+	liq := new(big.Int).SetInt64(1048)
+	_, _ = GetAmountsForLiq(nil, sqrtPriceAX96, sqrtPriceBX96, liq)
+}
+
+func TestGetAmountsForLiqDontBlowUpOnNilSqrtPriceAX96(t *testing.T) {
+	sqrtPriceX96 := encodePriceSqrt(99, 110)
+	sqrtPriceBX96 := encodePriceSqrt(100, 110)
+	liq := new(big.Int).SetInt64(1048)
+	_, _ = GetAmountsForLiq(sqrtPriceX96, nil, sqrtPriceBX96, liq)
+}
+
+func TestGetAmountsForLiqDontBlowUpOnNilSqrtPriceBX96(t *testing.T) {
+	sqrtPriceX96 := encodePriceSqrt(99, 110)
+	sqrtPriceAX96 := encodePriceSqrt(100, 110)
+	liq := new(big.Int).SetInt64(1048)
+	_, _ = GetAmountsForLiq(sqrtPriceX96, sqrtPriceAX96, nil, liq)
+}

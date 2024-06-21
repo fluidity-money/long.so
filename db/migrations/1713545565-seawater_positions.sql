@@ -1,6 +1,6 @@
 -- migrate:up
 
-CREATE MATERIALIZED VIEW seawater_positions_1 AS
+CREATE VIEW seawater_positions_1 AS
 	SELECT
 		events_seawater_mintPosition.created_by AS created_by,
 		events_seawater_mintPosition.block_hash AS block_hash,
@@ -16,7 +16,7 @@ CREATE MATERIALIZED VIEW seawater_positions_1 AS
 		ON transfers.pos_id = events_seawater_mintPosition.pos_id
 ;
 
-CREATE MATERIALIZED VIEW seawater_active_positions_1 AS
+CREATE VIEW seawater_active_positions_1 AS
 	SELECT *
 	FROM seawater_positions_1
 	WHERE pos_id NOT IN (
@@ -25,15 +25,5 @@ CREATE MATERIALIZED VIEW seawater_active_positions_1 AS
 ;
 
 CREATE UNIQUE INDEX ON seawater_active_positions_1 (pos_id);
-
-CREATE FUNCTION refresh_position_views()
-RETURNS VOID LANGUAGE PLPGSQL
-AS $$
-BEGIN
-	REFRESH MATERIALIZED VIEW seawater_positions_1;
-	REFRESH MATERIALIZED VIEW CONCURRENTLY seawater_active_positions_1;
-END $$;
-
-SELECT cron.schedule('refresh-positions', '*/30 * * * *', $$SELECT refresh_position_views()$$);
 
 -- migrate:down

@@ -89,10 +89,17 @@ func main() {
 	)
 	for i, r := range resps {
 		poolAddr := r.Pool.String()
+		pos, ok := positionMap[r.Pos]
+		if !ok {
+			slog.Info("position doesn't have any liquidity",
+				"position id", r.Pos,
+			)
+			continue
+		}
 		amount0Rat, amount1Rat := math.GetAmountsForLiq(
 			poolMap[poolAddr].curPrice, // The current sqrt ratio
-			positionMap[r.Pos].Lower.Big(),
-			positionMap[r.Pos].Upper.Big(),
+			pos.Lower.Big(),
+			pos.Upper.Big(),
 			r.Delta.Big(),
 		)
 		var (
