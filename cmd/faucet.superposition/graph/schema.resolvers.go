@@ -54,7 +54,7 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 		return "", fmt.Errorf("error requesting: %v", err)
 	}
 	//HACK (TODO replace me with the config)
-	isAllowed := isFlyStaker || wallet == "0x0d39d441d9cc572b2f0c284c5e6d8584cb92321a"
+	isAllowed := isFlyStaker || wallet == "0xfa77ded45d76e7e75d2502292e72ac09b898a32a"
 	// If the user is not a fly staker, kick them out if this feature is enabled.
 	if r.F.Is(features.FeatureFaucetStakersOnly) && !isAllowed {
 		slog.Error("non staker requested spn airdrop",
