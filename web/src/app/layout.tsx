@@ -117,7 +117,7 @@ export default async function RootLayout({
                       𝕏
                     </a>
                   </small>
-                  <a href="https://discord.gg/swag">
+                  <a href="https://discord.gg/superposition">
                     <Discord />
                   </a>
                   <small>
