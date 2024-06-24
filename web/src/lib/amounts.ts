@@ -78,11 +78,11 @@ const getFormattedPriceFromAmount = (amount: string, price: string | bigint, dec
   Number(amount) * Number(price) / 10 ** decimalsFusdc
 
 // convert a tick to a formatted price, scaled by decimals
-const getFormattedPriceFromTick = (tick: number, decimals: number) => {
+const getFormattedPriceFromTick = (tick: number, decimals0: number, decimals1: number) => {
   const ratio = getSqrtRatioAtTick(BigInt(tick))
-  const priceUnscaled = Number(sqrtPriceX96ToPrice(ratio))
-  // adjust for decimals, and for 18 digits of price precision
-  const scale = 10 ** -(decimals + 18)
+  const priceUnscaled = Number(sqrtPriceX96ToPrice(ratio, decimals0))
+  // adjust for decimals
+  const scale = 10 ** -(decimals1)
   const formattedPrice = usdFormat(priceUnscaled * scale)
   // display '∞ ' if the price is greater than $10e18 after scaling
   return formattedPrice.length > 20 ? '∞ ' : formattedPrice

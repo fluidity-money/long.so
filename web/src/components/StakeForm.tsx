@@ -187,7 +187,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   });
 
   const tokenPrice = poolSqrtPriceX96
-    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
     : 0n;
 
   // in this context, token0 is actually token1. It's converted to token1
@@ -270,31 +270,32 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   useEffect(() => {
     // set the ticks to the existing ticks of the pool
     if (mode === "existing") {
-      const priceLower = lowerTick === 0 ? "0" : (1.0001 ** lowerTick).toFixed(fUSDC.decimals)
-      const priceHigher = (1.0001 ** upperTick).toFixed(fUSDC.decimals)
-      setPriceLower(priceLower)
-      setPriceUpper(priceHigher)
+      const scale = token0.decimals - fUSDC.decimals
+      const priceLower = (1.0001 ** lowerTick * 10 ** scale).toFixed(fUSDC.decimals)
+      const priceHigher = (1.0001 ** upperTick * 10 ** scale).toFixed(fUSDC.decimals)
+      setPriceLower(priceLower, token0.decimals)
+      setPriceUpper(priceHigher, token0.decimals)
       return
     }
 
     if (liquidityRangeType === "full-range") {
       // lower price is 1 base fUSDC (0.000001)
-      setPriceLower(`0.${"0".repeat(token1.decimals - 1)}1`)
+      setPriceLower(`0.${"0".repeat(token1.decimals - 1)}1`, token0.decimals)
       // upper price is max tick
-      setPriceUpper(String(1.0001 ** MAX_TICK))
+      setPriceUpper(String(1.0001 ** MAX_TICK), token0.decimals)
     }
     else if (liquidityRangeType === "auto") {
       if (!curTick)
         return
       // auto sets the price range to +-10% of the current tick
-      const priceAtTick = sqrtPriceX96ToPrice(getSqrtRatioAtTick(curTick.result))
+      const priceAtTick = sqrtPriceX96ToPrice(getSqrtRatioAtTick(curTick.result), token0.decimals)
       const diff = priceAtTick / 10n
       const pu = priceAtTick + diff
       const pl = priceAtTick - diff
       const priceLower = (Number(pl) / 10 ** fUSDC.decimals).toFixed(fUSDC.decimals)
       const priceUpper = (Number(pu) / 10 ** fUSDC.decimals).toFixed(fUSDC.decimals)
-      setPriceLower(priceLower)
-      setPriceUpper(priceUpper)
+      setPriceLower(priceLower, token0.decimals)
+      setPriceUpper(priceUpper, token0.decimals)
     }
   }, [
     mode,
@@ -784,7 +785,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 className="border-b border-white text-2xs md:text-base bg-black"
                 disabled={liquidityRangeType !== "custom" || mode === "existing"}
                 value={priceLower}
-                onChange={(e) => setPriceLower(e.target.value)}
+                onChange={(e) => setPriceLower(e.target.value, token0.decimals)}
               />
               <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
                 <Ethereum className="invert" /> fUSDC per {token0.name}
@@ -797,7 +798,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 className="border-b border-white text-2xs md:text-base bg-black"
                 disabled={liquidityRangeType !== "custom" || mode === "existing"}
                 value={priceUpper}
-                onChange={(e) => setPriceUpper(e.target.value)}
+                onChange={(e) => setPriceUpper(e.target.value, token0.decimals)}
               />
               <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
                 <Ethereum className="invert" /> fUSDC per {token0.name}

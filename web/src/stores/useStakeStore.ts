@@ -50,8 +50,8 @@ interface StakeStore {
   priceUpper: string;
 
   // parse and set from a display amount
-  setPriceLower: (tick: string) => void;
-  setPriceUpper: (tick: string) => void;
+  setPriceLower: (tick: string, decimals: number) => void;
+  setPriceUpper: (tick: string, decimals: number) => void;
 }
 
 export const useStakeStore = create<StakeStore>((set) => ({
@@ -148,7 +148,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
   priceLower: "0",
   priceUpper: "0",
 
-  setPriceLower: (price) => {
+  setPriceLower: (price, decimals) => {
     const validNumber = !price.includes(" ") && !isNaN(Number(price)) || price === "."
     // update display amount if `amount` is valid as a display number
     if (!validNumber)
@@ -158,7 +158,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
     const priceN = Number(rawPrice);
     let tick = 0;
     try {
-      const newTick = getTickAtSqrtRatio(encodeSqrtPrice(priceN));
+      const newTick = getTickAtSqrtRatio(encodeSqrtPrice(priceN * 10 ** -decimals));
       tick = newTick;
     } catch { }
     set({
@@ -166,7 +166,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
       priceLower: price,
     });
   },
-  setPriceUpper: (price) => {
+  setPriceUpper: (price, decimals) => {
     const validNumber = !price.includes(" ") && !isNaN(Number(price)) || price === "."
     // update display amount if `amount` is valid as a display number
     if (!validNumber)
@@ -176,7 +176,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
     const priceN = Number(rawPrice);
     let tick = 0;
     try {
-      const newTick = getTickAtSqrtRatio(encodeSqrtPrice(priceN));
+      const newTick = getTickAtSqrtRatio(encodeSqrtPrice(priceN * 10 ** -decimals));
       tick = newTick;
     } catch { }
     set({

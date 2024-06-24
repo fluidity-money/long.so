@@ -33,12 +33,11 @@ export const encodeSqrtPrice = (price: number): bigint => {
 	return BigInt(Math.sqrt(price) * 2 ** 96);
 };
 
-// convert a sqrtPriceX96 to a price in 18 digits of precision
+// convert a sqrtPriceX96 to a price in n digits of precision
 // to then be adjusted and converted via token decimals.
-export const sqrtPriceX96ToPrice = (sqrtPriceX96: bigint): bigint => {
+export const sqrtPriceX96ToPrice = (sqrtPriceX96: bigint, decimals: number): bigint => {
 	const sqrtPrice = sqrtPriceX96 ** 2n;
-	const decimals = 10n ** 18n;
-	const price = sqrtPrice * decimals / (1n << 192n);
+	const price = sqrtPrice * 10n ** BigInt(decimals) / (1n << 192n);
 	return price;
 };
 

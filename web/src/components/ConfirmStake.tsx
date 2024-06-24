@@ -60,7 +60,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   });
 
   const tokenPrice = poolSqrtPriceX96
-    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
     : 0n;
 
   // if no token or no token amount redirect to the stake form

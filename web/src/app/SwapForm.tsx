@@ -141,7 +141,7 @@ export const SwapForm = () => {
   });
 
   const tokenPrice = poolSqrtPriceX96
-    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
     : 0n;
 
   const { data: token0Balance, refetch: refetchToken0Balance } = useBalance({

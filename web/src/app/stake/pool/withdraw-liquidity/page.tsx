@@ -95,7 +95,7 @@ export default function WithdrawLiquidity() {
   });
 
   const tokenPrice = poolSqrtPriceX96
-    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
     : 0n;
 
   const { data } = useGraphqlUser();
@@ -117,7 +117,7 @@ export default function WithdrawLiquidity() {
   const deltaUsd = useMemo(() => {
     if (!token0Amount || !token1Amount)
       return "$0.00"
-    const token0AmountScaled = Number(token0Amount) * Number(tokenPrice) * 10 ** fUSDC.decimals;
+    const token0AmountScaled = Number(token0Amount) * Number(tokenPrice) / 10 ** fUSDC.decimals
     return usdFormat(token0AmountScaled + parseFloat(token1Amount))
   }, [token0Amount, token1Amount])
 

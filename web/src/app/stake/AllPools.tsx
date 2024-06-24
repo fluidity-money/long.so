@@ -24,6 +24,7 @@ import { sum } from "lodash";
 import { graphql, useFragment } from "@/gql";
 import { useRouter } from "next/navigation";
 import { getFormattedPriceFromTick } from "@/lib/amounts";
+import { fUSDC } from "@/config/tokens";
 
 const DisplayModeMenu = ({
   setDisplayMode,
@@ -134,7 +135,7 @@ export const AllPools = () => {
         position.lower < min ? position.lower : min,
         position.upper > max ? position.upper : max
       ], [0, 0]).map(tick =>
-        getFormattedPriceFromTick(tick, pool.token.decimals)
+        getFormattedPriceFromTick(tick, pool.token.decimals, fUSDC.decimals)
       ) as [string, string];
 
       return {

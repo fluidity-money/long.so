@@ -46,7 +46,7 @@ export default function ConfirmWithdrawLiquidity() {
         address: ammAddress,
         abi: seawaterContract.abi,
         functionName: "updatePosition",
-        args: [token0.address, id, delta],
+        args: [token0.address, id, -delta],
       });
     },
     [delta, writeContractUpdatePosition, token0AmountRaw, token0],
@@ -61,7 +61,7 @@ export default function ConfirmWithdrawLiquidity() {
   });
 
   const tokenPrice = poolSqrtPriceX96
-    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
     : 0n;
 
   // step 1 pending

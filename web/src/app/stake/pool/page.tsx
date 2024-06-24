@@ -307,9 +307,9 @@ export default function PoolPage() {
                   <div className="flex flex-1 flex-col">
                     <div className="text-3xs md:text-2xs">Current Position Range</div>
                     <div className="text-xl md:text-2xl">
-                      {getFormattedPriceFromTick(lowerTick ?? 0, fUSDC.decimals)}
+                      {lowerTick ? getFormattedPriceFromTick(lowerTick, token0.decimals, token1.decimals) : usdFormat(0)}
                       -
-                      {getFormattedPriceFromTick(upperTick ?? 0, fUSDC.decimals)}
+                      {upperTick ? getFormattedPriceFromTick(upperTick, token0.decimals, token1.decimals) : usdFormat(0)}
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col">
