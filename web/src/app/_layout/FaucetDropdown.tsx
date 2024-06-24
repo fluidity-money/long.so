@@ -43,11 +43,13 @@ export const FaucetDropdown = () => {
               SPN faucet
             </DropdownMenu.Item>
           </a>
+          {/*
           <a rel="noopener noreferrer" target="_blank" href="https://wspn.long.so">
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
               Create WSPN
             </DropdownMenu.Item>
           </a>
+          */}
           <a rel="noopener noreferrer" target="_blank" href="https://sepolia.arbiscan.io/address/0x980b62da83eff3d4576c647993b0c1d7faf17c73#writeProxyContract#F5">
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
               Arbitrum Sepolia Create WETH
