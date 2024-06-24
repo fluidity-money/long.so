@@ -474,7 +474,7 @@ impl test_utils::StorageNew for StoragePool {
 
 #[cfg(test)]
 mod test {
-    use std::ops::{Mul, Sub};
+    use std::ops::{Div, Mul, Neg, Sub};
 
     use super::*;
     use crate::test_utils;
@@ -689,102 +689,126 @@ mod test {
             }
         });
     }
+
     #[test]
     fn test_pool_update_position_parametric() {
         let prices = [
-            [1,1],
+            [1, 1],
             [1, 3],
             [1, 1_000_000],
-            [3,1],
-            [3,5],
+            [3, 1],
+            [3, 5],
             [1_000_000, 1],
         ];
 
+        let tick_spacing = [1, 100, 1000, 1_000_000];
 
-        let tick_spacing = [
-            1,100,1000, 1_000_000
-        ];
+        let fee = 1111;
 
-        let fee = 300;
+        let position_delta =
+            [1000, 777, 100, 33, 3].map(|n| I128::unchecked_from(n).mul(I128::exp10(17)));
 
-        let deltas = [
-            1_000_000,
-            1000,
-            333,
-            -333,
-            -1000,
-            -1_000_000,
-        ].map(|n| I128::unchecked_from(n ));
+        let swap_amount_denom = I256::unchecked_from(10);
 
+        for price in prices.iter() {
+            for tick in tick_spacing.iter() {
+                for delta in position_delta.iter() {
+                    test_utils::with_storage::<_, StoragePool, _>(|pool| {
+                        let sqrt_price = test_utils::encode_sqrt_price(price[0], price[1]);
 
-        for price in prices.iter(){
-            for tick in tick_spacing.iter(){
-                for delta in deltas.iter(){
-                test_utils::with_storage::<_, StoragePool, _>(|pool| {
-                    
-                    let sqrt_price = test_utils::encode_sqrt_price(price[0], price[1]);
+                        pool.init(sqrt_price, fee, *tick as u8, u128::MAX).unwrap();
 
-                    pool.init(sqrt_price, fee, *tick as u8, u128::MAX)
+                        let id = uint!(2_U256);
+
+                        pool.create_position(
+                            id,
+                            tick_math::get_min_tick(*tick as u8),
+                            tick_math::get_max_tick(*tick as u8),
+                        )
                         .unwrap();
 
-                    let id = uint!(2_U256);
+                        pool.update_position(id, delta.unchecked_into()).unwrap();
 
-                    pool.create_position(id, tick_math::get_min_tick(*tick as u8), tick_math::get_max_tick(*tick as u8))
-                        .unwrap();
-                    
-                    let delta_abs  = if (*delta).is_negative(){
-                        -(*delta)
-                    } else {
-                        *delta
-                    };
+                        pool.liquidity.set(delta.unchecked_into());
 
-                    pool.update_position(id, delta_abs.unchecked_into()).unwrap();
+                        let swap_amount =
+                            I256::try_from(delta.to_string()).unwrap() / swap_amount_denom;
 
-                    let position_before = pool.positions.positions.get(id);
+                        pool.swap(false, swap_amount, sqrt_price + U256::from(1))
+                            .unwrap();
 
-                    let lower_before =  position_before.lower.get();
-                    let upper_before =  position_before.upper.get(); 
-                    let liquidity_before =  position_before.liquidity.get();
-                    let fee_growth_inside_0_before =  position_before.fee_growth_inside_0.get(); 
-                    let fee_growth_inside_1_before =  position_before.fee_growth_inside_1.get(); 
-                    let token_owed_0_before = position_before.token_owed_0.get() ;
-                    let token_owed_1_before = position_before.token_owed_1.get() ;
+                        pool.swap(true, swap_amount.neg(), sqrt_price).unwrap();
 
-                 
-                    pool.swap(
-                        false,
-                        I256::unchecked_from((*delta).sys()),
-                        sqrt_price + U256::from(1),
-                    ).unwrap();
+                        pool.swap(false, swap_amount, sqrt_price + U256::from(1))
+                            .unwrap();
 
-                    // pool.update_position(id, i128::from(0)).unwrap();
+                        pool.update_position(id, i128::from(0)).unwrap();
 
+                        let position_after = pool.positions.positions.get(id);
 
-                    let mut position_after = pool.positions.positions.get(id);
+                        assert_eq!(position_after.token_owed_1.get(), U128::lib(&1));
+                        //TODO: check owed_fees calculations carfully
 
-                    let lower_after =  position_after.lower.get();
-                    let upper_after =  position_after.upper.get();
-                    let liquidity_after =  position_after.liquidity.get();
-                    let fee_growth_inside_0_after =  position_after.fee_growth_inside_0.get();
-                    let fee_growth_inside_1_after =  position_after.fee_growth_inside_1.get();
-                    let token_owed_0_after = position_after.token_owed_0.get();
-                    let token_owed_1_after = position_after.token_owed_1.get();
+                        let delta_neg: i128 = delta.neg().unchecked_into();
 
-                    println!("lower: {}", lower_before - lower_after);
-                    println!("upper: {}", upper_before - upper_after);
-                    println!("liquidity: {}", liquidity_before - liquidity_after);
-                    println!("fee_growth_inside_0: {}", fee_growth_inside_0_before - fee_growth_inside_0_after);
-                    println!("fee_growth_inside_1: {}", fee_growth_inside_1_after - fee_growth_inside_1_before  );
-                    println!("token_owed_0: {}", token_owed_0_before - token_owed_0_after);
-                    println!("token_owed_1: {}", token_owed_1_before - token_owed_1_after);
-
-       
-
-                    // pool.update_position(id, (*delta).unchecked_into()).unwrap();
-                });
+                        pool.update_position(id, delta_neg).unwrap();
+                    });
+                }
             }
         }
-        }
-        
+    }
+
+    fn test_pool_swaps_reverts() {
+        test_utils::with_storage::<_, StoragePool, _>(|pool| {
+            let sqrt_price = test_utils::encode_sqrt_price(1, 1);
+
+            match pool.swap(true, I256::unchecked_from(1), sqrt_price) {
+                Err(r) => assert_eq!(
+                    Error::PoolDisabled.to_string(),
+                    String::from_utf8(r).unwrap()
+                ),
+                _ => panic!("expected PoolDisabled"),
+            }
+
+            pool.init(sqrt_price, 1, 1, u128::MAX).unwrap();
+
+            match pool.swap(true, I256::unchecked_from(1), sqrt_price + U256::from(1)) {
+                Err(r) => assert_eq!(
+                    Error::PriceLimitTooLow.to_string(),
+                    String::from_utf8(r).unwrap()
+                ),
+                _ => panic!("expected PriceLimitTooLow"),
+            }
+
+            match pool.swap(true, I256::unchecked_from(1), tick_math::MIN_SQRT_RATIO) {
+                Err(r) => assert_eq!(
+                    Error::PriceLimitTooLow.to_string(),
+                    String::from_utf8(r).unwrap()
+                ),
+                _ => panic!("expected PriceLimitTooLow"),
+            }
+
+            match pool.swap(false, I256::unchecked_from(1), tick_math::MAX_SQRT_RATIO) {
+                Err(r) => assert_eq!(
+                    Error::PriceLimitTooHigh.to_string(),
+                    String::from_utf8(r).unwrap()
+                ),
+                _ => panic!("expected PriceLimitTooHigh"),
+            }
+
+            match pool.swap(false, I256::unchecked_from(1), sqrt_price - U256::from(1)) {
+                Err(r) => assert_eq!(
+                    Error::PriceLimitTooHigh.to_string(),
+                    String::from_utf8(r).unwrap()
+                ),
+                _ => panic!("expected PriceLimitTooHigh"),
+            }
+        });
+    }
+
+    fn test_pool_swaps_parametric() {
+        test_utils::with_storage::<_, StoragePool, _>(|pool| {
+            //WIP
+        });
     }
 }
