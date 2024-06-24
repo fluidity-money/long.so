@@ -21,10 +21,11 @@ const BufferDuration = 4 * time.Second
 
 var (
 	// NonstakerSPNAmount to send when they request the faucet as a non-staker.
-	NonstakerSPNAmount = new(big.Int).SetInt64(1e18)
+	// = 1 SPN (1e18)
+	NonstakerSPNAmount, _ = new(big.Int).SetString("1000000000000000000", 10)
 	// StakerSPNAmount to send to FLY stakers.
-	//1e18
-	StakerSPNAmount, _ = new(big.Int).SetString("100000000000000000000", 10)
+	// = 5 SPN (5e18)
+	StakerSPNAmount, _ = new(big.Int).SetString("5000000000000000000", 10)
 )
 
 type SendFaucetFunc func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...faucet.FaucetReq) (hash *ethCommon.Hash, err error)
