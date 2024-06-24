@@ -43,6 +43,11 @@ export const FaucetDropdown = () => {
               SPN faucet
             </DropdownMenu.Item>
           </a>
+          <a rel="noopener noreferrer" target="_blank" href="https://faucet.quicknode.com/arbitrum/sepolia">
+            <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
+              Arbitrum Sepolia ETH faucet
+            </DropdownMenu.Item>
+          </a>
           {/*
           <a rel="noopener noreferrer" target="_blank" href="https://wspn.long.so">
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
