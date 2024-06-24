@@ -953,13 +953,13 @@ func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *seawater.
 			Token:         r.C.FusdcAddr,
 			Decimals:      r.C.FusdcDecimals,
 			Timestamp:     ts,
-			ValueUnscaled: res.Amount0,
+			ValueUnscaled: res.Amount1,
 		},
 		Token1: model.Amount{
 			Token:         obj.Pool,
 			Decimals:      int(pool.Decimals),
 			Timestamp:     ts,
-			ValueUnscaled: res.Amount1,
+			ValueUnscaled: res.Amount0,
 		},
 	}, nil
 }
