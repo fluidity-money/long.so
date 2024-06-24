@@ -307,7 +307,7 @@ export default function PoolPage() {
                     <div className="text-3xs md:text-2xs">My Pool Balance</div>
                     <div className="text-xl md:text-2xl">
                       {/* TODO: get my pool balance */}
-                      {showMockData ? "$190,301" : "???"}
+                      {showMockData ? "$190,301" : poolBalance}
                     </div>
                   </div>
 
