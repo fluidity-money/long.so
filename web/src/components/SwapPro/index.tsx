@@ -66,7 +66,7 @@ export const SwapPro = ({
         },
         token1: {
           valueUsd: token1Value
-        } }
+        } } = {fusdc: {valueUsd: "0"}, token1: {valueUsd: "0"}}
     ] = poolSwapPro?.volumeOverTime.daily || []
     return usdFormat(parseFloat(fusdcValue) + parseFloat(token1Value))
   }, [poolSwapPro])
@@ -74,7 +74,7 @@ export const SwapPro = ({
   const poolBalance = useMemo(() => (
     usdFormat(poolSwapPro ?
       poolSwapPro.liquidity.reduce((total, { liquidity }) =>
-        total + parseFloat(liquidity) + parseFloat(liquidity),
+        total + parseFloat(liquidity),
         0) :
       0
     )), [poolSwapPro])
