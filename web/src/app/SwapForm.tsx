@@ -560,7 +560,7 @@ export const SwapForm = () => {
                   {quoteIsLoading ? (
                     <LoaderIcon className="animate-spin" />
                   ) : (
-                    token1Amount
+                    Number(parseFloat(token1Amount ?? "0").toFixed(6))
                   )}
                 </div>
 
