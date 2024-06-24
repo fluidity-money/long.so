@@ -103,8 +103,8 @@ func main() {
 			r.Delta.Big(),
 		)
 		var (
-			amount0 = mulRatToInt(amount0Rat, poolMap[poolAddr].Decimals)
-			amount1 = mulRatToInt(amount1Rat, poolMap[poolAddr].Decimals)
+			amount0 = mulRatToInt(amount0Rat, config.FusdcDecimals)
+			amount1 = mulRatToInt(amount1Rat, int(poolMap[poolAddr].Decimals))
 		)
 		slog.Debug("amount 0 rat",
 			"id", r.Pool,
@@ -147,7 +147,7 @@ func httpPost(url string, contentType string, r io.Reader) (io.ReadCloser, error
 	return resp.Body, nil
 }
 
-func mulRatToInt(x *big.Rat, d uint8) *big.Int {
+func mulRatToInt(x *big.Rat, d int) *big.Int {
 	y := new(big.Int).SetInt64(10)
 	y.Exp(y, new(big.Int).SetInt64(int64(d)), nil)
 	r := new(big.Rat).Mul(x, new(big.Rat).SetInt(y))

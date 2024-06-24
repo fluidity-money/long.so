@@ -144,3 +144,13 @@ func TestGetAmountsForLiqDontBlowUpOnNilSqrtPriceBX96(t *testing.T) {
 	liq := new(big.Int).SetInt64(1048)
 	_, _ = GetAmountsForLiq(sqrtPriceX96, sqrtPriceAX96, nil, liq)
 }
+
+func TestGetAmountsForLiqWeird(t *testing.T) {
+	sqrtPriceX96 := GetSqrtRatioAtTick(new(big.Int).SetInt64(2206))
+	sqrtPriceAX96 := GetSqrtRatioAtTick(new(big.Int).SetInt64(-1140))
+	sqrtPriceBX96 := GetSqrtRatioAtTick(new(big.Int).SetInt64(960))
+	liq := new(big.Int).SetInt64(48296224)
+	amount0, amount1 := GetAmountsForLiq(sqrtPriceX96, sqrtPriceAX96, sqrtPriceBX96, liq)
+	assert.Equal(t, nil, amount0.FloatString(15))
+	assert.Equal(t, nil, amount1.FloatString(15))
+}
