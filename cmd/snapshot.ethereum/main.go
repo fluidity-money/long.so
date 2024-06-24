@@ -154,9 +154,6 @@ func httpPost(url string, contentType string, r io.Reader) (io.ReadCloser, error
 }
 
 func mulRatToInt(x *big.Rat, d int) *big.Int {
-	y := new(big.Int).SetInt64(10)
-	y.Exp(y, new(big.Int).SetInt64(int64(d)), nil)
-	r := new(big.Rat).Mul(x, new(big.Rat).SetInt(y))
-	i := new(big.Int).Quo(r.Num(), r.Denom())
+	i := new(big.Int).Quo(x.Num(), x.Denom())
 	return i
 }
