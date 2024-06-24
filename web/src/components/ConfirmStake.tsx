@@ -117,18 +117,21 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     data: approvalDataToken0,
     error: approvalErrorToken0,
     isPending: isApprovalPendingToken0,
+    reset: resetApproveToken0,
   } = useWriteContract();
   const {
     writeContract: writeContractApprovalToken1,
     data: approvalDataToken1,
     error: approvalErrorToken1,
     isPending: isApprovalPendingToken1,
+    reset: resetApproveToken1,
   } = useWriteContract();
   const {
     writeContract: writeContractUpdatePosition,
     data: updatePositionData,
     error: updatePositionError,
     isPending: isUpdatePositionPending,
+    reset: resetUpdatePosition,
   } = useWriteContract();
 
   console.log(updatePositionError);
@@ -323,7 +326,15 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
 
   // success
   if (updatePositionResult.data) {
-    return <Success transactionHash={updatePositionResult.data.transactionHash} />;
+    return <Success 
+    transactionHash={updatePositionResult.data.transactionHash} 
+    onDone={() => {
+      resetUpdatePosition()
+      resetApproveToken0()
+      resetApproveToken1()
+      updatePositionResult.refetch()
+    }}
+    />;
   }
 
   // error
