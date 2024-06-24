@@ -94,7 +94,7 @@ export const SwapPro = ({
         amountFrom: parseFloat(transaction.amountIn.valueScaled),
         amountTo: parseFloat(transaction.amountOut.valueScaled),
       };
-    });
+    }).sort((a, b) => a.time > b.time ? -1 : a.time === b.time ? 0 : 1);
   }, [transactions, showMockData]);
 
   return (
