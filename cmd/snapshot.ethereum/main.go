@@ -106,14 +106,15 @@ func main() {
 			amount0 = mulRatToInt(amount0Rat, config.FusdcDecimals)
 			amount1 = mulRatToInt(amount1Rat, int(poolMap[poolAddr].Decimals))
 		)
-		slog.Debug("amount 0 rat",
+		slog.Debug("price data",
 			"id", r.Pool,
-			"amount0", amount0Rat,
-			"amount1", amount1Rat,
-			"amount0", amount0,
-			"amount1", amount1,
-			"delta", r.Delta,
+			"amount0", amount0Rat.FloatString(10),
+			"amount1", amount1Rat.FloatString(10),
+			"amount0", amount0.String(),
+			"amount1", amount1.String(),
+			"delta", r.Delta.String(),
 			"lower", positionMap[r.Pos].Lower,
+			"upper", positionMap[r.Pos].Upper,
 		)
 		ids[i] = r.Pos
 		amount0s[i] = amount0.String()
