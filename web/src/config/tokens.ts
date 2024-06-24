@@ -33,11 +33,19 @@ export const WSPN: Token = {
   decimals: 18,
 }
 
+export const CAT: Token = {
+  name: "Cat Coin",
+  address: "0x09f7156aae9c903f90b1cb1e312582c4f208a759",
+  symbol: "CAT",
+  decimals: 18,
+}
+
 const allTokens: Token[] = [
   fUSDC,
   USDC,
   WSPN,
   WETH,
+  CAT,
 ];
 
 export const DefaultToken = USDC;
