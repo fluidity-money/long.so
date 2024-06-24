@@ -795,20 +795,20 @@ func (r *seawaterPoolResolver) Liquidity(ctx context.Context, obj *seawater.Pool
 		// Use the price data to get the USD value of token1, and
 		// add token0 to it, assuming it maintains peg. This is
 		// the price of the asset.
-		liq := new(big.Rat).SetInt(g.CumulativeAmount0.Big())
-		liq.Quo(liq, fusdcDecimals)
 		usdAmt1 := new(big.Rat).SetInt(g.CumulativeAmount1.Big())
+		usdAmt1.Quo(usdAmt1, fusdcDecimals)
+		usdAmt0 := new(big.Rat).SetInt(g.CumulativeAmount0.Big())
 		d := new(big.Int).SetInt64(int64(g.Decimals))
 		d.Exp(Ten, d, nil)
-		usdAmt1.Quo(usdAmt1, new(big.Rat).SetInt(d))
-		usdAmt1.Mul(usdAmt1, price)
-		liq.Add(liq, usdAmt1)
+		usdAmt0.Quo(usdAmt0, new(big.Rat).SetInt(d))
+		usdAmt0.Mul(usdAmt0, price)
+		usdAmt0.Add(usdAmt0, usdAmt1)
 		liquidity[i] = model.SeawaterLiquidity{
 			ID:        "", // TODO
 			TickLower: g.Tick.String(),
 			TickUpper: g.NextTick.String(),
 			Price:     price.FloatString(5),
-			Liquidity: liq.FloatString(5),
+			Liquidity: usdAmt0.FloatString(5),
 		}
 	}
 	// Group all the positions data from the most recent snapshot,
