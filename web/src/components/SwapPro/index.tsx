@@ -18,6 +18,7 @@ import { useFragment } from "@/gql";
 import { SwapProPoolFragment } from "@/components/SwapPro/SwapProPoolFragment";
 import { useMemo } from "react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { usdFormat } from "@/lib/usdFormat";
 
 const variants = {
   hidden: { opacity: 0, width: 0 },
@@ -56,6 +57,27 @@ export const SwapPro = ({
   );
 
   const poolSwapPro = useFragment(SwapProPoolFragment, pool);
+
+  const volume24H = useMemo(() => {
+    const [
+      {
+        fusdc: {
+          valueUsd: fusdcValue
+        },
+        token1: {
+          valueUsd: token1Value
+        } }
+    ] = poolSwapPro?.volumeOverTime.daily || []
+    return usdFormat(parseFloat(fusdcValue) + parseFloat(token1Value))
+  }, [poolSwapPro])
+
+  const poolBalance = useMemo(() => (
+    usdFormat(poolSwapPro ?
+      poolSwapPro.liquidity.reduce((total, { liquidity }) =>
+        total + parseFloat(liquidity) + parseFloat(liquidity),
+        0) :
+      0
+    )), [poolSwapPro])
 
   const transactions = poolSwapPro?.swaps.swaps
 
@@ -140,12 +162,12 @@ export const SwapPro = ({
         <div className="hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:flex">
           <div>
             <p className="text-2xs">Liquidity</p>
-            <p className="text-xl">$1.01M</p>
+            <p className="text-xl">{poolBalance}</p>
           </div>
 
           <div>
             <p className="text-2xs">Volume 24H</p>
-            <p className="text-xl">$115.21K</p>
+            <p className="text-xl">{volume24H}</p>
           </div>
 
           <div>
