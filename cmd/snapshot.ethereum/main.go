@@ -107,6 +107,7 @@ func main() {
 			amount1 = mulRatToInt(amount1Rat, int(poolMap[poolAddr].Decimals))
 		)
 		slog.Debug("price data",
+			"pool", r.Pool,
 			"id", r.Pos,
 			"amount0", amount0Rat.FloatString(10),
 			"amount1", amount1Rat.FloatString(10),
