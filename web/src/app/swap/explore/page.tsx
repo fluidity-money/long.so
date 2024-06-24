@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import IridescentToken from "@/assets/icons/token-iridescent.svg";
 import { AllAssetsTable } from "@/app/swap/explore/_AllAssetsTable/AllAssetsTable";
 import { columns } from "@/app/swap/explore/_AllAssetsTable/columns";
-import { Token } from "@/config/tokens";
+import { Token, fUSDC } from "@/config/tokens";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
@@ -22,6 +22,7 @@ import { getBalance } from "wagmi/actions";
 import { useAccount } from "wagmi";
 import { config } from "@/config";
 import { getFormattedStringFromTokenAmount } from "@/lib/amounts";
+import { SwapExploreFragmentFragment } from "@/gql/graphql";
 
 const SwapExploreFragment = graphql(`
   fragment SwapExploreFragment on SeawaterPool {
@@ -48,7 +49,14 @@ const ExplorePage = () => {
 
   const { data, isLoading } = useGraphqlGlobal();
 
-  const tokensData = useFragment(SwapExploreFragment, data?.pools);
+  const tokensData_ = useFragment(SwapExploreFragment, data?.pools);
+  // fUSDC can be queried through GraphQL but it
+  // still won't contain price, so create it manually
+  const fUSDCData = { token: fUSDC, price: "1" } satisfies SwapExploreFragmentFragment
+  const tokensData = useMemo(
+    () => [fUSDCData, ...(tokensData_ ?? [])],
+    [fUSDCData, tokensData_]
+  );
 
   const showMockData = useFeatureFlag("ui show demo data");
 
@@ -71,14 +79,14 @@ const ExplorePage = () => {
       ))
       setTokenBalances(balances)
     })()
-  }, [tokensData])
+  }, [address, tokensData])
 
   const allAssetsData = useMemo(() => {
     if (showMockData) return mockSwapExploreAssets;
 
     // reformat the data to match the columns
     return (
-      tokensData?.map((token, i) => ({
+      tokensData.map((token, i) => ({
         symbol: token.token.symbol,
         address: token.token.address,
         name: token.token.name,

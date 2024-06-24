@@ -140,16 +140,27 @@ export const SwapForm = () => {
     args: [poolAddress],
   });
 
-  const tokenPrice = poolSqrtPriceX96
-    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
+  const { data: token1SqrtPriceX96 } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "sqrtPriceX96",
+    args: [token1.address],
+  });
+
+  const token0Price = poolSqrtPriceX96
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
     : 0n;
 
-  const { data: token0Balance } = useBalance({
+  const token1Price = token1SqrtPriceX96
+    ? sqrtPriceX96ToPrice(token1SqrtPriceX96.result, token1.decimals)
+    : 0n;
+
+  const { data: token0Balance, refetch: refetchToken0Balance } = useBalance({
     address,
     token: token0.address,
   })
 
-  const { data: token1Balance } = useBalance({
+  const { data: token1Balance, refetch: refetchToken1Balance } = useBalance({
     address,
     token: token1.address,
   })
@@ -174,6 +185,38 @@ export const SwapForm = () => {
 
   const client = useClient()
 
+  const swapOptions = useMemo(() => {
+    if (isSwappingBaseAsset) {
+      // if one of the assets is fusdc, use swap1
+      return {
+        address: ammAddress,
+        abi: seawaterContract.abi,
+        functionName: "swap",
+        args: [token1.address, false, BigInt(token0AmountRaw ?? 0), maxUint256],
+      } as const
+    } else if (token1.address === fUSDC.address) {
+      return {
+        address: ammAddress,
+        abi: seawaterContract.abi,
+        functionName: "swap",
+        args: [token0.address, true, BigInt(token0AmountRaw ?? 0), maxUint256],
+      } as const
+    } else {
+      // if both of the assets aren't fusdc, use swap2
+      return {
+        address: ammAddress,
+        abi: seawaterContract.abi,
+        functionName: "swap2ExactIn",
+        args: [
+          token0.address,
+          token1.address,
+          BigInt(token0AmountRaw ?? 0),
+          BigInt(0),
+        ],
+      } as const
+    }
+  }, [isSwappingBaseAsset, token0AmountRaw, token0.address, token1.address])
+
   // TODO this is in ETH(/SPN), not USD
   const [estimatedGas, setEstimatedGas] = useState(0n)
   useEffect(() => {
@@ -192,7 +235,7 @@ export const SwapForm = () => {
         setEstimatedGas(estimatedGas)
       } catch { }
     })()
-  }, [client, token1, token0AmountRaw])
+  }, [address, client, token1, token0AmountRaw, swapOptions])
 
   const { error: quote2Error, isLoading: quote2IsLoading } =
     useSimulateContract({
@@ -297,38 +340,6 @@ export const SwapForm = () => {
     hash: approvalData,
   });
 
-  const swapOptions = useMemo(() => {
-    if (isSwappingBaseAsset) {
-      // if one of the assets is fusdc, use swap1
-      return {
-        address: ammAddress,
-        abi: seawaterContract.abi,
-        functionName: "swap",
-        args: [token1.address, false, BigInt(token0AmountRaw ?? 0), maxUint256],
-      } as const
-    } else if (token1.address === fUSDC.address) {
-      return {
-        address: ammAddress,
-        abi: seawaterContract.abi,
-        functionName: "swap",
-        args: [token0.address, true, BigInt(token0AmountRaw ?? 0), maxUint256],
-      } as const
-    } else {
-      // if both of the assets aren't fusdc, use swap2
-      return {
-        address: ammAddress,
-        abi: seawaterContract.abi,
-        functionName: "swap2ExactIn",
-        args: [
-          token0.address,
-          token1.address,
-          BigInt(token0AmountRaw ?? 0),
-          BigInt(0),
-        ],
-      } as const
-    }
-  }, [isSwappingBaseAsset, token0AmountRaw, token0.address, token1.address])
-
   const performSwap = useCallback(() => {
     console.log("performing swap");
 
@@ -371,6 +382,11 @@ export const SwapForm = () => {
 
   // success
   if (swapResult.data) {
+    // Manually refetch balances of each token.
+    // This is only necessary because there is no ConfirmSwap, as in staking,
+    // so this component doesn't remount when a swap is made
+    refetchToken0Balance()
+    refetchToken1Balance()
     return (
       <Success
         onDone={() => {
@@ -486,7 +502,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${token0.address === fUSDC.address ? token0AmountFloat : getFormattedPriceFromAmount(token0AmountFloat.toString(), tokenPrice, token0.decimals, token1.decimals)}
+                  ${token0.address === fUSDC.address ? token0AmountFloat : getFormattedPriceFromAmount(token0AmountFloat.toString(), token0Price, fUSDC.decimals)}
                 </div>
 
                 <div
@@ -544,7 +560,7 @@ export const SwapForm = () => {
                   {quoteIsLoading ? (
                     <LoaderIcon className="animate-spin" />
                   ) : (
-                    token1Amount
+                    Number(parseFloat(token1Amount ?? "0").toFixed(6))
                   )}
                 </div>
 
@@ -562,7 +578,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${token1.address === fUSDC.address ? token1AmountFloat : getFormattedPriceFromAmount(token1AmountFloat.toString(), tokenPrice, token1.decimals, token0.decimals)}
+                  ${token1.address === fUSDC.address ? token1AmountFloat : getFormattedPriceFromAmount(token1AmountFloat.toString(), token1Price, fUSDC.decimals)}
                 </div>
 
                 <div

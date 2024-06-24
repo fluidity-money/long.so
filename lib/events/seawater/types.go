@@ -9,7 +9,7 @@ type (
 	MintPosition struct {
 		events.Event
 
-		PosId types.Number  `json:"pos_id"`
+		PosId int           `json:"pos_id"`
 		Owner types.Address `json:"owner"`
 		Pool  types.Address `json:"pool"`
 		Lower types.Number  `json:"lower"`
@@ -19,7 +19,7 @@ type (
 	BurnPosition struct {
 		events.Event
 
-		PosId types.Number  `json:"pos_id"`
+		PosId int           `json:"pos_id"`
 		Owner types.Address `json:"owner"`
 	}
 
@@ -28,20 +28,20 @@ type (
 
 		From  types.Address `json:"from_"`
 		To    types.Address `json:"to_"`
-		PosId types.Number  `json:"pos_id"`
+		PosId int           `json:"pos_id"`
 	}
 
 	UpdatePositionLiquidity struct {
 		events.Event
 
-		PosId types.Number `json:"pos_id"`
+		PosId int          `json:"pos_id"`
 		Delta types.Number `json:"delta"`
 	}
 
 	CollectFees struct {
 		events.Event
 
-		PosId   types.Number         `json:"pos_id"`
+		PosId   int                  `json:"pos_id"`
 		Pool    types.Address        `json:"pool"`
 		To      types.Address        `json:"to"`
 		Amount0 types.UnscaledNumber `json:"amount0"`

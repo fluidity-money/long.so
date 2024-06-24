@@ -8,6 +8,10 @@ export const SwapProPoolFragment = graphql(`
     address
     token {
       address
+      symbol
+    }
+    liquidity {
+      liquidity
     }
     priceOverTime {
       daily
@@ -44,6 +48,23 @@ export const SwapProPoolFragment = graphql(`
         timestamp
         fusdc {
           valueUsd
+        }
+      }
+    }
+    swaps {
+      swaps {
+        timestamp
+        amountIn {
+          valueScaled
+          token {
+            symbol
+          }
+        }
+        amountOut {
+          valueScaled
+          token {
+            symbol
+          }
         }
       }
     }

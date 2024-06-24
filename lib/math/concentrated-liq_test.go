@@ -119,3 +119,38 @@ func TestGetSqrtRatioAtTick(t *testing.T) {
 		GetSqrtRatioAtTick(MaxTick).Text(10),
 	)
 }
+
+func TestGetPriceAtSqrtRatio(t *testing.T) {
+	t.Fatal("unimplemented")
+}
+
+func TestGetAmountsForLiqDontBlowUpOnNilSqrtPriceX96(t *testing.T) {
+	sqrtPriceAX96 := encodePriceSqrt(99, 110)
+	sqrtPriceBX96 := encodePriceSqrt(100, 110)
+	liq := new(big.Int).SetInt64(1048)
+	_, _ = GetAmountsForLiq(nil, sqrtPriceAX96, sqrtPriceBX96, liq)
+}
+
+func TestGetAmountsForLiqDontBlowUpOnNilSqrtPriceAX96(t *testing.T) {
+	sqrtPriceX96 := encodePriceSqrt(99, 110)
+	sqrtPriceBX96 := encodePriceSqrt(100, 110)
+	liq := new(big.Int).SetInt64(1048)
+	_, _ = GetAmountsForLiq(sqrtPriceX96, nil, sqrtPriceBX96, liq)
+}
+
+func TestGetAmountsForLiqDontBlowUpOnNilSqrtPriceBX96(t *testing.T) {
+	sqrtPriceX96 := encodePriceSqrt(99, 110)
+	sqrtPriceAX96 := encodePriceSqrt(100, 110)
+	liq := new(big.Int).SetInt64(1048)
+	_, _ = GetAmountsForLiq(sqrtPriceX96, sqrtPriceAX96, nil, liq)
+}
+
+func TestGetAmountsForLiqWeird(t *testing.T) {
+	sqrtPriceX96 := GetSqrtRatioAtTick(new(big.Int).SetInt64(2206))
+	sqrtPriceAX96 := GetSqrtRatioAtTick(new(big.Int).SetInt64(-1140))
+	sqrtPriceBX96 := GetSqrtRatioAtTick(new(big.Int).SetInt64(960))
+	liq := new(big.Int).SetInt64(48296224)
+	amount0, amount1 := GetAmountsForLiq(sqrtPriceX96, sqrtPriceAX96, sqrtPriceBX96, liq)
+	assert.Equal(t, nil, amount0.FloatString(15))
+	assert.Equal(t, nil, amount1.FloatString(15))
+}

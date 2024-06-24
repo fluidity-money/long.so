@@ -5,8 +5,20 @@
 		"inputs": [
 			{
 				"name": "_requests",
-				"type": "address[]",
-				"internalType": "address[]"
+				"type": "tuple[]",
+				"internalType": "struct IFaucet.FaucetReq[]",
+				"components": [
+					{
+						"name": "recipient",
+						"type": "address",
+						"internalType": "address"
+					},
+					{
+						"name": "amount",
+						"type": "uint256",
+						"internalType": "uint256"
+					}
+				]
 			}
 		],
 		"outputs": [],

@@ -121,6 +121,25 @@ export const output = {
     },
     {
       "type": "function",
+      "name": "tickSpacing",
+      "inputs": [
+        {
+          "name": "pool",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8",
+          "internalType": "uint8"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
       "name": "curTick",
       "inputs": [
         {
@@ -132,8 +151,8 @@ export const output = {
       "outputs": [
         {
           "name": "",
-          "type": "uint256",
-          "internalType": "uint256"
+          "type": "int32",
+          "internalType": "int32"
         }
       ],
       "stateMutability": "nonpayable"

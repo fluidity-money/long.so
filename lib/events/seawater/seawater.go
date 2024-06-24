@@ -42,8 +42,12 @@ func UnpackMintPosition(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*MintP
 	if !ok {
 		return nil, fmt.Errorf("bad upper: %T", i[1])
 	}
+	posId, err := hashToInt(topic1)
+	if err != nil {
+		return nil, err
+	}
 	return &MintPosition{
-		PosId: hashToNumber(topic1),
+		PosId: posId,
 		Owner: hashToAddr(topic2),
 		Pool:  hashToAddr(topic3),
 		Lower: types.NumberFromInt32(lower),
@@ -52,23 +56,35 @@ func UnpackMintPosition(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*MintP
 }
 
 func UnpackBurnPosition(topic1, topic2 ethCommon.Hash, d []byte) (*BurnPosition, error) {
+	posId, err := hashToInt(topic1)
+	if err != nil {
+		return nil, err
+	}
 	return &BurnPosition{
-		PosId: hashToNumber(topic1),
+		PosId: posId,
 		Owner: hashToAddr(topic2),
 	}, nil
 }
 
 func UnpackTransferPosition(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*TransferPosition, error) {
+	posId, err := hashToInt(topic3)
+	if err != nil {
+		return nil, err
+	}
 	return &TransferPosition{
-		PosId: hashToNumber(topic3),
+		PosId: posId,
 		From:  hashToAddr(topic1),
 		To:    hashToAddr(topic2),
 	}, nil
 }
 
 func UnpackUpdatePositionLiquidity(topic1, topic2 ethCommon.Hash, d []byte) (*UpdatePositionLiquidity, error) {
+	posId, err := hashToInt(topic1)
+	if err != nil {
+		return nil, err
+	}
 	return &UpdatePositionLiquidity{
-		PosId: hashToNumber(topic1),
+		PosId: posId,
 		Delta: hashToNumber(topic2),
 	}, nil
 }
@@ -86,8 +102,12 @@ func UnpackCollectFees(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*Collec
 	if !ok {
 		return nil, fmt.Errorf("bad amount1: %T", i[2])
 	}
+	posId, err := hashToInt(topic1)
+	if err != nil {
+		return nil, err
+	}
 	return &CollectFees{
-		PosId:   hashToNumber(topic1),
+		PosId:   posId,
 		Pool:    hashToAddr(topic2),
 		To:      hashToAddr(topic3),
 		Amount0: types.UnscaledNumberFromBig(amount0),
@@ -208,7 +228,16 @@ func UnpackSwap1(topic1, topic2 ethCommon.Hash, d []byte) (*Swap1, error) {
 }
 
 func hashToNumber(h ethCommon.Hash) types.Number {
+	// Always assumes the hash is well-formed.
 	return types.NumberFromBig(h.Big())
+}
+func hashToInt(h ethCommon.Hash) (int, error) {
+	// Makes an assumption that we're not going to exceed the limit on this.
+	i := hashToNumber(h)
+	if !i.IsInt64() { // Too large!
+		return 0, fmt.Errorf("too large: %#v", i.String())
+	}
+	return int(i.Int64()), nil
 }
 
 func hashToAddr(h ethCommon.Hash) types.Address {

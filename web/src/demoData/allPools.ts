@@ -10,6 +10,7 @@ export const mockAllPools: Pool[] = [
     rewards: 321,
     totalValueLocked: 4312,
     volume: 1231,
+    liquidityRange: ["0", "0"],
   },
   {
     id: "2",
@@ -21,6 +22,7 @@ export const mockAllPools: Pool[] = [
     totalValueLocked: 1213,
     volume: 5421,
     boosted: true,
+    liquidityRange: ["0", "0"],
   },
   {
     id: "3",
@@ -31,6 +33,7 @@ export const mockAllPools: Pool[] = [
     rewards: 131,
     totalValueLocked: 5412,
     volume: 8734,
+    liquidityRange: ["0", "0"],
   },
   {
     id: "4",
@@ -42,6 +45,7 @@ export const mockAllPools: Pool[] = [
     totalValueLocked: 4312,
     volume: 1231,
     boosted: true,
+    liquidityRange: ["0", "0"],
   },
   {
     id: "5",
@@ -53,6 +57,7 @@ export const mockAllPools: Pool[] = [
     totalValueLocked: 1213,
     volume: 5421,
     boosted: true,
+    liquidityRange: ["0", "0"],
   },
   {
     id: "6",
@@ -63,5 +68,6 @@ export const mockAllPools: Pool[] = [
     rewards: 131,
     totalValueLocked: 5412,
     volume: 8734,
+    liquidityRange: ["0", "0"],
   },
 ];

@@ -68,9 +68,9 @@ func main() {
 		}
 	}
 	// Store the positions in a map so we can reconcile the results together easier.
-	positionMap := make(map[string]seawater.Position, len(positions))
+	positionMap := make(map[int]seawater.Position, len(positions))
 	for _, p := range positions {
-		positionMap[p.Id.String()] = p
+		positionMap[p.Id] = p
 	}
 	// Make a separate RPC lookup for the current price of each pool.
 	// Pack the RPC data to be batched using storage slot lookups.
@@ -83,34 +83,51 @@ func main() {
 		log.Fatalf("positions request: %v", err)
 	}
 	var (
-		ids      = make([]string, len(positions))
+		ids      = make([]int, len(positions))
 		amount0s = make([]string, len(positions))
 		amount1s = make([]string, len(positions))
 	)
 	for i, r := range resps {
 		poolAddr := r.Pool.String()
+		pos, ok := positionMap[r.Pos]
+		if !ok {
+			slog.Info("position doesn't have any liquidity",
+				"position id", r.Pos,
+			)
+			continue
+		}
+		var (
+			lowerPrice = math.GetSqrtRatioAtTick(pos.Lower.Big())
+			upperPrice = math.GetSqrtRatioAtTick(pos.Upper.Big())
+		)
 		amount0Rat, amount1Rat := math.GetAmountsForLiq(
 			poolMap[poolAddr].curPrice, // The current sqrt ratio
-			positionMap[r.Pos.String()].Lower.Big(),
-			positionMap[r.Pos.String()].Upper.Big(),
+			lowerPrice,
+			upperPrice,
 			r.Delta.Big(),
 		)
 		var (
-			amount0 = mulRatToInt(amount0Rat, poolMap[poolAddr].Decimals)
-			amount1 = mulRatToInt(amount1Rat, poolMap[poolAddr].Decimals)
+			amount0 = mulRatToInt(amount0Rat, config.FusdcDecimals)
+			amount1 = mulRatToInt(amount1Rat, int(poolMap[poolAddr].Decimals))
 		)
-		slog.Debug("amount 0 rat",
-			"id", r.Pool,
-			"amount0", amount0Rat,
-			"amount1", amount1Rat,
-			"amount0", amount0,
-			"amount1", amount1,
-			"delta", r.Delta,
-			"lower", positionMap[r.Pos.String()].Lower,
+		slog.Debug("price data",
+			"pool", r.Pool,
+			"id", r.Pos,
+			"amount0", amount0Rat.FloatString(10),
+			"amount1", amount1Rat.FloatString(10),
+			"amount0", amount0.String(),
+			"amount1", amount1.String(),
+			"delta", r.Delta.String(),
+			"lower", lowerPrice,
+			"upper", upperPrice,
 		)
-		ids[i] = r.Pos.String()
+		ids[i] = r.Pos
 		amount0s[i] = amount0.String()
 		amount1s[i] = amount1.String()
+	}
+	if len(ids) == 0 {
+		slog.Info("no positions found")
+		return
 	}
 	if err := storePositions(db, ids, amount0s, amount1s); err != nil {
 		log.Fatalf("store positions: %v", err)
@@ -136,10 +153,7 @@ func httpPost(url string, contentType string, r io.Reader) (io.ReadCloser, error
 	return resp.Body, nil
 }
 
-func mulRatToInt(x *big.Rat, d uint8) *big.Int {
-	y := new(big.Int).SetInt64(10)
-	y.Exp(y, new(big.Int).SetInt64(int64(d)), nil)
-	r := new(big.Rat).Mul(x, new(big.Rat).SetInt(y))
-	i := new(big.Int).Quo(r.Num(), r.Denom())
+func mulRatToInt(x *big.Rat, d int) *big.Int {
+	i := new(big.Int).Quo(x.Num(), x.Denom())
 	return i
 }

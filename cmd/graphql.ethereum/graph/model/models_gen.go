@@ -54,7 +54,7 @@ type Token struct {
 	Name string `json:"name"`
 	// Image of the token that's stored on a URL somewhere. Loaded from the browser.
 	Image string `json:"image"`
-	// Total supply of the token, in the form of hex.
+	// Total supply of the token, in the form of base10.
 	TotalSupply string `json:"totalSupply"`
 	// Decimals used by the token.
 	Decimals int `json:"decimals"`

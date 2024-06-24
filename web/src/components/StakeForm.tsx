@@ -15,7 +15,7 @@ import CurrentPrice from "@/assets/icons/legend/current-price.svg";
 import LiquidityDistribution from "@/assets/icons/legend/liquidity-distribution.svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MAX_TICK, sqrtPriceX96ToPrice } from "@/lib/math";
+import { MAX_TICK, getSqrtRatioAtTick, sqrtPriceX96ToPrice } from "@/lib/math";
 import { ammAddress } from "@/lib/addresses";
 import { createChartData } from "@/lib/chartData";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
@@ -41,10 +41,10 @@ import { erc20Abi } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
-import { useGraphqlGlobal } from "@/hooks/useGraphql";
+import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 import { Token as TokenType, fUSDC, getTokenFromAddress } from "@/config/tokens";
-import { getFormattedPriceFromAmount } from "@/lib/amounts";
+import { getFormattedPriceFromAmount, getTokenAmountFromRawAmountAndPrice } from "@/lib/amounts";
 
 const colorGradient = new echarts.graphic.LinearGradient(
   0,
@@ -65,7 +65,7 @@ type StakeFormProps = { poolId: string } & ({
   positionId?: never,
 } | {
   mode: "existing",
-  positionId: string,
+  positionId: number,
 });
 
 const StakeFormFragment = graphql(`
@@ -73,6 +73,18 @@ const StakeFormFragment = graphql(`
     address
     earnedFeesAPRFUSDC
   }
+`);
+
+const PositionsFragment = graphql(`
+fragment DepositPositionsFragment on Wallet {
+  positions {
+    positions {
+      positionId
+      lower
+      upper
+    }
+  }
+}
 `);
 
 export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
@@ -97,10 +109,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     setToken1AmountRaw,
     priceLower,
     priceUpper,
-    tickLower,
-    priceLowerRaw,
     setPriceLower,
     setPriceUpper,
+    setTickLower,
+    setTickUpper,
   } = useStakeStore();
 
 
@@ -117,14 +129,29 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       setToken0(poolToken)
       setToken1(fUSDC)
     }
-  }, [])
+  }, [
+    poolId,
+    setToken0,
+    setToken1,
+    token0.address,
+    token1.address
+  ])
 
   // Parse the price lower and upper, and set the ticks properly.
 
   const { data } = useGraphqlGlobal();
+  const { data: userData } = useGraphqlUser();
 
   const poolsData = useFragment(StakeFormFragment, data?.pools);
   const poolData = poolsData?.find((pool) => pool.address === poolId);
+
+  const positionData_ = useFragment(PositionsFragment, userData?.getWallet)
+  const positionData = positionData_?.positions.positions.find(p => p.positionId === positionId)
+
+  const { upper: upperTick, lower: lowerTick } = positionData || {
+    upper: 0,
+    lower: 0
+  };
 
   const showMockData = useFeatureFlag("ui show demo data");
 
@@ -137,6 +164,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const showDynamicFeesPopup = useFeatureFlag("ui show optimising fee route");
   const showSingleToken = useFeatureFlag("ui show single token stake");
   const showCampaignBanner = useFeatureFlag("ui show campaign banner");
+  const showLiquidityVisualiser = useFeatureFlag("ui show liquidity visualiser")
 
   const onSubmit = () => {
     if (mode === "new") {
@@ -150,26 +178,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   const chartRef = useRef<ReactECharts>(null);
 
-  const [liquidityRangeType, setLiquidityRangeType] = useState<
-    "full-range" | "auto" | "custom"
-  >("full-range");
-
-  useEffect(() => {
-    if (liquidityRangeType === "full-range") {
-      // lower price is 1 base fUSDC (0.000001)
-      setPriceLower(`0.${"0".repeat(token1.decimals - 1)}1`)
-      // upper price is max tick adjusted for decimals
-      setPriceUpper(BigInt(1.0001 ** MAX_TICK * 10 ** -fUSDC.decimals).toString())
-    }
-    else if (liquidityRangeType === "auto") {
-      // TODO determine auto price
-      setPriceLower("-100")
-      setPriceLower("100")
-    } else {
-
-    }
-  }, [liquidityRangeType])
-
   // Price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
@@ -179,16 +187,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   });
 
   const tokenPrice = poolSqrtPriceX96
-    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result)
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
     : 0n;
-
-  // Current tick of the pool
-  const { data: curTick } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
-    functionName: "curTick",
-    args: [token0.address],
-  });
 
   // in this context, token0 is actually token1. It's converted to token1
   // when we use it.
@@ -213,18 +213,39 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   useEffect(() => {
     if (quotedToken === 'token0') {
-      const newToken1Amount = (BigInt(token0AmountRaw) * tokenPrice)
+      const newToken1Amount = getTokenAmountFromRawAmountAndPrice(
+        BigInt(token0AmountRaw),
+        tokenPrice,
+        BigInt(token0.decimals),
+        BigInt(token1.decimals),
+        'mul'
+      )
       if (token1Balance?.value && newToken1Amount > token1Balance.value)
         return
       setToken1AmountRaw(newToken1Amount.toString())
     }
     else {
-      const newToken0Amount = (BigInt(token1AmountRaw) / tokenPrice)
+      const newToken0Amount = getTokenAmountFromRawAmountAndPrice(
+        BigInt(token1AmountRaw),
+        tokenPrice,
+        BigInt(token0.decimals),
+        BigInt(token1.decimals),
+        'div'
+      );
       if (token0Balance?.value && newToken0Amount > token0Balance.value)
         return
       setToken0AmountRaw(newToken0Amount.toString())
     }
-  }, [token0AmountRaw, token1AmountRaw, tokenPrice, quotedToken])
+  }, [
+    setToken0AmountRaw,
+    setToken1AmountRaw,
+    token0Balance?.value,
+    token1Balance?.value,
+    token0AmountRaw,
+    token1AmountRaw,
+    tokenPrice,
+    quotedToken
+  ]);
 
   const setMaxBalance = (token: TokenType) => {
     token.address === token0.address ?
@@ -233,12 +254,58 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   }
 
   // The tick spacing will determine how granular the graph is.
-  const { data: tickSpacing } = useSimulateContract({
+  const { data: curTickNum } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
     functionName: "curTick",
     args: [token0.address],
   });
+  const curTick = useMemo(() => ({ result: BigInt(curTickNum?.result ?? 0) }), [curTickNum]);
+
+  const [liquidityRangeType, setLiquidityRangeType] = useState<
+    "full-range" | "auto" | "custom"
+  >("auto");
+
+  // TODO these could all be more precise
+  useEffect(() => {
+    // set the ticks to the existing ticks of the pool
+    if (mode === "existing") {
+      const scale = token0.decimals - fUSDC.decimals
+      const priceLower = (1.0001 ** lowerTick * 10 ** scale).toFixed(fUSDC.decimals)
+      const priceHigher = (1.0001 ** upperTick * 10 ** scale).toFixed(fUSDC.decimals)
+      setPriceLower(priceLower, token0.decimals)
+      setPriceUpper(priceHigher, token0.decimals)
+      return
+    }
+
+    if (liquidityRangeType === "full-range") {
+      // lower price is 1 base fUSDC (0.000001)
+      setPriceLower(`0.${"0".repeat(token1.decimals - 1)}1`, token0.decimals)
+      // upper price is max tick
+      setPriceUpper(String(1.0001 ** MAX_TICK), token0.decimals)
+    }
+    else if (liquidityRangeType === "auto") {
+      if (!curTick)
+        return
+      // auto sets the price range to +-10% of the current tick
+      const priceAtTick = sqrtPriceX96ToPrice(getSqrtRatioAtTick(curTick.result), token0.decimals)
+      const diff = priceAtTick / 10n
+      const pu = priceAtTick + diff
+      const pl = priceAtTick - diff
+      const priceLower = (Number(pl) / 10 ** fUSDC.decimals).toFixed(fUSDC.decimals)
+      const priceUpper = (Number(pu) / 10 ** fUSDC.decimals).toFixed(fUSDC.decimals)
+      setPriceLower(priceLower, token0.decimals)
+      setPriceUpper(priceUpper, token0.decimals)
+    }
+  }, [
+    mode,
+    curTick,
+    positionData,
+    setPriceLower,
+    setPriceUpper,
+    token1.decimals,
+    liquidityRangeType
+  ])
 
   const autoFeeTierRef = useRef();
   const manualFeeTierRef = useRef();
@@ -322,7 +389,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         },
       ],
     };
-  }, [liquidityRangeType]);
+  }, [
+    chartData,
+    liquidityRangeType
+  ]);
 
   useEffect(() => {
     if (chartRef.current) {
@@ -452,7 +522,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
             <div className="mt-[5px] flex w-full flex-row items-center justify-between">
               <div className="text-2xs md:text-gray-1">
-                ${token0.address === fUSDC.address ? token0Amount : getFormattedPriceFromAmount(token0Amount, tokenPrice, token0.decimals, token1.decimals)}
+                ${token0.address === fUSDC.address ? token0Amount : getFormattedPriceFromAmount(token0Amount, tokenPrice, fUSDC.decimals)}
               </div>
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
@@ -511,7 +581,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
               <div className="mt-[5px] flex w-full flex-row items-center justify-between">
                 <div className="text-2xs md:text-gray-1">
-                  ${token1.address === fUSDC.address ? token1Amount : getFormattedPriceFromAmount(token1Amount, tokenPrice, token1.decimals, token0.decimals)}
+                  ${token1.address === fUSDC.address ? token1Amount : getFormattedPriceFromAmount(token1Amount, tokenPrice, fUSDC.decimals)}
                 </div>
                 <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
                   {token1Balance && (
@@ -683,6 +753,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               variant={"secondary"}
               className={"text-3xs md:text-2xs"}
               callback={(val) => setLiquidityRangeType(val)}
+              // default to auto
+              defaultIndex={1}
               segments={[
                 {
                   label: "Full Range",
@@ -694,13 +766,13 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   label: "Auto",
                   value: "auto",
                   ref: useRef(),
-                  disabled: true,
+                  disabled: mode === "existing",
                 },
                 {
                   label: "Custom",
                   value: "custom",
                   ref: useRef(),
-                  disabled: true,
+                  disabled: mode === "existing",
                 },
               ]}
             />
@@ -713,7 +785,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 className="border-b border-white text-2xs md:text-base bg-black"
                 disabled={liquidityRangeType !== "custom" || mode === "existing"}
                 value={priceLower}
-                onChange={(e) => setPriceLower(e.target.value)}
+                onChange={(e) => setPriceLower(e.target.value, token0.decimals)}
               />
               <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
                 <Ethereum className="invert" /> fUSDC per {token0.name}
@@ -726,7 +798,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 className="border-b border-white text-2xs md:text-base bg-black"
                 disabled={liquidityRangeType !== "custom" || mode === "existing"}
                 value={priceUpper}
-                onChange={(e) => setPriceUpper(e.target.value)}
+                onChange={(e) => setPriceUpper(e.target.value, token0.decimals)}
               />
               <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
                 <Ethereum className="invert" /> fUSDC per {token0.name}
@@ -734,7 +806,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             </div>
           </div>
 
-          <div className="mt-[22px]">
+          {showLiquidityVisualiser && <div className="mt-[22px]">
             <div className="text-3xs text-gray-2 md:text-2xs">Visualiser</div>
             <ReactECharts
               className="mt-1"
@@ -773,7 +845,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 <LiquidityDistribution /> Liquidity Distribution
               </div>
             </div>
-          </div>
+          </div>}
         </div>
 
         <div className="mt-[21px] flex w-[318px] flex-row justify-end md:w-[392px]">

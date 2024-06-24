@@ -12,3 +12,5 @@ button {
 a {
   all: unset;
 }
+
+div[data-radix-popper-content-wrapper] { z-index: 10 !important; }

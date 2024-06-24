@@ -10,10 +10,10 @@ export const projectId = process.env.NEXT_PUBLIC_LONGTAIL_WALLETCONNECT_PROJECT_
 if (!projectId) throw new Error("Project ID is not defined");
 
 const metadata = {
-  name: "Superposition",
-  description: "Web3Modal Example",
-  url: "https://web3modal.com", // origin must match your domain & subdomain
-  icons: ["https://avatars.githubusercontent.com/u/37784886"],
+  name: "Superposition Testnet",
+  description: "",
+  url: "https://superposition.so",
+  icons: [""],
 };
 
 // Create wagmiConfig

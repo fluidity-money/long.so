@@ -36,23 +36,23 @@ export const graphqlQueryGlobal = graphql(`
  */
 export const graphqlQueryUser = graphql(`
   query ForUser($wallet: String!) {
-    getSwapsForUser(wallet: $wallet) {
-      # add transaction fragments here
-      ...SwapProTransactionsFragment
-      ...TradeTabTransactionsFragment
+    getSwapsForUser(wallet: $wallet, first: 10) {
+      swaps {
+        # add transaction fragments here
+        ...TradeTabTransactionsFragment
+      }
     }
 
     getWallet(address: $wallet) {
       # add wallet fragments here
       ...MyPositionsWalletFragment
       ...MyPositionsInventoryWalletFragment
-    }
-    getPositions(wallet: $wallet) {
       ...PositionsFragment
+      ...WithdrawPositionsFragment
+      ...DepositPositionsFragment
     }
   }
 `);
-
 /**
  * Fetch all data from the global GraphQL endpoint.
  */
@@ -64,6 +64,7 @@ export const useGraphqlGlobal = () => {
     queryKey: ["graphql"],
     queryFn: () =>
       request(graphqlEndpoint!, graphqlQueryGlobal),
+    refetchInterval: 60 * 1000 // 1 minute
   });
 };
 
@@ -78,6 +79,7 @@ export const useGraphqlUser = () => {
   return useQuery({
     queryKey: ["graphql", address ?? ""],
     queryFn: () =>
-      request(graphqlEndpoint!, graphqlQueryUser, { wallet: address ?? "" })
+      request(graphqlEndpoint!, graphqlQueryUser, { wallet: address ?? "" }),
+    refetchInterval: 60 * 1000 // 1 minute
   });
 };

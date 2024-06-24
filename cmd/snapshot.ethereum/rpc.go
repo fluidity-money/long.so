@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/big"
+	"strconv"
 	"strings"
 
 	"github.com/fluidity-money/long.so/lib/types"
@@ -25,10 +27,10 @@ const (
 
 type (
 	rpcReq struct {
-		JsonRpc string   `json:"jsonrpc"`
-		Id      string   `json:"id"`
-		Method  string   `json:"method"`
-		Params  []any `json:"params"`
+		JsonRpc string `json:"jsonrpc"`
+		Id      string `json:"id"`
+		Method  string `json:"method"`
+		Params  []any  `json:"params"`
 	}
 
 	rpcResp struct {
@@ -40,15 +42,16 @@ type (
 	// posResp that's also given to gorm to be used with a custom
 	// function that does a left join during insertion.
 	posResp struct {
-		Pool       types.Address
-		Pos, Delta types.Number
+		Pool  types.Address
+		Pos   int
+		Delta types.Number
 	}
 )
 
 // packRpcPosData by concatenating the pool address with the position id, so
 // we can quickly unpack it later. Assumes poolAddr, and ammAddr, are
 // correctly formatted (0x[A-Za-z0-9]{40}).
-func packRpcPosData(ammAddr string, positions map[string]seawater.Position) (req []rpcReq) {
+func packRpcPosData(ammAddr string, positions map[int]seawater.Position) (req []rpcReq) {
 	req = make([]rpcReq, len(positions))
 	i := 0
 	for _, p := range positions {
@@ -131,14 +134,14 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 							chanErrs <- fmt.Errorf("unpacking id: %#v", p.Id)
 							return
 						}
-						delta, err := types.NumberFromString(strings.TrimPrefix(p.Result, "0x"))
+						delta, err := types.NumberFromHex(strings.TrimPrefix(p.Result, "0x"))
 						if err != nil {
 							chanErrs <- fmt.Errorf("unpacking delta: %#v: %v", p, err)
 							return
 						}
 						r := posResp{
 							pool,
-							*position,
+							position,
 							*delta,
 						}
 						select {
@@ -208,28 +211,31 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 	return resps, nil
 }
 
-func decodeId(x string) (pool types.Address, id *types.Number, ok bool) {
+func decodeId(x string) (pool types.Address, id int, ok bool) {
 	if len(x) < 40 {
-		return "", nil, false
+		return "", 0, false
 	}
 	pool = types.AddressFromString(x[:42])
 	var err error
-	if id, err = types.NumberFromString(x[42:]); err != nil {
-		return "", nil, false
+	id_, err := strconv.ParseInt(x[42:], 16, 64)
+	if err != nil {
+		return "", 0, false
 	}
+	id = int(id_)
 	return pool, id, true
 }
 
-func encodeId(pool types.Address, id types.Number) string {
-	return pool.String() + id.String()
+func encodeId(pool types.Address, id int) string {
+	return fmt.Sprintf("%s%x", pool, id)
 }
 
-func getCalldata(pool types.Address, posId types.Number) string {
+func getCalldata(pool types.Address, posId int) string {
+	posIdB := new(big.Int).SetInt64(int64(posId)).Bytes()
 	x := append(
 		[]byte{0xe7, 0x59, 0xc4, 0x65},
 		append(
 			ethCommon.LeftPadBytes(ethCommon.HexToAddress(pool.String()).Bytes(), 32),
-			ethCommon.LeftPadBytes(posId.Big().Bytes(), 32)...,
+			ethCommon.LeftPadBytes(posIdB, 32)...,
 		)...,
 	)
 	return "0x" + hex.EncodeToString(x)

@@ -1,5 +1,5 @@
 {
-	"faucet stakers only": true,
+	"faucet stakers only": false,
 	"faucet enabled": true,
 	"graphql mock demo data": false,
 	"graphql mock demo data should delay": false,
@@ -27,5 +27,7 @@
 	"ui show tokens given out": false,
 	"ui show trade rewards": false,
 	"ui show utility incentives": false,
-	"ui show yield over time": false
+	"ui show yield over time": false,
+	"ui show liquidity visualiser": false
 }
+

@@ -12,14 +12,20 @@ import { motion } from "framer-motion";
 import { format, subDays } from "date-fns";
 import ReactECharts from "echarts-for-react";
 import Link from "next/link";
+import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { useEffect, useMemo, useState } from "react";
 import { graphql, useFragment } from "@/gql";
-import { useGraphqlGlobal } from "@/hooks/useGraphql";
+import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usdFormat } from "@/lib/usdFormat";
-import { fUSDC } from "@/config/tokens";
+import { fUSDC, getTokenFromAddress } from "@/config/tokens";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getFormattedPriceFromTick } from "@/lib/amounts";
+import { useStakeStore } from "@/stores/useStakeStore";
+import { useSwapStore } from "@/stores/useSwapStore";
+import { ammAddress } from "@/lib/addresses";
+import { useSimulateContract } from "wagmi";
+import { getTokenAmountsNumeric, sqrtPriceX96ToPrice } from "@/lib/math";
 
 const ManagePoolFragment = graphql(`
   fragment ManagePoolFragment on SeawaterPool {
@@ -41,12 +47,30 @@ const ManagePoolFragment = graphql(`
       maximumAmount
     }
     earnedFeesAPRFUSDC
+  }
+`);
+
+const PositionsFragment = graphql(`
+fragment PositionsFragment on Wallet {
+  positions {
     positions {
       positionId
+      pool {
+        address
+      }
       lower
       upper
+      liquidity {
+        fusdc {
+          valueUsd
+        }
+        token1 {
+          valueUsd
+        }
+      }
     }
   }
+}
 `);
 
 export default function PoolPage() {
@@ -57,10 +81,42 @@ export default function PoolPage() {
   // get the id from the query params
   const params = useSearchParams();
   const id = params.get("id");
-  const positionIdParam = params.get("positionId")
+  const positionIdParam = Number(params.get("positionId"));
 
-  const { data } = useGraphqlGlobal();
-  const allPoolsData = useFragment(ManagePoolFragment, data?.pools);
+  const { data: globalData } = useGraphqlGlobal();
+  const { data: userData } = useGraphqlUser();
+  const allPoolsData = useFragment(ManagePoolFragment, globalData?.pools);
+  const positionsData_ = useFragment(PositionsFragment, userData?.getWallet)
+  const positionsData = useMemo(() =>
+    positionsData_?.positions.positions.filter(p => p.pool.address === id),
+    [id, positionsData_]
+  );
+
+  const {
+    token0,
+    token1,
+    setToken0,
+    setToken1,
+  } = useStakeStore()
+
+  const {
+    setToken0: setToken0Swap,
+    setToken1: setToken1Swap,
+  } = useSwapStore();
+
+  useEffect(() => {
+    if (!id)
+      return
+    const token = getTokenFromAddress(id)
+    if (!token)
+      return
+    // Graph is rendered by SwapPro, which uses the swap store
+    // So we have to set both of these.
+    setToken0(token)
+    setToken1(fUSDC)
+    setToken0Swap(token)
+    setToken1Swap(fUSDC)
+  }, [id])
 
   const poolData = allPoolsData?.find((pool) => pool.id === id);
 
@@ -71,18 +127,56 @@ export default function PoolPage() {
   // the internal ID and query parameters
   const position = useMemo(() => {
     if (positionId_ !== undefined)
-      return poolData?.positions?.find(p => p.positionId === positionId_.toString())
+      return positionsData?.find(p => p.positionId === positionId_)
     if (positionIdParam)
-      return poolData?.positions?.find(p => p.positionId === positionIdParam.toString())
-    return poolData?.positions?.[0]
+      return positionsData?.find(p => p.positionId === positionIdParam)
+    return positionsData?.[0]
   }, [poolData, positionId_, positionIdParam])
 
   const { positionId, upper: upperTick, lower: lowerTick } = position || {}
 
-  // TODO fetch total pool liquidity in query
   const poolBalance = useMemo(() => (
-    0
-  ), [poolData])
+    usdFormat(positionsData ?
+      positionsData.reduce((total, { liquidity: { fusdc, token1 } }) =>
+        total + parseFloat(fusdc.valueUsd) + parseFloat(token1.valueUsd),
+        0) :
+      0
+    )), [poolData])
+
+  // Current liquidity of the position
+  const { data: positionLiquidity } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: 'positionLiquidity',
+    args: [token0.address, BigInt(positionId ?? 0)]
+  })
+
+  // Current tick of the pool
+  const { data: { result: curTickNum } = { result: 0 } } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "curTick",
+    args: [token0.address],
+  });
+  const curTick = BigInt(curTickNum)
+
+  const { data: poolSqrtPriceX96 } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "sqrtPriceX96",
+    args: [token0.address],
+  });
+
+  const tokenPrice = poolSqrtPriceX96
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
+    : 0n;
+
+  const positionBalance = useMemo(() => {
+    if (!positionLiquidity || !position)
+      return 0
+    const [amount0, amount1] = getTokenAmountsNumeric(Number(positionLiquidity.result), Number(curTick), position.lower, position.upper)
+    return usdFormat((amount0 * Number(tokenPrice) / 10 ** (token0.decimals + fUSDC.decimals)) + (amount1 / 10 ** token1.decimals))
+  }, [position, positionLiquidity, tokenPrice, token0, token1, curTick])
 
   const showMockData = useFeatureFlag("ui show demo data");
   const showBoostIncentives = useFeatureFlag("ui show boost incentives");
@@ -213,7 +307,7 @@ export default function PoolPage() {
                     <div className="text-3xs md:text-2xs">My Pool Balance</div>
                     <div className="text-xl md:text-2xl">
                       {/* TODO: get my pool balance */}
-                      {showMockData ? "$190,301" : usdFormat(poolBalance)}
+                      {showMockData ? "$190,301" : poolBalance}
                     </div>
                   </div>
 
@@ -243,31 +337,30 @@ export default function PoolPage() {
                   <div className="flex flex-1 flex-col">
                     <div className="text-3xs md:text-2xs">Current Position Range</div>
                     <div className="text-xl md:text-2xl">
-                      {getFormattedPriceFromTick(lowerTick ?? 0, fUSDC.decimals)}
+                      {lowerTick ? getFormattedPriceFromTick(lowerTick, token0.decimals, token1.decimals) : usdFormat(0)}
                       -
-                      {getFormattedPriceFromTick(upperTick ?? 0, fUSDC.decimals)}
+                      {upperTick ? getFormattedPriceFromTick(upperTick, token0.decimals, token1.decimals) : usdFormat(0)}
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col">
                     <div className="text-3xs md:text-2xs">Current Position Balance</div>
                     <div className="text-xl md:text-2xl">
-                      {/* TODO position liquidity */}
-                      {usdFormat(0)}
+                      {positionBalance}
                     </div>
                   </div>
                 </div>
                 <div className="flex flex-row gap-2">
                   <div className="flex flex-1 flex-col">
                     <div className="text-3xs md:text-2xs">Select Position</div>
-                    <Select value={positionId} onValueChange={value => setPositionId_(Number(value))} defaultValue={position?.positionId}>
+                    <Select value={`${positionId}`} onValueChange={value => setPositionId_(Number(value))} defaultValue={`${position?.positionId}`}>
                       <SelectTrigger className="h-6 w-auto border-0 bg-black p-0 text-[12px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {poolData?.positions.map(position => (
+                        {positionsData?.map(position => (
                           <SelectItem
-                            key={position.positionId}
-                            value={position.positionId}
+                            key={`${position.positionId}`}
+                            value={`${position.positionId}`}
                           >{position.positionId}</SelectItem>
                         ))}
                       </SelectContent>

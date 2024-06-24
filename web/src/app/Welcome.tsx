@@ -42,13 +42,15 @@ export const Welcome = () => {
                 <div className="flex h-full w-[320px] flex-col items-center justify-center gap-1 group-hover:w-[365px]">
                   <div className="text-sm group-hover:text-base">
                     <a href="https://docs.superposition.so/superposition-testnet/super-layer/super-assets" rel="noopener noreferrer" target="_blank">
-                      ⛽️💰 Gas Rebates and Negative Fees for traders
+                      ⛽️ Gas Rebates and Negative Fees for traders
                     </a>
                   </div>
                   <div className="hidden text-xs text-gray-1 group-hover:inline-flex">
                     Less Gas, More Cash.{" "}
                     <span className="ml-1 hidden cursor-pointer underline md:inline-flex">
-                      Learn More {"->"}
+                      <a href="https://docs.superposition.so/superposition-testnet/super-layer/super-assets" rel="noopener noreferrer" target="_blank">
+                        Learn More {"->"}
+                      </a>
                     </span>
                   </div>
                 </div>
@@ -72,9 +74,15 @@ export const Welcome = () => {
                   </div>
                   <div className="hidden text-xs text-gray-1 group-hover:inline-flex ">
                     Get rewarded for every transaction you make.{" "}
-                    <span className="ml-1 hidden cursor-pointer underline md:inline-flex">
-                      Learn More {"->"}
-                    </span>
+                    <a
+                      href="https://docs.superposition.so/superposition-testnet/super-layer/universal-shared-liquidity/longtail-amm-specs"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      <span className="ml-1 hidden cursor-pointer underline md:inline-flex">
+                        Learn More {"->"}
+                      </span>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -94,9 +102,15 @@ export const Welcome = () => {
                   </div>
                   <div className="hidden text-xs text-gray-1 group-hover:inline-flex">
                     Earn easy and earn big.{" "}
-                    <span className="ml-1 hidden cursor-pointer underline md:inline-flex">
-                      Learn More {"->"}
-                    </span>
+                    <a
+                      href="https://docs.superposition.so/superposition-testnet/super-layer/universal-shared-liquidity/longtail-amm-specs"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      <span className="ml-1 hidden cursor-pointer underline md:inline-flex">
+                        Learn More {"->"}
+                      </span>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -107,7 +121,14 @@ export const Welcome = () => {
             <Button onClick={() => setWelcome(false)} className="shine">
               <span className="iridescent-text">Get Started</span>
             </Button>
-            <Button variant="link">Learn more {"->"}</Button>
+            <a
+              rel="noopener noreferrer"
+              target="_blank"
+              href={"https://docs.superposition.so/longtail-amm/introducing-longtail"}
+            >
+              <Button
+                variant="link">Learn more {"->"}</Button>
+            </a>
           </div>
         </div>
       </div>

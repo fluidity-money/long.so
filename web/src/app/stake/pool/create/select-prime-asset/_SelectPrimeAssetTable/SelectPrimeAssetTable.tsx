@@ -133,9 +133,10 @@ export function SelectPrimeAssetTable<TData, TValue>({
                   className="border-b-0 cursor-pointer"
                   onClick={() => {
                     // assume the first token is always the original
-                    setToken0((row.original as any).tokens[0]);
+                    const [token0] = row.original.tokens
+                    setToken0(token0)
                     setToken1(fUSDC);
-                    router.back();
+                    router.push(`/stake/pool/create?id=${token0.address}`);
                   }}
                 >
                   {row.getVisibleCells().map((cell) => (

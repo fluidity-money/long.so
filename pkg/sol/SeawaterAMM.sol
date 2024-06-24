@@ -353,7 +353,7 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorPosition
-    function curTick(address /* pool */) external returns (uint256) {
+    function curTick(address /* pool */) external returns (int32) {
         directDelegate(_getExecutorAdmin());
     }
 

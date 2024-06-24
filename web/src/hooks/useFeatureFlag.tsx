@@ -147,6 +147,11 @@ export interface FeatureFlags {
    * Show breakdown of fees, rewards, and route in the swap form.
    */
   "ui show swap breakdown": boolean;
+
+  /**
+   * Show liquidity range visualiser in the stake form
+   */
+  "ui show liquidity visualiser": boolean;
 }
 
 /**
@@ -178,5 +183,11 @@ export const useFeatureFlag = <T extends keyof FeatureFlags>(
     if (skipOverride) return data?.[featureFlag];
     if (override) return featureFlagOverride[featureFlag];
     return data?.[featureFlag];
-  }, [override, featureFlagOverride, data, featureFlag]);
+  }, [
+    skipOverride,
+    override,
+    featureFlagOverride,
+    data,
+    featureFlag
+  ]);
 };

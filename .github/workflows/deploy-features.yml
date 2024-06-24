@@ -1,4 +1,4 @@
-name: Deploy Features
+name: Deploy features
 
 on:
   push:
@@ -6,15 +6,18 @@ on:
       - development
     paths:
       - 'features/**'
+  pull_request:
+    branches:
+      - development
+    paths:
+      - 'features/**'
 
 jobs:
-  deploy:
+  deploy-features:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Test the JSON is well-formed
         uses: sergeysova/jq-action@v2
@@ -26,12 +29,9 @@ jobs:
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_TOKEN }}
-          # update
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # update
           projectName: ${{ secrets.CLOUDFLARE_FEATURES_PROJECT_NAME }}
           directory: .
-          # to enable Github Deployments
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           branch: main
           workingDirectory: features

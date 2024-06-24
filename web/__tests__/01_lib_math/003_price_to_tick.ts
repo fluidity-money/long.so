@@ -1,6 +1,5 @@
 
 import {
-  encodeSqrtPrice,
   getTickAtSqrtRatio,
   MIN_SQRT_RATIO,
   MIN_TICK,

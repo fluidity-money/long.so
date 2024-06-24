@@ -12,9 +12,9 @@ import (
 
 	"github.com/fluidity-money/long.so/lib/events/erc20"
 	"github.com/fluidity-money/long.so/lib/events/seawater"
-
 	"github.com/fluidity-money/long.so/lib/config"
 	"github.com/fluidity-money/long.so/lib/features"
+	"github.com/fluidity-money/long.so/lib/heartbeat"
 
 	"gorm.io/gorm"
 
@@ -61,8 +61,8 @@ func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagin
 		if err != nil {
 			log.Fatalf("failed to get the last block checkpoint: %v", err)
 		}
-		from++ // Add 1 so we can start from the next block.
 		to := from + ingestorPagination
+		from++ // Increase the starting block by 1 so we always get the next block.
 		slog.Info("latest block checkpoint",
 			"from", from,
 			"collecting until", to,
@@ -71,6 +71,7 @@ func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagin
 		slog.Info("about to sleep before polling again",
 			"poll seconds", ingestorPollWait,
 		)
+		heartbeat.Pulse() // Report that we're alive.
 		time.Sleep(time.Duration(ingestorPollWait) * time.Second)
 	}
 }
@@ -95,14 +96,11 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 			if err := handleLog(db, seawaterAddr, l); err != nil {
 				return fmt.Errorf("failed to unpack log: %v", err)
 			}
-			isBigger := biggestBlockNo < l.BlockNumber
-			if isBigger {
+			isBiggerOrEqual := biggestBlockNo <= l.BlockNumber
+			if isBiggerOrEqual {
 				biggestBlockNo = l.BlockNumber
 				wasChanged = true
 			}
-		}
-		if err != nil {
-			return err
 		}
 		// Update checkpoint here.
 		if wasChanged {
@@ -155,6 +153,7 @@ func IngestWebsocket(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAdd
 			if err != nil {
 				log.Fatalf("failed to handle a database log: %v", err)
 			}
+			heartbeat.Pulse() // Report that we're alive.
 		}
 	}
 }

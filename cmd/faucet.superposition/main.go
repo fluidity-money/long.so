@@ -4,9 +4,8 @@ package main
 
 import (
 	"context"
-	_ "embed"
-	"encoding/json"
 	"crypto/ecdsa"
+	_ "embed"
 	"log"
 	"net/http"
 	"os"
@@ -15,26 +14,24 @@ import (
 	"github.com/fluidity-money/long.so/lib/features"
 	_ "github.com/fluidity-money/long.so/lib/setup"
 
-	"github.com/fluidity-money/long.so/cmd/faucet.superposition/lib/faucet"
 	"github.com/fluidity-money/long.so/cmd/faucet.superposition/graph"
+	"github.com/fluidity-money/long.so/cmd/faucet.superposition/lib/faucet"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 
-	"github.com/ethereum/go-ethereum/ethclient"
-	ethCrypto "github.com/ethereum/go-ethereum/crypto"
 	ethCommon "github.com/ethereum/go-ethereum/common"
+	ethCrypto "github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gormLogger "gorm.io/gorm/logger"
 
 	"github.com/aws/aws-lambda-go/lambda"
 
 	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
 )
-
-//go:embed stakers.json
-var StakersBytes []byte
 
 const (
 	// EnvFaucetAddr to use as the address for the faucet.
@@ -65,13 +62,11 @@ func (m requestMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	m.srv.ServeHTTP(w, r.WithContext(ctx))
 }
 
-// Stakers map created from stakers.json (that should be provided dring build-time.)
-var Stakers map[string]bool
-
 func main() {
 	config := config.Get()
 	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
 		DisableAutomaticPing: true,
+		Logger:               gormLogger.Default.LogMode(gormLogger.Silent),
 	})
 	if err != nil {
 		log.Fatalf("database open: %v", err)
@@ -103,12 +98,11 @@ func main() {
 	queue := RunSender(geth, chainId, key, senderAddr, faucetAddr, faucet.SendFaucet)
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
-			DB:      db,
-			F:       features.Get(),
-			Geth:    geth,
-			C:       config,
+			DB:    db,
+			F:     features.Get(),
+			Geth:  geth,
+			C:     config,
 			Queue: queue,
-			Stakers: Stakers,
 		},
 	}))
 	// Add a custom transport so we can access the requesting IP address in a context.
@@ -129,16 +123,5 @@ func main() {
 			"unexpected listen type: %#v, use either (lambda|http) for SPN_LISTEN_BACKEND",
 			typ,
 		)
-	}
-}
-
-func init() {
-	var stakers []string
-	if err := json.Unmarshal(StakersBytes, &stakers); err != nil {
-		panic(err)
-	}
-	Stakers = make(map[string]bool, len(stakers))
-	for _, s := range stakers {
-		Stakers[s] = true
 	}
 }

@@ -25,7 +25,7 @@ func TestUnpackMintPosition1(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unpack mint position: %v", err)
 	}
-	assert.Equalf(t, types.EmptyNumber(), p.PosId, "id was not zero")
+	assert.Equalf(t, 0, p.PosId, "id was not zero")
 	assert.Equalf(t,
 		types.AddressFromString("0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5"),
 		p.Owner,
@@ -62,7 +62,7 @@ func TestMintPosition2(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unpack mint position: %v", err)
 	}
-	assert.Equalf(t, types.EmptyNumber(), p.PosId, "id was not zero")
+	assert.Equalf(t, 0, p.PosId, "id was not zero")
 	assert.Equalf(t,
 		types.AddressFromString("0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5"),
 		p.Owner,
