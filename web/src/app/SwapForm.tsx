@@ -140,8 +140,19 @@ export const SwapForm = () => {
     args: [poolAddress],
   });
 
-  const tokenPrice = poolSqrtPriceX96
+  const { data: token1SqrtPriceX96 } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "sqrtPriceX96",
+    args: [token1.address],
+  });
+
+  const token0Price = poolSqrtPriceX96
     ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
+    : 0n;
+
+  const token1Price = token1SqrtPriceX96
+    ? sqrtPriceX96ToPrice(token1SqrtPriceX96.result, token1.decimals)
     : 0n;
 
   const { data: token0Balance, refetch: refetchToken0Balance } = useBalance({
@@ -491,7 +502,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${token0.address === fUSDC.address ? token0AmountFloat : getFormattedPriceFromAmount(token0AmountFloat.toString(), tokenPrice, fUSDC.decimals)}
+                  ${token0.address === fUSDC.address ? token0AmountFloat : getFormattedPriceFromAmount(token0AmountFloat.toString(), token0Price, fUSDC.decimals)}
                 </div>
 
                 <div
@@ -567,7 +578,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${token1.address === fUSDC.address ? token1AmountFloat : getFormattedPriceFromAmount(token1AmountFloat.toString(), tokenPrice, fUSDC.decimals)}
+                  ${token1.address === fUSDC.address ? token1AmountFloat : getFormattedPriceFromAmount(token1AmountFloat.toString(), token1Price, fUSDC.decimals)}
                 </div>
 
                 <div
