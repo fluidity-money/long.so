@@ -96,10 +96,14 @@ func main() {
 			)
 			continue
 		}
+		var (
+			lowerPrice = math.GetSqrtRatioAtTick(pos.Lower.Big())
+			upperPrice = math.GetSqrtRatioAtTick(pos.Upper.Big())
+		)
 		amount0Rat, amount1Rat := math.GetAmountsForLiq(
 			poolMap[poolAddr].curPrice, // The current sqrt ratio
-			pos.Lower.Big(),
-			pos.Upper.Big(),
+			lowerPrice,
+			upperPrice,
 			r.Delta.Big(),
 		)
 		var (
@@ -114,8 +118,8 @@ func main() {
 			"amount0", amount0.String(),
 			"amount1", amount1.String(),
 			"delta", r.Delta.String(),
-			"lower", positionMap[r.Pos].Lower,
-			"upper", positionMap[r.Pos].Upper,
+			"lower", lowerPrice,
+			"upper", upperPrice,
 		)
 		ids[i] = r.Pos
 		amount0s[i] = amount0.String()
