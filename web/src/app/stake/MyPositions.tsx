@@ -37,6 +37,14 @@ const MyPositionsWalletFragment = graphql(`
             symbol
           }
         }
+        liquidity {
+          fusdc {
+            valueUsd
+          }
+          token1 {
+            valueUsd
+          }
+        }
       }
     }
   }
@@ -74,7 +82,7 @@ export const MyPositions = () => {
           symbol: position.pool.token.symbol,
         },
       ],
-      staked: 0,
+      staked: parseFloat(position.liquidity.fusdc.valueUsd) + parseFloat(position.liquidity.token1.valueUsd),
       totalYield: 0,
     }));
   }, [showDemoData, address, walletData]);
