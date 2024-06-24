@@ -203,7 +203,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     console.log("approving token1");
     if (
       !allowanceDataToken1?.result ||
-      allowanceDataToken1.result === BigInt(0)
+      allowanceDataToken1.result < BigInt(token1AmountRaw)
     ) {
       writeContractApprovalToken1({
         address: token1.address,
@@ -229,7 +229,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     console.log("approving token0");
     if (
       !allowanceDataToken0?.result ||
-      allowanceDataToken0.result === BigInt(0)
+      allowanceDataToken0.result < BigInt(token1AmountRaw)
     ) {
       writeContractApprovalToken0({
         address: token0.address,
