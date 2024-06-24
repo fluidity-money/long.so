@@ -60,7 +60,7 @@
     "graphql-request": "^7.0.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.378.0",
-    "nanoid": "^5.0.6",
+    "nanoid": "^5.0.7",
     "next": "14.2.3",
     "rc-progress": "^4.0.0",
     "react": "18.2.0",
