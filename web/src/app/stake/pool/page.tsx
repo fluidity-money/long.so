@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { format, subDays } from "date-fns";
 import ReactECharts from "echarts-for-react";
 import Link from "next/link";
+import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { useEffect, useMemo, useState } from "react";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
@@ -22,6 +23,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { getFormattedPriceFromTick } from "@/lib/amounts";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useSwapStore } from "@/stores/useSwapStore";
+import { ammAddress } from "@/lib/addresses";
+import { useSimulateContract } from "wagmi";
+import { getTokenAmountsNumeric, sqrtPriceX96ToPrice } from "@/lib/math";
 
 const ManagePoolFragment = graphql(`
   fragment ManagePoolFragment on SeawaterPool {
@@ -88,7 +92,6 @@ export default function PoolPage() {
     [id, positionsData_]
   );
 
-
   const {
     token0,
     token1,
@@ -138,15 +141,42 @@ export default function PoolPage() {
         total + parseFloat(fusdc.valueUsd) + parseFloat(token1.valueUsd),
         0) :
       0
-    )), [positionsData])
+    )), [poolData])
 
-  const positionBalance = useMemo(() => (
-    usdFormat(
-      position ?
-        parseFloat(position.liquidity.fusdc.valueUsd) + parseFloat(position.liquidity.token1.valueUsd) :
-        0
-    )
-  ), [position])
+  // Current liquidity of the position
+  const { data: positionLiquidity } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: 'positionLiquidity',
+    args: [token0.address, BigInt(positionId ?? 0)]
+  })
+
+  // Current tick of the pool
+  const { data: { result: curTickNum } = { result: 0 } } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "curTick",
+    args: [token0.address],
+  });
+  const curTick = BigInt(curTickNum)
+
+  const { data: poolSqrtPriceX96 } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "sqrtPriceX96",
+    args: [token0.address],
+  });
+
+  const tokenPrice = poolSqrtPriceX96
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
+    : 0n;
+
+  const positionBalance = useMemo(() => {
+    if (!positionLiquidity || !position)
+      return 0
+    const [amount0, amount1] = getTokenAmountsNumeric(Number(positionLiquidity.result), Number(curTick), position.lower, position.upper)
+    return usdFormat((amount0 * Number(tokenPrice) / 10 ** (token0.decimals + fUSDC.decimals)) + (amount1 / 10 ** token1.decimals))
+  }, [position, positionLiquidity, tokenPrice, token0, token1, curTick])
 
   const showMockData = useFeatureFlag("ui show demo data");
   const showBoostIncentives = useFeatureFlag("ui show boost incentives");
@@ -315,7 +345,6 @@ export default function PoolPage() {
                   <div className="flex flex-1 flex-col">
                     <div className="text-3xs md:text-2xs">Current Position Balance</div>
                     <div className="text-xl md:text-2xl">
-                      {/* TODO position liquidity */}
                       {positionBalance}
                     </div>
                   </div>
