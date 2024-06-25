@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"log/slog"
 	"math/big"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/fluidity-money/long.so/lib/events/erc20"
 	"github.com/fluidity-money/long.so/lib/events/seawater"
 	"github.com/fluidity-money/long.so/lib/config"
+	"github.com/fluidity-money/long.so/lib/setup"
 	"github.com/fluidity-money/long.so/lib/features"
 	"github.com/fluidity-money/long.so/lib/heartbeat"
 
@@ -59,7 +59,7 @@ func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagin
 		// Start by finding the latest block number.
 		from, err := getLastBlockCheckpointed(db)
 		if err != nil {
-			log.Fatalf("failed to get the last block checkpoint: %v", err)
+			setup.Exitf("failed to get the last block checkpoint: %v", err)
 		}
 		to := from + ingestorPagination
 		from++ // Increase the starting block by 1 so we always get the next block.
@@ -87,7 +87,7 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 		Topics:    FilterTopics,
 	})
 	if err != nil {
-		log.Fatalf("failed to filter logs: %v", err)
+		setup.Exitf("failed to filter logs: %v", err)
 	}
 	err = db.Transaction(func(db *gorm.DB) error {
 		wasChanged := false
@@ -111,7 +111,7 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 		return nil
 	})
 	if err != nil {
-		log.Fatalf("failed to ingest logs into db: %v", err)
+		setup.Exitf("failed to ingest logs into db: %v", err)
 	}
 }
 
@@ -129,7 +129,7 @@ func IngestWebsocket(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAdd
 	go func() {
 		subscription, err := c.SubscribeFilterLogs(context.Background(), filter, logs)
 		if err != nil {
-			log.Fatalf("eth log subscription: %v", err)
+			setup.Exitf("eth log subscription: %v", err)
 		}
 		err = <-subscription.Err()
 		errors <- err
@@ -137,7 +137,7 @@ func IngestWebsocket(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAdd
 	for {
 		select {
 		case err := <-errors:
-			log.Fatalf("subscription error: %v", err)
+			setup.Exitf("subscription error: %v", err)
 		case l := <-logs:
 			// Figure out what kind of log this is, and then insert it into the database.
 			err := db.Transaction(func(db *gorm.DB) error {
@@ -151,7 +151,7 @@ func IngestWebsocket(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAdd
 				return nil
 			})
 			if err != nil {
-				log.Fatalf("failed to handle a database log: %v", err)
+				setup.Exitf("failed to handle a database log: %v", err)
 			}
 			heartbeat.Pulse() // Report that we're alive.
 		}

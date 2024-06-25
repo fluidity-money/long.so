@@ -5,14 +5,13 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"log/slog"
 	"math/big"
 	"net/http"
 
 	"github.com/fluidity-money/long.so/lib/config"
 	"github.com/fluidity-money/long.so/lib/math"
-	_ "github.com/fluidity-money/long.so/lib/setup"
+	"github.com/fluidity-money/long.so/lib/setup"
 	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
 
@@ -30,12 +29,13 @@ type PoolDetails struct {
 }
 
 func main() {
+	defer setup.Flush()
 	config := config.Get()
 	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
 		Logger: gormLogger.Default.LogMode(gormLogger.Silent),
 	})
 	if err != nil {
-		log.Fatalf("database open: %v", err)
+		setup.Exitf("database open: %v", err)
 	}
 	slog.Debug("about to make another lookup")
 	// Get every active position in the database, including the pools.
@@ -45,7 +45,7 @@ func main() {
 		Scan(&positions).
 		Error
 	if err != nil {
-		log.Fatalf("seawater positions scan: %v", err)
+		setup.Exitf("seawater positions scan: %v", err)
 	}
 	slog.Debug("positions we're about to scan", "positions", positions)
 	var poolDetails []PoolDetails
@@ -55,7 +55,7 @@ func main() {
 		Scan(&poolDetails).
 		Error
 	if err != nil {
-		log.Fatalf("scan positions: %v", err)
+		setup.Exitf("scan positions: %v", err)
 	}
 	slog.Debug("pools we're about to scan", "pools", poolDetails)
 	poolMap := make(map[string]PoolDetails, len(poolDetails))
@@ -80,7 +80,7 @@ func main() {
 	// Makes multiple requests if the request size exceeds the current restriction.
 	resps, err := reqPositions(context.Background(), config.GethUrl, d, httpPost)
 	if err != nil {
-		log.Fatalf("positions request: %v", err)
+		setup.Exitf("positions request: %v", err)
 	}
 	var (
 		ids      = make([]int, len(positions))
@@ -130,7 +130,7 @@ func main() {
 		return
 	}
 	if err := storePositions(db, ids, amount0s, amount1s); err != nil {
-		log.Fatalf("store positions: %v", err)
+		setup.Exitf("store positions: %v", err)
 	}
 }
 
