@@ -5,6 +5,7 @@ on:
     branches:
       - development
     paths:
+      - 'lib/**'
       - 'cmd/graphql.ethereum/**'
 
 jobs:

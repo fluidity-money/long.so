@@ -5,6 +5,7 @@ on:
     branches:
       - development
     paths:
+      - 'lib/**'
       - 'cmd/faucet.superposition/**'
 
 jobs:
