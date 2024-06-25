@@ -147,7 +147,7 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 				"ip addr", ipAddr,
 				"err", err,
 			)
-			return "", fmt.Errorf("error sending")
+			return "", fmt.Errorf("error sending: %v", err)
 		}
 	}
 	return "", nil
