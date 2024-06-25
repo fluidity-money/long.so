@@ -45,5 +45,8 @@ func SendFaucet(ctx context.Context, c *ethclient.Client, o *ethAbiBind.Transact
 		return nil, err
 	}
 	h := tx.Hash()
+	if _, err := ethAbiBind.WaitMined(ctx, c, tx); err != nil {
+		return nil, err
+	}
 	return &h, nil
 }
