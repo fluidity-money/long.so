@@ -113,6 +113,10 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 			"submitted query", wallet,
 			"err", err,
 		)
+		// We failed, so we're going to allow the user to retry by wiping out their request.
+		err = r.DB.
+			Exec("DELETE FROM faucet_requests WHERE addr = ?", wallet).
+			Error
 		return "", fmt.Errorf("error")
 	}
 	if isContract {
