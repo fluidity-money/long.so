@@ -31,7 +31,7 @@ type Multihandler struct {
 
 func (h Multihandler) Enabled(ctx context.Context, record slog.Level) bool {
 	// The JSON handler should be the furthest we're going.
-	return h.sentry.Enabled(ctx, record)
+	return h.json.Enabled(ctx, record)
 }
 func (h Multihandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	var s slog.Handler
