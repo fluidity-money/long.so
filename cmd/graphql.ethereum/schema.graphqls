@@ -412,6 +412,11 @@ type SeawaterPosition {
   id: ID!
 
   """
+  Creation timestamp of the position.
+  """
+  created: Int!
+
+  """
   Position Id in the contract of the user's position that they own. Used for a cursor.
   """
   positionId: Int!

@@ -859,6 +859,24 @@ func (r *seawaterPositionResolver) ID(ctx context.Context, obj *seawater.Positio
 	return "pos:" + strconv.Itoa(s), nil
 }
 
+// Created is the resolver for the created field.
+func (r *seawaterPositionResolver) Created(ctx context.Context, obj *seawater.Position) (int, error) {
+	if obj == nil {
+		return 0, fmt.Errorf("no position obj")
+	}
+	var pos seawater.Position
+	err := r.DB.
+		Table("events_seawater_mintposition").
+		Select("created_by").
+		Scan(&pos).
+		Error
+	if err != nil {
+		return 0, nil
+	}
+	ts := pos.CreatedBy.Unix()
+	return int(ts), nil
+}
+
 // PositionID is the resolver for the positionId field.
 func (r *seawaterPositionResolver) PositionID(ctx context.Context, obj *seawater.Position) (int, error) {
 	if obj == nil {
@@ -1183,7 +1201,7 @@ func (r *walletResolver) ID(ctx context.Context, obj *model.Wallet) (string, err
 		return "", fmt.Errorf("no wallet obj")
 	}
 	return "wallet:" + obj.Address.String(), nil
-} 
+}
 
 // Address is the resolver for the address field.
 func (r *walletResolver) Address(ctx context.Context, obj *model.Wallet) (string, error) {
