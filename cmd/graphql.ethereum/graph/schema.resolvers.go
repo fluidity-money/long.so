@@ -1157,7 +1157,7 @@ func (r *seawaterSwapsResolver) Sum(ctx context.Context, obj *model.SeawaterSwap
 	case obj.Wallet != nil:
 		stmt = stmt.
 			Raw(
-				"SELECT * FROM swaps_decimals_wallet_group_1(?,?,?)",
+				"SELECT * FROM swaps_decimals_user_group_1(?,?,?)",
 				r.C.FusdcAddr,
 				r.C.FusdcDecimals,
 				*obj.Wallet,
