@@ -129,6 +129,7 @@ func main() {
 		faucetAddrSepolia,
 		faucetAddrSpn,
 		faucet.SendFaucet,
+		faucet.WaitMined,
 	)
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{

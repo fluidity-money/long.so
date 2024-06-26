@@ -11,6 +11,7 @@ import (
 
 	ethAbiBind "github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethCommon "github.com/ethereum/go-ethereum/common"
+	ethTypes "github.com/ethereum/go-ethereum/core/types"
 	ethCrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
@@ -28,15 +29,18 @@ func TestFaucetThreeAddresses(t *testing.T) {
 	}
 	key, _ := ethCrypto.GenerateKey()
 	data := make(chan []ethCommon.Address)
-	f := func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucetAddr, sender ethCommon.Address, addrs ...faucet.FaucetReq) (hash *ethCommon.Hash, err error) {
+	f := func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucetAddr, sender ethCommon.Address, addrs ...faucet.FaucetReq) (tx *ethTypes.Transaction, err error) {
 		// Explicitly copy the array that's in use here.
 		x := make([]ethCommon.Address, len(addrs))
 		for i, a := range addrs {
 			x[i] = a.Recipient
 		}
 		data <- x
-		h := ethCommon.HexToHash("0x0a3739029f839086103e3123f9fe4669d1e0665961e215d9721e5f5c0c98d605")
-		return &h, nil
+		tx = new(ethTypes.Transaction)
+		return tx, nil
+	}
+	wait := func(ctx context.Context, c *ethclient.Client, tx *ethTypes.Transaction) error {
+		return nil
 	}
 	// Create the server first to get started.
 	requests := RunSender(
@@ -49,6 +53,7 @@ func TestFaucetThreeAddresses(t *testing.T) {
 		h2a("0x03d9371825f0424b9b2c0b01630351c8d559c2bc"), // Faucet addr Sepolia
 		h2a("0x027e3a2d86a7894c7ef68a3df1159496c88fedfc"), // Faucet addr SPN
 		f,
+		wait,
 	)
 	go func() {
 		for _, a := range recipients {

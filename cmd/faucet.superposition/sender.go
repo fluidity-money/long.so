@@ -14,16 +14,20 @@ import (
 
 	ethAbiBind "github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethCommon "github.com/ethereum/go-ethereum/common"
+	ethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 // BufferDuration to reuse to buffer requests to the faucet in.
 const BufferDuration = 4 * time.Second
 
-type SendFaucetFunc func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...faucet.FaucetReq) (hash *ethCommon.Hash, err error)
+type (
+	SendFaucetFunc func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...faucet.FaucetReq) (tx *ethTypes.Transaction, err error)
+	WaitMinedFunc  func(ctx context.Context, c *ethclient.Client, tx *ethTypes.Transaction) error
+)
 
 // RunSender, by creating a repeating timer of 5 seconds for the cache window, accumulating requests, then sending out tokens requested on demand. Takes the private key for the sender
-func RunSender(cSepolia, cSpn *ethclient.Client, chainIdSepolia, chainIdSpnTestnet *big.Int, key *ecdsa.PrivateKey, senderAddr, faucetAddrSepolia, faucetAddrSpnTestnet ethCommon.Address, sendTokens SendFaucetFunc) chan<- graph.FaucetReq {
+func RunSender(cSepolia, cSpn *ethclient.Client, chainIdSepolia, chainIdSpnTestnet *big.Int, key *ecdsa.PrivateKey, senderAddr, faucetAddrSepolia, faucetAddrSpnTestnet ethCommon.Address, sendTokens SendFaucetFunc, waitMined WaitMinedFunc) chan<- graph.FaucetReq {
 	reqs := make(chan graph.FaucetReq)
 	go func() {
 		t := time.NewTicker(BufferDuration + randSecs())
@@ -53,7 +57,7 @@ func RunSender(cSepolia, cSpn *ethclient.Client, chainIdSepolia, chainIdSpnTestn
 				for x, a := range buf[:i] {
 					faucetReqs[x] = faucet.FaucetReq{
 						Recipient: a.Addr,
-						IsStaker:    a.IsStaker,
+						IsStaker:  a.IsStaker,
 					}
 				}
 				// Get configuration for sending.
@@ -79,11 +83,11 @@ func RunSender(cSepolia, cSpn *ethclient.Client, chainIdSepolia, chainIdSpnTestn
 				}
 				// Send SPN tokens using the faucet!
 				var (
-					chanSpnTestnetHash = make(chan ethCommon.Hash)
-					chanSpnTestnetErr  = make(chan error)
+					chanSpnTestnetTx  = make(chan *ethTypes.Transaction)
+					chanSpnTestnetErr = make(chan error)
 				)
 				go func() {
-					hash, err := sendTokens(
+					tx, err := sendTokens(
 						context.Background(),
 						cSpn,
 						oSpn,
@@ -96,16 +100,12 @@ func RunSender(cSepolia, cSpn *ethclient.Client, chainIdSepolia, chainIdSpnTestn
 						chanSpnTestnetErr <- fmt.Errorf("spn error: %v", err)
 						return
 					}
-					if hash == nil {
-						slog.Error("sending with spn faucet, empty hash ", "err", err)
-						chanSpnTestnetErr <- fmt.Errorf("empty hash spn")
-						return
-					}
-					chanSpnTestnetHash <- *hash
+					chanSpnTestnetTx <- tx
 				}()
+				ctxWait, _ := context.WithTimeout(context.Background(), 15*time.Second)
 				// Start to send out the staked amounts, and log the hash.
-				hashSepolia, err := sendTokens(
-					context.Background(),
+				txSepolia, err := sendTokens(
+					ctxWait,
 					cSepolia,
 					oSepolia,
 					faucetAddrSepolia,
@@ -115,16 +115,28 @@ func RunSender(cSepolia, cSpn *ethclient.Client, chainIdSepolia, chainIdSpnTestn
 				if err != nil {
 					slog.Error("sepolia failed to send: %v", "err", err)
 				}
-				var hashSpn ethCommon.Hash
+				if err := waitMined(ctxWait, cSepolia, txSepolia); err != nil {
+					sendErrs(fmt.Errorf(
+						"failed to wait for the mining to happen for sepolia tx hash: %v",
+						txSepolia.Hash(),
+					))
+				}
+				var txSpn *ethTypes.Transaction
 				select {
-				case hash := <-chanSpnTestnetHash:
-					hashSpn = hash
+				case tx := <-chanSpnTestnetTx:
+					txSpn = tx
 				case err := <-chanSpnTestnetErr:
 					sendErrs(err)
 				}
+				if err := waitMined(ctxWait, cSpn, txSpn); err != nil {
+					sendErrs(fmt.Errorf(
+						"failed to wait for the mining to happen for spn tx hash: %v",
+						txSpn.Hash(),
+					))
+				}
 				slog.Info("sent faucet amounts",
-					"spn hash", hashSpn,
-					"sepolia hash", hashSepolia,
+					"spn hash", txSpn.Hash,
+					"sepolia hash", txSepolia.Hash(),
 					"size", len(buf),
 					"faucet reqs", faucetReqs,
 					"err?", err,

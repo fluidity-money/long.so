@@ -9,6 +9,7 @@ import (
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethAbiBind "github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethCommon "github.com/ethereum/go-ethereum/common"
+	ethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -19,12 +20,12 @@ var abi, _ = ethAbi.JSON(bytes.NewReader(abiBytes))
 
 type FaucetReq struct {
 	Recipient ethCommon.Address `abi:"recipient"`
-	IsStaker bool `abi:"isStaker"`
+	IsStaker  bool              `abi:"isStaker"`
 }
 
 // SendFaucet to multiple addresses, allowing the contract to randomly
 // choose how much to send.
-func SendFaucet(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...FaucetReq) (hash *ethCommon.Hash, err error) {
+func SendFaucet(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...FaucetReq) (hash *ethTypes.Transaction, err error) {
 	bc := ethAbiBind.NewBoundContract(faucet, abi, c, c, c)
 	d, err := abi.Pack("sendTo", addrs)
 	if err != nil {
@@ -44,9 +45,13 @@ func SendFaucet(ctx context.Context, c *ethclient.Client, o *ethAbiBind.Transact
 	if err != nil {
 		return nil, err
 	}
-	h := tx.Hash()
 	if _, err := ethAbiBind.WaitMined(ctx, c, tx); err != nil {
 		return nil, err
 	}
-	return &h, nil
+	return tx, nil
+}
+
+func WaitMined(ctx context.Context, c *ethclient.Client, tx *ethTypes.Transaction) error {
+	_, err := ethAbiBind.WaitMined(ctx, c, tx)
+	return err
 }
