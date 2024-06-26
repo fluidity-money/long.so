@@ -14,9 +14,9 @@
 						"internalType": "address"
 					},
 					{
-						"name": "amount",
-						"type": "uint256",
-						"internalType": "uint256"
+						"name": "isStaker",
+						"type": "bool",
+						"internalType": "isStaker"
 					}
 				]
 			}

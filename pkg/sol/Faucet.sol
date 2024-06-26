@@ -22,16 +22,20 @@ contract Faucet is IFaucet {
 
     uint256[] private amounts;
 
+    uint256 private gasTokenAmount;
+
     constructor(
         address _operator,
         address _emergencyCouncil,
         IERC20[] memory _tokens,
-        uint256[] memory _amounts
+        uint256[] memory _amounts,
+        uint256 _gasTokenAmount
     ) {
         operator_ = _operator;
         EMERGENCY_COUNCIL = _emergencyCouncil;
         tokens = _tokens;
         amounts = _amounts;
+        gasTokenAmount = _gasTokenAmount;
     }
 
     receive() external payable {}
@@ -41,16 +45,16 @@ contract Faucet is IFaucet {
         require(msg.sender == operator_, "only operator");
         for (uint i = 0; i < _requests.length; ++i) {
             address recipient = _requests[i].recipient;
-            bool isContract;
-            assembly {
-                isContract := gt(extcodesize(recipient), 0)
-            }
-            require(!isContract, "no contract");
-
+            bool isStaker = _requests[i].isStaker;
             for (uint x = 0; x < tokens.length; ++x) {
                 uint256 amount = amounts[x];
-                if (_requests[x].isStaker) amount *= 5;
+                if (isStaker) amount *= 5;
                 tokens[x].transfer(recipient, amount);
+            }
+            if (gasTokenAmount > 0) {
+                uint256 gas = gasTokenAmount;
+                if (isStaker) gas *= 5;
+                payable(recipient).transfer(gas);
             }
         }
     }

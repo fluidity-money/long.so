@@ -38,6 +38,7 @@ func SendFaucet(ctx context.Context, c *ethclient.Client, o *ethAbiBind.Transact
 	if err != nil {
 		return nil, err
 	}
+	g = uint64(float64(g) * 1.25) // Lazy!
 	o.GasLimit = uint64(float64(g) * 1.5)
 	tx, err := bc.Transact(o, "sendTo", addrs)
 	if err != nil {

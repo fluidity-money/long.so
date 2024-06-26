@@ -93,12 +93,12 @@ func RunSender(cSepolia, cSpn *ethclient.Client, chainIdSepolia, chainIdSpnTestn
 					)
 					if err != nil {
 						slog.Error("failed to send with spn faucet", "err", err)
-						chanSpnTestnetErr <- err
+						chanSpnTestnetErr <- fmt.Errorf("spn error: %v", err)
 						return
 					}
 					if hash == nil {
 						slog.Error("sending with spn faucet, empty hash ", "err", err)
-						chanSpnTestnetErr <- fmt.Errorf("empty hash")
+						chanSpnTestnetErr <- fmt.Errorf("empty hash spn")
 						return
 					}
 					chanSpnTestnetHash <- *hash
@@ -113,7 +113,7 @@ func RunSender(cSepolia, cSpn *ethclient.Client, chainIdSepolia, chainIdSpnTestn
 					faucetReqs...,
 				)
 				if err != nil {
-					slog.Error("failed to send with faucet", "err", err)
+					slog.Error("sepolia failed to send: %v", "err", err)
 				}
 				var hashSpn ethCommon.Hash
 				select {

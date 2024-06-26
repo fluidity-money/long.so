@@ -54,9 +54,8 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 		return "", fmt.Errorf("error requesting: %v", err)
 	}
 	//HACK (TODO replace me with the config)
-	isAllowed := isFlyStaker || wallet == "0xfa77ded45d76e7e75d2502292e72ac09b898a32a"
 	// If the user is not a fly staker, kick them out if this feature is enabled.
-	if r.F.Is(features.FeatureFaucetStakersOnly) && !isAllowed {
+	if r.F.Is(features.FeatureFaucetStakersOnly) && !isFlyStaker {
 		slog.Error("non staker requested spn airdrop",
 			"ip addr", ipAddr,
 			"submitted wallet", wallet,
@@ -115,10 +114,13 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 			"err", err,
 		)
 		// We failed, so we're going to allow the user to retry by wiping out their request.
-		err = r.DB.
+		err2 := r.DB.
 			Exec("DELETE FROM faucet_requests WHERE addr = ?", wallet).
 			Error
-		return "", fmt.Errorf("error")
+		if err2 != nil {
+			slog.Error("failed to allow user ro retry", "err", err2, "original error", err)
+		}
+		return "", fmt.Errorf("error: %v", err)
 	}
 	if isContract {
 		slog.Error("requested contract recipient",
@@ -140,7 +142,7 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 	t := time.NewTimer(TimeToLive)
 	select {
 	case <-t.C:
-		slog.Error("error sending amounts.",
+		slog.Error("timed out sending amounts.",
 			"ip addr", ipAddr,
 			"time to live", TimeToLive,
 		)
@@ -152,6 +154,13 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 				"ip addr", ipAddr,
 				"err", err,
 			)
+			// We failed, so we're going to allow the user to retry by wiping out their request.
+			err2 := r.DB.
+				Exec("DELETE FROM faucet_requests WHERE addr = ?", wallet).
+				Error
+			if err2 != nil {
+				slog.Error("failed to allow user ro retry", "err", err2, "original error", err)
+			}
 			return "", fmt.Errorf("error sending: %v", err)
 		}
 	}
