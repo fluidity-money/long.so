@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log/slog"
 	"time"
+	"strings"
 
 	"github.com/fluidity-money/long.so/lib/features"
 
@@ -19,7 +20,8 @@ import (
 const TimeToLive = 10 * time.Second
 
 // RequestTokens is the resolver for the requestTokens field.
-func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (string, error) {
+func (r *mutationResolver) RequestTokens(ctx context.Context, wallet_ string) (string, error) {
+	wallet := strings.ToLower(wallet_)
 	// Get the user's IP address to prevent them from spamming this
 	// incase our rate limiting is skipped somehow (it's good to be cautious.)
 	ipAddr, _ := ctx.Value("X-Forwarded-For").(string)
@@ -51,7 +53,6 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 		)
 		return "", fmt.Errorf("error requesting: %v", err)
 	}
-	//HACK (TODO replace me with the config)
 	// If the user is not a fly staker, kick them out if this feature is enabled.
 	if r.F.Is(features.FeatureFaucetStakersOnly) && !isFlyStaker {
 		slog.Error("non staker requested spn airdrop",
