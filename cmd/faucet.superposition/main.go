@@ -4,7 +4,6 @@ package main
 
 import (
 	"context"
-	"crypto/ecdsa"
 	_ "embed"
 	"net/http"
 	"os"
@@ -14,14 +13,9 @@ import (
 	"github.com/fluidity-money/long.so/lib/setup"
 
 	"github.com/fluidity-money/long.so/cmd/faucet.superposition/graph"
-	"github.com/fluidity-money/long.so/cmd/faucet.superposition/lib/faucet"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-
-	ethCommon "github.com/ethereum/go-ethereum/common"
-	ethCrypto "github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -77,68 +71,11 @@ func main() {
 	if err != nil {
 		setup.Exitf("database open: %v", err)
 	}
-	// Get the private key to use to make transactions to the faucet with later.
-	key_ := os.Getenv(EnvPrivateKey)
-	if key_ == "" {
-		setup.Exitf("%#v unset", EnvPrivateKey)
-	}
-	key, err := ethCrypto.HexToECDSA(key_)
-	if err != nil {
-		setup.Exitf("private key: %v", err)
-	}
-	var (
-		faucetAddrSepolia = ethCommon.HexToAddress(os.Getenv(EnvFaucetAddrSepolia))
-		faucetAddrSpn     = ethCommon.HexToAddress(os.Getenv(EnvFaucetAddrSpn))
-	)
-	senderPub, _ := key.Public().(*ecdsa.PublicKey) // Should be fine.
-	senderAddr := ethCrypto.PubkeyToAddress(*senderPub)
-	// Configure the RPCs.
-	sepoliaUrl := os.Getenv(EnvSepoliaUrl)
-	if sepoliaUrl == "" {
-		setup.Exitf("sepolia url empty. set %#v", EnvSepoliaUrl)
-	}
-	gethSepolia, err := ethclient.Dial(sepoliaUrl)
-	if err != nil {
-		setup.Exitf("geth open sepolia: %v", err)
-	}
-	defer gethSepolia.Close()
-	gethSpn, err := ethclient.Dial(config.GethUrl)
-	if err != nil {
-		setup.Exitf("geth open spn: %v", err)
-	}
-	defer gethSpn.Close()
-	defer gethSepolia.Close()
-	// Get the chain id for sending out requests to the faucet.
-	chainIdSepolia, err := gethSepolia.ChainID(context.Background())
-	if err != nil {
-		setup.Exitf("chain id seoplia: %v", err)
-	}
-	chainIdSpn, err := gethSpn.ChainID(context.Background())
-	if err != nil {
-		setup.Exitf("chain id spn: %v", err)
-	}
-	// Start the sender in another Go routine to send batch requests
-	// out of the SPN (gas) token.
-	queue := RunSender(
-		gethSepolia,
-		gethSpn,
-		chainIdSepolia,
-		chainIdSpn,
-		key,
-		senderAddr,
-		faucetAddrSepolia,
-		faucetAddrSpn,
-		faucet.SendFaucet,
-		faucet.WaitMined,
-	)
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
 			DB:          db,
 			F:           features.Get(),
-			GethSepolia: gethSepolia,
-			GethSpn:     gethSpn,
 			C:           config,
-			Queue:       queue,
 		},
 	}))
 	// Add a custom transport so we can access the requesting IP address in a context.
