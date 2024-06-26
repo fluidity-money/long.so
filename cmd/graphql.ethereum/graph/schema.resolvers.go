@@ -179,7 +179,7 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first
 	stmt := r.DB.Table("seawater_active_positions_1").
 		Where("pool = ?", p).
 		Limit(*first).
-		Order("created_by desc")
+		Order("created_by asc")
 	if after != nil {
 		stmt = stmt.Where("pos_id > ?", *after)
 	}
@@ -231,7 +231,7 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *
 	stmt := r.DB.Table("seawater_active_positions_1").
 		Where("owner = ?", w).
 		Limit(*first).
-		Order("created_by desc")
+		Order("created_by asc")
 	if after != nil {
 		stmt = stmt.Where("pos_id < ?", *after)
 	}
@@ -726,7 +726,7 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 	stmt := r.DB.Table("seawater_active_positions_1").
 		Where("pool = ?", obj.Token).
 		Limit(*first).
-		Order("created_by desc")
+		Order("created_by asc")
 	if after != nil {
 		stmt = stmt.Where("pos_id < ?", *after)
 	}
@@ -867,7 +867,7 @@ func (r *seawaterPositionResolver) Created(ctx context.Context, obj *seawater.Po
 	var pos seawater.Position
 	err := r.DB.
 		Table("events_seawater_mintposition").
-		Select("created_by").
+		Select("created_by asc").
 		Scan(&pos).
 		Error
 	if err != nil {
@@ -1236,7 +1236,7 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 	stmt := r.DB.Table("seawater_active_positions_1").
 		Where("owner = ?", obj.Address).
 		Limit(*first).
-		Order("created_by desc")
+		Order("created_by asc")
 	if after != nil {
 		stmt = stmt.Where("pos_id > ?", *after)
 	}
