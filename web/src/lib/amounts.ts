@@ -14,6 +14,18 @@ const getTokenAmountFromFormatted = (amount: bigint, decimals: number) =>
   amount * BigInt(10 ** decimals)
 
 /**
+ * @description format a number amount to at most the given decimals
+ * without the unncessary padding from toFixed
+ * @param amount - number amount
+ * @param decimals: maximum number of decimals to display
+ * @example 1.2, 6 -> 1.2
+ * @example 1.23456789, 6 -> 1.234567
+ * @example 1.0, 6 -> 1
+ */
+const snapAmountToDecimals = (amount: number, decimals: number = 6): number =>
+  Number(amount.toFixed(decimals))
+
+/**
  * @description convert a token amount to a formatted amount string
  * @param amount - raw token amount
  * @param decimals - number of token decimals
@@ -101,6 +113,7 @@ const getTokenAmountFromRawAmountAndPrice = (token0Unscaled: bigint, tokenPrice1
 
 export {
   getFormattedStringFromTokenAmount,
+  snapAmountToDecimals,
   getTokenAmountFromFormattedString,
   getFormattedPriceFromAmount,
   getFormattedPriceFromTick,
