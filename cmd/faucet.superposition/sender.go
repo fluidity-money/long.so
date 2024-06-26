@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/ecdsa"
+	"fmt"
 	"log/slog"
 	"math/big"
 	"math/rand"
@@ -19,24 +20,20 @@ import (
 // BufferDuration to reuse to buffer requests to the faucet in.
 const BufferDuration = 4 * time.Second
 
-var (
-	// NonstakerSPNAmount to send when they request the faucet as a non-staker.
-	// = 1 SPN (1e18)
-	NonstakerSPNAmount, _ = new(big.Int).SetString("1000000000000000000", 10)
-	// StakerSPNAmount to send to FLY stakers.
-	// = 5 SPN (5e18)
-	StakerSPNAmount, _ = new(big.Int).SetString("5000000000000000000", 10)
-)
-
 type SendFaucetFunc func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...faucet.FaucetReq) (hash *ethCommon.Hash, err error)
 
 // RunSender, by creating a repeating timer of 5 seconds for the cache window, accumulating requests, then sending out tokens requested on demand. Takes the private key for the sender
-func RunSender(c *ethclient.Client, chainId *big.Int, key *ecdsa.PrivateKey, senderAddr, faucetAddr ethCommon.Address, sendTokens SendFaucetFunc) chan<- graph.FaucetReq {
+func RunSender(cSepolia, cSpn *ethclient.Client, chainIdSepolia, chainIdSpnTestnet *big.Int, key *ecdsa.PrivateKey, senderAddr, faucetAddrSepolia, faucetAddrSpnTestnet ethCommon.Address, sendTokens SendFaucetFunc) chan<- graph.FaucetReq {
 	reqs := make(chan graph.FaucetReq)
 	go func() {
 		t := time.NewTicker(BufferDuration + randSecs())
 		buf := make([]graph.FaucetReq, 10)
 		i := 0
+		sendErrs := func(err error) {
+			for _, b := range buf[:i] {
+				b.Resp <- err
+			}
+		}
 		for {
 			select {
 			case a := <-reqs:
@@ -54,51 +51,87 @@ func RunSender(c *ethclient.Client, chainId *big.Int, key *ecdsa.PrivateKey, sen
 				}
 				faucetReqs := make([]faucet.FaucetReq, i)
 				for x, a := range buf[:i] {
-					var amount *big.Int
-					if a.IsStaker {
-						amount = StakerSPNAmount
-					} else {
-						amount = NonstakerSPNAmount
-					}
 					faucetReqs[x] = faucet.FaucetReq{
 						Recipient: a.Addr,
-						Amount:    amount,
+						IsStaker:    a.IsStaker,
 					}
 				}
-				o, err := ethAbiBind.NewKeyedTransactorWithChainID(key, chainId)
+				// Get configuration for sending.
+				oSpn, err := ethAbiBind.NewKeyedTransactorWithChainID(key, chainIdSpnTestnet)
 				if err != nil {
 					for _, b := range buf[:i] {
 						b.Resp <- err
 					}
-					slog.Error("failed to create keyed transactor with chain id",
+					slog.Error("failed to create keyed transactor with chain id for SPN",
 						"err", err,
 					)
 					continue
 				}
+				oSepolia, err := ethAbiBind.NewKeyedTransactorWithChainID(key, chainIdSepolia)
+				if err != nil {
+					for _, b := range buf[:i] {
+						b.Resp <- err
+					}
+					slog.Error("failed to create keyed transactor with chain id for Sepolia",
+						"err", err,
+					)
+					continue
+				}
+				// Send SPN tokens using the faucet!
+				var (
+					chanSpnTestnetHash = make(chan ethCommon.Hash)
+					chanSpnTestnetErr  = make(chan error)
+				)
+				go func() {
+					hash, err := sendTokens(
+						context.Background(),
+						cSpn,
+						oSpn,
+						faucetAddrSpnTestnet,
+						senderAddr,
+						faucetReqs...,
+					)
+					if err != nil {
+						slog.Error("failed to send with spn faucet", "err", err)
+						chanSpnTestnetErr <- err
+						return
+					}
+					if hash == nil {
+						slog.Error("sending with spn faucet, empty hash ", "err", err)
+						chanSpnTestnetErr <- fmt.Errorf("empty hash")
+						return
+					}
+					chanSpnTestnetHash <- *hash
+				}()
 				// Start to send out the staked amounts, and log the hash.
-				hash, err := sendTokens(
+				hashSepolia, err := sendTokens(
 					context.Background(),
-					c,
-					o,
-					faucetAddr,
+					cSepolia,
+					oSepolia,
+					faucetAddrSepolia,
 					senderAddr,
 					faucetReqs...,
 				)
 				if err != nil {
 					slog.Error("failed to send with faucet", "err", err)
 				}
+				var hashSpn ethCommon.Hash
+				select {
+				case hash := <-chanSpnTestnetHash:
+					hashSpn = hash
+				case err := <-chanSpnTestnetErr:
+					sendErrs(err)
+				}
 				slog.Info("sent faucet amounts",
-					"hash", hash,
+					"spn hash", hashSpn,
+					"sepolia hash", hashSepolia,
 					"size", len(buf),
 					"faucet reqs", faucetReqs,
 					"err?", err,
 				)
-				// Send responses to the connected
-				// buffers, making sure to only send to
+				// Send responses to the connected buffers, making sure to only send to
 				// the ones that we set up.
-				for _, b := range buf[:i] {
-					b.Resp <- err
-				}
+				sendErrs(err) // Thisshould be sent regardless.
 				i = 0
 				t.Reset(BufferDuration + randSecs()) // So there's no time lost in the ticker.
 			}

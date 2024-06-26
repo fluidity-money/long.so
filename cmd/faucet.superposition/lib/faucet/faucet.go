@@ -2,7 +2,6 @@ package faucet
 
 import (
 	"bytes"
-	"math/big"
 	"context"
 	_ "embed"
 
@@ -20,7 +19,7 @@ var abi, _ = ethAbi.JSON(bytes.NewReader(abiBytes))
 
 type FaucetReq struct {
 	Recipient ethCommon.Address `abi:"recipient"`
-	Amount    *big.Int          `abi:"amount"`
+	IsStaker bool `abi:"isStaker"`
 }
 
 // SendFaucet to multiple addresses, allowing the contract to randomly

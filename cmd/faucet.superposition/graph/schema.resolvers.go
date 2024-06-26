@@ -106,7 +106,8 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 	}
 	// We don't want to send to contracts. Test the codesize before doing anything.
 	addr := ethCommon.HexToAddress(wallet) // We need this for the batch sending.
-	isContract, err := IsContract(r.Geth, ctx, addr)
+	// It's possible that one side will be a contract, but what's the point of being excessive on this?
+	isContract, err := IsContract(r.GethSpn, ctx, addr)
 	if err != nil {
 		slog.Error("failure to request codesize",
 			"ip addr", ipAddr,

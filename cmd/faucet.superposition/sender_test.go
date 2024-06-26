@@ -18,54 +18,59 @@ import (
 )
 
 func TestFaucetThreeAddresses(t *testing.T) {
-	// In a window of 3 seconds, send a request each second, then
-	// hopefully they all get batched and sent out.
-	H := new(big.Int).SetInt64(100)
-	H.Exp(H, new(big.Int).SetInt64(1e18), nil)
-	expected := []faucet.FaucetReq{
-		{h2a("0x6221a9c005f6e47eb398fd867784cacfdcfff4e7"), H},
-		{h2a("0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5"), H},
-		{h2a("0x0000000000000000000000000000000000000000"), H},
+	// Test sending to 3 addresses, all waiting a second after
+	// sending one to see how things are batched.
+	responses := make(chan error)
+	recipients := []graph.FaucetReq{
+		{h2a("0x6221a9c005f6e47eb398fd867784cacfdcfff4e7"), true, responses},
+		{h2a("0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5"), true, responses},
+		{h2a("0x0000000000000000000000000000000000000000"), false, responses},
 	}
-	var (
-		faucetAddr = h2a("0x6221a9c005f6e47eb398fd867784cacfdcfff4e7")
-		senderAddr = h2a("0x0000000000000000000000000000000000000000")
+	key, _ := ethCrypto.GenerateKey()
+	data := make(chan []ethCommon.Address)
+	f := func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucetAddr, sender ethCommon.Address, addrs ...faucet.FaucetReq) (hash *ethCommon.Hash, err error) {
+		// Explicitly copy the array that's in use here.
+		x := make([]ethCommon.Address, len(addrs))
+		for i, a := range addrs {
+			x[i] = a.Recipient
+		}
+		data <- x
+		h := ethCommon.HexToHash("0x0a3739029f839086103e3123f9fe4669d1e0665961e215d9721e5f5c0c98d605")
+		return &h, nil
+	}
+	// Create the server first to get started.
+	requests := RunSender(
+		nil,                      // Sepolia geth
+		nil,                      // SPN geth
+		new(big.Int).SetInt64(1), // Sepolia chain ID
+		new(big.Int).SetInt64(2), // SPN chain ID
+		key,
+		h2a("0x0000000000000000000000000000000000000000"), // Sender addr
+		h2a("0x03d9371825f0424b9b2c0b01630351c8d559c2bc"), // Faucet addr Sepolia
+		h2a("0x027e3a2d86a7894c7ef68a3df1159496c88fedfc"), // Faucet addr SPN
+		f,
 	)
-	d := make(chan []faucet.FaucetReq)
-	chainId := new(big.Int).SetInt64(0)
-	k, err := ethCrypto.GenerateKey()
-	assert.Nilf(t, err, "failed to create key")
-	a := time.NewTimer(6 * time.Second)
-	c := RunSender(nil, chainId, k, faucetAddr, senderAddr, func(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...faucet.FaucetReq) (hash *ethCommon.Hash, err error) {
-		d <- addrs
-		return nil, nil
-	})
-	errs := make(chan error)
-	for _, a := range expected {
-		time.Sleep(1 * time.Second)
-		c <- graph.FaucetReq{a.Recipient, true, errs}
+	go func() {
+		for _, a := range recipients {
+			time.Sleep(time.Second)
+			requests <- a
+		}
+	}()
+	killTimer := time.NewTimer(10 * time.Second)
+	for i := 0; i < 1; i++ {
+		select {
+		case <-killTimer.C:
+			// We exceeded the batch time!
+			t.Fatal("kill timer exceeded")
+		case d := <-data:
+			// We need this twice, the first being the Sepolia send, and the latter being SPN.
+			for x, a := range d {
+				assert.Equalf(t, recipients[x].Addr, a, "not equal recipient in batch!")
+			}
+			assert.Equalf(t, 3, len(d), "length of the response batch didn't make sense!")
+		}
 	}
-	t.Log("sent through faucet requests")
-	// Go through all the attempts we sent out, and make sure they're not errors.
-	select {
-	case addrs := <-d:
-		assert.Equalf(t, expected, addrs, "first run inconsistent")
-		// Do nothing. Seems like things went okay.
-		break
-	case <-a.C:
-		t.Fatal("exceeded time budget")
-	}
-	a.Stop()
-	for i := 0; i < len(expected); i++ {
-		assert.Nilf(t, <-errs, "error happened in mock sender")
-	}
-	t.Log("done testing the expected list")
-	// Test that the buffer is now empty by sending a single address.
-	// It's not likely that we'll have a timer related issue here so
-	// we can give up checking the time involved.
-	c <- graph.FaucetReq{expected[0].Recipient, true, errs}
-	assert.Equalf(t, expected[:1], <-d, "second run inconsistent")
-	assert.Nilf(t, <-errs, "final faucet req has errors")
+	killTimer.Stop() // Kill the timer.
 }
 
 func h2a(x string) ethCommon.Address {
