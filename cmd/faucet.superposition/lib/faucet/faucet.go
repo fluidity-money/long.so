@@ -47,8 +47,3 @@ func SendFaucet(ctx context.Context, c *ethclient.Client, o *ethAbiBind.Transact
 	}
 	return tx, nil
 }
-
-func WaitMined(ctx context.Context, c *ethclient.Client, tx *ethTypes.Transaction) error {
-	_, err := ethAbiBind.WaitMined(ctx, c, tx)
-	return err
-}
