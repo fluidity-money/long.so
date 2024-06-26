@@ -117,12 +117,14 @@ func RunSender(cSepolia, cSpn *ethclient.Client, chainIdSepolia, chainIdSpnTestn
 				}
 				if txSepolia == nil {
 					sendErrs(fmt.Errorf("sepolia transaction is empty"))
+					continue
 				}
 				if err := waitMined(ctxWait, cSepolia, txSepolia); err != nil {
 					sendErrs(fmt.Errorf(
 						"failed to wait for the mining to happen for sepolia tx hash: %v",
 						txSepolia,
 					))
+					continue
 				}
 				var txSpn *ethTypes.Transaction
 				select {
@@ -130,12 +132,18 @@ func RunSender(cSepolia, cSpn *ethclient.Client, chainIdSepolia, chainIdSpnTestn
 					txSpn = tx
 				case err := <-chanSpnTestnetErr:
 					sendErrs(err)
+					continue
+				}
+				if txSpn == nil {
+					sendErrs(fmt.Errorf("spn empty transaction"))
+					continue
 				}
 				if err := waitMined(ctxWait, cSpn, txSpn); err != nil {
 					sendErrs(fmt.Errorf(
 						"failed to wait for the mining to happen for spn tx hash: %v",
 						txSpn.Hash(),
 					))
+					continue
 				}
 				slog.Info("sent faucet amounts",
 					"spn hash", txSpn.Hash,
