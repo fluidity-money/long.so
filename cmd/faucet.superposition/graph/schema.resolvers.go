@@ -164,6 +164,9 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 			return "", fmt.Errorf("error sending: %v", err)
 		}
 	}
+	slog.Debug("sent tokens to an address okay",
+		"address", addr,
+	)
 	return "", nil
 }
 
