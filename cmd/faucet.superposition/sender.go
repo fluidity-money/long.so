@@ -115,10 +115,13 @@ func RunSender(cSepolia, cSpn *ethclient.Client, chainIdSepolia, chainIdSpnTestn
 				if err != nil {
 					slog.Error("sepolia failed to send: %v", "err", err)
 				}
+				if txSepolia == nil {
+					sendErrs(fmt.Errorf("sepolia transaction is empty"))
+				}
 				if err := waitMined(ctxWait, cSepolia, txSepolia); err != nil {
 					sendErrs(fmt.Errorf(
 						"failed to wait for the mining to happen for sepolia tx hash: %v",
-						txSepolia.Hash(),
+						txSepolia,
 					))
 				}
 				var txSpn *ethTypes.Transaction
