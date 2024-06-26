@@ -13,8 +13,6 @@ import (
 	"github.com/fluidity-money/long.so/lib/features"
 
 	"github.com/fluidity-money/long.so/cmd/faucet.superposition/lib/faucet"
-
-	ethCommon "github.com/ethereum/go-ethereum/common"
 )
 
 // TimeToLive on the request before sending a customised failure.
@@ -93,6 +91,8 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 			IpAddr:    ipAddr,
 			CreatedBy: time.Now(),
 			UpdatedBy: time.Now(),
+			WasSent:   false,
+			IsStaker:  isFlyStaker,
 		}).
 		Error
 	if err != nil {
@@ -103,70 +103,6 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 		)
 		return "", fmt.Errorf("internal error")
 	}
-	// We don't want to send to contracts. Test the codesize before doing anything.
-	addr := ethCommon.HexToAddress(wallet) // We need this for the batch sending.
-	// It's possible that one side will be a contract, but what's the point of being excessive on this?
-	isContract, err := IsContract(r.GethSpn, ctx, addr)
-	if err != nil {
-		slog.Error("failure to request codesize",
-			"ip addr", ipAddr,
-			"submitted query", wallet,
-			"err", err,
-		)
-		// We failed, so we're going to allow the user to retry by wiping out their request.
-		err2 := r.DB.
-			Exec("DELETE FROM faucet_requests WHERE addr = ?", wallet).
-			Error
-		if err2 != nil {
-			slog.Error("failed to allow user ro retry", "err", err2, "original error", err)
-		}
-		return "", fmt.Errorf("error: %v", err)
-	}
-	if isContract {
-		slog.Error("requested contract recipient",
-			"ip addr", ipAddr,
-			"submitted query", wallet,
-		)
-		return "", fmt.Errorf("no contracts")
-	}
-	// Get the local queue, assuming the concurrency on this Lambda(?) is limited.
-	resp := make(chan error)
-	r.Queue <- FaucetReq{
-		Addr:     addr,
-		IsStaker: isFlyStaker,
-		Resp:     resp,
-	}
-	// Send back to the user the status on this once we're done.
-	// Assuming the throughput on the chain is good enough. Have a
-	// time to live of 15 seconds or so.
-	t := time.NewTimer(TimeToLive)
-	select {
-	case <-t.C:
-		slog.Error("timed out sending amounts.",
-			"ip addr", ipAddr,
-			"time to live", TimeToLive,
-		)
-		return "", fmt.Errorf("timed out")
-	case err := <-resp:
-		t.Stop() // Cancel the timer so it doesn't fire needlessly.
-		if err != nil {
-			slog.Error("error sending amounts.",
-				"ip addr", ipAddr,
-				"err", err,
-			)
-			// We failed, so we're going to allow the user to retry by wiping out their request.
-			err2 := r.DB.
-				Exec("DELETE FROM faucet_requests WHERE addr = ?", wallet).
-				Error
-			if err2 != nil {
-				slog.Error("failed to allow user ro retry", "err", err2, "original error", err)
-			}
-			return "", fmt.Errorf("error sending: %v", err)
-		}
-	}
-	slog.Debug("sent tokens to an address okay",
-		"address", addr,
-	)
 	return "", nil
 }
 
