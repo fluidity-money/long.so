@@ -92,7 +92,7 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string) (st
 			CreatedBy: time.Now(),
 			UpdatedBy: time.Now(),
 			WasSent:   false,
-			IsStaker:  isFlyStaker,
+			IsFlyStaker:  isFlyStaker,
 		}).
 		Error
 	if err != nil {
