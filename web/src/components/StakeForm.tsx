@@ -218,6 +218,16 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     setQuotedToken(quotedToken)
   }
 
+  // The tick spacing will determine how granular the graph is.
+  const { data: curTickNum } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "curTick",
+    args: [token0.address],
+  });
+  const curTick = useMemo(() => ({ result: BigInt(curTickNum?.result ?? 0) }), [curTickNum]);
+
+
   useEffect(() => {
     if (!token0AmountRaw || !curTick || tickLower === undefined || tickUpper === undefined)
       return
@@ -252,6 +262,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     token1AmountRaw,
     tokenPrice,
     quotedToken,
+    curTick,
     tickUpper,
     tickLower,
   ]);
@@ -261,15 +272,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       setToken0AmountRaw(token0Balance?.value.toString() ?? token0Amount ?? "0") :
       setToken1AmountRaw(token1Balance?.value.toString() ?? token1Amount ?? "0")
   }
-
-  // The tick spacing will determine how granular the graph is.
-  const { data: curTickNum } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
-    functionName: "curTick",
-    args: [token0.address],
-  });
-  const curTick = useMemo(() => ({ result: BigInt(curTickNum?.result ?? 0) }), [curTickNum]);
 
   const [liquidityRangeType, setLiquidityRangeType] = useState<
     "full-range" | "auto" | "custom"
