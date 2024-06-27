@@ -179,7 +179,7 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first
 	stmt := r.DB.Table("seawater_active_positions_1").
 		Where("pool = ?", p).
 		Limit(*first).
-		Order("created_by asc")
+		Order("created_by desc")
 	if after != nil {
 		stmt = stmt.Where("pos_id > ?", *after)
 	}
@@ -231,7 +231,7 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *
 	stmt := r.DB.Table("seawater_active_positions_1").
 		Where("owner = ?", w).
 		Limit(*first).
-		Order("created_by asc")
+		Order("created_by desc")
 	if after != nil {
 		stmt = stmt.Where("pos_id < ?", *after)
 	}
@@ -281,7 +281,7 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 	}
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND id > ? ORDER BY id LIMIT ?",
+		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND id > ? ORDER BY timestamp DESC LIMIT ?",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		poolAddress,
@@ -313,7 +313,7 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 	}
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE sender = ? AND id > ? ORDER BY id LIMIT ?",
+		"SELECT * FROM seawater_swaps_1(?, ?) WHERE sender = ? AND id > ? ORDER BY timestamp DESC LIMIT ?",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		walletAddress,
@@ -726,7 +726,7 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 	stmt := r.DB.Table("seawater_active_positions_1").
 		Where("pool = ?", obj.Token).
 		Limit(*first).
-		Order("created_by asc")
+		Order("created_by desc")
 	if after != nil {
 		stmt = stmt.Where("pos_id < ?", *after)
 	}
@@ -836,7 +836,7 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 	}
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND id > ? ORDER BY id LIMIT ?",
+		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND id > ? ORDER BY timestamp DESC LIMIT ?",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		obj.Token,
@@ -867,7 +867,7 @@ func (r *seawaterPositionResolver) Created(ctx context.Context, obj *seawater.Po
 	var pos seawater.Position
 	err := r.DB.
 		Table("events_seawater_mintposition").
-		Select("created_by asc").
+		Select("created_by desc").
 		Scan(&pos).
 		Error
 	if err != nil {
@@ -1236,7 +1236,7 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 	stmt := r.DB.Table("seawater_active_positions_1").
 		Where("owner = ?", obj.Address).
 		Limit(*first).
-		Order("created_by asc")
+		Order("created_by desc")
 	if after != nil {
 		stmt = stmt.Where("pos_id > ?", *after)
 	}
