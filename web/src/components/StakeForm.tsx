@@ -15,7 +15,7 @@ import CurrentPrice from "@/assets/icons/legend/current-price.svg";
 import LiquidityDistribution from "@/assets/icons/legend/liquidity-distribution.svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MAX_TICK, getSqrtRatioAtTick, sqrtPriceX96ToPrice } from "@/lib/math";
+import { MAX_TICK, calculateX, calculateY, getLiquidityForAmount0, getLiquidityForAmount1, getSqrtRatioAtTick, sqrtPriceX96ToPrice } from "@/lib/math";
 import { ammAddress } from "@/lib/addresses";
 import { createChartData } from "@/lib/chartData";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
@@ -44,7 +44,7 @@ import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 import { Token as TokenType, fUSDC, getTokenFromAddress } from "@/config/tokens";
-import { getFormattedPriceFromAmount, getTokenAmountFromRawAmountAndPrice } from "@/lib/amounts";
+import { getFormattedPriceFromAmount } from "@/lib/amounts";
 
 const colorGradient = new echarts.graphic.LinearGradient(
   0,
@@ -111,6 +111,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     priceUpper,
     setPriceLower,
     setPriceUpper,
+    tickLower,
+    tickUpper,
     setTickLower,
     setTickUpper,
   } = useStakeStore();
@@ -148,10 +150,15 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const positionData_ = useFragment(PositionsFragment, userData?.getWallet)
   const positionData = positionData_?.positions.positions.find(p => p.positionId === positionId)
 
-  const { upper: upperTick, lower: lowerTick } = positionData || {
+  const { upper: upperTickPosition, lower: lowerTickPosition } = positionData || {
     upper: 0,
     lower: 0
   };
+
+  useEffect(() => {
+    setTickLower(lowerTickPosition)
+    setTickUpper(upperTickPosition)
+  }, [positionData])
 
   const showMockData = useFeatureFlag("ui show demo data");
 
@@ -212,26 +219,26 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   }
 
   useEffect(() => {
+    if (!token0AmountRaw || !curTick || tickLower === undefined || tickUpper === undefined)
+      return
+    const lower = BigInt(tickLower)
+    const upper = BigInt(tickUpper)
+
+    const cur = curTick.result
+    const sqp = getSqrtRatioAtTick(cur)
+    const sqa = getSqrtRatioAtTick(lower)
+    const sqb = getSqrtRatioAtTick(upper)
+
     if (quotedToken === 'token0') {
-      const newToken1Amount = getTokenAmountFromRawAmountAndPrice(
-        BigInt(token0AmountRaw),
-        tokenPrice,
-        BigInt(token0.decimals),
-        BigInt(token1.decimals),
-        'mul'
-      )
+      const liq = getLiquidityForAmount0(cur, upper, BigInt(token0AmountRaw))
+      const newToken1Amount = calculateY(liq, sqa, sqp)
       if (token1Balance?.value && newToken1Amount > token1Balance.value)
         return
       setToken1AmountRaw(newToken1Amount.toString())
     }
     else {
-      const newToken0Amount = getTokenAmountFromRawAmountAndPrice(
-        BigInt(token1AmountRaw),
-        tokenPrice,
-        BigInt(token0.decimals),
-        BigInt(token1.decimals),
-        'div'
-      );
+      const liq = getLiquidityForAmount1(cur, lower, BigInt(token1AmountRaw))
+      const newToken0Amount = calculateX(liq, sqb, sqp)
       if (token0Balance?.value && newToken0Amount > token0Balance.value)
         return
       setToken0AmountRaw(newToken0Amount.toString())
@@ -244,7 +251,9 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     token0AmountRaw,
     token1AmountRaw,
     tokenPrice,
-    quotedToken
+    quotedToken,
+    tickUpper,
+    tickLower,
   ]);
 
   const setMaxBalance = (token: TokenType) => {
@@ -271,8 +280,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     // set the ticks to the existing ticks of the pool
     if (mode === "existing") {
       const scale = token0.decimals - fUSDC.decimals
-      const priceLower = (1.0001 ** lowerTick * 10 ** scale).toFixed(fUSDC.decimals)
-      const priceHigher = (1.0001 ** upperTick * 10 ** scale).toFixed(fUSDC.decimals)
+      const priceLower = (1.0001 ** (tickLower ?? 0) * 10 ** scale).toFixed(fUSDC.decimals)
+      const priceHigher = (1.0001 ** (tickUpper ?? 0) * 10 ** scale).toFixed(fUSDC.decimals)
       setPriceLower(priceLower, token0.decimals)
       setPriceUpper(priceHigher, token0.decimals)
       return

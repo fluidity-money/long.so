@@ -328,6 +328,26 @@ export const getAmountsForLiquidity = (
 	}
 };
 
+export const calculateY = (liq: bigint, sqrtPriceAX96: bigint, sqrtPriceBX96: bigint) => {
+	let sqrtPrice0X96 = sqrtPriceAX96;
+	let sqrtPrice1X96 = sqrtPriceBX96;
+	if (sqrtPriceAX96 > sqrtPriceBX96) {
+		sqrtPrice0X96 = sqrtPriceBX96
+		sqrtPrice1X96 = sqrtPriceAX96
+	}
+	return liq * (sqrtPrice1X96 - sqrtPrice0X96) / Q96
+}
+export const calculateX = (liq: bigint, sqrtPriceAX96: bigint, sqrtPriceBX96: bigint) => {
+	let sqrtPrice0X96 = sqrtPriceAX96;
+	let sqrtPrice1X96 = sqrtPriceBX96;
+	if (sqrtPriceAX96 > sqrtPriceBX96) {
+		sqrtPrice0X96 = sqrtPriceBX96
+		sqrtPrice1X96 = sqrtPriceAX96
+	}
+	return liq * Q96 * (sqrtPrice1X96 - sqrtPrice0X96) / sqrtPrice0X96 / sqrtPrice1X96
+}
+
+
 const getTickAtSqrtPrice = (sqrtPriceX96: number) =>
 	Math.floor(Math.log((sqrtPriceX96 / Number(Q96)) ** 2) / Math.log(1.0001));
 

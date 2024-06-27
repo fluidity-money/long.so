@@ -100,23 +100,11 @@ const getFormattedPriceFromTick = (tick: number, decimals0: number, decimals1: n
   return formattedPrice.length > 20 ? '∞ ' : formattedPrice
 }
 
-// get the amount of token1Unscaled, given the price and amount of token0Unscaled.
-// mul sets the operation to scale up token0Unscaled by tokenPrice18 (assumes token0Unscaled is the base token)
-// div sets the operation to divide token0Unscaled by tokenPrice18 (assumes token0Unscaled is the other token)
-const getTokenAmountFromRawAmountAndPrice = (token0Unscaled: bigint, tokenPrice18: bigint, dec0: bigint, dec1: bigint, op: 'mul' | 'div'): bigint => {
-  const num = token0Unscaled * 10n ** dec0;
-  const dec = dec1 <= dec0 ? (dec0 - dec1) + dec0 : dec0;
-  return op === 'mul' ?
-    num * tokenPrice18 / 10n ** (dec + dec1) :
-    num / tokenPrice18
-}
-
 export {
   getFormattedStringFromTokenAmount,
   snapAmountToDecimals,
   getTokenAmountFromFormattedString,
   getFormattedPriceFromAmount,
   getFormattedPriceFromTick,
-  getTokenAmountFromRawAmountAndPrice,
 }
 
