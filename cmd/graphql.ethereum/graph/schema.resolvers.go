@@ -187,9 +187,15 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first
 	if err := stmt.Scan(&pos).Error; err != nil || pos == nil {
 		return positions, err
 	}
+	// If we actually got return data here, we want to set it so we
+	// can start to paginate.
+	var to int
+	if l := len(pos); l > 0 {
+		to = int(pos[l-1].CreatedBy.Unix())
+	}
 	positions = model.SeawaterPositions{
-		From:      pos[0].Id,
-		To:        pos[len(pos)-1].Id,
+		From:      *first,
+		To:        to,
 		Pool:      &p,
 		Positions: pos,
 	}
@@ -1281,9 +1287,13 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 		return positions, err
 	}
 	w := obj.Address
+	var to int
+	if l := len(pos); l > 0 {
+		to = int(pos[l-1].CreatedBy.Unix())
+	}
 	positions = model.SeawaterPositions{
-		From:      pos[0].Id,
-		To:        pos[len(pos)-1].Id,
+		From:      *first,
+		To:        to,
 		Wallet:    &w,
 		Positions: pos,
 	}
