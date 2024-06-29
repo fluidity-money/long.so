@@ -13,12 +13,12 @@ import (
 	"time"
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
-	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib"
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
 	"github.com/fluidity-money/long.so/lib/features"
 	"github.com/fluidity-money/long.so/lib/math"
 	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
+
 	"gorm.io/gorm"
 )
 
@@ -165,7 +165,7 @@ func (r *queryResolver) GetPool(ctx context.Context, token string) (pool *seawat
 func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first *int, after *int) (positions model.SeawaterPositions, err error) {
 	p := types.AddressFromString(pool)
 	if first == nil {
-		fst := 50
+		fst := PoolPositionsPageSize
 		first = &fst
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
@@ -217,7 +217,7 @@ func (r *queryResolver) GetPosition(ctx context.Context, id int) (position *seaw
 func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *int, after *int) (positions model.SeawaterPositions, err error) {
 	w := types.AddressFromString(wallet)
 	if first == nil {
-		fst := lib.PaginationBatchSize
+		fst := PoolPositionsPageSize
 		first = &fst
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
@@ -267,7 +267,7 @@ func (r *queryResolver) GetWallet(ctx context.Context, address string) (wallet *
 func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, after *int) (swaps model.SeawaterSwaps, err error) {
 	poolAddress := types.AddressFromString(pool)
 	if first == nil {
-		fst := lib.PaginationBatchSize
+		fst := SwapPositionsPageSize
 		first = &fst
 	}
 	if after == nil {
@@ -299,7 +299,7 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, first *int, after *int) (swaps model.SeawaterSwaps, err error) {
 	walletAddress := types.AddressFromString(wallet)
 	if first == nil {
-		fst := lib.PaginationBatchSize
+		fst := PoolPositionsPageSize
 		first = &fst
 	}
 	if after == nil {
@@ -712,7 +712,7 @@ func (r *seawaterPoolResolver) UtilityIncentives(ctx context.Context, obj *seawa
 // Positions is the resolver for the positions field.
 func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool, first *int, after *int) (positions model.SeawaterPositions, err error) {
 	if first == nil {
-		fst := 50
+		fst := PoolPositionsPageSize
 		first = &fst
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
@@ -822,7 +822,7 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 		return swaps, fmt.Errorf("empty pool")
 	}
 	if first == nil {
-		fst := lib.PaginationBatchSize
+		fst := SwapPositionsPageSize
 		first = &fst
 	}
 	if after == nil {
@@ -836,7 +836,7 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 	}
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND id > ? ORDER BY timestamp DESC LIMIT ?",
+		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND id > ? ORDER BY id LIMIT ?",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		obj.Token,
@@ -1222,7 +1222,7 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 		return positions, fmt.Errorf("empty wallet")
 	}
 	if first == nil {
-		fst := lib.PaginationBatchSize
+		fst := PoolPositionsPageSize
 		first = &fst
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
