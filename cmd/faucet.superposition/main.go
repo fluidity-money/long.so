@@ -71,6 +71,7 @@ func main() {
 			DB:          db,
 			F:           features.Get(),
 			C:           config,
+			TurnstileSecret: turnstileSecret,
 		},
 	}))
 	// Add a custom transport so we can access the requesting IP address in a context.
