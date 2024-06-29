@@ -836,7 +836,7 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 	}
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND id > ? ORDER BY id LIMIT ?",
+		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND id > ? ORDER BY timestamp LIMIT ?",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		obj.Token,
