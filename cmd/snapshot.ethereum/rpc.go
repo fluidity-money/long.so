@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/hex"
+	"log"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -60,7 +61,6 @@ func packRpcPosData(ammAddr string, positions map[int]seawater.Position) (req []
 			JsonRpc: "2.0",
 			Id:      encodeId(p.Pool, p.Id),
 			Method:  "eth_call",
-			// TODO make the offset
 			Params: []any{
 				map[string]string{
 					"to":   ammAddr,
@@ -74,7 +74,7 @@ func packRpcPosData(ammAddr string, positions map[int]seawater.Position) (req []
 	return
 }
 
-type HttpReqFn func(url string, contentType string, r io.Reader) (io.ReadCloser, error)
+type HttpReqFn func(url, contentType string, r io.Reader) (io.ReadCloser, error)
 
 // reqPositions by querying the RPC provider with the requested
 // positions. Returns the pool and the ID by splitting the retured ID up.
@@ -91,8 +91,9 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 	)
 	// Figure out the maximum number of goroutines that we can run to
 	// make the requests. Scaling up accordingly.
-	frames := len(reqs) % BatchLimit
+	frames := len(reqs) / BatchLimit
 	workerCount := min(frames, WorkerCount)
+	log.Printf("i'm about to run with the frames %v, and the worker count %v", frames, workerCount)
 	for i := 0; i < workerCount; i++ {
 		go func() {
 			for {
@@ -107,7 +108,6 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 						return
 					}
 					// Make the request, then unpack the data to send back.
-
 					resp, err := makeReq(url, "application/json", &buf)
 					if err != nil {
 						chanErrs <- fmt.Errorf("request: %v", err)

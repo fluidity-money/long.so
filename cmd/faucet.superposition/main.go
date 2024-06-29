@@ -27,23 +27,14 @@ import (
 )
 
 const (
-	// EnvSepoliaUrl to usea s the URL to access Sepolia.
-	EnvSepoliaUrl = "SPN_SEPOLIA_GETH_URL"
-
-	// EnvFaucetAddr to use as the address for the faucet for Sepolia.
-	EnvFaucetAddrSepolia = "SPN_SEPOLIA_FAUCET_ADDR"
-
-	// EnvFaucetAddrSpn to use as the address of the faucet for SPN testnet.
-	EnvFaucetAddrSpn = "SPN_SPN_FAUCET_ADDR"
-
-	// EnvPrivateKey is the hex-encoded private key used to call the faucet.
-	EnvPrivateKey = "SPN_PRIVATE_KEY"
-
 	// EnvBackendType to use to listen the server with, (http|lambda).
 	EnvBackendType = "SPN_LISTEN_BACKEND"
 
 	// EnvListenAddr to listen the HTTP server on.
 	EnvListenAddr = "SPN_LISTEN_ADDR"
+
+	// EnvTurnstileSecret to use to prevent spam.
+	EnvTurnstileSecret = "SPN_TURNSTILE_SECRET"
 )
 
 // XForwardedFor to load as a cache key in the context for use
@@ -63,6 +54,10 @@ func (m requestMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	defer setup.Flush()
+	turnstileSecret := os.Getenv(EnvTurnstileSecret)
+	if turnstileSecret == "" {
+		setup.Exitf("turnstile secret empty. set %v", EnvTurnstileSecret)
+	}
 	config := config.Get()
 	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
 		DisableAutomaticPing: true,

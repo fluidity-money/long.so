@@ -46,7 +46,7 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		RequestTokens func(childComplexity int, wallet string) int
+		RequestTokens func(childComplexity int, wallet string, turnstileToken string) int
 	}
 
 	Query struct {
@@ -55,7 +55,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	RequestTokens(ctx context.Context, wallet string) (string, error)
+	RequestTokens(ctx context.Context, wallet string, turnstileToken string) (string, error)
 }
 type QueryResolver interface {
 	Healthcheck(ctx context.Context) (int, error)
@@ -90,7 +90,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RequestTokens(childComplexity, args["wallet"].(string)), true
+		return e.complexity.Mutation.RequestTokens(childComplexity, args["wallet"].(string), args["turnstileToken"].(string)), true
 
 	case "Query.healthcheck":
 		if e.complexity.Query.Healthcheck == nil {
@@ -210,7 +210,17 @@ type Mutation {
   collected with X-Forwarded-For and tracked in the database. Sends SPN token at the
   expense of the faucet.
   """
-  requestTokens(wallet: String!): String!
+  requestTokens(
+    """
+    Wallet address to use to request the tokens for.
+    """
+    wallet: String!,
+
+    """
+    Cloudflare token to request from the faucet with.
+    """
+    turnstileToken: String!
+  ): String!
 }
 
 type Query {
@@ -239,6 +249,15 @@ func (ec *executionContext) field_Mutation_requestTokens_args(ctx context.Contex
 		}
 	}
 	args["wallet"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["turnstileToken"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("turnstileToken"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["turnstileToken"] = arg1
 	return args, nil
 }
 
@@ -309,7 +328,7 @@ func (ec *executionContext) _Mutation_requestTokens(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RequestTokens(rctx, fc.Args["wallet"].(string))
+		return ec.resolvers.Mutation().RequestTokens(rctx, fc.Args["wallet"].(string), fc.Args["turnstileToken"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
