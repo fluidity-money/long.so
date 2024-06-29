@@ -51,7 +51,7 @@ const Item: React.FC<ItemProps> = ({
         "group rounded-md",
         proToggle &&
           `h-[43px] px-2 transition-[width] ${swapPro ? "md:w-[125px] md:hover:w-[147px]" : "md:w-[97px] md:hover:w-[122px]"}`,
-        !selected && "cursor-pointer",
+        selected ? "cursor-default" : "cursor-pointer",
         className,
       )}
       whileTap={{
@@ -85,7 +85,7 @@ const Item: React.FC<ItemProps> = ({
           "flex h-full flex-row items-center justify-center gap-2 text-base font-medium",
           {
             "iridescent-text": variant === "iridescent" && !selected,
-            "text-black": variant === "iridescent" && selected,
+            "text-black": variant === "iridescent" && selected
           },
         )}
       >
