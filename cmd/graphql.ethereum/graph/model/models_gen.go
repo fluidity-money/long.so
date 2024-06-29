@@ -2,6 +2,16 @@
 
 package model
 
+// Get swaps for a specific pool, set up to be more granular for caching.
+type GetSwaps struct {
+	Data SeawaterSwaps `json:"data"`
+}
+
+// Get swaps for user return type, set up to allow better control of caching.
+type GetSwapsForUser struct {
+	Data SeawaterSwaps `json:"data"`
+}
+
 // Liquidity over time available in the pool, in the form of PairAmount, so it's possible to
 // know which side is how much. More expensive to compute so it's preferable to use
 // TvlOverTime if possible, where the USD calculation is done already.

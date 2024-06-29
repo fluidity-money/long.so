@@ -18,7 +18,6 @@ import (
 	"github.com/fluidity-money/long.so/lib/math"
 	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
-
 	"gorm.io/gorm"
 )
 
@@ -164,7 +163,8 @@ func (r *queryResolver) GetPool(ctx context.Context, token string) (pool *seawat
 // GetPoolPositions is the resolver for the getPoolPositions field.
 func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first *int, after *int) (positions model.SeawaterPositions, err error) {
 	p := types.AddressFromString(pool)
-	if first == nil {
+	// If the user didn't set pagination, or they exceeded the restriction on the limit.
+	if first == nil || *first > PoolPositionsPageSize {
 		fst := PoolPositionsPageSize
 		first = &fst
 	}
@@ -216,7 +216,8 @@ func (r *queryResolver) GetPosition(ctx context.Context, id int) (position *seaw
 // GetPositions is the resolver for the getPositions field.
 func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *int, after *int) (positions model.SeawaterPositions, err error) {
 	w := types.AddressFromString(wallet)
-	if first == nil {
+	// If the user didn't set the limit, or they requested too much.
+	if first == nil || *first >PoolPositionsPageSize {
 		fst := PoolPositionsPageSize
 		first = &fst
 	}
@@ -264,9 +265,10 @@ func (r *queryResolver) GetWallet(ctx context.Context, address string) (wallet *
 }
 
 // GetSwaps is the resolver for the getSwaps field.
-func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, after *int) (swaps model.SeawaterSwaps, err error) {
+func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, after *int) (swaps model.GetSwaps, err error) {
 	poolAddress := types.AddressFromString(pool)
-	if first == nil {
+	// If there was no first supplied, or they went past the limit on pages.
+	if first == nil || *first > SwapPositionsPageSize {
 		fst := SwapPositionsPageSize
 		first = &fst
 	}
@@ -276,12 +278,13 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
-		swaps = MockSwaps(r.C.FusdcAddr, 150, "0x65dfe41220c438bf069bbce9eb66b087fe65db36")
-		return
+		d := MockSwaps(r.C.FusdcAddr, 150, "0x65dfe41220c438bf069bbce9eb66b087fe65db36")
+		return model.GetSwaps{d}, nil
 	}
+	var d []model.SeawaterSwap
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND id > ? ORDER BY timestamp DESC LIMIT ?",
+		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND timestamp > ? ORDER BY timestamp DESC LIMIT ?",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		poolAddress,
@@ -289,16 +292,31 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 		*after,
 		*first,
 	).
-		Scan(&swaps.Swaps).
+		Scan(&d).
 		Error
-	swaps.Pool = &poolAddress
+	if err != nil {
+		return
+	}
+	// If we actually got return data here, we want to set it so we
+	// can start to paginate.
+	var to int
+	if l := len(d); l > 0 {
+		to = d[l-1].Timestamp
+	}
+	swaps.Data = model.SeawaterSwaps{
+		From:  *first,
+		To:    to,
+		Pool:  &poolAddress,
+		Swaps: d,
+	}
 	return
 }
 
 // GetSwapsForUser is the resolver for the getSwapsForUser field.
-func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, first *int, after *int) (swaps model.SeawaterSwaps, err error) {
+func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, first *int, after *int) (swaps model.GetSwapsForUser, err error) {
 	walletAddress := types.AddressFromString(wallet)
-	if first == nil {
+	// If the user requested too large a limit, or they didn't supply anything.
+	if first == nil || *first > PoolPositionsPageSize {
 		fst := PoolPositionsPageSize
 		first = &fst
 	}
@@ -308,9 +326,10 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
-		swaps = MockSwaps(r.C.FusdcAddr, 150, walletAddress)
-		return
+		d := MockSwaps(r.C.FusdcAddr, 150, walletAddress)
+		return model.GetSwapsForUser{d}, nil
 	}
+	var d []model.SeawaterSwap
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
 		"SELECT * FROM seawater_swaps_1(?, ?) WHERE sender = ? AND id > ? ORDER BY timestamp DESC LIMIT ?",
@@ -320,9 +339,23 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 		*after,
 		*first,
 	).
-		Scan(&swaps.Swaps).
+		Scan(&d).
 		Error
-	swaps.Wallet = &walletAddress
+	if err != nil {
+		return
+	}
+	// If we actually got return data here, we want to set it so we
+	// can start to paginate.
+	var to int
+	if l := len(d); l > 0 {
+		to = d[l-1].Timestamp
+	}
+	swaps.Data = model.SeawaterSwaps{
+		From:   *first,
+		To:     to,
+		Wallet: &walletAddress,
+		Swaps:  d,
+	}
 	return
 }
 
@@ -711,7 +744,8 @@ func (r *seawaterPoolResolver) UtilityIncentives(ctx context.Context, obj *seawa
 
 // Positions is the resolver for the positions field.
 func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool, first *int, after *int) (positions model.SeawaterPositions, err error) {
-	if first == nil {
+	// If the user requested too large a limit, or they didn't supply a page size.
+	if first == nil || *first > PoolPositionsPageSize {
 		fst := PoolPositionsPageSize
 		first = &fst
 	}
@@ -821,7 +855,8 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 	if obj == nil {
 		return swaps, fmt.Errorf("empty pool")
 	}
-	if first == nil {
+	// If the user requested a nil limit, or they're too big.
+	if first == nil || *first > SwapPositionsPageSize {
 		fst := SwapPositionsPageSize
 		first = &fst
 	}
@@ -836,7 +871,7 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 	}
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND id > ? ORDER BY timestamp LIMIT ?",
+		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND timestamp > ? ORDER BY timestamp DESC LIMIT ?",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		obj.Token,
@@ -1221,7 +1256,8 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 	if obj == nil {
 		return positions, fmt.Errorf("empty wallet")
 	}
-	if first == nil {
+	// Prevent nil firsts, or past the limit.
+	if first == nil || *first > PoolPositionsPageSize {
 		fst := PoolPositionsPageSize
 		first = &fst
 	}

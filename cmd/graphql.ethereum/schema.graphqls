@@ -97,7 +97,7 @@ type Query {
     Where to start after based on the position id.
     """
     after: Int
-  ): SeawaterSwaps!
+  ): GetSwaps!
 
   """
   getSwapsForUser by the user across every pool we track.
@@ -115,7 +115,7 @@ type Query {
     Where to start after based on the position id.
     """
     after: Int
-  ): SeawaterSwaps!
+  ): GetSwapsForUser!
 }
 
 """
@@ -219,6 +219,20 @@ type SeawaterPool {
   Swaps that were made using this pool.
   """
   swaps(first: Int, after: Int): SeawaterSwaps!
+}
+
+"""
+Get swaps for user return type, set up to allow better control of caching.
+"""
+type GetSwapsForUser {
+  data: SeawaterSwaps!
+}
+
+"""
+Get swaps for a specific pool, set up to be more granular for caching.
+"""
+type GetSwaps {
+  data: SeawaterSwaps!
 }
 
 """
