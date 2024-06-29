@@ -68,9 +68,9 @@ func main() {
 	}
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
-			DB:          db,
-			F:           features.Get(),
-			C:           config,
+			DB:              db,
+			F:               features.Get(),
+			C:               config,
 			TurnstileSecret: turnstileSecret,
 		},
 	}))
