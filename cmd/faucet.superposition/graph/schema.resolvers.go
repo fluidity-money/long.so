@@ -20,7 +20,15 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet_ string, tu
 	wallet := strings.ToLower(wallet_)
 	// Get the user's IP address to prevent them from spamming this
 	// incase our rate limiting is skipped somehow (it's good to be cautious.)
-	ipAddr, _ := ctx.Value("X-Forwarded-For").(string)
+	ipAddrs, _ := ctx.Value("X-Forwarded-For").(string)
+	ipAddrsSplit := strings.Split(ipAddrs, ",")
+	if len(ipAddrsSplit) == 0 {
+		slog.Error("something is wrong with the middleware, refusing this request",
+			"wallet", wallet,
+		)
+		return "", fmt.Errorf("internal error")
+	}
+	ipAddr := ipAddrsSplit[0]
 	// First, verify the user's request via Cloudflare.
 	verifiedTurnstile, err := VerifyTurnstile(r.TurnstileSecret, turnstileToken)
 	if err != nil {
