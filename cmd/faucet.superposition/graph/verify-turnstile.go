@@ -15,8 +15,8 @@ const SiteVerifyUrl = "https://challenges.cloudflare.com/turnstile/v0/siteverify
 // if it happens, and false if we can't verify them upstream.
 func VerifyTurnstile(secret, key string) (bool, error) {
 	resp, err := http.PostForm(SiteVerifyUrl, url.Values{
-		"secret": {secret},
-		"key":    {key},
+		"secret":   {secret},
+		"response": {key},
 	})
 	if err != nil {
 		return false, err
