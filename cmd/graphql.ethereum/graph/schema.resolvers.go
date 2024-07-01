@@ -893,11 +893,10 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 
 // ID is the resolver for the id field.
 func (r *seawaterPositionResolver) ID(ctx context.Context, obj *seawater.Position) (string, error) {
-	s, err := r.PositionID(ctx, obj)
-	if err != nil {
-		return "", err
+	if obj == nil {
+		return "", fmt.Errorf("empty position")
 	}
-	return "pos:" + strconv.Itoa(s), nil
+	return fmt.Sprintf("pos:%v:%v", obj.Pool, obj.Id), nil
 }
 
 // Created is the resolver for the created field.
