@@ -331,14 +331,10 @@ export type SeawaterSwap = {
 export type SeawaterSwaps = {
   __typename?: 'SeawaterSwaps';
   next: SeawaterSwaps;
-  /** The pool associated with this query, if any. */
-  pool?: Maybe<SeawaterPool>;
   /** The sum of these value in these swaps per unique pool, if possible to collect. */
   sum?: Maybe<Array<PairAmount>>;
   /** The swaps that was returned in this page. */
   swaps: Array<SeawaterSwap>;
-  /** The wallet associated with this query, if any. */
-  wallet?: Maybe<Wallet>;
 };
 
 

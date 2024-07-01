@@ -1127,26 +1127,6 @@ func (r *seawaterSwapResolver) AmountOut(ctx context.Context, obj *model.Seawate
 	}, nil
 }
 
-// Pool is the resolver for the pool field.
-func (r *seawaterSwapsResolver) Pool(ctx context.Context, obj *model.SeawaterSwaps) (*seawater.Pool, error) {
-	if obj == nil {
-		return nil, fmt.Errorf("empty pool")
-	}
-	if obj.Pool == nil {
-		return nil, nil
-	}
-	pool, err := r.Query().GetPool(ctx, obj.Pool.String())
-	if err != nil {
-		return nil, err
-	}
-	return pool, nil
-}
-
-// Wallet is the resolver for the wallet field.
-func (r *seawaterSwapsResolver) Wallet(ctx context.Context, obj *model.SeawaterSwaps) (*model.Wallet, error) {
-	panic(fmt.Errorf("not implemented: Wallet - wallet"))
-}
-
 // Sum is the resolver for the sum field.
 func (r *seawaterSwapsResolver) Sum(ctx context.Context, obj *model.SeawaterSwaps) (amounts []model.PairAmount, err error) {
 	if obj == nil {

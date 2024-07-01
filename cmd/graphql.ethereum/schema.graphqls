@@ -241,16 +241,6 @@ came from, where it's at with pagination with the position ids.
 """
 type SeawaterSwaps {
   """
-  The pool associated with this query, if any.
-  """
-  pool: SeawaterPool
-
-  """
-  The wallet associated with this query, if any.
-  """
-  wallet: Wallet
-
-  """
   The sum of these value in these swaps per unique pool, if possible to collect.
   """
   sum: [PairAmount!]
