@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/hex"
-	"log"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"math/big"
 	"strconv"
 	"strings"
@@ -92,7 +92,7 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 	// Figure out the maximum number of goroutines that we can run to
 	// make the requests. Scaling up accordingly.
 	frames := len(reqs) / BatchLimit
-	workerCount := min(frames, WorkerCount)
+	workerCount := max(frames, WorkerCount)
 	log.Printf("i'm about to run with the frames %v, and the worker count %v", frames, workerCount)
 	for i := 0; i < workerCount; i++ {
 		go func() {

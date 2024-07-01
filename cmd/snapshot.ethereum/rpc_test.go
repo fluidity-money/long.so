@@ -90,7 +90,7 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 		id := encodeId(p.Pool, p.Id)
 		pool, posId, ok := decodeId(id)
 		assert.Equalf(t, p.Pool, pool, "pool not decoded")
-		assert.Equalf(t, &p.Id, posId, "id not decoded")
+		assert.Equalf(t, p.Id, posId, "id not decoded")
 		assert.Truef(t, ok, "decode id function not working")
 		positions[p.Id] = p
 	}
