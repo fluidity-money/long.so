@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/ethereum/go-ethereum v1.14.5
-	github.com/getsentry/sentry-go v0.22.0
+	github.com/getsentry/sentry-go v0.28.1
 	github.com/lib/pq v1.10.9
 	github.com/orandin/slog-gorm v1.3.2
 	github.com/samber/slog-sentry/v2 v2.5.0
