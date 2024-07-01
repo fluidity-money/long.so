@@ -31,8 +31,8 @@ func TestGetSlot(t *testing.T) {
 
 func TestReqPositionsErr(t *testing.T) {
 	// Test that we're handling errors correctly.
-	d := packRpcPosData("", map[int]seawater.Position{
-		0: {},
+	d := packRpcPosData("", map[string]seawater.Position{
+		"": {},
 	})
 	ctx := context.TODO()
 	_, err := reqPositions(ctx, "", d, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
@@ -54,8 +54,8 @@ func TestReqPositionsSinglePosition(t *testing.T) {
 		Id:   10,
 		Pool: types.AddressFromString("0xe984f758f362d255bd96601929970cef9ff19dd7"),
 	}
-	d := packRpcPosData("", map[int]seawater.Position{0: p})
 	id := encodeId(p.Pool, p.Id)
+	d := packRpcPosData("", map[string]seawater.Position{id: p})
 	pool, posId, ok := decodeId(id)
 	assert.Equalf(t, p.Pool, pool, "pool not decoded")
 	assert.Equalf(t, p.Id, posId, "id not decoded")
@@ -71,8 +71,7 @@ func TestReqPositionsSinglePosition(t *testing.T) {
 	})
 	assert.Nilf(t, err, "req positions errored")
 	expected := []posResp{{
-		Pool:  p.Pool,
-		Pos:   p.Id,
+		Key: id,
 		Delta: types.NumberFromInt64(152841813),
 	}}
 	assert.Equal(t, expected, r)
@@ -81,7 +80,7 @@ func TestReqPositionsSinglePosition(t *testing.T) {
 func TestReqPositionsHundredThousandPositions(t *testing.T) {
 	// Test if the request function can handle a single position.
 	ctx := context.TODO()
-	positions := make(map[int]seawater.Position, 100_000)
+	positions := make(map[string]seawater.Position, 100_000)
 	for i := 0; i < 100_000; i++ {
 		p := seawater.Position{ // Only these fields are used.
 			Id:   i,
@@ -92,7 +91,7 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 		assert.Equalf(t, p.Pool, pool, "pool not decoded")
 		assert.Equalf(t, p.Id, posId, "id not decoded")
 		assert.Truef(t, ok, "decode id function not working")
-		positions[p.Id] = p
+		positions[id] = p
 	}
 	d := packRpcPosData("", positions)
 	resps := make(map[int]rpcResp, 100_000)
@@ -121,12 +120,9 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 	})
 	expectedDelta := new(big.Int).SetInt64(152841813)
 	for _, r := range posResps {
-		p, ok := positions[r.Pos]
+		_, ok := positions[r.Key]
 		if !ok {
-			t.Fatalf("bad id number: %v", r.Pos)
-		}
-		if p.Pool != r.Pool {
-			t.Fatalf("bad pool: %v", r.Pool)
+			t.Fatalf("bad id key: %v", r.Key)
 		}
 		if r.Delta.Big().Cmp(expectedDelta) != 0 {
 			t.Fatalf("bad delta; %v", r.Delta)
@@ -138,13 +134,13 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 func TestReqPositionsHundredThousandErrors(t *testing.T) {
 	// Test if the request function can handle a single position.
 	ctx := context.TODO()
-	positions := make(map[int]seawater.Position, 100_000)
+	positions := make(map[string]seawater.Position, 100_000)
 	for i := 0; i < 100_000; i++ {
 		p := seawater.Position{ // Only these fields are used.
 			Id:   i,
 			Pool: types.AddressFromString("0xe984f758f362d255bd96601929970cef9ff19dd7"),
 		}
-		positions[i] = p
+		positions[encodeId(p.Pool, p.Id)] = p
 	}
 	d := packRpcPosData("", positions)
 	resps := make(map[int]rpcResp, 100_000)

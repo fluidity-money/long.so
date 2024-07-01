@@ -67,15 +67,14 @@ func main() {
 			curPrice:  math.GetSqrtRatioAtTick(p.FinalTick.Big()),
 		}
 	}
-	// Store the positions in a map so we can reconcile the results together easier.
-	positionMap := make(map[int]seawater.Position, len(positions))
+	// Store the positions in a map so we can reconcile the results
+	// together easier. The key is a concatenation of the pool, and the
+	// position id.
+	positionMap := make(map[string]seawater.Position, len(positions))
 	for _, p := range positions {
-		positionMap[p.Id] = p
+		positionMap[encodeId(p.Pool, p.Id)] = p
 	}
-	// Make a separate RPC lookup for the current price of each pool.
-	// Pack the RPC data to be batched using storage slot lookups.
 	d := packRpcPosData(config.SeawaterAddr.String(), positionMap)
-	slog.Debug("packed rpc data", "data", d)
 	// Request from the RPC the batched lookup of this data.
 	// Makes multiple requests if the request size exceeds the current restriction.
 	resps, err := reqPositions(context.Background(), config.GethUrl, d, httpPost)
@@ -83,19 +82,20 @@ func main() {
 		setup.Exitf("positions request: %v", err)
 	}
 	var (
+		pools = make([]string, len(positions))
 		ids      = make([]int, len(positions))
 		amount0s = make([]string, len(positions))
 		amount1s = make([]string, len(positions))
 	)
 	for i, r := range resps {
-		poolAddr := r.Pool.String()
-		pos, ok := positionMap[r.Pos]
+		pos, ok := positionMap[r.Key]
 		if !ok {
 			slog.Info("position doesn't have any liquidity",
-				"position id", r.Pos,
+				"position id", pos.Id,
 			)
 			continue
 		}
+		poolAddr := pos.Pool.String()
 		var (
 			lowerPrice = math.GetSqrtRatioAtTick(pos.Lower.Big())
 			upperPrice = math.GetSqrtRatioAtTick(pos.Upper.Big())
@@ -111,8 +111,8 @@ func main() {
 			amount1 = mulRatToInt(amount1Rat, int(poolMap[poolAddr].Decimals))
 		)
 		slog.Debug("price data",
-			"pool", r.Pool,
-			"id", r.Pos,
+			"pool", poolAddr,
+			"id", pos.Id,
 			"amount0", amount0Rat.FloatString(10),
 			"amount1", amount1Rat.FloatString(10),
 			"amount0", amount0.String(),
@@ -121,7 +121,8 @@ func main() {
 			"lower", lowerPrice,
 			"upper", upperPrice,
 		)
-		ids[i] = r.Pos
+		pools[i] = poolAddr
+		ids[i] = pos.Id
 		amount0s[i] = amount0.String()
 		amount1s[i] = amount1.String()
 	}
@@ -129,7 +130,7 @@ func main() {
 		slog.Info("no positions found")
 		return
 	}
-	if err := storePositions(db, ids, amount0s, amount1s); err != nil {
+	if err := storePositions(db, pools, ids, amount0s, amount1s); err != nil {
 		setup.Exitf("store positions: %v", err)
 	}
 }

@@ -42,8 +42,7 @@ type (
 	// posResp that's also given to gorm to be used with a custom
 	// function that does a left join during insertion.
 	posResp struct {
-		Pool  types.Address
-		Pos   int
+		Key string
 		Delta types.Number
 	}
 )
@@ -51,14 +50,14 @@ type (
 // packRpcPosData by concatenating the pool address with the position id, so
 // we can quickly unpack it later. Assumes poolAddr, and ammAddr, are
 // correctly formatted (0x[A-Za-z0-9]{40}).
-func packRpcPosData(ammAddr string, positions map[int]seawater.Position) (req []rpcReq) {
+func packRpcPosData(ammAddr string, positions map[string]seawater.Position) (req []rpcReq) {
 	req = make([]rpcReq, len(positions))
 	i := 0
-	for _, p := range positions {
+	for k, p := range positions {
 		s := getCalldata(p.Pool, p.Id)
 		req[i] = rpcReq{
 			JsonRpc: "2.0",
-			Id:      encodeId(p.Pool, p.Id),
+			Id:      k,
 			Method:  "eth_call",
 			Params: []any{
 				map[string]string{
@@ -126,22 +125,12 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 							chanErrs <- fmt.Errorf("error reported: %v", err)
 							return
 						}
-						// Decode the response data, and decode the ID.
-						pool, position, ok := decodeId(p.Id)
-						if !ok {
-							chanErrs <- fmt.Errorf("unpacking id: %#v", p.Id)
-							return
-						}
 						delta, err := types.NumberFromHex(strings.TrimPrefix(p.Result, "0x"))
 						if err != nil {
 							chanErrs <- fmt.Errorf("unpacking delta: %#v: %v", p, err)
 							return
 						}
-						r := posResp{
-							pool,
-							position,
-							*delta,
-						}
+						r := posResp{p.Id, *delta}
 						select {
 						case <-chanDone:
 							return // Hopefully this will prevent us from going through the rest.
@@ -169,19 +158,20 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 			select {
 			case <-chanDone:
 				return // We're done!
-			case chanReqs <- b:
+			case chanReqs <- c:
 			}
 			x = 0
 		}
 		if x > 0 {
 			c := make([]rpcReq, x)
+			// Copy the array so we don't have duplication.
 			for i := 0; i < x; i++ {
 				c[i] = b[i]
 			}
 			select {
 			case <-chanDone:
 				return // We're done!
-			case chanReqs <- b:
+			case chanReqs <- c:
 			}
 
 		}
