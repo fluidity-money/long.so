@@ -223,6 +223,7 @@ export const ConfirmSwap = () => {
           resetApproval();
           resetSwap();
           swapResult.refetch();
+          router.push("/");
         }}
         transactionHash={swapData}
       />
@@ -239,7 +240,7 @@ export const ConfirmSwap = () => {
           resetApproval();
           resetSwap();
           swapResult.refetch();
-          router.back();
+          router.push("/");
         }}
       />
     );
