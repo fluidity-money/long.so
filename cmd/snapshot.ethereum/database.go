@@ -20,7 +20,6 @@ func storePositions(db *gorm.DB, pools []string, ids []int, amount0s, amount1s [
 	}
 	var bu strings.Builder
 	for i, addr := range pools {
-		fmt.Fprintf(&bu, `'%s'`, addr)
 		if i != len(pools)-1 {
 			bu.WriteRune(',')
 		}
