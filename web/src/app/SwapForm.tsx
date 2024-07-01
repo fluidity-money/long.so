@@ -265,7 +265,7 @@ export const SwapForm = () => {
       ) || [];
 
     return [BigInt(quoteAmountString ?? 0), quoteIsLoading];
-  }, [isSwap1, quote1Error, quote1IsLoading, quote2Error, quote2IsLoading]);
+  }, [token0, token1, isSwap1, quote1Error, quote1IsLoading, quote2Error, quote2IsLoading]);
 
   // update the token1 amount when the quote amount changes
   useEffect(() => {
