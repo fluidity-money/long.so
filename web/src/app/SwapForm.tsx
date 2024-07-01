@@ -578,14 +578,14 @@ export const SwapForm = () => {
             <RewardsBreakdown hidden={breakdownHidden} />
             {address ? (
               <Button
-                className={"mt-[20px] hidden h-[53.92px] w-full md:inline-flex"}
+                className={"mt-[20px] hidden h-[53.92px] w-full inline-flex"}
                 onClick={() => onSubmit()}
               >
                 Swap
               </Button>
             ) : (
               <Button
-                className={"mt-[20px] hidden h-[53.92px] w-full md:inline-flex"}
+                className={"mt-[20px] hidden h-[53.92px] w-full inline-flex"}
                 onClick={() => open()}
               >
                 Connect Wallet
