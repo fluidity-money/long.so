@@ -593,14 +593,14 @@ export const SwapForm = () => {
             <RewardsBreakdown hidden={breakdownHidden} />
             {address ? (
               <Button
-                className={cn("mt-[20px] hidden h-[53.92px] w-full inline-flex", token1AmountFloat === 0 && !allowZeroSwap && "opacity-50")}
+                className={cn("mt-[20px] h-[53.92px] w-full inline-flex", token1AmountFloat === 0 && !allowZeroSwap && "opacity-50")}
                 onClick={() => onSubmit()}
               >
                 Swap
               </Button>
             ) : (
               <Button
-                className={"mt-[20px] hidden h-[53.92px] w-full inline-flex"}
+                className={"mt-[20px] h-[53.92px] w-full inline-flex"}
                 onClick={() => open()}
               >
                 Connect Wallet
