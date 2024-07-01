@@ -79,12 +79,12 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 		switch obj.Token {
 		case r.C.FusdcAddr:
 			// 4 decimals
-			return fmt.Sprintf("%0.4f", dividedAmt), nil
+			return fmt.Sprintf("%0.8f", dividedAmt), nil
 		default:
 			//value / (10 ** decimals) * 0.04
 			x := new(big.Float).Set(dividedAmt)
 			x.Quo(dividedAmt, new(big.Float).SetFloat64(0.04))
-			return fmt.Sprintf("%0.4f", x), nil
+			return fmt.Sprintf("%0.8f", x), nil
 		}
 	}
 	if obj.ValueUnscaled.Cmp(types.EmptyUnscaledNumber().Int) == 0 {

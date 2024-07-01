@@ -24,7 +24,7 @@ func (obj *Amount) UsdValue(price string, fusdcAddr types.Address) (string, erro
 	switch obj.Token {
 	case fusdcAddr:
 		// 4 decimals
-		return fmt.Sprintf("%0.4f", dividedAmt), nil
+		return fmt.Sprintf("%0.8f", dividedAmt), nil
 	default:
 		//value / (10 ** decimals) * price
 		x := new(big.Float).Set(dividedAmt)
@@ -39,6 +39,6 @@ func (obj *Amount) UsdValue(price string, fusdcAddr types.Address) (string, erro
 			return "0", nil
 		}
 		x.Quo(dividedAmt, priceFloat)
-		return fmt.Sprintf("%0.4f", x), nil
+		return fmt.Sprintf("%0.8f", x), nil
 	}
 }

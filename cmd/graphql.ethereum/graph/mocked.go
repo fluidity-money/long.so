@@ -210,8 +210,8 @@ func MockPriceOverTime(period int, fusdc, token types.Address) (history []string
 		history[i] = fmt.Sprintf("%0.04f", price)
 	}
 	avg.Sub(avg, new(big.Float).SetInt64(int64(period)))
-	average = fmt.Sprintf("%0.4f", avg)
-	max = fmt.Sprintf("%0.4f", max_)
+	average = fmt.Sprintf("%0.8f", avg)
+	max = fmt.Sprintf("%0.8f", max_)
 	return
 }
 
