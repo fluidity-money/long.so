@@ -273,16 +273,6 @@ Pagination-friendly way of viewing the current state of the positions available 
 """
 type SeawaterPositions {
   """
-  The specific pool (if any) that's responsible for the responses here.
-  """
-  pool: SeawaterPool
-
-  """
-  The specific wallet (if any) that's associated with the positions here.
-  """
-  wallet: Wallet
-
-  """
   The positions associated with this data.
   """
   positions: [SeawaterPosition!]!

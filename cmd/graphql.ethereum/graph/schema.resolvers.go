@@ -223,7 +223,7 @@ func (r *queryResolver) GetPosition(ctx context.Context, id int) (position *seaw
 func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *int, after *int) (positions model.SeawaterPositions, err error) {
 	w := types.AddressFromString(wallet)
 	// If the user didn't set the limit, or they requested too much.
-	if first == nil || *first >PoolPositionsPageSize {
+	if first == nil || *first > PoolPositionsPageSize {
 		fst := PoolPositionsPageSize
 		first = &fst
 	}
@@ -1020,36 +1020,6 @@ func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *seawater.
 			ValueUnscaled: res.Amount0,
 		},
 	}, nil
-}
-
-// Pool is the resolver for the pool field.
-func (r *seawaterPositionsResolver) Pool(ctx context.Context, obj *model.SeawaterPositions) (*seawater.Pool, error) {
-	if obj == nil {
-		return nil, fmt.Errorf("empty positions")
-	}
-	if obj.Pool == nil {
-		return nil, nil
-	}
-	pool, err := r.Query().GetPool(ctx, obj.Pool.String())
-	if err != nil {
-		return nil, err
-	}
-	return pool, nil
-}
-
-// Wallet is the resolver for the wallet field.
-func (r *seawaterPositionsResolver) Wallet(ctx context.Context, obj *model.SeawaterPositions) (*model.Wallet, error) {
-	if obj == nil {
-		return nil, fmt.Errorf("empty positions")
-	}
-	if obj.Wallet == nil {
-		return nil, nil
-	}
-	wallet, err := r.Query().GetWallet(ctx, obj.Wallet.String())
-	if err != nil {
-		return nil, err
-	}
-	return wallet, nil
 }
 
 // Sum is the resolver for the sum field.

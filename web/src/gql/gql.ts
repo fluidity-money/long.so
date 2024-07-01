@@ -13,7 +13,6 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-    "\n  fragment SwapFormFragment on SeawaterPool {\n    address\n    earnedFeesAPRFUSDC\n    earnedFeesAPRToken1\n    token {\n      address\n      decimals\n      name\n      symbol\n    }\n  }\n": types.SwapFormFragmentFragmentDoc,
     "\n  fragment AllPoolsFragment on SeawaterPool {\n    address\n    token {\n      name\n      decimals\n    }\n    volumeOverTime {\n      daily {\n        fusdc {\n          valueScaled\n        }\n      }\n    }\n    tvlOverTime {\n      daily\n    }\n    liquidityOverTime {\n      daily {\n        fusdc {\n          valueScaled\n        }\n      }\n    }\n    liquidityIncentives {\n      valueUsd\n    }\n    superIncentives {\n      valueUsd\n    }\n    positions {\n      positions {\n        lower\n        upper\n      }\n    }\n  }\n": types.AllPoolsFragmentFragmentDoc,
     "\n  fragment MyPositionsWalletFragment on Wallet {\n    id\n    positions {\n      positions {\n        positionId\n        pool {\n          token {\n            name\n            address\n            symbol\n          }\n        }\n        liquidity {\n          fusdc {\n            valueUsd\n          }\n          token1 {\n            valueUsd\n          }\n        }\n      }\n    }\n  }\n": types.MyPositionsWalletFragmentFragmentDoc,
     "\n  fragment SelectPrimeAssetFragment on SeawaterPool {\n    address\n    volumeOverTime {\n      daily {\n        fusdc {\n          valueUsd\n        }\n      }\n    }\n    token {\n      name\n      symbol\n      address\n      decimals\n    }\n  }\n": types.SelectPrimeAssetFragmentFragmentDoc,
@@ -25,6 +24,7 @@ const documents = {
     "\n  fragment TradeTabTransactionsFragment on SeawaterSwap {\n    timestamp\n    amountIn {\n      token {\n        symbol\n      }\n      valueScaled\n    }\n    amountOut {\n      token {\n        symbol\n      }\n      valueScaled\n    }\n  }\n": types.TradeTabTransactionsFragmentFragmentDoc,
     "\n  fragment StakeFormFragment on SeawaterPool {\n    address\n    earnedFeesAPRFUSDC\n  }\n": types.StakeFormFragmentFragmentDoc,
     "\nfragment DepositPositionsFragment on Wallet {\n  positions {\n    positions {\n      positionId\n      lower\n      upper\n    }\n  }\n}\n": types.DepositPositionsFragmentFragmentDoc,
+    "\n  fragment SwapFormFragment on SeawaterPool {\n    address\n    earnedFeesAPRFUSDC\n    earnedFeesAPRToken1\n    token {\n      address\n      decimals\n      name\n      symbol\n    }\n  }\n": types.SwapFormFragmentFragmentDoc,
     "\n  fragment SwapProPoolFragment on SeawaterPool {\n    address\n    token {\n      address\n      symbol\n    }\n    liquidity {\n      liquidity\n    }\n    priceOverTime {\n      daily\n      monthly\n    }\n    volumeOverTime {\n      monthly {\n        timestamp\n        token1 {\n          valueUsd\n        }\n        fusdc {\n          valueUsd\n        }\n      }\n      daily {\n        timestamp # TODO: timestamp is always 0\n        token1 {\n          valueUsd\n        }\n        fusdc {\n          valueUsd\n        }\n      }\n    }\n    liquidityOverTime {\n      daily {\n        timestamp\n        fusdc {\n          valueUsd\n        }\n      }\n      monthly {\n        timestamp\n        fusdc {\n          valueUsd\n        }\n      }\n    }\n    swaps {\n      swaps {\n        timestamp\n        amountIn {\n          valueScaled\n          token {\n            symbol\n          }\n        }\n        amountOut {\n          valueScaled\n          token {\n            symbol\n          }\n        }\n      }\n    }\n  }\n": types.SwapProPoolFragmentFragmentDoc,
     "\n  query AllData {\n    pools {\n      # used for the pool selector\n      address\n\n      # add general fragments here\n      ...SwapProPoolFragment\n      ...AllPoolsFragment\n      ...SelectPrimeAssetFragment\n      ...SwapExploreFragment\n      ...ManagePoolFragment\n      ...SwapFormFragment\n      ...StakeFormFragment\n    }\n  }\n": types.AllDataDocument,
     "\n  query ForUser($wallet: String!) {\n    getSwapsForUser(wallet: $wallet, first: 10) {\n      data {\n        swaps {\n          # add transaction fragments here\n          ...TradeTabTransactionsFragment\n        }\n      }\n    }\n\n    getWallet(address: $wallet) {\n      # add wallet fragments here\n      ...MyPositionsWalletFragment\n      ...MyPositionsInventoryWalletFragment\n      ...PositionsFragment\n      ...WithdrawPositionsFragment\n      ...DepositPositionsFragment\n    }\n  }\n": types.ForUserDocument,
@@ -44,10 +44,6 @@ const documents = {
  */
 export function graphql(source: string): unknown;
 
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  fragment SwapFormFragment on SeawaterPool {\n    address\n    earnedFeesAPRFUSDC\n    earnedFeesAPRToken1\n    token {\n      address\n      decimals\n      name\n      symbol\n    }\n  }\n"): (typeof documents)["\n  fragment SwapFormFragment on SeawaterPool {\n    address\n    earnedFeesAPRFUSDC\n    earnedFeesAPRToken1\n    token {\n      address\n      decimals\n      name\n      symbol\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -92,6 +88,10 @@ export function graphql(source: "\n  fragment StakeFormFragment on SeawaterPool 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\nfragment DepositPositionsFragment on Wallet {\n  positions {\n    positions {\n      positionId\n      lower\n      upper\n    }\n  }\n}\n"): (typeof documents)["\nfragment DepositPositionsFragment on Wallet {\n  positions {\n    positions {\n      positionId\n      lower\n      upper\n    }\n  }\n}\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment SwapFormFragment on SeawaterPool {\n    address\n    earnedFeesAPRFUSDC\n    earnedFeesAPRToken1\n    token {\n      address\n      decimals\n      name\n      symbol\n    }\n  }\n"): (typeof documents)["\n  fragment SwapFormFragment on SeawaterPool {\n    address\n    earnedFeesAPRFUSDC\n    earnedFeesAPRToken1\n    token {\n      address\n      decimals\n      name\n      symbol\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

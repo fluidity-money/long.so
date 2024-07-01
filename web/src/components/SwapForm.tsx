@@ -587,7 +587,7 @@ export const SwapForm = () => {
               <Token className={"-ml-2 mr-2 size-[20px]"} />
 
               <div className={"iridescent-text text-[12px] md:text-[14px]"}>
-                Earn up-to $100 for making this trade!
+                Earn up to $100 for making this trade!
               </div>
             </Badge>
             <RewardsBreakdown hidden={breakdownHidden} />
