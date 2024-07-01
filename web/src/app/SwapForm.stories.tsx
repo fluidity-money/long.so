@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { SwapForm } from "@/app/SwapForm";
+import { SwapForm } from "@/components/SwapForm";
 import { Provider } from "@/app/Provider";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
 import { useEffect } from "react";
