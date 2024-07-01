@@ -278,6 +278,12 @@ export const SwapForm = () => {
 
   const { open } = useWeb3Modal();
 
+  // make user confirm before receiving 0 tokens from a swap
+  const [allowZeroSwap, setAllowZeroSwap] = useState(false)
+
+  useEffect(() => {
+    setAllowZeroSwap(false)
+  }, [token0, token1, token0AmountFloat, token1AmountFloat])
 
   /**
    * Approve the AMM to spend the token
@@ -291,6 +297,15 @@ export const SwapForm = () => {
         title: "Invalid amount",
         description: "Please enter a valid amount",
       });
+      return;
+    }
+    if (token1AmountFloat === 0 && !allowZeroSwap) {
+      toast.toast({
+        variant: "destructive",
+        title: "Zero Value Swap",
+        description: `This swap will result in you receiving 0 ${token1.symbol}. Press "Swap" again to make the swap anyway.`,
+      });
+      setAllowZeroSwap(true)
       return;
     }
 
@@ -578,7 +593,7 @@ export const SwapForm = () => {
             <RewardsBreakdown hidden={breakdownHidden} />
             {address ? (
               <Button
-                className={"mt-[20px] hidden h-[53.92px] w-full inline-flex"}
+                className={cn("mt-[20px] hidden h-[53.92px] w-full inline-flex", token1AmountFloat === 0 && !allowZeroSwap && "opacity-50")}
                 onClick={() => onSubmit()}
               >
                 Swap
