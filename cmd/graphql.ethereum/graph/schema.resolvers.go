@@ -109,6 +109,14 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	}
 	sqrtPrice := math.GetSqrtRatioAtTick(finalTick.FinalTick.Big())
 	price := math.GetPriceAtSqrtRatio(sqrtPrice)
+
+	// amount * price / (10 ^ fusdcDecimals)
+	d := new(big.Int).SetInt64(10)
+	d.Exp(d, new(big.Int).SetInt64(int64(r.C.FusdcDecimals)), nil)
+	valueScaled := obj.ValueUnscaled.Quo(obj.ValueUnscaled.Int, d)
+	value := new(big.Rat).SetInt(valueScaled)
+	price.Mul(price, value)
+
 	return price.FloatString(5), nil
 }
 
