@@ -1,5 +1,9 @@
 {
-  "extends": ["next/core-web-vitals", "plugin:tailwindcss/recommended"],
+  "extends": [
+    "next/core-web-vitals",
+    "prettier",
+    "plugin:tailwindcss/recommended"
+  ],
   "plugins": ["@stylistic/ts", "@typescript-eslint"],
   "parser": "@typescript-eslint/parser",
   "overrides": [
