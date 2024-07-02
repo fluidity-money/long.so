@@ -174,8 +174,8 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first
 	p := types.AddressFromString(pool)
 	// If the user didn't set pagination, or they exceeded the restriction on the limit.
 	if first == nil || *first > PoolPositionsPageSize {
-		fst := PoolPositionsPageSize
-		first = &fst
+		x := PoolPositionsPageSize
+		first = &x
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
@@ -198,9 +198,10 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first
 	}
 	// If we actually got return data here, we want to set it so we
 	// can start to paginate.
-	var to int
+	var to *int
 	if l := len(pos); l > 0 {
-		to = int(pos[l-1].CreatedBy.Unix())
+		x := int(pos[l-1].CreatedBy.Unix())
+		to = &x
 	}
 	positions = model.SeawaterPositions{
 		From:      *first,
@@ -233,8 +234,8 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *
 	w := types.AddressFromString(wallet)
 	// If the user didn't set the limit, or they requested too much.
 	if first == nil || *first > PoolPositionsPageSize {
-		fst := PoolPositionsPageSize
-		first = &fst
+		x := PoolPositionsPageSize
+		first = &x
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
@@ -255,9 +256,10 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *
 	if err := stmt.Scan(&pos).Error; err != nil || pos == nil {
 		return positions, err
 	}
+	id := pos[len(pos)-1].Id
 	positions = model.SeawaterPositions{
 		From:      pos[0].Id,
-		To:        pos[len(pos)-1].Id,
+		To:        &id,
 		Wallet:    &w,
 		Positions: pos,
 	}
@@ -332,8 +334,8 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 	walletAddress := types.AddressFromString(wallet)
 	// If the user requested too large a limit, or they didn't supply anything.
 	if first == nil || *first > PoolPositionsPageSize {
-		fst := PoolPositionsPageSize
-		first = &fst
+		x := PoolPositionsPageSize
+		first = &x
 	}
 	if after == nil {
 		aft := 0
@@ -761,8 +763,8 @@ func (r *seawaterPoolResolver) UtilityIncentives(ctx context.Context, obj *seawa
 func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool, first *int, after *int) (positions model.SeawaterPositions, err error) {
 	// If the user requested too large a limit, or they didn't supply a page size.
 	if first == nil || *first > PoolPositionsPageSize {
-		fst := PoolPositionsPageSize
-		first = &fst
+		x := PoolPositionsPageSize
+		first = &x
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
@@ -777,16 +779,21 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 		Limit(*first).
 		Order("created_by desc")
 	if after != nil {
-		stmt = stmt.Where("pos_id < ?", *after)
+		stmt = stmt.Where("created_by < ?", *after)
 	}
 	var pos []seawater.Position
 	if err := stmt.Scan(&pos).Error; err != nil || pos == nil {
 		return positions, err
 	}
 	p := obj.Token
+	var to *int
+	if l := len(pos); l > 0 {
+		x := int(pos[l-1].CreatedBy.Unix())
+		to = &x
+	}
 	positions = model.SeawaterPositions{
 		From:      pos[0].Id,
-		To:        pos[len(pos)-1].Id,
+		To:        to,
 		Pool:      &p,
 		Positions: pos,
 	}
@@ -916,7 +923,7 @@ func (r *seawaterPositionResolver) Created(ctx context.Context, obj *seawater.Po
 	var pos seawater.Position
 	err := r.DB.
 		Table("events_seawater_mintposition").
-		Select("created_by desc").
+		Where("pos_id = ?", obj.Id).
 		Scan(&pos).
 		Error
 	if err != nil {
@@ -1080,7 +1087,51 @@ func (r *seawaterPositionsResolver) Sum(ctx context.Context, obj *model.Seawater
 
 // Next is the resolver for the next field.
 func (r *seawaterPositionsResolver) Next(ctx context.Context, obj *model.SeawaterPositions, first *int) (model.SeawaterPositions, error) {
-	panic(fmt.Errorf("not implemented: Next - next"))
+	if obj == nil {
+		return model.SeawaterPositions{}, fmt.Errorf("empty positions")
+	}
+	if first == nil || *first > PoolPositionsPageSize {
+		x := PoolPositionsPageSize
+		first = &x
+	}
+	// Check if we're able to continue, if to is set to anything other than nil.
+	if obj.To == nil {
+		// Looks like we can't continue! Return current positions obj.
+		return *obj, nil
+	}
+	to := time.Unix(int64(*obj.To), 0)
+	// Start to construct a statement based on whether internally a
+	// wallet, or a pool, was used.
+	stmt := r.DB.Table("seawater_active_positions_1").
+		Where("created_by < ?", to).
+		Limit(*first).
+		Order("created_by desc")
+	switch {
+	case obj.Wallet != nil:
+		// If a wallet was used, we filter on the wallet.
+		stmt = stmt.Where("wallet = ?", *obj.Wallet)
+	case obj.Pool != nil:
+		// Pool was used! Filtering there.
+		stmt = stmt.Where("pool = ?", obj.Pool)
+	default:
+		return model.SeawaterPositions{}, fmt.Errorf("unimplemented positions pagination behaviour")
+	}
+	var pos []seawater.Position
+	if err := stmt.Scan(&pos).Error; err != nil {
+		return model.SeawaterPositions{}, err
+	}
+	var newTo *int
+	if l := len(pos); l > 0 {
+		x := int(pos[l-1].CreatedBy.Unix())
+		newTo = &x
+	}
+	return model.SeawaterPositions{
+		From:      *obj.To,
+		To:        newTo,
+		Pool:      obj.Pool,
+		Wallet:    obj.Wallet,
+		Positions: pos,
+	}, nil
 }
 
 // Pool is the resolver for the pool field.
@@ -1222,8 +1273,8 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 	}
 	// Prevent nil firsts, or past the limit.
 	if first == nil || *first > PoolPositionsPageSize {
-		fst := PoolPositionsPageSize
-		first = &fst
+		x := PoolPositionsPageSize
+		first = &x
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
@@ -1245,9 +1296,10 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 		return positions, err
 	}
 	w := obj.Address
-	var to int
+	var to *int
 	if l := len(pos); l > 0 {
-		to = int(pos[l-1].CreatedBy.Unix())
+		x := int(pos[l-1].CreatedBy.Unix())
+		to = &x
 	}
 	positions = model.SeawaterPositions{
 		From:      *first,

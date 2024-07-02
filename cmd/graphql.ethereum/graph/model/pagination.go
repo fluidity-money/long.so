@@ -10,8 +10,8 @@ type SeawaterPositions struct {
 	// From is used alongside To to find the cursor position in the
 	// database scan. Pool is also used to filter for this.
 	// We use the position id for everything.
-	From int `json:"from"`
-	To   int `json:"to"`
+	From int  `json:"from"`
+	To   *int `json:"to"`
 
 	// Pool is set, then we assume the filtering needs to happen for a pool.
 	Pool *types.Address `json:"pool"`

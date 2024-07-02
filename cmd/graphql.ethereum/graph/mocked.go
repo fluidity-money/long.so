@@ -86,7 +86,7 @@ func MockGetPoolPositions(address types.Address) (positions model.SeawaterPositi
 	a := address // Copy so we don't keep alive the scope above.
 	return model.SeawaterPositions{
 		From: 0,
-		To:   0,
+		To:   nil,
 		Pool: &a,
 		// Wallet is unset here so we don't filter on it.
 		Wallet:    nil,
