@@ -39,8 +39,8 @@ export const useSwapStore = create<SwapStore>((set) => ({
     set(({ token0, token1, token1Amount, token0Amount, token0AmountRaw, token1AmountRaw }) => ({
       token0: token1,
       token1: token0,
-      token0Amount: token1Amount === "." ? "0" : token1Amount,
-      token1Amount: token0Amount === "." ? "0" : token0Amount,
+      token0Amount: token1Amount === "." || token1Amount === "" ? "0" : token1Amount,
+      token1Amount: token0Amount === "." || token0Amount === "" ? "0" : token0Amount,
       token0AmountRaw: token1AmountRaw,
       token1AmountRaw: token0AmountRaw,
     }))
@@ -91,5 +91,5 @@ export const useSwapStore = create<SwapStore>((set) => ({
   },
 
   gas: 0n,
-  setGas: gas => set({gas})
+  setGas: gas => set({ gas })
 }));
