@@ -1,30 +1,16 @@
 {
-  "extends": [
-    "next/core-web-vitals",
-    "plugin:storybook/recommended",
-    "plugin:tailwindcss/recommended"
-  ],
-  "plugins": [
-    "@stylistic/ts",
-    "@typescript-eslint"
-  ],
+  "extends": ["next/core-web-vitals", "plugin:tailwindcss/recommended"],
+  "plugins": ["@stylistic/ts", "@typescript-eslint"],
   "parser": "@typescript-eslint/parser",
   "overrides": [
     {
-      "files": [
-        "*.ts",
-        "*.tsx"
-      ],
+      "files": ["*.ts", "*.tsx"],
       "processor": "@graphql-eslint/graphql"
     },
     {
-      "files": [
-        "*.graphql"
-      ],
+      "files": ["*.graphql"],
       "parser": "@graphql-eslint/eslint-plugin",
-      "plugins": [
-        "@graphql-eslint"
-      ]
+      "plugins": ["@graphql-eslint"]
     }
   ]
 }
