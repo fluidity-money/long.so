@@ -10,6 +10,7 @@ import ReactECharts from "echarts-for-react";
 import { format, subDays } from "date-fns";
 import { SwapProPoolFragmentFragment } from "@/gql/graphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { usdFormat } from "@/lib/usdFormat";
 
 const durationToDays = {
   "7D": 7,
@@ -57,17 +58,18 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
         slicedData = slicedData?.slice(0, durationToDays[duration]);
       }
 
+      slicedData = slicedData?.reverse()
       const last = slicedData?.at(-1)
-      const header = parseFloat(last?.fusdc.valueUsd ?? "0") + parseFloat(last?.token1.valueUsd ?? "0")
+      const header = usdFormat(parseFloat(last?.fusdc.valueUsd ?? "0") + parseFloat(last?.token1.valueUsd ?? "0"))
 
       return (
         [slicedData
           // reformat pool data to match expected graph data
           ?.map((d) => ({
-            date: new Date(d.timestamp * 1000),
+            date: new Date(d.fusdc.timestamp * 1000),
             value: parseFloat(d.fusdc.valueUsd),
           })),
-        "$" + header,
+        header,
         ]
       );
     }
@@ -80,18 +82,18 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
         slicedData = slicedData?.slice(0, durationToDays[duration]);
       }
 
-      const last = slicedData?.at(-1)
-      const header = parseFloat(last ?? "0")
+      const last = slicedData?.at(0)
+
+      const header = usdFormat(parseFloat(last ?? "0"))
 
       return (
         [slicedData
           // reformat pool data to match expected graph data
           ?.map((d, i) => ({
-            // TODO: assume that the first value is the most recent (yesterday)
             date: subDays(new Date(), i),
             value: parseFloat(d),
-          })),
-        "$" + header
+          })).reverse(),
+        header
         ]
       );
     }
@@ -103,10 +105,11 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
       if (duration !== "ALL") {
         slicedData = slicedData?.slice(0, durationToDays[duration]);
       }
+      slicedData = slicedData?.reverse()
 
       const last = slicedData?.at(-1)
       // TODO - should liquidity include token1 value as well?
-      const header = parseFloat(last?.fusdc.valueUsd ?? "0")
+      const header = usdFormat(parseFloat(last?.fusdc.valueUsd ?? "0"))
 
       return (
         [slicedData
@@ -115,7 +118,7 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
             date: new Date(d.timestamp * 1000),
             value: parseFloat(d.fusdc.valueUsd),
           })),
-        "$" + header
+        header
         ]
       );
     }
