@@ -197,6 +197,9 @@ pub enum Error {
     // 32 (0x20)
     #[error("Operation unavailable when the pool is disabled")]
     PoolDisabled,
+
+    #[error("Invalid tick spacing")]
+    InvalidTickSpacing,
 }
 
 impl From<Error> for Vec<u8> {
