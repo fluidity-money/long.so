@@ -70,8 +70,9 @@ impl StoragePool {
     /// Creates a new position in this pool.
     pub fn create_position(&mut self, id: U256, low: i32, up: i32) -> Result<(), Revert> {
         assert_or!(self.enabled.get(), Error::PoolDisabled);
-        let spacing = self.tick_spacing.get().unwrap() as i32;
-        assert_or!(tick % spacing == 0, Error::InvalidTickSpacing);
+        let spacing = self.tick_spacing.get().sys() as i32;
+        assert_or!(low % spacing == 0, Error::InvalidTickSpacing);
+        assert_or!(up % spacing == 0, Error::InvalidTickSpacing);
         Ok(self.positions.new(id, low, up))
     }
 
