@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { nanoid } from "nanoid";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import Token from "@/assets/icons/token.svg";
+import TokenIcon from "@/assets/icons/token.svg";
 import TokenIridescent from "@/assets/icons/token-iridescent.svg";
 import SegmentedControl from "@/components/ui/segmented-control";
 import { useAccount } from "wagmi";
@@ -22,7 +22,7 @@ import { mockMyPositions } from "@/demoData/myPositions";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlUser } from "@/hooks/useGraphql";
-import { fUSDC } from "@/config/tokens";
+import { Token, fUSDC } from "@/config/tokens";
 
 const MyPositionsWalletFragment = graphql(`
   fragment MyPositionsWalletFragment on Wallet {
@@ -35,6 +35,7 @@ const MyPositionsWalletFragment = graphql(`
             name
             address
             symbol
+            decimals
           }
         }
         liquidity {
@@ -78,13 +79,14 @@ export const MyPositions = () => {
         fUSDC,
         {
           name: position.pool.token.name,
-          address: position.pool.token.address,
+          address: position.pool.token.address as `0x${string}`,
           symbol: position.pool.token.symbol,
-        },
-      ],
+          decimals: position.pool.token.decimals,
+        }
+      ] satisfies [Token, Token],
       staked: parseFloat(position.liquidity.fusdc.valueUsd) + parseFloat(position.liquidity.token1.valueUsd),
       totalYield: 0,
-    }));
+    })).filter(position => position.staked > 0);
   }, [showDemoData, address, walletData]);
 
   console.log(pools);
@@ -163,7 +165,7 @@ export const MyPositions = () => {
 
                 <div className="-mt-1 flex flex-col md:-mt-2">
                   <div className="flex flex-row">
-                    <Token className="ml-[-2px] size-[25px] rounded-full border border-black md:size-[35px]" />
+                    <TokenIcon className="ml-[-2px] size-[25px] rounded-full border border-black md:size-[35px]" />
                     <TokenIridescent className="ml-[-6px] size-[25px] rounded-full border-2 border-black md:size-[35px]" />
                   </div>
                   <div className="flex flex-row justify-center">
