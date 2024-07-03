@@ -8,6 +8,7 @@ import IridescentToken from "@/assets/icons/token-iridescent.svg";
 import Token from "@/assets/icons/token.svg";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { TokenIcon } from "@/components/TokenIcon";
 
 export type Asset = {
   name?: string;
@@ -26,11 +27,7 @@ export const columns: ColumnDef<Asset>[] = [
     cell: ({ row }) => {
       return (
         <div className={"flex flex-row items-center gap-2 py-1"}>
-          {row.original.icon ? (
-            <Image alt="" src={row.original.icon} width={0} height={0} className={"size-[22px]"} />
-          ) : (
-            <Token className={"size-[22px]"} />
-          )}
+        <TokenIcon src={row.original.icon} size={22}/>
           <div className={"flex flex-col"}>
             <div
               className={cn("text-xs md:text-sm", {

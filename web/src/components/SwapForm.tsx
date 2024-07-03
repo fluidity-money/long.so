@@ -39,6 +39,7 @@ import { getFormattedPriceFromAmount, snapAmountToDecimals } from "@/lib/amounts
 import { RewardsBreakdown } from "@/components/RewardsBreakdown";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { TokenIcon } from "./TokenIcon";
 
 const SwapFormFragment = graphql(`
   fragment SwapFormFragment on SeawaterPool {
@@ -390,7 +391,7 @@ export const SwapForm = () => {
                     variant="outline"
                     className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base w-max"
                   >
-                  {token0.icon ? <Image alt="" width={0} height={0} src={token0.icon} className="size-[20px] md:size-[25px]" /> : <Token className="size-[20px] md:size-[25px]" />}
+                 <TokenIcon src={token0.icon} /> 
                     <div>{token0.symbol}</div>
                     <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
                   </Badge>
@@ -466,7 +467,7 @@ export const SwapForm = () => {
                     variant="outline"
                     className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base"
                   >
-                  {token1.icon ? <Image alt="" width={0} height={0} src={token1.icon} className="size-[20px] md:size-[25px]" /> : <Token className="size-[20px] md:size-[25px]" />}
+                 <TokenIcon src={token1.icon} /> 
                     <div>{token1.symbol}</div>
                     <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
                   </Badge>
