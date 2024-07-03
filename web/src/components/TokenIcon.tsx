@@ -20,7 +20,7 @@ const TokenIcon = ({
         width={0}
         height={0}
         src={src}
-        className={`size-[${size}px] md:size-[${size}px]`}
+        className={`size-[${size}px] md:size-[${sizeMd}px]`}
         {...props}
       />
     ) : (
