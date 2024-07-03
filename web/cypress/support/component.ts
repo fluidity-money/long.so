@@ -1,5 +1,8 @@
 import "./commands";
 import { mount } from "cypress/react18";
+// add tailwindcss
+import "@/app/globals.css";
+
 declare global {
   namespace Cypress {
     interface Chainable {

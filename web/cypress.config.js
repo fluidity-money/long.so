@@ -11,7 +11,9 @@ module.exports = defineConfig({
       // require("@cypress/code-coverage/task")(on, config);
       return config;
     },
-    // supportFile: "cypress/support/component.ts",
+    // macbook-13 viewport
+    viewportWidth: 1280,
+    viewportHeight: 800,
   },
   e2e: {
     setupNodeEvents(on, config) {
@@ -19,6 +21,5 @@ module.exports = defineConfig({
       return config;
     },
     baseUrl: "http://localhost:3000",
-    // supportFile: "cypress/support/e2e.ts",
   },
 });
