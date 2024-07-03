@@ -24,15 +24,15 @@ describe("default SVGR <TokenIcon />", () => {
   });
 });
 
-describe("customized SVGR <TokenIcon />", () => {
+describe("customized SVGR <TokenIcon sizeMd={30} />", () => {
   beforeEach(() => {
     cy.mount(<TokenIcon sizeMd={30} />);
   });
-  it("default render should use svgr", () => {
+  it("customized render should use svgr", () => {
     cy.dataCy("token-icon-svgr");
   });
 
-  it("default render width should be 30px of width and height", () => {
+  it("customized render width should be 30px of width and height", () => {
     cy.dataCy("token-icon-svgr").should("be.visible");
 
     cy.dataCy("token-icon-svgr")
@@ -47,7 +47,7 @@ describe("customized SVGR <TokenIcon />", () => {
   });
 });
 
-describe("default Image <TokenIcon />", () => {
+describe("default Image <TokenIcon src={Token} />", () => {
   beforeEach(() => {
     cy.mount(<TokenIcon src={Token} />);
   });
@@ -70,15 +70,15 @@ describe("default Image <TokenIcon />", () => {
   });
 });
 
-describe("customized Image <TokenIcon />", () => {
+describe("customized Image <TokenIcon src={Token} sizeMd={30} />", () => {
   beforeEach(() => {
     cy.mount(<TokenIcon src={Token} sizeMd={30} />);
   });
-  it("default render should use image", () => {
+  it("customized render should use image", () => {
     cy.dataCy("token-icon-image");
   });
 
-  it("default render should be 30px of width and height", () => {
+  it("customized render should be 30px of width and height", () => {
     cy.dataCy("token-icon-image").should("be.visible");
 
     cy.dataCy("token-icon-image")
