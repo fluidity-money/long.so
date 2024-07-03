@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import IridescentToken from "@/assets/icons/token-iridescent.svg";
 import { AllAssetsTable } from "@/app/swap/explore/_AllAssetsTable/AllAssetsTable";
 import { columns } from "@/app/swap/explore/_AllAssetsTable/columns";
-import { Token, fUSDC } from "@/config/tokens";
+import { Token, fUSDC, getTokenFromAddress } from "@/config/tokens";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
@@ -84,21 +84,21 @@ const ExplorePage = () => {
   const allAssetsData = useMemo(() => {
     if (showMockData) return mockSwapExploreAssets;
 
+
     // reformat the data to match the columns
     return (
-      tokensData.map((token, i) => ({
-        symbol: token.token.symbol,
-        address: token.token.address,
-        name: token.token.name,
-        amount: tokenBalances[i]?.amount ?? 0,
-        amountUSD: tokenBalances[i]?.amountUSD ?? 0,
-        token: {
-          address: token.token.address as Hash,
-          name: token.token.name,
+      tokensData.map((token, i) => {
+        const tokenFromAddress = getTokenFromAddress(token.token.address)
+        return {
           symbol: token.token.symbol,
-          decimals: token.token.decimals,
-        } satisfies Token,
-      })) ?? []
+          address: token.token.address,
+          name: token.token.name,
+          amount: tokenBalances[i]?.amount ?? 0,
+          amountUSD: tokenBalances[i]?.amountUSD ?? 0,
+          icon: tokenFromAddress?.icon || "",
+          token: tokenFromAddress,
+        }
+      }) ?? []
     );
   }, [showMockData, tokensData, tokenBalances]);
 
