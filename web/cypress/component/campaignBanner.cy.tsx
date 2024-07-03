@@ -1,4 +1,4 @@
-import { CampaignBanner } from "../../src/components/CampaignBanner";
+import { CampaignBanner } from "@/components/CampaignBanner";
 
 describe("<CampaignBanner />", () => {
   it("should render and display expected content", () => {
