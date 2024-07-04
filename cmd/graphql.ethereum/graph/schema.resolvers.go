@@ -665,7 +665,7 @@ func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Po
 			dailyTvl string
 			price    = priceOverTime.Daily[i]
 		)
-		dailyTvl, err = v.Token1.UsdValue(price, r.C.FusdcAddr)
+		dailyTvl, err = v.Token1.UsdValue(price, r.C.FusdcAddr, r.C.FusdcDecimals)
 		if err != nil {
 			return
 		}
@@ -676,7 +676,7 @@ func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Po
 			monthlyTvl string
 			price      = priceOverTime.Monthly[i]
 		)
-		monthlyTvl, err = v.Token1.UsdValue(price, r.C.FusdcAddr)
+		monthlyTvl, err = v.Token1.UsdValue(price, r.C.FusdcAddr, r.C.FusdcDecimals)
 		if err != nil {
 			return
 		}

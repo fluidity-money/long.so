@@ -18,15 +18,15 @@ type Amount struct {
 
 var FloatZero = new(big.Float)
 
-func (obj *Amount) UsdValue(price string, fusdcAddr types.Address) (string, error) {
+func (obj *Amount) UsdValue(price string, fusdcAddr types.Address, fusdcDecimals int) (string, error) {
 	value := obj.ValueUnscaled
-	dividedAmt := value.Scale(obj.Decimals) //value / (10 ** decimals)
+	dividedAmt := value.Scale(fusdcDecimals) //value / (10 ** fusdcDecimals)
 	switch obj.Token {
 	case fusdcAddr:
 		// 4 decimals
 		return fmt.Sprintf("%0.8f", dividedAmt), nil
 	default:
-		//value / (10 ** decimals) * price
+		//value / (10 ** fusdcDecimals) * price
 		x := new(big.Float).Set(dividedAmt)
 		if price == "" {
 			return "0", nil // Empty price.
@@ -38,7 +38,7 @@ func (obj *Amount) UsdValue(price string, fusdcAddr types.Address) (string, erro
 		if priceFloat.Cmp(FloatZero) == 0 { // Price is also empty (0).
 			return "0", nil
 		}
-		x.Quo(dividedAmt, priceFloat)
+		x.Mul(dividedAmt, priceFloat)
 		return fmt.Sprintf("%0.8f", x), nil
 	}
 }
