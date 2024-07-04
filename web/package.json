@@ -102,6 +102,7 @@
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "style-loader": "^3.3.4",
+    "swc-plugin-coverage-instrument": "^0.0.22",
     "tailwindcss": "^3.4.1",
     "ts-node": "^10.9.2",
     "typescript": "5.4.5"

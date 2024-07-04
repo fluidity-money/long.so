@@ -8,7 +8,7 @@ module.exports = defineConfig({
       bundler: "webpack",
     },
     setupNodeEvents(on, config) {
-      // require("@cypress/code-coverage/task")(on, config);
+      require("@cypress/code-coverage/task")(on, config);
       return config;
     },
     // macbook-13 viewport
@@ -17,7 +17,7 @@ module.exports = defineConfig({
   },
   e2e: {
     setupNodeEvents(on, config) {
-      // require("@cypress/code-coverage/task")(on, config);
+      require("@cypress/code-coverage/task")(on, config);
       return config;
     },
     baseUrl: "http://localhost:3000",

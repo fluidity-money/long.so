@@ -264,6 +264,9 @@ importers:
       style-loader:
         specifier: ^3.3.4
         version: 3.3.4(webpack@5.92.0)
+      swc-plugin-coverage-instrument:
+        specifier: ^0.0.22
+        version: 0.0.22
       tailwindcss:
         specifier: ^3.4.1
         version: 3.4.1(ts-node@10.9.2(@types/node@20.6.0)(typescript@5.4.5))
@@ -8745,6 +8748,9 @@ packages:
 
   swap-case@2.0.2:
     resolution: {integrity: sha512-kc6S2YS/2yXbtkSMunBtKdah4VFETZ8Oh6ONSmSd9bRxhqTrtARUCBUiWXH3xVPpvR7tz2CSnkuXVE42EcGnMw==}
+
+  swc-plugin-coverage-instrument@0.0.22:
+    resolution: {integrity: sha512-jm4sGSJNL+6L1z3D9l3UU5+53Q2GeSyTKYTnxnY4XI9xM+6r5v+/AZet9U1joi1UXNGbPV8iLjxtXvafBMOueg==}
 
   symbol-tree@3.2.4:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
@@ -21012,6 +21018,8 @@ snapshots:
   swap-case@2.0.2:
     dependencies:
       tslib: 2.6.3
+
+  swc-plugin-coverage-instrument@0.0.22: {}
 
   symbol-tree@3.2.4: {}
 

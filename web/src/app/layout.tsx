@@ -51,6 +51,7 @@ export const metadata: Metadata = {
   },
 };
 
+/* istanbul ignore next */
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500"],
@@ -79,70 +80,70 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-        <body
-          className={cn("flex min-h-screen flex-col bg-white", inter.className)}
-        >
-          <Provider>
-            <PopulateQueryCache data={data} featuresData={featuresData} />
-            <div className="iridescent-blur absolute left-1/2 top-[180px] size-full max-h-[305px] max-w-[557px] -translate-x-1/2" />
+      <body
+        className={cn("flex min-h-screen flex-col bg-white", inter.className)}
+      >
+        <Provider>
+          <PopulateQueryCache data={data} featuresData={featuresData} />
+          <div className="iridescent-blur absolute left-1/2 top-[180px] size-full max-h-[305px] max-w-[557px] -translate-x-1/2" />
 
-            <header className="p-8">
-              <div className="flex w-full flex-col gap-8">
-                <div className="flex flex-row items-start justify-between">
-                  <div className="flex flex-row items-center gap-4">
-                    <a href="/"><LongTail height={34} width={34} /></a>
-                    <MobileNetworkSelection />
-                    <FeatureFlagConfig />
-                    <DemoData />
-                  </div>
-                  <div className="flex flex-row items-center gap-4">
-                   <FaucetDropdown />
-                    <NetworkSelection />
-                    <ConnectWalletButton />
-                  </div>
-                </div>
-              </div>
-              <div className="flex w-full flex-col items-start md:items-center">
-                <NavigationMenu />
-              </div>
-            </header>
-
-            <div className={"z-10 flex-1"}>{children}</div>
-
-            <footer className="w-full self-end p-8">
-              <div className="flex flex-row justify-between">
-                <div className="grid grid-cols-1 gap-x-[10px]">
-                  <small>
-                    <a href="https://x.com/superpositionso">
-                      𝕏
-                    </a>
-                  </small>
-                  <a href="https://discord.gg/superposition">
-                    <Discord />
+          <header className="p-8">
+            <div className="flex w-full flex-col gap-8">
+              <div className="flex flex-row items-start justify-between">
+                <div className="flex flex-row items-center gap-4">
+                  <a href="/">
+                    <LongTail height={34} width={34} />
                   </a>
-                  <small>
-                    <a
-                      rel="noopener noreferrer"
-                      target="_blank"
-                      href="https://github.com/fluidity-money/long.so/tree/development/audits"
-                    >
-                      Audits
-                    </a>
-                  </small>
+                  <MobileNetworkSelection />
+                  <FeatureFlagConfig />
+                  <DemoData />
                 </div>
+                <div className="flex flex-row items-center gap-4">
+                  <FaucetDropdown />
+                  <NetworkSelection />
+                  <ConnectWalletButton />
+                </div>
+              </div>
+            </div>
+            <div className="flex w-full flex-col items-start md:items-center">
+              <NavigationMenu />
+            </div>
+          </header>
+
+          <div className={"z-10 flex-1"}>{children}</div>
+
+          <footer className="w-full self-end p-8">
+            <div className="flex flex-row justify-between">
+              <div className="grid grid-cols-1 gap-x-[10px]">
+                <small>
+                  <a href="https://x.com/superpositionso">𝕏</a>
+                </small>
+                <a href="https://discord.gg/superposition">
+                  <Discord />
+                </a>
                 <small>
                   <a
                     rel="noopener noreferrer"
                     target="_blank"
-                    href={`https://github.com/fluidity-money/long.so/commit/${gitHash}`}
+                    href="https://github.com/fluidity-money/long.so/tree/development/audits"
                   >
-                    Commit {gitHash}
+                    Audits
                   </a>
                 </small>
               </div>
-            </footer>
-          </Provider>
-        </body>
+              <small>
+                <a
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  href={`https://github.com/fluidity-money/long.so/commit/${gitHash}`}
+                >
+                  Commit {gitHash}
+                </a>
+              </small>
+            </div>
+          </footer>
+        </Provider>
+      </body>
     </html>
   );
 }
