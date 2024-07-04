@@ -484,7 +484,7 @@ mod test {
 
     #[test]
     fn test_update_position() {
-        test_utils::with_storage::<_, StoragePool, _>(&hashmap! {}, |storage| {
+        test_utils::with_storage::<_, StoragePool, _>(None, &hashmap! {}, |storage| {
             storage
                 .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
                 .unwrap();
@@ -504,7 +504,7 @@ mod test {
 
     #[test]
     fn test_update_position_2() {
-        test_utils::with_storage::<_, StoragePool, _>(&hashmap! {}, |storage| {
+        test_utils::with_storage::<_, StoragePool, _>(None, &hashmap! {}, |storage| {
             storage
                 .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
                 .unwrap();
@@ -522,7 +522,7 @@ mod test {
 
     #[test]
     fn test_swap() -> Result<(), Revert> {
-        test_utils::with_storage::<_, StoragePool, _>(&hashmap! {}, |storage| {
+        test_utils::with_storage::<_, StoragePool, _>(None, &hashmap! {}, |storage| {
             storage.init(
                 test_utils::encode_sqrt_price(100, 1), // price
                 0,

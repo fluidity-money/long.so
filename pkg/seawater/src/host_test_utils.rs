@@ -56,10 +56,15 @@ pub trait StorageNew {
 }
 
 pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
+    default_sender: Option<[u8; 20]>,
     map: &HashMap<Word, Word>,
     f: F,
 ) -> T {
     let lock = test_shims::acquire_storage();
+    match default_sender {
+        Some(v) => test_shims::set_sender(v),
+        None => (),
+    };
     for (key, value) in map {
         test_shims::insert_word(key.clone(), value.clone())
     }

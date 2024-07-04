@@ -32,6 +32,13 @@ pub mod storage {
 
     pub static STORAGE_EXTERNAL: Mutex<()> = Mutex::new(());
 
+    pub static CURRENT_SENDER: LazyLock<Mutex<[u8; 20]>> = LazyLock::new(|| {
+        Mutex::new(
+            const_hex::const_decode_to_array::<20>(b"0x59e8db5c2e506ddd395d58a1dd8cd02b81ecbd6c")
+                .unwrap(),
+        )
+    });
+
     pub static STORAGE: LazyLock<Mutex<WordHashMap>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 
     pub unsafe fn read_word(key: *const u8) -> Word {
@@ -84,15 +91,19 @@ pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
 
 #[no_mangle]
 pub unsafe extern "C" fn msg_sender(sender: *mut u8) {
-    let addr =
-        const_hex::const_decode_to_array::<20>(b"0x59e8db5c2e506ddd395d58a1dd8cd02b81ecbd6c")
-            .unwrap();
+    // copy the currently defined sender and return the pointer
+    let addr = storage::CURRENT_SENDER.lock().unwrap().clone();
     std::ptr::copy(addr.as_ptr(), sender, 20);
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn emit_log(_: *const u8, _: usize, _: usize) {
     // do nothing, we just don't create logs on the host
+}
+
+pub fn set_sender(new_sender: [u8; 20]) {
+    let mut sender = storage::CURRENT_SENDER.lock().unwrap();
+    *sender = new_sender;
 }
 
 pub fn insert_word(key: storage::Word, value: storage::Word) {

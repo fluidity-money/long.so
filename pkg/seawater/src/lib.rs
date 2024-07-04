@@ -904,7 +904,7 @@ mod test {
 
     #[test]
     fn test_similar_to_ethers() -> Result<(), Vec<u8>> {
-        test_utils::with_storage::<_, Pools, _>(&hashmap! {}, |contract| {
+        test_utils::with_storage::<_, Pools, _>(None, &hashmap! {}, |contract| {
             // Create the storage
             contract.seawater_admin.set(msg::sender());
             let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
@@ -939,7 +939,7 @@ mod test {
 
     #[test]
     fn test_alex() -> Result<(), Vec<u8>> {
-        test_utils::with_storage::<_, Pools, _>(&hashmap! {}, |contract| {
+        test_utils::with_storage::<_, Pools, _>(None, &hashmap! {}, |contract| {
             // Create the storage
             contract.seawater_admin.set(msg::sender());
             let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
