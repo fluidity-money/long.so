@@ -1,6 +1,8 @@
 #!/bin/sh -e
 
-export SPN_GETH_URL=http://127.0.0.1:8547
+export \
+	SPN_GETH_URL=http://127.0.0.1:8547 \
+	RUST_BACKTRACE=1
 
 cargo test --features testing
 

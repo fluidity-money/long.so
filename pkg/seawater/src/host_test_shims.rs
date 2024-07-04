@@ -108,7 +108,7 @@ pub fn set_sender(new_sender: [u8; 20]) {
 
 pub fn insert_word(key: storage::Word, value: storage::Word) {
     // insert a word for testing reasons
-    storage::STORAGE.lock().unwrap().insert(key, value).unwrap();
+    let _ = storage::STORAGE.lock().unwrap().insert(key, value);
 }
 
 pub fn reset_storage() {

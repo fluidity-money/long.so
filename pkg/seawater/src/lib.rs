@@ -971,4 +971,29 @@ mod test {
             Ok(())
         })
     }
+
+    #[test]
+    fn broken_erik() -> Result<(), Vec<u8>> {
+        test_utils::with_storage::<_, Pools, _>(
+            Some(address!("eB6b882A295D316aC62C8cfcc81c3E37c084b7c5").into_array()),
+            &hashmap! {
+                  "0000000000000000000000000000000000000000000000000000000000000000" => "000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
+            "3aafa5613932f019a44c0ba4fef5db570fdc26a44b344eb7016ee305da1d2cdd"=> "0000000000000000000000000000000000000000000000000000000000000000",
+            "3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600"=> "0000000000000000000000000000000000000000000000000000000000000000",
+            "ce67bab47ccb0f35690620809f2318ef477b533824426881f498e863af201134"=> "00000000000000000000ffffffffffffffffffffffffffffffff3c00000bb801",
+            "ce67bab47ccb0f35690620809f2318ef477b533824426881f498e863af201135"=> "0000000000000000000000000000019a2e894955c0979e79d6604d04c8dda148",
+            "ce67bab47ccb0f35690620809f2318ef477b533824426881f498e863af201138"=> "000000000000000000000000fffbc80000000000000000001aa98842e8784745",
+            "ce67bab47ccb0f35690620809f2318ef477b533824426881f498e863af201139"=> "0000000000000000000000000000000000000000000010a59ab72a164292da7a"
+                },
+            |contract| {
+                let from = address!("09F7156AAE9C903F90B1CB1E312582C4f208A759");
+                let to = address!("6437fdc89cED41941b97A9f1f8992D88718C81c5");
+                let amount = U256::from_limbs([0x6bc75e2d, 0x5, 0, 0]);
+                let min_out = U256::from(0);
+                contract
+                    .swap_2_exact_in(from, to, amount, min_out)
+                    .map(|_| ())
+            },
+        )
+    }
 }

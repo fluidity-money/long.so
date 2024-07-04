@@ -6,7 +6,7 @@ use stylus_sdk::storage::StorageCache;
 
 use crate::{
     maths::sqrt_price_math::Q96,
-    test_shims::{self, storage::Word},
+    test_shims::{self},
     types::*,
 };
 
@@ -55,13 +55,24 @@ pub trait StorageNew {
     fn new(i: U256, v: u8) -> Self;
 }
 
+///! Set up the storage access, controlling for parallel use. Makes
 pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
-    default_sender: Option<[u8; 20]>,
-    map: &HashMap<Word, Word>,
+    sender: Option<[u8; 20]>,
+    map: &HashMap<&str, &str>,
     f: F,
 ) -> T {
+    let map: HashMap<[u8; 32], [u8; 32]> = map
+        .iter()
+        .map(|(key, value)| -> ([u8; 32], [u8; 32]) {
+            // avoid poisoning the lock if we fail to do this here.
+            (
+                const_hex::const_decode_to_array::<32>(key.as_bytes()).unwrap(),
+                const_hex::const_decode_to_array::<32>(value.as_bytes()).unwrap(),
+            )
+        })
+        .collect();
     let lock = test_shims::acquire_storage();
-    match default_sender {
+    match sender {
         Some(v) => test_shims::set_sender(v),
         None => (),
     };
