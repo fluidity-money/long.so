@@ -111,11 +111,9 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	price := math.GetPriceAtSqrtRatio(sqrtPrice)
 
 	// amount * price / (10 ^ fusdcDecimals)
-	d_ := new(big.Int).SetInt64(10)
-	d_.Exp(d_, new(big.Int).SetInt64(int64(r.C.FusdcDecimals)), nil)
-	d := new(big.Rat).SetInt(d_)
+	decimals := math.ExponentiateDecimals(int64(r.C.FusdcDecimals))
 	valueScaled := new(big.Rat).SetInt(obj.ValueUnscaled.Int)
-	value := valueScaled.Quo(valueScaled, d)
+	value := valueScaled.Quo(valueScaled, decimals)
 	price.Mul(price, value)
 
 	return price.FloatString(5), nil
@@ -665,7 +663,7 @@ func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Po
 			dailyTvl string
 			price    = priceOverTime.Daily[i]
 		)
-		dailyTvl, err = v.Token1.UsdValue(price, r.C.FusdcAddr, r.C.FusdcDecimals)
+		dailyTvl, err = v.Token1.UsdValue(price, r.C.FusdcAddr)
 		if err != nil {
 			return
 		}
@@ -676,7 +674,7 @@ func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Po
 			monthlyTvl string
 			price      = priceOverTime.Monthly[i]
 		)
-		monthlyTvl, err = v.Token1.UsdValue(price, r.C.FusdcAddr, r.C.FusdcDecimals)
+		monthlyTvl, err = v.Token1.UsdValue(price, r.C.FusdcAddr)
 		if err != nil {
 			return
 		}
