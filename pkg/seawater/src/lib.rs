@@ -214,7 +214,14 @@ impl Pools {
 
         assert_eq_or!(interim_usdc_out, interim_usdc_in, Error::InterimSwapNotEq);
         assert_or!(amount_out >= min_out, Error::MinOutNotReached);
-        Ok((original_amount, amount_in, amount_out, interim_usdc_out, final_tick_in, final_tick_out))
+        Ok((
+            original_amount,
+            amount_in,
+            amount_out,
+            interim_usdc_out,
+            final_tick_in,
+            final_tick_out,
+        ))
     }
 
     /// Performs a two step swap, taking a permit2 blob for transfers.
@@ -236,14 +243,8 @@ impl Pools {
             amount_out,
             interim_usdc_out,
             final_tick_in,
-            final_tick_out
-        ) = Self::swap_2_internal(
-            pools,
-            from,
-            to,
-            amount,
-            min_out,
-        )?;
+            final_tick_out,
+        ) = Self::swap_2_internal(pools, from, to, amount, min_out)?;
 
         // transfer tokens
         erc20::take(from, original_amount, permit2)?;
@@ -294,7 +295,6 @@ impl Pools {
 /// Quote functions. Only enabled when the `quotes` feature is set.
 #[cfg_attr(feature = "quotes", external)]
 impl Pools {
-
     /// Quote a [Self::swap]. Will revert with the result of the swap
     /// as a decimal number as the message of an `Error(string)`.
     /// Returns a `Result` as Stylus expects but will always only fill the `Revert`.
@@ -305,23 +305,20 @@ impl Pools {
         amount: I256,
         price_limit_x96: U256,
     ) -> Result<(), Revert> {
-        let swapped =
-            self
-                .pools
-                .setter(pool)
-                .swap(zero_for_one, amount, price_limit_x96);
+        let swapped = self
+            .pools
+            .setter(pool)
+            .swap(zero_for_one, amount, price_limit_x96);
 
         match swapped {
             Ok((amount_0, amount_1, _)) => {
                 // we always want the token that was taken from the pool, so it's always negative
-                let quote_amount = if zero_for_one {-amount_1} else {-amount_0};
+                let quote_amount = if zero_for_one { -amount_1 } else { -amount_0 };
                 let revert = erc20::revert_from_msg(&quote_amount.to_dec_string());
                 Err(revert)
             }
             // actual error, return it as normal
-            Err(e) => {
-                Err(e)
-            }
+            Err(e) => Err(e),
         }
     }
 
@@ -338,14 +335,12 @@ impl Pools {
         let swapped = Pools::swap_2_internal(self, from, to, amount, min_out);
 
         match swapped {
-            Ok((_,_,amount_out,_,_,_)) => {
+            Ok((_, _, amount_out, _, _, _)) => {
                 let revert = erc20::revert_from_msg(&amount_out.to_string());
                 Err(revert)
             }
             // actual error, return it as normal
-            Err(e) => {
-                Err(e)
-            }
+            Err(e) => Err(e),
         }
     }
 }
@@ -624,9 +619,9 @@ impl Pools {
         }
 
         evm::log(events::UpdatePositionLiquidity {
-          id: id,
-          token0: token_0,
-          token1: token_1
+            id: id,
+            token0: token_0,
+            token1: token_1,
         });
 
         Ok((token_0, token_1))
@@ -847,13 +842,14 @@ impl Pools {
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 impl test_utils::StorageNew for Pools {
     fn new(i: U256, v: u8) -> Self {
-      unsafe { <Self as stylus_sdk::storage::StorageType>::new(i, v) }
+        unsafe { <Self as stylus_sdk::storage::StorageType>::new(i, v) }
     }
 }
 
 #[cfg(test)]
 mod test {
     use crate::{eth_serde, test_utils, types::I256Extension, types::*, Pools};
+    use maplit::hashmap;
     use ruint_macro::uint;
     use stylus_sdk::{
         alloy_primitives::{address, bytes},
@@ -908,7 +904,7 @@ mod test {
 
     #[test]
     fn test_similar_to_ethers() -> Result<(), Vec<u8>> {
-        test_utils::with_storage::<_, Pools, _>(|contract| {
+        test_utils::with_storage::<_, Pools, _>(&hashmap! {}, |contract| {
             // Create the storage
             contract.seawater_admin.set(msg::sender());
             let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
@@ -943,7 +939,7 @@ mod test {
 
     #[test]
     fn test_alex() -> Result<(), Vec<u8>> {
-        test_utils::with_storage::<_, Pools, _>(|contract| {
+        test_utils::with_storage::<_, Pools, _>(&hashmap! {}, |contract| {
             // Create the storage
             contract.seawater_admin.set(msg::sender());
             let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");

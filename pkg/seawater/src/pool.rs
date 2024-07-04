@@ -438,19 +438,29 @@ impl StoragePool {
     }
 
     /// Gets the current pool price.
-    pub fn get_sqrt_price(&self) -> U256 { self.sqrt_price.get() }
+    pub fn get_sqrt_price(&self) -> U256 {
+        self.sqrt_price.get()
+    }
 
     /// Get the current tick.
-    pub fn get_cur_tick(&self) -> I32 { self.cur_tick.get() }
+    pub fn get_cur_tick(&self) -> I32 {
+        self.cur_tick.get()
+    }
 
     /// Get the tick spacing for the pool given.
-    pub fn get_tick_spacing(&self) -> U8 { self.tick_spacing.get() }
+    pub fn get_tick_spacing(&self) -> U8 {
+        self.tick_spacing.get()
+    }
 
     /// Get the global fee growth for token0.
-    pub fn get_fee_growth_global_0(&self) -> U256 { self.fee_growth_global_0.get() }
+    pub fn get_fee_growth_global_0(&self) -> U256 {
+        self.fee_growth_global_0.get()
+    }
 
     /// Get the current fee growth for token1 (fUSDC.)
-    pub fn get_fee_growth_global_1(&self) -> U256 { self.fee_growth_global_1.get() }
+    pub fn get_fee_growth_global_1(&self) -> U256 {
+        self.fee_growth_global_1.get()
+    }
 
     /// Enables or disables the pool.
     pub fn set_enabled(&mut self, enabled: bool) {
@@ -461,19 +471,20 @@ impl StoragePool {
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 impl test_utils::StorageNew for StoragePool {
     fn new(i: U256, v: u8) -> Self {
-      unsafe { <Self as stylus_sdk::storage::StorageType>::new(i, v) }
+        unsafe { <Self as stylus_sdk::storage::StorageType>::new(i, v) }
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::{test_utils};
+    use crate::test_utils;
+    use maplit::hashmap;
     use ruint_macro::uint;
 
     #[test]
     fn test_update_position() {
-        test_utils::with_storage::<_, StoragePool, _>(|storage| {
+        test_utils::with_storage::<_, StoragePool, _>(&hashmap! {}, |storage| {
             storage
                 .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
                 .unwrap();
@@ -493,16 +504,14 @@ mod test {
 
     #[test]
     fn test_update_position_2() {
-        test_utils::with_storage::<_, StoragePool, _>(|storage| {
+        test_utils::with_storage::<_, StoragePool, _>(&hashmap! {}, |storage| {
             storage
                 .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
                 .unwrap();
 
             let id = uint!(2_U256);
 
-            storage
-                .create_position(id, -874753, -662914)
-                .unwrap();
+            storage.create_position(id, -874753, -662914).unwrap();
 
             assert_eq!(
                 storage.update_position(id, 24703680000000000000000),
@@ -513,7 +522,7 @@ mod test {
 
     #[test]
     fn test_swap() -> Result<(), Revert> {
-        test_utils::with_storage::<_, StoragePool, _>(|storage| {
+        test_utils::with_storage::<_, StoragePool, _>(&hashmap! {}, |storage| {
             storage.init(
                 test_utils::encode_sqrt_price(100, 1), // price
                 0,
