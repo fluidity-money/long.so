@@ -8,11 +8,12 @@ package features
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/fluidity-money/long.so/lib/setup"
 )
 
 // EnvFeatures to enable at runtime from env (optionally)
@@ -32,7 +33,10 @@ type F struct {
 // or use EnvFeatures.
 func Get() F {
 	f := get()
-	slog.Debug("enabled features", "features", f.enabled, "everything enabled?", f.everything)
+	slog.Debug("enabled features",
+		"features", f.enabled,
+		"everything enabled?", f.everything,
+	)
 	return f
 }
 
@@ -61,17 +65,17 @@ func get() F {
 func getFromBucket() F {
 	r, err := http.Get(FeaturesBucket)
 	if err != nil {
-		log.Fatalf("features bucket: get: %v", err)
+		setup.Exitf("features bucket: get: %v", err)
 	}
 	defer r.Body.Close()
 	var enabled map[string]bool
 	var buf bytes.Buffer // copy for logging if something goes wrong here.
 	if _, err := buf.ReadFrom(r.Body); err != nil {
-		log.Fatalf("features bucket: draining: %v", err)
+		setup.Exitf("features bucket: draining: %v", err)
 	}
 	buf2 := buf
 	if err := json.NewDecoder(&buf).Decode(&enabled); err != nil {
-		log.Fatalf("features bucket: decoding %#v: %v", buf2.String(), err)
+		setup.Exitf("features bucket: decoding %#v: %v", buf2.String(), err)
 	}
 	return F{
 		everything: false,

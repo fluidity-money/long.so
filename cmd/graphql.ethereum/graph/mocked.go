@@ -86,7 +86,7 @@ func MockGetPoolPositions(address types.Address) (positions model.SeawaterPositi
 	a := address // Copy so we don't keep alive the scope above.
 	return model.SeawaterPositions{
 		From: 0,
-		To:   0,
+		To:   nil,
 		Pool: &a,
 		// Wallet is unset here so we don't filter on it.
 		Wallet:    nil,
@@ -210,8 +210,8 @@ func MockPriceOverTime(period int, fusdc, token types.Address) (history []string
 		history[i] = fmt.Sprintf("%0.04f", price)
 	}
 	avg.Sub(avg, new(big.Float).SetInt64(int64(period)))
-	average = fmt.Sprintf("%0.4f", avg)
-	max = fmt.Sprintf("%0.4f", max_)
+	average = fmt.Sprintf("%0.8f", avg)
+	max = fmt.Sprintf("%0.8f", max_)
 	return
 }
 

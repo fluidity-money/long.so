@@ -97,7 +97,7 @@ type Query {
     Where to start after based on the position id.
     """
     after: Int
-  ): SeawaterSwaps!
+  ): GetSwaps!
 
   """
   getSwapsForUser by the user across every pool we track.
@@ -115,7 +115,7 @@ type Query {
     Where to start after based on the position id.
     """
     after: Int
-  ): SeawaterSwaps!
+  ): GetSwapsForUser!
 }
 
 """
@@ -222,20 +222,24 @@ type SeawaterPool {
 }
 
 """
+Get swaps for user return type, set up to allow better control of caching.
+"""
+type GetSwapsForUser {
+  data: SeawaterSwaps!
+}
+
+"""
+Get swaps for a specific pool, set up to be more granular for caching.
+"""
+type GetSwaps {
+  data: SeawaterSwaps!
+}
+
+"""
 Pagination-friendly way to quickly receive swaps made somewhere. Knows internally where it
 came from, where it's at with pagination with the position ids.
 """
 type SeawaterSwaps {
-  """
-  The pool associated with this query, if any.
-  """
-  pool: SeawaterPool
-
-  """
-  The wallet associated with this query, if any.
-  """
-  wallet: Wallet
-
   """
   The sum of these value in these swaps per unique pool, if possible to collect.
   """
@@ -258,16 +262,6 @@ type SeawaterSwaps {
 Pagination-friendly way of viewing the current state of the positions available in a pool.
 """
 type SeawaterPositions {
-  """
-  The specific pool (if any) that's responsible for the responses here.
-  """
-  pool: SeawaterPool
-
-  """
-  The specific wallet (if any) that's associated with the positions here.
-  """
-  wallet: Wallet
-
   """
   The positions associated with this data.
   """
@@ -410,6 +404,11 @@ type SeawaterPosition {
   Id of the GraphQL object, for caching reasons. Made up of `positionId (pos:positionId)`.
   """
   id: ID!
+
+  """
+  Creation timestamp of the position.
+  """
+  created: Int!
 
   """
   Position Id in the contract of the user's position that they own. Used for a cursor.

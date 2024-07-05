@@ -2,19 +2,22 @@ const path = require("path");
 const childProcess = require("child_process");
 const { withSentryConfig } = require("@sentry/nextjs");
 
-const gitHash =
-  childProcess.execSync("git rev-parse --short HEAD").toString().trim();
+const gitHash = childProcess
+  .execSync("git rev-parse --short HEAD")
+  .toString()
+  .trim();
 
 module.exports = withSentryConfig(
   /** @type {import("next").NextConfig} */
   {
     output: "export",
     images: { unoptimized: true },
-
     env: {
-      GIT_HASH: gitHash
+      GIT_HASH: gitHash,
     },
-
+    experimental: {
+      swcPlugins: [["swc-plugin-coverage-instrument", {}]],
+    },
     webpack(config) {
       // Grab the existing rule that handles SVG imports
       const fileLoaderRule = config.module.rules.find((rule) =>
@@ -85,5 +88,5 @@ module.exports = withSentryConfig(
     // https://docs.sentry.io/product/crons/
     // https://vercel.com/docs/cron-jobs
     automaticVercelMonitors: true,
-  }
+  },
 );

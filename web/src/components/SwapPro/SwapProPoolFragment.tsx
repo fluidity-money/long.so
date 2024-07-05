@@ -19,20 +19,22 @@ export const SwapProPoolFragment = graphql(`
     }
     volumeOverTime {
       monthly {
-        timestamp
         token1 {
+          timestamp
           valueUsd
         }
         fusdc {
+          timestamp
           valueUsd
         }
       }
       daily {
-        timestamp # TODO: timestamp is always 0
         token1 {
+          timestamp
           valueUsd
         }
         fusdc {
+          timestamp
           valueUsd
         }
       }

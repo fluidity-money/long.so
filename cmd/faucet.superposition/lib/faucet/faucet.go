@@ -2,7 +2,6 @@ package faucet
 
 import (
 	"bytes"
-	"math/big"
 	"context"
 	_ "embed"
 
@@ -10,6 +9,7 @@ import (
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethAbiBind "github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethCommon "github.com/ethereum/go-ethereum/common"
+	ethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -20,12 +20,12 @@ var abi, _ = ethAbi.JSON(bytes.NewReader(abiBytes))
 
 type FaucetReq struct {
 	Recipient ethCommon.Address `abi:"recipient"`
-	Amount    *big.Int          `abi:"amount"`
+	IsStaker  bool              `abi:"isStaker"`
 }
 
 // SendFaucet to multiple addresses, allowing the contract to randomly
 // choose how much to send.
-func SendFaucet(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...FaucetReq) (hash *ethCommon.Hash, err error) {
+func SendFaucet(ctx context.Context, c *ethclient.Client, o *ethAbiBind.TransactOpts, faucet, sender ethCommon.Address, addrs ...FaucetReq) (hash *ethTypes.Transaction, err error) {
 	bc := ethAbiBind.NewBoundContract(faucet, abi, c, c, c)
 	d, err := abi.Pack("sendTo", addrs)
 	if err != nil {
@@ -39,11 +39,11 @@ func SendFaucet(ctx context.Context, c *ethclient.Client, o *ethAbiBind.Transact
 	if err != nil {
 		return nil, err
 	}
+	g = uint64(float64(g) * 1.25) // Lazy!
 	o.GasLimit = uint64(float64(g) * 1.5)
 	tx, err := bc.Transact(o, "sendTo", addrs)
 	if err != nil {
 		return nil, err
 	}
-	h := tx.Hash()
-	return &h, nil
+	return tx, nil
 }

@@ -31,6 +31,9 @@ const ManagePoolFragment = graphql(`
   fragment ManagePoolFragment on SeawaterPool {
     address
     id
+    liquidity {
+      liquidity
+    }
     token {
       symbol
       name
@@ -88,7 +91,10 @@ export default function PoolPage() {
   const allPoolsData = useFragment(ManagePoolFragment, globalData?.pools);
   const positionsData_ = useFragment(PositionsFragment, userData?.getWallet)
   const positionsData = useMemo(() =>
-    positionsData_?.positions.positions.filter(p => p.pool.address === id),
+    positionsData_?.positions.positions.filter(p =>
+      p.pool.address === id &&
+      (parseFloat(p.liquidity.fusdc.valueUsd) + parseFloat(p.liquidity.token1.valueUsd)) > 0
+    ),
     [id, positionsData_]
   );
 

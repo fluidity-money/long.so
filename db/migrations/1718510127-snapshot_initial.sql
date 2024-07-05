@@ -32,7 +32,7 @@ CREATE TABLE snapshot_positions_log_1 (
 	amount1 HUGEINT NOT NULL
 );
 
-CREATE FUNCTION snapshot_create_positions_1(ids HUGEINT[], amount0s HUGEINT[], amount1s HUGEINT[])
+CREATE FUNCTION snapshot_create_positions_1(pools VARCHAR[], ids HUGEINT[], amount0s HUGEINT[], amount1s HUGEINT[])
 RETURNS VOID LANGUAGE PLPGSQL
 AS $$
 DECLARE affected_rows INT;
@@ -53,7 +53,7 @@ BEGIN
 			CURRENT_TIMESTAMP,
 			sw.pos_id,
 			sw.owner,
-			sw.pool,
+			pool,
 			sw.lower,
 			sw.upper,
 			amount0s[i],
@@ -61,7 +61,8 @@ BEGIN
 		FROM
 			events_seawater_mintPosition sw
 		WHERE
-			sw.pos_id = ids[i];
+			sw.pos_id = ids[i] AND
+			sw.pool = pools[i];
 
 		INSERT INTO snapshot_positions_log_1 (
 			created_by,
@@ -77,7 +78,7 @@ BEGIN
 			CURRENT_TIMESTAMP,
 			sw.pos_id,
 			sw.owner,
-			sw.pool,
+			pool,
 			sw.lower,
 			sw.upper,
 			amount0s[i],
@@ -85,7 +86,8 @@ BEGIN
 		FROM
 			events_seawater_mintPosition sw
 		WHERE
-			sw.pos_id = ids[i];
+			sw.pos_id = ids[i] AND
+			sw.pool = pools[i];
 	END LOOP;
 END $$;
 

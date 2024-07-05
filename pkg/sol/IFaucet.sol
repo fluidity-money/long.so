@@ -5,7 +5,7 @@ pragma solidity 0.8.16;
 interface IFaucet {
     struct FaucetReq {
         address recipient;
-        uint256 amount;
+        bool isStaker;
     }
 
     /**

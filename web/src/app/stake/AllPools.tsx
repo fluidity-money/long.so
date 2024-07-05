@@ -165,8 +165,9 @@ export const AllPools = () => {
     );
   }, [showDemoData, poolsData]);
 
+
   const poolTvlSummed =
-    sum(poolsData?.map((pool) => pool.tvlOverTime.daily[0]));
+    sum(poolsData?.map((pool) => parseFloat(pool.tvlOverTime.daily[0])));
 
   return (
     <div className="flex w-full flex-col items-center">

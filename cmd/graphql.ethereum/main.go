@@ -3,13 +3,12 @@ package main
 //go:generate go run github.com/99designs/gqlgen generate
 
 import (
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/fluidity-money/long.so/lib/config"
 	"github.com/fluidity-money/long.so/lib/features"
-	_ "github.com/fluidity-money/long.so/lib/setup"
+	"github.com/fluidity-money/long.so/lib/setup"
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph"
 
@@ -20,7 +19,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	gormLogger "gorm.io/gorm/logger"
+	gormSlog "github.com/orandin/slog-gorm"
 
 	"github.com/aws/aws-lambda-go/lambda"
 
@@ -46,17 +45,18 @@ func (m corsMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	defer setup.Flush()
 	config := config.Get()
 	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
 		DisableAutomaticPing: true,
-		Logger: gormLogger.Default.LogMode(gormLogger.Silent),
+		Logger: gormSlog.New(), // Use default slog
 	})
 	if err != nil {
-		log.Fatalf("database open: %v", err)
+		setup.Exitf("database open: %v", err)
 	}
 	geth, err := ethclient.Dial(config.GethUrl)
 	if err != nil {
-		log.Fatalf("geth open: %v", err)
+		setup.Exitf("geth open: %v", err)
 	}
 	defer geth.Close()
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
@@ -74,12 +74,15 @@ func main() {
 		lambda.Start(httpadapter.New(http.DefaultServeMux).ProxyWithContext)
 	case "http":
 		err := http.ListenAndServe(os.Getenv(EnvListenAddr), nil)
-		log.Fatalf( // This should only return if there's an error.
+		setup.Exitf( // This should only return if there's an error.
 			"err listening, %#v not set?: %v",
 			EnvListenAddr,
 			err,
 		)
 	default:
-		log.Fatalf("unexpected listen type: %#v, use either (lambda|http) for SPN_LISTEN_BACKEND", typ)
+		setup.Exitf(
+			"unexpected listen type: %#v, use either (lambda|http) for SPN_LISTEN_BACKEND",
+			typ,
+		)
 	}
 }

@@ -1,12 +1,11 @@
 package main
 
 import (
-	"log"
 	"log/slog"
 	"os"
 	"strconv"
 
-	_ "github.com/fluidity-money/long.so/lib/setup"
+	"github.com/fluidity-money/long.so/lib/setup"
 
 	"github.com/fluidity-money/long.so/lib/config"
 	"github.com/fluidity-money/long.so/lib/features"
@@ -36,17 +35,18 @@ const (
 )
 
 func main() {
+	defer setup.Flush()
 	config := config.Get()
 	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
 		Logger: gormLogger.Default.LogMode(gormLogger.Silent),
 	})
 	if err != nil {
-		log.Fatalf("opening postgres: %v", err)
+		setup.Exitf("opening postgres: %v", err)
 	}
 	// Start to ingest block headers by connecting to the websocket given.
 	c, err := ethclient.Dial(config.GethUrl)
 	if err != nil {
-		log.Fatalf("websocket dial: %v", err)
+		setup.Exitf("websocket dial: %v", err)
 	}
 	defer c.Close()
 	/* Ingestor-specific configuration. */
@@ -63,7 +63,7 @@ func main() {
 		var err error
 		ingestorPagination, err = strconv.ParseUint(ingestorPagination_, 10, 64)
 		if err != nil {
-			log.Fatalf(
+			setup.Exitf(
 				"failed to parse pagination block increase, string is %#v: %v",
 				ingestorPagination_,
 				err,
@@ -80,7 +80,7 @@ func main() {
 	} else {
 		i, err := strconv.ParseInt(ingestorPollWait_, 10, 32)
 		if err != nil {
-			log.Fatalf(
+			setup.Exitf(
 				"failed to parse pagination poll wait, string is %#v: %v",
 				ingestorPollWait_,
 				err,
