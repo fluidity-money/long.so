@@ -15,7 +15,7 @@ pub const fn selector(name: &[u8]) -> [u8; 4] {
 
 /// Extracts a 256 bit word from a data stream, returning the word and the remaining data.
 pub fn take_word(data: &[u8]) -> (&[u8; 32], &[u8]) {
-    data.split_array_ref::<32>()
+    data.split_first_chunk::<32>().unwrap()
 }
 
 macro_rules! gen_parse {
@@ -67,7 +67,7 @@ gen_parse_int!(parse_i128, i128);
 
 /// Extracts a 32 bit selector from a data stream, returning the selector and the remaining data.
 pub fn parse_selector(data: &[u8]) -> (u32, &[u8]) {
-    let (selector, data) = data.split_array_ref::<4>();
+    let (selector, data) = data.split_first_chunk::<4>().unwrap();
     (u32::from_be_bytes(*selector), data)
 }
 

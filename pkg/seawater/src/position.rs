@@ -8,6 +8,7 @@ use crate::{
 
 use stylus_sdk::{prelude::*, storage::*};
 
+
 /// Storage type for the details on a position.
 #[solidity_storage]
 pub struct StoragePositionInfo {
@@ -116,3 +117,4 @@ impl StoragePositions {
         (amount_0, amount_1)
     }
 }
+
