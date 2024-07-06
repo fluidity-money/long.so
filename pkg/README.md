@@ -156,6 +156,12 @@ these logs, enable the `testing-dbg-<test>`
 feature and run the tests without capturing stdout, ie `cargo test
 --features=testing,testing-dbg-erc20 -- --nocapture`.
 
+Testing tools are available with the `with_storage` macro, which lets you set slots and
+maximum balances for ERC20 transfers. Reproducing on-chain transactions is possible by
+using a tracer on the chain the transaciton took place, then examining the storage slots
+that were accessed (perhaps by looking at `SLOAD`s), and setting it explicitly with the
+macro.
+
 ## Deployment
 
 You can deploy the contracts using the `deploy.sh` script.
