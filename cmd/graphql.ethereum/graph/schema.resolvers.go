@@ -13,10 +13,11 @@ import (
 	"time"
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
-	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
+	graphErc20 "github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
 	"github.com/fluidity-money/long.so/lib/features"
 	"github.com/fluidity-money/long.so/lib/math"
 	"github.com/fluidity-money/long.so/lib/types"
+	"github.com/fluidity-money/long.so/lib/types/erc20"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
 	"gorm.io/gorm"
 )
@@ -30,21 +31,47 @@ func (r *amountResolver) Token(ctx context.Context, obj *model.Amount) (model.To
 		MockDelay(r.F)
 		return MockToken(obj.Token.String())
 	}
-	name, symbol, totalSupply, err := erc20.GetErc20Details(
-		ctx,
-		r.Geth,
-		obj.Token,
-	)
-	if err != nil {
-		return model.Token{}, fmt.Errorf("erc20 token %#v: %v", obj.Token, err)
+	var token erc20.Erc20
+	err := r.DB.Table("erc20_cache_1").
+		Where("address = ?", obj.Token).
+		First(&token).
+		Error
+	switch {
+	case err == nil:
+		// Nothing went wrong! Return the user what we found.
+		return model.Token{token}, nil
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		// Look up the token, and store it in the database.
+		name, symbol, totalSupply, err := graphErc20.GetErc20Details(
+			ctx,
+			r.Geth,
+			obj.Token,
+		)
+		if err != nil {
+			return model.Token{}, fmt.Errorf("erc20 token %#v: %v", obj.Token, err)
+		}
+		err = r.DB.Exec(
+			"SELECT erc20_insert_1(?, ?, ?, ?, ?)",
+			obj.Token,
+			name,
+			symbol,
+			totalSupply,
+			obj.Decimals,
+		).
+			Error
+		if err != nil {
+			return model.Token{}, fmt.Errorf("insert erc20 %v: %v", obj.Token, err)
+		}
+		return model.Token{erc20.Erc20{
+			Address:     obj.Token,
+			Name:        name,
+			Symbol:      symbol,
+			TotalSupply: totalSupply,
+			Decimals:    obj.Decimals,
+		}}, nil
+	default:
+		return model.Token{}, err
 	}
-	return model.Token{
-		Address:     obj.Token.String(),
-		Name:        name,
-		Symbol:      symbol,
-		TotalSupply: totalSupply.String(),
-		Decimals:    obj.Decimals,
-	}, nil
 }
 
 // ValueUnscaled is the resolver for the valueUnscaled field.
@@ -121,21 +148,13 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 
 // Fusdc is the resolver for the fusdc field.
 func (r *queryResolver) Fusdc(ctx context.Context) (t model.Token, err error) {
-	name, symbol, totalSupply, err := erc20.GetErc20Details(
-		ctx,
-		r.Geth,
-		r.C.FusdcAddr,
-	)
-	if err != nil {
-		return t, fmt.Errorf("erc20 at %#v: %v", r.C.FusdcAddr, err)
-	}
-	return model.Token{
-		Address:     r.C.FusdcAddr.String(),
-		Name:        name,
-		Symbol:      symbol,
-		TotalSupply: totalSupply.String(),
+	return model.Token{erc20.Erc20{
+		Address:     r.C.FusdcAddr,
+		Name:        r.C.FusdcName,
+		Symbol:      r.C.FusdcSymbol,
+		TotalSupply: r.C.FusdcTotalSupply,
 		Decimals:    r.C.FusdcDecimals,
-	}, nil
+	}}, nil
 }
 
 // Pools is the resolver for the pools field.
@@ -421,30 +440,53 @@ func (r *seawaterPoolResolver) TickSpacing(ctx context.Context, obj *seawater.Po
 // Token is the resolver for the token field.
 func (r *seawaterPoolResolver) Token(ctx context.Context, obj *seawater.Pool) (t model.Token, err error) {
 	if obj == nil {
-		return t, fmt.Errorf("no pool obj")
+		return model.Token{}, fmt.Errorf("empty amount")
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
-		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
-			MockDelay(r.F)
-			return nil
-		})
+		MockDelay(r.F)
 		return MockToken(obj.Token.String())
 	}
-	name, symbol, totalSupply, err := erc20.GetErc20Details(
-		ctx,
-		r.Geth,
-		obj.Token,
-	)
-	if err != nil {
-		return t, fmt.Errorf("erc20 at %#v: %v", obj.Token, err)
+	var token erc20.Erc20
+	err = r.DB.Table("erc20_cache_1").
+		Where("address = ?", obj.Token).
+		First(&token).
+		Error
+	switch {
+	case err == nil:
+		// Nothing went wrong! Return the user what we found.
+		return model.Token{token}, nil
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		// Look up the token, and store it in the database.
+		name, symbol, totalSupply, err := graphErc20.GetErc20Details(
+			ctx,
+			r.Geth,
+			obj.Token,
+		)
+		if err != nil {
+			return model.Token{}, fmt.Errorf("erc20 token %#v: %v", obj.Token, err)
+		}
+		err = r.DB.Exec(
+			"SELECT erc20_insert_1(?, ?, ?, ?, ?)",
+			obj.Token,
+			name,
+			symbol,
+			totalSupply,
+			obj.Decimals,
+		).
+			Error
+		if err != nil {
+			return model.Token{}, fmt.Errorf("insert erc20 %v: %v", obj.Token, err)
+		}
+		return model.Token{erc20.Erc20{
+			Address:     obj.Token,
+			Name:        name,
+			Symbol:      symbol,
+			TotalSupply: totalSupply,
+			Decimals:    obj.Decimals,
+		}}, nil
+	default:
+		return model.Token{}, err
 	}
-	return model.Token{
-		Address:     obj.Token.String(),
-		Name:        name,
-		Symbol:      symbol,
-		TotalSupply: totalSupply.String(),
-		Decimals:    int(obj.Decimals),
-	}, nil
 }
 
 // Price is the resolver for the price field.
@@ -1367,11 +1409,40 @@ func (r *seawaterSwapsResolver) Next(ctx context.Context, obj *model.SeawaterSwa
 }
 
 // ID is the resolver for the id field.
+func (r *tokenResolver) ID(ctx context.Context, obj *model.Token) (string, error) {
+	if obj == nil {
+		return "", fmt.Errorf("empty token")
+	}
+	return fmt.Sprintf("token:%v", obj.Address), nil
+}
+
+// Address is the resolver for the address field.
+func (r *tokenResolver) Address(ctx context.Context, obj *model.Token) (string, error) {
+	if obj == nil {
+		return "", fmt.Errorf("empty token")
+	}
+	return obj.Address.String(), nil
+}
+
+// Image is the resolver for the image field.
+func (r *tokenResolver) Image(ctx context.Context, obj *model.Token) (string, error) {
+	panic(fmt.Errorf("not implemented: Image - image"))
+}
+
+// TotalSupply is the resolver for the totalSupply field.
+func (r *tokenResolver) TotalSupply(ctx context.Context, obj *model.Token) (string, error) {
+	if obj == nil {
+		return "", fmt.Errorf("empty token")
+	}
+	return obj.TotalSupply.String(), nil
+}
+
+// ID is the resolver for the id field.
 func (r *walletResolver) ID(ctx context.Context, obj *model.Wallet) (string, error) {
 	if obj == nil {
-		return "", fmt.Errorf("no wallet obj")
+		return "", fmt.Errorf("empty token")
 	}
-	return "wallet:" + obj.Address.String(), nil
+	return fmt.Sprintf("wallet:%v", obj.Address), nil
 }
 
 // Address is the resolver for the address field.
@@ -1466,6 +1537,9 @@ func (r *Resolver) SeawaterSwap() SeawaterSwapResolver { return &seawaterSwapRes
 // SeawaterSwaps returns SeawaterSwapsResolver implementation.
 func (r *Resolver) SeawaterSwaps() SeawaterSwapsResolver { return &seawaterSwapsResolver{r} }
 
+// Token returns TokenResolver implementation.
+func (r *Resolver) Token() TokenResolver { return &tokenResolver{r} }
+
 // Wallet returns WalletResolver implementation.
 func (r *Resolver) Wallet() WalletResolver { return &walletResolver{r} }
 
@@ -1478,4 +1552,5 @@ type seawaterPositionsGlobalResolver struct{ *Resolver }
 type seawaterPositionsUserResolver struct{ *Resolver }
 type seawaterSwapResolver struct{ *Resolver }
 type seawaterSwapsResolver struct{ *Resolver }
+type tokenResolver struct{ *Resolver }
 type walletResolver struct{ *Resolver }

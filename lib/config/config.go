@@ -18,6 +18,8 @@ type C struct {
 	GethUrl, TimescaleUrl   string
 	SeawaterAddr, FusdcAddr types.Address
 	FusdcDecimals           int
+	FusdcTotalSupply        types.UnscaledNumber
+	FusdcSymbol, FusdcName  string
 }
 
 // Get config by querying environment variables.
@@ -40,10 +42,13 @@ func Get() C {
 		setup.Exitf("SPN_FUSDC_ADDR not set")
 	}
 	return C{
-		GethUrl:       gethUrl,
-		TimescaleUrl:  timescaleUrl,
-		SeawaterAddr:  types.AddressFromString(seawaterAddr),
-		FusdcAddr:     types.AddressFromString(fusdcAddr),
-		FusdcDecimals: DefaultFusdcDecimals,
+		GethUrl:          gethUrl,
+		TimescaleUrl:     timescaleUrl,
+		SeawaterAddr:     types.AddressFromString(seawaterAddr),
+		FusdcAddr:        types.AddressFromString(fusdcAddr),
+		FusdcDecimals:    DefaultFusdcDecimals,
+		FusdcTotalSupply: DefaultFusdcTotalSupply,
+		FusdcSymbol:      DefaultFusdcSymbol,
+		FusdcName:        DefaultFusdcName,
 	}
 }

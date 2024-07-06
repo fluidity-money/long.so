@@ -10,6 +10,7 @@ import (
 
 	"github.com/fluidity-money/long.so/lib/features"
 	"github.com/fluidity-money/long.so/lib/types"
+	"github.com/fluidity-money/long.so/lib/types/erc20"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
@@ -36,13 +37,13 @@ var ox65Price, _ = new(big.Int).SetString("79228162514264337593543950336", 10)
 
 var (
 	Tokens = map[string]model.Token{
-		"0x65dfe41220c438bf069bbce9eb66b087fe65db36": {
-			Address:     "0x65dfe41220c438bf069bbce9eb66b087fe65db36",
+		"0x65dfe41220c438bf069bbce9eb66b087fe65db36": {erc20.Erc20{
+			Address:     types.AddressFromString("0x65dfe41220c438bf069bbce9eb66b087fe65db36"),
 			Name:        "NEW_TOKEN_2",
-			TotalSupply: "8ac72304c5836640", //10000000001000040000
+			TotalSupply: mustUnscaled("10000000001000040000"), //10000000001000040000
 			Decimals:    18,
 			Symbol:      "NEW_TOKEN_2",
-		},
+		}},
 	}
 
 	Pools = map[string]seawater.Pool{
@@ -330,4 +331,12 @@ func randomBoolean() bool {
 		panic(err)
 	}
 	return uint8(b[0]) > 127
+}
+
+func mustUnscaled(s string) types.UnscaledNumber {
+	x, err := types.UnscaledNumberFromBase10(s)
+	if err != nil {
+		panic(err)
+	}
+	return *x
 }
