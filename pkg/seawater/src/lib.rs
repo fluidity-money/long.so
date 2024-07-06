@@ -904,72 +904,84 @@ mod test {
 
     #[test]
     fn test_similar_to_ethers() -> Result<(), Vec<u8>> {
-        test_utils::with_storage::<_, Pools, _>(None, &hashmap! {}, |contract| {
-            // Create the storage
-            contract.seawater_admin.set(msg::sender());
-            let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
+        test_utils::with_storage::<_, Pools, _>(
+            None,
+            &hashmap! {}, // slots map
+            &hashmap! {}, // caller erc20 balances
+            &hashmap! {}, // amm erc20 balances
+            |contract| {
+                // Create the storage
+                contract.seawater_admin.set(msg::sender());
+                let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
 
-            // First, we set up the pool.
-            contract.create_pool(
-                token_addr,
-                test_utils::encode_sqrt_price(50, 1), // the price
-                0,
-                1,
-                100000000000,
-            )?;
+                // First, we set up the pool.
+                contract.create_pool(
+                    token_addr,
+                    test_utils::encode_sqrt_price(50, 1), // the price
+                    0,
+                    1,
+                    100000000000,
+                )?;
 
-            let lower_tick = test_utils::encode_tick(50);
-            let upper_tick = test_utils::encode_tick(150);
-            let liquidity_delta = 20000;
+                let lower_tick = test_utils::encode_tick(50);
+                let upper_tick = test_utils::encode_tick(150);
+                let liquidity_delta = 20000;
 
-            // Begin to create the position, following the same path as
-            // in `createPosition` in ethers-tests/tests.ts
-            contract.mint_position(token_addr, lower_tick, upper_tick)?;
-            let position_id = contract
-                .next_position_id
-                .clone()
-                .checked_sub(U256::one())
-                .unwrap();
+                // Begin to create the position, following the same path as
+                // in `createPosition` in ethers-tests/tests.ts
+                contract.mint_position(token_addr, lower_tick, upper_tick)?;
+                let position_id = contract
+                    .next_position_id
+                    .clone()
+                    .checked_sub(U256::one())
+                    .unwrap();
 
-            contract.update_position(token_addr, position_id, liquidity_delta)?;
+                contract.update_position(token_addr, position_id, liquidity_delta)?;
 
-            Ok(())
-        })
+                Ok(())
+            },
+        )
     }
 
     #[test]
     fn test_alex() -> Result<(), Vec<u8>> {
-        test_utils::with_storage::<_, Pools, _>(None, &hashmap! {}, |contract| {
-            // Create the storage
-            contract.seawater_admin.set(msg::sender());
-            let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
+        test_utils::with_storage::<_, Pools, _>(
+            None,
+            &hashmap! {}, // slots map
+            &hashmap! {}, // caller erc20 balances
+            &hashmap! {}, // amm erc20 balances
+            |contract| {
+                // Create the storage
+                contract.seawater_admin.set(msg::sender());
+                let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
 
-            // First, we set up the pool.
-            contract.create_pool(
-                token_addr,
-                test_utils::encode_sqrt_price(100, 1), // the price
-                0,
-                1,
-                100000000000,
-            )?;
+                // First, we set up the pool.
+                contract.create_pool(
+                    token_addr,
+                    test_utils::encode_sqrt_price(100, 1), // the price
+                    0,
+                    1,
+                    100000000000,
+                )?;
 
-            let lower_tick = 39122;
-            let upper_tick = 50108;
-            let liquidity_delta = 20000;
+                let lower_tick = 39122;
+                let upper_tick = 50108;
+                let liquidity_delta = 20000;
 
-            // Begin to create the position, following the same path as
-            // in `createPosition` in ethers-tests/tests.ts
-            contract.mint_position(token_addr, lower_tick, upper_tick)?;
-            let position_id = contract
-                .next_position_id
-                .clone()
-                .checked_sub(U256::one())
-                .unwrap();
+                // Begin to create the position, following the same path as
+                // in `createPosition` in ethers-tests/tests.ts
+                contract.mint_position(token_addr, lower_tick, upper_tick)?;
+                let position_id = contract
+                    .next_position_id
+                    .clone()
+                    .checked_sub(U256::one())
+                    .unwrap();
 
-            contract.update_position(token_addr, position_id, liquidity_delta)?;
+                contract.update_position(token_addr, position_id, liquidity_delta)?;
 
-            Ok(())
-        })
+                Ok(())
+            },
+        )
     }
 
     #[test]
@@ -988,6 +1000,8 @@ mod test {
               "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560d" => "0x00000000000000000000ffffffffffffffffffffffffffffffff3c00000bb801",
               "0xce67bab47ccb0f35690620809f2318ef477b533824426881f498e863af201136" => "0x0000000000000000000000000000000000000001850189a932f92a682dd7f589",
             },
+            &hashmap! {}, // caller balances
+            &hashmap! {}, // amm balances
             |contract| {
                 let from = address!("09F7156AAE9C903F90B1CB1E312582C4f208A759");
                 let to = address!("6437fdc89cED41941b97A9f1f8992D88718C81c5");
@@ -1002,45 +1016,47 @@ mod test {
 
     #[test]
     fn broken_alex_1() -> Result<(), Vec<u8>> {
-         //curl -d '{"jsonrpc":"2.0","id":757,"method":"eth_call","params":[{"data":"0x41e3cc580000000000000000000000006437fdc89ced41941b97a9f1f8992d88718c81c5000000000000000000000000de104342b32bca03ec995f999181f7cf1ffc04d7000000000000000000000000000000000000000000000000000000002e56dc130000000000000000000000000000000000000000000000000000000000000000","from":"0xFEb6034FC7dF27dF18a3a6baD5Fb94C0D3dCb6d5","to":"0x839c5cf32d9Bc2CD46027691d2941410251ED557"},"0x10d889"]}' -H 'Content-Type: application/json' https://testnet-rpc.superposition.so
+        //curl -d '{"jsonrpc":"2.0","id":757,"method":"eth_call","params":[{"data":"0x41e3cc580000000000000000000000006437fdc89ced41941b97a9f1f8992d88718c81c5000000000000000000000000de104342b32bca03ec995f999181f7cf1ffc04d7000000000000000000000000000000000000000000000000000000002e56dc130000000000000000000000000000000000000000000000000000000000000000","from":"0xFEb6034FC7dF27dF18a3a6baD5Fb94C0D3dCb6d5","to":"0x839c5cf32d9Bc2CD46027691d2941410251ED557"},"0x10d889"]}' -H 'Content-Type: application/json' https://testnet-rpc.superposition.so
         test_utils::with_storage::<_, Pools, _>(
             Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()),
             &hashmap! {
-                    "0x0000000000000000000000000000000000000000000000000000000000000000" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
-                    "0x0000000000000000000000000000000000000000000000000000000000000001" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                    "0x111d0640f526af34ab2c2b0a7859bd6d5100bb79adfa42d06f0cf959c792e4bd" => "0x00000000000000000080000000000000001000010000001ffffffffffffffffd",
-                    "0x127adb37788cce1252b022d229a4fd60399a3fa76e042c0dd89fa08d3d385ecf" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                    "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                    "0x3ee48c14b3579f9b80cbeda2dd14aff7d08bd3f20e4adb29e061f7e21c2b2390" => "0xffffffffffffffffffffffff8f7a9949000000000000000000000000708566b7",
-                    "0x3ee48c14b3579f9b80cbeda2dd14aff7d08bd3f20e4adb29e061f7e21c2b2391" => "0x0000000000000000000000000000000003ef2486b343c64fd68682c6c9a39702",
-                    "0x3ee48c14b3579f9b80cbeda2dd14aff7d08bd3f20e4adb29e061f7e21c2b2392" => "0x0000000000000000000000000000000004639bdb54f7a1de921aa7ac30d0eb37",
-                    "0x4e593f089becaec71895b870bff209137b04c509f7c3d755280f95ef7fe0c266" => "0xffffffffffffffffffffffff140b15d7000000000000000000000000ebf4ea29",
-                    "0x4e593f089becaec71895b870bff209137b04c509f7c3d755280f95ef7fe0c267" => "0x00000000000000000000000000000000058780d9fe6e0d1149ad0006e7982ddc",
-                    "0x4e593f089becaec71895b870bff209137b04c509f7c3d755280f95ef7fe0c268" => "0x00000000000000000000000000000000067b9c47122bb9ed2d63aae72a998814",
-                    "0x0531c08c13d7e1cc22a0194c3aa9402a78f465e53644da5608e58e4d6c2461bb" => "0x00000000000000000000ffffffffffffffffffffffffffffffff3c00000bb801",
-                    "0x0531c08c13d7e1cc22a0194c3aa9402a78f465e53644da5608e58e4d6c2461bd" => "0x00000000000000000000000000000000000001de1a7b5d4bdf78aa7f8d27b430",
-                    "0x0531c08c13d7e1cc22a0194c3aa9402a78f465e53644da5608e58e4d6c2461bf" => "0x000000000000000000000000fffcfafc00000000000000000023a204db6e3e43",
-                    "0x0531c08c13d7e1cc22a0194c3aa9402a78f465e53644da5608e58e4d6c2461c0" => "0x000000000000000000000000000000000000000000034ece95de4a271d37d4bb",
-                    "0x803a21268f706b17aba4df8977c8c2d84f261ad3c6b0157dbe2ce75b00255f1d" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                    "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560d" => "0x00000000000000000000ffffffffffffffffffffffffffffffff3c00000bb801",
-                    "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560e" => "0x000000000000000000000000000000000695b3b05f82082039034776136488f9",
-                    "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560f" => "0x0000000000000000000000000000000007de13c37272a27e0aed554d426a9659",
-                    "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f5611" => "0x00000000000000000000000000000a7500000000000000000000000a3df46e4f",
-                    "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f5612" => "0x000000000000000000000000000000000000000124ad1007a9006875318589bb",
-                    "0x91845b320c9a0f2447c33f2bd36de32c10319bb903ae7c0066b103d5a7693daf" => "0xffffffffffffffffffffffff55a4a029000000000000000000000000aa5b5fd7",
-                    "0x91845b320c9a0f2447c33f2bd36de32c10319bb903ae7c0066b103d5a7693db0" => "0x0000000000000000000000000000000005ef12cf9a3c52405e671fbc7004d116",
-                    "0x91845b320c9a0f2447c33f2bd36de32c10319bb903ae7c0066b103d5a7693db1" => "0x000000000000000000000000000000000702c066c65881164bf64bf87875e663",
-                    "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                    "0xabd3359f9239057b6bb692fc5d5f31334d460927d27c5bd0ba2f301926d78c01" => "0xfffffffffffffffffffffffe8892af80000000000000000000000001776d5080",
-                    "0xabd3359f9239057b6bb692fc5d5f31334d460927d27c5bd0ba2f301926d78c02" => "0x00000000000000000000000000000000050e6ee1e84712c4b99bb7676a4e721a",
-                    "0xabd3359f9239057b6bb692fc5d5f31334d460927d27c5bd0ba2f301926d78c03" => "0x0000000000000000000000000000000005deb0221d2632f8e79b6bcd3df4ddfa",
-                    "0xb27456616f8c77c635d3551b8179f6887795e920c5c4421a6fa3c3c76fc90fa8" => "0x0000000000000000000000003645836695dfac66314dfca62184b0353e43c258",
-                    "0xdc03f6203d56cf5fe49270519e5a797eebcd9be54de9070150d36d99795813bf" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                    "0xe4b52e62780a151c755afd3ef54b84744b416592e47feb63654e3a8e0bb7d84d" => "0xffffffffffffffffffffffff64defe450000000000000000000000009b2101bb",
-                    "0xe4b52e62780a151c755afd3ef54b84744b416592e47feb63654e3a8e0bb7d84e" => "0x000000000000000000000000000000000483f3e53b5ea3677da74656b7015fed",
-                    "0xe4b52e62780a151c755afd3ef54b84744b416592e47feb63654e3a8e0bb7d84f" => "0x00000000000000000000000000000000052c6140b702b3c43d7128f67a9cb7d3",
-                    "0xf55f69dbbfd00ec29a323ea4eb1513f3e0d1d702d854f8ec7456a6954b2a9cf9" => "0x0000000000000000000000000000000000000000000000000000000000000001",
-},
+                        "0x0000000000000000000000000000000000000000000000000000000000000000" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
+                        "0x0000000000000000000000000000000000000000000000000000000000000001" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x111d0640f526af34ab2c2b0a7859bd6d5100bb79adfa42d06f0cf959c792e4bd" => "0x00000000000000000080000000000000001000010000001ffffffffffffffffd",
+                        "0x127adb37788cce1252b022d229a4fd60399a3fa76e042c0dd89fa08d3d385ecf" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x3ee48c14b3579f9b80cbeda2dd14aff7d08bd3f20e4adb29e061f7e21c2b2390" => "0xffffffffffffffffffffffff8f7a9949000000000000000000000000708566b7",
+                        "0x3ee48c14b3579f9b80cbeda2dd14aff7d08bd3f20e4adb29e061f7e21c2b2391" => "0x0000000000000000000000000000000003ef2486b343c64fd68682c6c9a39702",
+                        "0x3ee48c14b3579f9b80cbeda2dd14aff7d08bd3f20e4adb29e061f7e21c2b2392" => "0x0000000000000000000000000000000004639bdb54f7a1de921aa7ac30d0eb37",
+                        "0x4e593f089becaec71895b870bff209137b04c509f7c3d755280f95ef7fe0c266" => "0xffffffffffffffffffffffff140b15d7000000000000000000000000ebf4ea29",
+                        "0x4e593f089becaec71895b870bff209137b04c509f7c3d755280f95ef7fe0c267" => "0x00000000000000000000000000000000058780d9fe6e0d1149ad0006e7982ddc",
+                        "0x4e593f089becaec71895b870bff209137b04c509f7c3d755280f95ef7fe0c268" => "0x00000000000000000000000000000000067b9c47122bb9ed2d63aae72a998814",
+                        "0x0531c08c13d7e1cc22a0194c3aa9402a78f465e53644da5608e58e4d6c2461bb" => "0x00000000000000000000ffffffffffffffffffffffffffffffff3c00000bb801",
+                        "0x0531c08c13d7e1cc22a0194c3aa9402a78f465e53644da5608e58e4d6c2461bd" => "0x00000000000000000000000000000000000001de1a7b5d4bdf78aa7f8d27b430",
+                        "0x0531c08c13d7e1cc22a0194c3aa9402a78f465e53644da5608e58e4d6c2461bf" => "0x000000000000000000000000fffcfafc00000000000000000023a204db6e3e43",
+                        "0x0531c08c13d7e1cc22a0194c3aa9402a78f465e53644da5608e58e4d6c2461c0" => "0x000000000000000000000000000000000000000000034ece95de4a271d37d4bb",
+                        "0x803a21268f706b17aba4df8977c8c2d84f261ad3c6b0157dbe2ce75b00255f1d" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560d" => "0x00000000000000000000ffffffffffffffffffffffffffffffff3c00000bb801",
+                        "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560e" => "0x000000000000000000000000000000000695b3b05f82082039034776136488f9",
+                        "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560f" => "0x0000000000000000000000000000000007de13c37272a27e0aed554d426a9659",
+                        "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f5611" => "0x00000000000000000000000000000a7500000000000000000000000a3df46e4f",
+                        "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f5612" => "0x000000000000000000000000000000000000000124ad1007a9006875318589bb",
+                        "0x91845b320c9a0f2447c33f2bd36de32c10319bb903ae7c0066b103d5a7693daf" => "0xffffffffffffffffffffffff55a4a029000000000000000000000000aa5b5fd7",
+                        "0x91845b320c9a0f2447c33f2bd36de32c10319bb903ae7c0066b103d5a7693db0" => "0x0000000000000000000000000000000005ef12cf9a3c52405e671fbc7004d116",
+                        "0x91845b320c9a0f2447c33f2bd36de32c10319bb903ae7c0066b103d5a7693db1" => "0x000000000000000000000000000000000702c066c65881164bf64bf87875e663",
+                        "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0xabd3359f9239057b6bb692fc5d5f31334d460927d27c5bd0ba2f301926d78c01" => "0xfffffffffffffffffffffffe8892af80000000000000000000000001776d5080",
+                        "0xabd3359f9239057b6bb692fc5d5f31334d460927d27c5bd0ba2f301926d78c02" => "0x00000000000000000000000000000000050e6ee1e84712c4b99bb7676a4e721a",
+                        "0xabd3359f9239057b6bb692fc5d5f31334d460927d27c5bd0ba2f301926d78c03" => "0x0000000000000000000000000000000005deb0221d2632f8e79b6bcd3df4ddfa",
+                        "0xb27456616f8c77c635d3551b8179f6887795e920c5c4421a6fa3c3c76fc90fa8" => "0x0000000000000000000000003645836695dfac66314dfca62184b0353e43c258",
+                        "0xdc03f6203d56cf5fe49270519e5a797eebcd9be54de9070150d36d99795813bf" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0xe4b52e62780a151c755afd3ef54b84744b416592e47feb63654e3a8e0bb7d84d" => "0xffffffffffffffffffffffff64defe450000000000000000000000009b2101bb",
+                        "0xe4b52e62780a151c755afd3ef54b84744b416592e47feb63654e3a8e0bb7d84e" => "0x000000000000000000000000000000000483f3e53b5ea3677da74656b7015fed",
+                        "0xe4b52e62780a151c755afd3ef54b84744b416592e47feb63654e3a8e0bb7d84f" => "0x00000000000000000000000000000000052c6140b702b3c43d7128f67a9cb7d3",
+                        "0xf55f69dbbfd00ec29a323ea4eb1513f3e0d1d702d854f8ec7456a6954b2a9cf9" => "0x0000000000000000000000000000000000000000000000000000000000000001",
+            },
+            &hashmap! {}, // caller balances
+            &hashmap! {}, // amm balances
             |contract| {
                 use core::str::FromStr;
 
@@ -1048,9 +1064,8 @@ mod test {
                 let to = address!("de104342B32BCa03ec995f999181f7Cf1fFc04d7");
                 let amount = U256::from_str("10000000000").unwrap();
                 let min_out = U256::from(0);
-                let (amount_in, amount_out) = contract
-                    .swap_2_exact_in(from, to, amount, min_out)
-                    .unwrap();
+                let (amount_in, amount_out) =
+                    contract.swap_2_exact_in(from, to, amount, min_out).unwrap();
                 assert_eq!(amount_in, amount);
                 assert_eq!(amount_out, U256::zero());
                 Ok(())
@@ -1063,7 +1078,55 @@ mod test {
         test_utils::with_storage::<_, Pools, _>(
             Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()),
             &hashmap! {},
-            |contract| {},
+            &hashmap! {},
+            &hashmap! {},
+            |contract| Ok(()),
+        )
+    }
+
+    #[test]
+    fn alex_0f08c379a() -> Result<(), Vec<u8>> {
+        //curl -d '{"jsonrpc":"2.0","id":6646,"method":"eth_call","params":[{"data":"0xe83c30490000000000000000000000006437fdc89ced41941b97a9f1f8992d88718c81c500000000000000000000000000000000000000000000000000000000000081e40000000000000000000000000000000000000000000000000000000437ea0584","from":"0xFEb6034FC7dF27dF18a3a6baD5Fb94C0D3dCb6d5","to":"0x839c5cf32d9Bc2CD46027691d2941410251ED557"},"0x110bb6"]}' -H 'Content-Type: application/json' https://testnet-rpc.superposition.so
+        test_utils::with_storage::<_, Pools, _>(
+            Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()),
+            &hashmap! {
+            "0x0000000000000000000000000000000000000000000000000000000000000000" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
+            "0x0000000000000000000000000000000000000000000000000000000000000001" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0x127adb37788cce1252b022d229a4fd60399a3fa76e042c0dd89fa08d3d385ecf" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0x3295b70d48c9d979f3e811eefc4335589c7c687db9128693f015bb35ed65873c" => "0x00000000000000000000000000000000000000000000000000000ff000000834",
+            "0x3295b70d48c9d979f3e811eefc4335589c7c687db9128693f015bb35ed65873d" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0x3295b70d48c9d979f3e811eefc4335589c7c687db9128693f015bb35ed65873e" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0x60d1f3048e5b913a0cd1df4b045ae0ecf5e3ba8adbaf407638e7e15e3e75b5f1" => "0xfffffffffffffffffffffffe923fe5c20000000000000000000000016dc01a3e",
+            "0x60d1f3048e5b913a0cd1df4b045ae0ecf5e3ba8adbaf407638e7e15e3e75b5f2" => "0x0000000000000000000000000000000002dcf66e6d0f31c3e94d01714646e21b",
+            "0x60d1f3048e5b913a0cd1df4b045ae0ecf5e3ba8adbaf407638e7e15e3e75b5f3" => "0x000000000000000000000000000000000309be0285b029b1da390863e158aab4",
+            "0x81e9c7c70971b5eb969cec21a82e6deed42e7c6736e0e83ced66d72297d9f1d7" => "0x000000000000000000000000ac31d6621f088fd08df6c546e9bf64d98f76a11a",
+            "0x8ea865850c62a560a0f06c451f935cda83db645b8433d53ee25660e379ed9a05" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
+            "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560d" => "0x00000000000000000000ffffffffffffffffffffffffffffffff3c00000bb801",
+            "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560e" => "0x0000000000000000000000000000000006c582de91f687cbc1bbd2d7ede29f6d",
+            "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560f" => "0x0000000000000000000000000000000008211b700f0b08eb8ff117cc5be381a0",
+            "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f5611" => "0x00000000000000000000000000000b9a0000000000000000000000055f1a022e",
+            "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f5612" => "0x000000000000000000000000000000000000000128fc70094157b85d8b948471",
+            "0x0951df22610b1d641fffea402634ee523fece890ea56ecb57d4eb766ca391d50" => "0xffffffffffffffffffffffffd3d2cc010000000000000000000000002c2d33ff",
+            "0x0951df22610b1d641fffea402634ee523fece890ea56ecb57d4eb766ca391d51" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0x0951df22610b1d641fffea402634ee523fece890ea56ecb57d4eb766ca391d52" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0xdc03f6203d56cf5fe49270519e5a797eebcd9be54de9070150d36d99795813bf" => "0x0000000000000000000000000000000000000000000000000000000000000000"
+                      },
+            &hashmap! {}, // caller balances
+            &hashmap! {}, // amm balances
+            |contract| {
+                use core::str::FromStr;
+
+                let pool = address!("6437fdc89cED41941b97A9f1f8992D88718C81c5");
+                let id = U256::from(33252);
+                let delta = i128::from_str("18117952900").unwrap();
+
+                let (delta0, delta1) = contract.update_position(pool, id, delta).unwrap();
+                assert_eq!(delta0, I256::zero());
+                assert_eq!(delta1, I256::zero());
+                Ok(())
+            },
         )
     }
 }

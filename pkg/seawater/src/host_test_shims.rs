@@ -26,9 +26,12 @@ pub mod storage {
     use std::sync::LazyLock;
     use std::sync::Mutex;
 
+    use crate::types::{Address, U256};
+
     const WORD_BYTES: usize = 32;
     pub type Word = [u8; WORD_BYTES];
     pub type WordHashMap = HashMap<Word, Word>;
+    pub type AddressHashMap = HashMap<Address, U256>;
 
     pub static STORAGE_EXTERNAL: Mutex<()> = Mutex::new(());
 
@@ -40,6 +43,12 @@ pub mod storage {
     });
 
     pub static STORAGE: LazyLock<Mutex<WordHashMap>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+
+    pub static CALLER_ERC20_BALANCES: LazyLock<Mutex<AddressHashMap>> =
+        LazyLock::new(|| Mutex::new(HashMap::new()));
+
+    pub static AMM_ERC20_BALANCES: LazyLock<Mutex<AddressHashMap>> =
+        LazyLock::new(|| Mutex::new(HashMap::new()));
 
     pub unsafe fn read_word(key: *const u8) -> Word {
         let mut res = Word::default();

@@ -1,4 +1,6 @@
-//! Utilities for pretending to call ERC20 on a host environment.
+//! Utilities for pretending to call ERC20 on a host environment. Also
+//! supports optionally controlling the amount of tokens that are sent
+//! with configuration in the `with_storage` function with host shims.
 
 pub use crate::permit2_types;
 
@@ -39,7 +41,13 @@ pub fn take_permit2(
     _details: Permit2Args,
 ) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg-erc20")]
-    dbg!(("take_permit2", current_test!(), _token, _transfer_amount, _details));
+    dbg!((
+        "take_permit2",
+        current_test!(),
+        _token,
+        _transfer_amount,
+        _details
+    ));
     Ok(())
 }
 
