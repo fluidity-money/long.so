@@ -19,14 +19,14 @@ func storePositions(db *gorm.DB, pools []string, ids []int, amount0s, amount1s [
 		idsS[i] = strconv.Itoa(id)
 	}
 	var bu strings.Builder
-	for i, addr := range pools {
+	for i, _ := range pools {
 		if i != len(pools)-1 {
 			bu.WriteRune(',')
 		}
 	}
 	s := fmt.Sprintf(
 		"SELECT snapshot_create_positions_1(ARRAY[%s], ARRAY[%s], ARRAY[%s], ARRAY[%s])",
-		bu.String(),    // pools
+		bu.String(),                 // pools
 		strings.Join(idsS, ","),     // ids
 		strings.Join(amount0s, ","), // amount0s
 		strings.Join(amount1s, ","), // amount1s
