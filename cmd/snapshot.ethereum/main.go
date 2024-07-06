@@ -84,7 +84,7 @@ func main() {
 		setup.Exitf("positions request: %v", err)
 	}
 	var (
-		pools = make([]string, len(positions))
+		pools    = make([]string, len(positions))
 		ids      = make([]int, len(positions))
 		amount0s = make([]string, len(positions))
 		amount1s = make([]string, len(positions))
@@ -132,23 +132,15 @@ func main() {
 		slog.Info("no positions found")
 		return
 	}
-	for i := 0; i < len(ids); {
-		mc := min(i+BatchSize, len(ids)-1) // Max cursor that we can increment with.
-		slog.Info("doing batch insertion",
-			"from", i,
-			"to", mc,
-		)
-		err := storePositions(
-			db,
-			pools[i:mc],
-			ids[i:mc],
-			amount0s[i:mc],
-			amount1s[i:mc],
-		)
-		if err != nil {
-			setup.Exitf("store positions: %v", err)
-		}
-		i += mc
+	err = storePositions(
+		db,
+		pools,
+		ids,
+		amount0s,
+		amount1s,
+	)
+	if err != nil {
+		setup.Exitf("store positions: %v", err)
 	}
 }
 
