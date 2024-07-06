@@ -76,6 +76,8 @@ pub extern "C" fn storage_flush_cache(_clear: bool) {
 
 #[no_mangle]
 pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
+    use crate::current_test;
+
     // SAFETY - stylus promises etc
     let key = unsafe { storage::read_word(key) };
 
@@ -86,11 +88,13 @@ pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
         .map(storage::Word::to_owned)
         .unwrap_or_default(); // defaults to zero value
 
-    eprintln!(
-        "read word: {}, got value: {}",
+    #[cfg(feature = "testing")]
+    dbg!((
+        "read word",
+        current_test!(),
         const_hex::const_encode::<32, false>(&key).as_str(),
         const_hex::const_encode::<32, false>(&value).as_str(),
-    );
+    ));
 
     unsafe { storage::write_word(out, value) };
 }

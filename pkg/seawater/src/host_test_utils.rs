@@ -66,7 +66,7 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
         .map(|(key, value)| -> ([u8; 32], [u8; 32]) {
             // avoid poisoning the lock if we fail to do this here.
             (
-                const_hex::const_decode_to_array::<32>(key.as_bytes()).unwrap(),
+                const_hex::const_decode_to_array::<32>(key.as_bytes()).expect(format!("failed to decode key: {}", key).as_str()),
                 const_hex::const_decode_to_array::<32>(value.as_bytes()).unwrap(),
             )
         })
