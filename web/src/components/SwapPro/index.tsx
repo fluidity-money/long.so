@@ -162,7 +162,7 @@ export const SwapPro = ({
         <div className="hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:flex">
           <div>
             <p className="text-2xs">Liquidity</p>
-            <p className="text-xl">???</p>
+            <p className="text-xl">{poolBalance}</p>
           </div>
 
           <div>
