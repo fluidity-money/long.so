@@ -13,5 +13,7 @@ type PriceResult struct {
 func (p PriceResult) Price(fusdcDecimals, poolDecimals int) string {
 	sqrtPrice := math.GetSqrtRatioAtTick(p.FinalTick.Big())
 	price := math.GetPriceAtSqrtRatio(sqrtPrice)
+	decimals := math.ExponentiateDecimals(int64(poolDecimals - fusdcDecimals))
+	price.Mul(price, decimals)
 	return price.FloatString(5)
 }

@@ -1,8 +1,14 @@
-//! Side-effect free functions for simple testing.
+///! Side-effect free functions for simple testing. Optionally configured
+///! with a pre-existing state.
+use std::collections::HashMap;
 
 use stylus_sdk::storage::StorageCache;
 
-use crate::{test_shims, types::*, maths::sqrt_price_math::Q96};
+use crate::{
+    maths::sqrt_price_math::Q96,
+    test_shims::{self},
+    types::*,
+};
 
 // hack to get the name of the current test running
 #[macro_export]
@@ -11,7 +17,7 @@ macro_rules! current_test {
         // the rust test framework usually names the thread the same as the running test, as long as
         // tests are configured to run multithreaded
         std::thread::current().name().unwrap()
-    }
+    };
 }
 
 // encodes a a/b price as a sqrt.q96 price
@@ -49,8 +55,33 @@ pub trait StorageNew {
     fn new(i: U256, v: u8) -> Self;
 }
 
-pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(f: F) -> T {
+///! Set up the storage access, controlling for parallel use. Makes
+pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
+    sender: Option<[u8; 20]>,
+    slots_map: &HashMap<&str, &str>,
+    caller_erc20_bals: &HashMap<Address, U256>,
+    amm_erc20_bals: &HashMap<Address, U256>,
+    f: F,
+) -> T {
+    let slots_map: HashMap<[u8; 32], [u8; 32]> = slots_map
+        .iter()
+        .map(|(key, value)| -> ([u8; 32], [u8; 32]) {
+            // avoid poisoning the lock if we fail to do this here.
+            (
+                const_hex::const_decode_to_array::<32>(key.as_bytes())
+                    .expect(format!("failed to decode key: {}", key).as_str()),
+                const_hex::const_decode_to_array::<32>(value.as_bytes()).unwrap(),
+            )
+        })
+        .collect();
     let lock = test_shims::acquire_storage();
+    match sender {
+        Some(v) => test_shims::set_sender(v),
+        None => (),
+    };
+    for (key, value) in slots_map {
+        test_shims::insert_word(key.clone(), value.clone())
+    }
     let mut pools = P::new(U256::ZERO, 0);
     let res = f(&mut pools);
     StorageCache::clear();

@@ -14,7 +14,7 @@ type Pool struct {
 	BlockNumber     types.Number  `json:"blockNumber"`
 	Token           types.Address `json:"token"`
 	Fee             types.Number  `json:"fee"`
-	Decimals        uint8         `json:"decimals"`
+	Decimals        int           `json:"decimals"`
 	TickSpacing     uint8         `json:"tickSpacing"`
 }
 

@@ -9,9 +9,7 @@ interface IERC20 {
 }
 
 /*
-* Faucet sends the SPN gas token to recipients given by a thirdparty service. Optionally
-* sends multiple amounts at once (presumably upstream will batch every 5 seconds to
-* accomplish this.)
+* Faucet sends ERC20 tokens that were configured to be sent to addresses given.
 */
 contract Faucet is IFaucet {
     /// @dev operator to use to send the amounts on request.
@@ -20,12 +18,24 @@ contract Faucet is IFaucet {
     /// @dev emergency council to use to "rescue" the funds at any point.
     address immutable EMERGENCY_COUNCIL;
 
-    IERC20 public immutable TOKEN;
+    IERC20[] public tokens;
 
-    constructor(address _operator, address _emergencyCouncil, IERC20 _token) {
+    uint256[] private amounts;
+
+    uint256 private gasTokenAmount;
+
+    constructor(
+        address _operator,
+        address _emergencyCouncil,
+        IERC20[] memory _tokens,
+        uint256[] memory _amounts,
+        uint256 _gasTokenAmount
+    ) {
         operator_ = _operator;
         EMERGENCY_COUNCIL = _emergencyCouncil;
-        TOKEN = _token;
+        tokens = _tokens;
+        amounts = _amounts;
+        gasTokenAmount = _gasTokenAmount;
     }
 
     receive() external payable {}
@@ -35,23 +45,23 @@ contract Faucet is IFaucet {
         require(msg.sender == operator_, "only operator");
         for (uint i = 0; i < _requests.length; ++i) {
             address recipient = _requests[i].recipient;
-            bool isContract;
-            assembly {
-                isContract := gt(extcodesize(recipient), 0)
+            bool isStaker = _requests[i].isStaker;
+            for (uint x = 0; x < tokens.length; ++x) {
+                uint256 amount = amounts[x];
+                if (isStaker) amount *= 5;
+                tokens[x].transfer(recipient, amount);
             }
-            require(!isContract, "no contract");
-            TOKEN.transfer(recipient, _requests[i].amount);
+            if (gasTokenAmount > 0) {
+                uint256 gas = gasTokenAmount;
+                if (isStaker) gas *= 5;
+                payable(recipient).transfer(gas);
+            }
         }
-    }
-
-    function rescue() external {
-      require(msg.sender == EMERGENCY_COUNCIL, "council only");
-      payable(msg.sender).transfer(address(this).balance);
     }
 
     function changeOperator(address _oldOperator, address _newOperator) external {
         require(operator_ == _oldOperator, "incorrect order");
-        require(msg.sender == operator_, "only operator");
+        require(msg.sender == EMERGENCY_COUNCIL, "only council");
         operator_ = _newOperator;
     }
 }

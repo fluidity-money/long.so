@@ -10,7 +10,7 @@ import Token from "@/assets/icons/token.svg";
 import Swap from "@/assets/icons/Swap.svg";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import { SuperloopPopover } from "@/app/SuperloopPopover";
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { motion } from "framer-motion";
@@ -22,27 +22,24 @@ import {
   useAccount,
   useBalance,
   useSimulateContract,
-  useWaitForTransactionReceipt,
-  useWriteContract,
   useClient,
 } from "wagmi";
-import { erc20Abi, formatEther, Hash, maxUint256 } from "viem";
+import { formatEther, maxUint256 } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
-import LightweightERC20 from "@/lib/abi/LightweightERC20";
 import { ammAddress } from "@/lib/addresses";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { fUSDC } from "@/config/tokens";
-import { EnableSpending } from "@/components/sequence/EnableSpending";
-import Confirm from "@/components/sequence/Confirm";
-import { Success } from "@/components/sequence/Success";
-import { Fail } from "@/components/sequence/Fail";
 import { LoaderIcon } from "lucide-react";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 import { useToast } from "@/components/ui/use-toast";
 import { estimateContractGas } from "viem/actions";
-import { getFormattedPriceFromAmount } from "@/lib/amounts";
+import { getFormattedPriceFromAmount, snapAmountToDecimals } from "@/lib/amounts";
+import { RewardsBreakdown } from "@/components/RewardsBreakdown";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { TokenIcon } from "./TokenIcon";
 
 const SwapFormFragment = graphql(`
   fragment SwapFormFragment on SeawaterPool {
@@ -64,6 +61,7 @@ export const SwapForm = () => {
   const { setWelcome, welcome, hovering, setHovering } = useWelcomeStore();
 
   const toast = useToast();
+  const router = useRouter();
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -86,9 +84,10 @@ export const SwapForm = () => {
     token0AmountRaw,
     token1Amount,
     setToken0Amount,
-    setToken1Amount,
     setToken0AmountRaw,
     setToken1AmountRaw,
+    gas,
+    setGas,
   } = useSwapStore();
   const { data } = useGraphqlGlobal();
 
@@ -155,15 +154,16 @@ export const SwapForm = () => {
     ? sqrtPriceX96ToPrice(token1SqrtPriceX96.result, token1.decimals)
     : 0n;
 
-  const { data: token0Balance, refetch: refetchToken0Balance } = useBalance({
+  const { data: token0Balance } = useBalance({
     address,
     token: token0.address,
   })
 
-  const { data: token1Balance, refetch: refetchToken1Balance } = useBalance({
+  const { data: token1Balance } = useBalance({
     address,
     token: token1.address,
   })
+
 
   const { error: quote1Error, isLoading: quote1IsLoading } =
     useSimulateContract({
@@ -218,7 +218,6 @@ export const SwapForm = () => {
   }, [isSwappingBaseAsset, token0AmountRaw, token0.address, token1.address])
 
   // TODO this is in ETH(/SPN), not USD
-  const [estimatedGas, setEstimatedGas] = useState(0n)
   useEffect(() => {
     (async () => {
       if (!client || !address)
@@ -232,7 +231,7 @@ export const SwapForm = () => {
           args: swapOptions.args,
           account: address,
         })
-        setEstimatedGas(estimatedGas)
+        setGas(estimatedGas)
       } catch { }
     })()
   }, [address, client, token1, token0AmountRaw, swapOptions])
@@ -268,7 +267,7 @@ export const SwapForm = () => {
       ) || [];
 
     return [BigInt(quoteAmountString ?? 0), quoteIsLoading];
-  }, [isSwap1, quote1Error, quote1IsLoading, quote2Error, quote2IsLoading]);
+  }, [token0, token1, isSwap1, quote1Error, quote1IsLoading, quote2Error, quote2IsLoading]);
 
   // update the token1 amount when the quote amount changes
   useEffect(() => {
@@ -281,31 +280,12 @@ export const SwapForm = () => {
 
   const { open } = useWeb3Modal();
 
-  // read the allowance of the token
-  const { data: allowanceData } = useSimulateContract({
-    address: token0.address,
-    abi: LightweightERC20,
-    // @ts-ignore this needs to use useSimulateContract which breaks the types
-    functionName: "allowance",
-    // @ts-ignore
-    args: [address as Hash, ammAddress],
-  });
+  // make user confirm before receiving 0 tokens from a swap
+  const [allowZeroSwap, setAllowZeroSwap] = useState(false)
 
-  // set up write hooks
-  const {
-    writeContract: writeContractApproval,
-    data: approvalData,
-    error: approvalError,
-    isPending: isApprovalPending,
-    reset: resetApproval,
-  } = useWriteContract();
-  const {
-    writeContract: writeContractSwap,
-    data: swapData,
-    error: swapError,
-    isPending: isSwapPending,
-    reset: resetSwap,
-  } = useWriteContract();
+  useEffect(() => {
+    setAllowZeroSwap(false)
+  }, [token0, token1, token0AmountFloat, token1AmountFloat])
 
   /**
    * Approve the AMM to spend the token
@@ -321,100 +301,18 @@ export const SwapForm = () => {
       });
       return;
     }
-
-    if (!allowanceData?.result || allowanceData.result === BigInt(0)) {
-      console.log("approving");
-      writeContractApproval({
-        address: token0.address,
-        abi: erc20Abi,
-        functionName: "approve",
-        args: [ammAddress, maxUint256],
+    if (token1AmountFloat === 0 && !allowZeroSwap) {
+      toast.toast({
+        variant: "destructive",
+        title: "Zero Value Swap",
+        description: `This swap will result in you receiving 0 ${token1.symbol}. Press "Swap" again to make the swap anyway.`,
       });
-    } else {
-      performSwap();
+      setAllowZeroSwap(true)
+      return;
     }
+
+    router.push(`/swap/confirm`)
   };
-
-  // wait for the approval transaction to complete
-  const approvalResult = useWaitForTransactionReceipt({
-    hash: approvalData,
-  });
-
-  const performSwap = useCallback(() => {
-    console.log("performing swap");
-
-    writeContractSwap({
-      ...swapOptions,
-      // Typescript doesn't support strongly typing this with destructuring
-      // https://github.com/microsoft/TypeScript/issues/46680
-      // @ts-expect-error
-      args: swapOptions.args
-    })
-  }, [swapOptions, writeContractSwap]);
-
-  const swapResult = useWaitForTransactionReceipt({
-    hash: swapData,
-  });
-
-  // once we have the result, initiate the swap
-  useEffect(() => {
-    if (!approvalResult.data) return;
-    performSwap();
-  }, [approvalResult.data, performSwap]);
-
-  if (isApprovalPending || (approvalData && !approvalResult.data)) {
-    return (
-      <EnableSpending
-        tokenName={token0.symbol}
-        transactionHash={approvalData}
-      />
-    );
-  }
-
-  if (isSwapPending || (swapData && !swapResult.data)) {
-    return <Confirm
-      text={"Swap"}
-      fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
-      toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
-      transactionHash={swapData}
-    />;
-  }
-
-  // success
-  if (swapResult.data) {
-    // Manually refetch balances of each token.
-    // This is only necessary because there is no ConfirmSwap, as in staking,
-    // so this component doesn't remount when a swap is made
-    refetchToken0Balance()
-    refetchToken1Balance()
-    return (
-      <Success
-        onDone={() => {
-          setToken0Amount("0");
-          setToken1Amount("0");
-          resetApproval();
-          resetSwap();
-          swapResult.refetch();
-        }}
-        transactionHash={swapData}
-      />
-    );
-  }
-
-  // error
-  if (swapError || approvalError) {
-    const error = swapError || approvalError;
-    return (
-      <Fail
-        text={(error as any)?.shortMessage}
-        onDone={() => {
-          resetApproval();
-          resetSwap();
-          swapResult.refetch();
-        }}
-      />
-    );
-  }
 
   return (
     <>
@@ -491,9 +389,9 @@ export const SwapForm = () => {
                 <Link href={"/swap/explore?token=0"}>
                   <Badge
                     variant="outline"
-                    className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base"
+                    className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base w-max"
                   >
-                    <Token className="size-[20px] md:size-[25px]" />
+                 <TokenIcon src={token0.icon} /> 
                     <div>{token0.symbol}</div>
                     <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
                   </Badge>
@@ -502,7 +400,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${token0.address === fUSDC.address ? token0AmountFloat : getFormattedPriceFromAmount(token0AmountFloat.toString(), token0Price, fUSDC.decimals)}
+                  ${snapAmountToDecimals(token0.address === fUSDC.address ? token0AmountFloat : getFormattedPriceFromAmount(token0AmountFloat.toString(), token0Price, fUSDC.decimals))}
                 </div>
 
                 <div
@@ -560,7 +458,7 @@ export const SwapForm = () => {
                   {quoteIsLoading ? (
                     <LoaderIcon className="animate-spin" />
                   ) : (
-                    Number(parseFloat(token1Amount ?? "0").toFixed(6))
+                    snapAmountToDecimals(parseFloat(token1Amount ?? "0"))
                   )}
                 </div>
 
@@ -569,7 +467,7 @@ export const SwapForm = () => {
                     variant="outline"
                     className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base"
                   >
-                    <Token className="size-[20px] md:size-[25px]" />
+                 <TokenIcon src={token1.icon} /> 
                     <div>{token1.symbol}</div>
                     <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
                   </Badge>
@@ -578,7 +476,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${token1.address === fUSDC.address ? token1AmountFloat : getFormattedPriceFromAmount(token1AmountFloat.toString(), token1Price, fUSDC.decimals)}
+                  ${snapAmountToDecimals(token1.address === fUSDC.address ? token1AmountFloat : getFormattedPriceFromAmount(token1AmountFloat.toString(), token1Price, fUSDC.decimals))}
                 </div>
 
                 <div
@@ -610,7 +508,7 @@ export const SwapForm = () => {
                 )}
               >
                 <Gas />
-                <div>{formatEther(estimatedGas)} SPN</div>
+                <div>{formatEther(gas)} SPN</div>
               </div>
 
               <div
@@ -655,7 +553,7 @@ export const SwapForm = () => {
               <div className={"flex flex-row justify-between"}>
                 <div>Fees</div>
                 <div className={"flex flex-row items-center gap-1"}>
-                  <Gas /> {formatEther(estimatedGas)} SPN
+                  <Gas /> {formatEther(gas)} SPN
                 </div>
               </div>
               <div className={"flex flex-row justify-between"}>
@@ -691,83 +589,20 @@ export const SwapForm = () => {
               <Token className={"-ml-2 mr-2 size-[20px]"} />
 
               <div className={"iridescent-text text-[12px] md:text-[14px]"}>
-                Earn up-to $100 for making this trade!
+                Earn up to $100 for making this trade!
               </div>
             </Badge>
-
-            <div
-              className={cn(
-                "mt-[15px] h-[140px] w-[317px] rounded-lg bg-black px-[15px] py-[17px] text-white md:mt-[22px] md:h-[140px] md:w-[393px]",
-                {
-                  hidden: breakdownHidden,
-                },
-              )}
-            >
-              <div className={"text-[12px]"}>Rewards Breakdown</div>
-              <div className={"mt-[10px] flex flex-col gap-[4px] "}>
-                <div className={"flex flex-row justify-between text-[10px]"}>
-                  <div>Fluid Rewards</div>
-                  <div
-                    className={
-                      "iridescent-text flex flex-row items-center gap-1"
-                    }
-                  >
-                    <Token />
-                    <div>$0 - $21.72</div>
-                  </div>
-                </div>
-                <div className={"flex flex-row justify-between text-[10px]"}>
-                  <div>Trader Rewards</div>
-                  <div
-                    className={
-                      "iridescent-text flex flex-row items-center gap-1"
-                    }
-                  >
-                    <Token />
-                    <div>$5.91 - $8.34</div>
-                  </div>
-                </div>
-                <div className={"flex flex-row justify-between text-[10px]"}>
-                  <div>Super Rewards</div>
-                  <div
-                    className={
-                      "iridescent-text flex flex-row items-center gap-1"
-                    }
-                  >
-                    <Token />
-                    <Token className={"-ml-2"} />
-                    <div>$0.20 - $13.06</div>
-                  </div>
-                </div>
-              </div>
-              <div
-                className={
-                  "mt-[10px] flex flex-row items-center justify-between text-[10px]"
-                }
-              >
-                <div className={"font-semibold"}>Total</div>
-                <Badge
-                  variant="iridescent"
-                  className="h-[17px] px-1 text-2xs font-normal"
-                >
-                  <Token />
-                  <Token className={"-ml-1"} />
-                  <Token className={"-ml-1 mr-1"} />
-                  <div>$6.11 - $33.12</div>
-                </Badge>
-              </div>
-            </div>
-
+            <RewardsBreakdown hidden={breakdownHidden} />
             {address ? (
               <Button
-                className={"mt-[20px] hidden h-[53.92px] w-full md:inline-flex"}
+                className={cn("mt-[20px] h-[53.92px] w-full inline-flex", token1AmountFloat === 0 && !allowZeroSwap && "opacity-50")}
                 onClick={() => onSubmit()}
               >
                 Swap
               </Button>
             ) : (
               <Button
-                className={"mt-[20px] hidden h-[53.92px] w-full md:inline-flex"}
+                className={"mt-[20px] h-[53.92px] w-full inline-flex"}
                 onClick={() => open()}
               >
                 Connect Wallet

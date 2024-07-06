@@ -1,6 +1,6 @@
 import { Welcome } from "@/app/Welcome";
 
-import { SwapForm } from "@/app/SwapForm";
+import { SwapForm } from "@/components/SwapForm";
 import { SwapPro } from "@/components/SwapPro";
 
 export default function Swap() {

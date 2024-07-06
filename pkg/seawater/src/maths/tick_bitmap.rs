@@ -17,13 +17,16 @@ pub fn next_initialized_tick_within_one_word(
     tick_spacing: i32,
     lte: bool,
 ) -> Result<(i32, bool), Error> {
-    let compressed = tick / tick_spacing;
-
-    let (word_pos, bit_pos) = position(compressed);
+    let compressed = if tick < 0 && tick % tick_spacing != 0 {
+        (tick / tick_spacing) - 1
+    } else {
+        tick / tick_spacing
+    };
 
     if lte {
-        let mask = (U256::one().wrapping_shl(bit_pos.into())) - U256::one()
-            + (U256::one().wrapping_shl(bit_pos.into()));
+        let (word_pos, bit_pos) = position(compressed);
+
+        let mask = (U256::one() << bit_pos) - U256::one() + (U256::one() << bit_pos);
 
         let masked = tick_bitmap.get(word_pos) & mask;
 
@@ -41,7 +44,9 @@ pub fn next_initialized_tick_within_one_word(
 
         Ok((next, initialized))
     } else {
-        let mask = !((U256::one().wrapping_shl(bit_pos.into())) - U256::one());
+        let (word_pos, bit_pos) = position(compressed + 1);
+
+        let mask = !((U256::one() << bit_pos) - U256::one());
 
         let masked = tick_bitmap.get(word_pos) & mask;
 
@@ -67,3 +72,6 @@ pub fn next_initialized_tick_within_one_word(
 pub fn position(tick: i32) -> (i16, u8) {
     ((tick >> 8) as i16, (tick % 256) as u8)
 }
+
+#[test]
+fn test_next_initialized_tick_within_one_word() {}

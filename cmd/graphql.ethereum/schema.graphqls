@@ -38,7 +38,7 @@ type Query {
     Where to start after based on the position id.
     """
     after: Int
-  ): SeawaterPositions!
+  ): SeawaterPositionsGlobal!
 
   """
   Get positions that're owned by any pool using it's ID, based on what's known to the database.
@@ -66,7 +66,7 @@ type Query {
     Where to start after based on the position id.
     """
     after: Int
-  ): SeawaterPositions!
+  ): SeawaterPositionsUser!
 
   """
   Get wallet information based on information including balances. SHOULD NOT be used to get
@@ -97,7 +97,7 @@ type Query {
     Where to start after based on the position id.
     """
     after: Int
-  ): SeawaterSwaps!
+  ): GetSwaps!
 
   """
   getSwapsForUser by the user across every pool we track.
@@ -115,7 +115,7 @@ type Query {
     Where to start after based on the position id.
     """
     after: Int
-  ): SeawaterSwaps!
+  ): GetSwapsForUser!
 }
 
 """
@@ -200,14 +200,14 @@ type SeawaterPool {
   utilityIncentives: [UtilityIncentive!]!
 
   """
-  Positions available in this pool.
+  Positions available in this pool. Cached aggressively.
   """
-  positions(first: Int, after: Int): SeawaterPositions!
+  positions(first: Int, after: Int): SeawaterPositionsGlobal!
 
   """
-  Positions available in this pool, that were created by the wallet given.
+  Positions available in this pool, that were created by the wallet given. Not so cached.
   """
-  positionsForUser(wallet: String!, first: Int, after: Int): SeawaterPositions!
+  positionsForUser(wallet: String!, first: Int, after: Int): SeawaterPositionsUser!
 
   """
   Liquidity available in a pool, with only 20 elements being returned encompassing the
@@ -222,20 +222,24 @@ type SeawaterPool {
 }
 
 """
+Get swaps for user return type, set up to allow better control of caching.
+"""
+type GetSwapsForUser {
+  data: SeawaterSwaps!
+}
+
+"""
+Get swaps for a specific pool, set up to be more granular for caching.
+"""
+type GetSwaps {
+  data: SeawaterSwaps!
+}
+
+"""
 Pagination-friendly way to quickly receive swaps made somewhere. Knows internally where it
 came from, where it's at with pagination with the position ids.
 """
 type SeawaterSwaps {
-  """
-  The pool associated with this query, if any.
-  """
-  pool: SeawaterPool
-
-  """
-  The wallet associated with this query, if any.
-  """
-  wallet: Wallet
-
   """
   The sum of these value in these swaps per unique pool, if possible to collect.
   """
@@ -256,17 +260,13 @@ type SeawaterSwaps {
 
 """
 Pagination-friendly way of viewing the current state of the positions available in a pool.
+Cached aggressively.
 """
-type SeawaterPositions {
+type SeawaterPositionsGlobal {
   """
-  The specific pool (if any) that's responsible for the responses here.
+  ID available for this for caching reasons. Should be posglobal:from:to.
   """
-  pool: SeawaterPool
-
-  """
-  The specific wallet (if any) that's associated with the positions here.
-  """
-  wallet: Wallet
+  id: ID!
 
   """
   The positions associated with this data.
@@ -284,9 +284,37 @@ type SeawaterPositions {
     The next number of fields to display from the current position.
     """
     first: Int
-  ): SeawaterPositions!
+  ): SeawaterPositionsGlobal!
 }
 
+"""
+Pagination-friendly way of viewing the current state of the positions available in a pool.
+Not cached so aggressively!
+"""
+type SeawaterPositionsUser {
+  """
+  ID available for this for caching reasons. Should be posuser:from:to.
+  """
+  id: ID!
+
+  """
+  The positions associated with this data.
+  """
+  positions: [SeawaterPosition!]!
+
+  """
+  The maximum returned by the underlying original query for this data if it's possible to
+  collect for fUSDC and the other token, done per unique token.
+  """
+  sum: [PairAmount!]
+
+  next(
+    """
+    The next number of fields to display from the current position.
+    """
+    first: Int
+  ): SeawaterPositionsUser!
+}
 """
 Volume that was made in the pool over time, in a daily and monthly metric.
 """
@@ -410,6 +438,11 @@ type SeawaterPosition {
   Id of the GraphQL object, for caching reasons. Made up of `positionId (pos:positionId)`.
   """
   id: ID!
+
+  """
+  Creation timestamp of the position.
+  """
+  created: Int!
 
   """
   Position Id in the contract of the user's position that they own. Used for a cursor.
@@ -565,7 +598,7 @@ type Wallet {
   """
   Positions opened by the user in the AMM.
   """
-  positions(first: Int, after: Int): SeawaterPositions!
+  positions(first: Int, after: Int): SeawaterPositionsUser!
 }
 
 """

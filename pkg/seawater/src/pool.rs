@@ -70,6 +70,9 @@ impl StoragePool {
     /// Creates a new position in this pool.
     pub fn create_position(&mut self, id: U256, low: i32, up: i32) -> Result<(), Revert> {
         assert_or!(self.enabled.get(), Error::PoolDisabled);
+        let spacing = self.tick_spacing.get().sys() as i32;
+        assert_or!(low % spacing == 0, Error::InvalidTickSpacing);
+        assert_or!(up % spacing == 0, Error::InvalidTickSpacing);
         Ok(self.positions.new(id, low, up))
     }
 
@@ -255,6 +258,7 @@ impl StoragePool {
             debug_assert!(iters != 100, "swapping didn't resolve after 100 iters!");
 
             let step_initial_price = state.price;
+
             // find the next tick based on which direction we're swapping
             let (step_next_tick, step_next_tick_initialised) =
                 tick_bitmap::next_initialized_tick_within_one_word(
@@ -283,6 +287,7 @@ impl StoragePool {
             // step_fee_amount is reduced by protocol fee later
             let (next_sqrt_price, step_amount_in, step_amount_out, mut step_fee_amount) =
                 swap_math::compute_swap_step(
+                    // CLEAN
                     state.price,
                     step_clamped_price,
                     state.liquidity,
@@ -475,113 +480,403 @@ impl test_utils::StorageNew for StoragePool {
 
 #[cfg(test)]
 mod test {
-    use std::{
-        iter,
-        ops::{Div, Mul, Neg, Sub},
-    };
+    use std::ops::{Mul, Neg};
 
     use super::*;
     use crate::test_utils;
+    use maplit::hashmap;
     use ruint_macro::uint;
-    use stylus_sdk::{
-        alloy_primitives::{Sign, Signed, I128},
-        debug,
-    };
+    use stylus_sdk::alloy_primitives::I128;
 
     #[test]
     fn test_update_position() {
-        test_utils::with_storage::<_, StoragePool, _>(|storage| {
-            storage
-                .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
-                .unwrap();
+        test_utils::with_storage::<_, StoragePool, _>(
+            None,
+            &hashmap! {}, // slots
+            &hashmap! {}, // caller balances
+            &hashmap! {}, // amm balances
+            |storage| {
+                storage
+                    .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
+                    .unwrap();
 
-            let id = uint!(2_U256);
+                let id = uint!(2_U256);
 
-            storage
-                .create_position(id, tick_math::get_min_tick(1), tick_math::get_max_tick(1))
-                .unwrap();
+                storage
+                    .create_position(id, tick_math::get_min_tick(1), tick_math::get_max_tick(1))
+                    .unwrap();
 
-            assert_eq!(
-                storage.update_position(id, 3161),
-                Ok((I256::unchecked_from(9996), I256::unchecked_from(1000))),
-            );
-        });
+                assert_eq!(
+                    storage.update_position(id, 3161),
+                    Ok((I256::unchecked_from(9996), I256::unchecked_from(1000))),
+                );
+            },
+        );
     }
 
     #[test]
     fn test_update_position_2() {
-        test_utils::with_storage::<_, StoragePool, _>(|storage| {
-            storage
-                .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
-                .unwrap();
+        test_utils::with_storage::<_, StoragePool, _>(
+            None,
+            &hashmap! {}, // slots
+            &hashmap! {}, // caller balances
+            &hashmap! {}, // amm balances
+            |storage| {
+                storage
+                    .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
+                    .unwrap();
 
-            let id = uint!(2_U256);
+                let id = uint!(2_U256);
 
-            storage.create_position(id, -874753, -662914).unwrap();
+                storage.create_position(id, -874753, -662914).unwrap();
 
-            assert_eq!(
-                storage.update_position(id, 24703680000000000000000),
-                Ok((I256::unchecked_from(0), I256::unchecked_from(99649663))),
-            );
-        });
+                assert_eq!(
+                    storage.update_position(id, 24703680000000000000000),
+                    Ok((I256::unchecked_from(0), I256::unchecked_from(99649663))),
+                );
+            },
+        );
     }
 
     #[test]
     fn test_swap() -> Result<(), Revert> {
-        test_utils::with_storage::<_, StoragePool, _>(|storage| {
-            storage.init(
-                test_utils::encode_sqrt_price(100, 1), // price
-                0,
-                1,
-                u128::MAX,
-            )?;
+        test_utils::with_storage::<_, StoragePool, _>(
+            None,
+            &hashmap! {}, // slots
+            &hashmap! {}, // caller balances
+            &hashmap! {}, // amm balances
+            |storage| {
+                storage.init(
+                    test_utils::encode_sqrt_price(100, 1), // price
+                    0,
+                    1,
+                    u128::MAX,
+                )?;
 
-            let id = uint!(2_U256);
-            storage
-                .create_position(
-                    id,
-                    tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(50, 1))?,
-                    tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(150, 1))?,
-                )
-                .unwrap();
-            storage.update_position(id, 100)?;
+                let id = uint!(2_U256);
+                storage
+                    .create_position(
+                        id,
+                        tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(50, 1))?,
+                        tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(150, 1))?,
+                    )
+                    .unwrap();
+                storage.update_position(id, 100)?;
 
-            let id = uint!(3_U256);
-            storage
-                .create_position(
-                    id,
-                    tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(80, 1))?,
-                    tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(150, 1))?,
-                )
-                .unwrap();
-            storage.update_position(id, 100)?;
+                let id = uint!(3_U256);
+                storage
+                    .create_position(
+                        id,
+                        tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(80, 1))?,
+                        tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(150, 1))?,
+                    )
+                    .unwrap();
+                storage.update_position(id, 100)?;
 
-            storage.swap(
-                true,
-                I256::unchecked_from(-10),
-                test_utils::encode_sqrt_price(60, 1),
-            )?;
+                storage.swap(
+                    true,
+                    I256::unchecked_from(-10),
+                    test_utils::encode_sqrt_price(60, 1),
+                )?;
 
-            storage.swap(
-                true,
-                I256::unchecked_from(10),
-                test_utils::encode_sqrt_price(50, 1),
-            )?;
+                storage.swap(
+                    true,
+                    I256::unchecked_from(10),
+                    test_utils::encode_sqrt_price(50, 1),
+                )?;
 
-            storage.swap(
-                false,
-                I256::unchecked_from(10),
-                test_utils::encode_sqrt_price(120, 1),
-            )?;
+                storage.swap(
+                    false,
+                    I256::unchecked_from(10),
+                    test_utils::encode_sqrt_price(120, 1),
+                )?;
 
-            storage.swap(
-                false,
-                I256::unchecked_from(-10000),
-                test_utils::encode_sqrt_price(120, 1),
-            )?;
+                storage.swap(
+                    false,
+                    I256::unchecked_from(-10000),
+                    test_utils::encode_sqrt_price(120, 1),
+                )?;
 
-            Ok(())
-        })
+                Ok(())
+            },
+        )
+    }
+
+    #[test]
+    fn test_pool_init_state() -> Result<(), Revert> {
+        test_utils::with_storage::<_, StoragePool, _>(
+            None,
+            &hashmap! {}, // slots
+            &hashmap! {}, // caller balances
+            &hashmap! {}, // amm balances
+            |pool| {
+                let price = test_utils::encode_sqrt_price(100, 1);
+
+                pool.init(
+                    price, // price
+                    2,
+                    1,
+                    u128::MAX,
+                )?;
+
+                assert_eq!(pool.enabled.get(), true);
+                assert_eq!(pool.sqrt_price.get(), price);
+
+                assert_eq!(
+                    pool.cur_tick.get(),
+                    I32::lib(&tick_math::get_tick_at_sqrt_ratio(price)?)
+                );
+
+                assert_eq!(pool.fee.get(), U32::lib(&2));
+
+                assert_eq!(pool.tick_spacing.get(), U8::lib(&1));
+
+                assert_eq!(pool.max_liquidity_per_tick.get(), U128::lib(&u128::MAX));
+
+                Ok(())
+            },
+        )
+    }
+
+    #[test]
+    fn test_pool_init_reverts() -> Result<(), Revert> {
+        test_utils::with_storage::<_, StoragePool, _>(
+            None,
+            &hashmap! {}, // slots
+            &hashmap! {}, // caller balances
+            &hashmap! {}, // amm balances
+            |storage| {
+                match storage.init(uint!(1_U256), 0, 0, 0_u128) {
+                    Err(r) => assert_eq!(Error::R.to_string(), String::from_utf8(r).unwrap()),
+                    _ => panic!("expected R"),
+                }
+
+                match storage.init(test_utils::encode_sqrt_price(100, 1), 0, 1, u128::MAX) {
+                    Err(r) => assert_eq!(
+                        Error::PoolAlreadyInitialised.to_string(),
+                        String::from_utf8(r).unwrap()
+                    ),
+                    _ => panic!("expected PoolAlreadyInitialised"),
+                }
+                Ok(())
+            },
+        )
+    }
+
+    #[test]
+    fn test_pool_position_create() -> Result<(), Revert> {
+        test_utils::with_storage::<_, StoragePool, _>(
+            None,
+            &hashmap! {}, // slots
+            &hashmap! {}, // caller balances
+            &hashmap! {}, // amm balances
+            |pool| {
+                let id = uint!(2_U256);
+                let low = tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(50, 1))?;
+                let up = tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(150, 1))?;
+
+                match pool.create_position(id, low, up) {
+                    Err(r) => assert_eq!(
+                        Error::PoolDisabled.to_string(),
+                        String::from_utf8(r).unwrap()
+                    ),
+                    _ => panic!("expected PoolDisabled"),
+                }
+
+                pool.init(
+                    test_utils::encode_sqrt_price(100, 1), // price
+                    0,
+                    1,
+                    u128::MAX,
+                )?;
+
+                pool.create_position(id, low, up)?;
+
+                let position_saved = pool.positions.positions.get(id);
+
+                assert_eq!(position_saved.lower.get().as_i32(), low);
+                assert_eq!(position_saved.upper.get().as_i32(), up);
+
+                Ok(())
+            },
+        )
+    }
+
+    #[test]
+    fn test_pool_update_position_reverts() {
+        test_utils::with_storage::<_, StoragePool, _>(
+            None,
+            &hashmap! {}, // slots
+            &hashmap! {}, // caller balances
+            &hashmap! {}, // amm balances
+            |pool| {
+                pool.init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
+                    .unwrap();
+
+                let id = uint!(2_U256);
+
+                pool.create_position(id, tick_math::get_min_tick(1), tick_math::get_max_tick(1))
+                    .unwrap();
+
+                pool.set_enabled(false);
+
+                match pool.update_position(id, 3161) {
+                    Err(r) => assert_eq!(
+                        Error::PoolDisabled.to_string(),
+                        String::from_utf8(r).unwrap()
+                    ),
+                    _ => panic!("expected PoolDisabled"),
+                }
+
+                match pool.update_position(id, 0) {
+                    Err(r) => assert_eq!(
+                        Error::PoolDisabled.to_string(),
+                        String::from_utf8(r).unwrap()
+                    ),
+                    _ => panic!("expected PoolDisabled"),
+                }
+            },
+        );
+    }
+
+    #[test]
+    fn test_pool_update_position_parametric() {
+        let prices = [
+            [1, 1],
+            [1, 3],
+            [1, 1_000_000],
+            [3, 1],
+            [3, 5],
+            [1_000_000, 1],
+        ];
+
+        let tick_spacing = [1, 100, 1000, 1_000_000];
+
+        let fee = 1111;
+
+        let position_delta =
+            [1000, 777, 100, 33, 3].map(|n| I128::unchecked_from(n).mul(I128::exp10(17)));
+
+        let swap_amount_denom = I256::unchecked_from(10);
+
+        for price in prices.iter() {
+            for tick in tick_spacing.iter() {
+                for delta in position_delta.iter() {
+                    test_utils::with_storage::<_, StoragePool, _>(
+                        None,
+                        &hashmap! {}, // slots
+                        &hashmap! {}, // caller balances
+                        &hashmap! {}, // amm balances
+                        |pool| {
+                            let sqrt_price = test_utils::encode_sqrt_price(price[0], price[1]);
+
+                            pool.init(sqrt_price, fee, *tick as u8, u128::MAX).unwrap();
+
+                            let id = uint!(2_U256);
+
+                            pool.create_position(
+                                id,
+                                tick_math::get_min_tick(*tick as u8),
+                                tick_math::get_max_tick(*tick as u8),
+                            )
+                            .unwrap();
+
+                            pool.update_position(id, delta.unchecked_into()).unwrap();
+
+                            pool.liquidity.set(delta.unchecked_into());
+
+                            let swap_amount =
+                                I256::try_from(delta.to_string()).unwrap() / swap_amount_denom;
+
+                            pool.swap(false, swap_amount, sqrt_price + U256::from(1))
+                                .unwrap();
+
+                            pool.swap(true, swap_amount.neg(), sqrt_price).unwrap();
+
+                            pool.swap(false, swap_amount, sqrt_price + U256::from(1))
+                                .unwrap();
+
+                            pool.update_position(id, i128::from(0)).unwrap();
+
+                            let position_after = pool.positions.positions.get(id);
+
+                            assert_eq!(position_after.token_owed_1.get(), U128::lib(&1));
+                            //TODO: check owed_fees calculations carfully
+
+                            let delta_neg: i128 = delta.neg().unchecked_into();
+
+                            pool.update_position(id, delta_neg).unwrap();
+                        },
+                    );
+                }
+            }
+        }
+    }
+
+    fn test_pool_swaps_reverts() {
+        test_utils::with_storage::<_, StoragePool, _>(
+            None,
+            &hashmap! {}, // slots
+            &hashmap! {}, // caller balances
+            &hashmap! {}, // amm balances
+            |pool| {
+                let sqrt_price = test_utils::encode_sqrt_price(1, 1);
+
+                match pool.swap(true, I256::unchecked_from(1), sqrt_price) {
+                    Err(r) => assert_eq!(
+                        Error::PoolDisabled.to_string(),
+                        String::from_utf8(r).unwrap()
+                    ),
+                    _ => panic!("expected PoolDisabled"),
+                }
+
+                pool.init(sqrt_price, 1, 1, u128::MAX).unwrap();
+
+                match pool.swap(true, I256::unchecked_from(1), sqrt_price + U256::from(1)) {
+                    Err(r) => assert_eq!(
+                        Error::PriceLimitTooLow.to_string(),
+                        String::from_utf8(r).unwrap()
+                    ),
+                    _ => panic!("expected PriceLimitTooLow"),
+                }
+
+                match pool.swap(true, I256::unchecked_from(1), tick_math::MIN_SQRT_RATIO) {
+                    Err(r) => assert_eq!(
+                        Error::PriceLimitTooLow.to_string(),
+                        String::from_utf8(r).unwrap()
+                    ),
+                    _ => panic!("expected PriceLimitTooLow"),
+                }
+
+                match pool.swap(false, I256::unchecked_from(1), tick_math::MAX_SQRT_RATIO) {
+                    Err(r) => assert_eq!(
+                        Error::PriceLimitTooHigh.to_string(),
+                        String::from_utf8(r).unwrap()
+                    ),
+                    _ => panic!("expected PriceLimitTooHigh"),
+                }
+
+                match pool.swap(false, I256::unchecked_from(1), sqrt_price - U256::from(1)) {
+                    Err(r) => assert_eq!(
+                        Error::PriceLimitTooHigh.to_string(),
+                        String::from_utf8(r).unwrap()
+                    ),
+                    _ => panic!("expected PriceLimitTooHigh"),
+                }
+            },
+        );
+    }
+
+    fn test_pool_swaps_parametric() {
+        test_utils::with_storage::<_, StoragePool, _>(
+            None,
+            &hashmap! {}, // slots
+            &hashmap! {}, // caller balances
+            &hashmap! {}, // amm balances
+            |pool| {
+                //WIP
+            },
+        );
     }
 
     #[test]

@@ -14,6 +14,18 @@ const getTokenAmountFromFormatted = (amount: bigint, decimals: number) =>
   amount * BigInt(10 ** decimals)
 
 /**
+ * @description format a number amount to at most the given decimals
+ * without the unncessary padding from toFixed
+ * @param amount - number amount
+ * @param decimals: maximum number of decimals to display
+ * @example 1.2, 6 -> 1.2
+ * @example 1.23456789, 6 -> 1.234567
+ * @example 1.0, 6 -> 1
+ */
+const snapAmountToDecimals = (amount: number, decimals: number = 6): number =>
+  Number(amount.toFixed(decimals))
+
+/**
  * @description convert a token amount to a formatted amount string
  * @param amount - raw token amount
  * @param decimals - number of token decimals
@@ -88,22 +100,11 @@ const getFormattedPriceFromTick = (tick: number, decimals0: number, decimals1: n
   return formattedPrice.length > 20 ? '∞ ' : formattedPrice
 }
 
-// get the amount of token1Unscaled, given the price and amount of token0Unscaled.
-// mul sets the operation to scale up token0Unscaled by tokenPrice18 (assumes token0Unscaled is the base token)
-// div sets the operation to divide token0Unscaled by tokenPrice18 (assumes token0Unscaled is the other token)
-const getTokenAmountFromRawAmountAndPrice = (token0Unscaled: bigint, tokenPrice18: bigint, dec0: bigint, dec1: bigint, op: 'mul' | 'div'): bigint => {
-  const num = token0Unscaled * 10n ** dec0;
-  const dec = dec1 <= dec0 ? (dec0 - dec1) + dec0 : dec0;
-  return op === 'mul' ?
-    num * tokenPrice18 / 10n ** (dec + dec1) :
-    num / tokenPrice18
-}
-
 export {
   getFormattedStringFromTokenAmount,
+  snapAmountToDecimals,
   getTokenAmountFromFormattedString,
   getFormattedPriceFromAmount,
   getFormattedPriceFromTick,
-  getTokenAmountFromRawAmountAndPrice,
 }
 

@@ -24,6 +24,9 @@ interface SwapStore {
 
   setToken0AmountRaw: (amountRaw: string) => void;
   setToken1AmountRaw: (amountRaw: string) => void;
+
+  gas: bigint;
+  setGas: (amount: bigint) => void;
 }
 
 export const useSwapStore = create<SwapStore>((set) => ({
@@ -36,8 +39,8 @@ export const useSwapStore = create<SwapStore>((set) => ({
     set(({ token0, token1, token1Amount, token0Amount, token0AmountRaw, token1AmountRaw }) => ({
       token0: token1,
       token1: token0,
-      token0Amount: token1Amount === "." ? "0" : token1Amount,
-      token1Amount: token0Amount === "." ? "0" : token0Amount,
+      token0Amount: token1Amount === "." || token1Amount === "" ? "0" : token1Amount,
+      token1Amount: token0Amount === "." || token0Amount === "" ? "0" : token0Amount,
       token0AmountRaw: token1AmountRaw,
       token1AmountRaw: token0AmountRaw,
     }))
@@ -86,4 +89,7 @@ export const useSwapStore = create<SwapStore>((set) => ({
       return { token1Amount: amount }
     })
   },
+
+  gas: 0n,
+  setGas: gas => set({ gas })
 }));

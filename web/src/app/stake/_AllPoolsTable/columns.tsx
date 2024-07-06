@@ -7,6 +7,8 @@ import Link from "next/link";
 import TokenIridescent from "@/assets/icons/iridescent-token.svg";
 import Ethereum from "@/assets/icons/ethereum.svg";
 import Token from "@/assets/icons/token.svg";
+import { TokenIcon } from "@/components/TokenIcon";
+import { getTokenFromAddress } from "@/config/tokens";
 
 export type Token = {
   name: string;
@@ -30,11 +32,12 @@ export const columns: ColumnDef<Pool>[] = [
     accessorKey: "tokens",
     header: "Pair",
     cell: ({ row }) => {
+      const token = getTokenFromAddress(row.original.id)
       return (
         <Link href={`/stake/pool?id=${row.original.id}`}>
           <Badge className="h-[35.61px] cursor-pointer gap-1 pl-1 text-2xs md:text-xs">
             <div className={"flex flex-row items-center"}>
-              <Token className={"size-[25px]"} />
+              <TokenIcon src={token?.icon} />
               <TokenIridescent className={"-ml-2 mb-3 size-[18px]"} />
             </div>
             <div className={"iridescent-text flex flex-row items-center gap-2"}>

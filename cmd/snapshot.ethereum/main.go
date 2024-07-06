@@ -5,14 +5,13 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"log/slog"
 	"math/big"
 	"net/http"
 
 	"github.com/fluidity-money/long.so/lib/config"
 	"github.com/fluidity-money/long.so/lib/math"
-	_ "github.com/fluidity-money/long.so/lib/setup"
+	"github.com/fluidity-money/long.so/lib/setup"
 	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
 
@@ -20,6 +19,8 @@ import (
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
 )
+
+const BatchSize = 100
 
 // PoolDetails retrieved from seawater_final_ticks_decimals_1
 type PoolDetails struct {
@@ -30,12 +31,13 @@ type PoolDetails struct {
 }
 
 func main() {
+	defer setup.Flush()
 	config := config.Get()
 	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
 		Logger: gormLogger.Default.LogMode(gormLogger.Silent),
 	})
 	if err != nil {
-		log.Fatalf("database open: %v", err)
+		setup.Exitf("database open: %v", err)
 	}
 	slog.Debug("about to make another lookup")
 	// Get every active position in the database, including the pools.
@@ -45,7 +47,7 @@ func main() {
 		Scan(&positions).
 		Error
 	if err != nil {
-		log.Fatalf("seawater positions scan: %v", err)
+		setup.Exitf("seawater positions scan: %v", err)
 	}
 	slog.Debug("positions we're about to scan", "positions", positions)
 	var poolDetails []PoolDetails
@@ -55,7 +57,7 @@ func main() {
 		Scan(&poolDetails).
 		Error
 	if err != nil {
-		log.Fatalf("scan positions: %v", err)
+		setup.Exitf("scan positions: %v", err)
 	}
 	slog.Debug("pools we're about to scan", "pools", poolDetails)
 	poolMap := make(map[string]PoolDetails, len(poolDetails))
@@ -67,35 +69,35 @@ func main() {
 			curPrice:  math.GetSqrtRatioAtTick(p.FinalTick.Big()),
 		}
 	}
-	// Store the positions in a map so we can reconcile the results together easier.
-	positionMap := make(map[int]seawater.Position, len(positions))
+	// Store the positions in a map so we can reconcile the results
+	// together easier. The key is a concatenation of the pool, and the
+	// position id.
+	positionMap := make(map[string]seawater.Position, len(positions))
 	for _, p := range positions {
-		positionMap[p.Id] = p
+		positionMap[encodeId(p.Pool, p.Id)] = p
 	}
-	// Make a separate RPC lookup for the current price of each pool.
-	// Pack the RPC data to be batched using storage slot lookups.
 	d := packRpcPosData(config.SeawaterAddr.String(), positionMap)
-	slog.Debug("packed rpc data", "data", d)
 	// Request from the RPC the batched lookup of this data.
 	// Makes multiple requests if the request size exceeds the current restriction.
 	resps, err := reqPositions(context.Background(), config.GethUrl, d, httpPost)
 	if err != nil {
-		log.Fatalf("positions request: %v", err)
+		setup.Exitf("positions request: %v", err)
 	}
 	var (
+		pools    = make([]string, len(positions))
 		ids      = make([]int, len(positions))
 		amount0s = make([]string, len(positions))
 		amount1s = make([]string, len(positions))
 	)
 	for i, r := range resps {
-		poolAddr := r.Pool.String()
-		pos, ok := positionMap[r.Pos]
+		pos, ok := positionMap[r.Key]
 		if !ok {
 			slog.Info("position doesn't have any liquidity",
-				"position id", r.Pos,
+				"position id", pos.Id,
 			)
 			continue
 		}
+		poolAddr := pos.Pool.String()
 		var (
 			lowerPrice = math.GetSqrtRatioAtTick(pos.Lower.Big())
 			upperPrice = math.GetSqrtRatioAtTick(pos.Upper.Big())
@@ -111,8 +113,8 @@ func main() {
 			amount1 = mulRatToInt(amount1Rat, int(poolMap[poolAddr].Decimals))
 		)
 		slog.Debug("price data",
-			"pool", r.Pool,
-			"id", r.Pos,
+			"pool", poolAddr,
+			"id", pos.Id,
 			"amount0", amount0Rat.FloatString(10),
 			"amount1", amount1Rat.FloatString(10),
 			"amount0", amount0.String(),
@@ -121,7 +123,8 @@ func main() {
 			"lower", lowerPrice,
 			"upper", upperPrice,
 		)
-		ids[i] = r.Pos
+		pools[i] = poolAddr
+		ids[i] = pos.Id
 		amount0s[i] = amount0.String()
 		amount1s[i] = amount1.String()
 	}
@@ -129,8 +132,15 @@ func main() {
 		slog.Info("no positions found")
 		return
 	}
-	if err := storePositions(db, ids, amount0s, amount1s); err != nil {
-		log.Fatalf("store positions: %v", err)
+	err = storePositions(
+		db,
+		pools,
+		ids,
+		amount0s,
+		amount1s,
+	)
+	if err != nil {
+		setup.Exitf("store positions: %v", err)
 	}
 }
 

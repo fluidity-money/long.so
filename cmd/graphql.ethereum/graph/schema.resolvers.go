@@ -13,11 +13,11 @@ import (
 	"time"
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
-	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib"
-	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
+	graphErc20 "github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
 	"github.com/fluidity-money/long.so/lib/features"
 	"github.com/fluidity-money/long.so/lib/math"
 	"github.com/fluidity-money/long.so/lib/types"
+	"github.com/fluidity-money/long.so/lib/types/erc20"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
 	"gorm.io/gorm"
 )
@@ -31,21 +31,47 @@ func (r *amountResolver) Token(ctx context.Context, obj *model.Amount) (model.To
 		MockDelay(r.F)
 		return MockToken(obj.Token.String())
 	}
-	name, symbol, totalSupply, err := erc20.GetErc20Details(
-		ctx,
-		r.Geth,
-		obj.Token,
-	)
-	if err != nil {
-		return model.Token{}, fmt.Errorf("erc20 token %#v: %v", obj.Token, err)
+	var token erc20.Erc20
+	err := r.DB.Table("erc20_cache_1").
+		Where("address = ?", obj.Token).
+		First(&token).
+		Error
+	switch {
+	case err == nil:
+		// Nothing went wrong! Return the user what we found.
+		return model.Token{token}, nil
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		// Look up the token, and store it in the database.
+		name, symbol, totalSupply, err := graphErc20.GetErc20Details(
+			ctx,
+			r.Geth,
+			obj.Token,
+		)
+		if err != nil {
+			return model.Token{}, fmt.Errorf("erc20 token %#v: %v", obj.Token, err)
+		}
+		err = r.DB.Exec(
+			"SELECT erc20_insert_1(?, ?, ?, ?, ?)",
+			obj.Token,
+			name,
+			symbol,
+			totalSupply,
+			obj.Decimals,
+		).
+			Error
+		if err != nil {
+			return model.Token{}, fmt.Errorf("insert erc20 %v: %v", obj.Token, err)
+		}
+		return model.Token{erc20.Erc20{
+			Address:     obj.Token,
+			Name:        name,
+			Symbol:      symbol,
+			TotalSupply: totalSupply,
+			Decimals:    obj.Decimals,
+		}}, nil
+	default:
+		return model.Token{}, err
 	}
-	return model.Token{
-		Address:     obj.Token.String(),
-		Name:        name,
-		Symbol:      symbol,
-		TotalSupply: totalSupply.String(),
-		Decimals:    obj.Decimals,
-	}, nil
 }
 
 // ValueUnscaled is the resolver for the valueUnscaled field.
@@ -80,12 +106,12 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 		switch obj.Token {
 		case r.C.FusdcAddr:
 			// 4 decimals
-			return fmt.Sprintf("%0.4f", dividedAmt), nil
+			return fmt.Sprintf("%0.8f", dividedAmt), nil
 		default:
 			//value / (10 ** decimals) * 0.04
 			x := new(big.Float).Set(dividedAmt)
 			x.Quo(dividedAmt, new(big.Float).SetFloat64(0.04))
-			return fmt.Sprintf("%0.4f", x), nil
+			return fmt.Sprintf("%0.8f", x), nil
 		}
 	}
 	if obj.ValueUnscaled.Cmp(types.EmptyUnscaledNumber().Int) == 0 {
@@ -100,7 +126,7 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	var finalTick struct {
 		FinalTick types.Number
 	}
-	err := r.DB.Table("seawater_final_ticks_1").
+	err := r.DB.Table("seawater_latest_ticks_1").
 		Select("final_tick").
 		Where("pool = ?", obj.Token).
 		First(&finalTick).
@@ -110,26 +136,25 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	}
 	sqrtPrice := math.GetSqrtRatioAtTick(finalTick.FinalTick.Big())
 	price := math.GetPriceAtSqrtRatio(sqrtPrice)
+
+	// amount * price / (10 ^ fusdcDecimals)
+	decimals := math.ExponentiateDecimals(int64(r.C.FusdcDecimals))
+	valueScaled := new(big.Rat).SetInt(obj.ValueUnscaled.Int)
+	value := valueScaled.Quo(valueScaled, decimals)
+	price.Mul(price, value)
+
 	return price.FloatString(5), nil
 }
 
 // Fusdc is the resolver for the fusdc field.
 func (r *queryResolver) Fusdc(ctx context.Context) (t model.Token, err error) {
-	name, symbol, totalSupply, err := erc20.GetErc20Details(
-		ctx,
-		r.Geth,
-		r.C.FusdcAddr,
-	)
-	if err != nil {
-		return t, fmt.Errorf("erc20 at %#v: %v", r.C.FusdcAddr, err)
-	}
-	return model.Token{
-		Address:     r.C.FusdcAddr.String(),
-		Name:        name,
-		Symbol:      symbol,
-		TotalSupply: totalSupply.String(),
+	return model.Token{erc20.Erc20{
+		Address:     r.C.FusdcAddr,
+		Name:        r.C.FusdcName,
+		Symbol:      r.C.FusdcSymbol,
+		TotalSupply: r.C.FusdcTotalSupply,
 		Decimals:    r.C.FusdcDecimals,
-	}, nil
+	}}, nil
 }
 
 // Pools is the resolver for the pools field.
@@ -162,18 +187,19 @@ func (r *queryResolver) GetPool(ctx context.Context, token string) (pool *seawat
 }
 
 // GetPoolPositions is the resolver for the getPoolPositions field.
-func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first *int, after *int) (positions model.SeawaterPositions, err error) {
+func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first *int, after *int) (positions model.SeawaterPositionsGlobal, err error) {
 	p := types.AddressFromString(pool)
-	if first == nil {
-		fst := 50
-		first = &fst
+	// If the user didn't set pagination, or they exceeded the restriction on the limit.
+	if first == nil || *first > PoolPositionsPageSize {
+		x := PoolPositionsPageSize
+		first = &x
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
-		positions = MockGetPoolPositions(p)
+		positions = model.SeawaterPositionsGlobal(MockGetPoolPositions(p))
 		return
 	}
 	stmt := r.DB.Table("seawater_active_positions_1").
@@ -187,12 +213,19 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first
 	if err := stmt.Scan(&pos).Error; err != nil || pos == nil {
 		return positions, err
 	}
-	positions = model.SeawaterPositions{
-		From:      pos[0].Id,
-		To:        pos[len(pos)-1].Id,
+	// If we actually got return data here, we want to set it so we
+	// can start to paginate.
+	var to *int
+	if l := len(pos); l > 0 {
+		x := int(pos[l-1].CreatedBy.Unix())
+		to = &x
+	}
+	positions = model.SeawaterPositionsGlobal(model.SeawaterPositions{
+		From:      *first,
+		To:        to,
 		Pool:      &p,
 		Positions: pos,
-	}
+	})
 	return
 }
 
@@ -214,18 +247,21 @@ func (r *queryResolver) GetPosition(ctx context.Context, id int) (position *seaw
 }
 
 // GetPositions is the resolver for the getPositions field.
-func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *int, after *int) (positions model.SeawaterPositions, err error) {
+func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *int, after *int) (positions model.SeawaterPositionsUser, err error) {
 	w := types.AddressFromString(wallet)
-	if first == nil {
-		fst := lib.PaginationBatchSize
-		first = &fst
+	// If the user didn't set the limit, or they requested too much.
+	if first == nil || *first > PoolPositionsPageSize {
+		x := PoolPositionsPageSize
+		first = &x
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
-		positions = MockGetPoolPositions("0x65dfe41220c438bf069bbce9eb66b087fe65db36")
+		positions = model.SeawaterPositionsUser(
+			MockGetPoolPositions("0x65dfe41220c438bf069bbce9eb66b087fe65db36"),
+		)
 		return
 	}
 	stmt := r.DB.Table("seawater_active_positions_1").
@@ -239,12 +275,13 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *
 	if err := stmt.Scan(&pos).Error; err != nil || pos == nil {
 		return positions, err
 	}
-	positions = model.SeawaterPositions{
+	id := pos[len(pos)-1].Id
+	positions = model.SeawaterPositionsUser(model.SeawaterPositions{
 		From:      pos[0].Id,
-		To:        pos[len(pos)-1].Id,
+		To:        &id,
 		Wallet:    &w,
 		Positions: pos,
-	}
+	})
 	return
 }
 
@@ -264,10 +301,11 @@ func (r *queryResolver) GetWallet(ctx context.Context, address string) (wallet *
 }
 
 // GetSwaps is the resolver for the getSwaps field.
-func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, after *int) (swaps model.SeawaterSwaps, err error) {
+func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, after *int) (swaps model.GetSwaps, err error) {
 	poolAddress := types.AddressFromString(pool)
-	if first == nil {
-		fst := lib.PaginationBatchSize
+	// If there was no first supplied, or they went past the limit on pages.
+	if first == nil || *first > SwapPositionsPageSize {
+		fst := SwapPositionsPageSize
 		first = &fst
 	}
 	if after == nil {
@@ -276,12 +314,13 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
-		swaps = MockSwaps(r.C.FusdcAddr, 150, "0x65dfe41220c438bf069bbce9eb66b087fe65db36")
-		return
+		d := MockSwaps(r.C.FusdcAddr, 150, "0x65dfe41220c438bf069bbce9eb66b087fe65db36")
+		return model.GetSwaps{d}, nil
 	}
+	var d []model.SeawaterSwap
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND id > ? ORDER BY id LIMIT ?",
+		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND timestamp > ? ORDER BY timestamp DESC LIMIT ?",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		poolAddress,
@@ -289,18 +328,33 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 		*after,
 		*first,
 	).
-		Scan(&swaps.Swaps).
+		Scan(&d).
 		Error
-	swaps.Pool = &poolAddress
+	if err != nil {
+		return
+	}
+	// If we actually got return data here, we want to set it so we
+	// can start to paginate.
+	var to int
+	if l := len(d); l > 0 {
+		to = d[l-1].Timestamp
+	}
+	swaps.Data = model.SeawaterSwaps{
+		From:  *first,
+		To:    to,
+		Pool:  &poolAddress,
+		Swaps: d,
+	}
 	return
 }
 
 // GetSwapsForUser is the resolver for the getSwapsForUser field.
-func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, first *int, after *int) (swaps model.SeawaterSwaps, err error) {
+func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, first *int, after *int) (swaps model.GetSwapsForUser, err error) {
 	walletAddress := types.AddressFromString(wallet)
-	if first == nil {
-		fst := lib.PaginationBatchSize
-		first = &fst
+	// If the user requested too large a limit, or they didn't supply anything.
+	if first == nil || *first > PoolPositionsPageSize {
+		x := PoolPositionsPageSize
+		first = &x
 	}
 	if after == nil {
 		aft := 0
@@ -308,21 +362,36 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
-		swaps = MockSwaps(r.C.FusdcAddr, 150, walletAddress)
-		return
+		d := MockSwaps(r.C.FusdcAddr, 150, walletAddress)
+		return model.GetSwapsForUser{d}, nil
 	}
+	var d []model.SeawaterSwap
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE sender = ? AND id > ? ORDER BY id LIMIT ?",
+		"SELECT * FROM seawater_swaps_1(?, ?) WHERE sender = ? AND id > ? ORDER BY timestamp DESC LIMIT ?",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		walletAddress,
 		*after,
 		*first,
 	).
-		Scan(&swaps.Swaps).
+		Scan(&d).
 		Error
-	swaps.Wallet = &walletAddress
+	if err != nil {
+		return
+	}
+	// If we actually got return data here, we want to set it so we
+	// can start to paginate.
+	var to int
+	if l := len(d); l > 0 {
+		to = d[l-1].Timestamp
+	}
+	swaps.Data = model.SeawaterSwaps{
+		From:   *first,
+		To:     to,
+		Wallet: &walletAddress,
+		Swaps:  d,
+	}
 	return
 }
 
@@ -371,30 +440,53 @@ func (r *seawaterPoolResolver) TickSpacing(ctx context.Context, obj *seawater.Po
 // Token is the resolver for the token field.
 func (r *seawaterPoolResolver) Token(ctx context.Context, obj *seawater.Pool) (t model.Token, err error) {
 	if obj == nil {
-		return t, fmt.Errorf("no pool obj")
+		return model.Token{}, fmt.Errorf("empty amount")
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
-		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
-			MockDelay(r.F)
-			return nil
-		})
+		MockDelay(r.F)
 		return MockToken(obj.Token.String())
 	}
-	name, symbol, totalSupply, err := erc20.GetErc20Details(
-		ctx,
-		r.Geth,
-		obj.Token,
-	)
-	if err != nil {
-		return t, fmt.Errorf("erc20 at %#v: %v", obj.Token, err)
+	var token erc20.Erc20
+	err = r.DB.Table("erc20_cache_1").
+		Where("address = ?", obj.Token).
+		First(&token).
+		Error
+	switch {
+	case err == nil:
+		// Nothing went wrong! Return the user what we found.
+		return model.Token{token}, nil
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		// Look up the token, and store it in the database.
+		name, symbol, totalSupply, err := graphErc20.GetErc20Details(
+			ctx,
+			r.Geth,
+			obj.Token,
+		)
+		if err != nil {
+			return model.Token{}, fmt.Errorf("erc20 token %#v: %v", obj.Token, err)
+		}
+		err = r.DB.Exec(
+			"SELECT erc20_insert_1(?, ?, ?, ?, ?)",
+			obj.Token,
+			name,
+			symbol,
+			totalSupply,
+			obj.Decimals,
+		).
+			Error
+		if err != nil {
+			return model.Token{}, fmt.Errorf("insert erc20 %v: %v", obj.Token, err)
+		}
+		return model.Token{erc20.Erc20{
+			Address:     obj.Token,
+			Name:        name,
+			Symbol:      symbol,
+			TotalSupply: totalSupply,
+			Decimals:    obj.Decimals,
+		}}, nil
+	default:
+		return model.Token{}, err
 	}
-	return model.Token{
-		Address:     obj.Token.String(),
-		Name:        name,
-		Symbol:      symbol,
-		TotalSupply: totalSupply.String(),
-		Decimals:    int(obj.Decimals),
-	}, nil
 }
 
 // Price is the resolver for the price field.
@@ -415,7 +507,7 @@ func (r *seawaterPoolResolver) Price(ctx context.Context, obj *seawater.Pool) (s
 		return daily[0], nil
 	}
 	var result model.PriceResult
-	err := r.DB.Table("seawater_final_ticks_1").
+	err := r.DB.Table("seawater_latest_ticks_1").
 		Where("pool = ?", obj.Token).
 		First(&result).
 		Error
@@ -710,17 +802,18 @@ func (r *seawaterPoolResolver) UtilityIncentives(ctx context.Context, obj *seawa
 }
 
 // Positions is the resolver for the positions field.
-func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool, first *int, after *int) (positions model.SeawaterPositions, err error) {
-	if first == nil {
-		fst := 50
-		first = &fst
+func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool, first *int, after *int) (positions model.SeawaterPositionsGlobal, err error) {
+	// If the user requested too large a limit, or they didn't supply a page size.
+	if first == nil || *first > PoolPositionsPageSize {
+		x := PoolPositionsPageSize
+		first = &x
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
-		positions = MockGetPoolPositions(obj.Token)
+		positions = model.SeawaterPositionsGlobal(MockGetPoolPositions(obj.Token))
 		return
 	}
 	stmt := r.DB.Table("seawater_active_positions_1").
@@ -728,31 +821,36 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 		Limit(*first).
 		Order("created_by desc")
 	if after != nil {
-		stmt = stmt.Where("pos_id < ?", *after)
+		stmt = stmt.Where("created_by < ?", *after)
 	}
 	var pos []seawater.Position
 	if err := stmt.Scan(&pos).Error; err != nil || pos == nil {
 		return positions, err
 	}
 	p := obj.Token
-	positions = model.SeawaterPositions{
+	var to *int
+	if l := len(pos); l > 0 {
+		x := int(pos[l-1].CreatedBy.Unix())
+		to = &x
+	}
+	positions = model.SeawaterPositionsGlobal(model.SeawaterPositions{
 		From:      pos[0].Id,
-		To:        pos[len(pos)-1].Id,
+		To:        to,
 		Pool:      &p,
 		Positions: pos,
-	}
+	})
 	return
 }
 
 // PositionsForUser is the resolver for the positionsForUser field.
-func (r *seawaterPoolResolver) PositionsForUser(ctx context.Context, obj *seawater.Pool, wallet string, first *int, after *int) (positions model.SeawaterPositions, err error) {
+func (r *seawaterPoolResolver) PositionsForUser(ctx context.Context, obj *seawater.Pool, wallet string, first *int, after *int) (positions model.SeawaterPositionsUser, err error) {
 	w := types.AddressFromString(wallet)
 	if obj == nil {
 		return positions, fmt.Errorf("empty pool")
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
-		positions = MockGetPoolPositions(w)
+		positions = model.SeawaterPositionsUser(MockGetPoolPositions(w))
 		return
 	}
 	err = r.DB.Table("seawater_active_positions_1").
@@ -775,6 +873,7 @@ func (r *seawaterPoolResolver) Liquidity(ctx context.Context, obj *seawater.Pool
 	var groups []seawater.LiquidityGroup
 	err = r.DB.Table("seawater_liquidity_groups_1").
 		Where("pool = ?", obj.Token).
+		Limit(LiquidityGroupsLimit).
 		Scan(&groups).
 		Error
 	if err != nil {
@@ -821,8 +920,9 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 	if obj == nil {
 		return swaps, fmt.Errorf("empty pool")
 	}
-	if first == nil {
-		fst := lib.PaginationBatchSize
+	// If the user requested a nil limit, or they're too big.
+	if first == nil || *first > SwapPositionsPageSize {
+		fst := SwapPositionsPageSize
 		first = &fst
 	}
 	if after == nil {
@@ -836,7 +936,7 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 	}
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND id > ? ORDER BY id LIMIT ?",
+		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND timestamp > ? ORDER BY timestamp DESC LIMIT ?",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		obj.Token,
@@ -852,11 +952,28 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 
 // ID is the resolver for the id field.
 func (r *seawaterPositionResolver) ID(ctx context.Context, obj *seawater.Position) (string, error) {
-	s, err := r.PositionID(ctx, obj)
-	if err != nil {
-		return "", err
+	if obj == nil {
+		return "", fmt.Errorf("empty position")
 	}
-	return "pos:" + strconv.Itoa(s), nil
+	return fmt.Sprintf("pos:%v:%v", obj.Pool, obj.Id), nil
+}
+
+// Created is the resolver for the created field.
+func (r *seawaterPositionResolver) Created(ctx context.Context, obj *seawater.Position) (int, error) {
+	if obj == nil {
+		return 0, fmt.Errorf("no position obj")
+	}
+	var pos seawater.Position
+	err := r.DB.
+		Table("events_seawater_mintposition").
+		Where("pos_id = ?", obj.Id).
+		Scan(&pos).
+		Error
+	if err != nil {
+		return 0, nil
+	}
+	ts := pos.CreatedBy.Unix()
+	return int(ts), nil
 }
 
 // PositionID is the resolver for the positionId field.
@@ -964,38 +1081,20 @@ func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *seawater.
 	}, nil
 }
 
-// Pool is the resolver for the pool field.
-func (r *seawaterPositionsResolver) Pool(ctx context.Context, obj *model.SeawaterPositions) (*seawater.Pool, error) {
+// ID is the resolver for the id field.
+func (r *seawaterPositionsGlobalResolver) ID(ctx context.Context, obj *model.SeawaterPositionsGlobal) (string, error) {
 	if obj == nil {
-		return nil, fmt.Errorf("empty positions")
+		return "", fmt.Errorf("empty positions")
 	}
-	if obj.Pool == nil {
-		return nil, nil
+	var to int
+	if obj.To != nil {
+		to = *obj.To
 	}
-	pool, err := r.Query().GetPool(ctx, obj.Pool.String())
-	if err != nil {
-		return nil, err
-	}
-	return pool, nil
-}
-
-// Wallet is the resolver for the wallet field.
-func (r *seawaterPositionsResolver) Wallet(ctx context.Context, obj *model.SeawaterPositions) (*model.Wallet, error) {
-	if obj == nil {
-		return nil, fmt.Errorf("empty positions")
-	}
-	if obj.Wallet == nil {
-		return nil, nil
-	}
-	wallet, err := r.Query().GetWallet(ctx, obj.Wallet.String())
-	if err != nil {
-		return nil, err
-	}
-	return wallet, nil
+	return fmt.Sprintf("posglobal:%v:%v", obj.From, to), nil
 }
 
 // Sum is the resolver for the sum field.
-func (r *seawaterPositionsResolver) Sum(ctx context.Context, obj *model.SeawaterPositions) (amounts []model.PairAmount, err error) {
+func (r *seawaterPositionsGlobalResolver) Sum(ctx context.Context, obj *model.SeawaterPositionsGlobal) (amounts []model.PairAmount, err error) {
 	if obj == nil {
 		return nil, fmt.Errorf("empty positions")
 	}
@@ -1042,8 +1141,160 @@ func (r *seawaterPositionsResolver) Sum(ctx context.Context, obj *model.Seawater
 }
 
 // Next is the resolver for the next field.
-func (r *seawaterPositionsResolver) Next(ctx context.Context, obj *model.SeawaterPositions, first *int) (model.SeawaterPositions, error) {
-	panic(fmt.Errorf("not implemented: Next - next"))
+func (r *seawaterPositionsGlobalResolver) Next(ctx context.Context, obj *model.SeawaterPositionsGlobal, first *int) (model.SeawaterPositionsGlobal, error) {
+	if obj == nil {
+		return model.SeawaterPositionsGlobal{}, fmt.Errorf("empty positions")
+	}
+	if first == nil || *first > PoolPositionsPageSize {
+		x := PoolPositionsPageSize
+		first = &x
+	}
+	// Check if we're able to continue, if to is set to anything other than nil.
+	if obj.To == nil {
+		// Looks like we can't continue! Return current positions obj.
+		return *obj, nil
+	}
+	to := time.Unix(int64(*obj.To), 0)
+	// Start to construct a statement based on whether internally a
+	// wallet, or a pool, was used.
+	stmt := r.DB.Table("seawater_active_positions_1").
+		Where("created_by < ?", to).
+		Limit(*first).
+		Order("created_by desc")
+	switch {
+	case obj.Wallet != nil:
+		// If a wallet was used, we filter on the wallet.
+		stmt = stmt.Where("owner = ?", *obj.Wallet)
+	case obj.Pool != nil:
+		// Pool was used! Filtering there.
+		stmt = stmt.Where("pool = ?", obj.Pool)
+	default:
+		return model.SeawaterPositionsGlobal{}, fmt.Errorf("unimplemented positions pagination behaviour")
+	}
+	var pos []seawater.Position
+	if err := stmt.Scan(&pos).Error; err != nil {
+		return model.SeawaterPositionsGlobal{}, err
+	}
+	var newTo *int
+	if l := len(pos); l > 0 {
+		x := int(pos[l-1].CreatedBy.Unix())
+		newTo = &x
+	}
+	return model.SeawaterPositionsGlobal{
+		From:      *obj.To,
+		To:        newTo,
+		Pool:      obj.Pool,
+		Wallet:    obj.Wallet,
+		Positions: pos,
+	}, nil
+}
+
+// ID is the resolver for the id field.
+func (r *seawaterPositionsUserResolver) ID(ctx context.Context, obj *model.SeawaterPositionsUser) (string, error) {
+	if obj == nil {
+		return "", fmt.Errorf("empty positions")
+	}
+	var to int
+	if obj.To != nil {
+		to = *obj.To
+	}
+	return fmt.Sprintf("posuser:%v:%v", obj.From, to), nil
+}
+
+// Sum is the resolver for the sum field.
+func (r *seawaterPositionsUserResolver) Sum(ctx context.Context, obj *model.SeawaterPositionsUser) (amounts []model.PairAmount, err error) {
+	if obj == nil {
+		return nil, fmt.Errorf("empty positions")
+	}
+	// Try to figure out whether we're servicing a per-wallet request, or a per-pool request.
+	var results []seawater.SnapshotPositionsLatestDecimalsGroup
+	stmt := r.DB
+	switch {
+	case obj.Pool != nil:
+		stmt = stmt.
+			Table("snapshot_positions_latest_decimals_grouped_1").
+			Where("pool = ?", obj.Pool)
+	case obj.Wallet != nil:
+		stmt = stmt.
+			Raw(
+				"SELECT * FROM snapshot_positions_latest_decimals_grouped_user_1(?)",
+				obj.Wallet,
+			)
+	default:
+		return nil, nil // Assume the query above didn't find any responses.
+	}
+	if err := stmt.Scan(&results).Error; err != nil {
+		return nil, err
+	}
+	amounts = make([]model.PairAmount, len(results))
+	now := int(time.Now().Unix())
+	for i, res := range results {
+		amounts[i] = model.PairAmount{
+			Timestamp: now,
+			Fusdc: model.Amount{
+				Token:         r.C.FusdcAddr,
+				Decimals:      r.C.FusdcDecimals,
+				Timestamp:     now,
+				ValueUnscaled: res.CumulativeAmount0,
+			},
+			Token1: model.Amount{
+				Token:         res.Pool,
+				Decimals:      int(res.Decimals),
+				Timestamp:     now,
+				ValueUnscaled: res.CumulativeAmount1,
+			},
+		}
+	}
+	return
+}
+
+// Next is the resolver for the next field.
+func (r *seawaterPositionsUserResolver) Next(ctx context.Context, obj *model.SeawaterPositionsUser, first *int) (model.SeawaterPositionsUser, error) {
+	if obj == nil {
+		return model.SeawaterPositionsUser{}, fmt.Errorf("empty positions")
+	}
+	if first == nil || *first > PoolPositionsPageSize {
+		x := PoolPositionsPageSize
+		first = &x
+	}
+	// Check if we're able to continue, if to is set to anything other than nil.
+	if obj.To == nil {
+		// Looks like we can't continue! Return current positions obj.
+		return *obj, nil
+	}
+	to := time.Unix(int64(*obj.To), 0)
+	// Start to construct a statement based on whether internally a
+	// wallet, or a pool, was used.
+	stmt := r.DB.Table("seawater_active_positions_1").
+		Where("created_by < ?", to).
+		Limit(*first).
+		Order("created_by desc")
+	switch {
+	case obj.Wallet != nil:
+		// If a wallet was used, we filter on the wallet.
+		stmt = stmt.Where("owner = ?", *obj.Wallet)
+	case obj.Pool != nil:
+		// Pool was used! Filtering there.
+		stmt = stmt.Where("pool = ?", obj.Pool)
+	default:
+		return model.SeawaterPositionsUser{}, fmt.Errorf("unimplemented positions pagination behaviour")
+	}
+	var pos []seawater.Position
+	if err := stmt.Scan(&pos).Error; err != nil {
+		return model.SeawaterPositionsUser{}, err
+	}
+	var newTo *int
+	if l := len(pos); l > 0 {
+		x := int(pos[l-1].CreatedBy.Unix())
+		newTo = &x
+	}
+	return model.SeawaterPositionsUser{
+		From:      *obj.To,
+		To:        newTo,
+		Pool:      obj.Pool,
+		Wallet:    obj.Wallet,
+		Positions: pos,
+	}, nil
 }
 
 // Pool is the resolver for the pool field.
@@ -1099,26 +1350,6 @@ func (r *seawaterSwapResolver) AmountOut(ctx context.Context, obj *model.Seawate
 	}, nil
 }
 
-// Pool is the resolver for the pool field.
-func (r *seawaterSwapsResolver) Pool(ctx context.Context, obj *model.SeawaterSwaps) (*seawater.Pool, error) {
-	if obj == nil {
-		return nil, fmt.Errorf("empty pool")
-	}
-	if obj.Pool == nil {
-		return nil, nil
-	}
-	pool, err := r.Query().GetPool(ctx, obj.Pool.String())
-	if err != nil {
-		return nil, err
-	}
-	return pool, nil
-}
-
-// Wallet is the resolver for the wallet field.
-func (r *seawaterSwapsResolver) Wallet(ctx context.Context, obj *model.SeawaterSwaps) (*model.Wallet, error) {
-	panic(fmt.Errorf("not implemented: Wallet - wallet"))
-}
-
 // Sum is the resolver for the sum field.
 func (r *seawaterSwapsResolver) Sum(ctx context.Context, obj *model.SeawaterSwaps) (amounts []model.PairAmount, err error) {
 	if obj == nil {
@@ -1139,7 +1370,7 @@ func (r *seawaterSwapsResolver) Sum(ctx context.Context, obj *model.SeawaterSwap
 	case obj.Wallet != nil:
 		stmt = stmt.
 			Raw(
-				"SELECT * FROM swaps_decimals_wallet_group_1(?,?,?)",
+				"SELECT * FROM swaps_decimals_user_group_1(?,?,?)",
 				r.C.FusdcAddr,
 				r.C.FusdcDecimals,
 				*obj.Wallet,
@@ -1178,12 +1409,41 @@ func (r *seawaterSwapsResolver) Next(ctx context.Context, obj *model.SeawaterSwa
 }
 
 // ID is the resolver for the id field.
+func (r *tokenResolver) ID(ctx context.Context, obj *model.Token) (string, error) {
+	if obj == nil {
+		return "", fmt.Errorf("empty token")
+	}
+	return fmt.Sprintf("token:%v", obj.Address), nil
+}
+
+// Address is the resolver for the address field.
+func (r *tokenResolver) Address(ctx context.Context, obj *model.Token) (string, error) {
+	if obj == nil {
+		return "", fmt.Errorf("empty token")
+	}
+	return obj.Address.String(), nil
+}
+
+// Image is the resolver for the image field.
+func (r *tokenResolver) Image(ctx context.Context, obj *model.Token) (string, error) {
+	panic(fmt.Errorf("not implemented: Image - image"))
+}
+
+// TotalSupply is the resolver for the totalSupply field.
+func (r *tokenResolver) TotalSupply(ctx context.Context, obj *model.Token) (string, error) {
+	if obj == nil {
+		return "", fmt.Errorf("empty token")
+	}
+	return obj.TotalSupply.String(), nil
+}
+
+// ID is the resolver for the id field.
 func (r *walletResolver) ID(ctx context.Context, obj *model.Wallet) (string, error) {
 	if obj == nil {
-		return "", fmt.Errorf("no wallet obj")
+		return "", fmt.Errorf("empty token")
 	}
-	return "wallet:" + obj.Address.String(), nil
-} 
+	return fmt.Sprintf("wallet:%v", obj.Address), nil
+}
 
 // Address is the resolver for the address field.
 func (r *walletResolver) Address(ctx context.Context, obj *model.Wallet) (string, error) {
@@ -1199,20 +1459,23 @@ func (r *walletResolver) Balances(ctx context.Context, obj *model.Wallet) ([]mod
 }
 
 // Positions is the resolver for the positions field.
-func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first *int, after *int) (positions model.SeawaterPositions, err error) {
+func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first *int, after *int) (positions model.SeawaterPositionsUser, err error) {
 	if obj == nil {
 		return positions, fmt.Errorf("empty wallet")
 	}
-	if first == nil {
-		fst := lib.PaginationBatchSize
-		first = &fst
+	// Prevent nil firsts, or past the limit.
+	if first == nil || *first > PoolPositionsPageSize {
+		x := PoolPositionsPageSize
+		first = &x
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
 			MockDelay(r.F)
 			return nil
 		})
-		positions = MockGetPoolPositions("0x65dfe41220c438bf069bbce9eb66b087fe65db36")
+		positions = model.SeawaterPositionsUser(
+			MockGetPoolPositions("0x65dfe41220c438bf069bbce9eb66b087fe65db36"),
+		)
 		return
 	}
 	stmt := r.DB.Table("seawater_active_positions_1").
@@ -1227,12 +1490,17 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 		return positions, err
 	}
 	w := obj.Address
-	positions = model.SeawaterPositions{
-		From:      pos[0].Id,
-		To:        pos[len(pos)-1].Id,
+	var to *int
+	if l := len(pos); l > 0 {
+		x := int(pos[l-1].CreatedBy.Unix())
+		to = &x
+	}
+	positions = model.SeawaterPositionsUser(model.SeawaterPositions{
+		From:      *first,
+		To:        to,
 		Wallet:    &w,
 		Positions: pos,
-	}
+	})
 	return
 }
 
@@ -1253,9 +1521,14 @@ func (r *Resolver) SeawaterPool() SeawaterPoolResolver { return &seawaterPoolRes
 // SeawaterPosition returns SeawaterPositionResolver implementation.
 func (r *Resolver) SeawaterPosition() SeawaterPositionResolver { return &seawaterPositionResolver{r} }
 
-// SeawaterPositions returns SeawaterPositionsResolver implementation.
-func (r *Resolver) SeawaterPositions() SeawaterPositionsResolver {
-	return &seawaterPositionsResolver{r}
+// SeawaterPositionsGlobal returns SeawaterPositionsGlobalResolver implementation.
+func (r *Resolver) SeawaterPositionsGlobal() SeawaterPositionsGlobalResolver {
+	return &seawaterPositionsGlobalResolver{r}
+}
+
+// SeawaterPositionsUser returns SeawaterPositionsUserResolver implementation.
+func (r *Resolver) SeawaterPositionsUser() SeawaterPositionsUserResolver {
+	return &seawaterPositionsUserResolver{r}
 }
 
 // SeawaterSwap returns SeawaterSwapResolver implementation.
@@ -1263,6 +1536,9 @@ func (r *Resolver) SeawaterSwap() SeawaterSwapResolver { return &seawaterSwapRes
 
 // SeawaterSwaps returns SeawaterSwapsResolver implementation.
 func (r *Resolver) SeawaterSwaps() SeawaterSwapsResolver { return &seawaterSwapsResolver{r} }
+
+// Token returns TokenResolver implementation.
+func (r *Resolver) Token() TokenResolver { return &tokenResolver{r} }
 
 // Wallet returns WalletResolver implementation.
 func (r *Resolver) Wallet() WalletResolver { return &walletResolver{r} }
@@ -1272,7 +1548,9 @@ type queryResolver struct{ *Resolver }
 type seawaterLiquidityResolver struct{ *Resolver }
 type seawaterPoolResolver struct{ *Resolver }
 type seawaterPositionResolver struct{ *Resolver }
-type seawaterPositionsResolver struct{ *Resolver }
+type seawaterPositionsGlobalResolver struct{ *Resolver }
+type seawaterPositionsUserResolver struct{ *Resolver }
 type seawaterSwapResolver struct{ *Resolver }
 type seawaterSwapsResolver struct{ *Resolver }
+type tokenResolver struct{ *Resolver }
 type walletResolver struct{ *Resolver }

@@ -2,6 +2,7 @@
 name = "seawater"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.81"
 
 [lib]
 name = "libseawater"
@@ -25,6 +26,7 @@ const-hex.workspace = true
 
 [dev-dependencies]
 rand = "0.8.5"
+maplit = "1.0.2"
 
 [features]
 export-abi = ["stylus-sdk/export-abi"]

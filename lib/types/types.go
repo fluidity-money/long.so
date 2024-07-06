@@ -196,7 +196,7 @@ func (u UnscaledNumber) ScaleStr(d int) string {
 	if d == 0 {
 		return u.String()
 	}
-	return fmt.Sprintf("%.4f", u.Scale(d))
+	return fmt.Sprintf("%.8f", u.Scale(d))
 }
 
 func HashFromString(s string) Hash {

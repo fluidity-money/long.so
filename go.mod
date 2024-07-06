@@ -7,7 +7,10 @@ require (
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/ethereum/go-ethereum v1.14.5
+	github.com/getsentry/sentry-go v0.28.1
 	github.com/lib/pq v1.10.9
+	github.com/orandin/slog-gorm v1.3.2
+	github.com/samber/slog-sentry/v2 v2.5.0
 	github.com/stretchr/testify v1.9.0
 	github.com/vektah/gqlparser/v2 v2.5.16
 	gorm.io/driver/postgres v1.5.9
@@ -43,6 +46,8 @@ require (
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/samber/lo v1.38.1 // indirect
+	github.com/samber/slog-common v0.16.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
 	github.com/supranational/blst v0.3.11 // indirect
