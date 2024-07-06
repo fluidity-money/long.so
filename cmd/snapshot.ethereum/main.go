@@ -20,6 +20,8 @@ import (
 	gormLogger "gorm.io/gorm/logger"
 )
 
+const BatchSize = 100
+
 // PoolDetails retrieved from seawater_final_ticks_decimals_1
 type PoolDetails struct {
 	Pool      types.Address
@@ -130,8 +132,23 @@ func main() {
 		slog.Info("no positions found")
 		return
 	}
-	if err := storePositions(db, pools, ids, amount0s, amount1s); err != nil {
-		setup.Exitf("store positions: %v", err)
+	for i := 0; i < len(ids); {
+		mc := min(i+BatchSize, len(ids)-1) // Max cursor that we can increment with.
+		slog.Info("doing batch insertion",
+			"from", i,
+			"to", mc,
+		)
+		err := storePositions(
+			db,
+			pools[i:mc],
+			ids[i:mc],
+			amount0s[i:mc],
+			amount1s[i:mc],
+		)
+		if err != nil {
+			setup.Exitf("store positions: %v", err)
+		}
+		i += mc
 	}
 }
 
