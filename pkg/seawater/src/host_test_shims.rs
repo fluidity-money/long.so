@@ -86,6 +86,12 @@ pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
         .map(storage::Word::to_owned)
         .unwrap_or_default(); // defaults to zero value
 
+    eprintln!(
+        "read word: {}, got value: {}",
+        const_hex::const_encode::<32, false>(&key).as_str(),
+        const_hex::const_encode::<32, false>(&value).as_str(),
+    );
+
     unsafe { storage::write_word(out, value) };
 }
 

@@ -257,6 +257,7 @@ impl StoragePool {
             debug_assert!(iters != 100, "swapping didn't resolve after 100 iters!");
 
             let step_initial_price = state.price;
+
             // find the next tick based on which direction we're swapping
             let (step_next_tick, step_next_tick_initialised) =
                 tick_bitmap::next_initialized_tick_within_one_word(
@@ -285,6 +286,7 @@ impl StoragePool {
             // step_fee_amount is reduced by protocol fee later
             let (next_sqrt_price, step_amount_in, step_amount_out, mut step_fee_amount) =
                 swap_math::compute_swap_step(
+                    // CLEAN
                     state.price,
                     step_clamped_price,
                     state.liquidity,
@@ -477,13 +479,13 @@ impl test_utils::StorageNew for StoragePool {
 
 #[cfg(test)]
 mod test {
-    use std::ops::{Div, Mul, Neg, Sub};
+    use std::ops::{Mul, Neg};
 
     use super::*;
     use crate::test_utils;
     use maplit::hashmap;
     use ruint_macro::uint;
-    use stylus_sdk::{alloy_primitives::I128, debug};
+    use stylus_sdk::alloy_primitives::I128;
 
     #[test]
     fn test_update_position() {
@@ -583,7 +585,7 @@ mod test {
 
     #[test]
     fn test_pool_init_state() -> Result<(), Revert> {
-        test_utils::with_storage::<_, StoragePool, _>(|pool| {
+        test_utils::with_storage::<_, StoragePool, _>(None, &hashmap! {}, |pool| {
             let price = test_utils::encode_sqrt_price(100, 1);
 
             pool.init(
@@ -613,7 +615,7 @@ mod test {
 
     #[test]
     fn test_pool_init_reverts() -> Result<(), Revert> {
-        test_utils::with_storage::<_, StoragePool, _>(|storage| {
+        test_utils::with_storage::<_, StoragePool, _>(None, &hashmap! {}, |storage| {
             match storage.init(uint!(1_U256), 0, 0, 0_u128) {
                 Err(r) => assert_eq!(Error::R.to_string(), String::from_utf8(r).unwrap()),
                 _ => panic!("expected R"),
@@ -632,7 +634,7 @@ mod test {
 
     #[test]
     fn test_pool_position_create() -> Result<(), Revert> {
-        test_utils::with_storage::<_, StoragePool, _>(|pool| {
+        test_utils::with_storage::<_, StoragePool, _>(None, &hashmap! {}, |pool| {
             let id = uint!(2_U256);
             let low = tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(50, 1))?;
             let up = tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(150, 1))?;
@@ -665,7 +667,7 @@ mod test {
 
     #[test]
     fn test_pool_update_position_reverts() {
-        test_utils::with_storage::<_, StoragePool, _>(|pool| {
+        test_utils::with_storage::<_, StoragePool, _>(None, &hashmap! {}, |pool| {
             pool.init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
                 .unwrap();
 
@@ -717,7 +719,7 @@ mod test {
         for price in prices.iter() {
             for tick in tick_spacing.iter() {
                 for delta in position_delta.iter() {
-                    test_utils::with_storage::<_, StoragePool, _>(|pool| {
+                    test_utils::with_storage::<_, StoragePool, _>(None, &hashmap! {}, |pool| {
                         let sqrt_price = test_utils::encode_sqrt_price(price[0], price[1]);
 
                         pool.init(sqrt_price, fee, *tick as u8, u128::MAX).unwrap();
@@ -763,7 +765,7 @@ mod test {
     }
 
     fn test_pool_swaps_reverts() {
-        test_utils::with_storage::<_, StoragePool, _>(|pool| {
+        test_utils::with_storage::<_, StoragePool, _>(None, &hashmap! {}, |pool| {
             let sqrt_price = test_utils::encode_sqrt_price(1, 1);
 
             match pool.swap(true, I256::unchecked_from(1), sqrt_price) {
@@ -811,7 +813,7 @@ mod test {
     }
 
     fn test_pool_swaps_parametric() {
-        test_utils::with_storage::<_, StoragePool, _>(|pool| {
+        test_utils::with_storage::<_, StoragePool, _>(None, &hashmap! {}, |pool| {
             //WIP
         });
     }
