@@ -44,7 +44,8 @@ type ResolverRoot interface {
 	SeawaterLiquidity() SeawaterLiquidityResolver
 	SeawaterPool() SeawaterPoolResolver
 	SeawaterPosition() SeawaterPositionResolver
-	SeawaterPositions() SeawaterPositionsResolver
+	SeawaterPositionsGlobal() SeawaterPositionsGlobalResolver
+	SeawaterPositionsUser() SeawaterPositionsUserResolver
 	SeawaterSwap() SeawaterSwapResolver
 	SeawaterSwaps() SeawaterSwapsResolver
 	Wallet() WalletResolver
@@ -140,7 +141,15 @@ type ComplexityRoot struct {
 		Upper      func(childComplexity int) int
 	}
 
-	SeawaterPositions struct {
+	SeawaterPositionsGlobal struct {
+		ID        func(childComplexity int) int
+		Next      func(childComplexity int, first *int) int
+		Positions func(childComplexity int) int
+		Sum       func(childComplexity int) int
+	}
+
+	SeawaterPositionsUser struct {
+		ID        func(childComplexity int) int
 		Next      func(childComplexity int, first *int) int
 		Positions func(childComplexity int) int
 		Sum       func(childComplexity int) int
@@ -209,9 +218,9 @@ type QueryResolver interface {
 	Fusdc(ctx context.Context) (model.Token, error)
 	Pools(ctx context.Context) ([]seawater.Pool, error)
 	GetPool(ctx context.Context, token string) (*seawater.Pool, error)
-	GetPoolPositions(ctx context.Context, pool string, first *int, after *int) (model.SeawaterPositions, error)
+	GetPoolPositions(ctx context.Context, pool string, first *int, after *int) (model.SeawaterPositionsGlobal, error)
 	GetPosition(ctx context.Context, id int) (*seawater.Position, error)
-	GetPositions(ctx context.Context, wallet string, first *int, after *int) (model.SeawaterPositions, error)
+	GetPositions(ctx context.Context, wallet string, first *int, after *int) (model.SeawaterPositionsUser, error)
 	GetWallet(ctx context.Context, address string) (*model.Wallet, error)
 	GetSwaps(ctx context.Context, pool string, first *int, after *int) (model.GetSwaps, error)
 	GetSwapsForUser(ctx context.Context, wallet string, first *int, after *int) (model.GetSwapsForUser, error)
@@ -236,8 +245,8 @@ type SeawaterPoolResolver interface {
 	LiquidityIncentives(ctx context.Context, obj *seawater.Pool) (model.Amount, error)
 	SuperIncentives(ctx context.Context, obj *seawater.Pool) (model.Amount, error)
 	UtilityIncentives(ctx context.Context, obj *seawater.Pool) ([]model.UtilityIncentive, error)
-	Positions(ctx context.Context, obj *seawater.Pool, first *int, after *int) (model.SeawaterPositions, error)
-	PositionsForUser(ctx context.Context, obj *seawater.Pool, wallet string, first *int, after *int) (model.SeawaterPositions, error)
+	Positions(ctx context.Context, obj *seawater.Pool, first *int, after *int) (model.SeawaterPositionsGlobal, error)
+	PositionsForUser(ctx context.Context, obj *seawater.Pool, wallet string, first *int, after *int) (model.SeawaterPositionsUser, error)
 	Liquidity(ctx context.Context, obj *seawater.Pool) ([]model.SeawaterLiquidity, error)
 	Swaps(ctx context.Context, obj *seawater.Pool, first *int, after *int) (model.SeawaterSwaps, error)
 }
@@ -251,9 +260,17 @@ type SeawaterPositionResolver interface {
 	Upper(ctx context.Context, obj *seawater.Position) (int, error)
 	Liquidity(ctx context.Context, obj *seawater.Position) (model.PairAmount, error)
 }
-type SeawaterPositionsResolver interface {
-	Sum(ctx context.Context, obj *model.SeawaterPositions) ([]model.PairAmount, error)
-	Next(ctx context.Context, obj *model.SeawaterPositions, first *int) (model.SeawaterPositions, error)
+type SeawaterPositionsGlobalResolver interface {
+	ID(ctx context.Context, obj *model.SeawaterPositionsGlobal) (string, error)
+
+	Sum(ctx context.Context, obj *model.SeawaterPositionsGlobal) ([]model.PairAmount, error)
+	Next(ctx context.Context, obj *model.SeawaterPositionsGlobal, first *int) (model.SeawaterPositionsGlobal, error)
+}
+type SeawaterPositionsUserResolver interface {
+	ID(ctx context.Context, obj *model.SeawaterPositionsUser) (string, error)
+
+	Sum(ctx context.Context, obj *model.SeawaterPositionsUser) ([]model.PairAmount, error)
+	Next(ctx context.Context, obj *model.SeawaterPositionsUser, first *int) (model.SeawaterPositionsUser, error)
 }
 type SeawaterSwapResolver interface {
 	Pool(ctx context.Context, obj *model.SeawaterSwap) (seawater.Pool, error)
@@ -270,7 +287,7 @@ type WalletResolver interface {
 	ID(ctx context.Context, obj *model.Wallet) (string, error)
 	Address(ctx context.Context, obj *model.Wallet) (string, error)
 	Balances(ctx context.Context, obj *model.Wallet) ([]model.Amount, error)
-	Positions(ctx context.Context, obj *model.Wallet, first *int, after *int) (model.SeawaterPositions, error)
+	Positions(ctx context.Context, obj *model.Wallet, first *int, after *int) (model.SeawaterPositionsUser, error)
 }
 
 type executableSchema struct {
@@ -734,31 +751,71 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SeawaterPosition.Upper(childComplexity), true
 
-	case "SeawaterPositions.next":
-		if e.complexity.SeawaterPositions.Next == nil {
+	case "SeawaterPositionsGlobal.id":
+		if e.complexity.SeawaterPositionsGlobal.ID == nil {
 			break
 		}
 
-		args, err := ec.field_SeawaterPositions_next_args(context.TODO(), rawArgs)
+		return e.complexity.SeawaterPositionsGlobal.ID(childComplexity), true
+
+	case "SeawaterPositionsGlobal.next":
+		if e.complexity.SeawaterPositionsGlobal.Next == nil {
+			break
+		}
+
+		args, err := ec.field_SeawaterPositionsGlobal_next_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.SeawaterPositions.Next(childComplexity, args["first"].(*int)), true
+		return e.complexity.SeawaterPositionsGlobal.Next(childComplexity, args["first"].(*int)), true
 
-	case "SeawaterPositions.positions":
-		if e.complexity.SeawaterPositions.Positions == nil {
+	case "SeawaterPositionsGlobal.positions":
+		if e.complexity.SeawaterPositionsGlobal.Positions == nil {
 			break
 		}
 
-		return e.complexity.SeawaterPositions.Positions(childComplexity), true
+		return e.complexity.SeawaterPositionsGlobal.Positions(childComplexity), true
 
-	case "SeawaterPositions.sum":
-		if e.complexity.SeawaterPositions.Sum == nil {
+	case "SeawaterPositionsGlobal.sum":
+		if e.complexity.SeawaterPositionsGlobal.Sum == nil {
 			break
 		}
 
-		return e.complexity.SeawaterPositions.Sum(childComplexity), true
+		return e.complexity.SeawaterPositionsGlobal.Sum(childComplexity), true
+
+	case "SeawaterPositionsUser.id":
+		if e.complexity.SeawaterPositionsUser.ID == nil {
+			break
+		}
+
+		return e.complexity.SeawaterPositionsUser.ID(childComplexity), true
+
+	case "SeawaterPositionsUser.next":
+		if e.complexity.SeawaterPositionsUser.Next == nil {
+			break
+		}
+
+		args, err := ec.field_SeawaterPositionsUser_next_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.SeawaterPositionsUser.Next(childComplexity, args["first"].(*int)), true
+
+	case "SeawaterPositionsUser.positions":
+		if e.complexity.SeawaterPositionsUser.Positions == nil {
+			break
+		}
+
+		return e.complexity.SeawaterPositionsUser.Positions(childComplexity), true
+
+	case "SeawaterPositionsUser.sum":
+		if e.complexity.SeawaterPositionsUser.Sum == nil {
+			break
+		}
+
+		return e.complexity.SeawaterPositionsUser.Sum(childComplexity), true
 
 	case "SeawaterSwap.amountIn":
 		if e.complexity.SeawaterSwap.AmountIn == nil {
@@ -1088,7 +1145,7 @@ type Query {
     Where to start after based on the position id.
     """
     after: Int
-  ): SeawaterPositions!
+  ): SeawaterPositionsGlobal!
 
   """
   Get positions that're owned by any pool using it's ID, based on what's known to the database.
@@ -1116,7 +1173,7 @@ type Query {
     Where to start after based on the position id.
     """
     after: Int
-  ): SeawaterPositions!
+  ): SeawaterPositionsUser!
 
   """
   Get wallet information based on information including balances. SHOULD NOT be used to get
@@ -1250,14 +1307,14 @@ type SeawaterPool {
   utilityIncentives: [UtilityIncentive!]!
 
   """
-  Positions available in this pool.
+  Positions available in this pool. Cached aggressively.
   """
-  positions(first: Int, after: Int): SeawaterPositions!
+  positions(first: Int, after: Int): SeawaterPositionsGlobal!
 
   """
-  Positions available in this pool, that were created by the wallet given.
+  Positions available in this pool, that were created by the wallet given. Not so cached.
   """
-  positionsForUser(wallet: String!, first: Int, after: Int): SeawaterPositions!
+  positionsForUser(wallet: String!, first: Int, after: Int): SeawaterPositionsUser!
 
   """
   Liquidity available in a pool, with only 20 elements being returned encompassing the
@@ -1310,8 +1367,14 @@ type SeawaterSwaps {
 
 """
 Pagination-friendly way of viewing the current state of the positions available in a pool.
+Cached aggressively.
 """
-type SeawaterPositions {
+type SeawaterPositionsGlobal {
+  """
+  ID available for this for caching reasons. Should be posglobal:from:to.
+  """
+  id: ID!
+
   """
   The positions associated with this data.
   """
@@ -1328,9 +1391,37 @@ type SeawaterPositions {
     The next number of fields to display from the current position.
     """
     first: Int
-  ): SeawaterPositions!
+  ): SeawaterPositionsGlobal!
 }
 
+"""
+Pagination-friendly way of viewing the current state of the positions available in a pool.
+Not cached so aggressively!
+"""
+type SeawaterPositionsUser {
+  """
+  ID available for this for caching reasons. Should be posuser:from:to.
+  """
+  id: ID!
+
+  """
+  The positions associated with this data.
+  """
+  positions: [SeawaterPosition!]!
+
+  """
+  The maximum returned by the underlying original query for this data if it's possible to
+  collect for fUSDC and the other token, done per unique token.
+  """
+  sum: [PairAmount!]
+
+  next(
+    """
+    The next number of fields to display from the current position.
+    """
+    first: Int
+  ): SeawaterPositionsUser!
+}
 """
 Volume that was made in the pool over time, in a daily and monthly metric.
 """
@@ -1614,7 +1705,7 @@ type Wallet {
   """
   Positions opened by the user in the AMM.
   """
-  positions(first: Int, after: Int): SeawaterPositions!
+  positions(first: Int, after: Int): SeawaterPositionsUser!
 }
 
 """
@@ -1952,7 +2043,22 @@ func (ec *executionContext) field_SeawaterPool_swaps_args(ctx context.Context, r
 	return args, nil
 }
 
-func (ec *executionContext) field_SeawaterPositions_next_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_SeawaterPositionsGlobal_next_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_SeawaterPositionsUser_next_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *int
@@ -3042,9 +3148,9 @@ func (ec *executionContext) _Query_getPoolPositions(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.SeawaterPositions)
+	res := resTmp.(model.SeawaterPositionsGlobal)
 	fc.Result = res
-	return ec.marshalNSeawaterPositions2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositions(ctx, field.Selections, res)
+	return ec.marshalNSeawaterPositionsGlobal2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositionsGlobal(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getPoolPositions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3055,14 +3161,16 @@ func (ec *executionContext) fieldContext_Query_getPoolPositions(ctx context.Cont
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_SeawaterPositionsGlobal_id(ctx, field)
 			case "positions":
-				return ec.fieldContext_SeawaterPositions_positions(ctx, field)
+				return ec.fieldContext_SeawaterPositionsGlobal_positions(ctx, field)
 			case "sum":
-				return ec.fieldContext_SeawaterPositions_sum(ctx, field)
+				return ec.fieldContext_SeawaterPositionsGlobal_sum(ctx, field)
 			case "next":
-				return ec.fieldContext_SeawaterPositions_next(ctx, field)
+				return ec.fieldContext_SeawaterPositionsGlobal_next(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type SeawaterPositions", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type SeawaterPositionsGlobal", field.Name)
 		},
 	}
 	defer func() {
@@ -3175,9 +3283,9 @@ func (ec *executionContext) _Query_getPositions(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.SeawaterPositions)
+	res := resTmp.(model.SeawaterPositionsUser)
 	fc.Result = res
-	return ec.marshalNSeawaterPositions2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositions(ctx, field.Selections, res)
+	return ec.marshalNSeawaterPositionsUser2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositionsUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getPositions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3188,14 +3296,16 @@ func (ec *executionContext) fieldContext_Query_getPositions(ctx context.Context,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_SeawaterPositionsUser_id(ctx, field)
 			case "positions":
-				return ec.fieldContext_SeawaterPositions_positions(ctx, field)
+				return ec.fieldContext_SeawaterPositionsUser_positions(ctx, field)
 			case "sum":
-				return ec.fieldContext_SeawaterPositions_sum(ctx, field)
+				return ec.fieldContext_SeawaterPositionsUser_sum(ctx, field)
 			case "next":
-				return ec.fieldContext_SeawaterPositions_next(ctx, field)
+				return ec.fieldContext_SeawaterPositionsUser_next(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type SeawaterPositions", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type SeawaterPositionsUser", field.Name)
 		},
 	}
 	defer func() {
@@ -4507,9 +4617,9 @@ func (ec *executionContext) _SeawaterPool_positions(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.SeawaterPositions)
+	res := resTmp.(model.SeawaterPositionsGlobal)
 	fc.Result = res
-	return ec.marshalNSeawaterPositions2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositions(ctx, field.Selections, res)
+	return ec.marshalNSeawaterPositionsGlobal2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositionsGlobal(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_SeawaterPool_positions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4520,14 +4630,16 @@ func (ec *executionContext) fieldContext_SeawaterPool_positions(ctx context.Cont
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_SeawaterPositionsGlobal_id(ctx, field)
 			case "positions":
-				return ec.fieldContext_SeawaterPositions_positions(ctx, field)
+				return ec.fieldContext_SeawaterPositionsGlobal_positions(ctx, field)
 			case "sum":
-				return ec.fieldContext_SeawaterPositions_sum(ctx, field)
+				return ec.fieldContext_SeawaterPositionsGlobal_sum(ctx, field)
 			case "next":
-				return ec.fieldContext_SeawaterPositions_next(ctx, field)
+				return ec.fieldContext_SeawaterPositionsGlobal_next(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type SeawaterPositions", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type SeawaterPositionsGlobal", field.Name)
 		},
 	}
 	defer func() {
@@ -4570,9 +4682,9 @@ func (ec *executionContext) _SeawaterPool_positionsForUser(ctx context.Context, 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.SeawaterPositions)
+	res := resTmp.(model.SeawaterPositionsUser)
 	fc.Result = res
-	return ec.marshalNSeawaterPositions2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositions(ctx, field.Selections, res)
+	return ec.marshalNSeawaterPositionsUser2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositionsUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_SeawaterPool_positionsForUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4583,14 +4695,16 @@ func (ec *executionContext) fieldContext_SeawaterPool_positionsForUser(ctx conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_SeawaterPositionsUser_id(ctx, field)
 			case "positions":
-				return ec.fieldContext_SeawaterPositions_positions(ctx, field)
+				return ec.fieldContext_SeawaterPositionsUser_positions(ctx, field)
 			case "sum":
-				return ec.fieldContext_SeawaterPositions_sum(ctx, field)
+				return ec.fieldContext_SeawaterPositionsUser_sum(ctx, field)
 			case "next":
-				return ec.fieldContext_SeawaterPositions_next(ctx, field)
+				return ec.fieldContext_SeawaterPositionsUser_next(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type SeawaterPositions", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type SeawaterPositionsUser", field.Name)
 		},
 	}
 	defer func() {
@@ -5136,8 +5250,52 @@ func (ec *executionContext) fieldContext_SeawaterPosition_liquidity(_ context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _SeawaterPositions_positions(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterPositions) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SeawaterPositions_positions(ctx, field)
+func (ec *executionContext) _SeawaterPositionsGlobal_id(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterPositionsGlobal) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterPositionsGlobal_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.SeawaterPositionsGlobal().ID(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SeawaterPositionsGlobal_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SeawaterPositionsGlobal",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SeawaterPositionsGlobal_positions(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterPositionsGlobal) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterPositionsGlobal_positions(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5167,9 +5325,9 @@ func (ec *executionContext) _SeawaterPositions_positions(ctx context.Context, fi
 	return ec.marshalNSeawaterPosition2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋlibᚋtypesᚋseawaterᚐPositionᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPositions_positions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPositionsGlobal_positions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "SeawaterPositions",
+		Object:     "SeawaterPositionsGlobal",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5198,8 +5356,8 @@ func (ec *executionContext) fieldContext_SeawaterPositions_positions(_ context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _SeawaterPositions_sum(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterPositions) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SeawaterPositions_sum(ctx, field)
+func (ec *executionContext) _SeawaterPositionsGlobal_sum(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterPositionsGlobal) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterPositionsGlobal_sum(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5212,7 +5370,7 @@ func (ec *executionContext) _SeawaterPositions_sum(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.SeawaterPositions().Sum(rctx, obj)
+		return ec.resolvers.SeawaterPositionsGlobal().Sum(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5226,9 +5384,9 @@ func (ec *executionContext) _SeawaterPositions_sum(ctx context.Context, field gr
 	return ec.marshalOPairAmount2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmountᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPositions_sum(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPositionsGlobal_sum(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "SeawaterPositions",
+		Object:     "SeawaterPositionsGlobal",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
@@ -5247,8 +5405,8 @@ func (ec *executionContext) fieldContext_SeawaterPositions_sum(_ context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _SeawaterPositions_next(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterPositions) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SeawaterPositions_next(ctx, field)
+func (ec *executionContext) _SeawaterPositionsGlobal_next(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterPositionsGlobal) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterPositionsGlobal_next(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5261,7 +5419,7 @@ func (ec *executionContext) _SeawaterPositions_next(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.SeawaterPositions().Next(rctx, obj, fc.Args["first"].(*int))
+		return ec.resolvers.SeawaterPositionsGlobal().Next(rctx, obj, fc.Args["first"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5273,27 +5431,29 @@ func (ec *executionContext) _SeawaterPositions_next(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.SeawaterPositions)
+	res := resTmp.(model.SeawaterPositionsGlobal)
 	fc.Result = res
-	return ec.marshalNSeawaterPositions2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositions(ctx, field.Selections, res)
+	return ec.marshalNSeawaterPositionsGlobal2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositionsGlobal(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPositions_next(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPositionsGlobal_next(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "SeawaterPositions",
+		Object:     "SeawaterPositionsGlobal",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_SeawaterPositionsGlobal_id(ctx, field)
 			case "positions":
-				return ec.fieldContext_SeawaterPositions_positions(ctx, field)
+				return ec.fieldContext_SeawaterPositionsGlobal_positions(ctx, field)
 			case "sum":
-				return ec.fieldContext_SeawaterPositions_sum(ctx, field)
+				return ec.fieldContext_SeawaterPositionsGlobal_sum(ctx, field)
 			case "next":
-				return ec.fieldContext_SeawaterPositions_next(ctx, field)
+				return ec.fieldContext_SeawaterPositionsGlobal_next(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type SeawaterPositions", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type SeawaterPositionsGlobal", field.Name)
 		},
 	}
 	defer func() {
@@ -5303,7 +5463,227 @@ func (ec *executionContext) fieldContext_SeawaterPositions_next(ctx context.Cont
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_SeawaterPositions_next_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_SeawaterPositionsGlobal_next_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SeawaterPositionsUser_id(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterPositionsUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterPositionsUser_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.SeawaterPositionsUser().ID(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SeawaterPositionsUser_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SeawaterPositionsUser",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SeawaterPositionsUser_positions(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterPositionsUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterPositionsUser_positions(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Positions, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]seawater.Position)
+	fc.Result = res
+	return ec.marshalNSeawaterPosition2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋlibᚋtypesᚋseawaterᚐPositionᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SeawaterPositionsUser_positions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SeawaterPositionsUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_SeawaterPosition_id(ctx, field)
+			case "created":
+				return ec.fieldContext_SeawaterPosition_created(ctx, field)
+			case "positionId":
+				return ec.fieldContext_SeawaterPosition_positionId(ctx, field)
+			case "owner":
+				return ec.fieldContext_SeawaterPosition_owner(ctx, field)
+			case "pool":
+				return ec.fieldContext_SeawaterPosition_pool(ctx, field)
+			case "lower":
+				return ec.fieldContext_SeawaterPosition_lower(ctx, field)
+			case "upper":
+				return ec.fieldContext_SeawaterPosition_upper(ctx, field)
+			case "liquidity":
+				return ec.fieldContext_SeawaterPosition_liquidity(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SeawaterPosition", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SeawaterPositionsUser_sum(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterPositionsUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterPositionsUser_sum(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.SeawaterPositionsUser().Sum(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]model.PairAmount)
+	fc.Result = res
+	return ec.marshalOPairAmount2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmountᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SeawaterPositionsUser_sum(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SeawaterPositionsUser",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "timestamp":
+				return ec.fieldContext_PairAmount_timestamp(ctx, field)
+			case "fusdc":
+				return ec.fieldContext_PairAmount_fusdc(ctx, field)
+			case "token1":
+				return ec.fieldContext_PairAmount_token1(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PairAmount", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SeawaterPositionsUser_next(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterPositionsUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterPositionsUser_next(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.SeawaterPositionsUser().Next(rctx, obj, fc.Args["first"].(*int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.SeawaterPositionsUser)
+	fc.Result = res
+	return ec.marshalNSeawaterPositionsUser2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositionsUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SeawaterPositionsUser_next(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SeawaterPositionsUser",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_SeawaterPositionsUser_id(ctx, field)
+			case "positions":
+				return ec.fieldContext_SeawaterPositionsUser_positions(ctx, field)
+			case "sum":
+				return ec.fieldContext_SeawaterPositionsUser_sum(ctx, field)
+			case "next":
+				return ec.fieldContext_SeawaterPositionsUser_next(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SeawaterPositionsUser", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_SeawaterPositionsUser_next_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -6536,9 +6916,9 @@ func (ec *executionContext) _Wallet_positions(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.SeawaterPositions)
+	res := resTmp.(model.SeawaterPositionsUser)
 	fc.Result = res
-	return ec.marshalNSeawaterPositions2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositions(ctx, field.Selections, res)
+	return ec.marshalNSeawaterPositionsUser2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositionsUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Wallet_positions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6549,14 +6929,16 @@ func (ec *executionContext) fieldContext_Wallet_positions(ctx context.Context, f
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_SeawaterPositionsUser_id(ctx, field)
 			case "positions":
-				return ec.fieldContext_SeawaterPositions_positions(ctx, field)
+				return ec.fieldContext_SeawaterPositionsUser_positions(ctx, field)
 			case "sum":
-				return ec.fieldContext_SeawaterPositions_sum(ctx, field)
+				return ec.fieldContext_SeawaterPositionsUser_sum(ctx, field)
 			case "next":
-				return ec.fieldContext_SeawaterPositions_next(ctx, field)
+				return ec.fieldContext_SeawaterPositionsUser_next(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type SeawaterPositions", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type SeawaterPositionsUser", field.Name)
 		},
 	}
 	defer func() {
@@ -10261,19 +10643,55 @@ func (ec *executionContext) _SeawaterPosition(ctx context.Context, sel ast.Selec
 	return out
 }
 
-var seawaterPositionsImplementors = []string{"SeawaterPositions"}
+var seawaterPositionsGlobalImplementors = []string{"SeawaterPositionsGlobal"}
 
-func (ec *executionContext) _SeawaterPositions(ctx context.Context, sel ast.SelectionSet, obj *model.SeawaterPositions) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, seawaterPositionsImplementors)
+func (ec *executionContext) _SeawaterPositionsGlobal(ctx context.Context, sel ast.SelectionSet, obj *model.SeawaterPositionsGlobal) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, seawaterPositionsGlobalImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("SeawaterPositions")
+			out.Values[i] = graphql.MarshalString("SeawaterPositionsGlobal")
+		case "id":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SeawaterPositionsGlobal_id(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "positions":
-			out.Values[i] = ec._SeawaterPositions_positions(ctx, field, obj)
+			out.Values[i] = ec._SeawaterPositionsGlobal_positions(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
@@ -10286,7 +10704,7 @@ func (ec *executionContext) _SeawaterPositions(ctx context.Context, sel ast.Sele
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._SeawaterPositions_sum(ctx, field, obj)
+				res = ec._SeawaterPositionsGlobal_sum(ctx, field, obj)
 				return res
 			}
 
@@ -10319,7 +10737,151 @@ func (ec *executionContext) _SeawaterPositions(ctx context.Context, sel ast.Sele
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._SeawaterPositions_next(ctx, field, obj)
+				res = ec._SeawaterPositionsGlobal_next(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var seawaterPositionsUserImplementors = []string{"SeawaterPositionsUser"}
+
+func (ec *executionContext) _SeawaterPositionsUser(ctx context.Context, sel ast.SelectionSet, obj *model.SeawaterPositionsUser) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, seawaterPositionsUserImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SeawaterPositionsUser")
+		case "id":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SeawaterPositionsUser_id(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "positions":
+			out.Values[i] = ec._SeawaterPositionsUser_positions(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "sum":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SeawaterPositionsUser_sum(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "next":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SeawaterPositionsUser_next(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -11710,8 +12272,12 @@ func (ec *executionContext) marshalNSeawaterPosition2ᚕgithubᚗcomᚋfluidity�
 	return ret
 }
 
-func (ec *executionContext) marshalNSeawaterPositions2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositions(ctx context.Context, sel ast.SelectionSet, v model.SeawaterPositions) graphql.Marshaler {
-	return ec._SeawaterPositions(ctx, sel, &v)
+func (ec *executionContext) marshalNSeawaterPositionsGlobal2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositionsGlobal(ctx context.Context, sel ast.SelectionSet, v model.SeawaterPositionsGlobal) graphql.Marshaler {
+	return ec._SeawaterPositionsGlobal(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSeawaterPositionsUser2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositionsUser(ctx context.Context, sel ast.SelectionSet, v model.SeawaterPositionsUser) graphql.Marshaler {
+	return ec._SeawaterPositionsUser(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNSeawaterSwap2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterSwap(ctx context.Context, sel ast.SelectionSet, v model.SeawaterSwap) graphql.Marshaler {

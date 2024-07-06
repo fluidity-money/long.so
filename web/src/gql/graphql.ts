@@ -112,11 +112,11 @@ export type Query = {
    */
   getPool?: Maybe<SeawaterPool>;
   /** Get pool positions using the address of the pool involved. */
-  getPoolPositions: SeawaterPositions;
+  getPoolPositions: SeawaterPositionsGlobal;
   /** Get positions that're owned by any pool using it's ID, based on what's known to the database. */
   getPosition?: Maybe<SeawaterPosition>;
   /** Get positions that're owned by a specific wallet. */
-  getPositions: SeawaterPositions;
+  getPositions: SeawaterPositionsUser;
   /**
    * Get swaps made using a pool. Safe to use to get up to date information on swaps going
    * through the UI.
@@ -212,10 +212,10 @@ export type SeawaterPool = {
   liquidityIncentives: Amount;
   /** The number of assets (the liquidity) that were kept in the pool, historically. */
   liquidityOverTime: LiquidityOverTime;
-  /** Positions available in this pool. */
-  positions: SeawaterPositions;
-  /** Positions available in this pool, that were created by the wallet given. */
-  positionsForUser: SeawaterPositions;
+  /** Positions available in this pool. Cached aggressively. */
+  positions: SeawaterPositionsGlobal;
+  /** Positions available in this pool, that were created by the wallet given. Not so cached. */
+  positionsForUser: SeawaterPositionsUser;
   /**
    * Information on the current price, last cached. Determined by the last tick of a trade
    * that was made.
@@ -290,10 +290,15 @@ export type SeawaterPosition = {
   upper: Scalars['Int']['output'];
 };
 
-/** Pagination-friendly way of viewing the current state of the positions available in a pool. */
-export type SeawaterPositions = {
-  __typename?: 'SeawaterPositions';
-  next: SeawaterPositions;
+/**
+ * Pagination-friendly way of viewing the current state of the positions available in a pool.
+ * Cached aggressively.
+ */
+export type SeawaterPositionsGlobal = {
+  __typename?: 'SeawaterPositionsGlobal';
+  /** ID available for this for caching reasons. Should be posglobal:from:to. */
+  id: Scalars['ID']['output'];
+  next: SeawaterPositionsGlobal;
   /** The positions associated with this data. */
   positions: Array<SeawaterPosition>;
   /**
@@ -304,8 +309,38 @@ export type SeawaterPositions = {
 };
 
 
-/** Pagination-friendly way of viewing the current state of the positions available in a pool. */
-export type SeawaterPositionsNextArgs = {
+/**
+ * Pagination-friendly way of viewing the current state of the positions available in a pool.
+ * Cached aggressively.
+ */
+export type SeawaterPositionsGlobalNextArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/**
+ * Pagination-friendly way of viewing the current state of the positions available in a pool.
+ * Not cached so aggressively!
+ */
+export type SeawaterPositionsUser = {
+  __typename?: 'SeawaterPositionsUser';
+  /** ID available for this for caching reasons. Should be posuser:from:to. */
+  id: Scalars['ID']['output'];
+  next: SeawaterPositionsUser;
+  /** The positions associated with this data. */
+  positions: Array<SeawaterPosition>;
+  /**
+   * The maximum returned by the underlying original query for this data if it's possible to
+   * collect for fUSDC and the other token, done per unique token.
+   */
+  sum?: Maybe<Array<PairAmount>>;
+};
+
+
+/**
+ * Pagination-friendly way of viewing the current state of the positions available in a pool.
+ * Not cached so aggressively!
+ */
+export type SeawaterPositionsUserNextArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -417,7 +452,7 @@ export type Wallet = {
   /** Id for GraphQL caching. Simply the user's address. */
   id: Scalars['ID']['output'];
   /** Positions opened by the user in the AMM. */
-  positions: SeawaterPositions;
+  positions: SeawaterPositionsUser;
 };
 
 
@@ -439,27 +474,27 @@ export type YieldOverTime = {
   monthly: Array<PairAmount>;
 };
 
-export type AllPoolsFragmentFragment = { __typename?: 'SeawaterPool', address: string, token: { __typename?: 'Token', name: string, decimals: number }, volumeOverTime: { __typename?: 'VolumeOverTime', daily: Array<{ __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueScaled: string } }> }, tvlOverTime: { __typename?: 'TvlOverTime', daily: Array<string> }, liquidityOverTime: { __typename?: 'LiquidityOverTime', daily: Array<{ __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueScaled: string } }> }, liquidityIncentives: { __typename?: 'Amount', valueUsd: string }, superIncentives: { __typename?: 'Amount', valueUsd: string }, positions: { __typename?: 'SeawaterPositions', positions: Array<{ __typename?: 'SeawaterPosition', lower: number, upper: number }> } } & { ' $fragmentName'?: 'AllPoolsFragmentFragment' };
+export type AllPoolsFragmentFragment = { __typename?: 'SeawaterPool', address: string, token: { __typename?: 'Token', name: string, decimals: number }, volumeOverTime: { __typename?: 'VolumeOverTime', daily: Array<{ __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueScaled: string } }> }, tvlOverTime: { __typename?: 'TvlOverTime', daily: Array<string> }, liquidityOverTime: { __typename?: 'LiquidityOverTime', daily: Array<{ __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueScaled: string } }> }, liquidityIncentives: { __typename?: 'Amount', valueUsd: string }, superIncentives: { __typename?: 'Amount', valueUsd: string }, positions: { __typename?: 'SeawaterPositionsGlobal', positions: Array<{ __typename?: 'SeawaterPosition', lower: number, upper: number }> } } & { ' $fragmentName'?: 'AllPoolsFragmentFragment' };
 
-export type MyPositionsWalletFragmentFragment = { __typename?: 'Wallet', id: string, positions: { __typename?: 'SeawaterPositions', positions: Array<{ __typename?: 'SeawaterPosition', positionId: number, pool: { __typename?: 'SeawaterPool', token: { __typename?: 'Token', name: string, address: string, symbol: string, decimals: number } }, liquidity: { __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueUsd: string }, token1: { __typename?: 'Amount', valueUsd: string } } }> } } & { ' $fragmentName'?: 'MyPositionsWalletFragmentFragment' };
+export type MyPositionsWalletFragmentFragment = { __typename?: 'Wallet', id: string, positions: { __typename?: 'SeawaterPositionsUser', positions: Array<{ __typename?: 'SeawaterPosition', positionId: number, pool: { __typename?: 'SeawaterPool', token: { __typename?: 'Token', name: string, address: string, symbol: string, decimals: number } }, liquidity: { __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueUsd: string }, token1: { __typename?: 'Amount', valueUsd: string } } }> } } & { ' $fragmentName'?: 'MyPositionsWalletFragmentFragment' };
 
 export type SelectPrimeAssetFragmentFragment = { __typename?: 'SeawaterPool', address: string, volumeOverTime: { __typename?: 'VolumeOverTime', daily: Array<{ __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueUsd: string } }> }, token: { __typename?: 'Token', name: string, symbol: string, address: string, decimals: number } } & { ' $fragmentName'?: 'SelectPrimeAssetFragmentFragment' };
 
 export type ManagePoolFragmentFragment = { __typename?: 'SeawaterPool', address: string, id: string, earnedFeesAPRFUSDC: Array<string>, liquidity: Array<{ __typename?: 'SeawaterLiquidity', liquidity: string }>, token: { __typename?: 'Token', symbol: string, name: string, decimals: number }, liquidityIncentives: { __typename?: 'Amount', valueScaled: string }, superIncentives: { __typename?: 'Amount', valueScaled: string }, utilityIncentives: Array<{ __typename?: 'UtilityIncentive', amountGivenOut: string, maximumAmount: string }> } & { ' $fragmentName'?: 'ManagePoolFragmentFragment' };
 
-export type PositionsFragmentFragment = { __typename?: 'Wallet', positions: { __typename?: 'SeawaterPositions', positions: Array<{ __typename?: 'SeawaterPosition', positionId: number, lower: number, upper: number, pool: { __typename?: 'SeawaterPool', address: string }, liquidity: { __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueUsd: string }, token1: { __typename?: 'Amount', valueUsd: string } } }> } } & { ' $fragmentName'?: 'PositionsFragmentFragment' };
+export type PositionsFragmentFragment = { __typename?: 'Wallet', positions: { __typename?: 'SeawaterPositionsUser', positions: Array<{ __typename?: 'SeawaterPosition', positionId: number, lower: number, upper: number, pool: { __typename?: 'SeawaterPool', address: string }, liquidity: { __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueUsd: string }, token1: { __typename?: 'Amount', valueUsd: string } } }> } } & { ' $fragmentName'?: 'PositionsFragmentFragment' };
 
-export type WithdrawPositionsFragmentFragment = { __typename?: 'Wallet', positions: { __typename?: 'SeawaterPositions', positions: Array<{ __typename?: 'SeawaterPosition', positionId: number, lower: number, upper: number, owner: { __typename?: 'Wallet', address: string }, liquidity: { __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueUsd: string, valueScaled: string }, token1: { __typename?: 'Amount', valueUsd: string, valueScaled: string } } }> } } & { ' $fragmentName'?: 'WithdrawPositionsFragmentFragment' };
+export type WithdrawPositionsFragmentFragment = { __typename?: 'Wallet', positions: { __typename?: 'SeawaterPositionsUser', positions: Array<{ __typename?: 'SeawaterPosition', positionId: number, lower: number, upper: number, owner: { __typename?: 'Wallet', address: string }, liquidity: { __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueUsd: string, valueScaled: string }, token1: { __typename?: 'Amount', valueUsd: string, valueScaled: string } } }> } } & { ' $fragmentName'?: 'WithdrawPositionsFragmentFragment' };
 
 export type SwapExploreFragmentFragment = { __typename?: 'SeawaterPool', price: string, token: { __typename?: 'Token', name: string, symbol: string, address: string, decimals: number } } & { ' $fragmentName'?: 'SwapExploreFragmentFragment' };
 
-export type MyPositionsInventoryWalletFragmentFragment = { __typename?: 'Wallet', id: string, positions: { __typename?: 'SeawaterPositions', positions: Array<{ __typename?: 'SeawaterPosition', id: string, pool: { __typename?: 'SeawaterPool', token: { __typename?: 'Token', name: string, address: string, symbol: string } } }> } } & { ' $fragmentName'?: 'MyPositionsInventoryWalletFragmentFragment' };
+export type MyPositionsInventoryWalletFragmentFragment = { __typename?: 'Wallet', id: string, positions: { __typename?: 'SeawaterPositionsUser', positions: Array<{ __typename?: 'SeawaterPosition', id: string, pool: { __typename?: 'SeawaterPool', token: { __typename?: 'Token', name: string, address: string, symbol: string } } }> } } & { ' $fragmentName'?: 'MyPositionsInventoryWalletFragmentFragment' };
 
 export type TradeTabTransactionsFragmentFragment = { __typename?: 'SeawaterSwap', timestamp: number, amountIn: { __typename?: 'Amount', valueScaled: string, token: { __typename?: 'Token', symbol: string } }, amountOut: { __typename?: 'Amount', valueScaled: string, token: { __typename?: 'Token', symbol: string } } } & { ' $fragmentName'?: 'TradeTabTransactionsFragmentFragment' };
 
 export type StakeFormFragmentFragment = { __typename?: 'SeawaterPool', address: string, earnedFeesAPRFUSDC: Array<string> } & { ' $fragmentName'?: 'StakeFormFragmentFragment' };
 
-export type DepositPositionsFragmentFragment = { __typename?: 'Wallet', positions: { __typename?: 'SeawaterPositions', positions: Array<{ __typename?: 'SeawaterPosition', positionId: number, lower: number, upper: number }> } } & { ' $fragmentName'?: 'DepositPositionsFragmentFragment' };
+export type DepositPositionsFragmentFragment = { __typename?: 'Wallet', positions: { __typename?: 'SeawaterPositionsUser', positions: Array<{ __typename?: 'SeawaterPosition', positionId: number, lower: number, upper: number }> } } & { ' $fragmentName'?: 'DepositPositionsFragmentFragment' };
 
 export type SwapFormFragmentFragment = { __typename?: 'SeawaterPool', address: string, earnedFeesAPRFUSDC: Array<string>, earnedFeesAPRToken1: Array<string>, token: { __typename?: 'Token', address: string, decimals: number, name: string, symbol: string } } & { ' $fragmentName'?: 'SwapFormFragmentFragment' };
 

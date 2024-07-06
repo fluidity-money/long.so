@@ -168,7 +168,7 @@ func (r *queryResolver) GetPool(ctx context.Context, token string) (pool *seawat
 }
 
 // GetPoolPositions is the resolver for the getPoolPositions field.
-func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first *int, after *int) (positions model.SeawaterPositions, err error) {
+func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first *int, after *int) (positions model.SeawaterPositionsGlobal, err error) {
 	p := types.AddressFromString(pool)
 	// If the user didn't set pagination, or they exceeded the restriction on the limit.
 	if first == nil || *first > PoolPositionsPageSize {
@@ -180,7 +180,7 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first
 			MockDelay(r.F)
 			return nil
 		})
-		positions = MockGetPoolPositions(p)
+		positions = model.SeawaterPositionsGlobal(MockGetPoolPositions(p))
 		return
 	}
 	stmt := r.DB.Table("seawater_active_positions_1").
@@ -201,12 +201,12 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first
 		x := int(pos[l-1].CreatedBy.Unix())
 		to = &x
 	}
-	positions = model.SeawaterPositions{
+	positions = model.SeawaterPositionsGlobal(model.SeawaterPositions{
 		From:      *first,
 		To:        to,
 		Pool:      &p,
 		Positions: pos,
-	}
+	})
 	return
 }
 
@@ -228,7 +228,7 @@ func (r *queryResolver) GetPosition(ctx context.Context, id int) (position *seaw
 }
 
 // GetPositions is the resolver for the getPositions field.
-func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *int, after *int) (positions model.SeawaterPositions, err error) {
+func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *int, after *int) (positions model.SeawaterPositionsUser, err error) {
 	w := types.AddressFromString(wallet)
 	// If the user didn't set the limit, or they requested too much.
 	if first == nil || *first > PoolPositionsPageSize {
@@ -240,7 +240,9 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *
 			MockDelay(r.F)
 			return nil
 		})
-		positions = MockGetPoolPositions("0x65dfe41220c438bf069bbce9eb66b087fe65db36")
+		positions = model.SeawaterPositionsUser(
+			MockGetPoolPositions("0x65dfe41220c438bf069bbce9eb66b087fe65db36"),
+		)
 		return
 	}
 	stmt := r.DB.Table("seawater_active_positions_1").
@@ -255,12 +257,12 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *
 		return positions, err
 	}
 	id := pos[len(pos)-1].Id
-	positions = model.SeawaterPositions{
+	positions = model.SeawaterPositionsUser(model.SeawaterPositions{
 		From:      pos[0].Id,
 		To:        &id,
 		Wallet:    &w,
 		Positions: pos,
-	}
+	})
 	return
 }
 
@@ -758,7 +760,7 @@ func (r *seawaterPoolResolver) UtilityIncentives(ctx context.Context, obj *seawa
 }
 
 // Positions is the resolver for the positions field.
-func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool, first *int, after *int) (positions model.SeawaterPositions, err error) {
+func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool, first *int, after *int) (positions model.SeawaterPositionsGlobal, err error) {
 	// If the user requested too large a limit, or they didn't supply a page size.
 	if first == nil || *first > PoolPositionsPageSize {
 		x := PoolPositionsPageSize
@@ -769,7 +771,7 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 			MockDelay(r.F)
 			return nil
 		})
-		positions = MockGetPoolPositions(obj.Token)
+		positions = model.SeawaterPositionsGlobal(MockGetPoolPositions(obj.Token))
 		return
 	}
 	stmt := r.DB.Table("seawater_active_positions_1").
@@ -789,24 +791,24 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 		x := int(pos[l-1].CreatedBy.Unix())
 		to = &x
 	}
-	positions = model.SeawaterPositions{
+	positions = model.SeawaterPositionsGlobal(model.SeawaterPositions{
 		From:      pos[0].Id,
 		To:        to,
 		Pool:      &p,
 		Positions: pos,
-	}
+	})
 	return
 }
 
 // PositionsForUser is the resolver for the positionsForUser field.
-func (r *seawaterPoolResolver) PositionsForUser(ctx context.Context, obj *seawater.Pool, wallet string, first *int, after *int) (positions model.SeawaterPositions, err error) {
+func (r *seawaterPoolResolver) PositionsForUser(ctx context.Context, obj *seawater.Pool, wallet string, first *int, after *int) (positions model.SeawaterPositionsUser, err error) {
 	w := types.AddressFromString(wallet)
 	if obj == nil {
 		return positions, fmt.Errorf("empty pool")
 	}
 	if r.F.Is(features.FeatureGraphqlMockGraph) {
 		MockDelay(r.F)
-		positions = MockGetPoolPositions(w)
+		positions = model.SeawaterPositionsUser(MockGetPoolPositions(w))
 		return
 	}
 	err = r.DB.Table("seawater_active_positions_1").
@@ -1037,8 +1039,20 @@ func (r *seawaterPositionResolver) Liquidity(ctx context.Context, obj *seawater.
 	}, nil
 }
 
+// ID is the resolver for the id field.
+func (r *seawaterPositionsGlobalResolver) ID(ctx context.Context, obj *model.SeawaterPositionsGlobal) (string, error) {
+	if obj == nil {
+		return "", fmt.Errorf("empty positions")
+	}
+	var to int
+	if obj.To != nil {
+		to = *obj.To
+	}
+	return fmt.Sprintf("posglobal:%v:%v", obj.From, to), nil
+}
+
 // Sum is the resolver for the sum field.
-func (r *seawaterPositionsResolver) Sum(ctx context.Context, obj *model.SeawaterPositions) (amounts []model.PairAmount, err error) {
+func (r *seawaterPositionsGlobalResolver) Sum(ctx context.Context, obj *model.SeawaterPositionsGlobal) (amounts []model.PairAmount, err error) {
 	if obj == nil {
 		return nil, fmt.Errorf("empty positions")
 	}
@@ -1085,9 +1099,9 @@ func (r *seawaterPositionsResolver) Sum(ctx context.Context, obj *model.Seawater
 }
 
 // Next is the resolver for the next field.
-func (r *seawaterPositionsResolver) Next(ctx context.Context, obj *model.SeawaterPositions, first *int) (model.SeawaterPositions, error) {
+func (r *seawaterPositionsGlobalResolver) Next(ctx context.Context, obj *model.SeawaterPositionsGlobal, first *int) (model.SeawaterPositionsGlobal, error) {
 	if obj == nil {
-		return model.SeawaterPositions{}, fmt.Errorf("empty positions")
+		return model.SeawaterPositionsGlobal{}, fmt.Errorf("empty positions")
 	}
 	if first == nil || *first > PoolPositionsPageSize {
 		x := PoolPositionsPageSize
@@ -1108,23 +1122,131 @@ func (r *seawaterPositionsResolver) Next(ctx context.Context, obj *model.Seawate
 	switch {
 	case obj.Wallet != nil:
 		// If a wallet was used, we filter on the wallet.
-		stmt = stmt.Where("wallet = ?", *obj.Wallet)
+		stmt = stmt.Where("owner = ?", *obj.Wallet)
 	case obj.Pool != nil:
 		// Pool was used! Filtering there.
 		stmt = stmt.Where("pool = ?", obj.Pool)
 	default:
-		return model.SeawaterPositions{}, fmt.Errorf("unimplemented positions pagination behaviour")
+		return model.SeawaterPositionsGlobal{}, fmt.Errorf("unimplemented positions pagination behaviour")
 	}
 	var pos []seawater.Position
 	if err := stmt.Scan(&pos).Error; err != nil {
-		return model.SeawaterPositions{}, err
+		return model.SeawaterPositionsGlobal{}, err
 	}
 	var newTo *int
 	if l := len(pos); l > 0 {
 		x := int(pos[l-1].CreatedBy.Unix())
 		newTo = &x
 	}
-	return model.SeawaterPositions{
+	return model.SeawaterPositionsGlobal{
+		From:      *obj.To,
+		To:        newTo,
+		Pool:      obj.Pool,
+		Wallet:    obj.Wallet,
+		Positions: pos,
+	}, nil
+}
+
+// ID is the resolver for the id field.
+func (r *seawaterPositionsUserResolver) ID(ctx context.Context, obj *model.SeawaterPositionsUser) (string, error) {
+	if obj == nil {
+		return "", fmt.Errorf("empty positions")
+	}
+	var to int
+	if obj.To != nil {
+		to = *obj.To
+	}
+	return fmt.Sprintf("posuser:%v:%v", obj.From, to), nil
+}
+
+// Sum is the resolver for the sum field.
+func (r *seawaterPositionsUserResolver) Sum(ctx context.Context, obj *model.SeawaterPositionsUser) (amounts []model.PairAmount, err error) {
+	if obj == nil {
+		return nil, fmt.Errorf("empty positions")
+	}
+	// Try to figure out whether we're servicing a per-wallet request, or a per-pool request.
+	var results []seawater.SnapshotPositionsLatestDecimalsGroup
+	stmt := r.DB
+	switch {
+	case obj.Pool != nil:
+		stmt = stmt.
+			Table("snapshot_positions_latest_decimals_grouped_1").
+			Where("pool = ?", obj.Pool)
+	case obj.Wallet != nil:
+		stmt = stmt.
+			Raw(
+				"SELECT * FROM snapshot_positions_latest_decimals_grouped_user_1(?)",
+				obj.Wallet,
+			)
+	default:
+		return nil, nil // Assume the query above didn't find any responses.
+	}
+	if err := stmt.Scan(&results).Error; err != nil {
+		return nil, err
+	}
+	amounts = make([]model.PairAmount, len(results))
+	now := int(time.Now().Unix())
+	for i, res := range results {
+		amounts[i] = model.PairAmount{
+			Timestamp: now,
+			Fusdc: model.Amount{
+				Token:         r.C.FusdcAddr,
+				Decimals:      r.C.FusdcDecimals,
+				Timestamp:     now,
+				ValueUnscaled: res.CumulativeAmount0,
+			},
+			Token1: model.Amount{
+				Token:         res.Pool,
+				Decimals:      int(res.Decimals),
+				Timestamp:     now,
+				ValueUnscaled: res.CumulativeAmount1,
+			},
+		}
+	}
+	return
+}
+
+// Next is the resolver for the next field.
+func (r *seawaterPositionsUserResolver) Next(ctx context.Context, obj *model.SeawaterPositionsUser, first *int) (model.SeawaterPositionsUser, error) {
+	if obj == nil {
+		return model.SeawaterPositionsUser{}, fmt.Errorf("empty positions")
+	}
+	if first == nil || *first > PoolPositionsPageSize {
+		x := PoolPositionsPageSize
+		first = &x
+	}
+	// Check if we're able to continue, if to is set to anything other than nil.
+	if obj.To == nil {
+		// Looks like we can't continue! Return current positions obj.
+		return *obj, nil
+	}
+	to := time.Unix(int64(*obj.To), 0)
+	// Start to construct a statement based on whether internally a
+	// wallet, or a pool, was used.
+	stmt := r.DB.Table("seawater_active_positions_1").
+		Where("created_by < ?", to).
+		Limit(*first).
+		Order("created_by desc")
+	switch {
+	case obj.Wallet != nil:
+		// If a wallet was used, we filter on the wallet.
+		stmt = stmt.Where("owner = ?", *obj.Wallet)
+	case obj.Pool != nil:
+		// Pool was used! Filtering there.
+		stmt = stmt.Where("pool = ?", obj.Pool)
+	default:
+		return model.SeawaterPositionsUser{}, fmt.Errorf("unimplemented positions pagination behaviour")
+	}
+	var pos []seawater.Position
+	if err := stmt.Scan(&pos).Error; err != nil {
+		return model.SeawaterPositionsUser{}, err
+	}
+	var newTo *int
+	if l := len(pos); l > 0 {
+		x := int(pos[l-1].CreatedBy.Unix())
+		newTo = &x
+	}
+	return model.SeawaterPositionsUser{
 		From:      *obj.To,
 		To:        newTo,
 		Pool:      obj.Pool,
@@ -1266,7 +1388,7 @@ func (r *walletResolver) Balances(ctx context.Context, obj *model.Wallet) ([]mod
 }
 
 // Positions is the resolver for the positions field.
-func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first *int, after *int) (positions model.SeawaterPositions, err error) {
+func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first *int, after *int) (positions model.SeawaterPositionsUser, err error) {
 	if obj == nil {
 		return positions, fmt.Errorf("empty wallet")
 	}
@@ -1280,7 +1402,9 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 			MockDelay(r.F)
 			return nil
 		})
-		positions = MockGetPoolPositions("0x65dfe41220c438bf069bbce9eb66b087fe65db36")
+		positions = model.SeawaterPositionsUser(
+			MockGetPoolPositions("0x65dfe41220c438bf069bbce9eb66b087fe65db36"),
+		)
 		return
 	}
 	stmt := r.DB.Table("seawater_active_positions_1").
@@ -1300,12 +1424,12 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 		x := int(pos[l-1].CreatedBy.Unix())
 		to = &x
 	}
-	positions = model.SeawaterPositions{
+	positions = model.SeawaterPositionsUser(model.SeawaterPositions{
 		From:      *first,
 		To:        to,
 		Wallet:    &w,
 		Positions: pos,
-	}
+	})
 	return
 }
 
@@ -1326,9 +1450,14 @@ func (r *Resolver) SeawaterPool() SeawaterPoolResolver { return &seawaterPoolRes
 // SeawaterPosition returns SeawaterPositionResolver implementation.
 func (r *Resolver) SeawaterPosition() SeawaterPositionResolver { return &seawaterPositionResolver{r} }
 
-// SeawaterPositions returns SeawaterPositionsResolver implementation.
-func (r *Resolver) SeawaterPositions() SeawaterPositionsResolver {
-	return &seawaterPositionsResolver{r}
+// SeawaterPositionsGlobal returns SeawaterPositionsGlobalResolver implementation.
+func (r *Resolver) SeawaterPositionsGlobal() SeawaterPositionsGlobalResolver {
+	return &seawaterPositionsGlobalResolver{r}
+}
+
+// SeawaterPositionsUser returns SeawaterPositionsUserResolver implementation.
+func (r *Resolver) SeawaterPositionsUser() SeawaterPositionsUserResolver {
+	return &seawaterPositionsUserResolver{r}
 }
 
 // SeawaterSwap returns SeawaterSwapResolver implementation.
@@ -1345,7 +1474,8 @@ type queryResolver struct{ *Resolver }
 type seawaterLiquidityResolver struct{ *Resolver }
 type seawaterPoolResolver struct{ *Resolver }
 type seawaterPositionResolver struct{ *Resolver }
-type seawaterPositionsResolver struct{ *Resolver }
+type seawaterPositionsGlobalResolver struct{ *Resolver }
+type seawaterPositionsUserResolver struct{ *Resolver }
 type seawaterSwapResolver struct{ *Resolver }
 type seawaterSwapsResolver struct{ *Resolver }
 type walletResolver struct{ *Resolver }

@@ -21,6 +21,11 @@ type SeawaterPositions struct {
 	Positions []seawater.Position `json:"positions"`
 }
 
+type (
+	SeawaterPositionsGlobal SeawaterPositions
+	SeawaterPositionsUser   SeawaterPositions
+)
+
 // Pagination-friendly way to quickly receive swaps made somewhere. Knows internally where it
 // came from, where it's at with pagination, and lets you continue to paginate through it
 // optionally.
