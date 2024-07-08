@@ -5,7 +5,7 @@
 package math
 
 import (
-	"fmt"
+	"strconv"
 	"math/big"
 	"testing"
 
@@ -75,7 +75,7 @@ var sqrtRatioAtTickTestTable = []struct {
 func TestGetSqrtRatioAtTick(t *testing.T) {
 	for i, test := range sqrtRatioAtTickTestTable {
 		test := test
-		t.Run(fmt.Sprintf("SqrtRatioAtTick: %v", i), func(t *testing.T) {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
 			out := GetSqrtRatioAtTick(new(big.Int).SetInt64(int64(test.arg)))
 			assert.Equal(t, test.expected.Text(10), out.Text(10))
@@ -4066,7 +4066,7 @@ var getAmountsForLiqLiveTestTable = []struct {
 func TestGetAmountsForLiqLive(t *testing.T) {
 	for i, test := range getAmountsForLiqLiveTestTable {
 		test := test
-		t.Run(fmt.Sprintf("live test table: %v", i), func(t *testing.T) {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
 			curPrice, err := new(big.Int).SetString(test.curPrice, 10)
 			assert.Truef(t, err, "bad current price, %v", i)
