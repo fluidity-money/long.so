@@ -14,6 +14,7 @@ const TokenIcon = ({
       alt=""
       fill={true}
       src={src ? src : "/icons/token.svg"}
+      {...props}
     />
   </div>
 );
