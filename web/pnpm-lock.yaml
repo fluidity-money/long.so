@@ -162,8 +162,8 @@ importers:
         specifier: ^2.5.17
         version: 2.5.17(@react-native-async-storage/async-storage@1.23.1(react-native@0.74.2(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.21)(bufferutil@4.0.8)(react@18.2.0)))(@tanstack/query-core@5.28.9)(@tanstack/react-query@5.28.9(react@18.2.0))(@types/react@18.2.21)(bufferutil@4.0.8)(react-dom@18.2.0(react@18.2.0))(react-native@0.74.2(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.21)(bufferutil@4.0.8)(react@18.2.0))(react@18.2.0)(rollup@3.29.4)(typescript@5.4.5)(viem@2.9.6(bufferutil@4.0.8)(typescript@5.4.5)(zod@3.23.8))(zod@3.23.8)
       zustand:
-        specifier: ^4.5.2
-        version: 4.5.2(@types/react@18.2.21)(react@18.2.0)
+        specifier: ^4.5.4
+        version: 4.5.4(@types/react@18.2.21)(react@18.2.0)
     devDependencies:
       '@0no-co/graphqlsp':
         specifier: ^1.12.2
@@ -9577,8 +9577,8 @@ packages:
       react:
         optional: true
 
-  zustand@4.5.2:
-    resolution: {integrity: sha512-2cN1tPkDVkwCy5ickKrI7vijSjPksFRfqS6237NzT0vqSsztTNnQdHw9mmN7uBdk3gceVXU0a+21jFzFzAc9+g==}
+  zustand@4.5.4:
+    resolution: {integrity: sha512-/BPMyLKJPtFEvVL0E9E9BTUM63MNyhPGlvxk1XjrfWTUlV+BR8jufjsovHzrtR6YNcBEcL7cMHovL1n9xHawEg==}
     engines: {node: '>=12.7.0'}
     peerDependencies:
       '@types/react': '>=16.8'
@@ -22033,7 +22033,7 @@ snapshots:
       '@types/react': 18.2.21
       react: 18.2.0
 
-  zustand@4.5.2(@types/react@18.2.21)(react@18.2.0):
+  zustand@4.5.4(@types/react@18.2.21)(react@18.2.0):
     dependencies:
       use-sync-external-store: 1.2.0(react@18.2.0)
     optionalDependencies:

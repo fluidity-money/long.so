@@ -72,7 +72,7 @@
     "vaul": "^0.9.1",
     "viem": "^2.9.6",
     "wagmi": "^2.5.17",
-    "zustand": "^4.5.2"
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@0no-co/graphqlsp": "^1.12.2",
