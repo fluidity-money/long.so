@@ -122,7 +122,7 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 					}
 					for _, p := range resps {
 						if err := p.Error; err != nil {
-							chanErrs <- fmt.Errorf("error reported: %v", err)
+							chanErrs <- fmt.Errorf(`error reported, reqs: %v: %v`, err)
 							return
 						}
 						delta, err := types.NumberFromHex(strings.TrimPrefix(p.Result, "0x"))

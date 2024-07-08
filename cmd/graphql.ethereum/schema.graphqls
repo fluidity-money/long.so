@@ -219,6 +219,11 @@ type SeawaterPool {
   Swaps that were made using this pool.
   """
   swaps(first: Int, after: Int): SeawaterSwaps!
+
+  """
+  Amounts currently contained in this pool.
+  """
+  amounts: PairAmount!
 }
 
 """

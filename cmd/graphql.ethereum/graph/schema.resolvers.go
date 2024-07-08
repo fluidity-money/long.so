@@ -950,6 +950,40 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 	return
 }
 
+// Amounts is the resolver for the amounts field.
+func (r *seawaterPoolResolver) Amounts(ctx context.Context, obj *seawater.Pool) (amounts model.PairAmount, err error) {
+	if obj == nil {
+		return amounts, fmt.Errorf("empty pool")
+	}
+	// Sum the position snapshots for the pool address given.
+	var sum seawater.SnapshotPositionsLatestDecimalsGroup
+	err = r.DB.
+		Table("snapshot_positions_latest_decimals_grouped_user_1_return").
+		Where("pool = ?", obj.Token).
+		First(&sum).
+		Error
+	if err != nil {
+		return
+	}
+	ts := int(time.Now().Unix())
+	amounts = model.PairAmount{
+		Timestamp: ts,
+		Fusdc: model.Amount{
+			Token: r.C.FusdcAddr,
+			Decimals: r.C.FusdcDecimals,
+			Timestamp: ts,
+			ValueUnscaled: sum.CumulativeAmount0,
+		},
+		Token1: model.Amount{
+			Token: obj.Token,
+			Decimals: int(sum.Decimals),
+			Timestamp: ts,
+			ValueUnscaled: sum.CumulativeAmount1,
+		},
+	}
+	return
+}
+
 // ID is the resolver for the id field.
 func (r *seawaterPositionResolver) ID(ctx context.Context, obj *seawater.Position) (string, error) {
 	if obj == nil {
