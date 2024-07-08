@@ -37,7 +37,7 @@ export const columns: ColumnDef<Pool>[] = [
         <Link href={`/stake/pool?id=${row.original.id}`}>
           <Badge className="h-[35.61px] cursor-pointer gap-1 pl-1 text-2xs md:text-xs">
             <div className={"flex flex-row items-center"}>
-              <TokenIcon src={token?.icon} />
+              <TokenIcon src={token?.icon} className="rounded-lg size-[25px]" />
               <TokenIridescent className={"-ml-2 mb-3 size-[18px]"} />
             </div>
             <div className={"iridescent-text flex flex-row items-center gap-2"}>
