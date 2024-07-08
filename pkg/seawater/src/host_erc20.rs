@@ -11,25 +11,43 @@ use stylus_sdk::alloy_primitives::{Address, U256};
 use permit2_types::*;
 
 #[allow(unused_imports)]
-use crate::current_test;
+use crate::{current_test, host_test_shims};
 
+///! Decimals function used in event mocking for pool creation.
 pub fn decimals(_token: Address) -> Result<u8, Error> {
     #[cfg(feature = "testing-dbg-erc20")]
     dbg!(("decimals", _token));
     Ok(6)
 }
 
-/// Pretends to take tokens from the user. Only useful for testing.
-pub fn take_transfer_from(_token: Address, _amount: U256) -> Result<(), Error> {
+///! Pretends to take tokens from the user. Only useful for testing.
+///! Assumes a single token is in use for the life of this test.
+pub fn take_transfer_from(_token: Address, amount: U256) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg-erc20")]
     dbg!(("take_transfer_from", current_test!(), _token, _amount));
+    #[cfg(feature = "testing")]
+    {
+        return match host_test_shims::take_caller_bal(amount) {
+            Err(_) => Err(Error::Erc20RevertNoData), // follow the trace!
+            Ok(()) => Ok(()),
+        };
+    }
+    #[allow(unreachable_code)]
     Ok(())
 }
 
 /// Pretends to give users tokens. Only useful for testing.
-pub fn give(_token: Address, _amount: U256) -> Result<(), Error> {
+pub fn give(_token: Address, amount: U256) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg-erc20")]
-    dbg!(("give", current_test!(), _token, _amount));
+    dbg!(("give", current_test!(), _token, amount));
+    #[cfg(feature = "testing")]
+    {
+        return match host_test_shims::take_amm_bal(amount) {
+            Err(_) => Err(Error::Erc20RevertNoData), // follow the trace!
+            Ok(()) => Ok(()),
+        };
+    }
+    #[allow(unreachable_code)]
     Ok(())
 }
 
@@ -37,7 +55,7 @@ pub fn give(_token: Address, _amount: U256) -> Result<(), Error> {
 /// environment is not WASM. Only useful for testing.
 pub fn take_permit2(
     _token: Address,
-    _transfer_amount: U256,
+    transfer_amount: U256,
     _details: Permit2Args,
 ) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg-erc20")]
@@ -48,6 +66,14 @@ pub fn take_permit2(
         _transfer_amount,
         _details
     ));
+    #[cfg(feature = "testing")]
+    {
+        return match host_test_shims::take_caller_bal(transfer_amount) {
+            Err(_) => Err(Error::Erc20RevertNoData), // follow the trace!
+            Ok(()) => Ok(()),
+        };
+    }
+    #[allow(unreachable_code)]
     Ok(())
 }
 
@@ -55,11 +81,19 @@ pub fn take_permit2(
 /// environment is not WASM. Only useful for testing.
 pub fn take(
     _token: Address,
-    _amount: U256,
+    amount: U256,
     _permit2_details: Option<Permit2Args>,
 ) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg-erc20")]
     dbg!(("take", current_test!(), _token, _amount, _permit2_details));
+    #[cfg(feature = "testing")]
+    {
+        return match host_test_shims::take_caller_bal(amount) {
+            Err(_) => Err(Error::Erc20RevertNoData), // follow the trace!
+            Ok(()) => Ok(()),
+        };
+    }
+    #[allow(unreachable_code)]
     Ok(())
 }
 
