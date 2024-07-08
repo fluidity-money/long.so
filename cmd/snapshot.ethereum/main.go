@@ -145,10 +145,10 @@ func main() {
 	}
 	err = storePositions(
 		db,
-		pools[0:i],
-		ids[0:i],
-		amount0s[0:i],
-		amount1s[0:i],
+		pools[:i],
+		ids[:i],
+		amount0s[:i],
+		amount1s[:i],
 	)
 	if err != nil {
 		setup.Exitf("store positions: %v", err)
