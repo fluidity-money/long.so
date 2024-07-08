@@ -30,6 +30,8 @@ type PoolDetails struct {
 	curPrice  *big.Int // Set inside this program
 }
 
+var Zero = new(big.Int)
+
 func main() {
 	defer setup.Flush()
 	config := config.Get()
@@ -93,7 +95,8 @@ func main() {
 		amount0s = make([]string, len(positions))
 		amount1s = make([]string, len(positions))
 	)
-	for i, r := range resps {
+	i := 0
+	for _, r := range resps {
 		pos, ok := positionMap[r.Key]
 		if !ok {
 			slog.Info("position doesn't have any liquidity",
@@ -127,10 +130,14 @@ func main() {
 			"lower", lowerPrice,
 			"upper", upperPrice,
 		)
+		if amount0.Cmp(Zero) == 0 && amount1.Cmp(Zero) == 0{
+			continue
+		}
 		pools[i] = poolAddr
 		ids[i] = pos.Id
 		amount0s[i] = amount0.String()
 		amount1s[i] = amount1.String()
+		i++
 	}
 	if len(ids) == 0 {
 		slog.Info("no positions found")

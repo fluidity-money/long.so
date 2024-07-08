@@ -18,8 +18,10 @@ import (
 )
 
 const (
-	// BatchLimit to get from the server before using multiple batches.
-	BatchLimit = 1000
+	// BatchLimit to get from the server before using multiple
+	// batches. Half of the maximum amount since upstream started to
+	// choke.
+	BatchLimit = 500
 
 	// WorkerCount of simultaneous requests that can be made max.
 	WorkerCount = 100
