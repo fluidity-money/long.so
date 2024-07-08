@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { nanoid } from "nanoid";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import TokenIcon from "@/assets/icons/token.svg";
 import TokenIridescent from "@/assets/icons/token-iridescent.svg";
 import SegmentedControl from "@/components/ui/segmented-control";
 import { useAccount } from "wagmi";
@@ -23,6 +22,7 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlUser } from "@/hooks/useGraphql";
 import { Token, fUSDC } from "@/config/tokens";
+import { TokenIcon } from "@/components/TokenIcon";
 
 const MyPositionsWalletFragment = graphql(`
   fragment MyPositionsWalletFragment on Wallet {
