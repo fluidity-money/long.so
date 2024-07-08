@@ -39,6 +39,10 @@ func main() {
 	if err != nil {
 		setup.Exitf("database open: %v", err)
 	}
+	slog.Debug("about to snapshot the state of the liquidity groups")
+	if err := db.Exec("SELECT snapshot_liquidity_groups_1()").Error; err != nil {
+		setup.Exitf("snapshot liquidity groups: %v", err)
+	}
 	slog.Debug("about to make another lookup")
 	// Get every active position in the database, including the pools.
 	var positions []seawater.Position

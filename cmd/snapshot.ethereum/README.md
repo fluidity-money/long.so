@@ -5,6 +5,8 @@ Snapshots every position tracked as a database event every 5 minutes (and up to 
 seconds) by retrieving the position's tick range, and the position's delta. Writes each
 response to the database.
 
+Also snapshots liquidity groups to the new table.
+
 ## Note
 
 It's wise to protect this from running without any protection in the form of a lock. At a

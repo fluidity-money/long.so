@@ -871,7 +871,7 @@ func (r *seawaterPoolResolver) Liquidity(ctx context.Context, obj *seawater.Pool
 		return
 	}
 	var groups []seawater.LiquidityGroup
-	err = r.DB.Table("seawater_liquidity_groups_1").
+	err = r.DB.Table("seawater_liquidity_groups_2").
 		Where("pool = ?", obj.Token).
 		Limit(LiquidityGroupsLimit).
 		Scan(&groups).
