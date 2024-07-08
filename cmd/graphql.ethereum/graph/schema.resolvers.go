@@ -958,7 +958,7 @@ func (r *seawaterPoolResolver) Amounts(ctx context.Context, obj *seawater.Pool) 
 	// Sum the position snapshots for the pool address given.
 	var sum seawater.SnapshotPositionsLatestDecimalsGroup
 	err = r.DB.
-		Table("snapshot_positions_latest_decimals_grouped_user_1_return").
+		Table("snapshot_positions_latest_decimals_grouped_1").
 		Where("pool = ?", obj.Token).
 		First(&sum).
 		Error
