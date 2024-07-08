@@ -25,7 +25,7 @@ export const columns: ColumnDef<Pool>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex flex-row items-center gap-2">
-          <TokenIcon className={"size-[20px]"} />
+          <TokenIcon className="size-[20px]" />
           <TokenIridescent
             className={"-ml-4 size-[20px] rounded-full border border-black"}
           />

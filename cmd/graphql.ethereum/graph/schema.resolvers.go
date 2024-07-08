@@ -871,7 +871,7 @@ func (r *seawaterPoolResolver) Liquidity(ctx context.Context, obj *seawater.Pool
 		return
 	}
 	var groups []seawater.LiquidityGroup
-	err = r.DB.Table("seawater_liquidity_groups_1").
+	err = r.DB.Table("seawater_liquidity_groups_2").
 		Where("pool = ?", obj.Token).
 		Limit(LiquidityGroupsLimit).
 		Scan(&groups).
@@ -947,6 +947,40 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 		Scan(&swaps.Swaps).
 		Error
 	swaps.Pool = &obj.Token
+	return
+}
+
+// Amounts is the resolver for the amounts field.
+func (r *seawaterPoolResolver) Amounts(ctx context.Context, obj *seawater.Pool) (amounts model.PairAmount, err error) {
+	if obj == nil {
+		return amounts, fmt.Errorf("empty pool")
+	}
+	// Sum the position snapshots for the pool address given.
+	var sum seawater.SnapshotPositionsLatestDecimalsGroup
+	err = r.DB.
+		Table("snapshot_positions_latest_decimals_grouped_1").
+		Where("pool = ?", obj.Token).
+		First(&sum).
+		Error
+	if err != nil {
+		return
+	}
+	ts := int(time.Now().Unix())
+	amounts = model.PairAmount{
+		Timestamp: ts,
+		Fusdc: model.Amount{
+			Token: r.C.FusdcAddr,
+			Decimals: r.C.FusdcDecimals,
+			Timestamp: ts,
+			ValueUnscaled: sum.CumulativeAmount0,
+		},
+		Token1: model.Amount{
+			Token: obj.Token,
+			Decimals: int(sum.Decimals),
+			Timestamp: ts,
+			ValueUnscaled: sum.CumulativeAmount1,
+		},
+	}
 	return
 }
 

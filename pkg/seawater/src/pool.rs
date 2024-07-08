@@ -484,7 +484,6 @@ mod test {
 
     use super::*;
     use crate::test_utils;
-    use maplit::hashmap;
     use ruint_macro::uint;
     use stylus_sdk::alloy_primitives::I128;
 
@@ -492,9 +491,9 @@ mod test {
     fn test_update_position() {
         test_utils::with_storage::<_, StoragePool, _>(
             None,
-            &hashmap! {}, // slots
-            &hashmap! {}, // caller balances
-            &hashmap! {}, // amm balances
+            None, // slots
+            None, // caller balances
+            None, // amm balances
             |storage| {
                 storage
                     .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
@@ -518,9 +517,9 @@ mod test {
     fn test_update_position_2() {
         test_utils::with_storage::<_, StoragePool, _>(
             None,
-            &hashmap! {}, // slots
-            &hashmap! {}, // caller balances
-            &hashmap! {}, // amm balances
+            None, // slots
+            None, // caller balances
+            None, // amm balances
             |storage| {
                 storage
                     .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
@@ -542,9 +541,9 @@ mod test {
     fn test_swap() -> Result<(), Revert> {
         test_utils::with_storage::<_, StoragePool, _>(
             None,
-            &hashmap! {}, // slots
-            &hashmap! {}, // caller balances
-            &hashmap! {}, // amm balances
+            None, // slots
+            None, // caller balances
+            None, // amm balances
             |storage| {
                 storage.init(
                     test_utils::encode_sqrt_price(100, 1), // price
@@ -606,9 +605,9 @@ mod test {
     fn test_pool_init_state() -> Result<(), Revert> {
         test_utils::with_storage::<_, StoragePool, _>(
             None,
-            &hashmap! {}, // slots
-            &hashmap! {}, // caller balances
-            &hashmap! {}, // amm balances
+            None, // slots
+            None, // caller balances
+            None, // amm balances
             |pool| {
                 let price = test_utils::encode_sqrt_price(100, 1);
 
@@ -642,9 +641,9 @@ mod test {
     fn test_pool_init_reverts() -> Result<(), Revert> {
         test_utils::with_storage::<_, StoragePool, _>(
             None,
-            &hashmap! {}, // slots
-            &hashmap! {}, // caller balances
-            &hashmap! {}, // amm balances
+            None, // slots
+            None, // caller balances
+            None, // amm balances
             |storage| {
                 match storage.init(uint!(1_U256), 0, 0, 0_u128) {
                     Err(r) => assert_eq!(Error::R.to_string(), String::from_utf8(r).unwrap()),
@@ -667,9 +666,9 @@ mod test {
     fn test_pool_position_create() -> Result<(), Revert> {
         test_utils::with_storage::<_, StoragePool, _>(
             None,
-            &hashmap! {}, // slots
-            &hashmap! {}, // caller balances
-            &hashmap! {}, // amm balances
+            None, // slots
+            None, // caller balances
+            None, // amm balances
             |pool| {
                 let id = uint!(2_U256);
                 let low = tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(50, 1))?;
@@ -706,9 +705,9 @@ mod test {
     fn test_pool_update_position_reverts() {
         test_utils::with_storage::<_, StoragePool, _>(
             None,
-            &hashmap! {}, // slots
-            &hashmap! {}, // caller balances
-            &hashmap! {}, // amm balances
+            None, // slots
+            None, // caller balances
+            None, // amm balances
             |pool| {
                 pool.init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
                     .unwrap();
@@ -764,9 +763,9 @@ mod test {
                 for delta in position_delta.iter() {
                     test_utils::with_storage::<_, StoragePool, _>(
                         None,
-                        &hashmap! {}, // slots
-                        &hashmap! {}, // caller balances
-                        &hashmap! {}, // amm balances
+                        None, // slots
+                        None, // caller balances
+                        None, // amm balances
                         |pool| {
                             let sqrt_price = test_utils::encode_sqrt_price(price[0], price[1]);
 
@@ -816,9 +815,9 @@ mod test {
     fn test_pool_swaps_reverts() {
         test_utils::with_storage::<_, StoragePool, _>(
             None,
-            &hashmap! {}, // slots
-            &hashmap! {}, // caller balances
-            &hashmap! {}, // amm balances
+            None, // slots
+            None, // caller balances
+            None, // amm balances
             |pool| {
                 let sqrt_price = test_utils::encode_sqrt_price(1, 1);
 
@@ -870,9 +869,9 @@ mod test {
     fn test_pool_swaps_parametric() {
         test_utils::with_storage::<_, StoragePool, _>(
             None,
-            &hashmap! {}, // slots
-            &hashmap! {}, // caller balances
-            &hashmap! {}, // amm balances
+            None, // slots
+            None, // caller balances
+            None, // amm balances
             |pool| {
                 //WIP
             },

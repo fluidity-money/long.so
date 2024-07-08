@@ -165,7 +165,6 @@ export const AllPools = () => {
     );
   }, [showDemoData, poolsData]);
 
-
   const poolTvlSummed =
     sum(poolsData?.map((pool) => parseFloat(pool.tvlOverTime.daily[0])));
 

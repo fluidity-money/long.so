@@ -906,9 +906,9 @@ mod test {
     fn test_similar_to_ethers() -> Result<(), Vec<u8>> {
         test_utils::with_storage::<_, Pools, _>(
             None,
-            &hashmap! {}, // slots map
-            &hashmap! {}, // caller erc20 balances
-            &hashmap! {}, // amm erc20 balances
+            None, // slots map
+            None, // caller erc20 balances
+            None, // amm erc20 balances
             |contract| {
                 // Create the storage
                 contract.seawater_admin.set(msg::sender());
@@ -947,9 +947,9 @@ mod test {
     fn test_alex() -> Result<(), Vec<u8>> {
         test_utils::with_storage::<_, Pools, _>(
             None,
-            &hashmap! {}, // slots map
-            &hashmap! {}, // caller erc20 balances
-            &hashmap! {}, // amm erc20 balances
+            None, // slots map
+            None, // caller erc20 balances
+            None, // amm erc20 balances
             |contract| {
                 // Create the storage
                 contract.seawater_admin.set(msg::sender());
@@ -988,7 +988,7 @@ mod test {
     fn broken_erik() -> Result<(), Vec<u8>> {
         test_utils::with_storage::<_, Pools, _>(
             Some(address!("eB6b882A295D316aC62C8cfcc81c3E37c084b7c5").into_array()),
-            &hashmap! {
+            Some(hashmap! {
               "0x0000000000000000000000000000000000000000000000000000000000000000"=> "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
               "0x3aafa5613932f019a44c0ba4fef5db570fdc26a44b344eb7016ee305da1d2cdd"=> "0x0000000000000000000000000000000000000000000000000000000000000000",
               "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600"=> "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -999,9 +999,9 @@ mod test {
               "0xce67bab47ccb0f35690620809f2318ef477b533824426881f498e863af201139"=> "0x0000000000000000000000000000000000000000000010a59b9bb894028ef201",
               "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560d" => "0x00000000000000000000ffffffffffffffffffffffffffffffff3c00000bb801",
               "0xce67bab47ccb0f35690620809f2318ef477b533824426881f498e863af201136" => "0x0000000000000000000000000000000000000001850189a932f92a682dd7f589",
-            },
-            &hashmap! {}, // caller balances
-            &hashmap! {}, // amm balances
+            }),
+            None, // caller balances
+            None, // amm balances
             |contract| {
                 let from = address!("09F7156AAE9C903F90B1CB1E312582C4f208A759");
                 let to = address!("6437fdc89cED41941b97A9f1f8992D88718C81c5");
@@ -1019,7 +1019,7 @@ mod test {
         //curl -d '{"jsonrpc":"2.0","id":757,"method":"eth_call","params":[{"data":"0x41e3cc580000000000000000000000006437fdc89ced41941b97a9f1f8992d88718c81c5000000000000000000000000de104342b32bca03ec995f999181f7cf1ffc04d7000000000000000000000000000000000000000000000000000000002e56dc130000000000000000000000000000000000000000000000000000000000000000","from":"0xFEb6034FC7dF27dF18a3a6baD5Fb94C0D3dCb6d5","to":"0x839c5cf32d9Bc2CD46027691d2941410251ED557"},"0x10d889"]}' -H 'Content-Type: application/json' https://testnet-rpc.superposition.so
         test_utils::with_storage::<_, Pools, _>(
             Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()),
-            &hashmap! {
+            Some(hashmap! {
                         "0x0000000000000000000000000000000000000000000000000000000000000000" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
                         "0x0000000000000000000000000000000000000000000000000000000000000001" => "0x0000000000000000000000000000000000000000000000000000000000000000",
                         "0x111d0640f526af34ab2c2b0a7859bd6d5100bb79adfa42d06f0cf959c792e4bd" => "0x00000000000000000080000000000000001000010000001ffffffffffffffffd",
@@ -1054,9 +1054,9 @@ mod test {
                         "0xe4b52e62780a151c755afd3ef54b84744b416592e47feb63654e3a8e0bb7d84e" => "0x000000000000000000000000000000000483f3e53b5ea3677da74656b7015fed",
                         "0xe4b52e62780a151c755afd3ef54b84744b416592e47feb63654e3a8e0bb7d84f" => "0x00000000000000000000000000000000052c6140b702b3c43d7128f67a9cb7d3",
                         "0xf55f69dbbfd00ec29a323ea4eb1513f3e0d1d702d854f8ec7456a6954b2a9cf9" => "0x0000000000000000000000000000000000000000000000000000000000000001",
-            },
-            &hashmap! {}, // caller balances
-            &hashmap! {}, // amm balances
+            }),
+            None, // caller balances
+            None, // amm balances
             |contract| {
                 use core::str::FromStr;
 
@@ -1077,9 +1077,9 @@ mod test {
     fn broken_alex_2() -> Result<(), Vec<u8>> {
         test_utils::with_storage::<_, Pools, _>(
             Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()),
-            &hashmap! {},
-            &hashmap! {},
-            &hashmap! {},
+            None,
+            None,
+            None,
             |contract| Ok(()),
         )
     }
@@ -1089,7 +1089,7 @@ mod test {
         //curl -d '{"jsonrpc":"2.0","id":6646,"method":"eth_call","params":[{"data":"0xe83c30490000000000000000000000006437fdc89ced41941b97a9f1f8992d88718c81c500000000000000000000000000000000000000000000000000000000000081e40000000000000000000000000000000000000000000000000000000437ea0584","from":"0xFEb6034FC7dF27dF18a3a6baD5Fb94C0D3dCb6d5","to":"0x839c5cf32d9Bc2CD46027691d2941410251ED557"},"0x110bb6"]}' -H 'Content-Type: application/json' https://testnet-rpc.superposition.so
         test_utils::with_storage::<_, Pools, _>(
             Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()),
-            &hashmap! {
+            Some(hashmap! {
             "0x0000000000000000000000000000000000000000000000000000000000000000" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
             "0x0000000000000000000000000000000000000000000000000000000000000001" => "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0x127adb37788cce1252b022d229a4fd60399a3fa76e042c0dd89fa08d3d385ecf" => "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -1112,9 +1112,9 @@ mod test {
             "0x0951df22610b1d641fffea402634ee523fece890ea56ecb57d4eb766ca391d52" => "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50" => "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0xdc03f6203d56cf5fe49270519e5a797eebcd9be54de9070150d36d99795813bf" => "0x0000000000000000000000000000000000000000000000000000000000000000"
-                      },
-            &hashmap! {}, // caller balances
-            &hashmap! {}, // amm balances
+                      }),
+            None, // caller balances
+            None, // amm balances
             |contract| {
                 use core::str::FromStr;
 

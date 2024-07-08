@@ -56,7 +56,7 @@ func GetAmountsForLiq(sqrtRatioX96, sqrtRatioAX96, sqrtRatioBX96, liq *big.Int) 
 	//if sqrtRatioX96 < sqrtRatio1X96
 	case sqrtRatioX96.Cmp(sqrtRatio1X96) < 0:
 		amount0 = GetAmount0ForLiq(sqrtRatioX96, sqrtRatio1X96, liq)
-		amount1 = GetAmount1ForLiq(sqrtRatio1X96, sqrtRatioX96, liq)
+		amount1 = GetAmount1ForLiq(sqrtRatio0X96, sqrtRatioX96, liq)
 
 	default:
 		amount0 = new(big.Rat)

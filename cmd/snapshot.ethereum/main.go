@@ -30,6 +30,8 @@ type PoolDetails struct {
 	curPrice  *big.Int // Set inside this program
 }
 
+var Zero = new(big.Int)
+
 func main() {
 	defer setup.Flush()
 	config := config.Get()
@@ -38,6 +40,10 @@ func main() {
 	})
 	if err != nil {
 		setup.Exitf("database open: %v", err)
+	}
+	slog.Debug("about to snapshot the state of the liquidity groups")
+	if err := db.Exec("SELECT snapshot_liquidity_groups_1()").Error; err != nil {
+		setup.Exitf("snapshot liquidity groups: %v", err)
 	}
 	slog.Debug("about to make another lookup")
 	// Get every active position in the database, including the pools.
@@ -89,7 +95,8 @@ func main() {
 		amount0s = make([]string, len(positions))
 		amount1s = make([]string, len(positions))
 	)
-	for i, r := range resps {
+	i := 0
+	for _, r := range resps {
 		pos, ok := positionMap[r.Key]
 		if !ok {
 			slog.Info("position doesn't have any liquidity",
@@ -123,10 +130,14 @@ func main() {
 			"lower", lowerPrice,
 			"upper", upperPrice,
 		)
+		if amount0.Cmp(Zero) == 0 && amount1.Cmp(Zero) == 0{
+			continue
+		}
 		pools[i] = poolAddr
 		ids[i] = pos.Id
 		amount0s[i] = amount0.String()
 		amount1s[i] = amount1.String()
+		i++
 	}
 	if len(ids) == 0 {
 		slog.Info("no positions found")
@@ -134,10 +145,10 @@ func main() {
 	}
 	err = storePositions(
 		db,
-		pools,
-		ids,
-		amount0s,
-		amount1s,
+		pools[:i],
+		ids[:i],
+		amount0s[:i],
+		amount1s[:i],
 	)
 	if err != nil {
 		setup.Exitf("store positions: %v", err)

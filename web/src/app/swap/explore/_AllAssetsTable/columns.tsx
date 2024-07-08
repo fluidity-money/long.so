@@ -27,7 +27,7 @@ export const columns: ColumnDef<Asset>[] = [
     cell: ({ row }) => {
       return (
         <div className={"flex flex-row items-center gap-2 py-1"}>
-        <TokenIcon src={row.original.icon} size={22}/>
+        <TokenIcon src={row.original.icon} className="size-[22px]"/>
           <div className={"flex flex-col"}>
             <div
               className={cn("text-xs md:text-sm", {

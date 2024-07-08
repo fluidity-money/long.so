@@ -18,8 +18,10 @@ import (
 )
 
 const (
-	// BatchLimit to get from the server before using multiple batches.
-	BatchLimit = 1000
+	// BatchLimit to get from the server before using multiple
+	// batches. Half of the maximum amount since upstream started to
+	// choke.
+	BatchLimit = 500
 
 	// WorkerCount of simultaneous requests that can be made max.
 	WorkerCount = 100
@@ -122,7 +124,7 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 					}
 					for _, p := range resps {
 						if err := p.Error; err != nil {
-							chanErrs <- fmt.Errorf("error reported: %v", err)
+							chanErrs <- fmt.Errorf(`error reported: %v`, err)
 							return
 						}
 						delta, err := types.NumberFromHex(strings.TrimPrefix(p.Result, "0x"))
@@ -220,6 +222,7 @@ func encodeId(pool types.Address, id int) string {
 func getCalldata(pool types.Address, posId int) string {
 	posIdB := new(big.Int).SetInt64(int64(posId)).Bytes()
 	x := append(
+		//positionLiquidity(address,uint256)
 		[]byte{0xe7, 0x59, 0xc4, 0x65},
 		append(
 			ethCommon.LeftPadBytes(ethCommon.HexToAddress(pool.String()).Bytes(), 32),
