@@ -388,7 +388,7 @@ export const SwapForm = () => {
                 <Link href={"/swap/explore?token=0"}>
                   <Badge
                     variant="outline"
-                    className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base w-max"
+                    className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base w-max space-x-1"
                   >
                  <TokenIcon className="size-[20px] md:size-[25px]" src={token0.icon} /> 
                     <div>{token0.symbol}</div>
@@ -464,7 +464,7 @@ export const SwapForm = () => {
                 <Link href={"/swap/explore?token=1"}>
                   <Badge
                     variant="outline"
-                    className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base"
+                    className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base space-x-1"
                   >
                  <TokenIcon className="size-[20px] md:size-[25px]" src={token1.icon} /> 
                     <div>{token1.symbol}</div>
