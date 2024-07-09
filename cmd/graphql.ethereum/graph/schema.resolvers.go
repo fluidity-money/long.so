@@ -1335,7 +1335,10 @@ func (r *seawaterPositionsUserResolver) Next(ctx context.Context, obj *model.Sea
 
 // Timestamp is the resolver for the timestamp field.
 func (r *seawaterSwapResolver) Timestamp(ctx context.Context, obj *model.SeawaterSwap) (int, error) {
-	panic(fmt.Errorf("not implemented: Timestamp - timestamp"))
+	if obj == nil {
+		return 0, fmt.Errorf("empty swap")
+	}
+	return int(obj.CreatedBy.Unix()), nil
 }
 
 // Pool is the resolver for the pool field.
