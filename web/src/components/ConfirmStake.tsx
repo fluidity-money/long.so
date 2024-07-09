@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import Ethereum from "@/assets/icons/ethereum.svg";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useStakeStore } from "@/stores/useStakeStore";
@@ -25,6 +24,7 @@ import { Fail } from "@/components/sequence/Fail";
 import { Success } from "@/components/sequence/Success";
 import { getFormattedPriceFromAmount } from "@/lib/amounts";
 import { fUSDC } from "@/config/tokens";
+import { TokenIcon } from "./TokenIcon";
 
 type ConfirmStakeProps = {
   mode: "new"
@@ -439,7 +439,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
                 <div className="text-3xs md:text-2xs">{token0.symbol}</div>
                 <div className="flex  flex-row items-center justify-between">
                   <div className="flex flex-row items-center gap-1 text-sm md:gap-2 md:text-2xl">
-                    <Ethereum className={"invert"} />
+                    <TokenIcon src={token0.icon} className={"invert size-[16px]"} />
                     <div>{token0Amount}</div>
                   </div>
                   <div className="text-3xs text-gray-2 md:text-xs">50%</div>
@@ -473,7 +473,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
             {token0.symbol}
           </div>
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
-            <Ethereum className={"invert"} /> {token0Amount}
+            <TokenIcon src={token0.icon} className={"invert size-[24px]"} /> {token0Amount}
           </div>
           <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">= ${getFormattedPriceFromAmount(token0Amount, tokenPrice, fUSDC.decimals)}</div>
         </div>
@@ -485,7 +485,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
         >
           <div className="text-3xs font-medium md:text-2xs">ƒUSDC</div>
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
-            <Ethereum className={"invert"} /> {token1Amount}
+            <TokenIcon src={token1.icon} className={"invert size-[24px]"} /> {token1Amount}
           </div>
           <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">
             = ${token1Amount}

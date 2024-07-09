@@ -7,7 +7,6 @@ import { columns, Pool } from "@/app/stake/_AllPoolsTable/columns";
 import { useMemo, useRef, useState } from "react";
 import { AllPoolsFilter } from "@/app/stake/AllPoolsFilter";
 import SegmentedControl from "@/components/ui/segmented-control";
-import Ethereum from "@/assets/icons/ethereum.svg";
 import { Badge } from "@/components/ui/badge";
 import IridescentToken from "@/assets/icons/iridescent-token.svg";
 import Token from "@/assets/icons/token.svg";
@@ -24,7 +23,8 @@ import { sum } from "lodash";
 import { graphql, useFragment } from "@/gql";
 import { useRouter } from "next/navigation";
 import { getFormattedPriceFromTick } from "@/lib/amounts";
-import { fUSDC } from "@/config/tokens";
+import { fUSDC, getTokenFromAddress } from "@/config/tokens";
+import { TokenIcon } from "@/components/TokenIcon";
 
 const DisplayModeMenu = ({
   setDisplayMode,
@@ -253,8 +253,9 @@ export const AllPools = () => {
                 }
               >
                 <div className={"absolute -left-1 -top-2 flex flex-row"}>
-                  <Ethereum
-                    className={"size-[24px] rounded-full border border-white"}
+                  <TokenIcon
+                    src={getTokenFromAddress(pool.id)?.icon}
+                    className={"rounded-full size-[24px]"}
                   />
                   <Badge
                     variant={"outline"}

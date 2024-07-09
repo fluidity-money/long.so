@@ -2,7 +2,6 @@
 
 import { CampaignBanner } from "@/components/CampaignBanner";
 import { Badge } from "@/components/ui/badge";
-import Ethereum from "@/assets/icons/ethereum.svg";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import Padlock from "@/assets/icons/padlock.svg";
 import Token from "@/assets/icons/token.svg";
@@ -45,6 +44,7 @@ import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 import { Token as TokenType, fUSDC, getTokenFromAddress } from "@/config/tokens";
 import { getFormattedPriceFromAmount } from "@/lib/amounts";
+import { TokenIcon } from "./TokenIcon";
 
 const colorGradient = new echarts.graphic.LinearGradient(
   0,
@@ -449,7 +449,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 flex: mode === "existing",
               })}
             >
-              <Ethereum className="size-[30px] rounded-full border-[3px] border-white" />
+              <TokenIcon src={token0.icon} className="size-[30px] rounded-full border-[1px] border-white" />
               <Badge
                 variant="outline"
                 className="-ml-2 h-[30px] justify-between border-[3px] bg-black pl-px text-white"
@@ -524,7 +524,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   variant="outline"
                   className="flex h-[26px] cursor-pointer flex-row justify-between gap-1 pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base"
                 >
-                  <Ethereum className="size-[20px] invert md:size-[25px]" />
+                  <TokenIcon src={token0.icon} className="size-[20px] invert md:size-[25px]" />
                   <div>{token0.symbol}</div>
                   <ArrowDown className="h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
                 </Badge>
@@ -584,7 +584,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   variant="outline"
                   className="flex h-[26px] w-[82px] flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[107px] md:pl-[4px] md:text-base"
                 >
-                  <Ethereum className="size-[20px] invert md:size-[25px]" />
+                  <TokenIcon src={token1.icon} className="size-[20px] invert md:size-[25px]" />
                   <div className="iridescent-text">ƒUSDC</div>
                   <Padlock className="ml-[2px] h-[7.53px] w-[6.45px] md:h-[10.3px] md:w-[8.82px]" />
                 </Badge>
@@ -799,7 +799,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 onChange={(e) => setPriceLower(e.target.value, token0.decimals)}
               />
               <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
-                <Ethereum className="invert" /> fUSDC per {token0.name}
+                <Token className="invert size-[12px]" /> fUSDC per {token0.name}
               </div>
             </div>
 
@@ -812,7 +812,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 onChange={(e) => setPriceUpper(e.target.value, token0.decimals)}
               />
               <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
-                <Ethereum className="invert" /> fUSDC per {token0.name}
+                <Token className="invert size-[12px]" /> fUSDC per {token0.name}
               </div>
             </div>
           </div>

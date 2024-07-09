@@ -8,7 +8,7 @@ const TokenIcon = ({
   src,
   ...props
 }: TokenIconProps) => (
-  <div {...props} className={`relative ${props.className}`}>
+  <div {...props} className={`relative shrink-0 ${props.className}`}>
     <Image
       data-test="token-icon-image"
       alt=""
