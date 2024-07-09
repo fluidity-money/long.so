@@ -276,6 +276,7 @@ type SeawaterPositionsUserResolver interface {
 	Next(ctx context.Context, obj *model.SeawaterPositionsUser, first *int) (model.SeawaterPositionsUser, error)
 }
 type SeawaterSwapResolver interface {
+	Timestamp(ctx context.Context, obj *model.SeawaterSwap) (int, error)
 	Pool(ctx context.Context, obj *model.SeawaterSwap) (seawater.Pool, error)
 	Sender(ctx context.Context, obj *model.SeawaterSwap) (model.Wallet, error)
 	AmountIn(ctx context.Context, obj *model.SeawaterSwap) (model.Amount, error)
@@ -5784,7 +5785,7 @@ func (ec *executionContext) _SeawaterSwap_timestamp(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Timestamp, nil
+		return ec.resolvers.SeawaterSwap().Timestamp(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5805,8 +5806,8 @@ func (ec *executionContext) fieldContext_SeawaterSwap_timestamp(_ context.Contex
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterSwap",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
 		},
@@ -11061,10 +11062,41 @@ func (ec *executionContext) _SeawaterSwap(ctx context.Context, sel ast.Selection
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("SeawaterSwap")
 		case "timestamp":
-			out.Values[i] = ec._SeawaterSwap_timestamp(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SeawaterSwap_timestamp(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "pool":
 			field := field
 

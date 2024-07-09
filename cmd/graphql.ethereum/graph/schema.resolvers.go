@@ -336,7 +336,7 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 	// can start to paginate.
 	var to int
 	if l := len(d); l > 0 {
-		to = d[l-1].Timestamp
+		to = int(d[l-1].CreatedBy.Unix())
 	}
 	swaps.Data = model.SeawaterSwaps{
 		From:  *first,
@@ -383,7 +383,7 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 	// can start to paginate.
 	var to int
 	if l := len(d); l > 0 {
-		to = d[l-1].Timestamp
+		to = int(d[l-1].CreatedBy.Unix())
 	}
 	swaps.Data = model.SeawaterSwaps{
 		From:   *first,
@@ -553,7 +553,11 @@ func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.
 	if err != nil {
 		return
 	}
-	err = r.DB.Table("seawater_final_ticks_monthly_1").Where("pool = ?", obj.Token).Limit(maxMonths).Scan(&monthly).Error
+	err = r.DB.Table("seawater_final_ticks_monthly_2").
+		Where("pool = ?", obj.Token).
+		Limit(maxMonths).
+		Scan(&monthly).
+		Error
 	if err != nil {
 		return
 	}
@@ -1329,6 +1333,11 @@ func (r *seawaterPositionsUserResolver) Next(ctx context.Context, obj *model.Sea
 	}, nil
 }
 
+// Timestamp is the resolver for the timestamp field.
+func (r *seawaterSwapResolver) Timestamp(ctx context.Context, obj *model.SeawaterSwap) (int, error) {
+	panic(fmt.Errorf("not implemented: Timestamp - timestamp"))
+}
+
 // Pool is the resolver for the pool field.
 func (r *seawaterSwapResolver) Pool(ctx context.Context, obj *model.SeawaterSwap) (seawater.Pool, error) {
 	var token string
@@ -1364,7 +1373,7 @@ func (r *seawaterSwapResolver) AmountIn(ctx context.Context, obj *model.Seawater
 	return model.Amount{
 		Token:         obj.TokenIn,
 		Decimals:      obj.TokenInDecimals,
-		Timestamp:     obj.Timestamp,
+		Timestamp:     int(obj.CreatedBy.Unix()),
 		ValueUnscaled: obj.AmountIn,
 	}, nil
 }
@@ -1377,7 +1386,7 @@ func (r *seawaterSwapResolver) AmountOut(ctx context.Context, obj *model.Seawate
 	return model.Amount{
 		Token:         obj.TokenOut,
 		Decimals:      obj.TokenOutDecimals,
-		Timestamp:     obj.Timestamp,
+		Timestamp:     int(obj.CreatedBy.Unix()),
 		ValueUnscaled: obj.AmountOut,
 	}, nil
 }
