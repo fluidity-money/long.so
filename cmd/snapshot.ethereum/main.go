@@ -41,6 +41,10 @@ func main() {
 	if err != nil {
 		setup.Exitf("database open: %v", err)
 	}
+	slog.Debug("about to snapshot the daily tick info")
+	if err := db.Exec("SELECT snapshot_final_ticks_daily_1()").Error; err != nil {
+		setup.Exitf("snapshot daily ticks: %v", err)
+	}
 	slog.Debug("about to snapshot the state of the liquidity groups")
 	if err := db.Exec("SELECT snapshot_liquidity_groups_1()").Error; err != nil {
 		setup.Exitf("snapshot liquidity groups: %v", err)
@@ -130,7 +134,7 @@ func main() {
 			"lower", lowerPrice,
 			"upper", upperPrice,
 		)
-		if amount0.Cmp(Zero) == 0 && amount1.Cmp(Zero) == 0{
+		if amount0.Cmp(Zero) == 0 && amount1.Cmp(Zero) == 0 {
 			continue
 		}
 		pools[i] = poolAddr
