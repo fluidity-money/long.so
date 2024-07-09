@@ -126,7 +126,7 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	var finalTick struct {
 		FinalTick types.Number
 	}
-	err := r.DB.Table("seawater_latest_ticks_1").
+	err := r.DB.Table("seawater_latest_ticks_2").
 		Select("final_tick").
 		Where("pool = ?", obj.Token).
 		First(&finalTick).
@@ -506,7 +506,7 @@ func (r *seawaterPoolResolver) Price(ctx context.Context, obj *seawater.Pool) (s
 		return daily[0], nil
 	}
 	var result model.PriceResult
-	err := r.DB.Table("seawater_latest_ticks_1").
+	err := r.DB.Table("seawater_latest_ticks_2").
 		Where("pool = ?", obj.Token).
 		First(&result).
 		Error
