@@ -706,6 +706,9 @@ func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Po
 		return
 	}
 	for i, v := range volumeOverTime.Daily {
+		if len(priceOverTime.Daily) == i {
+			break // Avoid a weird situation where the length doesn't add up.
+		}
 		var (
 			dailyTvl string
 			price    = priceOverTime.Daily[i]
@@ -717,6 +720,9 @@ func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Po
 		tvl.Daily = append(tvl.Daily, dailyTvl)
 	}
 	for i, v := range volumeOverTime.Monthly {
+		if len(priceOverTime.Monthly) == i {
+			break // Avoid a weird situation where the length doesn't add up.
+		}
 		var (
 			monthlyTvl string
 			price      = priceOverTime.Monthly[i]
