@@ -6,8 +6,11 @@
 .pnp.js
 
 # testing
-/coverage
 .nyc_output
+/test-results
+/.v8-coverage
+/jest-coverage
+/playwright-coverage
 
 # next.js
 /.next/

@@ -4,8 +4,7 @@
     "prettier",
     "plugin:tailwindcss/recommended"
   ],
-  "plugins": ["@stylistic/ts", "@typescript-eslint"],
-  "parser": "@typescript-eslint/parser",
+  "plugins": ["@stylistic/ts", "jest"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx"],
