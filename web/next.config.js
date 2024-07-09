@@ -15,9 +15,6 @@ module.exports = withSentryConfig(
     env: {
       GIT_HASH: gitHash,
     },
-    experimental: {
-      swcPlugins: [["swc-plugin-coverage-instrument", {}]],
-    },
     webpack(config) {
       // Grab the existing rule that handles SVG imports
       const fileLoaderRule = config.module.rules.find((rule) =>
