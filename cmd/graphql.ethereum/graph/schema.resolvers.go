@@ -320,12 +320,11 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 	var d []model.SeawaterSwap
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND timestamp > ? ORDER BY timestamp DESC LIMIT ?",
+		"SELECT * FROM seawater_swaps_pool_1(?, ?, ?, ?, ?)",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		poolAddress,
-		poolAddress,
-		*after,
+		time.Unix(int64(*after), 0),
 		*first,
 	).
 		Scan(&d).
@@ -368,11 +367,11 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 	var d []model.SeawaterSwap
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE sender = ? AND id > ? ORDER BY timestamp DESC LIMIT ?",
+		"SELECT * FROM seawater_swaps_user_1(?, ?, ?, ?, ?)",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		walletAddress,
-		*after,
+		time.Unix(int64(*after), 0),
 		*first,
 	).
 		Scan(&d).
@@ -936,12 +935,11 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 	}
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND timestamp > ? ORDER BY timestamp DESC LIMIT ?",
+		"SELECT * FROM seawater_swaps_pool_1(?, ?, ?, ?, ?)",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		obj.Token,
-		obj.Token,
-		*after,
+		time.Unix(int64(*after), 0),
 		*first,
 	).
 		Scan(&swaps.Swaps).
@@ -969,15 +967,15 @@ func (r *seawaterPoolResolver) Amounts(ctx context.Context, obj *seawater.Pool) 
 	amounts = model.PairAmount{
 		Timestamp: ts,
 		Fusdc: model.Amount{
-			Token: r.C.FusdcAddr,
-			Decimals: r.C.FusdcDecimals,
-			Timestamp: ts,
+			Token:         r.C.FusdcAddr,
+			Decimals:      r.C.FusdcDecimals,
+			Timestamp:     ts,
 			ValueUnscaled: sum.CumulativeAmount0,
 		},
 		Token1: model.Amount{
-			Token: obj.Token,
-			Decimals: int(sum.Decimals),
-			Timestamp: ts,
+			Token:         obj.Token,
+			Decimals:      int(sum.Decimals),
+			Timestamp:     ts,
 			ValueUnscaled: sum.CumulativeAmount1,
 		},
 	}
