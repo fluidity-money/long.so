@@ -1,9 +1,13 @@
 package model
 
-import "github.com/fluidity-money/long.so/lib/types"
+import (
+	"time"
+
+	"github.com/fluidity-money/long.so/lib/types"
+)
 
 type SeawaterSwap struct {
-	Timestamp        int                  `json:"timestamp"`
+	CreatedBy        time.Time            `json:"createdBy"`
 	Sender           types.Address        `json:"sender"`
 	TokenIn          types.Address        `json:"tokenIn"`
 	TokenInDecimals  int                  `json:"tokenInDecimals"`
