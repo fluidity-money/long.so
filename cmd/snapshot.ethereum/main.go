@@ -20,8 +20,6 @@ import (
 	gormLogger "gorm.io/gorm/logger"
 )
 
-const BatchSize = 100
-
 // PoolDetails retrieved from seawater_final_ticks_decimals_1
 type PoolDetails struct {
 	Pool      types.Address
