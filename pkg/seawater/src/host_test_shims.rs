@@ -6,7 +6,10 @@
 
 use std::collections::HashMap;
 
-use crate::{current_test, Address, U256};
+use crate::{Address, U256};
+
+#[allow(unused_imports)]
+use crate::current_test;
 
 static DEFAULT_SENDER: [u8; 20] = [
     //0x59e8db5c2e506ddd395d58a1dd8cd02b81ecbd6c
@@ -89,6 +92,7 @@ pub extern "C" fn storage_flush_cache(_clear: bool) {
 
 #[no_mangle]
 pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
+    #[allow(unused_imports)]
     use crate::current_test;
 
     // SAFETY - stylus promises etc
@@ -102,7 +106,7 @@ pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
             .unwrap_or_default()
     });
 
-    #[cfg(feature = "testing")]
+    #[cfg(feature = "testing-dbg")]
     dbg!((
         "read word",
         current_test!(),
@@ -124,10 +128,10 @@ pub unsafe extern "C" fn msg_sender(sender: *mut u8) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn emit_log(pointer: *const u8, len: usize, _: usize) {
-    #[cfg(feature = "testing")]
+pub unsafe extern "C" fn emit_log(_pointer: *const u8, _len: usize, _: usize) {
+    #[cfg(feature = "testing-dbg")]
     {
-        let s = std::slice::from_raw_parts(pointer, len);
+        let s = std::slice::from_raw_parts(_pointer, _len);
         dbg!(("log", current_test!(), const_hex::encode(s).as_str()));
     }
 }

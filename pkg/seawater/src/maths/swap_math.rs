@@ -162,6 +162,7 @@ mod test {
     };
     use crate::types::{I256Extension, U256Extension, I256, U256};
 
+    #[allow(unused_imports)]
     use crate::current_test;
 
     #[test]
@@ -294,7 +295,7 @@ mod test {
 
         assert!(sqrt_p < price_target);
 
-        #[cfg(feature = "testing")]
+        #[cfg(feature = "testing-dbg")]
         dbg!(
             ("sqrtp", current_test!(), sqrt_p,),
             (

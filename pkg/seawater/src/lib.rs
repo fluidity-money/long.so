@@ -1064,10 +1064,8 @@ mod test {
                 let to = address!("de104342B32BCa03ec995f999181f7Cf1fFc04d7");
                 let amount = U256::from_str("10000000000").unwrap();
                 let min_out = U256::from(0);
-                let (amount_in, amount_out) =
+                let (_amount_in, _amount_out) =
                     contract.swap_2_exact_in(from, to, amount, min_out).unwrap();
-                //assert_eq!(amount_in, amount);
-                //assert_eq!(amount_out, U256::zero());
                 Ok(())
             },
         )
