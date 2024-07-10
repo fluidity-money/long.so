@@ -1,9 +1,14 @@
 name: Jest Unit Tests
+
 on:
   push:
-    branches: [development, test-suit-js]
+    branches: 
+      - development
+      - test-suit-js
   pull_request:
-    branches: [development, test-suit-js]
+    branches: 
+      - development
+      - test-suit-js
 jobs:
   test:
     timeout-minutes: 60

@@ -1,11 +1,20 @@
----
 name: Go Unit Tests
+
 on:
   push:
-    branches: [development, test-suit-js]
-    paths: [pkg/**', 'web/**', 'cmd/**', 'lib/**', 'go.*']
+    branches: 
+      - development
+      - test-suit-js
+    paths: 
+      - 'pkg/**'
+      - 'web/**'
+      - 'cmd/**'
+      - 'lib/**'
+      - 'go.*'
   pull_request:
-    branches: [development, test-suit-js]
+    branches:
+      - development
+      - test-suit-js
 
 jobs:
   test:
