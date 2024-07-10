@@ -1,21 +1,15 @@
 ---
-name: codecov
+name: Go Unit Tests
 on:
   push:
-    branches:
-      - development
-    paths:
-      - 'pkg/**'
-      - 'web/**'
-      - 'cmd/**'
-      - 'lib/**'
-      - 'go.*'
+    branches: [development, test-suit-js]
+    paths: [pkg/**', 'web/**', 'cmd/**', 'lib/**', 'go.*']
   pull_request:
-    branches:
-      - development
+    branches: [development, test-suit-js]
 
 jobs:
-  codecov:
+  test:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -37,28 +31,11 @@ jobs:
       - name: Run Go tests and generate coverage report
         run: go test ./... -coverprofile=coverage-go.txt -covermode=count
 
-      - name: Set up Node.js
-        uses: pnpm/action-setup@v4
-        with:
-          path: web
-          node-version: '22'
-          version: 8
-          run_install: true
-
-#      - name: Install Node dependencies
-#        run: |
-#          cd web
-#          pnpm install
-
-      - name: Run Node tests and generate coverage report
-        run: |
-          cd web
-          pnpm run test
-
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4.3.1
+        uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
+          flags: unittests
+          name: go-unit-tests
+          token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
