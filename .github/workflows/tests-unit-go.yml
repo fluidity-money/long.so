@@ -5,12 +5,12 @@ on:
     branches: 
       - development
       - test-suite-js
-    paths: 
-      - 'pkg/**'
-      - 'web/**'
-      - 'cmd/**'
-      - 'lib/**'
-      - 'go.*'
+    # paths: 
+    #   - 'pkg/**'
+    #   - 'web/**'
+    #   - 'cmd/**'
+    #   - 'lib/**'
+    #   - 'go.*'
   pull_request:
     branches:
       - development

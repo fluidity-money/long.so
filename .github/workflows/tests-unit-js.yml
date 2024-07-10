@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+      - name: Enable pnpm
+        run: corepack enable pnpm
       - name: Install dependencies
         run: pnpm ci
       - name: Run Jest tests
