@@ -20,6 +20,15 @@ macro_rules! current_test {
     };
 }
 
+pub fn decode_sqrt_price_num(sqrt_price_x96: U256, denom: u64) -> U256 {
+    let denom = U256::from(denom);
+
+    let ratio = sqrt_price_x96 / Q96;
+
+    let ratio_squared = ratio * ratio;
+    return ratio_squared * denom;
+}
+
 // encodes a a/b price as a sqrt.q96 price
 pub fn encode_sqrt_price(num: u64, denom: u64) -> U256 {
     let num = U256::from(num);

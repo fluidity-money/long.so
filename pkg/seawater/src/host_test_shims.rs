@@ -103,6 +103,7 @@ pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
         .unwrap_or_default(); // defaults to zero value
 
     #[cfg(feature = "testing")]
+    #[cfg(feature = "testing-dbg-pool-storage")]
     dbg!((
         "read word",
         current_test!(),
