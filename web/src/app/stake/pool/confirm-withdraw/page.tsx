@@ -13,6 +13,7 @@ import { getFormattedPriceFromAmount } from "@/lib/amounts";
 import Confirm from "@/components/sequence/Confirm";
 import { Success } from "@/components/sequence/Success";
 import { Fail } from "@/components/sequence/Fail";
+import { TokenIcon } from "@/components/TokenIcon";
 
 export default function ConfirmWithdrawLiquidity() {
   const router = useRouter();
@@ -116,13 +117,17 @@ export default function ConfirmWithdrawLiquidity() {
 
         <div className="mt-[26px] px-[21px]">
           <div className="text-[8px] font-semibold">{token0.symbol}</div>
-          <div className="text-2xl text-white"> {token0Amount} </div>
+          <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
+            <TokenIcon src={token0.icon} className={"invert size-[24px]"} /> {token0Amount}
+          </div>
           <div className="text-[10px] text-neutral-400">= ${token0.address === fUSDC.address ? token0Amount : getFormattedPriceFromAmount(token0Amount, tokenPrice, fUSDC.decimals)}</div>
         </div>
 
         <div className="mt-[23px] px-[21px]">
           <div className={"text-[8px] font-semibold"}>{token1.symbol}</div>
-          <div className="text-2xl text-white">{token1Amount}</div>
+          <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
+            <TokenIcon src={token1.icon} className={"invert size-[24px]"} /> {token1Amount}
+          </div>
           <div className="text-[10px] text-neutral-400">= ${token1.address === fUSDC.address ? token1Amount : getFormattedPriceFromAmount(token1Amount, tokenPrice, fUSDC.decimals)}</div>
         </div>
 
@@ -145,7 +150,7 @@ export default function ConfirmWithdrawLiquidity() {
           </div>
         </div>
 
-        <div className="mt-[30px] px-[7px]">
+        <div className="mt-[22px] px-[7px]">
           <Button
             variant="secondary"
             className="h-10 w-[286px] md:h-10 md:w-[365px]"

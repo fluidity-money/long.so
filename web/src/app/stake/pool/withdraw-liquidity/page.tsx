@@ -22,6 +22,7 @@ import { ammAddress } from "@/lib/addresses";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { fUSDC } from "@/config/tokens";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { TokenIcon } from "@/components/TokenIcon";
 
 const PositionsFragment = graphql(`
 fragment WithdrawPositionsFragment on Wallet {
@@ -163,7 +164,7 @@ export default function WithdrawLiquidity() {
       >
         <motion.div className="flex flex-col" layout>
           <div className={cn("absolute -top-[15px] left-0 flex flex-row")}>
-            <Ethereum className="size-[30px] rounded-full border-[3px] border-white" />
+            <TokenIcon src={token0.icon} className="size-[30px] rounded-full border-[1px] border-white" />
             <Badge
               variant="outline"
               className="-ml-2 h-[30px] w-[124px] justify-between border-[3px] bg-black pl-px text-white"
