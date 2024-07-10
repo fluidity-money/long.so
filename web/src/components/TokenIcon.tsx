@@ -4,10 +4,7 @@ interface TokenIconProps extends Omit<ImageProps, "src" | "alt"> {
   src?: string;
 }
 
-const TokenIcon = ({
-  src,
-  ...props
-}: TokenIconProps) => (
+const TokenIcon = ({ src, ...props }: TokenIconProps) => (
   <div {...props} className={`relative shrink-0 ${props.className}`}>
     <Image
       data-test="token-icon-image"
