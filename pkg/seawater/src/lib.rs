@@ -1122,9 +1122,9 @@ mod test {
                 let id = U256::from(33252);
                 let delta = i128::from_str("18117952900").unwrap();
 
-                let (delta0, delta1) = contract.update_position(pool, id, delta).unwrap();
-                assert_eq!(delta0, I256::zero());
-                assert_eq!(delta1, I256::zero());
+                let (amount_0, amount_1) = contract.update_position(pool, id, delta).unwrap();
+                assert_eq!(I256::zero(), amount_0);
+                assert_eq!(I256::zero(), amount_1);
                 Ok(())
             },
         )

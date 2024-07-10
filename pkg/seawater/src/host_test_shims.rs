@@ -4,7 +4,9 @@
 //! Functions here are gated on tests, since normal contract execution should have the hosted
 //! stylus environment.
 
-use crate::U256;
+use std::collections::HashMap;
+
+use crate::{Address, U256};
 
 static DEFAULT_SENDER: [u8; 20] = [
     //0x59e8db5c2e506ddd395d58a1dd8cd02b81ecbd6c
@@ -34,7 +36,7 @@ pub mod storage {
     use std::sync::LazyLock;
     use std::sync::Mutex;
 
-    use crate::types::U256;
+    use crate::{types::U256, Address};
 
     const WORD_BYTES: usize = 32;
     pub type Word = [u8; WORD_BYTES];
@@ -47,13 +49,11 @@ pub mod storage {
 
     pub static STORAGE: LazyLock<Mutex<WordHashMap>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 
-    pub static DEFAULT_CALLER_BAL: U256 = U256::MAX;
+    pub static CALLER_BALS: LazyLock<Mutex<HashMap<Address, U256>>> =
+        LazyLock::new(|| Mutex::new(HashMap::new()));
 
-    pub static DEFAULT_AMM_BAL: U256 = U256::MAX;
-
-    pub static CALLER_BAL: LazyLock<Mutex<U256>> = LazyLock::new(|| Mutex::new(DEFAULT_CALLER_BAL));
-
-    pub static AMM_BAL: LazyLock<Mutex<U256>> = LazyLock::new(|| Mutex::new(DEFAULT_AMM_BAL));
+    pub static AMM_BALS: LazyLock<Mutex<HashMap<Address, U256>>> =
+        LazyLock::new(|| Mutex::new(HashMap::new()));
 
     pub unsafe fn read_word(key: *const u8) -> Word {
         let mut res = Word::default();
@@ -133,14 +133,14 @@ pub fn set_sender(new_sender: [u8; 20]) {
     *sender = Some(new_sender);
 }
 
-pub fn set_caller_bal(amount: U256) {
-    let mut bal = storage::CALLER_BAL.lock().unwrap();
-    *bal = amount;
+pub fn set_caller_bals(items: HashMap<Address, U256>) {
+    let mut map = storage::CALLER_BALS.lock().unwrap();
+    *map = items;
 }
 
-pub fn set_amm_bal(amount: U256) {
-    let mut bal = storage::AMM_BAL.lock().unwrap();
-    *bal = amount;
+pub fn set_amm_bals(items: HashMap<Address, U256>) {
+    let mut map = storage::AMM_BALS.lock().unwrap();
+    *map = items;
 }
 
 pub fn insert_word(key: storage::Word, value: storage::Word) {
@@ -152,28 +152,28 @@ pub fn reset_storage() {
     storage::STORAGE.lock().unwrap().clear();
     let mut sender = storage::CURRENT_SENDER.lock().unwrap();
     *sender = None;
-    let mut caller_bal = storage::CALLER_BAL.lock().unwrap();
-    *caller_bal = storage::DEFAULT_CALLER_BAL;
-    let mut amm_bal = storage::AMM_BAL.lock().unwrap();
-    *amm_bal = storage::DEFAULT_AMM_BAL;
+    storage::CALLER_BALS.lock().unwrap().clear();
+    storage::AMM_BALS.lock().unwrap().clear();
 }
 
-pub fn take_caller_bal(amt: U256) -> Result<(), U256> {
-    let mut caller_bal = storage::CALLER_BAL.lock().unwrap();
+pub fn take_caller_bal(token: Address, amt: U256) -> Result<(), U256> {
+    let mut b = storage::CALLER_BALS.lock().unwrap();
+    let caller_bal = b.get_mut(&token).unwrap();
     let (leftover, overflow) = caller_bal.overflowing_sub(amt);
     if overflow {
-        Err(amt - amt)
+        Err(amt.checked_sub(caller_bal.clone()).unwrap())
     } else {
         *caller_bal = leftover;
         Ok(())
     }
 }
 
-pub fn take_amm_bal(amt: U256) -> Result<(), U256> {
-    let mut amm_bal = storage::AMM_BAL.lock().unwrap();
+pub fn take_amm_bal(token: Address, amt: U256) -> Result<(), U256> {
+    let mut b = storage::AMM_BALS.lock().unwrap();
+    let amm_bal = b.get_mut(&token).unwrap();
     let (leftover, overflow) = amm_bal.overflowing_sub(amt);
     if overflow {
-        Err(amt - amt)
+        Err(amt.checked_sub(amm_bal.clone()).unwrap())
     } else {
         *amm_bal = leftover;
         Ok(())
