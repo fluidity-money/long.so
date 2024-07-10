@@ -4,7 +4,7 @@ on:
   push:
     branches: 
       - development
-      - test-suit-js
+      - test-suite-js
     paths: 
       - 'pkg/**'
       - 'web/**'
@@ -14,7 +14,7 @@ on:
   pull_request:
     branches:
       - development
-      - test-suit-js
+      - test-suite-js
 
 jobs:
   test:

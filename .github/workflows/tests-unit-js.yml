@@ -4,11 +4,12 @@ on:
   push:
     branches: 
       - development
-      - test-suit-js
+      - test-suite-js
   pull_request:
     branches: 
       - development
-      - test-suit-js
+      - test-suite-js
+
 jobs:
   test:
     timeout-minutes: 60
