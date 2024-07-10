@@ -56,7 +56,7 @@ fn test_get_tick_at_sqrt_ratio() {
         ]);
 
         #[cfg(feature = "testing")]
-        dbg!(("ratio", current_test!(), format!("testing {}", ratio)));
+        dbg!(("ratio", current_test!(), ratio));
 
         let tick = tick_math::get_tick_at_sqrt_ratio(ratio);
         let reference = reference::tick_math::get_tick_at_sqrt_ratio(ratio);
@@ -78,10 +78,14 @@ fn test_get_sqrt_ratio_at_tick() {
     for _ in 0..1000 {
         let tick = rng.gen_range(tick_math::MIN_TICK..=tick_math::MAX_TICK);
 
-        #[cfg(feature = "testing")]
-        dbg!(("tick", current_test!(), format!("tick {}", tick)));
-
         let ratio = tick_math::get_sqrt_ratio_at_tick(tick);
+
+        #[cfg(feature = "testing")]
+        dbg!(
+            ("tick", current_test!(), tick),
+            ("ratio", current_test!(), &ratio)
+        );
+
         let reference = reference::tick_math::get_sqrt_ratio_at_tick(tick);
         if ratio.is_err() {
             errs += 1;

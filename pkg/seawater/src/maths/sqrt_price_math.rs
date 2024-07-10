@@ -72,8 +72,6 @@ pub fn get_next_sqrt_price_from_amount_0_rounding_up(
     }
 
     let numerator_1: U256 = U256::from(liquidity) << 96;
-    let amount = amount;
-    let sqrt_price_x_96 = sqrt_price_x_96;
 
     if add {
         let product = amount.wrapping_mul(sqrt_price_x_96);
@@ -109,11 +107,13 @@ pub fn get_next_sqrt_price_from_amount_1_rounding_down(
     amount: U256,
     add: bool,
 ) -> Result<U256, Error> {
+    let liquidity = U256::from(liquidity);
+
     if add {
         let quotient = if amount <= MAX_U160 {
-            (amount.wrapping_shl(FIXED_POINT_96_RESOLUTION_USIZE)) / U256::from(liquidity)
+            (amount << FIXED_POINT_96_RESOLUTION) / liquidity
         } else {
-            mul_div(amount, Q96, U256::from(liquidity))?
+            mul_div(amount, Q96, liquidity)?
         };
 
         let next_sqrt_price = sqrt_price_x_96 + quotient;
@@ -125,12 +125,9 @@ pub fn get_next_sqrt_price_from_amount_1_rounding_down(
         }
     } else {
         let quotient = if amount <= MAX_U160 {
-            div_rounding_up(
-                amount.wrapping_shl(FIXED_POINT_96_RESOLUTION_USIZE),
-                U256::from(liquidity),
-            )
+            div_rounding_up(amount << FIXED_POINT_96_RESOLUTION, liquidity)
         } else {
-            mul_div_rounding_up(amount, Q96, U256::from(liquidity))?
+            mul_div_rounding_up(amount, Q96, liquidity)?
         };
 
         //require(sqrtPX96 > quotient);

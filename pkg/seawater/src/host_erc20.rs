@@ -26,10 +26,9 @@ pub fn take_transfer_from(token: Address, amount: U256) -> Result<(), Error> {
     #[cfg(feature = "testing")]
     {
         dbg!(("take_transfer_from", current_test!(), token, amount));
-        return match host_test_shims::take_caller_bal(token, amount) {
-            Err(_) => Err(Error::Erc20RevertNoData), // follow the trace!
-            Ok(()) => Ok(()),
-        };
+        return host_test_shims::take_caller_bal(token, amount).map_err(
+            |_| Error::Erc20RevertNoData, // follow the trace!
+        );
     }
     #[allow(unreachable_code)]
     Ok(())
@@ -72,10 +71,9 @@ pub fn take(
     #[cfg(feature = "testing")]
     {
         dbg!(("take", current_test!(), token, amount, _permit2_details));
-        return match host_test_shims::take_caller_bal(token, amount) {
-            Err(_) => Err(Error::Erc20RevertNoData), // follow the trace!
-            Ok(()) => Ok(()),
-        };
+        return host_test_shims::take_caller_bal(token, amount).map_err(
+            |_| Error::Erc20RevertNoData, // follow the trace!
+        );
     }
     #[allow(unreachable_code)]
     Ok(())

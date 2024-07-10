@@ -295,14 +295,14 @@ mod test {
         assert!(sqrt_p < price_target);
 
         #[cfg(feature = "testing")]
-        dbg!((
-            "swap_step",
-            current_test!(),
-            format!(
-                "sqrtp: {:?}, price_after_whole output amount: {:?}",
-                sqrt_p, price_after_whole_output_amount
+        dbg!(
+            ("sqrtp", current_test!(), sqrt_p,),
+            (
+                "price_after_whole output amount",
+                current_test!(),
+                price_after_whole_output_amount
             )
-        ));
+        );
 
         assert_eq!(sqrt_p, price_after_whole_output_amount);
 
