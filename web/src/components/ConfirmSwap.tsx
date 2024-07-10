@@ -7,6 +7,7 @@ import { useSwapStore } from "@/stores/useSwapStore";
 import { motion } from "framer-motion";
 import {
   useAccount,
+  useChainId,
   useSimulateContract,
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -32,7 +33,13 @@ export const ConfirmSwap = () => {
 
   const showSwapBreakdown = useFeatureFlag("ui show swap breakdown")
 
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
+  const expectedChainId = useChainId()
+
+  useEffect(() => {
+    if (!address || chainId !== expectedChainId)
+      router.back()
+  }, [address, expectedChainId, chainId])
 
   const {
     token0,

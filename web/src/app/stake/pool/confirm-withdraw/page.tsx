@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { ammAddress } from "@/lib/addresses";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
-import { useSimulateContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { useAccount, useChainId, useSimulateContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { fUSDC } from "@/config/tokens";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { getFormattedPriceFromAmount } from "@/lib/amounts";
@@ -19,6 +19,14 @@ export default function ConfirmWithdrawLiquidity() {
   const params = useSearchParams();
 
   const positionId = params.get("positionId") ?? "0";
+
+  const { address, chainId } = useAccount();
+  const expectedChainId = useChainId()
+
+  useEffect(() => {
+    if (!address || chainId !== expectedChainId)
+      router.back()
+  }, [address, expectedChainId, chainId])
 
   const {
     token0,

@@ -25,7 +25,7 @@ import * as RadioGroup from "@radix-ui/react-radio-group";
 import { Input } from "@/components/ui/input";
 import { useStakeStore } from "@/stores/useStakeStore";
 import SegmentedControl from "@/components/ui/segmented-control";
-import { useAccount, useBalance, useSimulateContract } from "wagmi";
+import { useAccount, useBalance, useChainId, useSimulateContract } from "wagmi";
 import {
   Tooltip,
   TooltipContent,
@@ -181,7 +181,9 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     }
   };
 
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
+  const expectedChainId = useChainId()
+  const isCorrectChain = useMemo(() => chainId === expectedChainId, [chainId, expectedChainId])
 
   const chartRef = useRef<ReactECharts>(null);
 
@@ -1082,19 +1084,31 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         </div>
 
         <div className="mt-[20px] hidden md:inline-flex md:w-[392px]">
-          {address ? (
-            <Button
-              className="w-full"
-              onClick={onSubmit}
-              disabled={!token0Amount}
-            >
-              Stake
-            </Button>
-          ) : (
-            <Button className={"w-full"} onClick={() => open()}>
-              Connect Wallet
-            </Button>
-          )}
+          {address ?
+            isCorrectChain ? (
+              <Button
+                className="w-full"
+                onClick={onSubmit}
+                disabled={!token0Amount}
+              >
+                Stake
+              </Button>
+            ) : (
+              <Button
+                className="w-full"
+                variant={"destructiveBorder"}
+                onClick={() => open({ view: 'Networks' })}
+                disabled={!token0Amount}
+              >
+                Wrong Network
+              </Button>
+            )
+            :
+            (
+              <Button className={"w-full"} onClick={() => open()}>
+                Connect Wallet
+              </Button>
+            )}
         </div>
       </motion.div>
     </div>
