@@ -6,7 +6,7 @@
 
 use std::collections::HashMap;
 
-use crate::{Address, U256};
+use crate::{current_test, Address, U256};
 
 static DEFAULT_SENDER: [u8; 20] = [
     //0x59e8db5c2e506ddd395d58a1dd8cd02b81ecbd6c
@@ -31,10 +31,9 @@ pub extern "C" fn native_keccak256(bytes: *const u8, len: usize, output: *mut u8
 }
 
 pub mod storage {
+    use std::cell::RefCell;
     use std::collections::HashMap;
     use std::ptr;
-    use std::sync::LazyLock;
-    use std::sync::Mutex;
 
     use crate::{types::U256, Address};
 
@@ -42,18 +41,18 @@ pub mod storage {
     pub type Word = [u8; WORD_BYTES];
     pub type WordHashMap = HashMap<Word, Word>;
 
-    pub static STORAGE_EXTERNAL: Mutex<()> = Mutex::new(());
+    thread_local! {
+        pub static CURRENT_SENDER: RefCell<Option<[u8; 20]>> =
+            RefCell::new(None);
 
-    pub static CURRENT_SENDER: LazyLock<Mutex<Option<[u8; 20]>>> =
-        LazyLock::new(|| Mutex::new(None));
+        pub static STORAGE: RefCell<WordHashMap> = RefCell::new(HashMap::new());
 
-    pub static STORAGE: LazyLock<Mutex<WordHashMap>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+        pub static CALLER_BALS: RefCell<HashMap<Address, U256>> =
+            RefCell::new(HashMap::new());
 
-    pub static CALLER_BALS: LazyLock<Mutex<HashMap<Address, U256>>> =
-        LazyLock::new(|| Mutex::new(HashMap::new()));
-
-    pub static AMM_BALS: LazyLock<Mutex<HashMap<Address, U256>>> =
-        LazyLock::new(|| Mutex::new(HashMap::new()));
+        pub static AMM_BALS: RefCell<HashMap<Address, U256>> =
+            RefCell::new(HashMap::new());
+    }
 
     pub unsafe fn read_word(key: *const u8) -> Word {
         let mut res = Word::default();
@@ -73,7 +72,7 @@ pub extern "C" fn storage_store_bytes32(key: *const u8, value: *const u8) {
         (storage::read_word(key), storage::read_word(value))
     };
 
-    storage::STORAGE.lock().unwrap().insert(key, value);
+    storage::STORAGE.with(|storage| storage.borrow_mut().insert(key, value));
 }
 
 #[no_mangle]
@@ -95,12 +94,13 @@ pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
     // SAFETY - stylus promises etc
     let key = unsafe { storage::read_word(key) };
 
-    let value = storage::STORAGE
-        .lock()
-        .unwrap()
-        .get(&key)
-        .map(storage::Word::to_owned)
-        .unwrap_or_default(); // defaults to zero value
+    let value = storage::STORAGE.with(|storage| {
+        storage
+            .borrow()
+            .get(&key)
+            .map(storage::Word::to_owned)
+            .unwrap_or_default()
+    });
 
     #[cfg(feature = "testing")]
     dbg!((
@@ -116,49 +116,47 @@ pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
 #[no_mangle]
 pub unsafe extern "C" fn msg_sender(sender: *mut u8) {
     // copy the currently defined sender and return the pointer, or default
-    let addr = match storage::CURRENT_SENDER.lock().unwrap().clone() {
+    let addr = storage::CURRENT_SENDER.with(|addr| match addr.borrow().clone() {
         Some(a) => a,
         None => DEFAULT_SENDER,
-    };
+    });
     std::ptr::copy(addr.as_ptr(), sender, 20);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn emit_log(_: *const u8, _: usize, _: usize) {
-    // do nothing, we just don't create logs on the host
+pub unsafe extern "C" fn emit_log(pointer: *const u8, len: usize, _: usize) {
+    #[cfg(feature = "testing")]
+    {
+        let s = std::slice::from_raw_parts(pointer, len);
+        dbg!(("log", current_test!(), const_hex::encode(s).as_str()));
+    }
 }
 
 pub fn set_sender(new_sender: [u8; 20]) {
-    let mut sender = storage::CURRENT_SENDER.lock().unwrap();
-    *sender = Some(new_sender);
+    storage::CURRENT_SENDER.with(|sender| *sender.borrow_mut() = Some(new_sender));
 }
 
 pub fn set_caller_bals(items: HashMap<Address, U256>) {
-    let mut map = storage::CALLER_BALS.lock().unwrap();
-    *map = items;
+    storage::CALLER_BALS.with(|sender| *sender.borrow_mut() = items);
 }
 
 pub fn set_amm_bals(items: HashMap<Address, U256>) {
-    let mut map = storage::AMM_BALS.lock().unwrap();
-    *map = items;
+    storage::AMM_BALS.with(|sender| *sender.borrow_mut() = items);
 }
 
 pub fn insert_word(key: storage::Word, value: storage::Word) {
-    // insert a word for testing reasons
-    let _ = storage::STORAGE.lock().unwrap().insert(key, value);
+    storage::STORAGE.with(|sender| sender.borrow_mut().insert(key, value));
 }
 
 pub fn reset_storage() {
-    storage::STORAGE.lock().unwrap().clear();
-    let mut sender = storage::CURRENT_SENDER.lock().unwrap();
-    *sender = None;
-    storage::CALLER_BALS.lock().unwrap().clear();
-    storage::AMM_BALS.lock().unwrap().clear();
+    storage::STORAGE.with(|storage| storage.borrow_mut().clear());
+    storage::CURRENT_SENDER.with(|sender| *sender.borrow_mut() = None);
+    storage::CALLER_BALS.with(|bals| bals.borrow_mut().clear());
+    storage::AMM_BALS.with(|bals| bals.borrow_mut().clear());
 }
 
 pub fn take_caller_bal(token: Address, amt: U256) -> Result<(), U256> {
-    let mut b = storage::CALLER_BALS.lock().unwrap();
-    match b.get_mut(&token) {
+    storage::CALLER_BALS.with(|bals| match bals.borrow_mut().get_mut(&token) {
         Some(caller_bal) => {
             let (leftover, overflow) = caller_bal.overflowing_sub(amt);
             if overflow {
@@ -169,14 +167,13 @@ pub fn take_caller_bal(token: Address, amt: U256) -> Result<(), U256> {
             }
         }
         _ => Ok(()),
-    }
+    })
 }
 
 ///! Take AMM balance at the address. If the index does not exist, assume the test is
 ///! permissive, and continue without issue.
 pub fn take_amm_bal(token: Address, amt: U256) -> Result<(), U256> {
-    let mut b = storage::AMM_BALS.lock().unwrap();
-    match b.get_mut(&token) {
+    storage::AMM_BALS.with(|bals| match bals.borrow_mut().get_mut(&token) {
         Some(amm_bal) => {
             let (leftover, overflow) = amm_bal.overflowing_sub(amt);
             if overflow {
@@ -187,9 +184,5 @@ pub fn take_amm_bal(token: Address, amt: U256) -> Result<(), U256> {
             }
         }
         _ => Ok(()),
-    }
-}
-
-pub fn acquire_storage() -> std::sync::MutexGuard<'static, ()> {
-    storage::STORAGE_EXTERNAL.lock().unwrap()
+    })
 }

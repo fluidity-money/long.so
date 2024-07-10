@@ -80,7 +80,6 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
         None => HashMap::new(),
     };
 
-    let lock = test_shims::acquire_storage();
     if let Some(v) = sender {
         test_shims::set_sender(v);
     }
@@ -97,7 +96,6 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     let res = f(&mut pools);
     StorageCache::clear();
     test_shims::reset_storage();
-    drop(lock);
     res
 }
 
