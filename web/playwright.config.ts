@@ -16,6 +16,7 @@ const coverageReportOptions: CoverageReportOptions = {
   outputDir: "./playwright-coverage",
 
   sourceFilter: (sourcePath) => {
+    if (sourcePath.includes("node_modules")) return false;
     return (
       sourcePath.includes("src/app") || sourcePath.includes("src/components")
     );
