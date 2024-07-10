@@ -5,6 +5,8 @@ on:
     branches:
       - development
       - test-suite-js
+    paths: 
+      - 'web/**'
   pull_request:
     branches:
       - development
@@ -21,6 +23,8 @@ jobs:
           node-version: lts/*
       - name: Enable pnpm
         run: corepack enable pnpm
+      - name: Change directory to web
+        run: cd web
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Install Playwright Browsers
