@@ -7,7 +7,7 @@ on:
       - test-suite-js
     paths: 
       - 'web/**'
-      - 'web/tests-e2e.yml'
+      - '.github/workflows/tests-e2e.yml'
   pull_request:
     branches:
       - development
