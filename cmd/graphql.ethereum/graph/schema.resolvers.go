@@ -126,7 +126,7 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	var finalTick struct {
 		FinalTick types.Number
 	}
-	err := r.DB.Table("seawater_latest_ticks_1").
+	err := r.DB.Table("seawater_latest_ticks_2").
 		Select("final_tick").
 		Where("pool = ?", obj.Token).
 		First(&finalTick).
@@ -202,7 +202,7 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first
 		positions = model.SeawaterPositionsGlobal(MockGetPoolPositions(p))
 		return
 	}
-	stmt := r.DB.Table("seawater_active_positions_1").
+	stmt := r.DB.Table("seawater_active_positions_2").
 		Where("pool = ?", p).
 		Limit(*first).
 		Order("created_by desc")
@@ -264,7 +264,7 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *
 		)
 		return
 	}
-	stmt := r.DB.Table("seawater_active_positions_1").
+	stmt := r.DB.Table("seawater_active_positions_2").
 		Where("owner = ?", w).
 		Limit(*first).
 		Order("created_by desc")
@@ -320,12 +320,11 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 	var d []model.SeawaterSwap
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND timestamp > ? ORDER BY timestamp DESC LIMIT ?",
+		"SELECT * FROM seawater_swaps_pool_1(?, ?, ?, ?, ?)",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		poolAddress,
-		poolAddress,
-		*after,
+		time.Unix(int64(*after), 0),
 		*first,
 	).
 		Scan(&d).
@@ -337,7 +336,7 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 	// can start to paginate.
 	var to int
 	if l := len(d); l > 0 {
-		to = d[l-1].Timestamp
+		to = int(d[l-1].CreatedBy.Unix())
 	}
 	swaps.Data = model.SeawaterSwaps{
 		From:  *first,
@@ -368,11 +367,11 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 	var d []model.SeawaterSwap
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE sender = ? AND id > ? ORDER BY timestamp DESC LIMIT ?",
+		"SELECT * FROM seawater_swaps_user_1(?, ?, ?, ?, ?)",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		walletAddress,
-		*after,
+		time.Unix(int64(*after), 0),
 		*first,
 	).
 		Scan(&d).
@@ -384,7 +383,7 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 	// can start to paginate.
 	var to int
 	if l := len(d); l > 0 {
-		to = d[l-1].Timestamp
+		to = int(d[l-1].CreatedBy.Unix())
 	}
 	swaps.Data = model.SeawaterSwaps{
 		From:   *first,
@@ -507,7 +506,7 @@ func (r *seawaterPoolResolver) Price(ctx context.Context, obj *seawater.Pool) (s
 		return daily[0], nil
 	}
 	var result model.PriceResult
-	err := r.DB.Table("seawater_latest_ticks_1").
+	err := r.DB.Table("seawater_latest_ticks_2").
 		Where("pool = ?", obj.Token).
 		First(&result).
 		Error
@@ -546,7 +545,7 @@ func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.
 		return model.PriceOverTime{daily, monthly}, nil
 	}
 	var daily, monthly []model.PriceResult
-	err = r.DB.Table("seawater_final_ticks_daily_1").
+	err = r.DB.Table("seawater_final_ticks_daily_2").
 		Where("pool = ?", obj.Token).
 		Limit(maxDays).
 		Scan(&daily).
@@ -554,7 +553,11 @@ func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.
 	if err != nil {
 		return
 	}
-	err = r.DB.Table("seawater_final_ticks_monthly_1").Where("pool = ?", obj.Token).Limit(maxMonths).Scan(&monthly).Error
+	err = r.DB.Table("seawater_final_ticks_monthly_2").
+		Where("pool = ?", obj.Token).
+		Limit(maxMonths).
+		Scan(&monthly).
+		Error
 	if err != nil {
 		return
 	}
@@ -703,6 +706,9 @@ func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Po
 		return
 	}
 	for i, v := range volumeOverTime.Daily {
+		if len(priceOverTime.Daily) == i {
+			break // Avoid a weird situation where the length doesn't add up.
+		}
 		var (
 			dailyTvl string
 			price    = priceOverTime.Daily[i]
@@ -714,6 +720,9 @@ func (r *seawaterPoolResolver) TvlOverTime(ctx context.Context, obj *seawater.Po
 		tvl.Daily = append(tvl.Daily, dailyTvl)
 	}
 	for i, v := range volumeOverTime.Monthly {
+		if len(priceOverTime.Monthly) == i {
+			break // Avoid a weird situation where the length doesn't add up.
+		}
 		var (
 			monthlyTvl string
 			price      = priceOverTime.Monthly[i]
@@ -816,7 +825,7 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 		positions = model.SeawaterPositionsGlobal(MockGetPoolPositions(obj.Token))
 		return
 	}
-	stmt := r.DB.Table("seawater_active_positions_1").
+	stmt := r.DB.Table("seawater_active_positions_2").
 		Where("pool = ?", obj.Token).
 		Limit(*first).
 		Order("created_by desc")
@@ -853,7 +862,7 @@ func (r *seawaterPoolResolver) PositionsForUser(ctx context.Context, obj *seawat
 		positions = model.SeawaterPositionsUser(MockGetPoolPositions(w))
 		return
 	}
-	err = r.DB.Table("seawater_active_positions_1").
+	err = r.DB.Table("seawater_active_positions_2").
 		Where("pool = ? and owner = ?", obj.Token, wallet).
 		Scan(&positions).
 		Error
@@ -936,12 +945,11 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 	}
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_1(?, ?) WHERE (token_in = ? OR token_out = ?) AND timestamp > ? ORDER BY timestamp DESC LIMIT ?",
+		"SELECT * FROM seawater_swaps_pool_1(?, ?, ?, ?, ?)",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		obj.Token,
-		obj.Token,
-		*after,
+		time.Unix(int64(*after), 0),
 		*first,
 	).
 		Scan(&swaps.Swaps).
@@ -969,15 +977,15 @@ func (r *seawaterPoolResolver) Amounts(ctx context.Context, obj *seawater.Pool) 
 	amounts = model.PairAmount{
 		Timestamp: ts,
 		Fusdc: model.Amount{
-			Token: r.C.FusdcAddr,
-			Decimals: r.C.FusdcDecimals,
-			Timestamp: ts,
+			Token:         r.C.FusdcAddr,
+			Decimals:      r.C.FusdcDecimals,
+			Timestamp:     ts,
 			ValueUnscaled: sum.CumulativeAmount0,
 		},
 		Token1: model.Amount{
-			Token: obj.Token,
-			Decimals: int(sum.Decimals),
-			Timestamp: ts,
+			Token:         obj.Token,
+			Decimals:      int(sum.Decimals),
+			Timestamp:     ts,
 			ValueUnscaled: sum.CumulativeAmount1,
 		},
 	}
@@ -1191,7 +1199,7 @@ func (r *seawaterPositionsGlobalResolver) Next(ctx context.Context, obj *model.S
 	to := time.Unix(int64(*obj.To), 0)
 	// Start to construct a statement based on whether internally a
 	// wallet, or a pool, was used.
-	stmt := r.DB.Table("seawater_active_positions_1").
+	stmt := r.DB.Table("seawater_active_positions_2").
 		Where("created_by < ?", to).
 		Limit(*first).
 		Order("created_by desc")
@@ -1299,7 +1307,7 @@ func (r *seawaterPositionsUserResolver) Next(ctx context.Context, obj *model.Sea
 	to := time.Unix(int64(*obj.To), 0)
 	// Start to construct a statement based on whether internally a
 	// wallet, or a pool, was used.
-	stmt := r.DB.Table("seawater_active_positions_1").
+	stmt := r.DB.Table("seawater_active_positions_2").
 		Where("created_by < ?", to).
 		Limit(*first).
 		Order("created_by desc")
@@ -1329,6 +1337,14 @@ func (r *seawaterPositionsUserResolver) Next(ctx context.Context, obj *model.Sea
 		Wallet:    obj.Wallet,
 		Positions: pos,
 	}, nil
+}
+
+// Timestamp is the resolver for the timestamp field.
+func (r *seawaterSwapResolver) Timestamp(ctx context.Context, obj *model.SeawaterSwap) (int, error) {
+	if obj == nil {
+		return 0, fmt.Errorf("empty swap")
+	}
+	return int(obj.CreatedBy.Unix()), nil
 }
 
 // Pool is the resolver for the pool field.
@@ -1366,7 +1382,7 @@ func (r *seawaterSwapResolver) AmountIn(ctx context.Context, obj *model.Seawater
 	return model.Amount{
 		Token:         obj.TokenIn,
 		Decimals:      obj.TokenInDecimals,
-		Timestamp:     obj.Timestamp,
+		Timestamp:     int(obj.CreatedBy.Unix()),
 		ValueUnscaled: obj.AmountIn,
 	}, nil
 }
@@ -1379,7 +1395,7 @@ func (r *seawaterSwapResolver) AmountOut(ctx context.Context, obj *model.Seawate
 	return model.Amount{
 		Token:         obj.TokenOut,
 		Decimals:      obj.TokenOutDecimals,
-		Timestamp:     obj.Timestamp,
+		Timestamp:     int(obj.CreatedBy.Unix()),
 		ValueUnscaled: obj.AmountOut,
 	}, nil
 }
@@ -1512,7 +1528,7 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 		)
 		return
 	}
-	stmt := r.DB.Table("seawater_active_positions_1").
+	stmt := r.DB.Table("seawater_active_positions_2").
 		Where("owner = ?", obj.Address).
 		Limit(*first).
 		Order("created_by desc")

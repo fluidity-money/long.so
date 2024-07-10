@@ -20,8 +20,6 @@ import (
 	gormLogger "gorm.io/gorm/logger"
 )
 
-const BatchSize = 100
-
 // PoolDetails retrieved from seawater_final_ticks_decimals_1
 type PoolDetails struct {
 	Pool      types.Address
@@ -35,15 +33,23 @@ var Zero = new(big.Int)
 func main() {
 	defer setup.Flush()
 	config := config.Get()
-	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(config.PickTimescaleUrl()), &gorm.Config{
 		Logger: gormLogger.Default.LogMode(gormLogger.Silent),
 	})
 	if err != nil {
 		setup.Exitf("database open: %v", err)
 	}
+	slog.Debug("about to snapshot the daily tick info")
+	if err := db.Exec("SELECT snapshot_final_ticks_daily_1()").Error; err != nil {
+		setup.Exitf("snapshot daily ticks: %v", err)
+	}
 	slog.Debug("about to snapshot the state of the liquidity groups")
 	if err := db.Exec("SELECT snapshot_liquidity_groups_1()").Error; err != nil {
 		setup.Exitf("snapshot liquidity groups: %v", err)
+	}
+	slog.Debug("about to snapshot the latest ticks")
+	if err := db.Exec("SELECT snapshot_latest_ticks_1()").Error; err != nil {
+		setup.Exitf("snapshot latest ticks: %v", err)
 	}
 	slog.Debug("about to make another lookup")
 	// Get every active position in the database, including the pools.
@@ -130,7 +136,7 @@ func main() {
 			"lower", lowerPrice,
 			"upper", upperPrice,
 		)
-		if amount0.Cmp(Zero) == 0 && amount1.Cmp(Zero) == 0{
+		if amount0.Cmp(Zero) == 0 && amount1.Cmp(Zero) == 0 {
 			continue
 		}
 		pools[i] = poolAddr

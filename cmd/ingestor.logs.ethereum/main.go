@@ -37,7 +37,7 @@ const (
 func main() {
 	defer setup.Flush()
 	config := config.Get()
-	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(config.PickTimescaleUrl()), &gorm.Config{
 		Logger: gormLogger.Default.LogMode(gormLogger.Silent),
 	})
 	if err != nil {

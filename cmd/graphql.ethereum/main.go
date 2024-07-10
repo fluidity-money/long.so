@@ -17,9 +17,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/ethclient"
 
+	gormSlog "github.com/orandin/slog-gorm"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	gormSlog "github.com/orandin/slog-gorm"
 
 	"github.com/aws/aws-lambda-go/lambda"
 
@@ -47,9 +47,9 @@ func (m corsMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func main() {
 	defer setup.Flush()
 	config := config.Get()
-	db, err := gorm.Open(postgres.Open(config.TimescaleUrl), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(config.PickTimescaleUrl()), &gorm.Config{
 		DisableAutomaticPing: true,
-		Logger: gormSlog.New(), // Use default slog
+		Logger:               gormSlog.New(), // Use default slog
 	})
 	if err != nil {
 		setup.Exitf("database open: %v", err)

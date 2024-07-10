@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { SwapPro } from "@/components/SwapPro";
 import { useHotkeys } from "react-hotkeys-hook";
 import Token from "@/assets/icons/token.svg";
-import Ethereum from "@/assets/icons/ethereum.svg";
 import { Badge } from "@/components/ui/badge";
 import { Line } from "rc-progress";
 import { motion } from "framer-motion";
@@ -26,6 +25,7 @@ import { useSwapStore } from "@/stores/useSwapStore";
 import { ammAddress } from "@/lib/addresses";
 import { useSimulateContract } from "wagmi";
 import { getTokenAmountsNumeric, sqrtPriceX96ToPrice } from "@/lib/math";
+import { TokenIcon } from "@/components/TokenIcon";
 
 const ManagePoolFragment = graphql(`
   fragment ManagePoolFragment on SeawaterPool {
@@ -237,7 +237,7 @@ export default function PoolPage() {
 
               <div className="mt-px flex flex-row items-center justify-between px-4">
                 <div className="flex flex-row items-center">
-                  <Ethereum className={"size-[24px] invert"} />
+                  <TokenIcon src={token0.icon} className={"size-[24px] invert"} />
                   <Badge className="iridescent z-20 -ml-1 flex flex-row gap-2 border-4 border-black pl-1 text-black">
                     <Token className={"size-[24px]"} />
                     <div className="text-nowrap text-sm">

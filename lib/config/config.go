@@ -5,17 +5,18 @@
 package config
 
 import (
+	"math/rand"
 	"os"
 	"strings"
 
 	"github.com/fluidity-money/long.so/lib/setup"
-
 	"github.com/fluidity-money/long.so/lib/types"
 )
 
 // C is configuration for each service, and globally.
 type C struct {
-	GethUrl, TimescaleUrl   string
+	GethUrl                 string
+	TimescaleUrls           []string
 	SeawaterAddr, FusdcAddr types.Address
 	FusdcDecimals           int
 	FusdcTotalSupply        types.UnscaledNumber
@@ -33,6 +34,7 @@ func Get() C {
 	if timescaleUrl == "" {
 		setup.Exitf("SPN_TIMESCALE not set")
 	}
+	timescaleUrls := strings.Split(timescaleUrl, ",")
 	seawaterAddr := strings.ToLower(os.Getenv("SPN_SEAWATER_ADDR"))
 	if seawaterAddr == "" {
 		setup.Exitf("SPN_SEAWATER_ADDR not set")
@@ -43,7 +45,7 @@ func Get() C {
 	}
 	return C{
 		GethUrl:          gethUrl,
-		TimescaleUrl:     timescaleUrl,
+		TimescaleUrls:    timescaleUrls,
 		SeawaterAddr:     types.AddressFromString(seawaterAddr),
 		FusdcAddr:        types.AddressFromString(fusdcAddr),
 		FusdcDecimals:    DefaultFusdcDecimals,
@@ -51,4 +53,8 @@ func Get() C {
 		FusdcSymbol:      DefaultFusdcSymbol,
 		FusdcName:        DefaultFusdcName,
 	}
+}
+
+func (c C) PickTimescaleUrl() string {
+	return c.TimescaleUrls[rand.Intn(len(c.TimescaleUrls))]
 }

@@ -7,7 +7,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"math/big"
+	"math/rand"
 	"strconv"
 	"strings"
 
@@ -18,10 +20,14 @@ import (
 )
 
 const (
-	// BatchLimit to get from the server before using multiple
+	// MinBatchLimit to get from the server before using multiple batches.
+	// This is the minimum that will be used.
+	MinBatchLimit = 200
+
+	// MaxBatchLimit to get from the server before using multiple
 	// batches. Half of the maximum amount since upstream started to
 	// choke.
-	BatchLimit = 500
+	MaxBatchLimit = 300
 
 	// WorkerCount of simultaneous requests that can be made max.
 	WorkerCount = 100
@@ -44,7 +50,7 @@ type (
 	// posResp that's also given to gorm to be used with a custom
 	// function that does a left join during insertion.
 	posResp struct {
-		Key string
+		Key   string
 		Delta types.Number
 	}
 )
@@ -91,7 +97,11 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 	)
 	// Figure out the maximum number of goroutines that we can run to
 	// make the requests. Scaling up accordingly.
-	frames := len(reqs) / BatchLimit
+	batchLimit := rand.Intn(MaxBatchLimit-MinBatchLimit) + MinBatchLimit
+	slog.Info("sending requests using a randomly chosen batch limit",
+		"batch limit", batchLimit,
+	)
+	frames := len(reqs) / batchLimit
 	workerCount := max(frames, WorkerCount)
 	for i := 0; i < workerCount; i++ {
 		go func() {
@@ -145,16 +155,16 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 		}()
 	}
 	go func() {
-		b := make([]rpcReq, BatchLimit)
+		b := make([]rpcReq, batchLimit)
 		x := 0
 		for _, p := range reqs {
 			b[x] = p
 			x++
-			if x != BatchLimit {
+			if x != batchLimit {
 				continue
 			}
-			c := make([]rpcReq, BatchLimit)
-			for i := 0; i < BatchLimit; i++ {
+			c := make([]rpcReq, batchLimit)
+			for i := 0; i < batchLimit; i++ {
 				c[i] = b[i]
 			}
 			select {

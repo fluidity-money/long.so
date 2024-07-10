@@ -1,13 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import Ethereum from "@/assets/icons/ethereum.svg";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { motion } from "framer-motion";
 import {
   useAccount,
+  useChainId,
   useSimulateContract,
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -26,13 +26,20 @@ import { getFormattedPriceFromAmount, snapAmountToDecimals } from "@/lib/amounts
 import { fUSDC } from "@/config/tokens";
 import { RewardsBreakdown } from "./RewardsBreakdown";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { TokenIcon } from "./TokenIcon";
 
 export const ConfirmSwap = () => {
   const router = useRouter();
 
   const showSwapBreakdown = useFeatureFlag("ui show swap breakdown")
 
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
+  const expectedChainId = useChainId()
+
+  useEffect(() => {
+    if (!address || chainId !== expectedChainId)
+      router.back()
+  }, [address, expectedChainId, chainId])
 
   const {
     token0,
@@ -271,7 +278,7 @@ export const ConfirmSwap = () => {
             Swap
           </div>
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
-            <Ethereum className={"invert"} /> {snapAmountToDecimals(parseFloat(token0Amount ?? "0"))} {token0.symbol}
+            <TokenIcon src={token0.icon} className={"invert size-[24px]"} /> {snapAmountToDecimals(parseFloat(token0Amount ?? "0"))} {token0.symbol}
           </div>
           <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">
             = ${snapAmountToDecimals(token0.address === fUSDC.address ? token0AmountFloat : getFormattedPriceFromAmount(token0AmountFloat.toString(), token0Price, fUSDC.decimals))}</div>
@@ -281,7 +288,7 @@ export const ConfirmSwap = () => {
           className={cn("mt-[23px] pl-[21px]")}
         >
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
-            <Ethereum className={"invert"} /> {snapAmountToDecimals(parseFloat(token1Amount ?? "0"))} {token1.symbol}
+            <TokenIcon src={token1.icon} className={"invert size-[24px]"} /> {snapAmountToDecimals(parseFloat(token1Amount ?? "0"))} {token1.symbol}
           </div>
           <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">
             = ${snapAmountToDecimals(token1.address === fUSDC.address ? token1AmountFloat : getFormattedPriceFromAmount(token1AmountFloat.toString(), token1Price, fUSDC.decimals))}

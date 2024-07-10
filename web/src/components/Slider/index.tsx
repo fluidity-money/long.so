@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 interface ISlider {
   onSlideComplete: () => void;
   children: React.ReactNode;
+  className?: string;
   disabled?: boolean;
 }
 
@@ -30,6 +31,7 @@ const Index: React.FC<ISlider> = (props) => {
     ${styles.SliderButton}
     ${disabled ? styles.disabled : ""}
     ${dragComplete ? styles.complete : ""}
+    ${props.className}
   `;
   useEffect(() => {
     if (dragComplete && !disabled) setDragComplete(false);

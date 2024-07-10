@@ -233,6 +233,7 @@ func MockSwaps(fusdc types.Address, amount int, pool types.Address) model.Seawat
 	for i := 0; i < amount; i++ {
 		ts, _ := rand.Int(rand.Reader, secsSinceLastMonth)
 		ts.Sub(new(big.Int).SetInt64(now.Unix()), ts)
+		t := time.Unix(ts.Int64(), 0)
 		var (
 			tokenIn, tokenOut                   types.Address
 			amountInDecimals, amountOutDecimals int
@@ -251,7 +252,7 @@ func MockSwaps(fusdc types.Address, amount int, pool types.Address) model.Seawat
 		amountIn, _ := rand.Int(rand.Reader, MaxMockedVolume)
 		amountOut, _ := rand.Int(rand.Reader, MaxMockedVolume)
 		swaps[i] = model.SeawaterSwap{
-			Timestamp:        int(ts.Int64()), // This should be fine.
+			CreatedBy:        t, // This should be fine.
 			Sender:           types.AddressFromString("0xdca670597bcc35e11200fe07d9191a33a73850b9"),
 			TokenIn:          tokenIn,
 			TokenInDecimals:  amountInDecimals,
@@ -263,14 +264,7 @@ func MockSwaps(fusdc types.Address, amount int, pool types.Address) model.Seawat
 	}
 	// Sort the remainder by the timestamps
 	slices.SortFunc(swaps, func(x, y model.SeawaterSwap) int {
-		switch {
-		case x.Timestamp > x.Timestamp:
-			return -1
-		case x.Timestamp > x.Timestamp:
-			return 1
-		default:
-			return 0
-		}
+		return x.CreatedBy.Compare(x.CreatedBy)
 	})
 	p := pool
 	pagination := model.SeawaterSwaps{

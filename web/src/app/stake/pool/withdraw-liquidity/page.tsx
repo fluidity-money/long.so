@@ -13,7 +13,7 @@ import Slider from "@/components/Slider";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
-import { useAccount, useSimulateContract } from "wagmi";
+import { useAccount, useChainId, useSimulateContract } from "wagmi";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlUser } from "@/hooks/useGraphql";
 import { useEffect, useMemo, useState } from "react";
@@ -21,6 +21,8 @@ import { usdFormat } from "@/lib/usdFormat";
 import { ammAddress } from "@/lib/addresses";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { fUSDC } from "@/config/tokens";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { TokenIcon } from "@/components/TokenIcon";
 
 const PositionsFragment = graphql(`
 fragment WithdrawPositionsFragment on Wallet {
@@ -57,7 +59,11 @@ export default function WithdrawLiquidity() {
     if (!positionId && typeof window !== undefined) router.back();
   }, [positionId, router]);
 
-  const { address } = useAccount()
+  const { address, chainId } = useAccount();
+  const expectedChainId = useChainId()
+  const isCorrectChain = useMemo(() => chainId === expectedChainId, [chainId, expectedChainId])
+
+  const { open } = useWeb3Modal();
 
   const {
     token0,
@@ -158,7 +164,7 @@ export default function WithdrawLiquidity() {
       >
         <motion.div className="flex flex-col" layout>
           <div className={cn("absolute -top-[15px] left-0 flex flex-row")}>
-            <Ethereum className="size-[30px] rounded-full border-[3px] border-white" />
+            <TokenIcon src={token0.icon} className="size-[30px] rounded-full border-[1px] border-white" />
             <Badge
               variant="outline"
               className="-ml-2 h-[30px] w-[124px] justify-between border-[3px] bg-black pl-px text-white"
@@ -261,17 +267,33 @@ export default function WithdrawLiquidity() {
         </div>
       </div>
 
-      <div className="z-10 mt-[20px] w-[318px] md:hidden">
-        <Slider onSlideComplete={onSubmit}>
-          <div className="text-xs font-medium">Withdraw</div>
-        </Slider>
-      </div>
+      {isCorrectChain ?
+        <div className="z-10 mt-[20px] w-[318px] md:hidden">
+          <Slider onSlideComplete={onSubmit}>
+            <div className="text-xs font-medium">Withdraw</div>
+          </Slider>
+        </div>
+        :
+        <div className="z-10 mt-[20px] w-[318px] md:hidden">
+          <Slider className="border border-destructive" onSlideComplete={() => open({ view: "Networks" })}>
+            <div className="text-xs font-medium text-destructive">Wrong Network</div>
+          </Slider>
+        </div>
+      }
 
-      <div className="z-10 mt-[20px] hidden md:inline">
-        <Button className="h-[53.92px] w-[395px]" onClick={onSubmit}>
-          Withdraw
-        </Button>
-      </div>
+      {isCorrectChain ?
+        <div className="z-10 mt-[20px] hidden md:inline">
+          <Button className="h-[53.92px] w-[395px]" onClick={onSubmit}>
+            Withdraw
+          </Button>
+        </div>
+        :
+        <div className="z-10 mt-[20px] hidden md:inline">
+          <Button variant="destructiveBorder" className="h-[53.92px] w-[395px]" onClick={() => open({ view: "Networks" })}>
+            Wrong Network
+          </Button>
+        </div>
+      }
     </div>
   );
 }

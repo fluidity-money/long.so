@@ -21,7 +21,7 @@ import { mockMyPositions } from "@/demoData/myPositions";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlUser } from "@/hooks/useGraphql";
-import { Token, fUSDC } from "@/config/tokens";
+import { Token, fUSDC, getTokenFromAddress } from "@/config/tokens";
 import { TokenIcon } from "@/components/TokenIcon";
 
 const MyPositionsWalletFragment = graphql(`
@@ -165,7 +165,7 @@ export const MyPositions = () => {
 
                 <div className="-mt-1 flex flex-col md:-mt-2">
                   <div className="flex flex-row">
-                    <TokenIcon className="ml-[-2px] size-[25px] rounded-full border border-black md:size-[35px]" />
+                    <TokenIcon src={getTokenFromAddress(pool.id)?.icon} className="ml-[-2px] size-[25px] rounded-full border border-black md:size-[35px]" />
                     <TokenIridescent className="ml-[-6px] size-[25px] rounded-full border-2 border-black md:size-[35px]" />
                   </div>
                   <div className="flex flex-row justify-center">
