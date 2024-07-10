@@ -158,25 +158,35 @@ pub fn reset_storage() {
 
 pub fn take_caller_bal(token: Address, amt: U256) -> Result<(), U256> {
     let mut b = storage::CALLER_BALS.lock().unwrap();
-    let caller_bal = b.get_mut(&token).unwrap();
-    let (leftover, overflow) = caller_bal.overflowing_sub(amt);
-    if overflow {
-        Err(amt.checked_sub(caller_bal.clone()).unwrap())
-    } else {
-        *caller_bal = leftover;
-        Ok(())
+    match b.get_mut(&token) {
+        Some(caller_bal) => {
+            let (leftover, overflow) = caller_bal.overflowing_sub(amt);
+            if overflow {
+                Err(amt.checked_sub(caller_bal.clone()).unwrap())
+            } else {
+                *caller_bal = leftover;
+                Ok(())
+            }
+        }
+        _ => Ok(()),
     }
 }
 
+///! Take AMM balance at the address. If the index does not exist, assume the test is
+///! permissive, and continue without issue.
 pub fn take_amm_bal(token: Address, amt: U256) -> Result<(), U256> {
     let mut b = storage::AMM_BALS.lock().unwrap();
-    let amm_bal = b.get_mut(&token).unwrap();
-    let (leftover, overflow) = amm_bal.overflowing_sub(amt);
-    if overflow {
-        Err(amt.checked_sub(amm_bal.clone()).unwrap())
-    } else {
-        *amm_bal = leftover;
-        Ok(())
+    match b.get_mut(&token) {
+        Some(amm_bal) => {
+            let (leftover, overflow) = amm_bal.overflowing_sub(amt);
+            if overflow {
+                Err(amt.checked_sub(amm_bal.clone()).unwrap())
+            } else {
+                *amm_bal = leftover;
+                Ok(())
+            }
+        }
+        _ => Ok(()),
     }
 }
 
