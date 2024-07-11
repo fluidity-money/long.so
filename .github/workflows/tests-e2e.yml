@@ -53,7 +53,7 @@ jobs:
         if: always()
         with:
           name: playwright-coverage
-          path: playwright-coverage/
+          path: web/playwright-coverage/
           retention-days: 30
 
       - name: Upload coverage reports to Codecov
