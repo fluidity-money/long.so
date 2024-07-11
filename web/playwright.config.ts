@@ -9,7 +9,9 @@ const coverageReportOptions: CoverageReportOptions = {
   entryFilter: (entry) => {
     // both client side and server side
     return (
-      entry.url.includes("next/static/chunks") ||
+      (entry.url.includes("next/static/chunks") &&
+        // add localhost condition to exclude walletconnect injected scripts from client chunks
+        entry.url.includes("localhost")) ||
       entry.url.includes("next/server/app")
     );
   },
