@@ -17,9 +17,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 
+	gormSlog "github.com/orandin/slog-gorm"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	gormLogger "gorm.io/gorm/logger"
 
 	"github.com/aws/aws-lambda-go/lambda"
 
@@ -61,7 +61,7 @@ func main() {
 	config := config.Get()
 	db, err := gorm.Open(postgres.Open(config.PickTimescaleUrl()), &gorm.Config{
 		DisableAutomaticPing: true,
-		Logger:               gormLogger.Default.LogMode(gormLogger.Silent),
+		Logger:               gormSlog.New(),
 	})
 	if err != nil {
 		setup.Exitf("database open: %v", err)

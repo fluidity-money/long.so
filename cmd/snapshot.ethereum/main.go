@@ -17,7 +17,8 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	gormLogger "gorm.io/gorm/logger"
+
+	gormSlog "github.com/orandin/slog-gorm"
 )
 
 // PoolDetails retrieved from seawater_final_ticks_decimals_1
@@ -34,7 +35,7 @@ func main() {
 	defer setup.Flush()
 	config := config.Get()
 	db, err := gorm.Open(postgres.Open(config.PickTimescaleUrl()), &gorm.Config{
-		Logger: gormLogger.Default.LogMode(gormLogger.Silent),
+		Logger: gormSlog.New(),
 	})
 	if err != nil {
 		setup.Exitf("database open: %v", err)
