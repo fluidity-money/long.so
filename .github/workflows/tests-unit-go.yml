@@ -5,12 +5,13 @@ on:
     branches: 
       - development
       - test-suite-js
-    # paths: 
-    #   - 'pkg/**'
-    #   - 'web/**'
-    #   - 'cmd/**'
-    #   - 'lib/**'
-    #   - 'go.*'
+    paths: 
+      - 'pkg/**'
+      - 'web/**'
+      - 'cmd/**'
+      - 'lib/**'
+      - 'go.*'
+      - '.github/workflows/tests-unit-go.yml'
   pull_request:
     branches:
       - development
@@ -31,11 +32,6 @@ jobs:
 
       - name: Install Go dependencies
         run: go mod tidy
-
-      - name: Add the stakers file to the faucet cmdlet
-        run: |
-          cd cmd/faucet.superposition
-          make stakers.json
 
       - name: Run Go tests and generate coverage report
         run: go test ./... -coverprofile=coverage-go.txt -covermode=count
