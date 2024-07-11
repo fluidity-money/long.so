@@ -44,6 +44,9 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
+        env:
+          NEXT_PUBLIC_LONGTAIL_GRAPHQL_URL: 'https://testnet-graph.long.so'
+          NEXT_PUBLIC_LONGTAIL_WALLETCONNECT_PROJECT_ID: 'cd720795a706b4092d3487ebfa62938a'
         run: pnpm test:e2e
       - uses: actions/upload-artifact@v4
         if: always()
