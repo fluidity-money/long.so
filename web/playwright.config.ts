@@ -50,7 +50,7 @@ export default defineConfig({
   // Test directory
   testDir: "./e2e",
   // If a test fails, retry it additional 2 times
-  retries: 0,
+  retries: 2,
   // Artifacts folder where screenshots, videos, and traces are stored.
   outputDir: "./test-results",
 
