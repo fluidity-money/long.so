@@ -12,7 +12,7 @@
     "codegen:watch": "graphql-codegen --config codegen.ts --watch",
     "clean": "cross-env NODE_V8_COVERAGE=.v8-coverage node ./scripts/clean.js",
     "test:start": "cross-env NODE_V8_COVERAGE=.v8-coverage NODE_OPTIONS=--inspect=9229 next dev",
-    "test:command": "npm run clean && npm run test:start",
+    "test:command": "pnpm clean && pnpm test:start",
     "test:unit": "jest",
     "test:e2e": "playwright test"
   },

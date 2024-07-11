@@ -50,7 +50,9 @@ export default defineConfig({
   // Test directory
   testDir: "./e2e",
   // If a test fails, retry it additional 2 times
-  retries: 2,
+  retries: process.env.CI ? 2 : 0,
+  // Opt out of parallel tests on CI.
+  workers: process.env.CI ? 1 : undefined,
   // Artifacts folder where screenshots, videos, and traces are stored.
   outputDir: "./test-results",
 
