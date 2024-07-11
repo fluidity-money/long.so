@@ -774,6 +774,10 @@ impl Pools {
         Ok(self.pools.getter(pool).get_cur_tick().sys())
     }
 
+    pub fn fees_owed(&self, pool: Address, id: U256) -> Result<(u128, u128), Revert> {
+        Ok(self.pools.getter(pool).get_fees_owed(id))
+    }
+
     /// Getter method for the tick spacing of the pool given.
     pub fn tick_spacing(&self, pool: Address) -> Result<u8, Revert> {
         // converted to i32 for automatic abi encoding
@@ -1110,8 +1114,10 @@ mod test {
             "0x0951df22610b1d641fffea402634ee523fece890ea56ecb57d4eb766ca391d52" => "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50" => "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0xdc03f6203d56cf5fe49270519e5a797eebcd9be54de9070150d36d99795813bf" => "0x0000000000000000000000000000000000000000000000000000000000000000"
-                      }),
-            None, // caller balances
+             }),
+            Some(hashmap! {
+                address!("6437fdc89ced41941b97a9f1f8992d88718c81c5") => U256::from(842893567)
+            }), // caller balances
             None, // amm balances
             |contract| {
                 use core::str::FromStr;

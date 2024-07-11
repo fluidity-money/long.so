@@ -1,13 +1,12 @@
 //! Structures and functions to track and update details on owned positions.
 
 use crate::{
-	error::*,
-	maths::{full_math, liquidity_math},
-	types::{WrappedNative, I32, U128, U256}
+    error::*,
+    maths::{full_math, liquidity_math},
+    types::{WrappedNative, I32, U128, U256},
 };
 
 use stylus_sdk::{prelude::*, storage::*};
-
 
 /// Storage type for the details on a position.
 #[solidity_storage]
@@ -92,6 +91,14 @@ impl StoragePositions {
         Ok(())
     }
 
+    pub fn fees_owed(&self, id: U256) -> (u128, u128) {
+        let position = self.positions.getter(id);
+        (
+            position.token_owed_0.get().sys(),
+            position.token_owed_1.get().sys(),
+        )
+    }
+
     /// Collects fees from a position, returning the amount of each token collected.
     ///
     /// # Arguments
@@ -117,4 +124,3 @@ impl StoragePositions {
         (amount_0, amount_1)
     }
 }
-

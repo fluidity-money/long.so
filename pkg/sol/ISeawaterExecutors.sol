@@ -137,31 +137,6 @@ interface ISeawaterExecutorPosition {
     /// @return the amount of liquidity contained in the position
     function positionLiquidity(address pool, uint256 id) external returns (uint128);
 
-    /// @notice gets the current sqrt price of the pool
-    /// @param pool to get from
-    /// @return the current sqrtPriceX96 for the pool
-    function sqrtPriceX96(address pool) external returns (uint256);
-
-    /// @notice gets the currently used tick of the pool
-    /// @param pool to get from
-    /// @return the current active tick in the pool
-    function curTick(address pool) external returns (int32);
-
-    /// @notice gets the tick spacing of the pool
-    /// @param pool to get from
-    /// @return the tick spacing of the pool
-    function tickSpacing(address pool) external returns (uint8);
-
-    /// @notice gets the fee growth for token 0
-    /// @param pool to get from
-    /// @return the fee growth for the other token
-    function feeGrowthGlobal0(address pool) external returns (uint256);
-
-    /// @notice gets the fee growth for token 1
-    /// @param pool to get from
-    /// @return the fee growth for fUSDC
-    function feeGrowthGlobal1(address pool) external returns (uint256);
-
     /// @notice collects fees from a position
     /// @param pool the pool the position belongs to
     /// @param id the id of the position
@@ -242,6 +217,37 @@ interface ISeawaterExecutorAdminExposed {
         uint128 amount0,
         uint128 amount1
     ) external returns (uint128, uint128);
+
+    /// @notice feesOwed to a position ID given.
+    /// @param pool to get the fees owed for
+    /// @param id of the position to check for
+    /// @return the amount of token0 and token1 to get in return
+    function feesOwed(address pool, uint256 id) external returns (uint128, uint128);
+
+    /// @notice gets the current sqrt price of the pool
+    /// @param pool to get from
+    /// @return the current sqrtPriceX96 for the pool
+    function sqrtPriceX96(address pool) external returns (uint256);
+
+    /// @notice gets the currently used tick of the pool
+    /// @param pool to get from
+    /// @return the current active tick in the pool
+    function curTick(address pool) external returns (int32);
+
+    /// @notice gets the tick spacing of the pool
+    /// @param pool to get from
+    /// @return the tick spacing of the pool
+    function tickSpacing(address pool) external returns (uint8);
+
+    /// @notice gets the fee growth for token 0
+    /// @param pool to get from
+    /// @return the fee growth for the other token
+    function feeGrowthGlobal0(address pool) external returns (uint256);
+
+    /// @notice gets the fee growth for token 1
+    /// @param pool to get from
+    /// @return the fee growth for fUSDC
+    function feeGrowthGlobal1(address pool) external returns (uint256);
 
     /// @notice enables or disables a pool
     /// @param pool the pool to enable or disable
