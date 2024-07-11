@@ -22,15 +22,27 @@ jobs:
         working-directory: './web'
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Install Git LFS
+        run: git lfs install
+
+      - name: Pull LFS files
+        run: git lfs pull
+
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
       - name: Enable pnpm
         run: corepack enable pnpm
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
+
       - name: Run Playwright tests
         run: pnpm test:e2e
       - uses: actions/upload-artifact@v4
@@ -39,6 +51,7 @@ jobs:
           name: playwright-coverage
           path: playwright-coverage/
           retention-days: 30
+
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         with:
