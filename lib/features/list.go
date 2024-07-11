@@ -12,10 +12,10 @@ const (
 	// FeatureIngestorPollRpc using the ingestor. Useful in environments
 	// where websocket access is inconsistent or unavailable. Does so with
 	// a (by default) 15 second delay, with checkpointing done in the database.
-	FeatureIngestorPollRpc  = "ingestor poll rpc"
+	FeatureIngestorPollRpc = "ingestor poll rpc"
 
-	// FeatureFaucetStakersOnly to gate access to the faucet to the
-	// list of stakers in the JSON blob in config/stakers.json.
+	// FeatureFaucetStakersOnly to gate access to the faucet to
+	// through the moderators graph.
 	FeatureFaucetStakersOnly = "faucet stakers only"
 
 	// FeatureFaucetEnabled is allowed to be used.
