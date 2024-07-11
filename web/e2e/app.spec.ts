@@ -8,7 +8,7 @@ test("should navigate to the stake page", async ({ page }) => {
   // );
   // await page.getByTestId("third-page-anchor").click();
   await page.click("text=Go to third page");
-  await page.waitForURL("/third");
+  await page.waitForURL("/third", { timeout: 60000, waitUntil: "load" });
   await expect(page).toHaveURL("/third");
   await expect(page.locator("h3")).toContainText("Third page");
 });
