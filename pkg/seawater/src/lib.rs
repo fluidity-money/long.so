@@ -82,11 +82,12 @@ mod allocator {
     feature = "positions",
     feature = "update_positions",
     feature = "admin",
+    feature = "migrations"
 )))]
 mod shim {
     #[cfg(target_arch = "wasm32")]
     compile_error!(
-        "Either `swaps` or `swap_permit2` or `quotes` or `positions` or `update_positions` or `admin` must be enabled when building for wasm."
+        "Either `swaps` or `swap_permit2` or `quotes` or `positions` or `update_positions`, `admin`, or `migrations` must be enabled when building for wasm."
     );
     #[stylus_sdk::prelude::external]
     impl crate::Pools {}
@@ -842,6 +843,10 @@ impl Pools {
         Ok(self.pools.setter(pool).set_enabled(enabled))
     }
 }
+
+/// Migration functions. Only enabled when the `migrations` feature is set.
+#[cfg_attr(feature = "migrations", external)]
+impl Pools {}
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 impl test_utils::StorageNew for Pools {
