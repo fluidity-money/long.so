@@ -4,14 +4,12 @@ on:
   push:
     branches:
       - development
-      - test-suite-js
     paths: 
       - 'web/**'
       - '.github/workflows/tests-e2e.yml'
   pull_request:
     branches:
       - development
-      - test-suite-js
 
 jobs:
   test:

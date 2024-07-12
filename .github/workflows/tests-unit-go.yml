@@ -4,7 +4,6 @@ on:
   push:
     branches: 
       - development
-      - test-suite-js
     paths: 
       - 'pkg/**'
       - 'web/**'
