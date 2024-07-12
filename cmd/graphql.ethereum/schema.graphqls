@@ -224,6 +224,11 @@ type SeawaterPool {
   Amounts currently contained in this pool.
   """
   amounts: PairAmount!
+
+  """
+  Configuration details available to this pool. Should be mostly static.
+  """
+  config: SeawaterConfig!
 }
 
 """
@@ -508,6 +513,42 @@ type SeawaterSwap {
   The asset and volume that was exchanged for by the other asset.
   """
   amountOut: Amount!
+}
+
+enum SeawaterPoolClassification {
+  STABLECOIN
+  VOLATILE
+  UNKNOWN
+}
+
+"""
+SeawaterConfig available to the pool.
+"""
+type SeawaterConfig {
+  """
+  Identifier of this config. Should be config:<pool address>
+  """
+  id: ID!
+
+  """
+  Pool this configuration belongs to.
+  """
+  pool: SeawaterPool!
+
+  """
+  Whether this pool should be displayed to frontend users.
+  """
+  displayed: Boolean!
+
+  """
+  Classification of the type of pool. Non-volatile assets like stablecoins (`STABLECOIN`)
+  should have a range of -10%-10% suggested to the user for the pool, volatile assets
+  (`VOLATILE`) should have a suggestion based on the historical trading data in the
+  backend, with the lowest price in the last 7 days, and the highest price, and an extra
+  5%. Unclear assets (`UNKNOWN`) should avoid these recommendations altogether, and only
+  allow the user to submit their price ranges without intervention.
+  """
+  classification: SeawaterPoolClassification!
 }
 
 """
