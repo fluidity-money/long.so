@@ -177,6 +177,26 @@ export type QueryGetWalletArgs = {
   address: Scalars['String']['input'];
 };
 
+/** SeawaterConfig available to the pool. */
+export type SeawaterConfig = {
+  __typename?: 'SeawaterConfig';
+  /**
+   * Classification of the type of pool. Non-volatile assets like stablecoins (`STABLECOIN`)
+   * should have a range of -10%-10% suggested to the user for the pool, volatile assets
+   * (`VOLATILE`) should have a suggestion based on the historical trading data in the
+   * backend, with the lowest price in the last 7 days, and the highest price, and an extra
+   * 5%. Unclear assets (`UNKNOWN`) should avoid these recommendations altogether, and only
+   * allow the user to submit their price ranges without intervention.
+   */
+  classification: SeawaterPoolClassification;
+  /** Whether this pool should be displayed to frontend users. */
+  displayed: Scalars['Boolean']['output'];
+  /** Identifier of this config. Should be config:<pool address> */
+  id: Scalars['ID']['output'];
+  /** Pool this configuration belongs to. */
+  pool: SeawaterPool;
+};
+
 /** SeawaterLiquidity available in a pool summed and grouped by ticks of 5000 at a time. */
 export type SeawaterLiquidity = {
   __typename?: 'SeawaterLiquidity';
@@ -197,6 +217,10 @@ export type SeawaterPool = {
   __typename?: 'SeawaterPool';
   /** Address of the pool, and of the token that's traded. */
   address: Scalars['String']['output'];
+  /** Amounts currently contained in this pool. */
+  amounts: PairAmount;
+  /** Configuration details available to this pool. Should be mostly static. */
+  config: SeawaterConfig;
   /** TODO */
   earnedFeesAPRFUSDC: Array<Scalars['String']['output']>;
   /** TODO */
@@ -265,6 +289,12 @@ export type SeawaterPoolSwapsArgs = {
   after?: InputMaybe<Scalars['Int']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
 };
+
+export enum SeawaterPoolClassification {
+  Stablecoin = 'STABLECOIN',
+  Unknown = 'UNKNOWN',
+  Volatile = 'VOLATILE'
+}
 
 /**
  * SeawaterPosition owned by a user. It should be possible to derive the price of this
