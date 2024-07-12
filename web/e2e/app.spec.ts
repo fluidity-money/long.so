@@ -1,15 +1,9 @@
 import { test, expect } from "./fixtures";
 
-test("should navigate to the stake page", async ({ page }) => {
+test("should navigate to the home page and welcome component should be visible", async ({
+  page,
+}) => {
   await page.goto("/");
 
-  await page.waitForSelector("data-test=third-page-anchor");
-
-  await expect(page.getByTestId("third-page-anchor")).toContainText(
-    "Go to third page",
-  );
-  await page.getByTestId("third-page-anchor").click();
-  await page.waitForURL("/third");
-  await expect(page).toHaveURL("/third");
-  await expect(page.locator("h3")).toContainText("Third page");
+  await expect(page.getByTestId("welcome-component")).toBeInViewport();
 });
