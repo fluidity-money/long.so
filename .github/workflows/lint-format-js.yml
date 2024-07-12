@@ -1,0 +1,41 @@
+name: Lint and Format Web App
+
+on:
+  push:
+    branches: 
+      - development
+    paths: 
+      - 'web/e2e/**'
+      - 'web/__tests__/**'
+      - 'web/src/**'
+      - '.github/workflows/lint-format-js.yml'
+  pull_request:
+    branches: 
+      - development
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: './web'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.15.0
+
+      - name: Enable pnpm
+        run: corepack enable pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check Linting
+        run: pnpm lint:next 
+      
+      - name: Check Formating
+        run: pnpm format:check
+

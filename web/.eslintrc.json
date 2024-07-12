@@ -7,9 +7,6 @@
   ],
   "plugins": ["@stylistic/ts"],
   "parser": "@typescript-eslint/parser",
-  // "parserOptions": {
-  //   "project": "./.tsconfig.json"
-  // },
   "rules": {
     "no-warning-comments": [
       "error",
