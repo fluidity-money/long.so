@@ -1,4 +1,3 @@
-
 import {
   getSqrtRatioAtTick,
   getAmountsForLiquidity,
@@ -6,7 +5,7 @@ import {
   MIN_TICK,
   MIN_SQRT_RATIO,
   MAX_TICK,
-  MAX_SQRT_RATIO
+  MAX_SQRT_RATIO,
 } from "@/lib/math";
 
 describe("Liquidity math", () => {
@@ -25,10 +24,10 @@ describe("Liquidity math", () => {
 
   it("Should convert liquidity to amounts correctly", () => {
     const [amount0, amount1] = getAmountsForLiquidity(
-      encodeSqrtPrice(1),                  // sqrtRatioX96
+      encodeSqrtPrice(1), // sqrtRatioX96
       encodeSqrtPrice(0.9090909090909091), // sqrtRatioAX96
-      encodeSqrtPrice(1.1),                // sqrtRatioBX96
-      2148n                                // liquidity
+      encodeSqrtPrice(1.1), // sqrtRatioBX96
+      2148n, // liquidity
     );
   });
 });

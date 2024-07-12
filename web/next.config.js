@@ -15,10 +15,16 @@ module.exports = withSentryConfig(
     env: {
       GIT_HASH: gitHash,
     },
-    experimental: {
-      swcPlugins: [["swc-plugin-coverage-instrument", {}]],
-    },
     webpack(config) {
+      if (process.env.NODE_V8_COVERAGE) {
+        Object.defineProperty(config, "devtool", {
+          get() {
+            return "source-map";
+          },
+          set() {},
+        });
+      }
+
       // Grab the existing rule that handles SVG imports
       const fileLoaderRule = config.module.rules.find((rule) =>
         rule.test?.test?.(".svg"),

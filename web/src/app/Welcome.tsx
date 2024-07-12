@@ -14,7 +14,10 @@ export const Welcome = () => {
 
   return (
     <>
-      <div className="absolute top-[40%] z-50 w-full">
+      <div
+        className="absolute top-[40%] z-50 w-full"
+        data-test="welcome-component"
+      >
         <div className="flex flex-col items-center justify-around gap-10 bg-white">
           <div className="mt-10 flex flex-row items-center gap-1 text-3xl font-medium">
             Think{" "}
@@ -41,14 +44,22 @@ export const Welcome = () => {
               <div className="group h-[35px] rounded-full border border-black p-3 transition-[height] hover:h-[60px] hover:bg-black hover:text-white ">
                 <div className="flex h-full w-[320px] flex-col items-center justify-center gap-1 group-hover:w-[365px]">
                   <div className="text-sm group-hover:text-base">
-                    <a href="https://docs.superposition.so/superposition-testnet/super-layer/super-assets" rel="noopener noreferrer" target="_blank">
+                    <a
+                      href="https://docs.superposition.so/superposition-testnet/super-layer/super-assets"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
                       ⛽️ Gas Rebates and Negative Fees for traders
                     </a>
                   </div>
                   <div className="hidden text-xs text-gray-1 group-hover:inline-flex">
                     Less Gas, More Cash.{" "}
                     <span className="ml-1 hidden cursor-pointer underline md:inline-flex">
-                      <a href="https://docs.superposition.so/superposition-testnet/super-layer/super-assets" rel="noopener noreferrer" target="_blank">
+                      <a
+                        href="https://docs.superposition.so/superposition-testnet/super-layer/super-assets"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
                         Learn More {"->"}
                       </a>
                     </span>
@@ -124,10 +135,11 @@ export const Welcome = () => {
             <a
               rel="noopener noreferrer"
               target="_blank"
-              href={"https://docs.superposition.so/longtail-amm/introducing-longtail"}
+              href={
+                "https://docs.superposition.so/longtail-amm/introducing-longtail"
+              }
             >
-              <Button
-                variant="link">Learn more {"->"}</Button>
+              <Button variant="link">Learn more {"->"}</Button>
             </a>
           </div>
         </div>
