@@ -9,6 +9,8 @@ GO_FILES := $(shell find . -name '*.go' -or -name '*.json' -type f)
 
 CMDLET := $(shell basename ${PWD})
 
+CONFIG_DIR := ../../config
+
 ${CMDLET}: ${EXTRA_FILES} ${GO_FILES}
 	@${GO_BUILD} ${GO_BUILD_EXTRA_ARGS}
 

@@ -27,7 +27,7 @@ const (
 	// MaxBatchLimit to get from the server before using multiple
 	// batches. Half of the maximum amount since upstream started to
 	// choke.
-	MaxBatchLimit = 500
+	MaxBatchLimit = 300
 
 	// WorkerCount of simultaneous requests that can be made max.
 	WorkerCount = 100

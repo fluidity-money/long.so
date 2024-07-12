@@ -59,14 +59,13 @@ pub trait StorageNew {
 pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     sender: Option<[u8; 20]>,
     slots: Option<HashMap<&str, &str>>,
-    caller_bal: Option<U256>,
-    amm_bal: Option<U256>,
+    caller_bals: Option<HashMap<Address, U256>>,
+    amm_bals: Option<HashMap<Address, U256>>,
     f: F,
 ) -> T {
-    let mut slots_map: HashMap<[u8; 32], [u8; 32]> = HashMap::new();
-    match slots {
+    let slots_map: HashMap<[u8; 32], [u8; 32]> = match slots {
         Some(items) => {
-            slots_map = items
+            items
                 .iter()
                 .map(|(key, value)| -> ([u8; 32], [u8; 32]) {
                     // avoid poisoning the lock if we fail to do this here.
@@ -78,17 +77,17 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
                 })
                 .collect()
         }
-        None => (),
+        None => HashMap::new(),
     };
-    let lock = test_shims::acquire_storage();
+
     if let Some(v) = sender {
         test_shims::set_sender(v);
     }
-    if let Some(v) = caller_bal {
-        test_shims::set_caller_bal(v);
+    if let Some(items) = caller_bals {
+        test_shims::set_caller_bals(items);
     }
-    if let Some(v) = amm_bal {
-        test_shims::set_amm_bal(v);
+    if let Some(items) = amm_bals {
+        test_shims::set_amm_bals(items);
     }
     for (key, value) in slots_map {
         test_shims::insert_word(key.clone(), value.clone())
@@ -97,7 +96,6 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     let res = f(&mut pools);
     StorageCache::clear();
     test_shims::reset_storage();
-    drop(lock);
     res
 }
 

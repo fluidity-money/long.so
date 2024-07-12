@@ -18,7 +18,11 @@ cache/
 
 seawater-admin.wasm
 seawater-positions.wasm
+seawater-quotes.wasm
+seawater-swap-permit2.wasm
 seawater-swaps.wasm
+seawater-update-positions.wasm
+seawater-migrations.wasm
 
 node_modules/
 

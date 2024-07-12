@@ -23,9 +23,11 @@ import {
   useBalance,
   useSimulateContract,
   useClient,
+  useChainId,
+  useWalletClient,
 } from "wagmi";
 import { formatEther, maxUint256 } from "viem";
-import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { useWalletInfo, useWeb3Modal } from "@web3modal/wagmi/react";
 import { ammAddress } from "@/lib/addresses";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { fUSDC } from "@/config/tokens";
@@ -118,7 +120,9 @@ export const SwapForm = () => {
     });
   }, [poolsData, token0.address, token1.address]);
 
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
+  const expectedChainId = useChainId()
+  const isCorrectChain = useMemo(() => chainId === expectedChainId, [chainId, expectedChainId])
 
   // the user is currently swapping the "base" asset, the fUSDC
   // asset, into the other.
@@ -390,7 +394,7 @@ export const SwapForm = () => {
                     variant="outline"
                     className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base w-max space-x-1"
                   >
-                 <TokenIcon className="size-[20px] md:size-[25px]" src={token0.icon} /> 
+                    <TokenIcon className="size-[20px] md:size-[25px]" src={token0.icon} />
                     <div>{token0.symbol}</div>
                     <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
                   </Badge>
@@ -466,7 +470,7 @@ export const SwapForm = () => {
                     variant="outline"
                     className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base space-x-1"
                   >
-                 <TokenIcon className="size-[20px] md:size-[25px]" src={token1.icon} /> 
+                    <TokenIcon className="size-[20px] md:size-[25px]" src={token1.icon} />
                     <div>{token1.symbol}</div>
                     <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
                   </Badge>
@@ -592,21 +596,30 @@ export const SwapForm = () => {
               </div>
             </Badge>
             <RewardsBreakdown hidden={breakdownHidden} />
-            {address ? (
-              <Button
-                className={cn("mt-[20px] h-[53.92px] w-full inline-flex", token1AmountFloat === 0 && !allowZeroSwap && "opacity-50")}
-                onClick={() => onSubmit()}
-              >
-                Swap
-              </Button>
-            ) : (
-              <Button
-                className={"mt-[20px] h-[53.92px] w-full inline-flex"}
-                onClick={() => open()}
-              >
-                Connect Wallet
-              </Button>
-            )}
+            {address ?
+              isCorrectChain ? (
+                <Button
+                  className={cn("mt-[20px] h-[53.92px] w-full inline-flex", token1AmountFloat === 0 && !allowZeroSwap && "opacity-50")}
+                  onClick={onSubmit}
+                >
+                  Swap
+                </Button>
+              ) : (
+                <Button
+                  className={"mt-[20px] h-[53.92px] w-full inline-flex"} 
+                  variant={"destructiveBorder"}
+                  onClick={() => open({ view: 'Networks' })}
+                >
+                  Wrong Network
+                </Button>
+              ) : (
+                <Button
+                  className={"mt-[20px] h-[53.92px] w-full inline-flex"}
+                  onClick={() => open()}
+                >
+                  Connect Wallet
+                </Button>
+              )}
           </motion.div>
         </div>
       </motion.div>

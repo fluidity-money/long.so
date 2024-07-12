@@ -15,37 +15,31 @@ use crate::{current_test, host_test_shims};
 
 ///! Decimals function used in event mocking for pool creation.
 pub fn decimals(_token: Address) -> Result<u8, Error> {
-    #[cfg(feature = "testing-dbg-erc20")]
-    dbg!(("decimals", _token));
     Ok(6)
 }
 
 ///! Pretends to take tokens from the user. Only useful for testing.
 ///! Assumes a single token is in use for the life of this test.
-pub fn take_transfer_from(_token: Address, amount: U256) -> Result<(), Error> {
-    #[cfg(feature = "testing-dbg-erc20")]
-    dbg!(("take_transfer_from", current_test!(), _token, _amount));
-    #[cfg(feature = "testing")]
+pub fn take_transfer_from(_token: Address, _amount: U256) -> Result<(), Error> {
+    #[cfg(feature = "testing-dbg")]
     {
-        return match host_test_shims::take_caller_bal(amount) {
-            Err(_) => Err(Error::Erc20RevertNoData), // follow the trace!
-            Ok(()) => Ok(()),
-        };
+        dbg!(("take_transfer_from", current_test!(), _token, _amount));
+        return host_test_shims::take_caller_bal(_token, _amount).map_err(
+            |_| Error::Erc20RevertNoData, // follow the trace!
+        );
     }
     #[allow(unreachable_code)]
     Ok(())
 }
 
 /// Pretends to give users tokens. Only useful for testing.
-pub fn give(_token: Address, amount: U256) -> Result<(), Error> {
-    #[cfg(feature = "testing-dbg-erc20")]
-    dbg!(("give", current_test!(), _token, amount));
-    #[cfg(feature = "testing")]
+pub fn give(_token: Address, _amount: U256) -> Result<(), Error> {
+    #[cfg(feature = "testing-dbg")]
     {
-        return match host_test_shims::take_amm_bal(amount) {
-            Err(_) => Err(Error::Erc20RevertNoData), // follow the trace!
-            Ok(()) => Ok(()),
-        };
+        dbg!(("give", current_test!(), _token, _amount));
+        return host_test_shims::take_amm_bal(_token, _amount).map_err(
+            |_| Error::Erc20RevertNoData, // follow the trace!
+        );
     }
     #[allow(unreachable_code)]
     Ok(())
@@ -53,25 +47,13 @@ pub fn give(_token: Address, amount: U256) -> Result<(), Error> {
 
 /// Pretends to take ERC20 tokens from the user, only happening if the underlying
 /// environment is not WASM. Only useful for testing.
-pub fn take_permit2(
-    _token: Address,
-    transfer_amount: U256,
-    _details: Permit2Args,
-) -> Result<(), Error> {
-    #[cfg(feature = "testing-dbg-erc20")]
-    dbg!((
-        "take_permit2",
-        current_test!(),
-        _token,
-        _transfer_amount,
-        _details
-    ));
-    #[cfg(feature = "testing")]
+pub fn take_permit2(_token: Address, _amount: U256, _details: Permit2Args) -> Result<(), Error> {
+    #[cfg(feature = "testing-dbg")]
     {
-        return match host_test_shims::take_caller_bal(transfer_amount) {
-            Err(_) => Err(Error::Erc20RevertNoData), // follow the trace!
-            Ok(()) => Ok(()),
-        };
+        dbg!(("take_permit2", current_test!(), _token, _amount, _details));
+        return host_test_shims::take_caller_bal(_token, _amount).map_err(
+            |_| Error::Erc20RevertNoData, // follow the trace!
+        );
     }
     #[allow(unreachable_code)]
     Ok(())
@@ -81,17 +63,15 @@ pub fn take_permit2(
 /// environment is not WASM. Only useful for testing.
 pub fn take(
     _token: Address,
-    amount: U256,
+    _amount: U256,
     _permit2_details: Option<Permit2Args>,
 ) -> Result<(), Error> {
-    #[cfg(feature = "testing-dbg-erc20")]
-    dbg!(("take", current_test!(), _token, _amount, _permit2_details));
-    #[cfg(feature = "testing")]
+    #[cfg(feature = "testing-dbg")]
     {
-        return match host_test_shims::take_caller_bal(amount) {
-            Err(_) => Err(Error::Erc20RevertNoData), // follow the trace!
-            Ok(()) => Ok(()),
-        };
+        dbg!(("take", current_test!(), _token, _amount, _permit2_details));
+        return host_test_shims::take_caller_bal(_token, _amount).map_err(
+            |_| Error::Erc20RevertNoData, // follow the trace!
+        );
     }
     #[allow(unreachable_code)]
     Ok(())
@@ -100,7 +80,7 @@ pub fn take(
 /// Pretends to construct a revert string from a message, only happening if the underlying
 /// environment is not WASM. Only useful for testing.
 pub fn revert_from_msg(_msg: &str) -> Vec<u8> {
-    #[cfg(feature = "testing-dbg-erc20")]
+    #[cfg(feature = "testing-dbg")]
     dbg!(("revert_from_msg", current_test!(), _msg));
     Vec::new()
 }

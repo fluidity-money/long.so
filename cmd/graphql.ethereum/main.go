@@ -61,10 +61,11 @@ func main() {
 	defer geth.Close()
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
-			DB:   db,
-			F:    features.Get(),
-			Geth: geth,
-			C:    config,
+			DB:          db,
+			F:           features.Get(),
+			Geth:        geth,
+			C:           config,
+			PoolsConfig: PoolsConfig,
 		},
 	}))
 	http.Handle("/", corsMiddleware{srv})

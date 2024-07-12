@@ -26,7 +26,7 @@ alloy-sol-types = "0.3.1"
 ruint-macro = "1.1.0"
 keccak-const = "0.2.0"
 lol_alloc = "0.4.0"
-const-hex = "1.10.0"
+const-hex = { version = "1.10.0", features = ["alloc"] }
 
 [patch.crates-io]
 stylus-sdk = { git = "https://github.com/fluidity-money/stylus-sdk-rs", branch = "feat-raw-fn" }

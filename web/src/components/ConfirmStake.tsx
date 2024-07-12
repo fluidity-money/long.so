@@ -8,6 +8,7 @@ import TokenIridescent from "@/assets/icons/token-iridescent.svg";
 import { motion } from "framer-motion";
 import {
   useAccount,
+  useChainId,
   useSimulateContract,
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -37,7 +38,13 @@ type ConfirmStakeProps = {
 export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const router = useRouter();
 
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
+  const expectedChainId = useChainId()
+
+  useEffect(() => {
+    if (!address || chainId !== expectedChainId)
+      router.back()
+  }, [address, expectedChainId, chainId])
 
   const {
     token0,
@@ -326,14 +333,14 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
 
   // success
   if (updatePositionResult.data) {
-    return <Success 
-    transactionHash={updatePositionResult.data.transactionHash} 
-    onDone={() => {
-      resetUpdatePosition()
-      resetApproveToken0()
-      resetApproveToken1()
-      updatePositionResult.refetch()
-    }}
+    return <Success
+      transactionHash={updatePositionResult.data.transactionHash}
+      onDone={() => {
+        resetUpdatePosition()
+        resetApproveToken0()
+        resetApproveToken1()
+        updatePositionResult.refetch()
+      }}
     />;
   }
 

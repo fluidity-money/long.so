@@ -29,10 +29,10 @@ interface ISeawaterAMM is
     /// @param _token the token to swap
     /// @param _amount input amount (token)
     /// @param _minOut the minimum output amount (usdc), reverting if the actual output is lower
-    /// @param _nonce the nonce for the token 
-    /// @param _deadline the deadline for the token 
-    /// @param _sig the signature for the token 
-    /// @param _maxAmount the max amount of the token 
+    /// @param _nonce the nonce for the token
+    /// @param _deadline the deadline for the token
+    /// @param _sig the signature for the token
+    /// @param _maxAmount the max amount of the token
     /// @return amount of usdc out
     function swapInPermit2(
         address _token,
@@ -59,10 +59,10 @@ interface ISeawaterAMM is
     /// @param _token the token to swap
     /// @param _amount input amount (usdc)
     /// @param _minOut the minimum output amount (token), reverting if the actual output is lower
-    /// @param _nonce the nonce for the token 
-    /// @param _deadline the deadline for the token 
-    /// @param _sig the signature for the token 
-    /// @param _maxAmount the max amount of the token 
+    /// @param _nonce the nonce for the token
+    /// @param _deadline the deadline for the token
+    /// @param _sig the signature for the token
+    /// @param _maxAmount the max amount of the token
     /// @return amount of token out
     function swapOutPermit2(
         address _token,

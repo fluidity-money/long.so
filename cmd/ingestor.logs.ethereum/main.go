@@ -12,9 +12,9 @@ import (
 
 	_ "github.com/lib/pq"
 
+	gormSlog "github.com/orandin/slog-gorm"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	gormLogger "gorm.io/gorm/logger"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -38,7 +38,7 @@ func main() {
 	defer setup.Flush()
 	config := config.Get()
 	db, err := gorm.Open(postgres.Open(config.PickTimescaleUrl()), &gorm.Config{
-		Logger: gormLogger.Default.LogMode(gormLogger.Silent),
+		Logger: gormSlog.New(),
 	})
 	if err != nil {
 		setup.Exitf("opening postgres: %v", err)

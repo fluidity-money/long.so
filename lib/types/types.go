@@ -7,9 +7,10 @@
 package types
 
 import (
-	"fmt"
 	sqlDriver "database/sql/driver"
 	"encoding/hex"
+	"encoding/json"
+	"fmt"
 	"math/big"
 	"strings"
 )
@@ -75,6 +76,7 @@ func (u Number) Hex() string {
 	}
 	return u.Int.Text(16)
 }
+
 // String the Number, printing its base10
 func (u Number) String() string {
 	if u.Int == nil {
@@ -127,7 +129,6 @@ func (int *Number) Scan(v interface{}) error {
 	return nil
 }
 
-
 func EmptyUnscaledNumber() UnscaledNumber {
 	return UnscaledNumber{new(big.Int)}
 }
@@ -158,6 +159,7 @@ func UnscaledNumberFromHex(v string) (*UnscaledNumber, error) {
 func (u UnscaledNumber) Hex() string {
 	return u.Int.Text(16)
 }
+
 // String the UnscaledNumber, printing its base 10 form
 func (u UnscaledNumber) String() string {
 	return u.Int.Text(10)
@@ -217,6 +219,14 @@ func (a Address) String() string {
 }
 func (a Address) Value() (sqlDriver.Value, error) {
 	return a.String(), nil
+}
+func (a *Address) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+	*a = AddressFromString(s)
+	return nil
 }
 
 func DataFromString(s string) Data {

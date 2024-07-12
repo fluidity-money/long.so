@@ -10,6 +10,7 @@ include config.mk
 	swaps \
 	swap-permit2 \
 	quotes \
+	migrations \
 	solidity \
 	amm-entrypoint \
 	ownership-nfts \
@@ -25,6 +26,7 @@ update-positions: ${OUT_SEAWATER_UPDATE_POSITIONS}
 swap-permit2: ${OUT_SEAWATER_SWAP_PERMIT2}
 swaps: ${OUT_SEAWATER_SWAPS}
 quotes: ${OUT_SEAWATER_QUOTES}
+migrations: ${OUT_SEAWATER_MIGRATIONS}
 
 stylus: admin positions update-positions swaps swap-permit2 quotes
 
@@ -51,37 +53,43 @@ DOCKER_BUILD := docker build
 ${OUT_SEAWATER_ADMIN}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_ADMIN}
 	@${CARGO_BUILD_STYLUS} --features admin
-	@mv seawater.wasm seawater-admin.wasm
+	@mv seawater.wasm ${OUT_SEAWATER_ADMIN}
 	@rm -f liblibseawater.rlib
 
 ${OUT_SEAWATER_POSITIONS}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_POSITIONS}
 	@${CARGO_BUILD_STYLUS} --features positions
-	@mv seawater.wasm seawater-positions.wasm
+	@mv seawater.wasm ${OUT_SEAWATER_POSITIONS}
 	@rm -f liblibseawater.rlib
 
 ${OUT_SEAWATER_UPDATE_POSITIONS}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_UPDATE_POSITIONS}
 	@${CARGO_BUILD_STYLUS} --features update_positions
-	@mv seawater.wasm seawater-update-positions.wasm
+	@mv seawater.wasm ${OUT_SEAWATER_UPDATE_POSITIONS}
 	@rm -f liblibseawater.rlib
 
 ${OUT_SEAWATER_SWAPS}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_SWAPS}
 	@${CARGO_BUILD_STYLUS} --features swaps
-	@mv seawater.wasm seawater-swaps.wasm
+	@mv seawater.wasm ${OUT_SEAWATER_SWAPS}
 	@rm -f liblibseawater.rlib
 
 ${OUT_SEAWATER_SWAP_PERMIT2}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_SWAP_PERMIT2}
 	@${CARGO_BUILD_STYLUS} --features swap_permit2
-	@mv seawater.wasm seawater-swap-permit2.wasm
+	@mv seawater.wasm ${OUT_SEAWATER_SWAP_PERMIT2}
 	@rm -f liblibseawater.rlib
 
 ${OUT_SEAWATER_QUOTES}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_QUOTES}
 	@${CARGO_BUILD_STYLUS} --features quotes
-	@mv seawater.wasm seawater-quotes.wasm
+	@mv seawater.wasm ${OUT_SEAWATER_QUOTES}
+	@rm -f liblibseawater.rlib
+
+${OUT_SEAWATER_MIGRATIONS}: ${FILES_RUST}
+	@rm -f ${OUT_SEAWATER_MIGRATIONS}
+	@${CARGO_BUILD_STYLUS} --features migrations
+	@mv seawater.wasm ${OUT_SEAWATER_MIGRATIONS}
 	@rm -f liblibseawater.rlib
 
 ### SOLIDITY

@@ -449,6 +449,10 @@ impl StoragePool {
         self.cur_tick.get()
     }
 
+    pub fn get_fees_owed(&self, id: U256) -> (u128, u128) {
+        self.positions.fees_owed(id)
+    }
+
     /// Get the tick spacing for the pool given.
     pub fn get_tick_spacing(&self) -> U8 {
         self.tick_spacing.get()
