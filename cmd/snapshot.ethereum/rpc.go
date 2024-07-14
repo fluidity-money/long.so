@@ -22,12 +22,12 @@ import (
 const (
 	// MinBatchLimit to get from the server before using multiple batches.
 	// This is the minimum that will be used.
-	MinBatchLimit = 200
+	MinBatchLimit = 100
 
 	// MaxBatchLimit to get from the server before using multiple
 	// batches. Half of the maximum amount since upstream started to
 	// choke.
-	MaxBatchLimit = 300
+	MaxBatchLimit = 200
 
 	// WorkerCount of simultaneous requests that can be made max.
 	WorkerCount = 100
