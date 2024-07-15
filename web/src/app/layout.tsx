@@ -118,7 +118,7 @@ export default async function RootLayout({
                 <small>
                   <a href="https://x.com/superpositionso">𝕏</a>
                 </small>
-                <a href="https://discord.gg/superposition">
+                <a href="">
                   <Discord />
                 </a>
                 <small>
