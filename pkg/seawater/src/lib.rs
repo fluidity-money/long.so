@@ -534,42 +534,49 @@ impl Pools {
     /// Only usable by the position's owner.
     ///
     /// # Arguments
-    /// * `pool` - The pool the position belongs to.
-    /// * `id` - The ID of the position.
-    /// * `amount_0` - The maximum amount of token 0 (the pool token) to collect.
-    /// * `amount_1` - The maximum amount of token 1 (the fluid token) to collect.
+    /// * `pools` - The pool the position belongs to.
+    /// * `ids` - The ID of the positions.
     ///
     /// # Side effects
     /// Transfers tokens to the caller, and triggers a release of fluid LP rewards.
     ///
     /// # Errors
     /// Requires the caller to be the position owner. Requires the pool to be enabled.
+    /// Requires the length of the pools and ids to be equal.
     pub fn collect(
         &mut self,
-        pool: Address,
-        id: U256,
-        amount_0: u128,
-        amount_1: u128,
-    ) -> Result<(u128, u128), Revert> {
-        assert_eq_or!(
-            msg::sender(),
-            self.position_owners.get(id),
-            Error::PositionOwnerOnly
-        );
+        pools: Vec<Address>,
+        ids: Vec<U256>
+    ) -> Result<Vec<(u128, u128)>, Revert> {
+        assert_eq!(ids.len(), pools.len());
 
-        let (token_0, token_1) = self.pools.setter(pool).collect(id, amount_0, amount_1)?;
+        let mut sends = Vec::with_capacity(ids.len());
 
-        erc20::give(pool, U256::from(token_0))?;
-        erc20::give(FUSDC_ADDR, U256::from(token_1))?;
+        for (i, (&pool, &id)) in pools.iter().zip(ids.iter()).enumerate() {
+            assert_eq_or!(
+                msg::sender(),
+                self.position_owners.get(id),
+                Error::PositionOwnerOnly
+            );
 
-        evm::log(events::CollectFees {
-            id,
-            pool,
-            to: msg::sender(),
-            amount0: token_0,
-            amount1: token_1,
-        });
-        Ok((token_0, token_1))
+            let res = self.pools.setter(pool).collect(id)?;
+            let (token_0, token_1) = res;
+
+            evm::log(events::CollectFees {
+                id,
+                pool,
+                to: msg::sender(),
+                amount0: token_0,
+                amount1: token_1,
+            });
+
+            erc20::give(pool, U256::from(token_0))?;
+            erc20::give(FUSDC_ADDR, U256::from(token_1))?;
+
+            sends[i] = res;
+        }
+
+        Ok(sends)
     }
 }
 

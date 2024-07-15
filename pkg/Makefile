@@ -43,7 +43,7 @@ CARGO_BUILD_STYLUS := \
 		--release \
 		--target wasm32-unknown-unknown \
 		--package seawater \
-		--out-dir .
+		--artifact-dir .
 
 FORGE_BUILD := forge build
 DOCKER_BUILD := docker build

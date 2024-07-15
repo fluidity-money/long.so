@@ -286,7 +286,6 @@ impl StoragePool {
             // step_fee_amount is reduced by protocol fee later
             let (next_sqrt_price, step_amount_in, step_amount_out, mut step_fee_amount) =
                 swap_math::compute_swap_step(
-                    // CLEAN
                     state.price,
                     step_clamped_price,
                     state.liquidity,
@@ -423,15 +422,9 @@ impl StoragePool {
     }
 
     /// Collects fees earned by a liquidity provider.
-    pub fn collect(
-        &mut self,
-        id: U256,
-        amount_0: u128,
-        amount_1: u128,
-    ) -> Result<(u128, u128), Revert> {
+    pub fn collect(&mut self, id: U256) -> Result<(u128, u128), Revert> {
         assert_or!(self.enabled.get(), Error::PoolDisabled);
-
-        Ok(self.positions.collect_fees(id, amount_0, amount_1))
+        Ok(self.positions.collect_fees(id))
     }
 
     /// Returns the amount of liquidity in a position.
