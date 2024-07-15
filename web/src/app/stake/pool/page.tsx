@@ -12,20 +12,21 @@ import { format, subDays } from "date-fns";
 import ReactECharts from "echarts-for-react";
 import Link from "next/link";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usdFormat } from "@/lib/usdFormat";
 import { fUSDC, getTokenFromAddress } from "@/config/tokens";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getFormattedPriceFromTick } from "@/lib/amounts";
+import { getFormattedPriceFromAmount, getFormattedPriceFromTick } from "@/lib/amounts";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { ammAddress } from "@/lib/addresses";
-import { useSimulateContract } from "wagmi";
+import { useSimulateContract, useWriteContract } from "wagmi";
 import { getTokenAmountsNumeric, sqrtPriceX96ToPrice } from "@/lib/math";
 import { TokenIcon } from "@/components/TokenIcon";
+import { maxUint128 } from "viem";
 
 const ManagePoolFragment = graphql(`
   fragment ManagePoolFragment on SeawaterPool {
@@ -177,6 +178,43 @@ export default function PoolPage() {
     ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
     : 0n;
 
+  const {
+    writeContract: writeContractCollect,
+    data: collectData,
+    error: collectError,
+    isPending: isCollectPending,
+  } = useWriteContract();
+
+  // TODO update ABI/params once function signature changes
+  const { data: unclaimedRewardsData } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "collect",
+    args: [token0.address, BigInt(positionId ?? 0), maxUint128, maxUint128],
+  });
+
+  const unclaimedRewards = useMemo(() => {
+    if (!unclaimedRewardsData || !positionId)
+      return "$0.00"
+
+    const [token0Amount, token1Amount] = unclaimedRewardsData.result || [0n, 0n]
+    const token0AmountScaled = Number(token0Amount) * Number(tokenPrice) / 10 ** (token0.decimals + fUSDC.decimals)
+    const token1AmountScaled = Number(token1Amount) / 10 ** fUSDC.decimals
+    return usdFormat(token0AmountScaled + token1AmountScaled)
+  }, [unclaimedRewardsData])
+
+  const collect = useCallback(
+    (id: bigint) => {
+      writeContractCollect({
+        address: ammAddress,
+        abi: seawaterContract.abi,
+        functionName: "collect",
+        args: [token0.address, id, maxUint128, maxUint128],
+      });
+    },
+    [writeContractCollect, token0],
+  );
+
   const positionBalance = useMemo(() => {
     if (!positionLiquidity || !position)
       return 0
@@ -323,21 +361,9 @@ export default function PoolPage() {
                     </div>
                     <div className="text-xl md:text-2xl">
                       {/* TODO:get unclaimed rewards */}
-                      {showMockData ? "$52,420" : usdFormat(0)}
+                      {showMockData ? "$52,420" : unclaimedRewards}
                     </div>
                   </div>
-
-                  {showClaimYield && (
-                    <div>
-                      <Button
-                        variant="secondary"
-                        className="h-[19px] w-[75px] px-[27px] py-[5px] md:h-[22px] md:w-[92px]"
-                        size="sm"
-                      >
-                        <div className="text-3xs">Claim Yield</div>
-                      </Button>
-                    </div>
-                  )}
                 </div>
                 <div className="flex flex-row gap-2">
                   <div className="flex flex-1 flex-col">
@@ -503,6 +529,27 @@ export default function PoolPage() {
                     )}
 
                     <div className="flex flex-1" />
+                    {showClaimYield && (
+                      <div>
+                        <Button
+                          variant={collectError ? "destructive" : "secondary"}
+                          className="h-[19px] w-[75px] px-[27px] py-[5px] md:h-[22px] md:w-[92px]"
+                          size="sm"
+                          disabled={!!collectData || isCollectPending}
+                          onClick={() => positionId && collect(BigInt(positionId))}
+                        >
+                          <div className="text-3xs">{
+                            collectError ?
+                              "Failed" :
+                              collectData ?
+                                "Claimed!" :
+                                isCollectPending ?
+                                  "Claiming..." :
+                                  "Claim Yield"
+                          }</div>
+                        </Button>
+                      </div>
+                    )}
 
                     {showBoostIncentives && (
                       <div>
