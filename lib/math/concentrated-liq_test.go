@@ -123,7 +123,12 @@ func TestGetAmountsForLiq(t *testing.T) {
 		test := test
 		t.Run(k, func(t *testing.T) {
 			t.Parallel()
-			amount0, amount1 := GetAmountsForLiq(test.sqrtRatioX96, test.sqrtRatioAX96, test.sqrtRatioBX96, new(big.Int).SetInt64(int64(test.liq)))
+			amount0, amount1 := GetAmountsForLiq(
+				test.sqrtRatioX96,
+				test.sqrtRatioAX96,
+				test.sqrtRatioBX96,
+				new(big.Int).SetInt64(int64(test.liq)),
+			)
 			assertOneDiff(t, test.expectedAmount0, amount0, "amount0 is wrong")
 			assertOneDiff(t, test.expectedAmount1, amount1, "amount1 is wrong")
 		})
@@ -4953,6 +4958,7 @@ var getAmountsForLiqLiveTestTable = []struct {
 
 func TestGetAmountsForLiqLive(t *testing.T) {
 	for i, test := range getAmountsForLiqLiveTestTable {
+		i := i
 		test := test
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
@@ -6627,6 +6633,7 @@ var getIndividualAmountsForLiquidityTestTable = []struct {
 
 func TestGetIndividualAmountsForLiquidity(t *testing.T) {
 	for i, test := range getIndividualAmountsForLiquidityTestTable {
+		i := i
 		test := test
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
