@@ -340,7 +340,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
         resetApproveToken0()
         resetApproveToken1()
         updatePositionResult.refetch()
-        router.push("/")
+        router.push("/stake")
       }}
     />;
   }
