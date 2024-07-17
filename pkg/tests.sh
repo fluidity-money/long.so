@@ -8,4 +8,4 @@ cargo test --features testing,testing-dbg
 
 #forge test
 
-#node --test --loader tsx ethers-tests/test.ts
+node --test --loader tsx ethers-tests/test.ts

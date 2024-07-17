@@ -389,10 +389,20 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorUpdatePosition
-    function updatePosition_957a57(
-        address /* pool */,
+    function updatePosition_3dca03(
         uint256 /* id */,
         int128 /* delta */
+    ) external returns (int256, int256) {
+        directDelegate(_getExecutorUpdatePosition());
+    }
+
+    /// @inheritdoc ISeawaterExecutorUpdatePosition
+    function incrPosition_1da3e5(
+        uint256 /* id */,
+        uint256 /* amount0Min */,
+        uint256 /* amount1Min */,
+        uint256 /* amount0Max */,
+        uint256 /* amount1Max */
     ) external returns (int256, int256) {
         directDelegate(_getExecutorUpdatePosition());
     }
@@ -417,6 +427,7 @@ contract SeawaterAMM is ISeawaterAMM {
     // fallback!
     fallback() external {
         require(msg.data.length > 3);
+        require(msg.data[0] == 0);
         // swaps
         if (uint8(msg.data[2]) == 0) directDelegate(_getExecutorSwap());
         // update positions

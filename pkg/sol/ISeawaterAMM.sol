@@ -86,7 +86,4 @@ interface ISeawaterAMM is
         uint256 _amount,
         uint256 _minOut
     ) external returns (uint256, uint256);
-
-    //function burn(uint8 poolId) external returns (uint112 burned);
-    //function mint(uint8 poolId) external returns (uint112 minted);
 }

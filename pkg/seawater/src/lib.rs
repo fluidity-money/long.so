@@ -646,7 +646,8 @@ impl Pools {
 impl Pools {
     /// Refreshes and updates liquidity in a position, using approvals to transfer tokens.
     /// See [Self::update_position_internal].
-    pub fn update_position(
+    #[allow(non_snake_case)]
+    pub fn update_position__d58ed3(
         &mut self,
         pool: Address,
         id: U256,
@@ -937,7 +938,7 @@ mod test {
                 let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
 
                 // First, we set up the pool.
-                contract.create_pool(
+                contract.create_pool_816c1f(
                     token_addr,
                     test_utils::encode_sqrt_price(50, 1), // the price
                     0,
@@ -951,14 +952,14 @@ mod test {
 
                 // Begin to create the position, following the same path as
                 // in `createPosition` in ethers-tests/tests.ts
-                contract.mint_position(token_addr, lower_tick, upper_tick)?;
+                contract.mint_position_05ca11(token_addr, lower_tick, upper_tick)?;
                 let position_id = contract
                     .next_position_id
                     .clone()
                     .checked_sub(U256::one())
                     .unwrap();
 
-                contract.update_position(token_addr, position_id, liquidity_delta)?;
+                contract.update_position__d58ed3(token_addr, position_id, liquidity_delta)?;
 
                 Ok(())
             },
@@ -978,7 +979,7 @@ mod test {
                 let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
 
                 // First, we set up the pool.
-                contract.create_pool(
+                contract.create_pool_816c1f(
                     token_addr,
                     test_utils::encode_sqrt_price(100, 1), // the price
                     0,
@@ -992,14 +993,14 @@ mod test {
 
                 // Begin to create the position, following the same path as
                 // in `createPosition` in ethers-tests/tests.ts
-                contract.mint_position(token_addr, lower_tick, upper_tick)?;
+                contract.mint_position_05ca11(token_addr, lower_tick, upper_tick)?;
                 let position_id = contract
                     .next_position_id
                     .clone()
                     .checked_sub(U256::one())
                     .unwrap();
 
-                contract.update_position(token_addr, position_id, liquidity_delta)?;
+                contract.update_position__d58ed3(token_addr, position_id, liquidity_delta)?;
 
                 Ok(())
             },
@@ -1030,7 +1031,7 @@ mod test {
                 let amount = U256::from_limbs([0x6bc75e2d, 0x5, 0, 0]);
                 let min_out = U256::from(0);
                 contract
-                    .swap_2_exact_in(from, to, amount, min_out)
+                    .swap_2_exact_in_57968f(from, to, amount, min_out)
                     .map(|_| ())
             },
         )
@@ -1087,7 +1088,7 @@ mod test {
                 let amount = U256::from_str("10000000000").unwrap();
                 let min_out = U256::from(0);
                 let (_amount_in, _amount_out) =
-                    contract.swap_2_exact_in(from, to, amount, min_out).unwrap();
+                    contract.swap_2_exact_in_57968f(from, to, amount, min_out).unwrap();
                 Ok(())
             },
         )
@@ -1171,7 +1172,7 @@ mod test {
                 // sqrt lower	87999098777895760865233273050
                 // sqrt upper	97156358459122590463153608088
 
-                let (_amount_0, _amount_1) = contract.update_position(pool_addr, id, delta).unwrap();
+                let (_amount_0, _amount_1) = contract.update_position__d58ed3(pool_addr, id, delta).unwrap();
 
                 Ok(())
             },
