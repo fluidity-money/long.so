@@ -254,7 +254,9 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     if (!mintPositionId) return;
 
     approveToken0();
-  }, [approveToken0, mintPositionId]);
+    // including approveToken0 in this dependency array causes changes in allowance data 
+    // to retrigger the staking flow, as allowance data is a dependency of approveToken0
+  }, [mintPositionId]);
 
   // wait for the approval transaction to complete
   const approvalToken0Result = useWaitForTransactionReceipt({
@@ -265,7 +267,9 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   useEffect(() => {
     if (!approvalToken0Result.data || !mintPositionId) return;
     approveToken1();
-  }, [approveToken1, approvalToken0Result.data, mintPositionId]);
+    // including approveToken1 in this dependency array causes changes in allowance data 
+    // to retrigger the staking flow, as allowance data is a dependency of approveToken1
+  }, [approvalToken0Result.data, mintPositionId]);
 
   const approvalToken1Result = useWaitForTransactionReceipt({
     hash: approvalDataToken1,
@@ -340,6 +344,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
         resetApproveToken0()
         resetApproveToken1()
         updatePositionResult.refetch()
+        router.push("/stake")
       }}
     />;
   }

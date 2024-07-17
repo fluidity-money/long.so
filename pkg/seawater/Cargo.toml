@@ -23,6 +23,7 @@ tiny-keccak.workspace = true
 lol_alloc.workspace = true
 keccak-const.workspace = true
 const-hex.workspace = true
+num-traits.workspace = true
 
 [dev-dependencies]
 rand = "0.8.5"
@@ -36,11 +37,7 @@ quotes = []
 positions = []
 update_positions = []
 admin = []
+migrations = []
 debug = []
 testing = []
-testing-dbg-erc20 = []
-testing-dbg-compute_swap_step = []
-testing-dbg-mul_div = []
-testing-dbg-get_tick_at_sqrt_ratio = []
-testing-dbg-get_sqrt_ratio_at_tick = []
-testing-dbg-pool-storage = []
+testing-dbg = []

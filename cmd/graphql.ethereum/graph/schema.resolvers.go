@@ -14,6 +14,7 @@ import (
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
 	graphErc20 "github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
+	"github.com/fluidity-money/long.so/lib/config"
 	"github.com/fluidity-money/long.so/lib/features"
 	"github.com/fluidity-money/long.so/lib/math"
 	"github.com/fluidity-money/long.so/lib/types"
@@ -391,6 +392,26 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 		Wallet: &walletAddress,
 		Swaps:  d,
 	}
+	return
+}
+
+// ID is the resolver for the id field.
+func (r *seawaterConfigResolver) ID(ctx context.Context, obj *model.SeawaterConfig) (string, error) {
+	if obj == nil {
+		return "", fmt.Errorf("empty config")
+	}
+	return "config:" + obj.Addr.String(), nil
+}
+
+// Pool is the resolver for the pool field.
+func (r *seawaterConfigResolver) Pool(ctx context.Context, obj *model.SeawaterConfig) (pool seawater.Pool, err error) {
+	if obj == nil {
+		return pool, fmt.Errorf("empty config")
+	}
+	err = r.DB.Table("events_seawater_newpool").
+		Where("token = ?", obj.Addr).
+		Scan(&pool).
+		Error
 	return
 }
 
@@ -992,6 +1013,19 @@ func (r *seawaterPoolResolver) Amounts(ctx context.Context, obj *seawater.Pool) 
 	return
 }
 
+// Config is the resolver for the config field.
+func (r *seawaterPoolResolver) Config(ctx context.Context, obj *seawater.Pool) (m model.SeawaterConfig, err error) {
+	if obj == nil {
+		return m, fmt.Errorf("empty pool")
+	}
+	c, ok := r.PoolsConfig[obj.Token]
+	if !ok {
+		// Return the default pool configuration.
+		return model.SeawaterConfig{obj.Token, config.DefaultPoolConfiguration}, nil
+	}
+	return model.SeawaterConfig{obj.Token, c}, nil
+}
+
 // ID is the resolver for the id field.
 func (r *seawaterPositionResolver) ID(ctx context.Context, obj *seawater.Position) (string, error) {
 	if obj == nil {
@@ -1043,7 +1077,9 @@ func (r *seawaterPositionResolver) Pool(ctx context.Context, obj *seawater.Posit
 	if obj == nil {
 		return seawater.Pool{}, fmt.Errorf("no position obj")
 	}
-	err = r.DB.Table("events_seawater_newpool").Where("token = ?", obj.Pool).Scan(&pool).Error
+	err = r.DB.Table("events_seawater_newpool").
+		Where("token = ?", obj.Pool).
+		Scan(&pool).Error
 	return
 }
 
@@ -1560,6 +1596,9 @@ func (r *Resolver) Amount() AmountResolver { return &amountResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// SeawaterConfig returns SeawaterConfigResolver implementation.
+func (r *Resolver) SeawaterConfig() SeawaterConfigResolver { return &seawaterConfigResolver{r} }
+
 // SeawaterLiquidity returns SeawaterLiquidityResolver implementation.
 func (r *Resolver) SeawaterLiquidity() SeawaterLiquidityResolver {
 	return &seawaterLiquidityResolver{r}
@@ -1595,6 +1634,7 @@ func (r *Resolver) Wallet() WalletResolver { return &walletResolver{r} }
 
 type amountResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type seawaterConfigResolver struct{ *Resolver }
 type seawaterLiquidityResolver struct{ *Resolver }
 type seawaterPoolResolver struct{ *Resolver }
 type seawaterPositionResolver struct{ *Resolver }

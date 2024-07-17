@@ -200,6 +200,12 @@ pub enum Error {
 
     #[error("Invalid tick spacing")]
     InvalidTickSpacing,
+
+    #[error("Amount 0 too low")]
+    Amount0TooLow,
+
+    #[error("Amount 1 too low")]
+    Amount1TooLow
 }
 
 impl From<Error> for Vec<u8> {

@@ -162,6 +162,9 @@ mod test {
     };
     use crate::types::{I256Extension, U256Extension, I256, U256};
 
+    #[allow(unused_imports)]
+    use crate::current_test;
+
     #[test]
     fn test_compute_swap_step() {
         //------------------------------------------------------------
@@ -291,11 +294,17 @@ mod test {
         // sqrtp: 158456325028528675187087900672, price_after_whole output amount: 118842243771396506390315925504
 
         assert!(sqrt_p < price_target);
-        #[cfg(feature = "testing-dbg-compute_swap_step")]
-        println!(
-            "sqrtp: {:?}, price_after_whole output amount: {:?}",
-            sqrt_p, price_after_whole_output_amount
+
+        #[cfg(feature = "testing-dbg")]
+        dbg!(
+            ("sqrtp", current_test!(), sqrt_p,),
+            (
+                "price_after_whole output amount",
+                current_test!(),
+                price_after_whole_output_amount
+            )
         );
+
         assert_eq!(sqrt_p, price_after_whole_output_amount);
 
         //------------------------------------------------------------

@@ -43,7 +43,7 @@ type (
 
 		PosId   int                  `json:"pos_id"`
 		Pool    types.Address        `json:"pool"`
-		To      types.Address        `json:"to"`
+		To      types.Address        `json:"to" gorm:"column:to_"`
 		Amount0 types.UnscaledNumber `json:"amount0"`
 		Amount1 types.UnscaledNumber `json:"amount1"`
 	}

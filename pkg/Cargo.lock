@@ -925,6 +925,7 @@ dependencies = [
  "keccak-const",
  "lol_alloc",
  "maplit",
+ "num-traits",
  "rand",
  "ruint",
  "ruint-macro",

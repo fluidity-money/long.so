@@ -184,6 +184,41 @@ impl StoragePool {
         }
     }
 
+    ///! Signature for this position is u128 externally. In reality it's a U256 under the hood.
+    ///! If the end result exceeds 128, the whole thing will blow up without a revert message.
+    pub fn incr_position(
+        &mut self,
+        id: U256,
+        amount_0_min: U256,
+        amount_1_min: U256,
+        amount_0_max: U256,
+        amount_1_max: U256
+    ) -> Result<(I256, I256), Revert> {
+        // calculate the delta using the amounts that we have here, guaranteeing
+        // that we don't dip below the amount that's supplied as the minimum.
+
+        let position = self.positions.positions.get(id);
+
+        let sqrt_ratio_x_96 = tick_math::get_sqrt_ratio_at_tick(self.get_cur_tick().as_i32())?;
+        let sqrt_ratio_a_x_96 = tick_math::get_sqrt_ratio_at_tick(position.lower.get().as_i32())?;
+        let sqrt_ratio_b_x_96 = tick_math::get_sqrt_ratio_at_tick(position.upper.get().as_i32())?;
+
+        let delta = sqrt_price_math::get_liquidity_for_amounts(
+            sqrt_ratio_x_96,   // cur_tick
+            sqrt_ratio_a_x_96, // lower_tick
+            sqrt_ratio_b_x_96, // upper_tick
+            amount_0_max,      // amount_0
+            amount_1_max       // amount_1
+        )?;
+
+        let (amount_0, amount_1) = self.update_position(id, delta)?;
+
+        assert_or!(amount_0.abs_pos()? >= amount_0_min, Error::Amount0TooLow);
+        assert_or!(amount_1.abs_pos()? >= amount_1_min, Error::Amount1TooLow);
+
+        Ok((amount_0, amount_1))
+    }
+
     /// Performs a swap on this pool.
     pub fn swap(
         &mut self,
@@ -286,7 +321,6 @@ impl StoragePool {
             // step_fee_amount is reduced by protocol fee later
             let (next_sqrt_price, step_amount_in, step_amount_out, mut step_fee_amount) =
                 swap_math::compute_swap_step(
-                    // CLEAN
                     state.price,
                     step_clamped_price,
                     state.liquidity,
@@ -424,15 +458,9 @@ impl StoragePool {
     }
 
     /// Collects fees earned by a liquidity provider.
-    pub fn collect(
-        &mut self,
-        id: U256,
-        amount_0: u128,
-        amount_1: u128,
-    ) -> Result<(u128, u128), Revert> {
+    pub fn collect(&mut self, id: U256) -> Result<(u128, u128), Revert> {
         assert_or!(self.enabled.get(), Error::PoolDisabled);
-
-        Ok(self.positions.collect_fees(id, amount_0, amount_1))
+        Ok(self.positions.collect_fees(id))
     }
 
     /// Returns the amount of liquidity in a position.
@@ -448,6 +476,15 @@ impl StoragePool {
     /// Get the current tick.
     pub fn get_cur_tick(&self) -> I32 {
         self.cur_tick.get()
+    }
+
+    ///! Get a position given. This is a helper function for testing.
+    pub fn get_position(&self, id: U256) -> StorageGuard<'_, position::StoragePositionInfo> {
+        self.positions.positions.get(id)
+    }
+
+    pub fn get_fees_owed(&self, id: U256) -> (u128, u128) {
+        self.positions.fees_owed(id)
     }
 
     /// Get the tick spacing for the pool given.
