@@ -53,7 +53,7 @@ contract OwnershipNFTs is IERC721Metadata {
      */
     function ownerOf(uint256 _tokenId) public view returns (address) {
         (bool ok, bytes memory rc) = address(SEAWATER).staticcall(abi.encodeWithSelector(
-            SEAWATER.positionOwner__0602c2.selector,
+            SEAWATER.positionOwnerD7878480.selector,
             _tokenId
         ));
         require(ok, "position owner revert");
@@ -112,7 +112,7 @@ contract OwnershipNFTs is IERC721Metadata {
         uint256 _tokenId
     ) internal {
         _requireAuthorised(_from, _tokenId);
-        SEAWATER.transferPosition_5bf9a4(_tokenId, _from, _to);
+        SEAWATER.transferPositionEEC7A3CD(_tokenId, _from, _to);
     }
 
     function transferFrom(
@@ -170,7 +170,7 @@ contract OwnershipNFTs is IERC721Metadata {
     /// @inheritdoc IERC721Metadata
     function balanceOf(address _spender) external view returns (uint256) {
         (bool ok, bytes memory rc) = address(SEAWATER).staticcall(abi.encodeWithSelector(
-            SEAWATER.positionBalance_f285b1.selector,
+            SEAWATER.positionBalance4F32C7DB.selector,
             _spender
         ));
         require(ok, "position balance revert");

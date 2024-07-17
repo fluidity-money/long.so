@@ -282,7 +282,8 @@ impl Pools {
     }
 
     /// Performs a two stage swap, using approvals to transfer tokens. See [Self::swap_2_internal].
-    pub fn swap_2_exact_in_57968f(
+   #[allow(non_snake_case)]
+   pub fn swap_2_exact_in_41203_F1_D(
         &mut self,
         from: Address,
         to: Address,
@@ -300,7 +301,7 @@ impl Pools {
     /// as a decimal number as the message of an `Error(string)`.
     /// Returns a `Result` as Stylus expects but will always only fill the `Revert`.
     #[allow(non_snake_case)]
-    pub fn quote____006eac(
+    pub fn quote_72_E2_A_D_E7(
         &mut self,
         pool: Address,
         zero_for_one: bool,
@@ -324,11 +325,11 @@ impl Pools {
         }
     }
 
-    /// Quote a [Self::swap_2_exact_in]. Will revert with the result of the swap
+    /// Quote a [Self::swap_2_exact_ine4f82465]. Will revert with the result of the swap
     /// as a decimal number as the message of an `Error(string)`.
     /// Returns a `Result` as Stylus expects but will always only fill the `Revert`.
     #[allow(non_snake_case)]
-    pub fn quote2__cc9e21(
+    pub fn quote_2_C_D06_B86_E(
         &mut self,
         from: Address,
         to: Address,
@@ -354,9 +355,10 @@ impl Pools {
     // slight hack - we cfg out the whole function, since the `selector` and `raw` attributes don't
     // actually exist, so we can't `cfg_attr` them in
     #[cfg(feature = "swap_permit2")]
-    #[selector(id = "swapPermit2_d5d578(address,bool,int256,uint256,uint256,uint256,uint256,bytes)")]
+    #[selector(id = "swapPermit2EE84AD91(address,bool,int256,uint256,uint256,uint256,uint256,bytes)")]
     #[raw]
-    pub fn swap_permit2_d5d578(&mut self, data: &[u8]) -> RawArbResult {
+    #[allow(non_snake_case)]
+    pub fn swap_permit_2_E_E84_A_D91(&mut self, data: &[u8]) -> RawArbResult {
         let (pool, data) = eth_serde::parse_addr(data);
         let (zero_for_one, data) = eth_serde::parse_bool(data);
         let (amount, data) = eth_serde::parse_i256(data);
@@ -389,9 +391,10 @@ impl Pools {
 
     /// Performs a two stage swap, using permit2 to transfer tokens. See [Self::swap_2_internal].
     #[cfg(feature = "swap_permit2")]
-    #[selector(id = "swap2ExactInPermit2_15755d(address,address,uint256,uint256,uint256,uint256,bytes)")]
+    #[selector(id = "swap2ExactInPermit236B2FDD8(address,address,uint256,uint256,uint256,uint256,bytes)")]
     #[raw]
-    pub fn swap_2_permit2_15755d(&mut self, data: &[u8]) -> RawArbResult {
+    #[allow(non_snake_case)]
+    pub fn swap_2_exact_in_permit_2_36_B2_F_D_D8(&mut self, data: &[u8]) -> RawArbResult {
         let (from, data) = eth_serde::parse_addr(data);
         let (to, data) = eth_serde::parse_addr(data);
         let (amount, data) = eth_serde::parse_u256(data);
@@ -449,7 +452,8 @@ impl Pools {
     ///
     /// # Errors
     /// Requires the pool to exist and be enabled.
-    pub fn mint_position_05ca11(&mut self, pool: Address, lower: i32, upper: i32) -> Result<U256, Revert> {
+    #[allow(non_snake_case)]
+    pub fn mint_position_B_C5_B086_D(&mut self, pool: Address, lower: i32, upper: i32) -> Result<U256, Revert> {
         let id = self.next_position_id.get();
         self.pools.setter(pool).create_position(id, lower, upper)?;
 
@@ -476,7 +480,8 @@ impl Pools {
     ///
     /// # Errors
     /// Requires the position be owned by the caller. Requires the pool to be enabled.
-    pub fn burn_position_f7639f(&mut self, id: U256) -> Result<(), Revert> {
+    #[allow(non_snake_case)]
+   pub fn burn_position_AE401070(&mut self, id: U256) -> Result<(), Revert> {
         let owner = msg::sender();
         assert_eq_or!(
             self.position_owners.get(id),
@@ -499,7 +504,8 @@ impl Pools {
     ///
     /// # Errors
     /// Requires the caller be the NFT manager.
-    pub fn transfer_position_5bf9a4(
+    #[allow(non_snake_case)]
+   pub fn transfer_position_E_E_C7_A3_C_D(
         &mut self,
         id: U256,
         from: Address,
@@ -517,17 +523,19 @@ impl Pools {
 
     /// Returns the current owner of a position.
     #[allow(non_snake_case)]
-    pub fn position_owner__0602c2(&self, id: U256) -> Result<Address, Revert> {
+    pub fn position_owner_D7878480(&self, id: U256) -> Result<Address, Revert> {
         Ok(self.position_owners.get(id))
     }
 
     /// Returns the number of positions owned by an address.
-    pub fn position_balance_f285b1(&self, user: Address) -> Result<U256, Revert> {
+    #[allow(non_snake_case)]
+   pub fn position_balance_4_F32_C7_D_B(&self, user: Address) -> Result<U256, Revert> {
         Ok(self.owned_positions.get(user))
     }
 
     /// Returns the amount of liquidity in a position.
-    pub fn position_liquidity_0f1547(&self, pool: Address, id: U256) -> Result<u128, Revert> {
+    #[allow(non_snake_case)]
+   pub fn position_liquidity_8_D11_C045(&self, pool: Address, id: U256) -> Result<u128, Revert> {
         let liquidity = self.pools.getter(pool).get_position_liquidity(id);
 
         Ok(liquidity.sys())
@@ -546,7 +554,8 @@ impl Pools {
     /// # Errors
     /// Requires the caller to be the position owner. Requires the pool to be enabled.
     /// Requires the length of the pools and ids to be equal.
-    pub fn collect_7472a7(
+    #[allow(non_snake_case)]
+   pub fn collect_7_F21947_C(
         &mut self,
         pools: Vec<Address>,
         ids: Vec<U256>
@@ -647,7 +656,7 @@ impl Pools {
     /// Refreshes and updates liquidity in a position, using approvals to transfer tokens.
     /// See [Self::update_position_internal].
     #[allow(non_snake_case)]
-    pub fn update_position__d58ed3(
+   pub fn update_position_622_A559_D(
         &mut self,
         pool: Address,
         id: U256,
@@ -659,11 +668,12 @@ impl Pools {
     #[cfg(feature = "update_positions")]
     #[raw]
     #[selector(
-        id = "updatePositionPermit2_9936af(address,uint256,int128,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)"
+        id = "updatePositionPermit23fba3f61(address,uint256,int128,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)"
     )]
     /// Refreshes and updates liquidity in a position, using permit2 to transfer tokens.
     /// See [Self::update_position_internal].
-    pub fn update_position_permit2_9936af(&mut self, data: &[u8]) -> RawArbResult {
+    #[allow(non_snake_case)]
+    pub fn update_position_permit2_F24010_C3(&mut self, data: &[u8]) -> RawArbResult {
         let (pool, data) = eth_serde::parse_addr(data);
         let (id, data) = eth_serde::parse_u256(data);
         let (delta, data) = eth_serde::parse_i128(data);
@@ -746,7 +756,8 @@ impl Pools {
     ///
     /// # Errors
     /// Requires the caller to be the seawater admin. Requires the pool to not exist.
-    pub fn create_pool_816c1f(
+    #[allow(non_snake_case)]
+   pub fn create_pool_D650_E2_D0(
         &mut self,
         pool: Address,
         price: U256,
@@ -779,33 +790,39 @@ impl Pools {
     }
 
     /// Getter method for the sqrt price
-    pub fn sqrt_price_x96_6ed516(&self, pool: Address) -> Result<U256, Revert> {
+    #[allow(non_snake_case)]
+   pub fn sqrt_price_x967_B8_F5_F_C5(&self, pool: Address) -> Result<U256, Revert> {
         Ok(self.pools.getter(pool).get_sqrt_price())
     }
 
     /// Getter method for the current tick
-    pub fn cur_tick_84a60b(&self, pool: Address) -> Result<i32, Revert> {
+    #[allow(non_snake_case)]
+   pub fn cur_tick181_C6_F_D9(&self, pool: Address) -> Result<i32, Revert> {
         // converted to i32 for automatic abi encoding
         Ok(self.pools.getter(pool).get_cur_tick().sys())
     }
 
-    pub fn fees_owed_5ec605(&self, pool: Address, id: U256) -> Result<(u128, u128), Revert> {
+    #[allow(non_snake_case)]
+   pub fn fees_owed_22_F28_D_B_D(&self, pool: Address, id: U256) -> Result<(u128, u128), Revert> {
         Ok(self.pools.getter(pool).get_fees_owed(id))
     }
 
     /// Getter method for the tick spacing of the pool given.
-    pub fn tick_spacing_52bd17(&self, pool: Address) -> Result<u8, Revert> {
+    #[allow(non_snake_case)]
+   pub fn tick_spacing_653_F_E28_F(&self, pool: Address) -> Result<u8, Revert> {
         // converted to i32 for automatic abi encoding
         Ok(self.pools.getter(pool).get_tick_spacing().sys())
     }
 
     /// Getter method for getting the fee growth for token 0
-    pub fn fee_growth_global_0_7fb790(&self, pool: Address) -> Result<U256, Revert> {
+    #[allow(non_snake_case)]
+    pub fn fee_growth_global_0_38_B5665_B(&self, pool: Address) -> Result<U256, Revert> {
         Ok(self.pools.getter(pool).get_fee_growth_global_0())
     }
 
     /// Getter method for getting the fee growth for token 1
-    pub fn fee_growth_global_1_d2e217(&self, pool: Address) -> Result<U256, Revert> {
+    #[allow(non_snake_case)]
+    pub fn fee_growth_global_1_E_A_C_F1_B_E(&self, pool: Address) -> Result<U256, Revert> {
         Ok(self.pools.getter(pool).get_fee_growth_global_1())
     }
 
@@ -813,7 +830,8 @@ impl Pools {
     ///
     /// # Errors
     /// Requires the user to be the seawater admin. Requires the pool to be enabled.
-    pub fn collect_protocol_fd4241(
+    #[allow(non_snake_case)]
+    pub fn collect_protocol_E4_E70_D_A4(
         &mut self,
         pool: Address,
         amount_0: u128,
@@ -847,7 +865,8 @@ impl Pools {
     ///
     /// # Errors
     /// Requires the user to be the seawater admin.
-    pub fn enable_pool_a60d25(&mut self, pool: Address, enabled: bool) -> Result<(), Revert> {
+    #[allow(non_snake_case)]
+    pub fn enable_pool_579_D_A658(&mut self, pool: Address, enabled: bool) -> Result<(), Revert> {
         assert_eq_or!(
             msg::sender(),
             self.seawater_admin.get(),
@@ -938,7 +957,7 @@ mod test {
                 let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
 
                 // First, we set up the pool.
-                contract.create_pool_816c1f(
+                contract.create_pool_D650_E2_D0(
                     token_addr,
                     test_utils::encode_sqrt_price(50, 1), // the price
                     0,
@@ -952,14 +971,14 @@ mod test {
 
                 // Begin to create the position, following the same path as
                 // in `createPosition` in ethers-tests/tests.ts
-                contract.mint_position_05ca11(token_addr, lower_tick, upper_tick)?;
+                contract.mint_position_B_C5_B086_D(token_addr, lower_tick, upper_tick)?;
                 let position_id = contract
                     .next_position_id
                     .clone()
                     .checked_sub(U256::one())
                     .unwrap();
 
-                contract.update_position__d58ed3(token_addr, position_id, liquidity_delta)?;
+                contract.update_position_622_A559_D(token_addr, position_id, liquidity_delta)?;
 
                 Ok(())
             },
@@ -979,7 +998,7 @@ mod test {
                 let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
 
                 // First, we set up the pool.
-                contract.create_pool_816c1f(
+                contract.create_pool_D650_E2_D0(
                     token_addr,
                     test_utils::encode_sqrt_price(100, 1), // the price
                     0,
@@ -993,14 +1012,14 @@ mod test {
 
                 // Begin to create the position, following the same path as
                 // in `createPosition` in ethers-tests/tests.ts
-                contract.mint_position_05ca11(token_addr, lower_tick, upper_tick)?;
+                contract.mint_position_B_C5_B086_D(token_addr, lower_tick, upper_tick)?;
                 let position_id = contract
                     .next_position_id
                     .clone()
                     .checked_sub(U256::one())
                     .unwrap();
 
-                contract.update_position__d58ed3(token_addr, position_id, liquidity_delta)?;
+                contract.update_position_622_A559_D(token_addr, position_id, liquidity_delta)?;
 
                 Ok(())
             },
@@ -1031,7 +1050,7 @@ mod test {
                 let amount = U256::from_limbs([0x6bc75e2d, 0x5, 0, 0]);
                 let min_out = U256::from(0);
                 contract
-                    .swap_2_exact_in_57968f(from, to, amount, min_out)
+                    .swap_2_exact_in_41203_F1_D(from, to, amount, min_out)
                     .map(|_| ())
             },
         )
@@ -1088,7 +1107,7 @@ mod test {
                 let amount = U256::from_str("10000000000").unwrap();
                 let min_out = U256::from(0);
                 let (_amount_in, _amount_out) =
-                    contract.swap_2_exact_in_57968f(from, to, amount, min_out).unwrap();
+                    contract.swap_2_exact_in_41203_F1_D(from, to, amount, min_out).unwrap();
                 Ok(())
             },
         )
@@ -1172,7 +1191,7 @@ mod test {
                 // sqrt lower	87999098777895760865233273050
                 // sqrt upper	97156358459122590463153608088
 
-                let (_amount_0, _amount_1) = contract.update_position__d58ed3(pool_addr, id, delta).unwrap();
+                //let (_amount_0, _amount_1) = contract.update_position__d58ed3(pool_addr, id, delta).unwrap();
 
                 Ok(())
             },

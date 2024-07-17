@@ -184,6 +184,8 @@ impl StoragePool {
         }
     }
 
+    ///! Signature for this position is u128 externally. In reality it's a U256 under the hood.
+    ///! If the end result exceeds 128, the whole thing will blow up without a revert message.
     pub fn incr_position(
         &mut self,
         id: U256,

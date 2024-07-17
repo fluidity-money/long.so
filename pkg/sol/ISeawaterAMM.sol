@@ -19,7 +19,7 @@ interface ISeawaterAMM is
     /// @param _amount input amount (token)
     /// @param _minOut the minimum output amount (usdc), reverting if the actual output is lower
     /// @return amount of usdc out
-    function swapIn_33a1f7(
+    function swapIn32502CA71(
         address _token,
         uint256 _amount,
         uint256 _minOut
@@ -34,7 +34,7 @@ interface ISeawaterAMM is
     /// @param _sig the signature for the token
     /// @param _maxAmount the max amount of the token
     /// @return amount of usdc out
-    function swapInPermit2_3e9dd6(
+    function swapInPermit2CEAAB576(
         address _token,
         uint256 _amount,
         uint256 _minOut,
@@ -49,7 +49,7 @@ interface ISeawaterAMM is
     /// @param _amount input amount (usdc)
     /// @param _minOut the minimum output amount (token), reverting if the actual output is lower
     /// @return amount of token out
-    function swapOut_63c461(
+    function swapOut5E08A399(
         address _token,
         uint256 _amount,
         uint256 _minOut
@@ -64,7 +64,7 @@ interface ISeawaterAMM is
     /// @param _sig the signature for the token
     /// @param _maxAmount the max amount of the token
     /// @return amount of token out
-    function swapOutPermit2_5dec48(
+    function swapOutPermit23273373B(
         address _token,
         uint256 _amount,
         uint256 _minOut,
@@ -80,7 +80,7 @@ interface ISeawaterAMM is
     /// @param _amount input amount (tokenA)
     /// @param _minOut the minimum output amount (tokenB), reverting if the actual output is lower
     /// @return amount of token A in, amount of token B out
-    function swap2ExactIn_f4bd2d(
+    function swap2ExactIn41203F1D(
         address _tokenA,
         address _tokenB,
         uint256 _amount,
