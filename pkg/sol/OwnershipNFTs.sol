@@ -2,15 +2,16 @@
 pragma solidity 0.8.16;
 
 import "./IERC721Metadata.sol";
+import "./ISeawaterAMM.sol";
+
 import "./IERC721TokenReceiver.sol";
-import "./ISeawaterOwnership.sol";
 
 /*
  * OwnershipNFTs is a simple interface for tracking ownership of
  * positions in the Seawater Stylus contract.
  */
 contract OwnershipNFTs is IERC721Metadata {
-    ISeawaterOwnership immutable public SEAWATER;
+    ISeawaterAMM immutable public SEAWATER;
 
     /**
      * @notice TOKEN_URI to set as the default token URI for every NFT
@@ -38,7 +39,7 @@ contract OwnershipNFTs is IERC721Metadata {
         string memory _name,
         string memory _symbol,
         string memory _tokenURI,
-        ISeawaterOwnership _seawater
+        ISeawaterAMM _seawater
     ) {
         name = _name;
         symbol = _symbol;
@@ -51,7 +52,13 @@ contract OwnershipNFTs is IERC721Metadata {
      * @param _tokenId to look up
      */
     function ownerOf(uint256 _tokenId) public view returns (address) {
-        return SEAWATER.ownerOf(_tokenId);
+        (bool ok, bytes memory rc) = address(SEAWATER).staticcall(abi.encodeWithSelector(
+            SEAWATER.positionOwner__0602c2.selector,
+            _tokenId
+        ));
+        require(ok, "position owner revert");
+        (address owner) = abi.decode(rc, (address));
+        return owner;
     }
 
     /**
@@ -105,7 +112,7 @@ contract OwnershipNFTs is IERC721Metadata {
         uint256 _tokenId
     ) internal {
         _requireAuthorised(_from, _tokenId);
-        SEAWATER.transfer(_from, _tokenId, _to);
+        SEAWATER.transferPosition_5bf9a4(_tokenId, _from, _to);
     }
 
     function transferFrom(
@@ -162,7 +169,13 @@ contract OwnershipNFTs is IERC721Metadata {
 
     /// @inheritdoc IERC721Metadata
     function balanceOf(address _spender) external view returns (uint256) {
-        return SEAWATER.balanceOf(_spender);
+        (bool ok, bytes memory rc) = address(SEAWATER).staticcall(abi.encodeWithSelector(
+            SEAWATER.positionBalance_f285b1.selector,
+            _spender
+        ));
+        require(ok, "position balance revert");
+        (uint256 balance) = abi.decode(rc, (uint256));
+        return balance;
     }
 
     /// @inheritdoc IERC721Metadata

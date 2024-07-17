@@ -9,6 +9,7 @@ use crate::{
     },
 };
 use ruint_macro::uint;
+use num_traits::cast::ToPrimitive;
 
 /// The maximum value storable in a 160-bit unsigned integer.
 pub const MAX_U160: U256 =
@@ -237,6 +238,49 @@ pub fn get_amount_1_delta(
             true,
         )?))
     }
+}
+
+fn get_liquidity_for_amount_0(
+    sqrt_ratio_a_x_96: U256,
+    sqrt_ratio_b_x_96: U256,
+    amount: U256,
+) -> Result<U256, Error> {
+    let intermediate = mul_div(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, Q96)?;
+    mul_div(amount, intermediate, sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96)
+}
+
+fn get_liquidity_for_amount_1(
+    sqrt_ratio_a_x_96: U256,
+    sqrt_ratio_b_x_96: U256,
+    amount: U256,
+) -> Result<U256, Error> {
+    mul_div(amount, Q96, sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96)
+}
+
+pub fn get_liquidity_for_amounts(
+    sqrt_ratio_x_96: U256,
+    sqrt_ratio_a_x_96: U256,
+    sqrt_ratio_b_x_96: U256,
+    amount_0: U256,
+    amount_1: U256,
+) -> Result<i128, Error> {
+    let (sqrt_ratio_0_x_96, sqrt_ratio_1_x_96) = if sqrt_ratio_a_x_96 > sqrt_ratio_b_x_96 {
+        (sqrt_ratio_a_x_96, sqrt_ratio_b_x_96)
+    } else {
+        (sqrt_ratio_b_x_96, sqrt_ratio_a_x_96)
+    };
+
+    let delta = if sqrt_ratio_x_96 <= sqrt_ratio_0_x_96 {
+        get_liquidity_for_amount_0(sqrt_ratio_0_x_96, sqrt_ratio_1_x_96, amount_0)?
+    } else if sqrt_ratio_x_96 < sqrt_ratio_1_x_96 {
+        let liq0 = get_liquidity_for_amount_0(sqrt_ratio_x_96, sqrt_ratio_1_x_96, amount_0)?;
+        let liq1 = get_liquidity_for_amount_1(sqrt_ratio_0_x_96, sqrt_ratio_x_96, amount_1)?;
+        if liq0 > liq1 { liq0 } else { liq1 }
+    } else {
+        get_liquidity_for_amount_1(sqrt_ratio_0_x_96, sqrt_ratio_1_x_96, amount_1)?
+    };
+
+    Ok(delta.to_i128().unwrap())
 }
 
 #[cfg(test)]

@@ -8,7 +8,7 @@ interface ISeawaterExecutorSwap {
     /// @param amount the amount of token to swap, positive if exactIn, negative if exactOut
     /// @param priceLimit the price limit for swaps, encoded as a sqrtX96 price
     /// @return (token0, token1) delta
-    function swap(
+    function swap_eb3a17(
         address pool,
         bool zeroForOne,
         int256 amount,
@@ -21,7 +21,7 @@ interface ISeawaterExecutorSwap {
     /// @param amount the amount of the input token to use
     /// @param minOut the minimum valid amount of the output token, reverts if not reached
     /// @return (amount in, amount out)
-    function swap2ExactIn(
+    function swap2ExactIn_f4bd2d(
         address from,
         address to,
         uint256 amount,
@@ -40,7 +40,7 @@ interface ISeawaterExecutorSwapPermit2 {
     /// @param maxAmount the permit2 maxAmount
     /// @param sig the permit2 signature
     /// @return (token0, token1) delta
-    function swapPermit2(
+    function swapPermit2_d5d578(
         address pool,
         bool zeroForOne,
         int256 amount,
@@ -61,7 +61,7 @@ interface ISeawaterExecutorSwapPermit2 {
     /// @param sig the permit2 signature
     /// @notice permit2's max amount must be set to `amount`
     /// @return (amount in, amount out)
-    function swap2ExactInPermit2(
+    function swap2ExactInPermit2_15755d(
         address from,
         address to,
         uint256 amount,
@@ -79,7 +79,7 @@ interface ISeawaterExecutorQuote {
     /// @param amount the amount of token to swap, positive if exactIn, negative if exactOut
     /// @param priceLimit the price limit for swaps, encoded as a sqrtX96 price
     /// @notice always revert with Error(string(amountOut))
-    function quote(
+    function quote____006eac(
         address pool,
         bool zeroForOne,
         int256 amount,
@@ -92,7 +92,7 @@ interface ISeawaterExecutorQuote {
     /// @param amount the amount of the input token to use
     /// @param minOut the minimum valid amount of the output token, reverts if not reached
     /// @notice always revert with Error(string(amountOut))
-    function quote2(
+    function quote2__cc9e21(
         address from,
         address to,
         uint256 amount,
@@ -105,37 +105,37 @@ interface ISeawaterExecutorPosition {
     /// @param pool the pool to create the position on
     /// @param lower the lower tick of the position (for concentrated liquidity)
     /// @param upper the upper tick of the position
-    function mintPosition(
+    function mintPosition_05ca11(
         address pool,
         int32 lower,
         int32 upper
-    ) external;
+    ) external returns (uint256 id);
 
     /// @notice burns a position, leaving the liquidity in it inaccessible
     /// @notice id the id of the position to burn
-    function burnPosition(uint256 id) external;
+    function burnPosition_f7639f(uint256 id) external;
 
     /// @notice transferPosition transfers a position. usable only by the NFT manager
     /// @param id the id of the position to transfer
     /// @param from the user to transfer the position from
     /// @param to the user to transfer the position to
-    function transferPosition(uint256 id, address from, address to) external;
+    function transferPosition_5bf9a4(uint256 id, address from, address to) external;
 
     /// @notice gets the owner of a position
     /// @param id the id of the position
     /// @return the owner of the position
-    function positionOwner(uint256 id) external returns (address);
+    function positionOwner__0602c2(uint256 id) external returns (address);
 
     /// @notice gets the number of positions owned by a user
     /// @param user the user to get position balance for
     /// @return the number of positions owned by the user
-    function positionBalance(address user) external returns (uint256);
+    function positionBalance_f285b1(address user) external returns (uint256);
 
     /// @notice gets the amount of liquidity in a position
     /// @param pool the pool the position belongs to
     /// @param id the id of the position
     /// @return the amount of liquidity contained in the position
-    function positionLiquidity(address pool, uint256 id) external returns (uint128);
+    function positionLiquidity_0f1547(address pool, uint256 id) external returns (uint128);
 
     /// @notice collects fees from a position
     /// @param pool the pool the position belongs to
@@ -143,7 +143,7 @@ interface ISeawaterExecutorPosition {
     /// @param amount0 the maximum amount of token0 to claim
     /// @param amount1 the maximum amount of token1 to claim
     /// @return the amount of token0 and token1 collected
-    function collect(
+    function collect_7472a7(
         address pool,
         uint256 id,
         uint128 amount0,
@@ -157,7 +157,7 @@ interface ISeawaterExecutorUpdatePosition {
     /// @param id the id of the position
     /// @param delta the amount of liquidity to add or remove
     /// @return the deltas for token0 and token1 for the user
-    function updatePosition(
+    function updatePosition_957a57(
         address pool,
         uint256 id,
         int128 delta
@@ -176,7 +176,7 @@ interface ISeawaterExecutorUpdatePosition {
     /// @param maxAmount1 the max amount for token 1
     /// @param sig1 the signature for token 1
     /// @return the deltas for token0 and token1 for the user
-    function updatePositionPermit2(
+    function updatePositionPermit2__0c5637(
         address pool,
         uint256 id,
         int128 delta,
@@ -199,7 +199,7 @@ interface ISeawaterExecutorAdminExposed {
     /// @param fee the fee to use
     /// @param tickSpacing the spacing for valid liquidity ticks
     /// @param maxLiquidityPerTick the maximum amount of liquidity allowed in a single tick
-    function createPool(
+    function createPool_816c1f(
         address pool,
         uint256 sqrtPriceX96,
         uint32 fee,
@@ -212,7 +212,7 @@ interface ISeawaterExecutorAdminExposed {
     /// @param amount0 the maximum amount of token0 fees to collect
     /// @param amount1 the maximum amount of token1 fees to collect
     /// @return the amount of token0 and token1 fees collected
-    function collectProtocol(
+    function collectProtocol_fd4241(
         address pool,
         uint128 amount0,
         uint128 amount1
@@ -222,37 +222,37 @@ interface ISeawaterExecutorAdminExposed {
     /// @param pool to get the fees owed for
     /// @param id of the position to check for
     /// @return the amount of token0 and token1 to get in return
-    function feesOwed(address pool, uint256 id) external returns (uint128, uint128);
+    function feesOwed_5ec605(address pool, uint256 id) external returns (uint128, uint128);
 
     /// @notice gets the current sqrt price of the pool
     /// @param pool to get from
     /// @return the current sqrtPriceX96 for the pool
-    function sqrtPriceX96(address pool) external returns (uint256);
+    function sqrtPriceX96_6ed516(address pool) external returns (uint256);
 
     /// @notice gets the currently used tick of the pool
     /// @param pool to get from
     /// @return the current active tick in the pool
-    function curTick(address pool) external returns (int32);
+    function curTick_84a60b(address pool) external returns (int32);
 
     /// @notice gets the tick spacing of the pool
     /// @param pool to get from
     /// @return the tick spacing of the pool
-    function tickSpacing(address pool) external returns (uint8);
+    function tickSpacing_52bd17(address pool) external returns (uint8);
 
     /// @notice gets the fee growth for token 0
     /// @param pool to get from
     /// @return the fee growth for the other token
-    function feeGrowthGlobal0(address pool) external returns (uint256);
+    function feeGrowthGlobal0_7fb790(address pool) external returns (uint256);
 
     /// @notice gets the fee growth for token 1
     /// @param pool to get from
     /// @return the fee growth for fUSDC
-    function feeGrowthGlobal1(address pool) external returns (uint256);
+    function feeGrowthGlobal1_d2e217(address pool) external returns (uint256);
 
     /// @notice enables or disables a pool
     /// @param pool the pool to enable or disable
     /// @param enabled true to enable to pool, false to disable it
-    function setPoolEnabled(address pool, bool enabled) external;
+    function enablePool___e9825f(address pool, bool enabled) external;
 }
 
 interface ISeawaterExecutorAdmin  is ISeawaterExecutorAdminExposed {
@@ -262,6 +262,4 @@ interface ISeawaterExecutorAdmin  is ISeawaterExecutorAdminExposed {
     function ctor(address seawaterAdmin, address nftManager) external;
 }
 
-interface ISeawaterExecutorFallback {
-
-}
+interface ISeawaterExecutorFallback {}

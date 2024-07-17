@@ -23,6 +23,7 @@ tiny-keccak.workspace = true
 lol_alloc.workspace = true
 keccak-const.workspace = true
 const-hex.workspace = true
+num-traits.workspace = true
 
 [dev-dependencies]
 rand = "0.8.5"

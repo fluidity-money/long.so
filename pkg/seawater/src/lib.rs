@@ -271,7 +271,7 @@ impl Pools {
 /// Swap functions. Only enabled when the `swaps` feature is set.
 #[cfg_attr(feature = "swaps", external)]
 impl Pools {
-    pub fn swap(
+    pub fn swap_eb3a17(
         &mut self,
         pool: Address,
         zero_for_one: bool,
@@ -282,7 +282,7 @@ impl Pools {
     }
 
     /// Performs a two stage swap, using approvals to transfer tokens. See [Self::swap_2_internal].
-    pub fn swap_2_exact_in(
+    pub fn swap_2_exact_in_57968f(
         &mut self,
         from: Address,
         to: Address,
@@ -299,7 +299,8 @@ impl Pools {
     /// Quote a [Self::swap]. Will revert with the result of the swap
     /// as a decimal number as the message of an `Error(string)`.
     /// Returns a `Result` as Stylus expects but will always only fill the `Revert`.
-    pub fn quote(
+    #[allow(non_snake_case)]
+    pub fn quote____006eac(
         &mut self,
         pool: Address,
         zero_for_one: bool,
@@ -326,7 +327,8 @@ impl Pools {
     /// Quote a [Self::swap_2_exact_in]. Will revert with the result of the swap
     /// as a decimal number as the message of an `Error(string)`.
     /// Returns a `Result` as Stylus expects but will always only fill the `Revert`.
-    pub fn quote2(
+    #[allow(non_snake_case)]
+    pub fn quote2__cc9e21(
         &mut self,
         from: Address,
         to: Address,
@@ -352,9 +354,9 @@ impl Pools {
     // slight hack - we cfg out the whole function, since the `selector` and `raw` attributes don't
     // actually exist, so we can't `cfg_attr` them in
     #[cfg(feature = "swap_permit2")]
-    #[selector(id = "swapPermit2(address,bool,int256,uint256,uint256,uint256,uint256,bytes)")]
+    #[selector(id = "swapPermit2_d5d578(address,bool,int256,uint256,uint256,uint256,uint256,bytes)")]
     #[raw]
-    pub fn swap_permit2(&mut self, data: &[u8]) -> RawArbResult {
+    pub fn swap_permit2_d5d578(&mut self, data: &[u8]) -> RawArbResult {
         let (pool, data) = eth_serde::parse_addr(data);
         let (zero_for_one, data) = eth_serde::parse_bool(data);
         let (amount, data) = eth_serde::parse_i256(data);
@@ -387,9 +389,9 @@ impl Pools {
 
     /// Performs a two stage swap, using permit2 to transfer tokens. See [Self::swap_2_internal].
     #[cfg(feature = "swap_permit2")]
-    #[selector(id = "swap2ExactInPermit2(address,address,uint256,uint256,uint256,uint256,bytes)")]
+    #[selector(id = "swap2ExactInPermit2_15755d(address,address,uint256,uint256,uint256,uint256,bytes)")]
     #[raw]
-    pub fn swap_2_permit2(&mut self, data: &[u8]) -> RawArbResult {
+    pub fn swap_2_permit2_15755d(&mut self, data: &[u8]) -> RawArbResult {
         let (from, data) = eth_serde::parse_addr(data);
         let (to, data) = eth_serde::parse_addr(data);
         let (amount, data) = eth_serde::parse_u256(data);
@@ -447,7 +449,7 @@ impl Pools {
     ///
     /// # Errors
     /// Requires the pool to exist and be enabled.
-    pub fn mint_position(&mut self, pool: Address, lower: i32, upper: i32) -> Result<(), Revert> {
+    pub fn mint_position_05ca11(&mut self, pool: Address, lower: i32, upper: i32) -> Result<U256, Revert> {
         let id = self.next_position_id.get();
         self.pools.setter(pool).create_position(id, lower, upper)?;
 
@@ -465,7 +467,7 @@ impl Pools {
             upper,
         });
 
-        Ok(())
+        Ok(id)
     }
 
     /// Burns a position. Only usable by the position owner.
@@ -474,7 +476,7 @@ impl Pools {
     ///
     /// # Errors
     /// Requires the position be owned by the caller. Requires the pool to be enabled.
-    pub fn burn_position(&mut self, id: U256) -> Result<(), Revert> {
+    pub fn burn_position_f7639f(&mut self, id: U256) -> Result<(), Revert> {
         let owner = msg::sender();
         assert_eq_or!(
             self.position_owners.get(id),
@@ -497,7 +499,7 @@ impl Pools {
     ///
     /// # Errors
     /// Requires the caller be the NFT manager.
-    pub fn transfer_position(
+    pub fn transfer_position_5bf9a4(
         &mut self,
         id: U256,
         from: Address,
@@ -514,17 +516,18 @@ impl Pools {
     }
 
     /// Returns the current owner of a position.
-    pub fn position_owner(&self, id: U256) -> Result<Address, Revert> {
+    #[allow(non_snake_case)]
+    pub fn position_owner__0602c2(&self, id: U256) -> Result<Address, Revert> {
         Ok(self.position_owners.get(id))
     }
 
-    /// Returns the number of positions owned by an account.
-    pub fn position_balance(&self, user: Address) -> Result<U256, Revert> {
+    /// Returns the number of positions owned by an address.
+    pub fn position_balance_f285b1(&self, user: Address) -> Result<U256, Revert> {
         Ok(self.owned_positions.get(user))
     }
 
     /// Returns the amount of liquidity in a position.
-    pub fn position_liquidity(&self, pool: Address, id: U256) -> Result<u128, Revert> {
+    pub fn position_liquidity_0f1547(&self, pool: Address, id: U256) -> Result<u128, Revert> {
         let liquidity = self.pools.getter(pool).get_position_liquidity(id);
 
         Ok(liquidity.sys())
@@ -543,7 +546,7 @@ impl Pools {
     /// # Errors
     /// Requires the caller to be the position owner. Requires the pool to be enabled.
     /// Requires the length of the pools and ids to be equal.
-    pub fn collect(
+    pub fn collect_7472a7(
         &mut self,
         pools: Vec<Address>,
         ids: Vec<U256>
@@ -613,6 +616,9 @@ impl Pools {
 
         let (token_0, token_1) = self.pools.setter(pool).update_position(id, delta)?;
 
+        #[cfg(feature = "testing-dbg")]
+        dbg!(("update position taking", current_test!(), token_0, token_1));
+
         if delta < 0 {
             erc20::give(pool, token_0.abs_neg()?)?;
             erc20::give(FUSDC_ADDR, token_1.abs_neg()?)?;
@@ -652,11 +658,11 @@ impl Pools {
     #[cfg(feature = "update_positions")]
     #[raw]
     #[selector(
-        id = "updatePositionPermit2(address,uint256,int128,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)"
+        id = "updatePositionPermit2_9936af(address,uint256,int128,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)"
     )]
     /// Refreshes and updates liquidity in a position, using permit2 to transfer tokens.
     /// See [Self::update_position_internal].
-    pub fn update_position_permit2(&mut self, data: &[u8]) -> RawArbResult {
+    pub fn update_position_permit2_9936af(&mut self, data: &[u8]) -> RawArbResult {
         let (pool, data) = eth_serde::parse_addr(data);
         let (id, data) = eth_serde::parse_u256(data);
         let (delta, data) = eth_serde::parse_i128(data);
@@ -739,7 +745,7 @@ impl Pools {
     ///
     /// # Errors
     /// Requires the caller to be the seawater admin. Requires the pool to not exist.
-    pub fn create_pool(
+    pub fn create_pool_816c1f(
         &mut self,
         pool: Address,
         price: U256,
@@ -772,33 +778,33 @@ impl Pools {
     }
 
     /// Getter method for the sqrt price
-    pub fn sqrt_price_x96(&self, pool: Address) -> Result<U256, Revert> {
+    pub fn sqrt_price_x96_6ed516(&self, pool: Address) -> Result<U256, Revert> {
         Ok(self.pools.getter(pool).get_sqrt_price())
     }
 
     /// Getter method for the current tick
-    pub fn cur_tick(&self, pool: Address) -> Result<i32, Revert> {
+    pub fn cur_tick_84a60b(&self, pool: Address) -> Result<i32, Revert> {
         // converted to i32 for automatic abi encoding
         Ok(self.pools.getter(pool).get_cur_tick().sys())
     }
 
-    pub fn fees_owed(&self, pool: Address, id: U256) -> Result<(u128, u128), Revert> {
+    pub fn fees_owed_5ec605(&self, pool: Address, id: U256) -> Result<(u128, u128), Revert> {
         Ok(self.pools.getter(pool).get_fees_owed(id))
     }
 
     /// Getter method for the tick spacing of the pool given.
-    pub fn tick_spacing(&self, pool: Address) -> Result<u8, Revert> {
+    pub fn tick_spacing_52bd17(&self, pool: Address) -> Result<u8, Revert> {
         // converted to i32 for automatic abi encoding
         Ok(self.pools.getter(pool).get_tick_spacing().sys())
     }
 
     /// Getter method for getting the fee growth for token 0
-    pub fn fee_growth_global_0(&self, pool: Address) -> Result<U256, Revert> {
+    pub fn fee_growth_global_0_7fb790(&self, pool: Address) -> Result<U256, Revert> {
         Ok(self.pools.getter(pool).get_fee_growth_global_0())
     }
 
     /// Getter method for getting the fee growth for token 1
-    pub fn fee_growth_global_1(&self, pool: Address) -> Result<U256, Revert> {
+    pub fn fee_growth_global_1_d2e217(&self, pool: Address) -> Result<U256, Revert> {
         Ok(self.pools.getter(pool).get_fee_growth_global_1())
     }
 
@@ -806,7 +812,7 @@ impl Pools {
     ///
     /// # Errors
     /// Requires the user to be the seawater admin. Requires the pool to be enabled.
-    pub fn collect_protocol(
+    pub fn collect_protocol_fd4241(
         &mut self,
         pool: Address,
         amount_0: u128,
@@ -840,7 +846,7 @@ impl Pools {
     ///
     /// # Errors
     /// Requires the user to be the seawater admin.
-    pub fn enable_pool(&mut self, pool: Address, enabled: bool) -> Result<(), Revert> {
+    pub fn enable_pool_a60d25(&mut self, pool: Address, enabled: bool) -> Result<(), Revert> {
         assert_eq_or!(
             msg::sender(),
             self.seawater_admin.get(),
@@ -864,7 +870,7 @@ impl test_utils::StorageNew for Pools {
 
 #[cfg(test)]
 mod test {
-    use crate::{eth_serde, test_utils, types::I256Extension, types::*, Pools};
+    use crate::{eth_serde, test_utils, types::I256Extension, types::*, Pools, tick_math};
     use maplit::hashmap;
     use ruint_macro::uint;
     use stylus_sdk::{
@@ -1128,17 +1134,45 @@ mod test {
             "0xdc03f6203d56cf5fe49270519e5a797eebcd9be54de9070150d36d99795813bf" => "0x0000000000000000000000000000000000000000000000000000000000000000"
              }),
             Some(hashmap! {
-                address!("6437fdc89ced41941b97a9f1f8992d88718c81c5") => U256::from(842893567)
+                address!("6437fdc89ced41941b97a9f1f8992d88718c81c5") => U256::from(777444371)
             }), // caller balances
             None, // amm balances
             |contract| {
                 use core::str::FromStr;
 
-                let pool = address!("6437fdc89cED41941b97A9f1f8992D88718C81c5");
+                let pool_addr = address!("6437fdc89cED41941b97A9f1f8992D88718C81c5");
                 let id = U256::from(33252);
                 let delta = i128::from_str("18117952900").unwrap();
 
-                let (_amount_0, _amount_1) = contract.update_position(pool, id, delta).unwrap();
+                let pool = contract.pools.get(pool_addr);
+
+                let liq = pool.get_position_liquidity(id);
+                let sqrt_price = pool.get_sqrt_price();
+                let tick_current = pool.get_cur_tick().as_i32();
+
+                let position = pool.get_position(id);
+                let tick_lower = position.lower.get().as_i32();
+                let tick_upper = position.upper.get().as_i32();
+
+                let sqrt_current = tick_math::get_sqrt_ratio_at_tick(tick_current)?;
+                let sqrt_lower = tick_math::get_sqrt_ratio_at_tick(tick_lower)?;
+                let sqrt_upper = tick_math::get_sqrt_ratio_at_tick(tick_upper)?;
+
+                dbg!(("update_position", liq, sqrt_price, tick_current, id, delta, tick_lower, tick_upper, sqrt_lower, sqrt_upper, sqrt_current));
+
+                // liquidity		0
+                // sqrt price	91912741289436239605563425905
+                // current tick	2970
+                // id			33252
+                // delta		18117952900
+                // tick lower	2100
+                // tick upper	4080
+                // sqrt current	91911338314972375132734921679
+                // sqrt lower	87999098777895760865233273050
+                // sqrt upper	97156358459122590463153608088
+
+                let (_amount_0, _amount_1) = contract.update_position(pool_addr, id, delta).unwrap();
+
                 Ok(())
             },
         )

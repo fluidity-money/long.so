@@ -22,41 +22,29 @@ pub fn decimals(_token: Address) -> Result<u8, Error> {
 ///! Assumes a single token is in use for the life of this test.
 pub fn take_transfer_from(_token: Address, _amount: U256) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg")]
-    {
-        dbg!(("take_transfer_from", current_test!(), _token, _amount));
-        return host_test_shims::take_caller_bal(_token, _amount).map_err(
-            |_| Error::Erc20RevertNoData, // follow the trace!
-        );
-    }
-    #[allow(unreachable_code)]
-    Ok(())
+    dbg!(("take_transfer_from", current_test!(), _token, _amount));
+    host_test_shims::take_caller_bal(_token, _amount).map_err(
+        |_| Error::Erc20RevertNoData, // follow the trace!
+    )
 }
 
 /// Pretends to give users tokens. Only useful for testing.
 pub fn give(_token: Address, _amount: U256) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg")]
-    {
-        dbg!(("give", current_test!(), _token, _amount));
-        return host_test_shims::take_amm_bal(_token, _amount).map_err(
-            |_| Error::Erc20RevertNoData, // follow the trace!
-        );
-    }
-    #[allow(unreachable_code)]
-    Ok(())
+    dbg!(("give", current_test!(), _token, _amount));
+    host_test_shims::take_amm_bal(_token, _amount).map_err(
+        |_| Error::Erc20RevertNoData, // follow the trace!
+    )
 }
 
 /// Pretends to take ERC20 tokens from the user, only happening if the underlying
 /// environment is not WASM. Only useful for testing.
 pub fn take_permit2(_token: Address, _amount: U256, _details: Permit2Args) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg")]
-    {
-        dbg!(("take_permit2", current_test!(), _token, _amount, _details));
-        return host_test_shims::take_caller_bal(_token, _amount).map_err(
-            |_| Error::Erc20RevertNoData, // follow the trace!
-        );
-    }
-    #[allow(unreachable_code)]
-    Ok(())
+    dbg!(("take_permit2", current_test!(), _token, _amount, _details));
+    host_test_shims::take_caller_bal(_token, _amount).map_err(
+        |_| Error::Erc20RevertNoData, // follow the trace!
+    )
 }
 
 /// Pretends to take ERC20 tokens from the user, only happening if the underlying
@@ -67,14 +55,10 @@ pub fn take(
     _permit2_details: Option<Permit2Args>,
 ) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg")]
-    {
-        dbg!(("take", current_test!(), _token, _amount, _permit2_details));
-        return host_test_shims::take_caller_bal(_token, _amount).map_err(
-            |_| Error::Erc20RevertNoData, // follow the trace!
-        );
-    }
-    #[allow(unreachable_code)]
-    Ok(())
+    dbg!(("take", current_test!(), _token, _amount, _permit2_details));
+    host_test_shims::take_caller_bal(_token, _amount).map_err(
+        |_| Error::Erc20RevertNoData, // follow the trace!
+    )
 }
 
 /// Pretends to construct a revert string from a message, only happening if the underlying

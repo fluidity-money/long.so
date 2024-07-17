@@ -184,6 +184,39 @@ impl StoragePool {
         }
     }
 
+    pub fn incr_position(
+        &mut self,
+        id: U256,
+        amount_0_min: U256,
+        amount_1_min: U256,
+        amount_0_max: U256,
+        amount_1_max: U256
+    ) -> Result<(I256, I256), Revert> {
+        // calculate the delta using the amounts that we have here, guaranteeing
+        // that we don't dip below the amount that's supplied as the minimum.
+
+        let position = self.positions.positions.get(id);
+
+        let sqrt_ratio_x_96 = tick_math::get_sqrt_ratio_at_tick(self.get_cur_tick().as_i32())?;
+        let sqrt_ratio_a_x_96 = tick_math::get_sqrt_ratio_at_tick(position.lower.get().as_i32())?;
+        let sqrt_ratio_b_x_96 = tick_math::get_sqrt_ratio_at_tick(position.upper.get().as_i32())?;
+
+        let delta = sqrt_price_math::get_liquidity_for_amounts(
+            sqrt_ratio_x_96,   // cur_tick
+            sqrt_ratio_a_x_96, // lower_tick
+            sqrt_ratio_b_x_96, // upper_tick
+            amount_0_max,      // amount_0
+            amount_1_max       // amount_1
+        )?;
+
+        let (amount_0, amount_1) = self.update_position(id, delta)?;
+
+        assert_or!(amount_0.abs_pos()? >= amount_0_min, Error::Amount0TooLow);
+        assert_or!(amount_1.abs_pos()? >= amount_1_min, Error::Amount1TooLow);
+
+        Ok((amount_0, amount_1))
+    }
+
     /// Performs a swap on this pool.
     pub fn swap(
         &mut self,
@@ -440,6 +473,11 @@ impl StoragePool {
     /// Get the current tick.
     pub fn get_cur_tick(&self) -> I32 {
         self.cur_tick.get()
+    }
+
+    ///! Get a position given. This is a helper function for testing.
+    pub fn get_position(&self, id: U256) -> StorageGuard<'_, position::StoragePositionInfo> {
+        self.positions.positions.get(id)
     }
 
     pub fn get_fees_owed(&self, id: U256) -> (u128, u128) {
