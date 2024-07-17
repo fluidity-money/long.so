@@ -148,10 +148,12 @@ interface ISeawaterExecutorPosition {
 
 interface ISeawaterExecutorUpdatePosition {
     /// @notice refreshes a position's fees, and adds or removes liquidity
+    /// @param pool to use this with
     /// @param id the id of the position
     /// @param delta the amount of liquidity to add or remove
     /// @return the deltas for token0 and token1 for the user
     function updatePosition622A559D(
+        address pool,
         uint256 id,
         int128 delta
     ) external returns (int256, int256);
