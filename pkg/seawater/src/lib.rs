@@ -668,7 +668,7 @@ impl Pools {
     #[cfg(feature = "update_positions")]
     #[raw]
     #[selector(
-        id = "updatePositionPermit23fba3f61(address,uint256,int128,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)"
+        id = "updatePositionPermit2F24010C3(address,uint256,int128,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)"
     )]
     /// Refreshes and updates liquidity in a position, using permit2 to transfer tokens.
     /// See [Self::update_position_internal].

@@ -388,6 +388,7 @@ contract SeawaterAMM is ISeawaterAMM {
 
     /// @inheritdoc ISeawaterExecutorUpdatePosition
     function updatePosition622A559D(
+        address /* pool */,
         uint256 /* id */,
         int128 /* delta */
     ) external returns (int256, int256) {
