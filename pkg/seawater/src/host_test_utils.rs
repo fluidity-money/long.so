@@ -21,12 +21,8 @@ macro_rules! current_test {
 }
 
 pub fn decode_sqrt_price_num(sqrt_price_x96: U256, denom: u64) -> U256 {
-    let denom = U256::from(denom);
-
-    let ratio = sqrt_price_x96 / Q96;
-
-    let ratio_squared = ratio * ratio;
-    return ratio_squared * denom;
+    let numerator = sqrt_price_x96.pow(U256::from(2)) * U256::from(denom);
+    numerator >> 192
 }
 
 // encodes a a/b price as a sqrt.q96 price

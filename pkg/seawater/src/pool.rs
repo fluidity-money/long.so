@@ -327,7 +327,6 @@ impl StoragePool {
                 )?;
             }
 
-            dbg!(test_utils::decode_sqrt_price_num(state.price, 1).to_string());
             // shift tick
             if state.price == step_next_price {
                 if step_next_tick_initialised {
@@ -801,11 +800,11 @@ mod test {
 
         let delta = 10i128.pow(18);
 
-        let init_price = test_utils::encode_sqrt_price(100, 1);
+        let init_price = test_utils::encode_sqrt_price(100_000, 1_000);
 
-        let liq_price_inside = [75, 110];
+        let liq_price_inside = [101_000, 105_000];
 
-        let swap_amounts: Vec<i128> = (1..=1).map(|p| p * delta / 100).collect();
+        let swap_amounts: Vec<i128> = (1..=100).map(|p| p * delta / 100).collect();
 
         for swap_amount in &swap_amounts {
             // Price inside liquidity range
@@ -814,13 +813,13 @@ mod test {
 
                 let lower = tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(
                     liq_price_inside[0],
-                    1,
+                    1_000,
                 ))
                 .unwrap();
 
                 let upper = tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(
                     liq_price_inside[1],
-                    1,
+                    1_000,
                 ))
                 .unwrap();
 
@@ -829,11 +828,14 @@ mod test {
 
                 pool.update_position(pos_id, delta).unwrap();
 
-                let (a0, a1, _) = pool
+                let (a0, a1, final_tick) = pool
                     .swap(true, I256::unchecked_from(*swap_amount), U256::MAX)
                     .unwrap();
 
-                dbg!(a0, a1, swap_amount);
+                dbg!(a0);
+                dbg!(a1);
+                // assert_eq!(swap_amount, &a0.as_i128());
+                // assert!()
             });
         }
 
@@ -872,8 +874,6 @@ mod test {
 
                     pool.update_position(pos_id, delta).unwrap();
                 }
-
-                dbg!(pool.get_sqrt_price());
 
                 let (a0, a1, _) = pool
                     .swap(
