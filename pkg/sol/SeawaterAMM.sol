@@ -382,7 +382,7 @@ contract SeawaterAMM is ISeawaterAMM {
     function collect7F21947C(
         address[] memory /* pools */,
         uint256[] memory /* ids */
-    ) external returns (uint128, uint128) {
+    ) external returns (CollectResult[] memory) {
         directDelegate(_getExecutorPosition());
     }
 

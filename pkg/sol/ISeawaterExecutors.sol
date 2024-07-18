@@ -101,6 +101,10 @@ interface ISeawaterExecutorQuote {
 }
 
 interface ISeawaterExecutorPosition {
+    struct CollectResult {
+        uint128 amount0;
+        uint128 amount1;
+    }
     /// @notice creates a new position
     /// @param pool the pool to create the position on
     /// @param lower the lower tick of the position (for concentrated liquidity)
@@ -142,8 +146,8 @@ interface ISeawaterExecutorPosition {
     /// @param ids to claim the positions of
     function collect7F21947C(
         address[] memory pools,
-        uint256[] memory  ids
-    ) external returns (uint128, uint128);
+        uint256[] memory ids
+    ) external returns (CollectResult[] memory);
 }
 
 interface ISeawaterExecutorUpdatePosition {
