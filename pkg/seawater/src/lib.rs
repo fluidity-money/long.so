@@ -166,8 +166,7 @@ impl Pools {
             .ok_or(Error::SwapResultTooHigh)?
             .into_raw();
 
-        assert_or!(amount_0_abs > U256::zero(), Error::SwapResultTooLow);
-        assert_or!(amount_1_abs > U256::zero(), Error::SwapResultTooLow);
+        assert_or!(amount_0_abs > U256::zero() || amount_1_abs > U256::zero(), Error::SwapResultTooLow);
 
         evm::log(events::Swap1 {
             user: msg::sender(),

@@ -222,6 +222,17 @@ impl StoragePool {
         Ok((amount_0, amount_1))
     }
 
+    pub fn decr_position(
+        &mut self,
+        id: U256,
+        amount_0_min: U256,
+        amount_1_min: U256,
+        amount_0_max: U256,
+        amount_1_max: U256
+    ) -> Result<(I256, I256), Revert> {
+        Ok((I256::zero(), I256::zero()))
+    }
+
     /// Performs a swap on this pool.
     pub fn swap(
         &mut self,
