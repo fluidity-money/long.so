@@ -42,7 +42,7 @@ export default function ConfirmWithdrawLiquidity() {
   const { data: positionLiquidity } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: 'positionLiquidity',
+    functionName: 'positionLiquidity8D11C045',
     args: [token0.address, BigInt(positionId ?? 0)]
   })
 
@@ -77,7 +77,7 @@ export default function ConfirmWithdrawLiquidity() {
       writeContractUpdatePosition({
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "updatePosition",
+        functionName: "updatePosition622A559D",
         args: [token0.address, id, -delta],
       });
     },
@@ -100,7 +100,7 @@ export default function ConfirmWithdrawLiquidity() {
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "sqrtPriceX96",
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address === fUSDC.address ? token1.address : token0.address],
   });
 

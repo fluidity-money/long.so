@@ -62,7 +62,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "sqrtPriceX96",
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
   });
 
@@ -100,7 +100,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const { data: curTickNum } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "curTick",
+    functionName: "curTick181C6FD9",
     args: [token0.address],
   });
   const curTick = { result: BigInt(curTickNum?.result ?? 0) }
@@ -108,7 +108,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const { data: tickSpacing } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "tickSpacing",
+    functionName: "tickSpacing653FE28F",
     args: [token0.address],
   });
 
@@ -172,7 +172,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     writeContractMint({
       address: ammAddress,
       abi: seawaterContract.abi,
-      functionName: "mintPosition",
+      functionName: "mintPositionBC5B086D",
       args: [token0.address, lower, upper],
     });
   }
@@ -190,7 +190,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
       writeContractUpdatePosition({
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "updatePosition",
+        functionName: "updatePosition622A559D",
         args: [token0.address, id, delta],
       });
     },
