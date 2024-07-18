@@ -286,8 +286,8 @@ impl Pools {
     }
 
     /// Performs a two stage swap, using approvals to transfer tokens. See [Self::swap_2_internal].
-   #[allow(non_snake_case)]
-   pub fn swap_2_exact_in_41203_F1_D(
+    #[allow(non_snake_case)]
+    pub fn swap_2_exact_in_41203_F1_D(
         &mut self,
         from: Address,
         to: Address,
@@ -359,7 +359,9 @@ impl Pools {
     // slight hack - we cfg out the whole function, since the `selector` and `raw` attributes don't
     // actually exist, so we can't `cfg_attr` them in
     #[cfg(feature = "swap_permit2")]
-    #[selector(id = "swapPermit2EE84AD91(address,bool,int256,uint256,uint256,uint256,uint256,bytes)")]
+    #[selector(
+        id = "swapPermit2EE84AD91(address,bool,int256,uint256,uint256,uint256,uint256,bytes)"
+    )]
     #[raw]
     #[allow(non_snake_case)]
     pub fn swap_permit_2_E_E84_A_D91(&mut self, data: &[u8]) -> RawArbResult {
@@ -395,7 +397,9 @@ impl Pools {
 
     /// Performs a two stage swap, using permit2 to transfer tokens. See [Self::swap_2_internal].
     #[cfg(feature = "swap_permit2")]
-    #[selector(id = "swap2ExactInPermit236B2FDD8(address,address,uint256,uint256,uint256,uint256,bytes)")]
+    #[selector(
+        id = "swap2ExactInPermit236B2FDD8(address,address,uint256,uint256,uint256,uint256,bytes)"
+    )]
     #[raw]
     #[allow(non_snake_case)]
     pub fn swap_2_exact_in_permit_2_36_B2_F_D_D8(&mut self, data: &[u8]) -> RawArbResult {
@@ -457,7 +461,12 @@ impl Pools {
     /// # Errors
     /// Requires the pool to exist and be enabled.
     #[allow(non_snake_case)]
-    pub fn mint_position_B_C5_B086_D(&mut self, pool: Address, lower: i32, upper: i32) -> Result<U256, Revert> {
+    pub fn mint_position_B_C5_B086_D(
+        &mut self,
+        pool: Address,
+        lower: i32,
+        upper: i32,
+    ) -> Result<U256, Revert> {
         let id = self.next_position_id.get();
         self.pools.setter(pool).create_position(id, lower, upper)?;
 
@@ -485,7 +494,7 @@ impl Pools {
     /// # Errors
     /// Requires the position be owned by the caller. Requires the pool to be enabled.
     #[allow(non_snake_case)]
-   pub fn burn_position_AE401070(&mut self, id: U256) -> Result<(), Revert> {
+    pub fn burn_position_AE401070(&mut self, id: U256) -> Result<(), Revert> {
         let owner = msg::sender();
         assert_eq_or!(
             self.position_owners.get(id),
@@ -509,7 +518,7 @@ impl Pools {
     /// # Errors
     /// Requires the caller be the NFT manager.
     #[allow(non_snake_case)]
-   pub fn transfer_position_E_E_C7_A3_C_D(
+    pub fn transfer_position_E_E_C7_A3_C_D(
         &mut self,
         id: U256,
         from: Address,
@@ -533,13 +542,13 @@ impl Pools {
 
     /// Returns the number of positions owned by an address.
     #[allow(non_snake_case)]
-   pub fn position_balance_4_F32_C7_D_B(&self, user: Address) -> Result<U256, Revert> {
+    pub fn position_balance_4_F32_C7_D_B(&self, user: Address) -> Result<U256, Revert> {
         Ok(self.owned_positions.get(user))
     }
 
     /// Returns the amount of liquidity in a position.
     #[allow(non_snake_case)]
-   pub fn position_liquidity_8_D11_C045(&self, pool: Address, id: U256) -> Result<u128, Revert> {
+    pub fn position_liquidity_8_D11_C045(&self, pool: Address, id: U256) -> Result<u128, Revert> {
         let liquidity = self.pools.getter(pool).get_position_liquidity(id);
 
         Ok(liquidity.sys())
@@ -559,10 +568,10 @@ impl Pools {
     /// Requires the caller to be the position owner. Requires the pool to be enabled.
     /// Requires the length of the pools and ids to be equal.
     #[allow(non_snake_case)]
-   pub fn collect_7_F21947_C(
+    pub fn collect_7_F21947_C(
         &mut self,
         pools: Vec<Address>,
-        ids: Vec<U256>
+        ids: Vec<U256>,
     ) -> Result<Vec<(u128, u128)>, Revert> {
         assert_eq!(ids.len(), pools.len());
 
@@ -660,7 +669,7 @@ impl Pools {
     /// Refreshes and updates liquidity in a position, using approvals to transfer tokens.
     /// See [Self::update_position_internal].
     #[allow(non_snake_case)]
-   pub fn update_position_622_A559_D(
+    pub fn update_position_622_A559_D(
         &mut self,
         pool: Address,
         id: U256,
@@ -761,7 +770,7 @@ impl Pools {
     /// # Errors
     /// Requires the caller to be the seawater admin. Requires the pool to not exist.
     #[allow(non_snake_case)]
-   pub fn create_pool_D650_E2_D0(
+    pub fn create_pool_D650_E2_D0(
         &mut self,
         pool: Address,
         price: U256,
@@ -795,25 +804,25 @@ impl Pools {
 
     /// Getter method for the sqrt price
     #[allow(non_snake_case)]
-   pub fn sqrt_price_x967_B8_F5_F_C5(&self, pool: Address) -> Result<U256, Revert> {
+    pub fn sqrt_price_x967_B8_F5_F_C5(&self, pool: Address) -> Result<U256, Revert> {
         Ok(self.pools.getter(pool).get_sqrt_price())
     }
 
     /// Getter method for the current tick
     #[allow(non_snake_case)]
-   pub fn cur_tick181_C6_F_D9(&self, pool: Address) -> Result<i32, Revert> {
+    pub fn cur_tick181_C6_F_D9(&self, pool: Address) -> Result<i32, Revert> {
         // converted to i32 for automatic abi encoding
         Ok(self.pools.getter(pool).get_cur_tick().sys())
     }
 
     #[allow(non_snake_case)]
-   pub fn fees_owed_22_F28_D_B_D(&self, pool: Address, id: U256) -> Result<(u128, u128), Revert> {
+    pub fn fees_owed_22_F28_D_B_D(&self, pool: Address, id: U256) -> Result<(u128, u128), Revert> {
         Ok(self.pools.getter(pool).get_fees_owed(id))
     }
 
     /// Getter method for the tick spacing of the pool given.
     #[allow(non_snake_case)]
-   pub fn tick_spacing_653_F_E28_F(&self, pool: Address) -> Result<u8, Revert> {
+    pub fn tick_spacing_653_F_E28_F(&self, pool: Address) -> Result<u8, Revert> {
         // converted to i32 for automatic abi encoding
         Ok(self.pools.getter(pool).get_tick_spacing().sys())
     }
@@ -894,7 +903,7 @@ impl test_utils::StorageNew for Pools {
 
 #[cfg(test)]
 mod test {
-    use crate::{eth_serde, test_utils, types::I256Extension, types::*, Pools, tick_math};
+    use crate::{eth_serde, test_utils, tick_math, types::I256Extension, types::*, Pools};
     use maplit::hashmap;
     use ruint_macro::uint;
     use stylus_sdk::{
@@ -941,11 +950,6 @@ mod test {
         assert_eq!(nonce, uint!(1_U256));
         assert_eq!(max_amount, uint!(10_U256));
         assert_eq!(data.len(), 0);
-    }
-
-    #[test]
-    fn test_sqrt_price() {
-        dbg!(test_utils::encode_sqrt_price(100, 1));
     }
 
     #[test]
@@ -1110,8 +1114,9 @@ mod test {
                 let to = address!("de104342B32BCa03ec995f999181f7Cf1fFc04d7");
                 let amount = U256::from_str("10000000000").unwrap();
                 let min_out = U256::from(0);
-                let (_amount_in, _amount_out) =
-                    contract.swap_2_exact_in_41203_F1_D(from, to, amount, min_out).unwrap();
+                let (_amount_in, _amount_out) = contract
+                    .swap_2_exact_in_41203_F1_D(from, to, amount, min_out)
+                    .unwrap();
                 Ok(())
             },
         )
@@ -1182,7 +1187,19 @@ mod test {
                 let sqrt_lower = tick_math::get_sqrt_ratio_at_tick(tick_lower)?;
                 let sqrt_upper = tick_math::get_sqrt_ratio_at_tick(tick_upper)?;
 
-                dbg!(("update_position", liq, sqrt_price, tick_current, id, delta, tick_lower, tick_upper, sqrt_lower, sqrt_upper, sqrt_current));
+                dbg!((
+                    "update_position",
+                    liq,
+                    sqrt_price,
+                    tick_current,
+                    id,
+                    delta,
+                    tick_lower,
+                    tick_upper,
+                    sqrt_lower,
+                    sqrt_upper,
+                    sqrt_current
+                ));
 
                 // liquidity		0
                 // sqrt price	91912741289436239605563425905
