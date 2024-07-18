@@ -185,21 +185,20 @@ export default function PoolPage() {
     isPending: isCollectPending,
   } = useWriteContract();
 
-  // TODO update ABI/params once function signature changes
   const { data: unclaimedRewardsData } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "collect",
-    args: [token0.address, BigInt(positionId ?? 0), maxUint128, maxUint128],
+    functionName: "collect7F21947C",
+    args: [[token0.address], [BigInt(positionId ?? 0)]],
   });
 
   const unclaimedRewards = useMemo(() => {
     if (!unclaimedRewardsData || !positionId)
       return "$0.00"
 
-    const [token0Amount, token1Amount] = unclaimedRewardsData.result || [0n, 0n]
-    const token0AmountScaled = Number(token0Amount) * Number(tokenPrice) / 10 ** (token0.decimals + fUSDC.decimals)
-    const token1AmountScaled = Number(token1Amount) / 10 ** fUSDC.decimals
+    const [{ amount0, amount1 }] = unclaimedRewardsData.result || [{ amount0: 0n, amount1: 0n }]
+    const token0AmountScaled = Number(amount0) * Number(tokenPrice) / 10 ** (token0.decimals + fUSDC.decimals)
+    const token1AmountScaled = Number(amount1) / 10 ** fUSDC.decimals
     return usdFormat(token0AmountScaled + token1AmountScaled)
   }, [unclaimedRewardsData])
 
@@ -208,8 +207,8 @@ export default function PoolPage() {
       writeContractCollect({
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "collect",
-        args: [token0.address, id, maxUint128, maxUint128],
+        functionName: "collect7F21947C",
+        args: [[token0.address], [id]],
       });
     },
     [writeContractCollect, token0],
