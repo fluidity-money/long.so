@@ -192,7 +192,7 @@ impl StoragePool {
         amount_0_min: U256,
         amount_1_min: U256,
         amount_0_max: U256,
-        amount_1_max: U256
+        amount_1_max: U256,
     ) -> Result<(I256, I256), Revert> {
         // calculate the delta using the amounts that we have here, guaranteeing
         // that we don't dip below the amount that's supplied as the minimum.
@@ -208,7 +208,7 @@ impl StoragePool {
             sqrt_ratio_a_x_96, // lower_tick
             sqrt_ratio_b_x_96, // upper_tick
             amount_0_max,      // amount_0
-            amount_1_max       // amount_1
+            amount_1_max,      // amount_1
         )?;
 
         let (amount_0, amount_1) = self.update_position(id, delta)?;
@@ -731,16 +731,24 @@ mod test {
             pool.init(
                 test_utils::encode_sqrt_price(100, 1), // price
                 0,
-                1,
+                10,
                 u128::MAX,
             )?;
 
-            pool.create_position(id, low, up)?;
+            match pool.create_position(id, 11, 17) {
+                Err(r) => assert_eq!(
+                    Error::InvalidTickSpacing.to_string(),
+                    String::from_utf8(r).unwrap()
+                ),
+                _ => panic!("expected InvalidTickSpacing"),
+            }
+
+            pool.create_position(id, low - low % 10, up - up % 10)?;
 
             let position_saved = pool.positions.positions.get(id);
 
-            assert_eq!(position_saved.lower.get().as_i32(), low);
-            assert_eq!(position_saved.upper.get().as_i32(), up);
+            assert_eq!(position_saved.lower.get().as_i32(), low - low % 10);
+            assert_eq!(position_saved.upper.get().as_i32(), up - up % 10);
 
             Ok(())
         })
@@ -779,7 +787,7 @@ mod test {
 
     #[test]
     fn test_pool_update_position_parametric() {
-        let init_prices = [
+        let init_prices: [[i64; 2]; 9] = [
             [10, 10],
             [10, 33],
             [10, 171],
@@ -791,7 +799,7 @@ mod test {
             [1_048_572, 10],
         ];
 
-        let position_range_percent: u64 = 10;
+        let position_ranges: [[i64; 2]; 3] = [[-20, -10], [-10, 10], [10, 20]];
 
         let position_delta_template = [1000, 777, 252, 33, 5];
 
@@ -799,34 +807,54 @@ mod test {
 
         for price in init_prices.iter() {
             for delta in position_delta.iter() {
-                test_utils::with_storage::<_, StoragePool, _>(None, None, None, None, |pool| {
-                    let init_price = test_utils::encode_sqrt_price(price[0], price[1]);
+                for position_range in position_ranges.iter() {
+                    test_utils::with_storage::<_, StoragePool, _>(None, None, None, None, |pool| {
+                        let init_price = test_utils::encode_sqrt_price(
+                            price[0].unsigned_abs(),
+                            price[1].unsigned_abs(),
+                        );
 
-                    let position_price_offset = price[0] * position_range_percent / 100;
+                        let position_prices = [
+                            price[0] + price[0] * position_range[0] / 100,
+                            price[0] + price[0] * position_range[1] / 100,
+                        ];
 
-                    let position_prices = [
-                        price[0] - position_price_offset,
-                        price[0] + position_price_offset,
-                    ]
-                    .map(|x| test_utils::encode_sqrt_price(x, price[1]));
+                        let low = tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(
+                            position_prices[0].unsigned_abs(),
+                            price[1].unsigned_abs(),
+                        ))
+                        .unwrap();
 
-                    let low = tick_math::get_tick_at_sqrt_ratio(position_prices[0]).unwrap();
-                    let up = tick_math::get_tick_at_sqrt_ratio(position_prices[1]).unwrap();
+                        let up = tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(
+                            position_prices[1].unsigned_abs(),
+                            price[1].unsigned_abs(),
+                        ))
+                        .unwrap();
 
-                    pool.init(init_price, 3000, 60 as u8, u128::MAX).unwrap();
+                        pool.init(init_price, 3000, 60 as u8, u128::MAX).unwrap();
 
-                    let id = uint!(2_U256);
+                        let id = uint!(2_U256);
 
-                    pool.create_position(id, low, up).unwrap();
+                        let low_padded = low - low % 60;
+                        let up_padded = up - up % 60;
 
-                    pool.update_position(id, *delta).unwrap();
+                        pool.create_position(id, low_padded, up_padded).unwrap();
 
-                    //TODO: check liquidity
+                        let liqudity = pool.liquidity.get().sys();
 
-                    pool.update_position(id, -delta).unwrap();
+                        let (u0, u1) = pool.update_position(id, *delta).unwrap();
 
-                    //TODO: compare liqudity
-                });
+                        if position_prices[0] < price[0] && price[0] < position_prices[1] {
+                            assert!(u0.gt(&I256::zero()));
+                            assert!(u1.gt(&I256::zero()));
+                            assert!(pool.liquidity.get().sys() - liqudity > 0);
+                            pool.update_position(id, -delta).unwrap();
+                            assert!(pool.liquidity.get().sys() == 0);
+                        } else {
+                            assert!(pool.liquidity.get().sys() - liqudity == 0);
+                        }
+                    });
+                }
             }
         }
     }
@@ -839,9 +867,10 @@ mod test {
 
         let init_price = test_utils::encode_sqrt_price(100_000, 1_000);
 
-        let liq_price_inside = [101_000, 105_000];
+        let liq_price_inside = [50_000, 150_000];
 
-        let swap_amounts: Vec<i128> = (1..=100).map(|p| p * delta / 100).collect();
+        //Swap up to 1% of the liquidity
+        let swap_amounts: Vec<i128> = (1..=10).map(|p| p * delta / 1_000).collect();
 
         for swap_amount in &swap_amounts {
             // Price inside liquidity range
@@ -869,10 +898,7 @@ mod test {
                     .swap(true, I256::unchecked_from(*swap_amount), U256::MAX)
                     .unwrap();
 
-                dbg!(a0);
-                dbg!(a1);
-                // assert_eq!(swap_amount, &a0.as_i128());
-                // assert!()
+                assert!(a0 == I256::unchecked_from(*swap_amount));
             });
         }
 
@@ -891,6 +917,7 @@ mod test {
 
         let init_price = test_utils::encode_sqrt_price(100, 1);
 
+        //TODO: Maybe add checks after zero amounts fix
         for swap_amount in &swap_amounts {
             test_utils::with_storage::<_, StoragePool, _>(None, None, None, None, |pool| {
                 pool.init(init_price, 3000, 60, u128::MAX).unwrap();
