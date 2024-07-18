@@ -197,6 +197,9 @@ impl StoragePool {
         // calculate the delta using the amounts that we have here, guaranteeing
         // that we don't dip below the amount that's supplied as the minimum.
 
+        assert_or!(amount_0_max > U256::zero(), Error::SwapResultTooLow);
+        assert_or!(amount_1_max > U256::zero(), Error::SwapResultTooLow);
+
         let position = self.positions.positions.get(id);
 
         let sqrt_ratio_x_96 = tick_math::get_sqrt_ratio_at_tick(self.get_cur_tick().as_i32())?;
