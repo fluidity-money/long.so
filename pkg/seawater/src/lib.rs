@@ -166,6 +166,9 @@ impl Pools {
             .ok_or(Error::SwapResultTooHigh)?
             .into_raw();
 
+        assert_or!(amount_0_abs > U256::zero(), Error::SwapResultTooLow);
+        assert_or!(amount_1_abs > U256::zero(), Error::SwapResultTooLow);
+
         evm::log(events::Swap1 {
             user: msg::sender(),
             pool,
@@ -271,7 +274,8 @@ impl Pools {
 /// Swap functions. Only enabled when the `swaps` feature is set.
 #[cfg_attr(feature = "swaps", external)]
 impl Pools {
-    pub fn swap_eb3a17(
+    #[allow(non_snake_case)]
+    pub fn swap_904369_B_E(
         &mut self,
         pool: Address,
         zero_for_one: bool,

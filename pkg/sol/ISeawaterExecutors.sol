@@ -8,7 +8,7 @@ interface ISeawaterExecutorSwap {
     /// @param amount the amount of token to swap, positive if exactIn, negative if exactOut
     /// @param priceLimit the price limit for swaps, encoded as a sqrtX96 price
     /// @return (token0, token1) delta
-    function swap_5a7d1bbd(
+    function swap904369BE(
         address pool,
         bool zeroForOne,
         int256 amount,

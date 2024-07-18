@@ -186,7 +186,7 @@ contract SeawaterAMM is ISeawaterAMM {
     // swap functions
 
     /// @inheritdoc ISeawaterExecutorSwap
-    function swap_5a7d1bbd(address /* pool */, bool /* zeroForOne */, int256 /* amount */, uint256 /* priceLimit */) external returns (int256, int256) {
+    function swap904369BE(address /* pool */, bool /* zeroForOne */, int256 /* amount */, uint256 /* priceLimit */) external returns (int256, int256) {
         directDelegate(_getExecutorSwap());
     }
 
@@ -236,7 +236,7 @@ contract SeawaterAMM is ISeawaterAMM {
     /// @inheritdoc ISeawaterAMM
     function swapIn32502CA71(address token, uint256 amountIn, uint256 minOut) external returns (int256, int256) {
         (bool success, bytes memory data) = _getExecutorSwap().delegatecall(abi.encodeCall(
-            ISeawaterExecutorSwap.swap_5a7d1bbd,
+            ISeawaterExecutorSwap.swap904369BE,
             (
                 token,
                 true,
@@ -278,7 +278,7 @@ contract SeawaterAMM is ISeawaterAMM {
     /// @inheritdoc ISeawaterAMM
     function swapOut5E08A399(address token, uint256 amountIn, uint256 minOut) external returns (int256, int256) {
         (bool success, bytes memory data) = _getExecutorSwap().delegatecall(abi.encodeCall(
-            ISeawaterExecutorSwap.swap_5a7d1bbd,
+            ISeawaterExecutorSwap.swap904369BE,
             (
                 token,
                 false,

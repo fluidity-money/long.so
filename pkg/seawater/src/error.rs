@@ -198,14 +198,13 @@ pub enum Error {
     #[error("Operation unavailable when the pool is disabled")]
     PoolDisabled,
 
+    // 33 (0x21)
     #[error("Invalid tick spacing")]
     InvalidTickSpacing,
 
-    #[error("Amount 0 too low")]
-    Amount0TooLow,
-
-    #[error("Amount 1 too low")]
-    Amount1TooLow
+    // 34 (0x22)
+    #[error("Swap result too low")]
+    SwapResultTooLow,
 }
 
 impl From<Error> for Vec<u8> {

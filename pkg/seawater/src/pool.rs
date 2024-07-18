@@ -213,8 +213,8 @@ impl StoragePool {
 
         let (amount_0, amount_1) = self.update_position(id, delta)?;
 
-        assert_or!(amount_0.abs_pos()? >= amount_0_min, Error::Amount0TooLow);
-        assert_or!(amount_1.abs_pos()? >= amount_1_min, Error::Amount1TooLow);
+        assert_or!(amount_0.abs_pos()? >= amount_0_min, Error::SwapResultTooLow);
+        assert_or!(amount_1.abs_pos()? >= amount_1_min, Error::SwapResultTooLow);
 
         Ok((amount_0, amount_1))
     }
