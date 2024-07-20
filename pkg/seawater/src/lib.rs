@@ -747,10 +747,34 @@ impl Pools {
         self.update_position_internal(pool, id, delta, None)
     }
 
-    /// Refreshes and updates liquidity in a position, transferring tokens using a check for the amounts taken.
+    /// Refreshes and updates liquidity in a position, transferring tokens from the user with a restriction on the amount taken.
     /// See [Self::adjust_position_internal].
     #[allow(non_snake_case)]
     pub fn incr_position_05_F_D_2263(
+        &mut self,
+        pool: Address,
+        id: U256,
+        amount_0_min: U256,
+        amount_1_min: U256,
+        amount_0_max: U256,
+        amount_1_max: U256,
+    ) -> Result<(U256, U256), Revert> {
+        self.adjust_position_internal(
+            pool,
+            id,
+            amount_0_min,
+            amount_1_min,
+            amount_0_max,
+            amount_1_max,
+            false,
+            None
+        )
+    }
+
+    /// Refreshes and updates liquidity in a position, transferring tokens to the user with restrictions.
+    /// See [Self::adjust_position_internal].
+    #[allow(non_snake_case)]
+    pub fn decr_position_F_C_C_D_4896(
         &mut self,
         pool: Address,
         id: U256,
@@ -784,19 +808,18 @@ impl Pools {
         let (id, data) = eth_serde::parse_u256(data);
         let (amount_0_min, data) = eth_serde::parse_u256(data);
         let (amount_1_min, data) = eth_serde::parse_u256(data);
-        let (amount_0_max, data) = eth_serde::parse_u256(data);
-        let (amount_1_max, data) = eth_serde::parse_u256(data);
 
-        fn parse_permit2(data: &[u8]) -> (U256, U256, &[u8]) {
+        fn parse_permit2(data: &[u8]) -> (U256, U256, U256, &[u8]) {
             let (nonce, data) = eth_serde::parse_u256(data);
             let (deadline, data) = eth_serde::parse_u256(data);
+            let (token_max, data) = eth_serde::parse_u256(data);
             let (_, data) = eth_serde::take_word(data);
 
-            (nonce, deadline, max_amount, data)
+            (nonce, deadline, token_max, data)
         }
 
-        let (nonce_0, deadline_0, data) = parse_permit2(data);
-        let (nonce_1, deadline_1, data) = parse_permit2(data);
+        let (nonce_0, deadline_0, amount_0_max, data) = parse_permit2(data);
+        let (nonce_1, deadline_1, amount_1_max, data) = parse_permit2(data);
 
         let (sig_0, data) = eth_serde::parse_bytes(data);
         let (sig_1, _) = eth_serde::parse_bytes(data);
@@ -823,6 +846,7 @@ impl Pools {
             amount_1_min,
             amount_0_max,
             amount_1_max,
+            false,
             Some((permit2_token_0, permit2_token_1)),
         ) {
             Ok((token_0, token_1)) => Some(Ok([
