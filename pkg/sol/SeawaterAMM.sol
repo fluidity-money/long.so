@@ -402,15 +402,45 @@ contract SeawaterAMM is ISeawaterAMM {
         uint256 /* amount1Min */,
         uint256 /* amount0Max */,
         uint256 /* amount1Max */
-    ) external returns (int256, int256) {
+    ) external returns (uint256, uint256) {
         directDelegate(_getExecutorUpdatePosition());
     }
 
     /// @inheritdoc ISeawaterExecutorUpdatePosition
-    function updatePositionPermit2F24010C3(
-        address /* pool */,
+    function decrPositionFCCD4896(
         uint256 /* id */,
-        int128 /* delta */,
+        uint256 /* amount0Min */,
+        uint256 /* amount1Min */,
+        uint256 /* amount0Max */,
+        uint256 /* amount1Max */
+    ) external returns (uint256, uint256) {
+        directDelegate(_getExecutorUpdatePosition());
+    }
+
+    function incrPositionPermit2E0AA1766( // TODO
+        address /* token */,
+        uint256 /* id */,
+        uint256 /* amount0Min */,
+        uint256 /* amount1Min */,
+        uint256 /* amount0Max */,
+        uint256 /* amount1Max */,
+        uint256 /* nonce0 */,
+        uint256 /* deadline0 */,
+        bytes memory /* sig0 */,
+        uint256 /* nonce1 */,
+        uint256 /* deadline1 */,
+        bytes memory /* sig1 */
+    ) external returns (uint256, uint256) {
+        directDelegate(_getExecutorUpdatePosition());
+    }
+
+    function decrPositionPermit2(
+        address /* token */,
+        uint256 /* id */,
+        uint256 /* amount0Min */,
+        uint256 /* amount1Min */,
+        uint256 /* amount0Max */,
+        uint256 /* amount1Max */,
         uint256 /* nonce0 */,
         uint256 /* deadline0 */,
         uint256 /* maxAmount0 */,
@@ -419,7 +449,7 @@ contract SeawaterAMM is ISeawaterAMM {
         uint256 /* deadline1 */,
         uint256 /* maxAmount1 */,
         bytes memory /* sig1 */
-    ) external returns (int256, int256) {
+    ) external returns (uint256, uint256) {
         directDelegate(_getExecutorUpdatePosition());
     }
 

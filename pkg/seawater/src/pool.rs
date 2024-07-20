@@ -186,19 +186,17 @@ impl StoragePool {
 
     ///! Signature for this position is u128 externally. In reality it's a U256 under the hood.
     ///! If the end result exceeds 128, the whole thing will blow up without a revert message.
-    pub fn incr_position(
+    pub fn adjust_position(
         &mut self,
         id: U256,
-        amount_0_min: U256,
-        amount_1_min: U256,
-        amount_0_max: U256,
-        amount_1_max: U256,
+        amount_0: U256,
+        amount_1: U256,
     ) -> Result<(I256, I256), Revert> {
         // calculate the delta using the amounts that we have here, guaranteeing
         // that we don't dip below the amount that's supplied as the minimum.
 
-        assert_or!(amount_0_max > U256::zero(), Error::SwapResultTooLow);
-        assert_or!(amount_1_max > U256::zero(), Error::SwapResultTooLow);
+        assert_or!(amount_0 > U256::zero(), Error::SwapResultTooLow);
+        assert_or!(amount_1 > U256::zero(), Error::SwapResultTooLow);
 
         let position = self.positions.positions.get(id);
 
@@ -210,27 +208,13 @@ impl StoragePool {
             sqrt_ratio_x_96,   // cur_tick
             sqrt_ratio_a_x_96, // lower_tick
             sqrt_ratio_b_x_96, // upper_tick
-            amount_0_max,      // amount_0
-            amount_1_max,      // amount_1
+            amount_0,      // amount_0
+            amount_1,      // amount_1
         )?;
 
-        let (amount_0, amount_1) = self.update_position(id, delta)?;
+        // should also ensure that we don't do this on a pool that's not currently running
 
-        assert_or!(amount_0.abs_pos()? >= amount_0_min, Error::SwapResultTooLow);
-        assert_or!(amount_1.abs_pos()? >= amount_1_min, Error::SwapResultTooLow);
-
-        Ok((amount_0, amount_1))
-    }
-
-    pub fn decr_position(
-        &mut self,
-        id: U256,
-        amount_0_min: U256,
-        amount_1_min: U256,
-        amount_0_max: U256,
-        amount_1_max: U256
-    ) -> Result<(I256, I256), Revert> {
-        Ok((I256::zero(), I256::zero()))
+        self.update_position(id, delta)
     }
 
     /// Performs a swap on this pool.

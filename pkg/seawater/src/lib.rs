@@ -166,7 +166,10 @@ impl Pools {
             .ok_or(Error::SwapResultTooHigh)?
             .into_raw();
 
-        assert_or!(amount_0_abs > U256::zero() || amount_1_abs > U256::zero(), Error::SwapResultTooLow);
+        assert_or!(
+            amount_0_abs > U256::zero() || amount_1_abs > U256::zero(),
+            Error::SwapResultTooLow
+        );
 
         evm::log(events::Swap1 {
             user: msg::sender(),
@@ -661,6 +664,73 @@ impl Pools {
 
         Ok((token_0, token_1))
     }
+
+    pub fn adjust_position_internal(
+        &mut self,
+        pool: Address,
+        id: U256,
+        amount_0_min: U256,
+        amount_1_min: U256,
+        amount_0_max: U256,
+        amount_1_max: U256,
+        giving: bool,
+        permit2: Option<(Permit2Args, Permit2Args)>,
+    ) -> Result<(U256, U256), Revert> {
+        assert_eq_or!(
+            msg::sender(),
+            self.position_owners.get(id),
+            Error::PositionOwnerOnly
+        );
+
+        let (amount_0, amount_1) = self.pools.setter(pool).adjust_position(
+            id,
+            amount_0_max,
+            amount_1_max
+        )?;
+
+        evm::log(events::UpdatePositionLiquidity {
+            id: id,
+            token0: amount_0,
+            token1: amount_1,
+        });
+
+        let (amount_0, amount_1) = if giving {
+            (amount_0.abs_neg()?, amount_1.abs_neg()?)
+        } else {
+            (amount_0.abs_pos()?, amount_1.abs_pos()?)
+        };
+
+        assert_or!(amount_0 >= amount_0_min, Error::SwapResultTooLow);
+        assert_or!(amount_1 >= amount_1_min, Error::SwapResultTooLow);
+
+        #[cfg(feature = "testing-dbg")]
+        dbg!((
+            "adjust position modifying",
+            current_test!(),
+            amount_0,
+            amount_1,
+            amount_0_min,
+            amount_1_min,
+            amount_0_max,
+            amount_1_max,
+            giving
+        ));
+
+        if giving {
+            erc20::give(pool, amount_0)?;
+            erc20::give(FUSDC_ADDR, amount_1)?;
+        } else {
+            let (permit_0, permit_1) = match permit2 {
+                Some((permit_0, permit_1)) => (Some(permit_0), Some(permit_1)),
+                None => (None, None),
+            };
+
+            erc20::take(pool, amount_0, permit_0)?;
+            erc20::take(FUSDC_ADDR, amount_1, permit_1)?;
+        }
+
+        Ok((amount_0, amount_1))
+    }
 }
 
 #[cfg_attr(feature = "update_positions", external)]
@@ -677,53 +747,82 @@ impl Pools {
         self.update_position_internal(pool, id, delta, None)
     }
 
+    /// Refreshes and updates liquidity in a position, transferring tokens using a check for the amounts taken.
+    /// See [Self::adjust_position_internal].
+    #[allow(non_snake_case)]
+    pub fn incr_position_05_F_D_2263(
+        &mut self,
+        pool: Address,
+        id: U256,
+        amount_0_min: U256,
+        amount_1_min: U256,
+        amount_0_max: U256,
+        amount_1_max: U256,
+    ) -> Result<(U256, U256), Revert> {
+        self.adjust_position_internal(
+            pool,
+            id,
+            amount_0_min,
+            amount_1_min,
+            amount_0_max,
+            amount_1_max,
+            true,
+            None
+        )
+    }
+
     #[cfg(feature = "update_positions")]
     #[raw]
     #[selector(
-        id = "updatePositionPermit2F24010C3(address,uint256,int128,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)"
+        id = "incrPositionPermit2E0AA1766(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,bytes,uint256,uint256,bytes)"
     )]
-    /// Refreshes and updates liquidity in a position, using permit2 to transfer tokens.
-    /// See [Self::update_position_internal].
+    /// Refreshes and increases the liquidity in a position with some protections, using permit2 to transfer tokens.
+    /// See [Self::adjust_position_internal].
     #[allow(non_snake_case)]
-    pub fn update_position_permit2_F24010_C3(&mut self, data: &[u8]) -> RawArbResult {
+    pub fn incr_position_permit2_E_0AA1766(&mut self, data: &[u8]) -> RawArbResult {
         let (pool, data) = eth_serde::parse_addr(data);
         let (id, data) = eth_serde::parse_u256(data);
-        let (delta, data) = eth_serde::parse_i128(data);
+        let (amount_0_min, data) = eth_serde::parse_u256(data);
+        let (amount_1_min, data) = eth_serde::parse_u256(data);
+        let (amount_0_max, data) = eth_serde::parse_u256(data);
+        let (amount_1_max, data) = eth_serde::parse_u256(data);
 
-        fn parse_permit2(data: &[u8]) -> (U256, U256, U256, &[u8]) {
+        fn parse_permit2(data: &[u8]) -> (U256, U256, &[u8]) {
             let (nonce, data) = eth_serde::parse_u256(data);
             let (deadline, data) = eth_serde::parse_u256(data);
-            let (max_amount, data) = eth_serde::parse_u256(data);
             let (_, data) = eth_serde::take_word(data);
 
             (nonce, deadline, max_amount, data)
         }
 
-        let (nonce_0, deadline_0, max_amount_0, data) = parse_permit2(data);
-        let (nonce_1, deadline_1, max_amount_1, data) = parse_permit2(data);
+        let (nonce_0, deadline_0, data) = parse_permit2(data);
+        let (nonce_1, deadline_1, data) = parse_permit2(data);
 
         let (sig_0, data) = eth_serde::parse_bytes(data);
         let (sig_1, _) = eth_serde::parse_bytes(data);
 
         let permit2_token_0 = Permit2Args {
-            max_amount: max_amount_0,
+            max_amount: amount_0_max,
             nonce: nonce_0,
             deadline: deadline_0,
             sig: sig_0,
         };
 
         let permit2_token_1 = Permit2Args {
-            max_amount: max_amount_1,
+            max_amount: amount_1_max,
             nonce: nonce_1,
             deadline: deadline_1,
             sig: sig_1,
         };
 
-        match Pools::update_position_internal(
+        match Pools::adjust_position_internal(
             self,
             pool,
             id,
-            delta,
+            amount_0_min,
+            amount_1_min,
+            amount_0_max,
+            amount_1_max,
             Some((permit2_token_0, permit2_token_1)),
         ) {
             Ok((token_0, token_1)) => Some(Ok([

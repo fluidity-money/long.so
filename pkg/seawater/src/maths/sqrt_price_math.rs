@@ -8,8 +8,8 @@ use crate::{
         unsafe_math::div_rounding_up,
     },
 };
-use ruint_macro::uint;
 use num_traits::cast::ToPrimitive;
+use ruint_macro::uint;
 
 /// The maximum value storable in a 160-bit unsigned integer.
 pub const MAX_U160: U256 =
@@ -275,7 +275,11 @@ pub fn get_liquidity_for_amounts(
     } else if sqrt_ratio_x_96 < sqrt_ratio_1_x_96 {
         let liq0 = get_liquidity_for_amount_0(sqrt_ratio_x_96, sqrt_ratio_1_x_96, amount_0)?;
         let liq1 = get_liquidity_for_amount_1(sqrt_ratio_0_x_96, sqrt_ratio_x_96, amount_1)?;
-        if liq0 > liq1 { liq0 } else { liq1 }
+        if liq0 > liq1 {
+            liq0
+        } else {
+            liq1
+        }
     } else {
         get_liquidity_for_amount_1(sqrt_ratio_0_x_96, sqrt_ratio_1_x_96, amount_1)?
     };

@@ -162,12 +162,12 @@ interface ISeawaterExecutorUpdatePosition {
         int128 delta
     ) external returns (int256, int256);
 
-    /// @notice refreshes a position's fees, and adds liquidity, with some safeguards
+    /// @notice refreshes a position's fees, and adds liquidity, preventing less than the minimum from being taken.
     /// @param id the id of the position
     /// @param amount0Min minimum of amount0 to take from the user
     /// @param amount1Min minimum of amount1 to take from the user
-    /// @param amount0Max to use as the maximum of amount0, used to create the delta
-    /// @param amount1Max to use as the maximum of amount1, used to create the delta
+    /// @param amount0Max to take from the user, the maximum of token0
+    /// @param amount1Max to take from the user, the maximum of token1
     /// @return the deltas for token0, and token1
     function incrPosition05FD2263(
         uint256 id,
@@ -175,34 +175,37 @@ interface ISeawaterExecutorUpdatePosition {
         uint256 amount1Min,
         uint256 amount0Max,
         uint256 amount1Max
-    ) external returns (int256, int256);
+    ) external returns (uint256, uint256);
 
-    /// @notice refreshes a position's fees, and adds or removes liquidity using permit2 for token transfers
-    /// @param pool the pool the position belongs to
+    /// @notice refreshes a position's fees, and takes liquidity, preventing less than the minimum from being taken.
     /// @param id the id of the position
-    /// @param delta the amount of liquidity to add or remove
-    /// @param nonce0 the nonce for token 0
-    /// @param deadline0 the deadline for token 0
-    /// @param maxAmount0 the max amount for token 0
-    /// @param sig0 the signature for token 0
-    /// @param nonce1 the nonce for token 1
-    /// @param deadline1 the deadline for token 1
-    /// @param maxAmount1 the max amount for token 1
-    /// @param sig1 the signature for token 1
-    /// @return the deltas for token0 and token1 for the user
-    function updatePositionPermit2F24010C3(
-        address pool,
+    /// @param amount0Min minimum of amount0 to take from the user
+    /// @param amount1Min minimum of amount1 to take from the user
+    /// @param amount0Max to use as the maximum of amount0, used to create the delta
+    /// @param amount1Max to use as the maximum of amount1, used to create the delta
+    /// @return the deltas for token0, and token1
+    function decrPositionFCCD4896(
         uint256 id,
-        int128 delta,
-        uint256 nonce0,
-        uint256 deadline0,
-        uint256 maxAmount0,
-        bytes memory sig0,
-        uint256 nonce1,
-        uint256 deadline1,
-        uint256 maxAmount1,
-        bytes memory sig1
-    ) external returns (int256, int256);
+        uint256 amount0Min,
+        uint256 amount1Min,
+        uint256 amount0Max,
+        uint256 amount1Max
+    ) external returns (uint256, uint256);
+
+    function incrPositionPermit2E0AA1766( // TODO
+        address /* token */,
+        uint256 /* id */,
+        uint256 /* amount0Min */,
+        uint256 /* amount1Min */,
+        uint256 /* amount0Max */,
+        uint256 /* amount1Max */,
+        uint256 /* nonce0 */,
+        uint256 /* deadline0 */,
+        bytes memory /* sig0 */,
+        uint256 /* nonce1 */,
+        uint256 /* deadline1 */,
+        bytes memory /* sig1 */
+    ) external returns (uint256, uint256);
 }
 
 /// @dev contains just the admin functions that are exposed directly
