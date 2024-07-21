@@ -76,7 +76,7 @@ async function createPosition(
     const {args}  = amm.interface.parseLog(mintLog) || {}
     const [id, /*user*/, /*pool*/, /*low*/, /*high*/] = args as unknown as mintEventArgs;
 
-    const updatePositionResult = await amm.updatePosition622A559D(address, id, delta)
+    const updatePositionResult = await amm.updatePositionC7F1F740(address, id, delta)
     await updatePositionResult.wait()
 
     return id;
@@ -205,7 +205,7 @@ test("amm", async t => {
         return sig;
     }
 
-    await t.test("position modification with permit2 blobs", async t => {
+    await t.test("position adjustment with permit2 blobs", async t => {
         let maxAmount = 10000000;
         let nonce0 = curNonce++;
         let nonce1 = curNonce++;
@@ -219,21 +219,13 @@ test("amm", async t => {
 
         console.log("about to incr position permit2");
 
-        console.log("amm", amm.interface.fragments);
-
-        let response = await amm["incrPositionPermit2E0AA1766(address,uint256,uint256,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)"](
+        let response = await amm.incrPositionC1041D18(
             tusdcAddress, // token
             tusdcPositionId, // id
-            10000000, // amount0Min
-            10000000, // amount1Min
-            nonce0, // nonce0
-            deadline, // deadline0
+            0, // amount0Min
+            0, // amount1Min
             maxAmount, // amount0Max
-            sig0, // sig0
-            nonce1, // nonce1
-            deadline, // deadline1
             maxAmount, // amount1Max
-            sig1, // sig1
         );
         await response.wait();
 
@@ -246,7 +238,7 @@ test("amm", async t => {
         assert(tusdcAfterBalance < tusdcBeforeBalance, "expected tusdc balance to decrease");
 
         await t.test("withdrawing a position shouldn't lose money", async _ => {
-            let response = await amm.updatePosition622A559D(
+            let response = await amm.updatePositionC7F1F740(
                 tusdcAddress, // pool
                 tusdcPositionId,
                 -100, // delta

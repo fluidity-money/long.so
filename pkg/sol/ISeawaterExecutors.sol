@@ -156,20 +156,22 @@ interface ISeawaterExecutorUpdatePosition {
     /// @param id the id of the position
     /// @param delta the amount of liquidity to add or remove
     /// @return the deltas for token0 and token1 for the user
-    function updatePosition622A559D(
+    function updatePositionC7F1F740(
         address pool,
         uint256 id,
         int128 delta
     ) external returns (int256, int256);
 
     /// @notice refreshes a position's fees, and adds liquidity, preventing less than the minimum from being taken.
+    /// @param pool of the token to use
     /// @param id the id of the position
     /// @param amount0Min minimum of amount0 to take from the user
     /// @param amount1Min minimum of amount1 to take from the user
     /// @param amount0Max to take from the user, the maximum of token0
     /// @param amount1Max to take from the user, the maximum of token1
     /// @return the deltas for token0, and token1
-    function incrPosition05FD2263(
+    function incrPositionC1041D18(
+        address pool,
         uint256 id,
         uint256 amount0Min,
         uint256 amount1Min,
@@ -192,13 +194,13 @@ interface ISeawaterExecutorUpdatePosition {
         uint256 amount1Max
     ) external returns (uint256, uint256);
 
-    function incrPositionPermit2E0AA1766(
+    function incrPositionPermit25468326E(
         address /* token */,
         uint256 /* id */,
         uint256 /* amount0Min */,
         uint256 /* amount1Min */,
         uint256 /* nonce0 */,
-        uint256 /* deadline0,
+        uint256 /* deadline0 */,
         uint256 /* amount0Max */,
         bytes memory /* sig0 */,
         uint256 /* nonce1 */,

@@ -11,11 +11,7 @@ use crate::{Address, U256};
 #[allow(unused_imports)]
 use crate::current_test;
 
-static DEFAULT_SENDER: [u8; 20] = [
-    //0x59e8db5c2e506ddd395d58a1dd8cd02b81ecbd6c
-    0x59, 0xe8, 0xdb, 0x5c, 0x2e, 0x50, 0x6d, 0xdd, 0x39, 0x5d, 0x58, 0xa1, 0xdd, 0x8c, 0xd0, 0x2b,
-    0x81, 0xec, 0xbd, 0x6c,
-];
+static DEFAULT_SENDER: [u8; 20] = [0; 20];
 
 #[no_mangle]
 pub extern "C" fn native_keccak256(bytes: *const u8, len: usize, output: *mut u8) {

@@ -186,8 +186,6 @@ impl StoragePool {
         }
     }
 
-    ///! Signature for this position is u128 externally. In reality it's a U256 under the hood.
-    ///! If the end result exceeds 128, the whole thing will blow up without a revert message.
     pub fn adjust_position(
         &mut self,
         id: U256,
@@ -218,7 +216,7 @@ impl StoragePool {
             .to_i128()
             .map_or_else(|| Err(Error::LiquidityAmountTooWide), |v| Ok(v))?;
 
-        // should also ensure that we don't do this on a pool that's not currently running
+        // [update_position] should also ensure that we don't do this on a pool that's not currently running
 
         self.update_position(id, delta)
     }

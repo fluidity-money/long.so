@@ -55,7 +55,13 @@ pub fn take(
     _permit2_details: Option<Permit2Args>,
 ) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg")]
-    dbg!(("take", current_test!(), _token, _amount, _permit2_details));
+    dbg!((
+        "take",
+        current_test!(),
+        _token,
+        _amount.to_string(),
+        _permit2_details
+    ));
     host_test_shims::take_caller_bal(_token, _amount).map_err(
         |_| Error::Erc20RevertNoData, // follow the trace!
     )
