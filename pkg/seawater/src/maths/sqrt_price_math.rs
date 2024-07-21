@@ -2,7 +2,6 @@
 
 use crate::types::{I256, U256};
 use crate::{
-    current_test,
     error::Error,
     maths::{
         full_math::{mul_div, mul_div_rounding_up},
@@ -243,34 +242,26 @@ pub fn get_amount_1_delta(
 
 /// Calculates the liquidity in the form of the delta amount for amount0.
 fn get_liquidity_for_amount_0(
-    sqrt_ratio_a_x_96: U256,
-    sqrt_ratio_b_x_96: U256,
+    mut sqrt_ratio_a_x_96: U256,
+    mut sqrt_ratio_b_x_96: U256,
     amount: U256,
 ) -> Result<U256, Error> {
-    let (sqrt_ratio_0_x_96, sqrt_ratio_1_x_96) = if sqrt_ratio_a_x_96 > sqrt_ratio_b_x_96 {
-        (sqrt_ratio_a_x_96, sqrt_ratio_b_x_96)
-    } else {
-        (sqrt_ratio_b_x_96, sqrt_ratio_a_x_96)
+    if sqrt_ratio_a_x_96 > sqrt_ratio_b_x_96 {
+        (sqrt_ratio_a_x_96, sqrt_ratio_b_x_96) = (sqrt_ratio_b_x_96, sqrt_ratio_a_x_96)
     };
-    let intermediate = mul_div(sqrt_ratio_0_x_96, sqrt_ratio_1_x_96, Q96)?;
-    #[cfg(feature = "testing-dbg")]
-    dbg!((
-        "get_liquidity_for_amount_0",
-        current_test!(),
-        intermediate.to_string(),
-        sqrt_ratio_0_x_96.to_string(),
-        sqrt_ratio_1_x_96.to_string(),
-        Q96.to_string()
-    ));
-    mul_div(amount, intermediate, sqrt_ratio_1_x_96 - sqrt_ratio_0_x_96)
+    let intermediate = mul_div(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, Q96)?;
+    mul_div(amount, intermediate, sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96)
 }
 
 /// Calculates the liquidity in the form of the delta number for amount0.
 fn get_liquidity_for_amount_1(
-    sqrt_ratio_a_x_96: U256,
-    sqrt_ratio_b_x_96: U256,
+    mut sqrt_ratio_a_x_96: U256,
+    mut sqrt_ratio_b_x_96: U256,
     amount: U256,
 ) -> Result<U256, Error> {
+    if sqrt_ratio_a_x_96 > sqrt_ratio_b_x_96 {
+        (sqrt_ratio_a_x_96, sqrt_ratio_b_x_96) = (sqrt_ratio_b_x_96, sqrt_ratio_a_x_96)
+    };
     mul_div(amount, Q96, sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96)
 }
 
@@ -735,11 +726,12 @@ mod test {
         assert_eq!(
             get_liquidity_for_amount_0(
                 U256::from_str("79228162514264337593543950336").unwrap(),
-                U256::from_str("79224201403219477170569942574").unwrap(),
-                U256::from(100001)
+                U256::from_str("82974292838386133450542").unwrap(),
+                U256::from_str("1506981345970968035").unwrap()
             )
-            .unwrap(),
-            U256::from_str("1578237314707").unwrap() // Uniswap answer
+            .unwrap()
+            .to_string(),
+            U256::from_str("1578237314707").unwrap().to_string() // Uniswap answer
         );
     }
 }
@@ -756,7 +748,8 @@ mod test_properties {
         fn test_get_liquidity_for_amount0(
             min_tick in -887272..887272,
             upper_tick in -887272..887272,
-            amount in 10u128..340282366920938463463374607431768211455
+            amount_1 in any::<u64>(),
+            amount_2 in any::<u64>(),
         ) {
             // test if the liquidity for amount0 works, by calculating the liquidity,
             // then reversing it to get amount0.
@@ -768,11 +761,12 @@ mod test_properties {
             let sqrt_ratio_a_x_96 = tick_math::get_sqrt_ratio_at_tick(min_tick)?;
             let sqrt_ratio_b_x_96 = tick_math::get_sqrt_ratio_at_tick(upper_tick)?;
 
-            let amount_expected = U256::from(amount);
-            let liquidity = get_liquidity_for_amount_0(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, amount_expected)?;
+            let amount_expected = U256::from_limbs([amount_1, amount_2, 0, 0]);
+            let liquidity = get_liquidity_for_amount_0(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, amount_expected)?.to_i128().unwrap();
 
-            let amount_result = get_amount_0_delta(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, liquidity.to_i128().unwrap())?;
+            let amount_result = get_amount_0_delta(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, liquidity)?;
 
+            #[cfg(feature = "testing-dbg")]
             dbg!((
                 sqrt_ratio_a_x_96.to_string(),
                 sqrt_ratio_b_x_96.to_string(),
