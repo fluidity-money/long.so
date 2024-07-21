@@ -798,7 +798,7 @@ impl Pools {
     #[cfg(feature = "update_positions")]
     #[raw]
     #[selector(
-        id = "incrPositionPermit2E0AA1766(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,bytes,uint256,uint256,bytes)"
+        id = "incrPositionPermit2E0AA1766(address,uint256,uint256,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)"
     )]
     /// Refreshes and increases the liquidity in a position with some protections, using permit2 to transfer tokens.
     /// See [Self::adjust_position_internal].
@@ -1251,7 +1251,7 @@ mod test {
             None,
             None,
             None,
-            |contract| Ok(()),
+            |_contract| Ok(()),
         )
     }
 

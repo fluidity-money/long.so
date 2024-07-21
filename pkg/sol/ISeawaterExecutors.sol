@@ -192,18 +192,18 @@ interface ISeawaterExecutorUpdatePosition {
         uint256 amount1Max
     ) external returns (uint256, uint256);
 
-    function incrPositionPermit2E0AA1766( // TODO
+    function incrPositionPermit2E0AA1766(
         address /* token */,
         uint256 /* id */,
         uint256 /* amount0Min */,
         uint256 /* amount1Min */,
-        uint256 /* amount0Max */,
-        uint256 /* amount1Max */,
         uint256 /* nonce0 */,
-        uint256 /* deadline0 */,
+        uint256 /* deadline0,
+        uint256 /* amount0Max */,
         bytes memory /* sig0 */,
         uint256 /* nonce1 */,
         uint256 /* deadline1 */,
+        uint256 /* amount1Max */,
         bytes memory /* sig1 */
     ) external returns (uint256, uint256);
 }

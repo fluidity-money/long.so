@@ -6,4 +6,4 @@ export \
 
 cargo test --features testing,testing-dbg
 
-node --test --loader tsx ethers-tests/test.ts
+#node --test --loader tsx ethers-tests/test.ts

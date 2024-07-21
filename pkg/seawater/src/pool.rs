@@ -287,6 +287,7 @@ impl StoragePool {
         let mut iters = 0;
         while !state.amount_remaining.is_zero() && state.price != price_limit {
             iters += 1;
+            debug_assert!(iters != 100, "swapping didn't resolve after 100 iters!");
 
             let step_initial_price = state.price;
 
@@ -515,12 +516,9 @@ impl test_utils::StorageNew for StoragePool {
 
 #[cfg(test)]
 mod test {
-    use std::ops::Neg;
-
     use super::*;
     use crate::test_utils;
     use ruint_macro::uint;
-    use stylus_sdk::alloy_primitives::{Signed, I128};
 
     #[test]
     fn test_update_position() {
@@ -799,8 +797,6 @@ mod test {
 
         let position_ranges: [[i64; 2]; 3] = [[-20, -10], [-10, 10], [10, 20]];
 
-        let position_delta_template = [1000, 777, 252, 33, 5];
-
         let position_delta: Vec<i128> = (1..=20).map(|d| d * 10i128.pow(18)).collect();
 
         for price in init_prices.iter() {
@@ -892,7 +888,7 @@ mod test {
 
                 pool.update_position(pos_id, delta).unwrap();
 
-                let (a0, a1, final_tick) = pool
+                let (a0, _a1, _final_tick) = pool
                     .swap(true, I256::unchecked_from(*swap_amount), U256::MAX)
                     .unwrap();
 

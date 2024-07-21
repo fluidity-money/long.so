@@ -217,24 +217,27 @@ test("amm", async t => {
         const fusdcBeforeBalance = await fusdcContract.balanceOf(defaultAccount)
         const tusdcBeforeBalance = await tusdcContract.balanceOf(defaultAccount)
 
-        console.log("about to update position permit2")
+        console.log("about to incr position permit2");
 
-        let response = await amm.updatePositionPermit2F24010C3(
-            tusdcAddress, // pool
-            tusdcPositionId,
-            100, // delta
-            nonce0,
-            deadline,
-            maxAmount,
-            sig0,
-            nonce1,
-            deadline,
-            maxAmount,
-            sig1,
+        console.log("amm", amm.interface.fragments);
+
+        let response = await amm["incrPositionPermit2E0AA1766(address,uint256,uint256,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)"](
+            tusdcAddress, // token
+            tusdcPositionId, // id
+            10000000, // amount0Min
+            10000000, // amount1Min
+            nonce0, // nonce0
+            deadline, // deadline0
+            maxAmount, // amount0Max
+            sig0, // sig0
+            nonce1, // nonce1
+            deadline, // deadline1
+            maxAmount, // amount1Max
+            sig1, // sig1
         );
         await response.wait();
 
-        console.log("done updating position2")
+        console.log("done incrementing position2")
 
         const fusdcAfterBalance = await fusdcContract.balanceOf(defaultAccount)
         const tusdcAfterBalance = await tusdcContract.balanceOf(defaultAccount)

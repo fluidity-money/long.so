@@ -18,6 +18,36 @@ fn rand_u256<R: Rng + ?Sized>(rng: &mut R) -> U256 {
 }
 
 #[test]
+fn test_mul_div_uniswap() {
+    use core::str::FromStr;
+
+    let expected = U256::from_str("82974292838386133450542").unwrap();
+
+    assert_eq!(
+        reference::full_math::mul_div(
+            U256::from_str("79224201403219477170569942574").unwrap(),
+            U256::from_str("79228162514264337593543950336").unwrap(),
+            U256::from_str("79228162514264337593543950336").unwrap()
+        )
+        .unwrap()
+        .to_string(),
+        expected.to_string(),
+        "reference mul_div is broken"
+    );
+
+    assert_eq!(
+        full_math::mul_div(
+            U256::from_str("79224201403219477170569942574").unwrap(),
+            U256::from_str("79228162514264337593543950336").unwrap(),
+            U256::from_str("79228162514264337593543950336").unwrap()
+        )
+        .unwrap()
+        .to_string(),
+        expected.to_string(),
+        "our mul_div is broken"
+    );
+}
+#[test]
 fn test_mul_div() {
     let mut rng = rand::thread_rng();
     let mut errs: i64 = 0;
