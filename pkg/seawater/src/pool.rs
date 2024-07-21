@@ -8,6 +8,8 @@ use crate::types::{I256Extension, U256Extension, WrappedNative, I256, I32, U128,
 use alloc::vec::Vec;
 use stylus_sdk::{prelude::*, storage::*};
 
+use num_traits::ToPrimitive;
+
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 use crate::test_utils;
 
@@ -208,9 +210,13 @@ impl StoragePool {
             sqrt_ratio_x_96,   // cur_tick
             sqrt_ratio_a_x_96, // lower_tick
             sqrt_ratio_b_x_96, // upper_tick
-            amount_0,      // amount_0
-            amount_1,      // amount_1
+            amount_0,          // amount_0
+            amount_1,          // amount_1
         )?;
+
+        let delta = delta
+            .to_i128()
+            .map_or_else(|| Err(Error::LiquidityAmountTooWide), |v| Ok(v))?;
 
         // should also ensure that we don't do this on a pool that's not currently running
 
