@@ -75,6 +75,11 @@ impl StoragePool {
         let spacing = self.tick_spacing.get().sys() as i32;
         assert_or!(low % spacing == 0, Error::InvalidTickSpacing);
         assert_or!(up % spacing == 0, Error::InvalidTickSpacing);
+        let spacing: u8 = spacing.try_into().map_err(|_| Error::InvalidTickSpacing)?;
+        let min_tick = tick_math::get_min_tick(spacing);
+        let max_tick = tick_math::get_max_tick(spacing);
+        assert_or!(low > min_tick && low < max_tick, Error::InvalidTick);
+        assert_or!(up > min_tick && up < max_tick, Error::InvalidTick);
         Ok(self.positions.new(id, low, up))
     }
 
@@ -157,7 +162,6 @@ impl StoragePool {
                 // we're inside the range, the liquidity is active and we need both tokens
                 let new_liquidity = liquidity_math::add_delta(self.liquidity.get().sys(), delta)?;
                 self.liquidity.set(U128::lib(&new_liquidity));
-
                 (
                     sqrt_price_math::get_amount_0_delta(
                         self.sqrt_price.get(),

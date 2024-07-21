@@ -209,6 +209,10 @@ pub enum Error {
     // 35 (0x23)
     #[error("Lquidity amount too low or high to be a int128")]
     LiquidityAmountTooWide,
+
+    // 36 (0x24)
+    #[error("Invalid tick")]
+    InvalidTick,
 }
 
 impl From<Error> for Vec<u8> {
