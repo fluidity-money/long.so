@@ -245,12 +245,14 @@ fn get_liquidity_for_amount_0(
     mut sqrt_ratio_a_x_96: U256,
     mut sqrt_ratio_b_x_96: U256,
     amount: U256,
-) -> Result<U256, Error> {
+) -> Result<i128, Error> {
     if sqrt_ratio_a_x_96 > sqrt_ratio_b_x_96 {
         (sqrt_ratio_a_x_96, sqrt_ratio_b_x_96) = (sqrt_ratio_b_x_96, sqrt_ratio_a_x_96)
     };
     let intermediate = mul_div(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, Q96)?;
-    mul_div(amount, intermediate, sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96)
+    let res = mul_div(amount, intermediate, sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96)?;
+    res.to_i128()
+        .map_or_else(|| Err(Error::LiquidityAmountTooWide), |v| Ok(v))
 }
 
 /// Calculates the liquidity in the form of the delta number for amount0.
@@ -258,11 +260,13 @@ fn get_liquidity_for_amount_1(
     mut sqrt_ratio_a_x_96: U256,
     mut sqrt_ratio_b_x_96: U256,
     amount: U256,
-) -> Result<U256, Error> {
+) -> Result<i128, Error> {
     if sqrt_ratio_a_x_96 > sqrt_ratio_b_x_96 {
         (sqrt_ratio_a_x_96, sqrt_ratio_b_x_96) = (sqrt_ratio_b_x_96, sqrt_ratio_a_x_96)
     };
-    mul_div(amount, Q96, sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96)
+    let res = mul_div(amount, Q96, sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96)?;
+    res.to_i128()
+        .map_or_else(|| Err(Error::LiquidityAmountTooWide), |v| Ok(v))
 }
 
 pub fn get_liquidity_for_amounts(
@@ -292,7 +296,7 @@ pub fn get_liquidity_for_amounts(
         get_liquidity_for_amount_1(sqrt_ratio_0_x_96, sqrt_ratio_1_x_96, amount_1)?
     };
 
-    Ok(delta.to_i128().unwrap())
+    Ok(delta)
 }
 
 #[cfg(test)]
@@ -731,12 +735,9 @@ mod test {
             )
             .unwrap()
             .to_string(),
-            U256::from_str("1578237314707").unwrap().to_string() // Uniswap answer
+            U256::from_str("1578237314707").unwrap().to_string()
         );
 
-        let x = U256::from_limbs([4294805859, 0, 0, 0]);
-        let y = U256::from_limbs([4294805859, 1, 0, 0]);
-        eprintln!("testing {x}, {y}");
         assert_eq!(
             get_liquidity_for_amount_0(
                 U256::from_limbs([4294805859, 0, 0, 0]), //4294805859
@@ -745,7 +746,26 @@ mod test {
             )
             .unwrap()
             .to_string(),
-            U256::from_str("0").unwrap().to_string() // Uniswap answer
+            U256::from_str("0").unwrap().to_string()
+        );
+    }
+
+    #[test]
+    fn test_get_liquidity_for_amount1_spot_tests() {
+        // tests reproduced from the Uniswap test suite
+        use core::str::FromStr;
+
+        assert_eq!(
+            get_liquidity_for_amount_1(
+                U256::from_limbs([4294805859, 0, 0, 0]), //4294805859
+                U256::from_limbs([4294805859, 1, 0, 0]), //18446744078004357475
+                U256::from_limbs([1, 2147483648, 0, 0])  //39614081257132168796771975169
+            )
+            .unwrap()
+            .to_string(),
+            U256::from_str("170141183460469231731687303720179073024")
+                .unwrap()
+                .to_string()
         );
     }
 }
@@ -762,8 +782,7 @@ mod test_properties {
             sqrt_price_a_x_96_2 in 0..4294805859u64,
             sqrt_price_b_x_96_1 in 4294805859..u64::MAX,
             sqrt_price_b_x_96_2 in 0..4294805859u64,
-            amount_1 in 1..u64::MAX,
-            amount_2 in any::<u64>()
+            amount in 1..i128::MAX
         ) {
             // test if the liquidity for amount0 works, by calculating the liquidity,
             // then reversing it to get amount0.
@@ -771,20 +790,45 @@ mod test_properties {
             let sqrt_ratio_a_x_96 = U256::from_limbs([sqrt_price_a_x_96_1, sqrt_price_a_x_96_2, 0, 0]);
             let sqrt_ratio_b_x_96 = U256::from_limbs([sqrt_price_b_x_96_1, sqrt_price_b_x_96_2, 0, 0]);
 
-            let amount_expected = U256::from_limbs([amount_1, amount_2, 0, 0]);
+            let amount_expected = U256::from(amount);
 
             if sqrt_ratio_a_x_96 == sqrt_ratio_b_x_96 {
                 return Ok(());
             }
-            if amount_expected.is_zero() {
-                return Ok(());
-            }
 
-            let liquidity = get_liquidity_for_amount_0(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, amount_expected)?.to_i128();
-            prop_assert_ne!(liquidity, None);
-            let liquidity: u128 = liquidity.unwrap().try_into().unwrap();
+            let liquidity_ = get_liquidity_for_amount_0(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, amount_expected);
+            prop_assert!(
+                liquidity_.is_ok(),
+                "failed to unpack liquidity amount1, args {}, {}, {}",
+                sqrt_ratio_a_x_96,
+                sqrt_ratio_b_x_96,
+                amount_expected
+            );
 
-            let amount_result = _get_amount_0_delta(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, liquidity, false)?;
+            let liquidity_ = liquidity_.unwrap();
+            let liquidity = liquidity_.to_u128();
+            prop_assert!(
+                liquidity.is_some(),
+                "failed to convert liquidity amount1 to uint128 {}, args {}, {}, {}",
+                liquidity_,
+                sqrt_ratio_a_x_96,
+                sqrt_ratio_b_x_96,
+                amount_expected
+            );
+
+            let liquidity = liquidity.unwrap();
+
+            let amount_result = _get_amount_0_delta(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, liquidity, false);
+            prop_assert!(
+                amount_result.is_ok(),
+                "_get_amount_0_delta returned {:?}, args {}, {}, {}, {}",
+                amount_result.err(),
+                sqrt_ratio_a_x_96,
+                sqrt_ratio_b_x_96,
+                liquidity,
+                false
+            );
+            let amount_result = amount_result.unwrap();
 
             #[cfg(feature = "testing-dbg")]
             dbg!((
@@ -804,29 +848,56 @@ mod test_properties {
             sqrt_price_a_x_96_2 in 0..4294805859u64,
             sqrt_price_b_x_96_1 in 4294805859..u64::MAX,
             sqrt_price_b_x_96_2 in 0..4294805859u64,
-            amount_1 in 1..u64::MAX,
-            amount_2 in any::<u64>()
+            amount in 1..i128::MAX
         ) {
-            // test if the liquidity for amount0 works, by calculating the liquidity,
-            // then reversing it to get amount0.
+            // test if the liquidity for amount1 works, by calculating the liquidity,
+            // then reversing it to get amount1.
 
             let sqrt_ratio_a_x_96 = U256::from_limbs([sqrt_price_a_x_96_1, sqrt_price_a_x_96_2, 0, 0]);
             let sqrt_ratio_b_x_96 = U256::from_limbs([sqrt_price_b_x_96_1, sqrt_price_b_x_96_2, 0, 0]);
 
-            let amount_expected = U256::from_limbs([amount_1, amount_2, 0, 0]);
+            let amount_expected = U256::from(amount);
 
             if sqrt_ratio_a_x_96 == sqrt_ratio_b_x_96 {
                 return Ok(());
             }
-            if amount_expected.is_zero() {
-                return Ok(());
-            }
 
-            let liquidity = get_liquidity_for_amount_1(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, amount_expected)?.to_i128();
-            prop_assert_ne!(liquidity, None);
-            let liquidity: u128 = liquidity.unwrap().try_into().unwrap();
+            let liquidity_ = get_liquidity_for_amount_1(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, amount_expected);
+            prop_assert!(
+                liquidity_.is_ok(),
+                "failed to unpack liquidity amount1, args {}, {}, {}",
+                sqrt_ratio_a_x_96,
+                sqrt_ratio_b_x_96,
+                amount_expected
+            );
 
-            let amount_result = _get_amount_1_delta(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, liquidity, false)?;
+            let liquidity_ = liquidity_.unwrap();
+            let liquidity = liquidity_.to_u128();
+
+            prop_assert!(
+                liquidity.is_some(),
+                "failed to convert liquidity amount1 to uint128 {}, args {}, {}, {}",
+                liquidity_,
+                sqrt_ratio_a_x_96,
+                sqrt_ratio_b_x_96,
+                amount_expected
+            );
+
+            let liquidity = liquidity.unwrap();
+
+            let amount_result = _get_amount_1_delta(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, liquidity, false);
+
+            prop_assert!(
+                amount_result.is_ok(),
+                "_get_amount_1_delta returned {:?}, args {}, {}, {}, {}",
+                amount_result.err(),
+                sqrt_ratio_a_x_96,
+                sqrt_ratio_b_x_96,
+                liquidity,
+                false
+            );
+
+            let amount_result = amount_result.unwrap();
 
             #[cfg(feature = "testing-dbg")]
             dbg!((

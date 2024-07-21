@@ -205,6 +205,10 @@ pub enum Error {
     // 34 (0x22)
     #[error("Swap result too low")]
     SwapResultTooLow,
+
+    // 35 (0x23)
+    #[error("Lquidity amount too low or high to be a int128")]
+    LiquidityAmountTooWide,
 }
 
 impl From<Error> for Vec<u8> {
