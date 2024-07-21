@@ -26,7 +26,7 @@ fn test_mul_div_uniswap() {
     assert_eq!(
         reference::full_math::mul_div(
             U256::from_str("79224201403219477170569942574").unwrap(),
-            U256::from_str("79228162514264337593543950336").unwrap(),
+            U256::from_str("82974292838386133450542").unwrap(),
             U256::from_str("79228162514264337593543950336").unwrap()
         )
         .unwrap()
@@ -38,7 +38,7 @@ fn test_mul_div_uniswap() {
     assert_eq!(
         full_math::mul_div(
             U256::from_str("79224201403219477170569942574").unwrap(),
-            U256::from_str("79228162514264337593543950336").unwrap(),
+            U256::from_str("82974292838386133450542").unwrap(),
             U256::from_str("79228162514264337593543950336").unwrap()
         )
         .unwrap()
