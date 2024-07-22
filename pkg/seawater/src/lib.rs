@@ -685,7 +685,7 @@ impl Pools {
         let (amount_0, amount_1) =
             self.pools
                 .setter(pool)
-                .adjust_position(id, amount_0_max, amount_1_max)?;
+                .adjust_position(id, amount_0_max, amount_1_max, giving)?;
 
         evm::log(events::UpdatePositionLiquidity {
             id: id,

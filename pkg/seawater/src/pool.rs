@@ -195,6 +195,7 @@ impl StoragePool {
         id: U256,
         amount_0: U256,
         amount_1: U256,
+        giving: bool,
     ) -> Result<(I256, I256), Revert> {
         // calculate the delta using the amounts that we have here, guaranteeing
         // that we don't dip below the amount that's supplied as the minimum.
@@ -208,17 +209,27 @@ impl StoragePool {
         let sqrt_ratio_a_x_96 = tick_math::get_sqrt_ratio_at_tick(position.lower.get().as_i32())?;
         let sqrt_ratio_b_x_96 = tick_math::get_sqrt_ratio_at_tick(position.upper.get().as_i32())?;
 
-        let delta = sqrt_price_math::get_liquidity_for_amounts(
+        let new_delta = sqrt_price_math::get_liquidity_for_amounts(
             sqrt_ratio_x_96,   // cur_tick
             sqrt_ratio_a_x_96, // lower_tick
             sqrt_ratio_b_x_96, // upper_tick
             amount_0,          // amount_0
             amount_1,          // amount_1
-        )?;
+        )?
+        .to_i128()
+        .map_or_else(|| Err(Error::LiquidityAmountTooWide), |v| Ok(v))?;
 
-        let delta = delta
+        let old_delta = position
+            .liquidity
+            .get()
             .to_i128()
             .map_or_else(|| Err(Error::LiquidityAmountTooWide), |v| Ok(v))?;
+
+        let delta = if giving {
+            old_delta - new_delta
+        } else {
+            old_delta + new_delta
+        };
 
         // [update_position] should also ensure that we don't do this on a pool that's not currently running
 
