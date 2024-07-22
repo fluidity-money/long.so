@@ -1,7 +1,7 @@
 
-# Long Tail contracts
+# Longtail contracts
 
-Long Tail is Arbitrum's cheapest and most rewarding AMM.
+Longtail is Arbitrum's cheapest and most rewarding AMM.
 
 ## Deployments
 
@@ -11,10 +11,10 @@ Long Tail is Arbitrum's cheapest and most rewarding AMM.
 
 #### AMM contract deployments
 
-|       Deployment name     |              Deployment address            |
-|---------------------------|--------------------------------------------|
-| Long Tail AMM             | 0x839c5cf32d9Bc2CD46027691d2941410251ED557 |
-| Long Tail NFT manager     | 0xC96F6A050382d4aA73fd91f7A4D02aB8E5654338 |
+|      Deployment name     |              Deployment address            |
+|--------------------------|--------------------------------------------|
+| Longtail AMM             | 0x839c5cf32d9Bc2CD46027691d2941410251ED557 |
+| Longtail NFT manager     | 0xC96F6A050382d4aA73fd91f7A4D02aB8E5654338 |
 
 #### Useful testing token deployments
 
