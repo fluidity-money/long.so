@@ -83,9 +83,22 @@ func UnpackUpdatePositionLiquidity(topic1, topic2 ethCommon.Hash, d []byte) (*Up
 	if err != nil {
 		return nil, err
 	}
+	i, err := abi.Unpack("UpdatePositionLiquidity", d)
+	if err != nil {
+		return nil, err
+	}
+	token0, ok := i[0].(*big.Int)
+	if !ok {
+		return nil, fmt.Errorf("bad token0: %T", i[1])
+	}
+	token1, ok := i[1].(*big.Int)
+	if !ok {
+		return nil, fmt.Errorf("bad token1: %T", i[2])
+	}
 	return &UpdatePositionLiquidity{
 		PosId: posId,
-		Delta: hashToNumber(topic2),
+		Token0: types.UnscaledNumberFromBig(token0),
+		Token1: types.UnscaledNumberFromBig(token1),
 	}, nil
 }
 

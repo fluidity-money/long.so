@@ -7,9 +7,13 @@ transaction with yield, whilst remaining the most affordable AMM with
 a low gas profile leveraging Stylus.
 
 Stylus is a WASM frontend to the standard EVM stack made available
-exclusively on Arbitrum. The Stylus Rust toolchain leverages LLVM to
-produce WASM binaries with support for using the EVM once deployed
-on-chain.
+exclusively on Arbitrum.
+
+## Learn more about Stylus
+
+https://arbitrum.io/stylus
+
+## Addresses
 
 Deployment addresses are available at [DEPLOYMENT.md](DEPLOYMENT.md).
 
@@ -17,9 +21,12 @@ Architecture information is available at [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Contributing
 
-(This is a TODO!)
+[HACKING.md](HACKING)
 
 ## Security
 
-[Security disclosure/report link](SECURITY)
+[Security instructions](https://github.com/fluidity-money/long.so/blob/development/SECURITY)
 
+## Contributors
+
+[Contributors](https://github.com/fluidity-money/long.so/blob/development/AUTHORS.md)
