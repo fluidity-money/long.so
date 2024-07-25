@@ -37,6 +37,12 @@ pub fn give(_token: Address, _amount: U256) -> Result<(), Error> {
     )
 }
 
+/// Pretends to give a specific address tokens.
+pub fn send_to(_token: Address, _recipient: Address, _amount: U256) -> Result<(), Error> {
+    // TODO
+    Ok(())
+}
+
 /// Pretends to take ERC20 tokens from the user, only happening if the underlying
 /// environment is not WASM. Only useful for testing.
 pub fn take_permit2(_token: Address, _amount: U256, _details: Permit2Args) -> Result<(), Error> {

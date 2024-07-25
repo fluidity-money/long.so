@@ -213,6 +213,14 @@ pub enum Error {
     // 36 (0x24)
     #[error("Invalid tick")]
     InvalidTick,
+
+    // 37 (0x25)
+    #[error("Pool enabled")]
+    PoolEnabled,
+
+    // 38 (0x26)
+    #[error("Position is empty when it shouldn't be")]
+    EmptyPosition,
 }
 
 impl From<Error> for Vec<u8> {

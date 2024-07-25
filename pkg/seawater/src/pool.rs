@@ -524,6 +524,10 @@ impl StoragePool {
     pub fn set_enabled(&mut self, enabled: bool) {
         self.enabled.set(enabled)
     }
+
+    pub fn get_enabled(&self) -> bool {
+        self.enabled.get()
+    }
 }
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]

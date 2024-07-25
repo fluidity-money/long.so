@@ -120,6 +120,14 @@ pub unsafe extern "C" fn msg_sender(sender: *mut u8) {
         Some(a) => a,
         None => DEFAULT_SENDER,
     });
+
+    #[cfg(feature = "testing-dbg")]
+    dbg!((
+        "read sender",
+        current_test!(),
+        const_hex::const_encode::<20, false>(&addr).as_str(),
+    ));
+
     std::ptr::copy(addr.as_ptr(), sender, 20);
 }
 
@@ -130,6 +138,10 @@ pub unsafe extern "C" fn emit_log(_pointer: *const u8, _len: usize, _: usize) {
         let s = std::slice::from_raw_parts(_pointer, _len);
         dbg!(("log", current_test!(), const_hex::encode(s).as_str()));
     }
+}
+
+pub fn get_sender() -> Option<[u8; 20]> {
+    storage::CURRENT_SENDER.with(|sender| *sender.borrow())
 }
 
 pub fn set_sender(new_sender: [u8; 20]) {

@@ -70,10 +70,15 @@ the appropriate error in this table:
 | 30 | 0x1e | Only the NFT manager can use this                                                       |
 | 31 | 0x1f | Only the Seawater admin can use this                                                    |
 | 32 | 0x20 | Operation unavailable when the pool is disabled                                         |
+| 33 | 0x21 | Invalid tick spacing                                                                    |
+| 34 | 0x22 | Swap result too low                                                                     |
+| 35 | 0x23 | Liquidity too low or high to be a int128                                                |
+| 36 | 0x24 | Invalid tick                                                                            |
+| 37 | 0x25 | Pool enabled when it should be disabled for this action                                 |
+| 38 | 0x26 | Position is empty when it shouldn't be                                                  |
 
 If more bytes are in the error, then the issue was produced by the ERC20 token. Convert
-any error types to their keccak form to see. For example, an allowance
-error might be hard to unpack, and it'll be several bytes.g
+any error types to their selector form to see.
 
 ## Security
 

@@ -1026,9 +1026,48 @@ impl Pools {
     }
 }
 
-/// Migration functions. Only enabled when the `migrations` feature is set.
+///! Migrations code that should only be used in a testing environment, or in a rescue
+///! situation. These functions will break the internal state of the pool most likely.
 #[cfg_attr(feature = "migrations", external)]
-impl Pools {}
+impl Pools {
+    ///! Divest the position IDs given for the pool given., sending them the
+    ///! amount given This would involve mutliple transactions in practice to
+    ///! cover each asset. Will break if a position has empty liquidity, assuming that
+    ///! the position was provided in error. Won't decrease the count of positions
+    ///! a user has.
+    fn divest_positions(
+        &mut self,
+        token: Address,
+        positions: Vec<U256>,
+        token_0: Vec<U256>,
+        token_1: Vec<U256>,
+    ) -> Result<(), Vec<u8>> {
+        assert_eq_or!(
+            msg::sender(),
+            self.seawater_admin.get(),
+            Error::SeawaterAdminOnly
+        );
+
+        let pool = self.pools.get(token);
+
+        // this admin action can only be done on a pool that's disabled.
+
+        assert_or!(!pool.get_enabled(), Error::PoolEnabled);
+
+        for ((position, token_0), token_1) in
+            positions.iter().zip(token_0.iter()).zip(token_1.iter())
+        {
+            let owner = self.position_owners.get(*position);
+            let is_position_zero = pool.get_position_liquidity(*position).is_zero();
+            assert_or!(!is_position_zero, Error::EmptyPosition);
+            erc20::send_to(token, owner, *token_0)?;
+            erc20::send_to(FUSDC_ADDR, owner, *token_1)?;
+            self.position_owners.setter(*position).erase();
+        }
+
+        Ok(())
+    }
+}
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 impl test_utils::StorageNew for Pools {
@@ -1380,7 +1419,18 @@ mod test {
             }),
             None,
             |contract| {
+                use crate::host_test_shims::get_sender;
+
                 let pool = address!("ACd8c4Dc161BEF1Cde93C14861589B35f5000a19");
+
+                let owner = contract.position_owners.get(U256::from(0));
+                eprintln!(
+                    "msg sender: {}, sender is equal to owner? {}",
+                    const_hex::const_encode::<20, false>(&get_sender().unwrap()).as_str(),
+                    owner == get_sender().unwrap()
+                );
+
+                eprintln!("owner in contract: {}", owner);
 
                 let (amount_0, amount_1) = contract.incr_position_C_1041_D_18(
                     pool,
