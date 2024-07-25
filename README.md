@@ -1,8 +1,8 @@
 
-# Long Tail AMM (Superposition AMM) [![codecov](https://codecov.io/gh/fluidity-money/long.so/graph/badge.svg?token=LIRGRUVdTr)](https://codecov.io/gh/fluidity-money/long.so)
+# Longtail AMM (Superposition AMM) [![codecov](https://codecov.io/gh/fluidity-money/long.so/graph/badge.svg?token=LIRGRUVdTr)](https://codecov.io/gh/fluidity-money/long.so)
 
-Long Tail AMM is Arbitrum's most rewarding AMM, made possible with
-Stylus. Long Tail AMM leverages Super Assets to reward every on-chain
+Longtail AMM is Arbitrum's most rewarding AMM, made possible with
+Stylus. Longtail AMM leverages Super Assets to reward every on-chain
 transaction with yield, whilst remaining the most affordable AMM with
 a low gas profile leveraging Stylus.
 

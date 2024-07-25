@@ -1,5 +1,5 @@
 
-# Long Tail AMM webapp
+# Longtail AMM webapp
 
 ## Getting Started
 
