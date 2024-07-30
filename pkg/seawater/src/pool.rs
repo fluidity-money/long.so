@@ -1,6 +1,5 @@
 //! The [StoragePool] struct, containing most of the core AMM functions.
 
-use crate::current_test;
 use crate::error::Error;
 use crate::maths::{full_math, liquidity_math, sqrt_price_math, swap_math, tick_bitmap, tick_math};
 use crate::position;
@@ -13,6 +12,9 @@ use num_traits::ToPrimitive;
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 use crate::test_utils;
+
+#[cfg(feature = "testing-dbg")]
+use crate::current_test;
 
 type Revert = Vec<u8>;
 
