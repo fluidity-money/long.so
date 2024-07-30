@@ -25,7 +25,7 @@ import * as RadioGroup from "@radix-ui/react-radio-group";
 import { Input } from "@/components/ui/input";
 import { useStakeStore } from "@/stores/useStakeStore";
 import SegmentedControl from "@/components/ui/segmented-control";
-import { useAccount, useBalance, useChainId, useSimulateContract } from "wagmi";
+import { useAccount, useBalance, useChainId, useConnectorClient, useSimulateContract } from "wagmi";
 import {
   Tooltip,
   TooltipContent,
@@ -187,10 +187,16 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   const chartRef = useRef<ReactECharts>(null);
 
+  // useSimulateContract throws if connector.account is not defined
+  // so we must check if it exists or use a dummy address for sqrtPriceX96
+  const { data: connector } = useConnectorClient()
+  const simulateAccount = connector?.account ?? "0x0000000000000000000000000000000000000000";
+
   // Price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
+    account: simulateAccount,
     functionName: "sqrtPriceX96",
     args: [token0.address],
   });
