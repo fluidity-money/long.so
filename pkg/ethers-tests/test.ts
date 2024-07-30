@@ -217,9 +217,9 @@ test("amm", async t => {
         const fusdcBeforeBalance = await fusdcContract.balanceOf(defaultAccount)
         const tusdcBeforeBalance = await tusdcContract.balanceOf(defaultAccount)
 
-        console.log("about to incr position permit2");
+        console.log("about to decr position permit2");
 
-        let response = await amm.incrPositionC1041D18(
+        let response = await amm.decr position(
             tusdcAddress, // token
             tusdcPositionId, // id
             0, // amount0Min

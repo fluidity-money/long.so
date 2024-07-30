@@ -240,6 +240,33 @@ pub fn get_amount_1_delta(
     }
 }
 
+pub fn get_amounts_for_delta(
+    sqrt_ratio_x_96: U256,
+    mut sqrt_ratio_a_x_96: U256,
+    mut sqrt_ratio_b_x_96: U256,
+    liquidity: i128,
+) -> Result<(I256, I256), Error> {
+    if sqrt_ratio_a_x_96 > sqrt_ratio_b_x_96 {
+        (sqrt_ratio_a_x_96, sqrt_ratio_b_x_96) = (sqrt_ratio_b_x_96, sqrt_ratio_a_x_96)
+    };
+    Ok(if sqrt_ratio_x_96 <= sqrt_ratio_a_x_96 {
+        (
+            get_amount_0_delta(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, liquidity)?,
+            I256::ZERO,
+        )
+    } else if sqrt_ratio_x_96 < sqrt_ratio_b_x_96 {
+        (
+            get_amount_0_delta(sqrt_ratio_x_96, sqrt_ratio_b_x_96, liquidity)?,
+            get_amount_1_delta(sqrt_ratio_a_x_96, sqrt_ratio_x_96, liquidity)?,
+        )
+    } else {
+        (
+            I256::ZERO,
+            get_amount_1_delta(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, liquidity)?,
+        )
+    })
+}
+
 /// Calculates the liquidity in the form of the delta amount for
 /// amount0.
 fn get_liquidity_for_amount_0(
@@ -288,9 +315,9 @@ pub fn get_liquidity_for_amounts(
         let liq0 = get_liquidity_for_amount_0(sqrt_ratio_x_96, sqrt_ratio_b_x_96, amount_0)?;
         let liq1 = get_liquidity_for_amount_1(sqrt_ratio_a_x_96, sqrt_ratio_x_96, amount_1)?;
         if liq0 > liq1 {
-            liq0
-        } else {
             liq1
+        } else {
+            liq0
         }
     } else {
         get_liquidity_for_amount_1(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, amount_1)?
@@ -1228,6 +1255,30 @@ mod test {
             );
         }
     }
+
+    #[test]
+    fn test_get_liquidity_for_amounts() {
+        //751912010970822292130506636887
+        let sqrt_ratio_x_96 = U256::from_limbs([11538413573761564247, 40761231790, 0, 0]);
+        //560222498985353939371108591955
+        let sqrt_ratio_a_x_96 = U256::from_limbs([14000197498442344787, 30369722523, 0, 0]);
+        //970301221836460185987766484855
+        let sqrt_ratio_b_x_96 = U256::from_limbs([396151174394216311, 52600134634, 0, 0]);
+        let amount_0 = U256::from(10000000);
+        let amount_1 = U256::from(10000000);
+        let expected_delta = 4133150_u128;
+
+        let delta = get_liquidity_for_amounts(
+            sqrt_ratio_x_96,
+            sqrt_ratio_a_x_96,
+            sqrt_ratio_b_x_96,
+            amount_0,
+            amount_1,
+        )
+        .unwrap();
+
+        assert_eq!(delta, expected_delta);
+    }
 }
 
 #[cfg(test)]
@@ -1245,7 +1296,7 @@ mod test_properties {
             sqrt_price_a_x_96_2 in 0..MIN_PRICE_WORD,
             sqrt_price_b_x_96_1 in MIN_PRICE_WORD..MAX_PRICE_WORD,
             sqrt_price_b_x_96_2 in 0..MIN_PRICE_WORD,
-            amount in 0..1e30.to_i128().unwrap()
+            amount in 0..1e30 as i128
         ) {
             // test if the liquidity for amount0 works, by calculating the liquidity,
             // then reversing it to get amount0.
@@ -1323,7 +1374,7 @@ mod test_properties {
             sqrt_price_a_x_96_2 in 0..MIN_PRICE_WORD,
             sqrt_price_b_x_96_1 in MIN_PRICE_WORD..MAX_PRICE_WORD,
             sqrt_price_b_x_96_2 in 0..MIN_PRICE_WORD,
-            amount in 0..1e3.to_i128().unwrap()
+            amount in 0..1e3 as i128
         ) {
             // test if the liquidity for amount1 works, by calculating the liquidity,
             // then reversing it to get amount1.

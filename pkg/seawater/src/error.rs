@@ -207,7 +207,7 @@ pub enum Error {
     SwapResultTooLow,
 
     // 35 (0x23)
-    #[error("Lquidity amount too low or high to be a int128")]
+    #[error("Liquidity amount too low or high to be a int128")]
     LiquidityAmountTooWide,
 
     // 36 (0x24)

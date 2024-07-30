@@ -1,5 +1,6 @@
 //! The [StoragePool] struct, containing most of the core AMM functions.
 
+use crate::current_test;
 use crate::error::Error;
 use crate::maths::{full_math, liquidity_math, sqrt_price_math, swap_math, tick_bitmap, tick_math};
 use crate::position;
@@ -149,6 +150,17 @@ impl StoragePool {
             Ok((I256::zero(), I256::zero()))
         } else {
             let (amount_0, amount_1) = if self.cur_tick.get().sys() < lower {
+                #[cfg(feature = "testing-dbg")]
+                dbg!((
+                    "update_position, cur_tick < lower path",
+                    lower,
+                    upper,
+                    tick_math::get_sqrt_ratio_at_tick(lower)?,
+                    tick_math::get_sqrt_ratio_at_tick(upper)?,
+                    self.sqrt_price.get(),
+                    delta
+                ));
+
                 // we're below the range, we need to move right, we'll need more token0
                 (
                     sqrt_price_math::get_amount_0_delta(
@@ -162,6 +174,20 @@ impl StoragePool {
                 // we're inside the range, the liquidity is active and we need both tokens
                 let new_liquidity = liquidity_math::add_delta(self.liquidity.get().sys(), delta)?;
                 self.liquidity.set(U128::lib(&new_liquidity));
+
+                #[cfg(feature = "testing-dbg")]
+                dbg!((
+                    "update_position, cur_tick < upper path",
+                    lower,
+                    upper,
+                    tick_math::get_sqrt_ratio_at_tick(lower)?,
+                    tick_math::get_sqrt_ratio_at_tick(upper)?,
+                    self.sqrt_price.get(),
+                    delta,
+                    self.liquidity.get().sys(),
+                    new_liquidity
+                ));
+
                 (
                     sqrt_price_math::get_amount_0_delta(
                         self.sqrt_price.get(),
@@ -175,6 +201,17 @@ impl StoragePool {
                     )?,
                 )
             } else {
+                #[cfg(feature = "testing-dbg")]
+                dbg!((
+                    "update_position, else",
+                    lower,
+                    upper,
+                    tick_math::get_sqrt_ratio_at_tick(lower)?,
+                    tick_math::get_sqrt_ratio_at_tick(upper)?,
+                    self.sqrt_price.get(),
+                    delta,
+                ));
+
                 // we're above the range, we need to move left, we'll need token1
                 (
                     I256::zero(),
@@ -195,7 +232,6 @@ impl StoragePool {
         id: U256,
         amount_0: U256,
         amount_1: U256,
-        giving: bool,
     ) -> Result<(I256, I256), Revert> {
         // calculate the delta using the amounts that we have here, guaranteeing
         // that we don't dip below the amount that's supplied as the minimum.
@@ -209,7 +245,7 @@ impl StoragePool {
         let sqrt_ratio_a_x_96 = tick_math::get_sqrt_ratio_at_tick(position.lower.get().as_i32())?;
         let sqrt_ratio_b_x_96 = tick_math::get_sqrt_ratio_at_tick(position.upper.get().as_i32())?;
 
-        let new_delta = sqrt_price_math::get_liquidity_for_amounts(
+        let delta = sqrt_price_math::get_liquidity_for_amounts(
             sqrt_ratio_x_96,   // cur_tick
             sqrt_ratio_a_x_96, // lower_tick
             sqrt_ratio_b_x_96, // upper_tick
@@ -219,19 +255,20 @@ impl StoragePool {
         .to_i128()
         .map_or_else(|| Err(Error::LiquidityAmountTooWide), |v| Ok(v))?;
 
-        let old_delta = position
-            .liquidity
-            .get()
-            .to_i128()
-            .map_or_else(|| Err(Error::LiquidityAmountTooWide), |v| Ok(v))?;
+        #[cfg(feature = "testing-dbg")]
+        dbg!((
+            "inside adjust_position",
+            current_test!(),
+            sqrt_ratio_x_96.to_string(),
+            sqrt_ratio_a_x_96.to_string(),
+            sqrt_ratio_b_x_96.to_string(),
+            amount_0.to_string(),
+            amount_1,
+            delta
+        ));
 
-        let delta = if giving {
-            old_delta - new_delta
-        } else {
-            old_delta + new_delta
-        };
-
-        // [update_position] should also ensure that we don't do this on a pool that's not currently running
+        // [update_position] should also ensure that we don't do this on a pool that's not currently
+        // running
 
         self.update_position(id, delta)
     }

@@ -685,13 +685,26 @@ impl Pools {
         let (amount_0, amount_1) =
             self.pools
                 .setter(pool)
-                .adjust_position(id, amount_0_max, amount_1_max, giving)?;
+                .adjust_position(id, amount_0_max, amount_1_max)?;
 
         evm::log(events::UpdatePositionLiquidity {
             id: id,
             token0: amount_0,
             token1: amount_1,
         });
+
+        #[cfg(feature = "testing-dbg")]
+        dbg!((
+            "adjust position before conversion",
+            current_test!(),
+            amount_0,
+            amount_1,
+            amount_0_min,
+            amount_1_min,
+            amount_0_max.to_string(),
+            amount_1_max.to_string(),
+            giving
+        ));
 
         let (amount_0, amount_1) = if giving {
             (
@@ -705,12 +718,15 @@ impl Pools {
             )
         };
 
-        assert_or!(amount_0 >= amount_0_min, Error::SwapResultTooLow);
-        assert_or!(amount_1 >= amount_1_min, Error::SwapResultTooLow);
+        assert_or!(amount_0 > amount_0_min, Error::SwapResultTooLow);
+        assert_or!(amount_1 > amount_1_min, Error::SwapResultTooLow);
+
+        assert_or!(amount_0 < amount_0_max, Error::SwapResultTooHigh);
+        assert_or!(amount_1 < amount_1_max, Error::SwapResultTooHigh);
 
         #[cfg(feature = "testing-dbg")]
         dbg!((
-            "adjust position modifying",
+            "adjust position after conversion",
             current_test!(),
             amount_0,
             amount_1,
@@ -1035,7 +1051,7 @@ impl Pools {
     ///! cover each asset. Will break if a position has empty liquidity, assuming that
     ///! the position was provided in error. Won't decrease the count of positions
     ///! a user has.
-    fn divest_positions(
+    pub fn divest_positions(
         &mut self,
         token: Address,
         positions: Vec<U256>,
@@ -1078,7 +1094,10 @@ impl test_utils::StorageNew for Pools {
 
 #[cfg(test)]
 mod test {
-    use crate::{eth_serde, test_utils, tick_math, types::I256Extension, types::*, Pools};
+    use crate::{
+        eth_serde, maths::sqrt_price_math, test_utils, tick_math, types::I256Extension, types::*,
+        Pools,
+    };
     use maplit::hashmap;
     use ruint_macro::uint;
     use stylus_sdk::{
@@ -1400,6 +1419,11 @@ mod test {
     fn test_update_position_adjust() -> Result<(), Vec<u8>> {
         //curl -d '{"jsonrpc":"2.0","id":1,"method":"eth_call","params":[{"data":"0x000001ea000000000000000000000000acd8c4dc161bef1cde93c14861589b35f5000a1900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000009896800000000000000000000000000000000000000000000000000000000000989680","from":"0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E","to":"0x3B5b80304dFda6bA079161acFaD648959c8745dd"},"0x5f8"]}' -H 'Content-Type: application/json' http://localhost:8547
 
+        use num_traits::ToPrimitive;
+
+        let testing_amount_0_bal = U256::from(10000000);
+        let testing_amount_1_bal = U256::from(10000000);
+
         test_utils::with_storage::<_, Pools, _>(
             Some(address!("3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E").into_array()), // sender
             Some(hashmap! {
@@ -1415,7 +1439,8 @@ mod test {
                             "0x3b77a15f47a3e0631c64845cd046efa6f46e623465f5ed88d8f1673aa9e1a541" => "0x00000000000000000000000000000000000000097d9e34b457d2ebda0c06c859",
             }),
             Some(hashmap! {
-                address!("ACd8c4Dc161BEF1Cde93C14861589B35f5000a19") => U256::from(10000000)
+                address!("ACd8c4Dc161BEF1Cde93C14861589B35f5000a19") => testing_amount_0_bal,
+                address!("A8EA92c819463EFbEdDFB670FEfC881A480f0115") => testing_amount_1_bal
             }),
             None,
             |contract| {
@@ -1430,25 +1455,59 @@ mod test {
                     owner == get_sender().unwrap()
                 );
 
-                eprintln!("owner in contract: {}", owner);
+                let id = U256::from(0);
+
+                let cur_price = contract.sqrt_price_x967_B8_F5_F_C5(pool).unwrap();
+                let lower_price = //encodeTick(50);
+                    U256::from_limbs([474970402381366317, 4305717609, 0, 0]);
+                let upper_price = //encodeTick(150);
+                    U256::from_limbs([11121627101190020371, 4327299026, 0, 0]);
+
+                let existing_delta = contract
+                    .position_liquidity_8_D11_C045(pool, id)
+                    .unwrap()
+                    .to_i128()
+                    .unwrap();
+
+                let (orig_amount_0, orig_amount_1) = sqrt_price_math::get_amounts_for_delta(
+                    cur_price,
+                    lower_price,
+                    upper_price,
+                    existing_delta,
+                )
+                .unwrap();
+
+                dbg!((
+                    "test_update_position_adjust",
+                    existing_delta,
+                    orig_amount_0,
+                    orig_amount_1
+                ));
 
                 let (amount_0, amount_1) = contract.incr_position_C_1041_D_18(
                     pool,
-                    U256::from(0),
-                    U256::from(0),
-                    U256::from(0),
-                    U256::from(10000000),
-                    U256::from(10000000),
+                    id,
+                    U256::from(0),        // minimum token 0
+                    U256::from(0),        // minimum token 1
+                    testing_amount_0_bal, // maximum token 0
+                    testing_amount_1_bal, // maximum token 1
                 )?;
 
                 let current = contract.sqrt_price_x967_B8_F5_F_C5(pool)?;
 
                 dbg!((
-                    "test_update_position_adjust",
+                    "test_update_position_adjust after incr position",
                     current.to_string(),
                     amount_0.to_string(),
                     amount_1.to_string()
                 ));
+
+                let new_delta = contract.position_liquidity_8_D11_C045(pool, id).unwrap();
+
+                dbg!(("test_update_position_adjust", new_delta));
+
+                assert!(amount_0 <= testing_amount_0_bal);
+                assert!(amount_1 <= testing_amount_1_bal);
 
                 Ok(())
             },
