@@ -77,7 +77,7 @@ export default function ConfirmWithdrawLiquidity() {
       writeContractUpdatePosition({
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "updatePosition622A559D",
+        functionName: "updatePositionC7F1F740",
         args: [token0.address, id, -delta],
       });
     },

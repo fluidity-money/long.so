@@ -190,7 +190,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
       writeContractUpdatePosition({
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "updatePosition622A559D",
+        functionName: "updatePositionC7F1F740",
         args: [token0.address, id, delta],
       });
     },

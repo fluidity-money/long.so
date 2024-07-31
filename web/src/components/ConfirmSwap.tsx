@@ -78,14 +78,14 @@ export const ConfirmSwap = () => {
       return {
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "swap_5a7d1bbd",
+        functionName: "swap904369BE",
         args: [token1.address, false, BigInt(token0AmountRaw ?? 0), maxUint256],
       } as const
     } else if (token1.address === fUSDC.address) {
       return {
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "swap_5a7d1bbd",
+        functionName: "swap904369BE",
         args: [token0.address, true, BigInt(token0AmountRaw ?? 0), maxUint256],
       } as const
     } else {
