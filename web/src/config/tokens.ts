@@ -41,7 +41,7 @@ export const WSPN: Token = {
 
 export const CATBUX: Token = {
   name: "CATBUX",
-  address: "0x36c116a8851869cf8a99b3Bda0Fad42453D32B99",
+  address: "0x36c116a8851869cf8a99b3bda0fad42453d32b99",
   symbol: "BUX",
   decimals: 18,
   icon: "/icons/cbux.svg",
