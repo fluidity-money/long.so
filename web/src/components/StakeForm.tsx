@@ -197,7 +197,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     address: ammAddress,
     abi: seawaterContract.abi,
     account: simulateAccount,
-    functionName: "sqrtPriceX96",
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
   });
 
@@ -230,7 +230,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const { data: curTickNum } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "curTick",
+    functionName: "curTick181C6FD9",
     args: [token0.address],
   });
   const curTick = useMemo(() => ({ result: BigInt(curTickNum?.result ?? 0) }), [curTickNum]);

@@ -146,7 +146,7 @@ export const SwapForm = () => {
     address: ammAddress,
     abi: seawaterContract.abi,
     account: simulateAccount,
-    functionName: "sqrtPriceX96",
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [poolAddress],
   });
 
@@ -154,7 +154,7 @@ export const SwapForm = () => {
     address: ammAddress,
     abi: seawaterContract.abi,
     account: simulateAccount,
-    functionName: "sqrtPriceX96",
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [token1.address],
   });
 
@@ -182,7 +182,7 @@ export const SwapForm = () => {
       address: ammAddress,
       account: simulateAccount,
       abi: seawaterContract.abi,
-      functionName: "quote",
+      functionName: "quote72E2ADE7",
       args: [
         poolAddress,
         token1.address === fUSDC.address,
@@ -204,14 +204,14 @@ export const SwapForm = () => {
       return {
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "swap",
+        functionName: "swap904369BE",
         args: [token1.address, false, BigInt(token0AmountRaw ?? 0), maxUint256],
       } as const
     } else if (token1.address === fUSDC.address) {
       return {
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "swap",
+        functionName: "swap904369BE",
         args: [token0.address, true, BigInt(token0AmountRaw ?? 0), maxUint256],
       } as const
     } else {
@@ -219,7 +219,7 @@ export const SwapForm = () => {
       return {
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "swap2ExactIn",
+        functionName: "swap2ExactIn41203F1D",
         args: [
           token0.address,
           token1.address,
@@ -254,7 +254,7 @@ export const SwapForm = () => {
       address: ammAddress,
       abi: seawaterContract.abi,
       account: simulateAccount,
-      functionName: "quote2",
+      functionName: "quote2CD06B86E",
       args: [
         token0.address,
         token1.address,
