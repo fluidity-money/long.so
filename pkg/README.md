@@ -13,8 +13,8 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 
 |      Deployment name     |              Deployment address            |
 |--------------------------|--------------------------------------------|
-| Longtail AMM             | 0x839c5cf32d9Bc2CD46027691d2941410251ED557 |
-| Longtail NFT manager     | 0xC96F6A050382d4aA73fd91f7A4D02aB8E5654338 |
+| Longtail AMM             | 0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1 |
+| Longtail NFT manager     | 0x1260F0E48AA5A195C811B5E7B1DFac1E9AD8debB |
 
 #### Useful testing token deployments
 
@@ -24,6 +24,7 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 | WETH                      | 0xde104342B32BCa03ec995f999181f7Cf1fFc04d7 |
 | USDC                      | 0x6437fdc89cED41941b97A9f1f8992D88718C81c5 |
 | WSPN                      | 0x22b9fa698b68bBA071B513959794E9a47d19214c |
+| CATBUX                    | 0x36c116a8851869cf8a99b3Bda0Fad42453D32B99 |
 
 ##### Access graph
 

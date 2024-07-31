@@ -38,7 +38,7 @@ pub fn give(_token: Address, _amount: U256) -> Result<(), Error> {
 }
 
 /// Pretends to give a specific address tokens.
-pub fn send_to(_token: Address, _recipient: Address, _amount: U256) -> Result<(), Error> {
+pub fn take_from_to(_token: Address, _recipient: Address, _amount: U256) -> Result<(), Error> {
     // TODO
     Ok(())
 }

@@ -156,8 +156,8 @@ pub fn give(token: Address, amount: U256) -> Result<(), Error> {
 ///
 /// # Side effects
 /// Transfers ERC20 tokens to the address given.
-pub fn send_to(token: Address, recipient: Address, amount: U256) -> Result<(), Error> {
-    safe_transfer(token, recipient, amount)
+pub fn take_from_to(token: Address, recipient: Address, amount: U256) -> Result<(), Error> {
+    safe_transfer_from(token, msg::sender(), recipient, amount)
 }
 
 /// Takes ERC20 tokens from the transaction sender using `transferFrom`.

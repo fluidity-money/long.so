@@ -28,7 +28,7 @@ swaps: ${OUT_SEAWATER_SWAPS}
 quotes: ${OUT_SEAWATER_QUOTES}
 migrations: ${OUT_SEAWATER_MIGRATIONS}
 
-stylus: admin positions update-positions swaps swap-permit2 quotes
+stylus: admin positions update-positions swaps swap-permit2 quotes migrations
 
 amm-entrypoint: ${OUT_SEAWATER_AMM}
 ownership-nfts: ${OUT_OWNERSHIP_NFTS}

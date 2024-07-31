@@ -1046,17 +1046,24 @@ impl Pools {
 ///! situation. These functions will break the internal state of the pool most likely.
 #[cfg_attr(feature = "migrations", external)]
 impl Pools {
-    ///! Divest the position IDs given for the pool given., sending them the
-    ///! amount given This would involve mutliple transactions in practice to
-    ///! cover each asset. Will break if a position has empty liquidity, assuming that
-    ///! the position was provided in error. Won't decrease the count of positions
-    ///! a user has.
-    pub fn divest_positions(
+    pub fn disable_pools(&mut self, pools: Vec<Address>) -> Result<(), Vec<u8>> {
+        assert_eq_or!(
+            msg::sender(),
+            self.seawater_admin.get(),
+            Error::SeawaterAdminOnly
+        );
+
+        for pool in pools {
+            self.pools.setter(pool).set_enabled(false);
+        }
+
+        Ok(())
+    }
+
+    pub fn send_token_to_sender(
         &mut self,
         token: Address,
-        positions: Vec<U256>,
-        token_0: Vec<U256>,
-        token_1: Vec<U256>,
+        amount: U256
     ) -> Result<(), Vec<u8>> {
         assert_eq_or!(
             msg::sender(),
@@ -1064,21 +1071,25 @@ impl Pools {
             Error::SeawaterAdminOnly
         );
 
-        let pool = self.pools.get(token);
+        erc20::give(token, amount).unwrap();
 
-        // this admin action can only be done on a pool that's disabled.
+        Ok(())
+    }
 
-        assert_or!(!pool.get_enabled(), Error::PoolEnabled);
+    pub fn send_amounts_from_sender(
+        &mut self,
+        token: Address,
+        recipient_addrs: Vec<Address>,
+        recipient_amounts: Vec<U256>
+    ) -> Result<(), Revert> {
+        assert_eq_or!(
+            msg::sender(),
+            self.seawater_admin.get(),
+            Error::SeawaterAdminOnly
+        );
 
-        for ((position, token_0), token_1) in
-            positions.iter().zip(token_0.iter()).zip(token_1.iter())
-        {
-            let owner = self.position_owners.get(*position);
-            let is_position_zero = pool.get_position_liquidity(*position).is_zero();
-            assert_or!(!is_position_zero, Error::EmptyPosition);
-            erc20::send_to(token, owner, *token_0)?;
-            erc20::send_to(FUSDC_ADDR, owner, *token_1)?;
-            self.position_owners.setter(*position).erase();
+        for (addr, amount) in recipient_addrs.iter().zip(recipient_amounts.iter()) {
+            erc20::take_from_to(token, *addr, *amount)?;
         }
 
         Ok(())
