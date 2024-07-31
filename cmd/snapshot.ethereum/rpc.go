@@ -232,8 +232,8 @@ func encodeId(pool types.Address, id int) string {
 func getCalldata(pool types.Address, posId int) string {
 	posIdB := new(big.Int).SetInt64(int64(posId)).Bytes()
 	x := append(
-		//positionLiquidity(address,uint256)
-		[]byte{0xe7, 0x59, 0xc4, 0x65},
+		//positionLiquidity8D11C045(address,uint256)
+		[]byte{0, 0, 0x02, 0x5b},
 		append(
 			ethCommon.LeftPadBytes(ethCommon.HexToAddress(pool.String()).Bytes(), 32),
 			ethCommon.LeftPadBytes(posIdB, 32)...,
