@@ -65,7 +65,6 @@ CREATE VIEW seawater_pool_swap1_volume_hourly_1 AS
 	SELECT
 		events_seawater_swap1.pool AS pool,
 		date_trunc('hour', events_seawater_swap1.created_by) AS hourly_interval,
-		-- TODO push this (need to replace everything that relies on this)
 		CAST(SUM(amount1) AS HUGEINT) AS fusdc_volume,
 		CAST(SUM(amount0) AS HUGEINT) AS tokena_volume
 	FROM events_seawater_swap1
