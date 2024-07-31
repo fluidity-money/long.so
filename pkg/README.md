@@ -1,7 +1,7 @@
 
-# Long Tail contracts
+# Longtail contracts
 
-Long Tail is Arbitrum's cheapest and most rewarding AMM.
+Longtail is Arbitrum's cheapest and most rewarding AMM.
 
 ## Deployments
 
@@ -11,10 +11,10 @@ Long Tail is Arbitrum's cheapest and most rewarding AMM.
 
 #### AMM contract deployments
 
-|       Deployment name     |              Deployment address            |
-|---------------------------|--------------------------------------------|
-| Long Tail AMM             | 0x839c5cf32d9Bc2CD46027691d2941410251ED557 |
-| Long Tail NFT manager     | 0xC96F6A050382d4aA73fd91f7A4D02aB8E5654338 |
+|      Deployment name     |              Deployment address            |
+|--------------------------|--------------------------------------------|
+| Longtail AMM             | 0x839c5cf32d9Bc2CD46027691d2941410251ED557 |
+| Longtail NFT manager     | 0xC96F6A050382d4aA73fd91f7A4D02aB8E5654338 |
 
 #### Useful testing token deployments
 
@@ -70,10 +70,15 @@ the appropriate error in this table:
 | 30 | 0x1e | Only the NFT manager can use this                                                       |
 | 31 | 0x1f | Only the Seawater admin can use this                                                    |
 | 32 | 0x20 | Operation unavailable when the pool is disabled                                         |
+| 33 | 0x21 | Invalid tick spacing                                                                    |
+| 34 | 0x22 | Swap result too low                                                                     |
+| 35 | 0x23 | Liquidity too low or high to be a int128                                                |
+| 36 | 0x24 | Invalid tick                                                                            |
+| 37 | 0x25 | Pool enabled when it should be disabled for this action                                 |
+| 38 | 0x26 | Position is empty when it shouldn't be                                                  |
 
 If more bytes are in the error, then the issue was produced by the ERC20 token. Convert
-any error types to their keccak form to see. For example, an allowance
-error might be hard to unpack, and it'll be several bytes.g
+any error types to their selector form to see.
 
 ## Security
 

@@ -8,8 +8,13 @@ use crate::types::{I256Extension, U256Extension, WrappedNative, I256, I32, U128,
 use alloc::vec::Vec;
 use stylus_sdk::{prelude::*, storage::*};
 
+use num_traits::ToPrimitive;
+
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 use crate::test_utils;
+
+#[cfg(feature = "testing-dbg")]
+use crate::current_test;
 
 type Revert = Vec<u8>;
 
@@ -73,6 +78,11 @@ impl StoragePool {
         let spacing = self.tick_spacing.get().sys() as i32;
         assert_or!(low % spacing == 0, Error::InvalidTickSpacing);
         assert_or!(up % spacing == 0, Error::InvalidTickSpacing);
+        let spacing: u8 = spacing.try_into().map_err(|_| Error::InvalidTickSpacing)?;
+        let min_tick = tick_math::get_min_tick(spacing);
+        let max_tick = tick_math::get_max_tick(spacing);
+        assert_or!(low >= min_tick && low <= max_tick, Error::InvalidTick);
+        assert_or!(up >= min_tick && up <= max_tick, Error::InvalidTick);
         Ok(self.positions.new(id, low, up))
     }
 
@@ -142,6 +152,17 @@ impl StoragePool {
             Ok((I256::zero(), I256::zero()))
         } else {
             let (amount_0, amount_1) = if self.cur_tick.get().sys() < lower {
+                #[cfg(feature = "testing-dbg")]
+                dbg!((
+                    "update_position, cur_tick < lower path",
+                    lower,
+                    upper,
+                    tick_math::get_sqrt_ratio_at_tick(lower)?,
+                    tick_math::get_sqrt_ratio_at_tick(upper)?,
+                    self.sqrt_price.get(),
+                    delta
+                ));
+
                 // we're below the range, we need to move right, we'll need more token0
                 (
                     sqrt_price_math::get_amount_0_delta(
@@ -156,6 +177,19 @@ impl StoragePool {
                 let new_liquidity = liquidity_math::add_delta(self.liquidity.get().sys(), delta)?;
                 self.liquidity.set(U128::lib(&new_liquidity));
 
+                #[cfg(feature = "testing-dbg")]
+                dbg!((
+                    "update_position, cur_tick < upper path",
+                    lower,
+                    upper,
+                    tick_math::get_sqrt_ratio_at_tick(lower)?,
+                    tick_math::get_sqrt_ratio_at_tick(upper)?,
+                    self.sqrt_price.get(),
+                    delta,
+                    self.liquidity.get().sys(),
+                    new_liquidity
+                ));
+
                 (
                     sqrt_price_math::get_amount_0_delta(
                         self.sqrt_price.get(),
@@ -169,6 +203,17 @@ impl StoragePool {
                     )?,
                 )
             } else {
+                #[cfg(feature = "testing-dbg")]
+                dbg!((
+                    "update_position, else",
+                    lower,
+                    upper,
+                    tick_math::get_sqrt_ratio_at_tick(lower)?,
+                    tick_math::get_sqrt_ratio_at_tick(upper)?,
+                    self.sqrt_price.get(),
+                    delta,
+                ));
+
                 // we're above the range, we need to move left, we'll need token1
                 (
                     I256::zero(),
@@ -184,21 +229,17 @@ impl StoragePool {
         }
     }
 
-    ///! Signature for this position is u128 externally. In reality it's a U256 under the hood.
-    ///! If the end result exceeds 128, the whole thing will blow up without a revert message.
-    pub fn incr_position(
+    pub fn adjust_position(
         &mut self,
         id: U256,
-        amount_0_min: U256,
-        amount_1_min: U256,
-        amount_0_max: U256,
-        amount_1_max: U256,
+        amount_0: U256,
+        amount_1: U256,
     ) -> Result<(I256, I256), Revert> {
         // calculate the delta using the amounts that we have here, guaranteeing
         // that we don't dip below the amount that's supplied as the minimum.
 
-        assert_or!(amount_0_max > U256::zero(), Error::SwapResultTooLow);
-        assert_or!(amount_1_max > U256::zero(), Error::SwapResultTooLow);
+        assert_or!(amount_0 > U256::zero(), Error::SwapResultTooLow);
+        assert_or!(amount_1 > U256::zero(), Error::SwapResultTooLow);
 
         let position = self.positions.positions.get(id);
 
@@ -210,16 +251,28 @@ impl StoragePool {
             sqrt_ratio_x_96,   // cur_tick
             sqrt_ratio_a_x_96, // lower_tick
             sqrt_ratio_b_x_96, // upper_tick
-            amount_0_max,      // amount_0
-            amount_1_max,      // amount_1
-        )?;
+            amount_0,          // amount_0
+            amount_1,          // amount_1
+        )?
+        .to_i128()
+        .map_or_else(|| Err(Error::LiquidityAmountTooWide), |v| Ok(v))?;
 
-        let (amount_0, amount_1) = self.update_position(id, delta)?;
+        #[cfg(feature = "testing-dbg")]
+        dbg!((
+            "inside adjust_position",
+            current_test!(),
+            sqrt_ratio_x_96.to_string(),
+            sqrt_ratio_a_x_96.to_string(),
+            sqrt_ratio_b_x_96.to_string(),
+            amount_0.to_string(),
+            amount_1,
+            delta
+        ));
 
-        assert_or!(amount_0.abs_pos()? >= amount_0_min, Error::SwapResultTooLow);
-        assert_or!(amount_1.abs_pos()? >= amount_1_min, Error::SwapResultTooLow);
+        // [update_position] should also ensure that we don't do this on a pool that's not currently
+        // running
 
-        Ok((amount_0, amount_1))
+        self.update_position(id, delta)
     }
 
     /// Performs a swap on this pool.
@@ -292,6 +345,7 @@ impl StoragePool {
         let mut iters = 0;
         while !state.amount_remaining.is_zero() && state.price != price_limit {
             iters += 1;
+            debug_assert!(iters != 100, "swapping didn't resolve after 100 iters!");
 
             let step_initial_price = state.price;
 
@@ -509,6 +563,10 @@ impl StoragePool {
     pub fn set_enabled(&mut self, enabled: bool) {
         self.enabled.set(enabled)
     }
+
+    pub fn get_enabled(&self) -> bool {
+        self.enabled.get()
+    }
 }
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
@@ -520,12 +578,9 @@ impl test_utils::StorageNew for StoragePool {
 
 #[cfg(test)]
 mod test {
-    use std::ops::Neg;
-
     use super::*;
     use crate::test_utils;
     use ruint_macro::uint;
-    use stylus_sdk::alloy_primitives::{Signed, I128};
 
     #[test]
     fn test_update_position() {
@@ -804,8 +859,6 @@ mod test {
 
         let position_ranges: [[i64; 2]; 3] = [[-20, -10], [-10, 10], [10, 20]];
 
-        let position_delta_template = [1000, 777, 252, 33, 5];
-
         let position_delta: Vec<i128> = (1..=20).map(|d| d * 10i128.pow(18)).collect();
 
         for price in init_prices.iter() {
@@ -897,7 +950,7 @@ mod test {
 
                 pool.update_position(pos_id, delta).unwrap();
 
-                let (a0, a1, final_tick) = pool
+                let (a0, _a1, _final_tick) = pool
                     .swap(true, I256::unchecked_from(*swap_amount), U256::MAX)
                     .unwrap();
 

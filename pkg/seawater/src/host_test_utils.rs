@@ -68,20 +68,19 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     amm_bals: Option<HashMap<Address, U256>>,
     f: F,
 ) -> T {
+    StorageCache::clear();
+    test_shims::reset_storage();
     let slots_map: HashMap<[u8; 32], [u8; 32]> = match slots {
-        Some(items) => {
-            items
-                .iter()
-                .map(|(key, value)| -> ([u8; 32], [u8; 32]) {
-                    // avoid poisoning the lock if we fail to do this here.
-                    (
-                        const_hex::const_decode_to_array::<32>(key.as_bytes())
-                            .expect(format!("failed to decode key: {:?}", key).as_str()),
-                        const_hex::const_decode_to_array::<32>(value.as_bytes()).unwrap(),
-                    )
-                })
-                .collect()
-        }
+        Some(items) => items
+            .iter()
+            .map(|(key, value)| -> ([u8; 32], [u8; 32]) {
+                (
+                    const_hex::const_decode_to_array::<32>(key.as_bytes())
+                        .expect(format!("failed to decode key: {:?}", key).as_str()),
+                    const_hex::const_decode_to_array::<32>(value.as_bytes()).unwrap(),
+                )
+            })
+            .collect(),
         None => HashMap::new(),
     };
 
@@ -99,8 +98,6 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     }
     let mut pools = P::new(U256::ZERO, 0);
     let res = f(&mut pools);
-    StorageCache::clear();
-    test_shims::reset_storage();
     res
 }
 

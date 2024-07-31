@@ -166,8 +166,10 @@ impl Pools {
             .ok_or(Error::SwapResultTooHigh)?
             .into_raw();
 
-        assert_or!(amount_0_abs > U256::zero(), Error::SwapResultTooLow);
-        assert_or!(amount_1_abs > U256::zero(), Error::SwapResultTooLow);
+        assert_or!(
+            amount_0_abs > U256::zero() || amount_1_abs > U256::zero(),
+            Error::SwapResultTooLow
+        );
 
         evm::log(events::Swap1 {
             user: msg::sender(),
@@ -662,6 +664,94 @@ impl Pools {
 
         Ok((token_0, token_1))
     }
+
+    pub fn adjust_position_internal(
+        &mut self,
+        pool: Address,
+        id: U256,
+        amount_0_min: U256,
+        amount_1_min: U256,
+        amount_0_max: U256,
+        amount_1_max: U256,
+        giving: bool,
+        permit2: Option<(Permit2Args, Permit2Args)>,
+    ) -> Result<(U256, U256), Revert> {
+        assert_eq_or!(
+            msg::sender(),
+            self.position_owners.get(id),
+            Error::PositionOwnerOnly
+        );
+
+        let (amount_0, amount_1) =
+            self.pools
+                .setter(pool)
+                .adjust_position(id, amount_0_max, amount_1_max)?;
+
+        evm::log(events::UpdatePositionLiquidity {
+            id: id,
+            token0: amount_0,
+            token1: amount_1,
+        });
+
+        #[cfg(feature = "testing-dbg")]
+        dbg!((
+            "adjust position before conversion",
+            current_test!(),
+            amount_0,
+            amount_1,
+            amount_0_min,
+            amount_1_min,
+            amount_0_max.to_string(),
+            amount_1_max.to_string(),
+            giving
+        ));
+
+        let (amount_0, amount_1) = if giving {
+            (
+                amount_0.abs_neg().map_err(|_| Error::SwapResultTooLow)?,
+                amount_1.abs_neg().map_err(|_| Error::SwapResultTooLow)?,
+            )
+        } else {
+            (
+                amount_0.abs_pos().map_err(|_| Error::SwapResultTooLow)?,
+                amount_1.abs_pos().map_err(|_| Error::SwapResultTooLow)?,
+            )
+        };
+
+        assert_or!(amount_0 > amount_0_min, Error::SwapResultTooLow);
+        assert_or!(amount_1 > amount_1_min, Error::SwapResultTooLow);
+
+        assert_or!(amount_0 < amount_0_max, Error::SwapResultTooHigh);
+        assert_or!(amount_1 < amount_1_max, Error::SwapResultTooHigh);
+
+        #[cfg(feature = "testing-dbg")]
+        dbg!((
+            "adjust position after conversion",
+            current_test!(),
+            amount_0,
+            amount_1,
+            amount_0_min,
+            amount_1_min,
+            amount_0_max,
+            amount_1_max,
+            giving
+        ));
+
+        if giving {
+            erc20::give(pool, amount_0)?;
+            erc20::give(FUSDC_ADDR, amount_1)?;
+        } else {
+            let (permit_0, permit_1) = match permit2 {
+                Some((permit_0, permit_1)) => (Some(permit_0), Some(permit_1)),
+                None => (None, None),
+            };
+
+            erc20::take(pool, amount_0, permit_0)?;
+            erc20::take(FUSDC_ADDR, amount_1, permit_1)?;
+        }
+
+        Ok((amount_0, amount_1))
+    }
 }
 
 #[cfg_attr(feature = "update_positions", external)]
@@ -669,7 +759,7 @@ impl Pools {
     /// Refreshes and updates liquidity in a position, using approvals to transfer tokens.
     /// See [Self::update_position_internal].
     #[allow(non_snake_case)]
-    pub fn update_position_622_A559_D(
+    pub fn update_position_C_7_F_1_F_740(
         &mut self,
         pool: Address,
         id: U256,
@@ -678,53 +768,115 @@ impl Pools {
         self.update_position_internal(pool, id, delta, None)
     }
 
+    /// Refreshes and updates liquidity in a position, transferring tokens from the user with a restriction on the amount taken.
+    /// See [Self::adjust_position_internal].
+    #[allow(non_snake_case)]
+    pub fn incr_position_C_1041_D_18(
+        &mut self,
+        pool: Address,
+        id: U256,
+        amount_0_min: U256,
+        amount_1_min: U256,
+        amount_0_max: U256,
+        amount_1_max: U256,
+    ) -> Result<(U256, U256), Revert> {
+        self.adjust_position_internal(
+            pool,
+            id,
+            amount_0_min,
+            amount_1_min,
+            amount_0_max,
+            amount_1_max,
+            false,
+            None,
+        )
+    }
+
+    /// Refreshes and updates liquidity in a position, transferring tokens to the user with restrictions.
+    /// See [Self::adjust_position_internal].
+    #[allow(non_snake_case)]
+    pub fn decr_position_F_C_C_D_4896(
+        &mut self,
+        pool: Address,
+        id: U256,
+        amount_0_min: U256,
+        amount_1_min: U256,
+        amount_0_max: U256,
+        amount_1_max: U256,
+    ) -> Result<(U256, U256), Revert> {
+        self.adjust_position_internal(
+            pool,
+            id,
+            amount_0_min,
+            amount_1_min,
+            amount_0_max,
+            amount_1_max,
+            true,
+            None,
+        )
+    }
+
     #[cfg(feature = "update_positions")]
     #[raw]
     #[selector(
-        id = "updatePositionPermit2F24010C3(address,uint256,int128,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)"
+        id = "incrPositionPermit25468326E(address,uint256,uint256,uint256,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)"
     )]
-    /// Refreshes and updates liquidity in a position, using permit2 to transfer tokens.
-    /// See [Self::update_position_internal].
+    /// Refreshes and increases the liquidity in a position with some protections, using permit2 to transfer tokens.
+    /// See [Self::adjust_position_internal].
     #[allow(non_snake_case)]
-    pub fn update_position_permit2_F24010_C3(&mut self, data: &[u8]) -> RawArbResult {
+    pub fn incr_position_permit2_5468326_E(&mut self, data: &[u8]) -> RawArbResult {
+        //address,uint256,uint256,uint256,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes
         let (pool, data) = eth_serde::parse_addr(data);
+        //uint256,uint256,uint256,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes
         let (id, data) = eth_serde::parse_u256(data);
-        let (delta, data) = eth_serde::parse_i128(data);
+        //uint256,uint256,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes
+        let (amount_0_min, data) = eth_serde::parse_u256(data);
+        //uint256,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes
+        let (amount_1_min, data) = eth_serde::parse_u256(data);
 
         fn parse_permit2(data: &[u8]) -> (U256, U256, U256, &[u8]) {
+            //uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes
             let (nonce, data) = eth_serde::parse_u256(data);
+            //uint256,uint256,bytes,uint256,uint256,uint256,bytes
             let (deadline, data) = eth_serde::parse_u256(data);
-            let (max_amount, data) = eth_serde::parse_u256(data);
+            //uint256,bytes,uint256,uint256,uint256,bytes
+            let (token_max, data) = eth_serde::parse_u256(data);
+            //bytes,uint256,uint256,uint256,bytes
             let (_, data) = eth_serde::take_word(data);
 
-            (nonce, deadline, max_amount, data)
+            (nonce, deadline, token_max, data)
         }
 
-        let (nonce_0, deadline_0, max_amount_0, data) = parse_permit2(data);
-        let (nonce_1, deadline_1, max_amount_1, data) = parse_permit2(data);
+        let (nonce_0, deadline_0, amount_0_max, data) = parse_permit2(data);
+        //uint256,uint256,uint256,bytes
+        let (nonce_1, deadline_1, amount_1_max, data) = parse_permit2(data);
 
         let (sig_0, data) = eth_serde::parse_bytes(data);
         let (sig_1, _) = eth_serde::parse_bytes(data);
 
         let permit2_token_0 = Permit2Args {
-            max_amount: max_amount_0,
+            max_amount: amount_0_max,
             nonce: nonce_0,
             deadline: deadline_0,
             sig: sig_0,
         };
 
         let permit2_token_1 = Permit2Args {
-            max_amount: max_amount_1,
+            max_amount: amount_1_max,
             nonce: nonce_1,
             deadline: deadline_1,
             sig: sig_1,
         };
 
-        match Pools::update_position_internal(
+        match Pools::adjust_position_internal(
             self,
             pool,
             id,
-            delta,
+            amount_0_min,
+            amount_1_min,
+            amount_0_max,
+            amount_1_max,
+            false,
             Some((permit2_token_0, permit2_token_1)),
         ) {
             Ok((token_0, token_1)) => Some(Ok([
@@ -890,9 +1042,48 @@ impl Pools {
     }
 }
 
-/// Migration functions. Only enabled when the `migrations` feature is set.
+///! Migrations code that should only be used in a testing environment, or in a rescue
+///! situation. These functions will break the internal state of the pool most likely.
 #[cfg_attr(feature = "migrations", external)]
-impl Pools {}
+impl Pools {
+    ///! Divest the position IDs given for the pool given., sending them the
+    ///! amount given This would involve mutliple transactions in practice to
+    ///! cover each asset. Will break if a position has empty liquidity, assuming that
+    ///! the position was provided in error. Won't decrease the count of positions
+    ///! a user has.
+    pub fn divest_positions(
+        &mut self,
+        token: Address,
+        positions: Vec<U256>,
+        token_0: Vec<U256>,
+        token_1: Vec<U256>,
+    ) -> Result<(), Vec<u8>> {
+        assert_eq_or!(
+            msg::sender(),
+            self.seawater_admin.get(),
+            Error::SeawaterAdminOnly
+        );
+
+        let pool = self.pools.get(token);
+
+        // this admin action can only be done on a pool that's disabled.
+
+        assert_or!(!pool.get_enabled(), Error::PoolEnabled);
+
+        for ((position, token_0), token_1) in
+            positions.iter().zip(token_0.iter()).zip(token_1.iter())
+        {
+            let owner = self.position_owners.get(*position);
+            let is_position_zero = pool.get_position_liquidity(*position).is_zero();
+            assert_or!(!is_position_zero, Error::EmptyPosition);
+            erc20::send_to(token, owner, *token_0)?;
+            erc20::send_to(FUSDC_ADDR, owner, *token_1)?;
+            self.position_owners.setter(*position).erase();
+        }
+
+        Ok(())
+    }
+}
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 impl test_utils::StorageNew for Pools {
@@ -903,7 +1094,10 @@ impl test_utils::StorageNew for Pools {
 
 #[cfg(test)]
 mod test {
-    use crate::{eth_serde, test_utils, tick_math, types::I256Extension, types::*, Pools};
+    use crate::{
+        eth_serde, maths::sqrt_price_math, test_utils, tick_math, types::I256Extension, types::*,
+        Pools,
+    };
     use maplit::hashmap;
     use ruint_macro::uint;
     use stylus_sdk::{
@@ -986,7 +1180,7 @@ mod test {
                     .checked_sub(U256::one())
                     .unwrap();
 
-                contract.update_position_622_A559_D(token_addr, position_id, liquidity_delta)?;
+                contract.update_position_C_7_F_1_F_740(token_addr, position_id, liquidity_delta)?;
 
                 Ok(())
             },
@@ -1027,7 +1221,7 @@ mod test {
                     .checked_sub(U256::one())
                     .unwrap();
 
-                contract.update_position_622_A559_D(token_addr, position_id, liquidity_delta)?;
+                contract.update_position_C_7_F_1_F_740(token_addr, position_id, liquidity_delta)?;
 
                 Ok(())
             },
@@ -1129,7 +1323,7 @@ mod test {
             None,
             None,
             None,
-            |contract| Ok(()),
+            |_contract| Ok(()),
         )
     }
 
@@ -1160,7 +1354,8 @@ mod test {
             "0x0951df22610b1d641fffea402634ee523fece890ea56ecb57d4eb766ca391d51" => "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0x0951df22610b1d641fffea402634ee523fece890ea56ecb57d4eb766ca391d52" => "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0xdc03f6203d56cf5fe49270519e5a797eebcd9be54de9070150d36d99795813bf" => "0x0000000000000000000000000000000000000000000000000000000000000000"
+            "0xdc03f6203d56cf5fe49270519e5a797eebcd9be54de9070150d36d99795813bf" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0x3b77a15f47a3e0631c64845cd046efa6f46e623465f5ed88d8f1673aa9e1a541" => "0x00000000000000000000000000000000000000097d9e34b457d2ebda0c06c859",
              }),
             Some(hashmap! {
                 address!("6437fdc89ced41941b97a9f1f8992d88718c81c5") => U256::from(777444371)
@@ -1171,34 +1366,35 @@ mod test {
 
                 let pool_addr = address!("6437fdc89cED41941b97A9f1f8992D88718C81c5");
                 let id = U256::from(33252);
-                let delta = i128::from_str("18117952900").unwrap();
+                let _delta = i128::from_str("18117952900").unwrap();
 
                 let pool = contract.pools.get(pool_addr);
 
-                let liq = pool.get_position_liquidity(id);
-                let sqrt_price = pool.get_sqrt_price();
+                let _liq = pool.get_position_liquidity(id);
+                let _sqrt_price = pool.get_sqrt_price();
                 let tick_current = pool.get_cur_tick().as_i32();
 
                 let position = pool.get_position(id);
                 let tick_lower = position.lower.get().as_i32();
                 let tick_upper = position.upper.get().as_i32();
 
-                let sqrt_current = tick_math::get_sqrt_ratio_at_tick(tick_current)?;
-                let sqrt_lower = tick_math::get_sqrt_ratio_at_tick(tick_lower)?;
-                let sqrt_upper = tick_math::get_sqrt_ratio_at_tick(tick_upper)?;
+                let _sqrt_current = tick_math::get_sqrt_ratio_at_tick(tick_current)?;
+                let _sqrt_lower = tick_math::get_sqrt_ratio_at_tick(tick_lower)?;
+                let _sqrt_upper = tick_math::get_sqrt_ratio_at_tick(tick_upper)?;
 
+                #[cfg(feature = "testing-dbg")]
                 dbg!((
                     "update_position",
-                    liq,
-                    sqrt_price,
+                    _liq,
+                    _sqrt_price,
                     tick_current,
                     id,
-                    delta,
+                    _delta,
                     tick_lower,
                     tick_upper,
-                    sqrt_lower,
-                    sqrt_upper,
-                    sqrt_current
+                    _sqrt_lower,
+                    _sqrt_upper,
+                    _sqrt_current
                 ));
 
                 // liquidity		0
@@ -1213,6 +1409,105 @@ mod test {
                 // sqrt upper	97156358459122590463153608088
 
                 //let (_amount_0, _amount_1) = contract.update_position__d58ed3(pool_addr, id, delta).unwrap();
+
+                Ok(())
+            },
+        )
+    }
+
+    #[test]
+    fn test_update_position_adjust() -> Result<(), Vec<u8>> {
+        //curl -d '{"jsonrpc":"2.0","id":1,"method":"eth_call","params":[{"data":"0x000001ea000000000000000000000000acd8c4dc161bef1cde93c14861589b35f5000a1900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000009896800000000000000000000000000000000000000000000000000000000000989680","from":"0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E","to":"0x3B5b80304dFda6bA079161acFaD648959c8745dd"},"0x5f8"]}' -H 'Content-Type: application/json' http://localhost:8547
+
+        use num_traits::ToPrimitive;
+
+        let testing_amount_0_bal = U256::from(10000000);
+        let testing_amount_1_bal = U256::from(10000000);
+
+        test_utils::with_storage::<_, Pools, _>(
+            Some(address!("3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E").into_array()), // sender
+            Some(hashmap! {
+                            "0x000000000000000000000000000000000000000000000000000000000000014d" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                            "0x0000000000000000000000000000000000000000000000000000000000000000" => "0x0000000000000000000000003f1eae7d46d88f08fc2f8ed27fcb2ab183eb2d0e",
+                            "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                            "0x17ef568e3e12ab5b9c7254a8d58478811de00f9e6eb34345acd53bf8fd09d3ec" => "0x0000000000000000000000003f1eae7d46d88f08fc2f8ed27fcb2ab183eb2d0e",
+                            "0x3b77a15f47a3e0631c64845cd046efa6f46e623465f5ed88d8f1673aa9e1a540" => "0x0000000000000000000000000000afd000000000000000000000000000004e20",
+                            "0xd69c6ce8a70c25375a33ec21ac6ba05a42b7919a0b7d24bb04d1a5bd64753058" => "0x000000000000000000000000000000000000000000004e200000c3bc000098d2",
+                            "0x3b77a15f47a3e0631c64845cd046efa6f46e623465f5ed88d8f1673aa9e1a53c" => "0x000000000000000000000000000000000000000000174876e800010000000001",
+                            "0x3b77a15f47a3e0631c64845cd046efa6f46e623465f5ed88d8f1673aa9e1a53d" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                            "0x3b77a15f47a3e0631c64845cd046efa6f46e623465f5ed88d8f1673aa9e1a53e" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                            "0x3b77a15f47a3e0631c64845cd046efa6f46e623465f5ed88d8f1673aa9e1a541" => "0x00000000000000000000000000000000000000097d9e34b457d2ebda0c06c859",
+            }),
+            Some(hashmap! {
+                address!("ACd8c4Dc161BEF1Cde93C14861589B35f5000a19") => testing_amount_0_bal,
+                address!("A8EA92c819463EFbEdDFB670FEfC881A480f0115") => testing_amount_1_bal
+            }),
+            None,
+            |contract| {
+                use crate::host_test_shims::get_sender;
+
+                let pool = address!("ACd8c4Dc161BEF1Cde93C14861589B35f5000a19");
+
+                let owner = contract.position_owners.get(U256::from(0));
+                eprintln!(
+                    "msg sender: {}, sender is equal to owner? {}",
+                    const_hex::const_encode::<20, false>(&get_sender().unwrap()).as_str(),
+                    owner == get_sender().unwrap()
+                );
+
+                let id = U256::from(0);
+
+                let cur_price = contract.sqrt_price_x967_B8_F5_F_C5(pool).unwrap();
+                let lower_price = //encodeTick(50);
+                    U256::from_limbs([474970402381366317, 4305717609, 0, 0]);
+                let upper_price = //encodeTick(150);
+                    U256::from_limbs([11121627101190020371, 4327299026, 0, 0]);
+
+                let existing_delta = contract
+                    .position_liquidity_8_D11_C045(pool, id)
+                    .unwrap()
+                    .to_i128()
+                    .unwrap();
+
+                let (orig_amount_0, orig_amount_1) = sqrt_price_math::get_amounts_for_delta(
+                    cur_price,
+                    lower_price,
+                    upper_price,
+                    existing_delta,
+                )
+                .unwrap();
+
+                dbg!((
+                    "test_update_position_adjust",
+                    existing_delta,
+                    orig_amount_0,
+                    orig_amount_1
+                ));
+
+                let (amount_0, amount_1) = contract.incr_position_C_1041_D_18(
+                    pool,
+                    id,
+                    U256::from(0),        // minimum token 0
+                    U256::from(0),        // minimum token 1
+                    testing_amount_0_bal, // maximum token 0
+                    testing_amount_1_bal, // maximum token 1
+                )?;
+
+                let current = contract.sqrt_price_x967_B8_F5_F_C5(pool)?;
+
+                dbg!((
+                    "test_update_position_adjust after incr position",
+                    current.to_string(),
+                    amount_0.to_string(),
+                    amount_1.to_string()
+                ));
+
+                let new_delta = contract.position_liquidity_8_D11_C045(pool, id).unwrap();
+
+                dbg!(("test_update_position_adjust", new_delta));
+
+                assert!(amount_0 <= testing_amount_0_bal);
+                assert!(amount_1 <= testing_amount_1_bal);
 
                 Ok(())
             },

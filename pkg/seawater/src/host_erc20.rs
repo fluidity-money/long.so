@@ -37,6 +37,12 @@ pub fn give(_token: Address, _amount: U256) -> Result<(), Error> {
     )
 }
 
+/// Pretends to give a specific address tokens.
+pub fn send_to(_token: Address, _recipient: Address, _amount: U256) -> Result<(), Error> {
+    // TODO
+    Ok(())
+}
+
 /// Pretends to take ERC20 tokens from the user, only happening if the underlying
 /// environment is not WASM. Only useful for testing.
 pub fn take_permit2(_token: Address, _amount: U256, _details: Permit2Args) -> Result<(), Error> {
@@ -55,7 +61,13 @@ pub fn take(
     _permit2_details: Option<Permit2Args>,
 ) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg")]
-    dbg!(("take", current_test!(), _token, _amount, _permit2_details));
+    dbg!((
+        "take",
+        current_test!(),
+        _token,
+        _amount.to_string(),
+        _permit2_details
+    ));
     host_test_shims::take_caller_bal(_token, _amount).map_err(
         |_| Error::Erc20RevertNoData, // follow the trace!
     )

@@ -76,7 +76,7 @@ async function createPosition(
     const {args}  = amm.interface.parseLog(mintLog) || {}
     const [id, /*user*/, /*pool*/, /*low*/, /*high*/] = args as unknown as mintEventArgs;
 
-    const updatePositionResult = await amm.updatePosition622A559D(address, id, delta)
+    const updatePositionResult = await amm.updatePositionC7F1F740(address, id, delta)
     await updatePositionResult.wait()
 
     return id;
@@ -205,7 +205,7 @@ test("amm", async t => {
         return sig;
     }
 
-    await t.test("position modification with permit2 blobs", async t => {
+    await t.test("position adjustment with permit2 blobs", async t => {
         let maxAmount = 10000000;
         let nonce0 = curNonce++;
         let nonce1 = curNonce++;
@@ -217,24 +217,19 @@ test("amm", async t => {
         const fusdcBeforeBalance = await fusdcContract.balanceOf(defaultAccount)
         const tusdcBeforeBalance = await tusdcContract.balanceOf(defaultAccount)
 
-        console.log("about to update position permit2")
+        console.log("about to decr position permit2");
 
-        let response = await amm.updatePositionPermit2F24010C3(
-            tusdcAddress, // pool
-            tusdcPositionId,
-            100, // delta
-            nonce0,
-            deadline,
-            maxAmount,
-            sig0,
-            nonce1,
-            deadline,
-            maxAmount,
-            sig1,
+        let response = await amm.decr position(
+            tusdcAddress, // token
+            tusdcPositionId, // id
+            0, // amount0Min
+            0, // amount1Min
+            maxAmount, // amount0Max
+            maxAmount, // amount1Max
         );
         await response.wait();
 
-        console.log("done updating position2")
+        console.log("done incrementing position2")
 
         const fusdcAfterBalance = await fusdcContract.balanceOf(defaultAccount)
         const tusdcAfterBalance = await tusdcContract.balanceOf(defaultAccount)
@@ -243,7 +238,7 @@ test("amm", async t => {
         assert(tusdcAfterBalance < tusdcBeforeBalance, "expected tusdc balance to decrease");
 
         await t.test("withdrawing a position shouldn't lose money", async _ => {
-            let response = await amm.updatePosition622A559D(
+            let response = await amm.updatePositionC7F1F740(
                 tusdcAddress, // pool
                 tusdcPositionId,
                 -100, // delta

@@ -12,3 +12,4 @@ Thanks to all the people who contributed to this repo!
 | Erin Allen (Labrys)                     | Project managed the first UI sprint.                       |
 | Luke Shulver (Labrys)                   | Project managed the second UI sprint.                      |
 | Marcelo Grebois                         | Implemented deployment code/infrastructure.                |
+| Ogous Chan Ali (Fluidity Labs)          | Implemented parts of Longtail frontend, and testing        |

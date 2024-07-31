@@ -1,7 +1,7 @@
 // the Permit2 contract from https://github.com/Uniswap/permit2 flattened into a single file
 
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.16;
 
 interface IEIP712 {
     function DOMAIN_SEPARATOR() external view returns (bytes32);

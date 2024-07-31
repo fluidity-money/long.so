@@ -25,6 +25,7 @@ import {
   useClient,
   useChainId,
   useWalletClient,
+  useConnectorClient,
 } from "wagmi";
 import { formatEther, maxUint256 } from "viem";
 import { useWalletInfo, useWeb3Modal } from "@web3modal/wagmi/react";
@@ -41,6 +42,7 @@ import { getFormattedPriceFromAmount, snapAmountToDecimals } from "@/lib/amounts
 import { RewardsBreakdown } from "@/components/RewardsBreakdown";
 import { useRouter } from "next/navigation";
 import { TokenIcon } from "./TokenIcon";
+import { config } from "@/config";
 
 const SwapFormFragment = graphql(`
   fragment SwapFormFragment on SeawaterPool {
@@ -134,10 +136,16 @@ export const SwapForm = () => {
   // the pool currently in use's price
   const poolAddress = isSwappingBaseAsset ? token1!.address : token0.address;
 
+  // useSimulateContract throws if connector.account is not defined
+  // so we must check if it exists or use a dummy address for sqrtPriceX96 and quote/quote2
+  const { data: connector } = useConnectorClient();
+  const simulateAccount = connector?.account ?? "0x0000000000000000000000000000000000000000";
+
   // price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
+    account: simulateAccount,
     functionName: "sqrtPriceX967B8F5FC5",
     args: [poolAddress],
   });
@@ -145,6 +153,7 @@ export const SwapForm = () => {
   const { data: token1SqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
+    account: simulateAccount,
     functionName: "sqrtPriceX967B8F5FC5",
     args: [token1.address],
   });
@@ -171,6 +180,7 @@ export const SwapForm = () => {
   const { error: quote1Error, isLoading: quote1IsLoading } =
     useSimulateContract({
       address: ammAddress,
+      account: simulateAccount,
       abi: seawaterContract.abi,
       functionName: "quote72E2ADE7",
       args: [
@@ -243,6 +253,7 @@ export const SwapForm = () => {
     useSimulateContract({
       address: ammAddress,
       abi: seawaterContract.abi,
+      account: simulateAccount,
       functionName: "quote2CD06B86E",
       args: [
         token0.address,
@@ -606,7 +617,7 @@ export const SwapForm = () => {
                 </Button>
               ) : (
                 <Button
-                  className={"mt-[20px] h-[53.92px] w-full inline-flex"} 
+                  className={"mt-[20px] h-[53.92px] w-full inline-flex"}
                   variant={"destructiveBorder"}
                   onClick={() => open({ view: 'Networks' })}
                 >
