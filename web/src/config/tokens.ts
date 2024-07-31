@@ -39,10 +39,10 @@ export const WSPN: Token = {
 
 }
 
-export const CAT: Token = {
-  name: "Cat Coin",
-  address: "0x09f7156aae9c903f90b1cb1e312582c4f208a759",
-  symbol: "CAT",
+export const CATBUX: Token = {
+  name: "CATBUX",
+  address: "0x36c116a8851869cf8a99b3Bda0Fad42453D32B99",
+  symbol: "BUX",
   decimals: 18,
 }
 
@@ -51,7 +51,7 @@ const allTokens: Token[] = [
   USDC,
   WSPN,
   WETH,
-  CAT,
+  CATBUX,
 ];
 
 export const DefaultToken = USDC;
