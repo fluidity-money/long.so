@@ -44,6 +44,7 @@ export const CATBUX: Token = {
   address: "0x36c116a8851869cf8a99b3Bda0Fad42453D32B99",
   symbol: "BUX",
   decimals: 18,
+  icon: "/icons/cbux.svg",
 }
 
 const allTokens: Token[] = [
