@@ -139,8 +139,8 @@ pub fn exchange(token: Address, amount: I256) -> Result<(), Error> {
         // take tokens from the user
         take_transfer_from(token, amount.abs_pos()?)
     } else {
-        // no amount, do nothing
-        Ok(())
+        // this branch isn't possible!
+        assert!(false);
     }
 }
 

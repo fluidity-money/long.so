@@ -1735,9 +1735,9 @@ mod test {
 
     #[test]
     fn eli_incr_position() {
-        use core::str::FromStr;
+        use crate::maths::full_math;
 
-        //curl -d '{"jsonrpc":"2.0","method":"eth_call","id":123,"params":[{"from": "0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5", "to": "0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1", "data": "0x000001ea00000000000000000000000022b9fa698b68bba071b513959794e9a47d19214c00000000000000000000000000000000000000000000000000000000000006120000000000000000000000000000000000000000000000007ce66c50e284000000000000000000000000000000000000000000000000000000000001fedc472a0000000000000000000000000000000000000000000000006f05b59d3b20000000000000000000000000000000000000000000000000000000000001c61922d0"}, "0x640737"]}' https://testnet-rpc.superposition.so
+        //curl -d '{"jsonrpc":"2.0","method":"eth_call","id":123,"params":[{"from": "0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5", "to": "0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1", "data": "0x000001ea00000000000000000000000022b9fa698b68bba071b513959794e9a47d19214c000000000000000000000000000000000000000000000000000000000000064d0000000000000000000000000000000000000000000000006f05b59d3b20000000000000000000000000000000000000000000000000000000000001c08c19960000000000000000000000000000000000000000000000007ce66c50e284000000000000000000000000000000000000000000000000000000000001f89d9cc9"}, "0x64160b"]}' https://testnet-rpc.superposition.so
 
         test_utils::with_storage::<_, Pools, _>(
             Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()), // sender
@@ -1745,26 +1745,58 @@ mod test {
                 "0x81e9c7c70971b5eb969cec21a82e6deed42e7c6736e0e83ced66d72297d9f1d7" => "0x0000000000000000000000002b4158d5fa1c37a35aedc38c5018778582f96518",
                 "0x0000000000000000000000000000000000000000000000000000000000000000" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
                 "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                "0x2448ce83c4e15220ac87fca9b1592769c614bbff1cd4995e778ff53b3085dff0" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
-                "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e392" => "0x000000000000000000000000fffcd0b700000000000000000021d8772890a50d",
-                "0x991303194fc25988a33aee4daf77149a35d4e61b83561943a16e22a9e1b150f5" => "0x000000000000000000000000000000000000000000000000fffcd45cfffccca0",
+                "0x830d8ac5b57f386d159b0fe8f38030b1491866ba79d0ef9d011fbf2934391286" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
+                "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e392" => "0x000000000000000000000000fffcd03b00000000000000000021f18cc0777544",
+                "0x9777d3d8106751edcbd161850d58ac0568e8ccdaa496416b38ce8766d0f43dc7" => "0x000000000000000000000000000000000000000000000000fffcd3e4fffccc28",
                 "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e38e" => "0x00000000000000000000000000000000d3c21bcecceda10000003c00000bb801",
-                "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e38f" => "0x000000000000000000000000000000ca3e8e97890bde29e693932ddc4160efb5",
-                "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e390" => "0x00000000000000000000000000000000000003465efe7035e0d9f5f5aca3ea73",
-                "0x02448ce83c4e15220ac87fca9b1592769c614bbff1cd4995e778ff53b3085dff" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
-                "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e393" => "0x00000000000000000000000000000000000000000001ecbc3b3d27bf02598069"
+                "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e38f" => "0x000000000000000000000000000000cb0390d6100490f63f7f7eea00c57729f9",
+                "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e390" => "0x0000000000000000000000000000000000000346dd57f57ca689b26e8097f476",
+                "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e393" => "0x00000000000000000000000000000000000000000001e9e96d7a34fd85eae8d9",
             }),
             None,
             None,
             |contract| -> Result<(), Vec<u8>> {
-                let (amount_0, amount_1) = contract.incr_position_C_1041_D_18(
-                    address!("22b9fa698b68bBA071B513959794E9a47d19214c"),
-                     U256::from(1554),
-                     U256::from_str("9000000000000000000").unwrap(),
-                     U256::from_str("8570816298").unwrap(),
-                     U256::from_str("8000000000000000000").unwrap(),
-                     U256::from_str("7618503376").unwrap()
-                 )?;
+                // Start by estimating what the token suggestion should be
+
+                //2209158043040899456876440
+                let price_lower = U256::from_limbs([12866261590974447512, 119758, 0, 0]);
+                //2439044873223731592077462
+                let price_upper = U256::from_limbs([16371797854677409942, 132220, 0, 0]);
+
+                let token = address!("22b9fa698b68bBA071B513959794E9a47d19214c");
+
+                let token_0_bal = full_math::mul_div(
+                    U256::from_limbs([10000000000000000000, 0, 0, 0]),
+                    U256::from(80),
+                    U256::from(10),
+                )?;
+
+                let token_1_bal = full_math::mul_div(
+                    U256::from_limbs([9000000000, 0, 0, 0]),
+                    U256::from(80),
+                    U256::from(10),
+                )?;
+
+                let price_cur = contract.sqrt_price_x967_B8_F5_F_C5(token)?;
+
+                let liq = sqrt_price_math::get_liquidity_for_amounts(
+                    price_cur,
+                    price_lower,
+                    price_upper,
+                    token_0_bal,
+                    token_1_bal
+                )?.try_into().unwrap();
+
+                eprintln!("price cur: {}, price lower: {}, price upper: {}, liq: {}", price_cur, price_lower, price_upper, liq);
+
+                let (new_token_0_amt, new_token_1_amt) = sqrt_price_math::get_amounts_for_delta(
+                    price_cur,
+                    price_lower,
+                    price_upper,
+                    liq
+                )?;
+
+                eprintln!("token0: {}, token1: {}", new_token_0_amt, new_token_1_amt);
 
                  Ok(())
             },

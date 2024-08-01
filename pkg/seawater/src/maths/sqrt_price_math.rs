@@ -269,7 +269,7 @@ pub fn get_amounts_for_delta(
 
 /// Calculates the liquidity in the form of the delta amount for
 /// amount0.
-fn get_liquidity_for_amount_0(
+pub fn get_liquidity_for_amount_0(
     mut sqrt_ratio_a_x_96: U256,
     mut sqrt_ratio_b_x_96: U256,
     amount: U256,
@@ -285,7 +285,7 @@ fn get_liquidity_for_amount_0(
 
 /// Calculates the liquidity in the form of the delta number for amount0. Refer to
 /// [get_liquidity_for_amount_0]
-fn get_liquidity_for_amount_1(
+pub fn get_liquidity_for_amount_1(
     mut sqrt_ratio_a_x_96: U256,
     mut sqrt_ratio_b_x_96: U256,
     amount: U256,
