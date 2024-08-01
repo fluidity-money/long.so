@@ -15,6 +15,7 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 |--------------------------|--------------------------------------------|
 | Longtail AMM             | 0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1 |
 | Longtail NFT manager     | 0x1260F0E48AA5A195C811B5E7B1DFac1E9AD8debB |
+| Permit2 router           | 0x2246431582087b930F2CE561c34deb8E7e5c44bE |
 
 #### Useful testing token deployments
 
