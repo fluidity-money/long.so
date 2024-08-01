@@ -225,10 +225,6 @@ pub enum Error {
     // 39 (0x27)
     #[error("Liquidity that was taken is too low")]
     LiqResultTooLow,
-
-    // 40 (0x28)
-    #[error("Liquidity that was taken is too high")]
-    LiqResultTooHigh,
 }
 
 impl From<Error> for Vec<u8> {

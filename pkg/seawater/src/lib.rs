@@ -799,9 +799,6 @@ impl Pools {
         assert_or!(amount_0 >= amount_0_min, Error::LiqResultTooLow);
         assert_or!(amount_1 >= amount_1_min, Error::LiqResultTooLow);
 
-        assert_or!(amount_0 <= amount_0_max, Error::LiqResultTooHigh);
-        assert_or!(amount_1 <= amount_1_max, Error::LiqResultTooHigh);
-
         #[cfg(feature = "testing-dbg")]
         dbg!((
             "adjust position after conversion",
