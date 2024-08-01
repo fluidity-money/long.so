@@ -682,10 +682,12 @@ impl Pools {
             Error::PositionOwnerOnly
         );
 
-        let (amount_0, amount_1) =
-            self.pools
-                .setter(pool)
-                .adjust_position(id, amount_0_desired, amount_1_desired, giving)?;
+        let (amount_0, amount_1) = self.pools.setter(pool).adjust_position(
+            id,
+            amount_0_desired,
+            amount_1_desired,
+            giving,
+        )?;
 
         evm::log(events::UpdatePositionLiquidity {
             id: id,
@@ -1795,6 +1797,9 @@ mod test {
 
                 eprintln!("price cur: {}, price lower: {}, price upper: {}, liq: {}", price_cur, price_lower, price_upper, liq);
 
+                // price cur: 2313543190168391606003929, price lower: 2195943438955908078141207, price upper: 2424455146405991693936024, liq: 48507140892841379
+                // token0 desired: 75992697509586515214, token1 desired: 72000000000, token0 min: 721930626341071894533, token1 min: 684000000000
+
                 let (token_0_desired, token_1_desired) = sqrt_price_math::get_amounts_for_delta(
                     price_cur,
                     price_lower,
@@ -1802,19 +1807,21 @@ mod test {
                     liq
                 )?;
 
+                eprintln!("token0 desired: {}, token1 desired: {}", token_0_desired, token_1_desired);
+
                 let token_0_desired =token_0_desired.try_into().unwrap();
                 let token_1_desired =token_1_desired.try_into().unwrap();
 
                 let token_0_min = full_math::mul_div(
                     token_0_desired,
                     U256::from(95),
-                    U256::from(10),
+                    U256::from(100),
                 )?;
 
                 let token_1_min = full_math::mul_div(
                     token_1_desired,
                     U256::from(95),
-                    U256::from(10),
+                    U256::from(100),
                 )?;
 
                 eprintln!("token0 desired: {}, token1 desired: {}, token0 min: {}, token1 min: {}", token_0_desired, token_1_desired, token_0_min, token_1_min);

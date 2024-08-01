@@ -88,7 +88,7 @@ impl StoragePool {
 
     /// Updates a position in this pool, refreshing fees earned and updating liquidity.
     pub fn update_position(&mut self, id: U256, delta: i128) -> Result<(I256, I256), Revert> {
-        // either the pool must be enabled or we must be removing liquidity
+        // the pool must be enabled
         assert_or!(self.enabled.get(), Error::PoolDisabled);
 
         let position = self.positions.positions.get(id);
@@ -175,7 +175,6 @@ impl StoragePool {
             } else if self.cur_tick.get().sys() < upper {
                 // we're inside the range, the liquidity is active and we need both tokens
                 let new_liquidity = liquidity_math::add_delta(self.liquidity.get().sys(), delta)?;
-                self.liquidity.set(U128::lib(&new_liquidity));
 
                 #[cfg(feature = "testing-dbg")]
                 dbg!((
@@ -189,6 +188,8 @@ impl StoragePool {
                     self.liquidity.get().sys(),
                     new_liquidity
                 ));
+
+                self.liquidity.set(U128::lib(&new_liquidity));
 
                 (
                     sqrt_price_math::get_amount_0_delta(
