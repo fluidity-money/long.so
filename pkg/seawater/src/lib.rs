@@ -707,22 +707,100 @@ impl Pools {
         ));
 
         let (amount_0, amount_1) = if giving {
-            (
-                amount_0.abs_neg().map_err(|_| Error::SwapResultTooLow)?,
-                amount_1.abs_neg().map_err(|_| Error::SwapResultTooLow)?,
-            )
+            #[cfg(feature = "testing-dbg")]
+            {
+                if amount_0 > I256::zero() {
+                    dbg!((
+                        "amount_0 > 0 (abs neg failed!)",
+                        current_test!(),
+                        amount_0.to_string(),
+                    ));
+                }
+                if amount_1 > I256::zero() {
+                    dbg!((
+                        "amount_1 > 0 (abs neg failed!)",
+                        current_test!(),
+                        amount_1.to_string(),
+                    ));
+                }
+            }
+            (amount_0.abs_neg()?, amount_1.abs_neg()?)
         } else {
-            (
-                amount_0.abs_pos().map_err(|_| Error::SwapResultTooLow)?,
-                amount_1.abs_pos().map_err(|_| Error::SwapResultTooLow)?,
-            )
+            #[cfg(feature = "testing-dbg")]
+            {
+                if amount_0 < I256::zero() {
+                    dbg!((
+                        "amount_0 < 0 (abs pos failed!)",
+                        current_test!(),
+                        amount_0.to_string(),
+                    ));
+                }
+                if amount_1 < I256::zero() {
+                    dbg!((
+                        "amount_1 < 0 (abs pos failed!)",
+                        current_test!(),
+                        amount_1.to_string(),
+                    ));
+                }
+            }
+            (amount_0.abs_pos()?, amount_1.abs_pos()?)
         };
 
-        assert_or!(amount_0 > amount_0_min, Error::SwapResultTooLow);
-        assert_or!(amount_1 > amount_1_min, Error::SwapResultTooLow);
+        #[cfg(feature = "testing-dbg")]
+        {
+            if amount_0 < amount_0_min {
+                dbg!((
+                    "amount 0 < amount 0 min",
+                    current_test!(),
+                    amount_0.to_string(),
+                    amount_0_min.to_string()
+                ));
+            }
+            if amount_1 < amount_1_min {
+                dbg!((
+                    "amount 1 < amount 1 min",
+                    current_test!(),
+                    amount_1.to_string(),
+                    amount_1_min.to_string()
+                ));
+            }
+        }
 
-        assert_or!(amount_0 < amount_0_max, Error::SwapResultTooHigh);
-        assert_or!(amount_1 < amount_1_max, Error::SwapResultTooHigh);
+        #[cfg(feature = "testing-dbg")]
+        dbg!((
+            "amounts",
+            current_test!(),
+            amount_0.to_string(),
+            amount_1.to_string(),
+            amount_0_max.to_string(),
+            amount_1_max.to_string()
+        ));
+
+        #[cfg(feature = "testing-dbg")]
+        {
+            if amount_0 > amount_0_max {
+                dbg!((
+                    "amount 0 > amount 0 max",
+                    current_test!(),
+                    amount_0.to_string(),
+                    amount_0_max.to_string()
+                ));
+            }
+            if amount_1 > amount_1_max {
+                dbg!((
+                    "amount 1 > amount 1 max",
+                    current_test!(),
+                    amount_1.to_string(),
+                    amount_1_max.to_string()
+                ));
+            }
+        }
+
+        assert_or!(amount_0 >= amount_0_min, Error::LiqResultTooLow);
+        assert_or!(amount_1 >= amount_1_min, Error::LiqResultTooLow);
+
+        assert_or!(amount_0 <= amount_0_max, Error::LiqResultTooHigh);
+        assert_or!(amount_1 <= amount_1_max, Error::LiqResultTooHigh);
 
         #[cfg(feature = "testing-dbg")]
         dbg!((
@@ -777,16 +855,16 @@ impl Pools {
         id: U256,
         amount_0_min: U256,
         amount_1_min: U256,
-        amount_0_max: U256,
-        amount_1_max: U256,
+        amount_0_desired: U256,
+        amount_1_desired: U256,
     ) -> Result<(U256, U256), Revert> {
         self.adjust_position_internal(
             pool,
             id,
             amount_0_min,
             amount_1_min,
-            amount_0_max,
-            amount_1_max,
+            amount_0_desired,
+            amount_1_desired,
             false,
             None,
         )
@@ -1060,11 +1138,7 @@ impl Pools {
         Ok(())
     }
 
-    pub fn send_token_to_sender(
-        &mut self,
-        token: Address,
-        amount: U256
-    ) -> Result<(), Vec<u8>> {
+    pub fn send_token_to_sender(&mut self, token: Address, amount: U256) -> Result<(), Vec<u8>> {
         assert_eq_or!(
             msg::sender(),
             self.seawater_admin.get(),
@@ -1080,7 +1154,7 @@ impl Pools {
         &mut self,
         token: Address,
         recipient_addrs: Vec<Address>,
-        recipient_amounts: Vec<U256>
+        recipient_amounts: Vec<U256>,
     ) -> Result<(), Revert> {
         assert_eq_or!(
             msg::sender(),
@@ -1474,6 +1548,11 @@ mod test {
                 let upper_price = //encodeTick(150);
                     U256::from_limbs([11121627101190020371, 4327299026, 0, 0]);
 
+                // Based on the weighting already
+
+                let desired_amount_0 = U256::from(900731);
+                let desired_amount_1 = U256::from(10001);
+
                 let existing_delta = contract
                     .position_liquidity_8_D11_C045(pool, id)
                     .unwrap()
@@ -1498,10 +1577,10 @@ mod test {
                 let (amount_0, amount_1) = contract.incr_position_C_1041_D_18(
                     pool,
                     id,
-                    U256::from(0),        // minimum token 0
-                    U256::from(0),        // minimum token 1
-                    testing_amount_0_bal, // maximum token 0
-                    testing_amount_1_bal, // maximum token 1
+                    U256::from(0),    // minimum token 0
+                    U256::from(0),    // minimum token 1
+                    desired_amount_0, // maximum token 0
+                    desired_amount_1, // maximum token 1
                 )?;
 
                 let current = contract.sqrt_price_x967_B8_F5_F_C5(pool)?;
@@ -1517,9 +1596,6 @@ mod test {
 
                 dbg!(("test_update_position_adjust", new_delta));
 
-                assert!(amount_0 <= testing_amount_0_bal);
-                assert!(amount_1 <= testing_amount_1_bal);
-
                 Ok(())
             },
         )
@@ -1527,7 +1603,7 @@ mod test {
 
     #[test]
     fn test_realyolleofficial() -> Result<(), Vec<u8>> {
-        //curl -d '{"jsonrpc":"2.0","method":"eth_call","id":123,"params":[{"from": "0x7F8ddA85d44A6F225257375546fec2f96C3b95EE", "to": "0x839c5cf32d9Bc2CD46027691d2941410251ED557", "data": "0x0000000000000000000000000000000036c116a8851869cf8a99b3bda0fad42453d32b99000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f4240ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}, "0x62c993"]}' https://testnet-rpc.superposition.so
+        //curl -d '{"jsonrpc":"2.0","method":"eth_call","id":123,"params":[{"from": "0x7F8ddA85d44A6F225257375546fec2f96C3b95EE", "to": "0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1", "data": "0x0000000000000000000000000000000036c116a8851869cf8a99b3bda0fad42453d32b99000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f4240ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}, "0x62c993"]}' https://testnet-rpc.superposition.so
 
         test_utils::with_storage::<_, Pools, _>(
             Some(address!("7F8ddA85d44A6F225257375546fec2f96C3b95EE").into_array()), // sender
@@ -1555,8 +1631,6 @@ mod test {
                 use std::str::FromStr;
 
                 let pool = address!("36c116a8851869cf8a99b3Bda0Fad42453D32B99");
-
-                let owner = contract.position_owners.get(U256::from(0));
 
                 contract.swap_904369_B_E(pool, false, I256::from_str("1000000").unwrap(), U256::from_str("115792089237316195423570985008687907853269984665640564039457584007913129639935").unwrap()).unwrap();
 

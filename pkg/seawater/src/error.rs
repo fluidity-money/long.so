@@ -221,6 +221,14 @@ pub enum Error {
     // 38 (0x26)
     #[error("Position is empty when it shouldn't be")]
     EmptyPosition,
+
+    // 39 (0x27)
+    #[error("Liquidity that was taken is too low")]
+    LiqResultTooLow,
+
+    // 40 (0x28)
+    #[error("Liquidity that was taken is too high")]
+    LiqResultTooHigh,
 }
 
 impl From<Error> for Vec<u8> {
