@@ -89,7 +89,7 @@ impl StoragePool {
     /// Updates a position in this pool, refreshing fees earned and updating liquidity.
     pub fn update_position(&mut self, id: U256, delta: i128) -> Result<(I256, I256), Revert> {
         // either the pool must be enabled or we must be removing liquidity
-        assert_or!(delta < 0 || self.enabled.get(), Error::PoolDisabled);
+        assert_or!(self.enabled.get(), Error::PoolDisabled);
 
         let position = self.positions.positions.get(id);
         let lower = position.lower.get().sys();
@@ -234,12 +234,10 @@ impl StoragePool {
         id: U256,
         amount_0: U256,
         amount_1: U256,
+        giving: bool,
     ) -> Result<(I256, I256), Revert> {
         // calculate the delta using the amounts that we have here, guaranteeing
         // that we don't dip below the amount that's supplied as the minimum.
-
-        assert_or!(amount_0 > U256::zero(), Error::SwapResultTooLow);
-        assert_or!(amount_1 > U256::zero(), Error::SwapResultTooLow);
 
         let position = self.positions.positions.get(id);
 
@@ -247,7 +245,7 @@ impl StoragePool {
         let sqrt_ratio_a_x_96 = tick_math::get_sqrt_ratio_at_tick(position.lower.get().as_i32())?;
         let sqrt_ratio_b_x_96 = tick_math::get_sqrt_ratio_at_tick(position.upper.get().as_i32())?;
 
-        let delta = sqrt_price_math::get_liquidity_for_amounts(
+        let mut delta = sqrt_price_math::get_liquidity_for_amounts(
             sqrt_ratio_x_96,   // cur_tick
             sqrt_ratio_a_x_96, // lower_tick
             sqrt_ratio_b_x_96, // upper_tick
@@ -257,6 +255,11 @@ impl StoragePool {
         .to_i128()
         .map_or_else(|| Err(Error::LiquidityAmountTooWide), |v| Ok(v))?;
 
+        if giving {
+            // If we're giving, then we need to take from the delta.
+            delta = -delta;
+        }
+
         #[cfg(feature = "testing-dbg")]
         dbg!((
             "inside adjust_position",
@@ -265,7 +268,7 @@ impl StoragePool {
             sqrt_ratio_a_x_96.to_string(),
             sqrt_ratio_b_x_96.to_string(),
             amount_0.to_string(),
-            amount_1,
+            amount_1.to_string(),
             delta
         ));
 

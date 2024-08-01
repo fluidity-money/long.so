@@ -685,7 +685,7 @@ impl Pools {
         let (amount_0, amount_1) =
             self.pools
                 .setter(pool)
-                .adjust_position(id, amount_0_max, amount_1_max)?;
+                .adjust_position(id, amount_0_max, amount_1_max, giving)?;
 
         evm::log(events::UpdatePositionLiquidity {
             id: id,
@@ -697,13 +697,13 @@ impl Pools {
         dbg!((
             "adjust position before conversion",
             current_test!(),
-            amount_0,
-            amount_1,
-            amount_0_min,
-            amount_1_min,
+            giving,
+            amount_0.to_string(),
+            amount_1.to_string(),
+            amount_0_min.to_string(),
+            amount_1_min.to_string(),
             amount_0_max.to_string(),
             amount_1_max.to_string(),
-            giving
         ));
 
         let (amount_0, amount_1) = if giving {
@@ -1596,6 +1596,103 @@ mod test {
                 Ok(())
             },
         )
+    }
+
+    #[test]
+    fn decr_nonexisting_position() {
+        use core::str::FromStr;
+
+        use crate::error::Error;
+
+        let token = Address::with_last_byte(1);
+
+        test_utils::with_storage::<_, Pools, _>(
+            None,
+            None,
+            None,
+            None,
+            |contract| -> Result<(), Vec<u8>> {
+                contract.create_pool_D650_E2_D0(
+                    token,
+                    U256::from_str("792281625142643375935439503360").unwrap(), // encodeSqrtPrice(100)
+                    3000,
+                    1,
+                    u128::MAX,
+                )?;
+
+                let id = U256::from(0);
+
+                contract.mint_position_B_C5_B086_D(token, -887272, 887272)?;
+
+                assert_eq!(
+                    contract
+                        .decr_position_F_C_C_D_4896(
+                            token,
+                            id,
+                            U256::zero(),
+                            U256::zero(),
+                            U256::from(10000),
+                            U256::from(10000),
+                        )
+                        .unwrap_err(),
+                    Vec::<u8>::from(Error::CheckedAbsIsNegative)
+                );
+
+                Ok(())
+            },
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn decr_existing_position_some() {
+        use core::str::FromStr;
+
+        let token = Address::with_last_byte(1);
+
+        test_utils::with_storage::<_, Pools, _>(
+            None,
+            None,
+            None,
+            None,
+            |contract| -> Result<(), Vec<u8>> {
+                contract.create_pool_D650_E2_D0(
+                    token,
+                    U256::from_str("792281625142643375935439503360").unwrap(), // encodeSqrtPrice(100)
+                    3000,
+                    1,
+                    u128::MAX,
+                )?;
+
+                let id = U256::from(0);
+
+                contract.mint_position_B_C5_B086_D(token, -887272, 887272)?;
+
+                let (amount_0_taken, amount_1_taken) = contract.incr_position_C_1041_D_18(
+                    token,
+                    id,
+                    U256::zero(),
+                    U256::zero(),
+                    U256::from(100_000),
+                    U256::from(100_000),
+                )?;
+
+                // Took some amount off the amount to take, since the taking rounds
+                // up, and the removal rounds down.
+
+                contract.decr_position_F_C_C_D_4896(
+                    token,
+                    id,
+                    U256::from(998),
+                    U256::from(99_000),
+                    amount_0_taken,
+                    amount_1_taken,
+                )?;
+
+                Ok(())
+            },
+        )
+        .unwrap();
     }
 
     #[test]
