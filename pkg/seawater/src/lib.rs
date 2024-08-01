@@ -671,8 +671,8 @@ impl Pools {
         id: U256,
         amount_0_min: U256,
         amount_1_min: U256,
-        amount_0_max: U256,
-        amount_1_max: U256,
+        amount_0_desired: U256,
+        amount_1_desired: U256,
         giving: bool,
         permit2: Option<(Permit2Args, Permit2Args)>,
     ) -> Result<(U256, U256), Revert> {
@@ -685,7 +685,7 @@ impl Pools {
         let (amount_0, amount_1) =
             self.pools
                 .setter(pool)
-                .adjust_position(id, amount_0_max, amount_1_max, giving)?;
+                .adjust_position(id, amount_0_desired, amount_1_desired, giving)?;
 
         evm::log(events::UpdatePositionLiquidity {
             id: id,
@@ -702,8 +702,8 @@ impl Pools {
             amount_1.to_string(),
             amount_0_min.to_string(),
             amount_1_min.to_string(),
-            amount_0_max.to_string(),
-            amount_1_max.to_string(),
+            amount_0_desired.to_string(),
+            amount_1_desired.to_string(),
         ));
 
         let (amount_0, amount_1) = if giving {
@@ -772,26 +772,26 @@ impl Pools {
             current_test!(),
             amount_0.to_string(),
             amount_1.to_string(),
-            amount_0_max.to_string(),
-            amount_1_max.to_string()
+            amount_0_desired.to_string(),
+            amount_1_desired.to_string()
         ));
 
         #[cfg(feature = "testing-dbg")]
         {
-            if amount_0 > amount_0_max {
+            if amount_0 > amount_0_desired {
                 dbg!((
-                    "amount 0 > amount 0 max",
+                    "amount 0 > amount 0 desired",
                     current_test!(),
                     amount_0.to_string(),
-                    amount_0_max.to_string()
+                    amount_0_desired.to_string()
                 ));
             }
-            if amount_1 > amount_1_max {
+            if amount_1 > amount_1_desired {
                 dbg!((
-                    "amount 1 > amount 1 max",
+                    "amount 1 > amount 1 desired",
                     current_test!(),
                     amount_1.to_string(),
-                    amount_1_max.to_string()
+                    amount_1_desired.to_string()
                 ));
             }
         }
@@ -807,8 +807,8 @@ impl Pools {
             amount_1,
             amount_0_min,
             amount_1_min,
-            amount_0_max,
-            amount_1_max,
+            amount_0_desired,
+            amount_1_desired,
             giving
         ));
 
@@ -1765,6 +1765,8 @@ mod test {
 
                 let token = address!("22b9fa698b68bBA071B513959794E9a47d19214c");
 
+                let id = U256::from(1613);
+
                 let token_0_bal = full_math::mul_div(
                     U256::from_limbs([10000000000000000000, 0, 0, 0]),
                     U256::from(80),
@@ -1789,14 +1791,31 @@ mod test {
 
                 eprintln!("price cur: {}, price lower: {}, price upper: {}, liq: {}", price_cur, price_lower, price_upper, liq);
 
-                let (new_token_0_amt, new_token_1_amt) = sqrt_price_math::get_amounts_for_delta(
+                let (token_0_desired, token_1_desired) = sqrt_price_math::get_amounts_for_delta(
                     price_cur,
                     price_lower,
                     price_upper,
                     liq
                 )?;
 
-                eprintln!("token0: {}, token1: {}", new_token_0_amt, new_token_1_amt);
+                let token_0_desired =token_0_desired.try_into().unwrap();
+                let token_1_desired =token_1_desired.try_into().unwrap();
+
+                let token_0_min = full_math::mul_div(
+                    token_0_desired,
+                    U256::from(95),
+                    U256::from(10),
+                )?;
+
+                let token_1_min = full_math::mul_div(
+                    token_1_desired,
+                    U256::from(95),
+                    U256::from(10),
+                )?;
+
+                eprintln!("token0 desired: {}, token1 desired: {}, token0 min: {}, token1 min: {}", token_0_desired, token_1_desired, token_0_min, token_1_min);
+
+                contract.incr_position_C_1041_D_18(token, id, token_0_min, token_1_min, token_0_desired, token_1_desired)?;
 
                  Ok(())
             },
