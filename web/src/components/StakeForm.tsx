@@ -14,7 +14,7 @@ import CurrentPrice from "@/assets/icons/legend/current-price.svg";
 import LiquidityDistribution from "@/assets/icons/legend/liquidity-distribution.svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MAX_TICK, calculateX, calculateY, getLiquidityForAmount0, getLiquidityForAmount1, getSqrtRatioAtTick, sqrtPriceX96ToPrice } from "@/lib/math";
+import { MAX_TICK, getAmount0ForLiquidity, getAmount1ForLiquidity, getLiquidityForAmount0, getLiquidityForAmount1, getSqrtRatioAtTick, sqrtPriceX96ToPrice } from "@/lib/math";
 import { ammAddress } from "@/lib/addresses";
 import { createChartData } from "@/lib/chartData";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
@@ -249,14 +249,15 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
     if (quotedToken === 'token0') {
       const liq = getLiquidityForAmount0(cur, upper, BigInt(token0AmountRaw))
-      const newToken1Amount = calculateY(liq, sqa, sqp)
+      const newToken1Amount = getAmount0ForLiquidity(sqa, sqp, liq)
       if (token1Balance?.value && newToken1Amount > token1Balance.value)
         return
+      console.log("quoted token is 0", liq, newToken1Amount.toString());
       setToken1AmountRaw(newToken1Amount.toString())
     }
     else {
       const liq = getLiquidityForAmount1(cur, lower, BigInt(token1AmountRaw))
-      const newToken0Amount = calculateX(liq, sqb, sqp)
+      const newToken0Amount = getAmount1ForLiquidity(sqb, sqp, liq)
       if (token0Balance?.value && newToken0Amount > token0Balance.value)
         return
       setToken0AmountRaw(newToken0Amount.toString())
