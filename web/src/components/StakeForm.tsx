@@ -249,15 +249,14 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
     if (quotedToken === 'token0') {
       const liq = getLiquidityForAmount0(cur, upper, BigInt(token0AmountRaw))
-      const newToken1Amount = getAmount0ForLiquidity(sqa, sqp, liq)
+      const newToken1Amount = getAmount1ForLiquidity(sqa, sqp, liq)
       if (token1Balance?.value && newToken1Amount > token1Balance.value)
         return
-      console.log("quoted token is 0", liq, newToken1Amount.toString());
       setToken1AmountRaw(newToken1Amount.toString())
     }
     else {
       const liq = getLiquidityForAmount1(cur, lower, BigInt(token1AmountRaw))
-      const newToken0Amount = getAmount1ForLiquidity(sqb, sqp, liq)
+      const newToken0Amount = getAmount0ForLiquidity(sqb, sqp, liq)
       if (token0Balance?.value && newToken0Amount > token0Balance.value)
         return
       setToken0AmountRaw(newToken0Amount.toString())
