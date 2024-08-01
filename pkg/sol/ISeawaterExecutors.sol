@@ -167,8 +167,8 @@ interface ISeawaterExecutorUpdatePosition {
     /// @param id the id of the position
     /// @param amount0Min minimum of amount0 to take from the user
     /// @param amount1Min minimum of amount1 to take from the user
-    /// @param amount0Max to take from the user, the maximum of token0
-    /// @param amount1Max to take from the user, the maximum of token1
+    /// @param amount0Desired to take from the user. May exceed.
+    /// @param amount1Desired to take from the user. May exceed.
     /// @return the deltas for token0, and token1
     function incrPositionC1041D18(
         address pool,
