@@ -182,9 +182,9 @@ impl StoragePool {
                     "update_position, cur_tick < upper path",
                     lower,
                     upper,
-                    tick_math::get_sqrt_ratio_at_tick(lower)?,
-                    tick_math::get_sqrt_ratio_at_tick(upper)?,
-                    self.sqrt_price.get(),
+                    tick_math::get_sqrt_ratio_at_tick(lower)?.to_string(),
+                    tick_math::get_sqrt_ratio_at_tick(upper)?.to_string(),
+                    self.sqrt_price.get().to_string(),
                     delta,
                     self.liquidity.get().sys(),
                     new_liquidity

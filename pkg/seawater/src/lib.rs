@@ -1758,10 +1758,14 @@ mod test {
             |contract| -> Result<(), Vec<u8>> {
                 // Start by estimating what the token suggestion should be
 
-                //2209158043040899456876440
-                let price_lower = U256::from_limbs([12866261590974447512, 119758, 0, 0]);
-                //2439044873223731592077462
-                let price_upper = U256::from_limbs([16371797854677409942, 132220, 0, 0]);
+                // lower tick -209880
+                // upper tick -207900
+
+                //2195943438955908078141207
+                let price_lower = U256::from_limbs([6130933375634669335, 119042, 0, 0]);
+
+                //2424455146405991693936024
+                let price_upper = U256::from_limbs([18019542419034596760, 131429, 0, 0]);
 
                 let token = address!("22b9fa698b68bBA071B513959794E9a47d19214c");
 
