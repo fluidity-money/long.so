@@ -175,8 +175,8 @@ interface ISeawaterExecutorUpdatePosition {
         uint256 id,
         uint256 amount0Min,
         uint256 amount1Min,
-        uint256 amount0Max,
-        uint256 amount1Max
+        uint256 amount0Desired,
+        uint256 amount1Desired
     ) external returns (uint256, uint256);
 
     /// @notice refreshes a position's fees, and takes liquidity, preventing less than the minimum from being taken.

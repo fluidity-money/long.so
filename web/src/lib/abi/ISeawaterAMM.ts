@@ -289,12 +289,12 @@ export const output = {
           "internalType": "uint256"
         },
         {
-          "name": "amount0Max",
+          "name": "amount0Desired",
           "type": "uint256",
           "internalType": "uint256"
         },
         {
-          "name": "amount1Max",
+          "name": "amount1Desired",
           "type": "uint256",
           "internalType": "uint256"
         }
