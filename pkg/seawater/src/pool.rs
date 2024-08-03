@@ -59,7 +59,6 @@ impl StoragePool {
             Error::PoolAlreadyInitialised
         );
 
-        self.enabled.set(true);
         self.sqrt_price.set(price);
         self.cur_tick
             .set(I32::lib(&tick_math::get_tick_at_sqrt_ratio(price)?));
