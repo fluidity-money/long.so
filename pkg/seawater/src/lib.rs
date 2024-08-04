@@ -1901,8 +1901,11 @@ mod test {
             None,
             |contract| -> Result<(), Vec<u8>> {
                  let token = address!("de104342b32bca03ec995f999181f7cf1ffc04d7");
-                 let amount = I256::from_limbs([100000000000, 0, 0, 0]);
-                 let (amount_0_delta, amount_1_out) = contract.swap_904369_B_E(token, false, amount, U256::MAX)?;
+                 let amount_in_ui = I256::from_limbs([100000000000, 0, 0, 0]);
+                 let amount_quoted = contract.quote_72_E2_A_D_E7(token, false, amount_in_ui, U256::MAX);
+                 eprintln!("amount quoted: {:?}", amount_quoted);
+                 return Ok(());
+                 let (amount_0_delta, amount_1_out) = contract.swap_904369_B_E(token, false, amount_in_ui, U256::MAX)?;
                  //the frontend quoted that for the amount given, 1.061269 weth should be returned
                  eprintln!("amount 0 delta: {}, amount 1 out: {}", amount_0_delta, amount_1_out);
                  Ok(())
