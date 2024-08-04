@@ -133,14 +133,11 @@ fn safe_transfer_from(
 /// Performs an ERC20 `transfer` or `transferFrom`. Requires the user's allowance to be set correctly.
 pub fn exchange(token: Address, amount: I256) -> Result<(), Error> {
     if amount.is_negative() {
-        // send tokens to the user
+        // send tokens to the user. this should also be activated on 0
         give(token, amount.abs_neg()?)
-    } else if amount.is_positive() {
+    } else {
         // take tokens from the user
         take_transfer_from(token, amount.abs_pos()?)
-    } else {
-        // this branch isn't possible!
-        assert!(false);
     }
 }
 
