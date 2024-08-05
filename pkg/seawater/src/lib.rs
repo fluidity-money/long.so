@@ -1749,6 +1749,8 @@ mod test {
         use crate::maths::full_math;
 
         //curl -d '{"jsonrpc":"2.0","method":"eth_call","id":123,"params":[{"from": "0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5", "to": "0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1", "data": "0x000001ea00000000000000000000000022b9fa698b68bba071b513959794e9a47d19214c000000000000000000000000000000000000000000000000000000000000064d0000000000000000000000000000000000000000000000006f05b59d3b20000000000000000000000000000000000000000000000000000000000001c08c19960000000000000000000000000000000000000000000000007ce66c50e284000000000000000000000000000000000000000000000000000000000001f89d9cc9"}, "0x64160b"]}' https://testnet-rpc.superposition.so
+        //cast call -r https://testnet-rpc.superposition.so --block 6559243 0xA8EA92c819463EFbEdDFB670FEfC881A480f0115 'balanceOf(address)(uint256)' 0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5
+        //cast call -r https://testnet-rpc.superposition.so --block 6559243 0x22b9fa698b68bBA071B513959794E9a47d19214c 'balanceOf(address)(uint256)' 0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5
 
         test_utils::with_storage::<_, Pools, _>(
             Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()), // sender
@@ -1764,7 +1766,10 @@ mod test {
                 "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e390" => "0x0000000000000000000000000000000000000346dd57f57ca689b26e8097f476",
                 "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e393" => "0x00000000000000000000000000000000000000000001e9e96d7a34fd85eae8d9",
             }),
-            None,
+            Some(hashmap! {
+            	address!("A8EA92c819463EFbEdDFB670FEfC881A480f0115") => U256::from_limbs([10000000000000000000, 5, 0, 0]),
+            	address!("22b9fa698b68bBA071B513959794E9a47d19214c") => U256::from_limbs([9000000000, 1842, 0, 0])
+            }),
             None,
             |contract| -> Result<(), Vec<u8>> {
                 // Start by estimating what the token suggestion should be
