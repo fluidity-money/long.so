@@ -355,6 +355,7 @@ impl Pools {
 
         match swapped {
             Ok((_, _, amount_out, _, _, _)) => {
+                erc20::give(to, amount_out)?;
                 let revert = erc20::revert_from_msg(&amount_out.to_string());
                 Err(revert)
             }
