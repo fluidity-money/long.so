@@ -5,8 +5,7 @@ use std::cmp::min;
 
 use rand::prelude::*;
 mod reference;
-use libseawater::maths::full_math;
-use libseawater::maths::tick_math;
+use libseawater::maths::{full_math, tick_math};
 use ruint::aliases::U256;
 use ruint::uint;
 
@@ -101,4 +100,51 @@ fn test_get_sqrt_ratio_at_tick() {
     }
     // make sure that we're actually testing the function
     assert!(errs < 10);
+}
+
+mod test_mul_div_more {
+    use crate::reference;
+
+    use proptest::prelude::*;
+
+    use libseawater::{
+        maths::{full_math, sqrt_price_math::Q96},
+        types::U256,
+    };
+
+    proptest! {
+        #[test]
+        fn test_proptest_muldiv(
+            a_1 in any::<u64>(),
+            a_2 in any::<u64>(),
+            b_1 in any::<u64>(),
+            b_2 in any::<u64>(),
+        ) {
+            let a = U256::from_limbs([a_1, a_2, 0, 0]);
+            let b = U256::from_limbs([b_1, b_2, 0, 0]);
+
+            let prod = a.checked_mul(b).unwrap();
+
+            // assuming rounding down
+            let (expected, _) = prod.div_rem(Q96);
+            let expected = expected.to_string();
+
+            let reference_res = reference::full_math::mul_div(a, b, Q96).unwrap().to_string();
+            assert_eq!(reference_res, expected);
+
+            let ours_res = full_math::mul_div(a, b, Q96).unwrap().to_string();
+            assert_eq!(ours_res, expected);
+
+            #[cfg(feature = "testing-dbg")]
+            dbg!((
+                "test_proptest_muldiv",
+                a.to_string(),
+                b.to_string(),
+                prod.to_string(),
+                expected,
+                reference_res,
+                ours_res
+            ));
+        }
+    }
 }

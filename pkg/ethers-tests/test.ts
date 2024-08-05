@@ -58,7 +58,7 @@ async function createPosition(
     upper: number,
     delta: BigInt,
 ) {
-    const mintResult = await amm.mintPosition(address, lower, upper);
+    const mintResult = await amm.mintPositionBC5B086D(address, lower, upper);
 
     console.log(`mint position tx: ${mintResult.hash}`);
 
@@ -76,7 +76,7 @@ async function createPosition(
     const {args}  = amm.interface.parseLog(mintLog) || {}
     const [id, /*user*/, /*pool*/, /*low*/, /*high*/] = args as unknown as mintEventArgs;
 
-    const updatePositionResult = await amm.updatePosition(address, id, delta)
+    const updatePositionResult = await amm.updatePositionC7F1F740(address, id, delta)
     await updatePositionResult.wait()
 
     return id;
@@ -153,8 +153,8 @@ test("amm", async t => {
     // uint32 fee,
     // uint8 tickSpacing,
     // uint128 maxLiquidityPerTick
-    await (await amm.createPool(tusdcAddress, encodeSqrtPrice(100), 0, 1, 100000000000)).wait();
-    await (await amm.createPool(tusdc2Address, encodeSqrtPrice(100), 0, 1, 100000000000)).wait();
+    await (await amm.createPoolD650E2D0(tusdcAddress, encodeSqrtPrice(100), 0, 1, 100000000000)).wait();
+    await (await amm.createPoolD650E2D0(tusdc2Address, encodeSqrtPrice(100), 0, 1, 100000000000)).wait();
 
     // approve amm for both contracts
     // initialise an empty position
@@ -205,7 +205,7 @@ test("amm", async t => {
         return sig;
     }
 
-    await t.test("position modification with permit2 blobs", async t => {
+    await t.test("position adjustment with permit2 blobs", async t => {
         let maxAmount = 10000000;
         let nonce0 = curNonce++;
         let nonce1 = curNonce++;
@@ -217,24 +217,19 @@ test("amm", async t => {
         const fusdcBeforeBalance = await fusdcContract.balanceOf(defaultAccount)
         const tusdcBeforeBalance = await tusdcContract.balanceOf(defaultAccount)
 
-        console.log("about to update position permit2")
+        console.log("about to decr position permit2");
 
-        let response = await amm.updatePositionPermit2(
-            tusdcAddress, // pool
-            tusdcPositionId,
-            100, // delta
-            nonce0,
-            deadline,
-            maxAmount,
-            sig0,
-            nonce1,
-            deadline,
-            maxAmount,
-            sig1,
+        let response = await amm.decr position(
+            tusdcAddress, // token
+            tusdcPositionId, // id
+            0, // amount0Min
+            0, // amount1Min
+            maxAmount, // amount0Max
+            maxAmount, // amount1Max
         );
         await response.wait();
 
-        console.log("done updating position2")
+        console.log("done incrementing position2")
 
         const fusdcAfterBalance = await fusdcContract.balanceOf(defaultAccount)
         const tusdcAfterBalance = await tusdcContract.balanceOf(defaultAccount)
@@ -243,7 +238,7 @@ test("amm", async t => {
         assert(tusdcAfterBalance < tusdcBeforeBalance, "expected tusdc balance to decrease");
 
         await t.test("withdrawing a position shouldn't lose money", async _ => {
-            let response = await amm.updatePosition(
+            let response = await amm.updatePositionC7F1F740(
                 tusdcAddress, // pool
                 tusdcPositionId,
                 -100, // delta
@@ -279,7 +274,7 @@ test("amm", async t => {
         let sig = await getPermit2Data({token, maxAmount, nonce, deadline});
 
         // swap 10 tUSDC -> fUSDC without hitting the price limit
-        let response = await amm.swapPermit2(
+        let response = await amm.swapPermit2EE84AD91(
             tusdcAddress,
             true,
             10,
@@ -312,7 +307,7 @@ test("amm", async t => {
 
         sig = await getPermit2Data({token, maxAmount, nonce, deadline});
 
-        response = await amm.swapPermit2(
+        response = await amm.swapPermit2EE84AD91(
             tusdcAddress,
             false,
             amount,
@@ -342,7 +337,7 @@ test("amm", async t => {
         const tusdcBeforeBalance = await tusdcContract.balanceOf(defaultAccount)
         const tusdc2BeforeBalance = await tusdc2Contract.balanceOf(defaultAccount)
 
-        let response = await amm.swap2ExactInPermit2(
+        let response = await amm.swap2ExactInPermit236B2FDD8(
             tusdcAddress,
             tusdc2Address,
             maxAmount,

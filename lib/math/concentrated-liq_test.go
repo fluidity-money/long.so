@@ -90,7 +90,7 @@ func TestGetPriceAtSqrtRatio(t *testing.T) {
 	t.Fatal("unimplemented")
 }
 
-var getAmountForsLiqTestTable = map[string]struct {
+var getAmountsForLiqTestTable = map[string]struct {
 	sqrtRatioX96, sqrtRatioAX96, sqrtRatioBX96 *big.Int
 	liq                                        int
 
@@ -116,14 +116,43 @@ var getAmountForsLiqTestTable = map[string]struct {
 		encodePriceSqrt(111, 100), encodePriceSqrt(100, 110), encodePriceSqrt(110, 100), 2097,
 		new(big.Rat).SetInt64(0), new(big.Rat).SetInt64(200),
 	},
+	"contract alex_0f08c379a": {
+		GetSqrtRatioAtTick(new(big.Int).SetInt64(2970)), // Current tick
+		GetSqrtRatioAtTick(new(big.Int).SetInt64(2100)), // Lower tick
+		GetSqrtRatioAtTick(new(big.Int).SetInt64(4080)), // Upper tick
+		18117952900,                      // Liquidity (delta)
+		new(big.Rat).SetInt64(842893567), // Amount0
+		new(big.Rat).SetInt64(842893567), // Amount1
+	},
+	"contract alex_0f08c379a without tick conversion in the go code": {
+		mustIntFromStr("91911338314972375132734921679"), // Current tick
+		mustIntFromStr("87999098777895760865233273050"), // Lower tick
+		mustIntFromStr("97156358459122590463153608088"), // Upper tick
+		18117952900,                      // Liquidity (delta)
+		new(big.Rat).SetInt64(842893567), // Amount0
+		new(big.Rat).SetInt64(842893567), // Amount1
+	},
+}
+
+func mustIntFromStr(x string) *big.Int {
+	i, ok := new(big.Int).SetString(x, 10)
+	if !ok {
+		panic(x)
+	}
+	return i
 }
 
 func TestGetAmountsForLiq(t *testing.T) {
-	for k, test := range getAmountForsLiqTestTable {
+	for k, test := range getAmountsForLiqTestTable {
 		test := test
 		t.Run(k, func(t *testing.T) {
 			t.Parallel()
-			amount0, amount1 := GetAmountsForLiq(test.sqrtRatioX96, test.sqrtRatioAX96, test.sqrtRatioBX96, new(big.Int).SetInt64(int64(test.liq)))
+			amount0, amount1 := GetAmountsForLiq(
+				test.sqrtRatioX96,
+				test.sqrtRatioAX96,
+				test.sqrtRatioBX96,
+				new(big.Int).SetInt64(int64(test.liq)),
+			)
 			assertOneDiff(t, test.expectedAmount0, amount0, "amount0 is wrong")
 			assertOneDiff(t, test.expectedAmount1, amount1, "amount1 is wrong")
 		})
@@ -4953,6 +4982,7 @@ var getAmountsForLiqLiveTestTable = []struct {
 
 func TestGetAmountsForLiqLive(t *testing.T) {
 	for i, test := range getAmountsForLiqLiveTestTable {
+		i := i
 		test := test
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
@@ -6627,6 +6657,7 @@ var getIndividualAmountsForLiquidityTestTable = []struct {
 
 func TestGetIndividualAmountsForLiquidity(t *testing.T) {
 	for i, test := range getIndividualAmountsForLiquidityTestTable {
+		i := i
 		test := test
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()

@@ -80,7 +80,7 @@ export default function WithdrawLiquidity() {
   const { data: { result: curTickNum } = { result: 0 } } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "curTick",
+    functionName: "curTick181C6FD9",
     args: [token0.address],
   });
   const curTick = BigInt(curTickNum)
@@ -89,14 +89,14 @@ export default function WithdrawLiquidity() {
   const { data: positionLiquidity } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: 'positionLiquidity',
+    functionName: 'positionLiquidity8D11C045',
     args: [token0.address, BigInt(positionId ?? 0)]
   })
 
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "sqrtPriceX96",
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
   });
 

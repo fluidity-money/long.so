@@ -1400,7 +1400,8 @@ type SeawaterPool {
   amounts: PairAmount!
 
   """
-  Configuration details available to this pool. Should be mostly static.
+  Configuration details available to this pool. Should be mostly static. This is displayed
+  to the frontend. Can be used to hint how the display of the tick selection should work.
   """
   config: SeawaterConfig!
 }

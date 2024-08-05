@@ -1,2 +1,2 @@
-export const ammAddress = "0x839c5cf32d9Bc2CD46027691d2941410251ED557";
+export const ammAddress = "0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1";
 export const faucetAddress = "0x0000000000000000000000000000000000000000";

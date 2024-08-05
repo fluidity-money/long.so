@@ -101,7 +101,6 @@ mod tests {
 
 #[cfg(test)]
 mod test {
-
     use std::ops::{Div, Mul, Sub};
 
     use crate::types::{U256Extension, U256};

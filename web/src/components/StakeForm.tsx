@@ -14,7 +14,7 @@ import CurrentPrice from "@/assets/icons/legend/current-price.svg";
 import LiquidityDistribution from "@/assets/icons/legend/liquidity-distribution.svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MAX_TICK, calculateX, calculateY, getLiquidityForAmount0, getLiquidityForAmount1, getSqrtRatioAtTick, sqrtPriceX96ToPrice } from "@/lib/math";
+import { MAX_TICK, getAmount0ForLiquidity, getAmount1ForLiquidity, getLiquidityForAmount0, getLiquidityForAmount1, getSqrtRatioAtTick, sqrtPriceX96ToPrice } from "@/lib/math";
 import { ammAddress } from "@/lib/addresses";
 import { createChartData } from "@/lib/chartData";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
@@ -25,7 +25,7 @@ import * as RadioGroup from "@radix-ui/react-radio-group";
 import { Input } from "@/components/ui/input";
 import { useStakeStore } from "@/stores/useStakeStore";
 import SegmentedControl from "@/components/ui/segmented-control";
-import { useAccount, useBalance, useChainId, useSimulateContract } from "wagmi";
+import { useAccount, useBalance, useChainId, useConnectorClient, useSimulateContract } from "wagmi";
 import {
   Tooltip,
   TooltipContent,
@@ -187,11 +187,17 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   const chartRef = useRef<ReactECharts>(null);
 
+  // useSimulateContract throws if connector.account is not defined
+  // so we must check if it exists or use a dummy address for sqrtPriceX96
+  const { data: connector } = useConnectorClient()
+  const simulateAccount = connector?.account ?? "0x1111111111111111111111111111111111111111";
+
   // Price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "sqrtPriceX96",
+    account: simulateAccount,
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
   });
 
@@ -224,7 +230,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const { data: curTickNum } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "curTick",
+    functionName: "curTick181C6FD9",
     args: [token0.address],
   });
   const curTick = useMemo(() => ({ result: BigInt(curTickNum?.result ?? 0) }), [curTickNum]);
@@ -243,14 +249,14 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
     if (quotedToken === 'token0') {
       const liq = getLiquidityForAmount0(cur, upper, BigInt(token0AmountRaw))
-      const newToken1Amount = calculateY(liq, sqa, sqp)
+      const newToken1Amount = getAmount1ForLiquidity(sqa, sqp, liq)
       if (token1Balance?.value && newToken1Amount > token1Balance.value)
         return
       setToken1AmountRaw(newToken1Amount.toString())
     }
     else {
       const liq = getLiquidityForAmount1(cur, lower, BigInt(token1AmountRaw))
-      const newToken0Amount = calculateX(liq, sqb, sqp)
+      const newToken0Amount = getAmount0ForLiquidity(sqb, sqp, liq)
       if (token0Balance?.value && newToken0Amount > token0Balance.value)
         return
       setToken0AmountRaw(newToken0Amount.toString())

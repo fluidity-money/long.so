@@ -103,22 +103,17 @@ impl StoragePositions {
     ///
     /// # Arguments
     /// * `id` - The position ID of the position to collect fees for.
-    /// * `amount_0` - The maximum amount of token 0 (the pool token) to withdraw.
-    /// * `amount_1` - The maximum amount of token 1 (the fluid token) to withdraw.
-    pub fn collect_fees(&mut self, id: U256, amount_0: u128, amount_1: u128) -> (u128, u128) {
+    pub fn collect_fees(&mut self, id: U256) -> (u128, u128) {
         let mut position = self.positions.setter(id);
 
-        let owed_0 = position.token_owed_0.get().sys();
-        let owed_1 = position.token_owed_1.get().sys();
-
-        let amount_0 = u128::min(amount_0, owed_0);
-        let amount_1 = u128::min(amount_1, owed_1);
+        let amount_0 = position.token_owed_0.get().sys();
+        let amount_1 = position.token_owed_1.get().sys();
 
         if amount_0 > 0 {
-            position.token_owed_0.set(U128::lib(&(owed_0 - amount_0)));
+            position.token_owed_0.set(U128::ZERO);
         }
         if amount_1 > 0 {
-            position.token_owed_1.set(U128::lib(&(owed_1 - amount_1)));
+            position.token_owed_1.set(U128::ZERO);
         }
 
         (amount_0, amount_1)

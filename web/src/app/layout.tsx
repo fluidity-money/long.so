@@ -17,9 +17,9 @@ import { graphqlEndpoint } from "@/config/graphqlEndpoint";
 import { graphqlQueryGlobal } from "@/hooks/useGraphql";
 import PopulateQueryCache from "@/app/PopulateQueryCache";
 
-const title = "Long Tail AMM";
+const title = "Longtail";
 
-const description = "Long Tail is Arbitrum's cheapest and most rewarding AMM.";
+const description = "Longtail is Arbitrum's cheapest and most rewarding AMM.";
 
 const image = "https://static.long.so/embed.png";
 
@@ -38,14 +38,14 @@ export const metadata: Metadata = {
     images: [image],
   },
   openGraph: {
-    title: "Long Tail AMM",
+    title: "Longtail AMM",
     url: "https://long.so",
     images: [
       {
         url: image,
         width: 1200,
         height: 800,
-        alt: "Long Tail AMM",
+        alt: "Longtail AMM",
       },
     ],
   },
@@ -118,7 +118,7 @@ export default async function RootLayout({
                 <small>
                   <a href="https://x.com/superpositionso">𝕏</a>
                 </small>
-                <a href="https://discord.gg/superposition">
+                <a href="https://discord.gg/VjUWjRQP8y">
                   <Discord />
                 </a>
                 <small>

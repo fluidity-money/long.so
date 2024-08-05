@@ -10,7 +10,7 @@ export const projectId = process.env.NEXT_PUBLIC_LONGTAIL_WALLETCONNECT_PROJECT_
 if (!projectId) throw new Error("Project ID is not defined");
 
 const metadata = {
-  name: "Long Tail",
+  name: "Longtail",
   description: "",
   url: "https://long.so",
   icons: [""],

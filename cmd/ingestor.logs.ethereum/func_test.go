@@ -50,6 +50,51 @@ func TestHandleLogCallbackNewPool(t *testing.T) {
 	})
 }
 
+func TestHandleLogCallbackUpdatePositionLiquidity(t *testing.T) {
+	// Test the new pool handling code.
+	seawaterAddr := ethCommon.HexToAddress("0x839c5cf32d9bc2cd46027691d2941410251ed557")
+	s := strings.NewReader(`
+{
+	"address": "0x839c5cf32d9bc2cd46027691d2941410251ed557",
+	"blockHash": "0xc6c5a097fa5983067a5604e557f0a748d20d6569d33ca76ec52ba242abbae864",
+	"blockNumber": "0x4fa7dc",
+	"data": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+	"logIndex": "0x2",
+	"removed": false,
+	"topics": [
+		"0x555c5816cc24ae6b4a85b2e02a07ebc514a04639a07694f29ff9a0de9b650987",
+		"0x0000000000000000000000000000000000000000000000000000000000079b03"
+	],
+	"transactionHash": "0x82cec4ef154ddd92f000e442db6a8710bec69c24d8d790c2398c2676e0d30704",
+	"transactionIndex": "0x1"
+}`)
+	var l ethTypes.Log
+	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
+	handleLogCallback(seawaterAddr, l, func(table string, a any) error {
+		assert.Equalf(t, "events_seawater_updatepositionliquidity", table, "table not equal")
+		// This test is captured in a unit test, so we can focus on just testing
+		// this one field.
+		updatePositionLiq, ok := a.(*seawater.UpdatePositionLiquidity)
+		assert.Truef(t, ok, "UpdatePositionLiquidity type coercion not true")
+		assert.Equalf(t,
+			498435,
+			updatePositionLiq.PosId,
+			"position id not equal",
+		)
+		assert.Equalf(t,
+			types.EmptyUnscaledNumber(),
+			updatePositionLiq.Token0,
+			"token not equal",
+		)
+		assert.Equalf(t,
+			types.EmptyUnscaledNumber(),
+			updatePositionLiq.Token1,
+			"token not equal",
+		)
+		return nil
+	})
+}
+
 func TestHandleLogCallbackMintPosition(t *testing.T) {
 	// Test the new pool handling code.
 	seawaterAddr := ethCommon.HexToAddress("0x40e659f4eB2fdA398ce0860aFB74701d4977E530")
@@ -121,4 +166,24 @@ func TestHandleLogCallbackSwap1(t *testing.T) {
 		)
 		return nil
 	})
+}
+
+func TestCurrentEventIds(t *testing.T) {
+	var currentIds = map[string]bool{ // From `forge selectors`, not including ERC20 Transfer
+		"0x01bacdc82c3891bc884396788e83d024aafbd4e2a08341fb9c9ce422a683830f": false,
+		"0x1b15f741d045342b3dab007e75a3d20b22aaab33e294b8fcce374753a4d9cea3": false,
+		"0x4732a2a38bb86e2c4a36fcc0204c09ed254bcb6e36f7b76c0f0532a403d4b402": false,
+		"0x555c5816cc24ae6b4a85b2e02a07ebc514a04639a07694f29ff9a0de9b650987": false,
+		"0x7b0f5059c07211d90c2400fc99ac93e0e56db5168afa91f60d178bb6dc1c73f0": false,
+		"0x95f3c86e9f05acaefa0a1c98f3eaa48aeb910a1dfa82ad7653a561eab31274cc": false,
+		"0xcb076a66f4dca163de39a4023de987ca633a005767c796b3772e3462c573e339": false,
+		"0xd3593b1fa4a2b80431faf29b3fb80cd1ef82a2b65128a650c625c4ed8d1b4d92": false,
+		"0xd500e81443925d03f2ac45364aa32d71b4bbd8f697bc7b8fc5a4accc4601b54b": false,
+	}
+	for _, id := range FilterTopics[0] {
+		currentIds[id.Hex()] = true
+	}
+	for id, status := range currentIds {
+		assert.Truef(t, status, "id %v is not tracked", id)
+	}
 }

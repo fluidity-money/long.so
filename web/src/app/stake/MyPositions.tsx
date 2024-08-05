@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import List from "@/assets/icons/list.svg";
 import Grid from "@/assets/icons/grid.svg";
@@ -10,19 +10,23 @@ import { columns, Pool } from "@/app/stake/_MyPositionsTable/columns";
 import { Badge } from "@/components/ui/badge";
 import { usdFormat } from "@/lib/usdFormat";
 import Position from "@/assets/icons/position.svg";
+import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { Button } from "@/components/ui/button";
 import { nanoid } from "nanoid";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import TokenIridescent from "@/assets/icons/token-iridescent.svg";
 import SegmentedControl from "@/components/ui/segmented-control";
-import { useAccount } from "wagmi";
+import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
 import { mockMyPositions } from "@/demoData/myPositions";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlUser } from "@/hooks/useGraphql";
 import { Token, fUSDC, getTokenFromAddress } from "@/config/tokens";
 import { TokenIcon } from "@/components/TokenIcon";
+import { ammAddress } from "@/lib/addresses";
+import { useStakeStore } from "@/stores/useStakeStore";
+import { sqrtPriceX96ToPrice } from "@/lib/math";
 
 const MyPositionsWalletFragment = graphql(`
   fragment MyPositionsWalletFragment on Wallet {
@@ -59,6 +63,7 @@ export const MyPositions = () => {
   const router = useRouter();
 
   const { address } = useAccount();
+  const { token0 } = useStakeStore()
 
   const showDemoData = useFeatureFlag("ui show demo data");
   const showClaimAllYield = useFeatureFlag("ui show claim all yield");
@@ -85,11 +90,67 @@ export const MyPositions = () => {
         }
       ] satisfies [Token, Token],
       staked: parseFloat(position.liquidity.fusdc.valueUsd) + parseFloat(position.liquidity.token1.valueUsd),
+      // TODO set this based on unclaimedRewardsData
       totalYield: 0,
     })).filter(position => position.staked > 0);
   }, [showDemoData, address, walletData]);
 
   console.log(pools);
+
+  const { data: poolSqrtPriceX96 } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "sqrtPriceX967B8F5FC5",
+    args: [token0.address],
+  });
+
+  const tokenPrice = poolSqrtPriceX96
+    ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
+    : 0n;
+
+  const {
+    writeContract: writeContractCollect,
+    data: collectData,
+    error: collectError,
+    isPending: isCollectPending,
+  } = useWriteContract();
+
+  const collectArgs = useMemo(() => [
+    pools?.map(p => p.id as `0x${string}`) ?? [],
+    pools?.map(p => BigInt(p.positionId)) ?? [],
+  ] as const, [pools])
+
+  const { data: unclaimedRewardsData } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "collect7F21947C",
+    args: collectArgs
+  });
+
+  const unclaimedRewards = useMemo(() => {
+    if (!unclaimedRewardsData)
+      return "$0.00"
+
+    const rewards = unclaimedRewardsData.result.reduce((p, c) => {
+      const token0AmountScaled = Number(c.amount0) * Number(tokenPrice) / 10 ** (token0.decimals + fUSDC.decimals)
+      const token1AmountScaled = Number(c.amount1) / 10 ** fUSDC.decimals
+      return p + token0AmountScaled + token1AmountScaled
+
+    }, 0)
+    return usdFormat(rewards)
+  }, [unclaimedRewardsData, token0, tokenPrice])
+
+  const collectAll = useCallback(
+    () => {
+      writeContractCollect({
+        address: ammAddress,
+        abi: seawaterContract.abi,
+        functionName: "collect7F21947C",
+        args: collectArgs
+      });
+    },
+    [writeContractCollect, collectArgs],
+  );
 
   return (
     <motion.div
@@ -230,16 +291,24 @@ export const MyPositions = () => {
           <div className="flex flex-1 flex-col items-center">
             <Button
               className="w-full text-3xs text-black md:text-xs"
-              variant="iridescent"
+              variant={collectError ? "destructive" : "iridescent"}
+              disabled={!!collectData || isCollectPending}
               size="sm"
-            >
-              Claim all yield
-            </Button>
+              onClick={() => collectAll()}
+            >{
+                collectError ?
+                  "Failed" :
+                  collectData ?
+                    "Claimed!" :
+                    isCollectPending ?
+                      "Claiming..." :
+                      "Claim All Yield"
+              }</Button>
             <Badge
-              variant="iridescent"
+              variant={collectError ? "destructive" : "iridescent"}
               className="-mt-2 gap-2 border-2 border-black text-3xs"
             >
-              {usdFormat(920.12)}
+              {unclaimedRewards}
             </Badge>
           </div>
         )}

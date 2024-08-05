@@ -52,7 +52,11 @@ const ExplorePage = () => {
   const tokensData_ = useFragment(SwapExploreFragment, data?.pools);
   // fUSDC can be queried through GraphQL but it
   // still won't contain price, so create it manually
-  const fUSDCData = { token: fUSDC, price: "1" } satisfies SwapExploreFragmentFragment
+  const fUSDCData = useMemo(() => ({
+    token: fUSDC,
+    price: "1"
+  } satisfies SwapExploreFragmentFragment), [fUSDC])
+
   const tokensData = useMemo(
     () => [fUSDCData, ...(tokensData_ ?? [])],
     [fUSDCData, tokensData_]
@@ -83,7 +87,6 @@ const ExplorePage = () => {
 
   const allAssetsData = useMemo(() => {
     if (showMockData) return mockSwapExploreAssets;
-
 
     // reformat the data to match the columns
     return (

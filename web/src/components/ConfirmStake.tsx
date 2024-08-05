@@ -62,7 +62,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "sqrtPriceX96",
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
   });
 
@@ -100,7 +100,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const { data: curTickNum } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "curTick",
+    functionName: "curTick181C6FD9",
     args: [token0.address],
   });
   const curTick = { result: BigInt(curTickNum?.result ?? 0) }
@@ -108,7 +108,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const { data: tickSpacing } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "tickSpacing",
+    functionName: "tickSpacing653FE28F",
     args: [token0.address],
   });
 
@@ -172,7 +172,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     writeContractMint({
       address: ammAddress,
       abi: seawaterContract.abi,
-      functionName: "mintPosition",
+      functionName: "mintPositionBC5B086D",
       args: [token0.address, lower, upper],
     });
   }
@@ -190,7 +190,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
       writeContractUpdatePosition({
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "updatePosition",
+        functionName: "updatePositionC7F1F740",
         args: [token0.address, id, delta],
       });
     },
@@ -254,7 +254,9 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     if (!mintPositionId) return;
 
     approveToken0();
-  }, [approveToken0, mintPositionId]);
+    // including approveToken0 in this dependency array causes changes in allowance data 
+    // to retrigger the staking flow, as allowance data is a dependency of approveToken0
+  }, [mintPositionId]);
 
   // wait for the approval transaction to complete
   const approvalToken0Result = useWaitForTransactionReceipt({
@@ -265,7 +267,9 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   useEffect(() => {
     if (!approvalToken0Result.data || !mintPositionId) return;
     approveToken1();
-  }, [approveToken1, approvalToken0Result.data, mintPositionId]);
+    // including approveToken1 in this dependency array causes changes in allowance data 
+    // to retrigger the staking flow, as allowance data is a dependency of approveToken1
+  }, [approvalToken0Result.data, mintPositionId]);
 
   const approvalToken1Result = useWaitForTransactionReceipt({
     hash: approvalDataToken1,
@@ -340,6 +344,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
         resetApproveToken0()
         resetApproveToken1()
         updatePositionResult.refetch()
+        router.push("/stake")
       }}
     />;
   }

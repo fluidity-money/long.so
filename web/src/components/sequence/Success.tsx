@@ -15,7 +15,6 @@ export const Success = ({ transactionHash, onDone }: SuccessProps) => {
   const router = useRouter();
   const chains = useChains();
   const chainId = useChainId();
-  console.log("TX HAS", transactionHash)
 
   const chain = chains.find((chain) => chain.id === chainId);
 

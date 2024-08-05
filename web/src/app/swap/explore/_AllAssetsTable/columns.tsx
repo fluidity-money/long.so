@@ -22,7 +22,7 @@ export type Asset = {
 
 export const columns: ColumnDef<Asset>[] = [
   {
-    accessorKey: "symbol",
+    accessorKey: "icon",
     header: "Token",
     cell: ({ row }) => {
       return (

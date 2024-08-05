@@ -20,6 +20,11 @@ macro_rules! current_test {
     };
 }
 
+pub fn decode_sqrt_price_num(sqrt_price_x96: U256, denom: u64) -> U256 {
+    let numerator = sqrt_price_x96.pow(U256::from(2)) * U256::from(denom);
+    numerator >> 192
+}
+
 // encodes a a/b price as a sqrt.q96 price
 pub fn encode_sqrt_price(num: u64, denom: u64) -> U256 {
     let num = U256::from(num);
@@ -55,7 +60,7 @@ pub trait StorageNew {
     fn new(i: U256, v: u8) -> Self;
 }
 
-///! Set up the storage access, controlling for parallel use. Makes
+///! Set up the storage access, controlling for parallel use.
 pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     sender: Option<[u8; 20]>,
     slots: Option<HashMap<&str, &str>>,
@@ -63,20 +68,19 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     amm_bals: Option<HashMap<Address, U256>>,
     f: F,
 ) -> T {
+    StorageCache::clear();
+    test_shims::reset_storage();
     let slots_map: HashMap<[u8; 32], [u8; 32]> = match slots {
-        Some(items) => {
-            items
-                .iter()
-                .map(|(key, value)| -> ([u8; 32], [u8; 32]) {
-                    // avoid poisoning the lock if we fail to do this here.
-                    (
-                        const_hex::const_decode_to_array::<32>(key.as_bytes())
-                            .expect(format!("failed to decode key: {:?}", key).as_str()),
-                        const_hex::const_decode_to_array::<32>(value.as_bytes()).unwrap(),
-                    )
-                })
-                .collect()
-        }
+        Some(items) => items
+            .iter()
+            .map(|(key, value)| -> ([u8; 32], [u8; 32]) {
+                (
+                    const_hex::const_decode_to_array::<32>(key.as_bytes())
+                        .expect(format!("failed to decode key: {:?}", key).as_str()),
+                    const_hex::const_decode_to_array::<32>(value.as_bytes()).unwrap(),
+                )
+            })
+            .collect(),
         None => HashMap::new(),
     };
 
@@ -92,11 +96,7 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     for (key, value) in slots_map {
         test_shims::insert_word(key.clone(), value.clone())
     }
-    let mut pools = P::new(U256::ZERO, 0);
-    let res = f(&mut pools);
-    StorageCache::clear();
-    test_shims::reset_storage();
-    res
+    f(&mut P::new(U256::ZERO, 0))
 }
 
 #[test]

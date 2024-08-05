@@ -20,7 +20,6 @@ import (
 	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/erc20"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
-
 	"gorm.io/gorm"
 )
 
@@ -410,7 +409,7 @@ func (r *seawaterConfigResolver) Pool(ctx context.Context, obj *model.SeawaterCo
 		return pool, fmt.Errorf("empty config")
 	}
 	err = r.DB.Table("events_seawater_newpool").
-		Where("token = ?", obj.Pool).
+		Where("token = ?", obj.Addr).
 		Scan(&pool).
 		Error
 	return
@@ -1078,7 +1077,9 @@ func (r *seawaterPositionResolver) Pool(ctx context.Context, obj *seawater.Posit
 	if obj == nil {
 		return seawater.Pool{}, fmt.Errorf("no position obj")
 	}
-	err = r.DB.Table("events_seawater_newpool").Where("token = ?", obj.Pool).Scan(&pool).Error
+	err = r.DB.Table("events_seawater_newpool").
+		Where("token = ?", obj.Pool).
+		Scan(&pool).Error
 	return
 }
 
