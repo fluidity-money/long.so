@@ -105,7 +105,7 @@ export const AllPools = () => {
 
   const { data, isLoading } = useGraphqlGlobal();
 
-  const router = useRouter()
+  const router = useRouter();
 
   const poolsData = useFragment(AllPoolsFragment, data?.pools);
 
@@ -121,22 +121,27 @@ export const AllPools = () => {
       const volume = (() => {
         if (pool.volumeOverTime.daily.length > 0)
           return parseFloat(
-            pool.volumeOverTime.daily?.[0].fusdc.valueScaled ?? 0
+            pool.volumeOverTime.daily?.[0].fusdc.valueScaled ?? 0,
           );
         return 0;
       })();
       const totalValueLocked = (() => {
         if (pool.tvlOverTime.daily.length > 0)
           return parseFloat(pool.tvlOverTime.daily[0] ?? 0);
-        return 0
+        return 0;
       })();
 
-      const liquidityRange = pool.positions.positions.reduce(([min, max], position) => [
-        position.lower < min ? position.lower : min,
-        position.upper > max ? position.upper : max
-      ], [0, 0]).map(tick =>
-        getFormattedPriceFromTick(tick, pool.token.decimals, fUSDC.decimals)
-      ) as [string, string];
+      const liquidityRange = pool.positions.positions
+        .reduce(
+          ([min, max], position) => [
+            position.lower < min ? position.lower : min,
+            position.upper > max ? position.upper : max,
+          ],
+          [0, 0],
+        )
+        .map((tick) =>
+          getFormattedPriceFromTick(tick, pool.token.decimals, fUSDC.decimals),
+        ) as [string, string];
 
       return {
         id: pool.address,
@@ -160,13 +165,13 @@ export const AllPools = () => {
         fees: 0,
         claimable: false,
         annualPercentageYield: 0,
-      }
-    }
-    );
+      };
+    });
   }, [showDemoData, poolsData]);
 
-  const poolTvlSummed =
-    sum(poolsData?.map((pool) => parseFloat(pool.tvlOverTime.daily[0])));
+  const poolTvlSummed = sum(
+    poolsData?.map((pool) => parseFloat(pool.tvlOverTime.daily[0])),
+  );
 
   return (
     <div className="flex w-full flex-col items-center">
@@ -188,26 +193,27 @@ export const AllPools = () => {
                 {showDemoData
                   ? "12.1M"
                   : // sum the tvl of all pools, assume the first daily value is the current value
-                  usdFormat(poolTvlSummed ? poolTvlSummed : 0)
-                }
+                    usdFormat(poolTvlSummed ? poolTvlSummed : 0)}
               </div>
             </div>
 
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">Incentives</div>
               <div className="text-2xl md:text-3xl">
-                {!showIncentives ? "-" : showDemoData
-                  ? "200k"
-                  : // sum the liquidity and super incentives of all pools
-                  usdFormat(
-                    sum(
-                      poolsData?.map(
-                        (pool) =>
-                          parseFloat(pool.liquidityIncentives.valueUsd) +
-                          parseFloat(pool.superIncentives.valueUsd),
-                      ),
-                    ),
-                  )}
+                {!showIncentives
+                  ? "-"
+                  : showDemoData
+                    ? "200k"
+                    : // sum the liquidity and super incentives of all pools
+                      usdFormat(
+                        sum(
+                          poolsData?.map(
+                            (pool) =>
+                              parseFloat(pool.liquidityIncentives.valueUsd) +
+                              parseFloat(pool.superIncentives.valueUsd),
+                          ),
+                        ),
+                      )}
               </div>
             </div>
 
@@ -255,7 +261,7 @@ export const AllPools = () => {
                 <div className={"absolute -left-1 -top-2 flex flex-row"}>
                   <TokenIcon
                     src={getTokenFromAddress(pool.id)?.icon}
-                    className={"rounded-full size-[24px]"}
+                    className={"size-[24px] rounded-full"}
                   />
                   <Badge
                     variant={"outline"}
@@ -327,7 +333,9 @@ export const AllPools = () => {
                         ●
                       </div>
                     </div>
-                    <div className={"text-xs"}>{pool.liquidityRange[0]}-{pool.liquidityRange[1]}</div>
+                    <div className={"text-xs"}>
+                      {pool.liquidityRange[0]}-{pool.liquidityRange[1]}
+                    </div>
                   </div>
                 </div>
 
@@ -341,7 +349,9 @@ export const AllPools = () => {
                     View Pool
                   </Button>
                   <Button
-                    onClick={() => router.push(`/stake/pool/create?id=${pool.id}`)}
+                    onClick={() =>
+                      router.push(`/stake/pool/create?id=${pool.id}`)
+                    }
                     variant={"secondary"}
                     size={"sm"}
                     className={"h-[23px] text-[9px]"}

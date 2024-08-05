@@ -60,26 +60,28 @@ export const SwapPro = ({
 
   const volume24H = useMemo(() => {
     const [
-      {
-        fusdc: {
-          valueUsd: fusdcValue
-        },
-        token1: {
-          valueUsd: token1Value
-        } } = {fusdc: {valueUsd: "0"}, token1: {valueUsd: "0"}}
-    ] = poolSwapPro?.volumeOverTime.daily || []
-    return usdFormat(parseFloat(fusdcValue) + parseFloat(token1Value))
-  }, [poolSwapPro])
+      { fusdc: { valueUsd: fusdcValue }, token1: { valueUsd: token1Value } } = {
+        fusdc: { valueUsd: "0" },
+        token1: { valueUsd: "0" },
+      },
+    ] = poolSwapPro?.volumeOverTime.daily || [];
+    return usdFormat(parseFloat(fusdcValue) + parseFloat(token1Value));
+  }, [poolSwapPro]);
 
-  const poolBalance = useMemo(() => (
-    usdFormat(poolSwapPro ?
-      poolSwapPro.liquidity.reduce((total, { liquidity }) =>
-        total + parseFloat(liquidity),
-        0) :
-      0
-    )), [poolSwapPro])
+  const poolBalance = useMemo(
+    () =>
+      usdFormat(
+        poolSwapPro
+          ? poolSwapPro.liquidity.reduce(
+              (total, { liquidity }) => total + parseFloat(liquidity),
+              0,
+            )
+          : 0,
+      ),
+    [poolSwapPro],
+  );
 
-  const transactions = poolSwapPro?.swaps.swaps
+  const transactions = poolSwapPro?.swaps.swaps;
 
   const showMockData = useFeatureFlag("ui show demo data");
   const showStakeApy = useFeatureFlag("ui show stake apy");
@@ -107,16 +109,18 @@ export const SwapPro = ({
         },
       ] as Transaction[];
 
-    return transactions?.map((transaction) => {
-      return {
-        id: transaction.timestamp.toString(),
-        value: parseFloat(transaction.amountIn.valueScaled),
-        rewards: 0,
-        time: new Date(transaction.timestamp * 1000),
-        amountFrom: parseFloat(transaction.amountIn.valueScaled),
-        amountTo: parseFloat(transaction.amountOut.valueScaled),
-      };
-    }).sort((a, b) => a.time > b.time ? -1 : a.time === b.time ? 0 : 1);
+    return transactions
+      ?.map((transaction) => {
+        return {
+          id: transaction.timestamp.toString(),
+          value: parseFloat(transaction.amountIn.valueScaled),
+          rewards: 0,
+          time: new Date(transaction.timestamp * 1000),
+          amountFrom: parseFloat(transaction.amountIn.valueScaled),
+          amountTo: parseFloat(transaction.amountOut.valueScaled),
+        };
+      })
+      .sort((a, b) => (a.time > b.time ? -1 : a.time === b.time ? 0 : 1));
   }, [transactions, showMockData]);
 
   return (

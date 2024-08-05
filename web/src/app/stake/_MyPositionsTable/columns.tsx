@@ -26,7 +26,7 @@ export const columns: ColumnDef<Pool>[] = [
     accessorKey: "tokens",
     header: "Pool",
     cell: ({ row }) => {
-      const token = getTokenFromAddress(row.original.id)
+      const token = getTokenFromAddress(row.original.id);
       return (
         <div className="flex flex-row items-center gap-2">
           <TokenIcon src={token?.icon} className="size-[20px]" />

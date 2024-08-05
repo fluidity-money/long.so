@@ -12,16 +12,21 @@ export interface ConfirmProps {
   text?: string;
   fromAsset: {
     amount: string;
-    symbol: string
-  }
+    symbol: string;
+  };
   toAsset: {
     amount: string;
-    symbol: string
-  }
+    symbol: string;
+  };
   transactionHash?: string;
 }
 
-export default function Confirm({ text = "Swap", transactionHash, fromAsset, toAsset }: ConfirmProps) {
+export default function Confirm({
+  text = "Swap",
+  transactionHash,
+  fromAsset,
+  toAsset,
+}: ConfirmProps) {
   const router = useRouter();
   const chains = useChains();
   const chainId = useChainId();
@@ -53,9 +58,13 @@ export default function Confirm({ text = "Swap", transactionHash, fromAsset, toA
         </div>
         <div className="mt-[13px] flex flex-row items-center gap-1 text-2xs md:mt-[29px]">
           <Token />
-          <div>{fromAsset.amount} {fromAsset.symbol} {"->"}</div>
+          <div>
+            {fromAsset.amount} {fromAsset.symbol} {"->"}
+          </div>
           <Token />
-          <div>{toAsset.amount} {toAsset.symbol}</div>
+          <div>
+            {toAsset.amount} {toAsset.symbol}
+          </div>
         </div>
         <div className="mt-[12px] cursor-pointer text-3xs underline md:hidden">
           {transactionHash && chain?.blockExplorers?.default && (

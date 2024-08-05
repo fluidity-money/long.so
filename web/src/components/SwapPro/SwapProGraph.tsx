@@ -58,20 +58,22 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
         slicedData = slicedData?.slice(0, durationToDays[duration]);
       }
 
-      slicedData = slicedData?.reverse()
-      const last = slicedData?.at(-1)
-      const header = usdFormat(parseFloat(last?.fusdc.valueUsd ?? "0") + parseFloat(last?.token1.valueUsd ?? "0"))
+      slicedData = slicedData?.reverse();
+      const last = slicedData?.at(-1);
+      const header = usdFormat(
+        parseFloat(last?.fusdc.valueUsd ?? "0") +
+          parseFloat(last?.token1.valueUsd ?? "0"),
+      );
 
-      return (
-        [slicedData
+      return [
+        slicedData
           // reformat pool data to match expected graph data
           ?.map((d) => ({
             date: new Date(d.fusdc.timestamp * 1000),
             value: parseFloat(d.fusdc.valueUsd),
           })),
         header,
-        ]
-      );
+      ];
     }
 
     if (activeGraphType === "price") {
@@ -82,20 +84,20 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
         slicedData = slicedData?.slice(0, durationToDays[duration]);
       }
 
-      const last = slicedData?.at(0)
+      const last = slicedData?.at(0);
 
-      const header = usdFormat(parseFloat(last ?? "0"))
+      const header = usdFormat(parseFloat(last ?? "0"));
 
-      return (
-        [slicedData
+      return [
+        slicedData
           // reformat pool data to match expected graph data
           ?.map((d, i) => ({
             date: subDays(new Date(), i),
             value: parseFloat(d),
-          })).reverse(),
-        header
-        ]
-      );
+          }))
+          .reverse(),
+        header,
+      ];
     }
 
     if (activeGraphType === "liquidity") {
@@ -105,22 +107,21 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
       if (duration !== "ALL") {
         slicedData = slicedData?.slice(0, durationToDays[duration]);
       }
-      slicedData = slicedData?.reverse()
+      slicedData = slicedData?.reverse();
 
-      const last = slicedData?.at(-1)
+      const last = slicedData?.at(-1);
       // TODO - should liquidity include token1 value as well?
-      const header = usdFormat(parseFloat(last?.fusdc.valueUsd ?? "0"))
+      const header = usdFormat(parseFloat(last?.fusdc.valueUsd ?? "0"));
 
-      return (
-        [slicedData
+      return [
+        slicedData
           // reformat pool data to match expected graph data
           ?.map((d) => ({
             date: new Date(d.timestamp * 1000),
             value: parseFloat(d.fusdc.valueUsd),
           })),
-        header
-        ]
-      );
+        header,
+      ];
     }
 
     // should never reach here

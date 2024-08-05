@@ -63,7 +63,7 @@ export const MyPositions = () => {
   const router = useRouter();
 
   const { address } = useAccount();
-  const { token0 } = useStakeStore()
+  const { token0 } = useStakeStore();
 
   const showDemoData = useFeatureFlag("ui show demo data");
   const showClaimAllYield = useFeatureFlag("ui show claim all yield");
@@ -76,23 +76,27 @@ export const MyPositions = () => {
   const pools = useMemo((): Pool[] | undefined => {
     if (showDemoData && address) return mockMyPositions;
 
-    return walletData?.positions?.positions?.map((position) => ({
-      positionId: position.positionId,
-      id: position.pool.token.address,
-      duration: 0,
-      tokens: [
-        fUSDC,
-        {
-          name: position.pool.token.name,
-          address: position.pool.token.address as `0x${string}`,
-          symbol: position.pool.token.symbol,
-          decimals: position.pool.token.decimals,
-        }
-      ] satisfies [Token, Token],
-      staked: parseFloat(position.liquidity.fusdc.valueUsd) + parseFloat(position.liquidity.token1.valueUsd),
-      // TODO set this based on unclaimedRewardsData
-      totalYield: 0,
-    })).filter(position => position.staked > 0);
+    return walletData?.positions?.positions
+      ?.map((position) => ({
+        positionId: position.positionId,
+        id: position.pool.token.address,
+        duration: 0,
+        tokens: [
+          fUSDC,
+          {
+            name: position.pool.token.name,
+            address: position.pool.token.address as `0x${string}`,
+            symbol: position.pool.token.symbol,
+            decimals: position.pool.token.decimals,
+          },
+        ] satisfies [Token, Token],
+        staked:
+          parseFloat(position.liquidity.fusdc.valueUsd) +
+          parseFloat(position.liquidity.token1.valueUsd),
+        // TODO set this based on unclaimedRewardsData
+        totalYield: 0,
+      }))
+      .filter((position) => position.staked > 0);
   }, [showDemoData, address, walletData]);
 
   console.log(pools);
@@ -115,42 +119,43 @@ export const MyPositions = () => {
     isPending: isCollectPending,
   } = useWriteContract();
 
-  const collectArgs = useMemo(() => [
-    pools?.map(p => p.id as `0x${string}`) ?? [],
-    pools?.map(p => BigInt(p.positionId)) ?? [],
-  ] as const, [pools])
+  const collectArgs = useMemo(
+    () =>
+      [
+        pools?.map((p) => p.id as `0x${string}`) ?? [],
+        pools?.map((p) => BigInt(p.positionId)) ?? [],
+      ] as const,
+    [pools],
+  );
 
   const { data: unclaimedRewardsData } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
     functionName: "collect7F21947C",
-    args: collectArgs
+    args: collectArgs,
   });
 
   const unclaimedRewards = useMemo(() => {
-    if (!unclaimedRewardsData)
-      return "$0.00"
+    if (!unclaimedRewardsData) return "$0.00";
 
     const rewards = unclaimedRewardsData.result.reduce((p, c) => {
-      const token0AmountScaled = Number(c.amount0) * Number(tokenPrice) / 10 ** (token0.decimals + fUSDC.decimals)
-      const token1AmountScaled = Number(c.amount1) / 10 ** fUSDC.decimals
-      return p + token0AmountScaled + token1AmountScaled
+      const token0AmountScaled =
+        (Number(c.amount0) * Number(tokenPrice)) /
+        10 ** (token0.decimals + fUSDC.decimals);
+      const token1AmountScaled = Number(c.amount1) / 10 ** fUSDC.decimals;
+      return p + token0AmountScaled + token1AmountScaled;
+    }, 0);
+    return usdFormat(rewards);
+  }, [unclaimedRewardsData, token0, tokenPrice]);
 
-    }, 0)
-    return usdFormat(rewards)
-  }, [unclaimedRewardsData, token0, tokenPrice])
-
-  const collectAll = useCallback(
-    () => {
-      writeContractCollect({
-        address: ammAddress,
-        abi: seawaterContract.abi,
-        functionName: "collect7F21947C",
-        args: collectArgs
-      });
-    },
-    [writeContractCollect, collectArgs],
-  );
+  const collectAll = useCallback(() => {
+    writeContractCollect({
+      address: ammAddress,
+      abi: seawaterContract.abi,
+      functionName: "collect7F21947C",
+      args: collectArgs,
+    });
+  }, [writeContractCollect, collectArgs]);
 
   return (
     <motion.div
@@ -218,7 +223,11 @@ export const MyPositions = () => {
                 layout
                 key={pool.id}
                 className="flex h-[83px] w-[77px] cursor-pointer flex-col items-center rounded-xl border border-white p-2 md:h-[120px] md:min-w-[111px] md:gap-1"
-                onClick={() => router.push(`/stake/pool?id=${pool.id}&positionId=${pool.positionId}`)}
+                onClick={() =>
+                  router.push(
+                    `/stake/pool?id=${pool.id}&positionId=${pool.positionId}`,
+                  )
+                }
               >
                 <div className="flex w-full flex-row">
                   <div className="size-1 rounded-full bg-red-500 md:size-2" />
@@ -226,7 +235,10 @@ export const MyPositions = () => {
 
                 <div className="-mt-1 flex flex-col md:-mt-2">
                   <div className="flex flex-row">
-                    <TokenIcon src={getTokenFromAddress(pool.id)?.icon} className="ml-[-2px] size-[25px] rounded-full border border-black md:size-[35px]" />
+                    <TokenIcon
+                      src={getTokenFromAddress(pool.id)?.icon}
+                      className="ml-[-2px] size-[25px] rounded-full border border-black md:size-[35px]"
+                    />
                     <TokenIridescent className="ml-[-6px] size-[25px] rounded-full border-2 border-black md:size-[35px]" />
                   </div>
                   <div className="flex flex-row justify-center">
@@ -250,12 +262,18 @@ export const MyPositions = () => {
                   </div>
                 </div>
                 <Badge
-                  onClick={() => router.push(`/stake/pool?id=${pool.id}&positionId=${pool.positionId}`)}
+                  onClick={() =>
+                    router.push(
+                      `/stake/pool?id=${pool.id}&positionId=${pool.positionId}`,
+                    )
+                  }
                   variant="secondary"
                   className="mt-[5px] h-6 w-full justify-center gap-1 text-nowrap p-0 px-1 text-2xs"
                 >
                   <Position className={"size-[6px] md:size-[10px]"} />
-                  <div className="text-4xs md:text-3xs">{usdFormat(pool.staked)} Position</div>
+                  <div className="text-4xs md:text-3xs">
+                    {usdFormat(pool.staked)} Position
+                  </div>
                 </Badge>
               </motion.div>
             ))}
@@ -295,15 +313,15 @@ export const MyPositions = () => {
               disabled={!!collectData || isCollectPending}
               size="sm"
               onClick={() => collectAll()}
-            >{
-                collectError ?
-                  "Failed" :
-                  collectData ?
-                    "Claimed!" :
-                    isCollectPending ?
-                      "Claiming..." :
-                      "Claim All Yield"
-              }</Button>
+            >
+              {collectError
+                ? "Failed"
+                : collectData
+                  ? "Claimed!"
+                  : isCollectPending
+                    ? "Claiming..."
+                    : "Claim All Yield"}
+            </Button>
             <Badge
               variant={collectError ? "destructive" : "iridescent"}
               className="-mt-2 gap-2 border-2 border-black text-3xs"

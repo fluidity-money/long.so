@@ -41,7 +41,7 @@ const ExplorePage = () => {
 
   const { setToken1, setToken0 } = useSwapStore();
 
-  const { address } = useAccount()
+  const { address } = useAccount();
 
   const searchParams = useSearchParams();
 
@@ -52,38 +52,49 @@ const ExplorePage = () => {
   const tokensData_ = useFragment(SwapExploreFragment, data?.pools);
   // fUSDC can be queried through GraphQL but it
   // still won't contain price, so create it manually
-  const fUSDCData = useMemo(() => ({
-    token: fUSDC,
-    price: "1"
-  } satisfies SwapExploreFragmentFragment), [fUSDC])
+  const fUSDCData = useMemo(
+    () =>
+      ({
+        token: fUSDC,
+        price: "1",
+      }) satisfies SwapExploreFragmentFragment,
+    [fUSDC],
+  );
 
   const tokensData = useMemo(
     () => [fUSDCData, ...(tokensData_ ?? [])],
-    [fUSDCData, tokensData_]
+    [fUSDCData, tokensData_],
   );
 
   const showMockData = useFeatureFlag("ui show demo data");
 
-  const [tokenBalances, setTokenBalances] = useState<Array<{ amount: number, amountUSD: number }>>([])
+  const [tokenBalances, setTokenBalances] = useState<
+    Array<{ amount: number; amountUSD: number }>
+  >([]);
 
   useEffect(() => {
     (async () => {
-      if (!tokensData || !address)
-        return
+      if (!tokensData || !address) return;
 
-      const balances = await Promise.all(tokensData.map(async (token) => {
-        const { value } = await getBalance(config, {
-          address,
-          token: token.token.address as `0x${string}`,
-        })
-        const amount = Number(getFormattedStringFromTokenAmount(value.toString(), token.token.decimals))
-        const amountUSD = amount * Number(token.price)
-        return { amount, amountUSD }
-      }
-      ))
-      setTokenBalances(balances)
-    })()
-  }, [address, tokensData])
+      const balances = await Promise.all(
+        tokensData.map(async (token) => {
+          const { value } = await getBalance(config, {
+            address,
+            token: token.token.address as `0x${string}`,
+          });
+          const amount = Number(
+            getFormattedStringFromTokenAmount(
+              value.toString(),
+              token.token.decimals,
+            ),
+          );
+          const amountUSD = amount * Number(token.price);
+          return { amount, amountUSD };
+        }),
+      );
+      setTokenBalances(balances);
+    })();
+  }, [address, tokensData]);
 
   const allAssetsData = useMemo(() => {
     if (showMockData) return mockSwapExploreAssets;
@@ -91,7 +102,7 @@ const ExplorePage = () => {
     // reformat the data to match the columns
     return (
       tokensData.map((token, i) => {
-        const tokenFromAddress = getTokenFromAddress(token.token.address)
+        const tokenFromAddress = getTokenFromAddress(token.token.address);
         return {
           symbol: token.token.symbol,
           address: token.token.address,
@@ -100,7 +111,7 @@ const ExplorePage = () => {
           amountUSD: tokenBalances[i]?.amountUSD ?? 0,
           icon: tokenFromAddress?.icon || "",
           token: tokenFromAddress,
-        }
+        };
       }) ?? []
     );
   }, [showMockData, tokensData, tokenBalances]);

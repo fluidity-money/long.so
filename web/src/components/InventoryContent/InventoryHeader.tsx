@@ -24,7 +24,7 @@ export const InventoryHeader = () => {
       </div>
 
       <div className="flex flex-row items-center gap-[20px]">
-        {showTransactionSettings &&
+        {showTransactionSettings && (
           <Badge
             variant="secondary"
             className={cn(
@@ -43,7 +43,7 @@ export const InventoryHeader = () => {
             />
             {settings && "Settings"}
           </Badge>
-        }
+        )}
         <DisconnectButton />
       </div>
     </div>

@@ -38,12 +38,20 @@ export const FaucetDropdown = () => {
             "-mt-2 flex w-[--radix-dropdown-menu-trigger-width] flex-col gap-0.5 rounded-2xl rounded-t-none border border-t-0 border-black bg-black p-2 text-xs text-white",
           )}
         >
-          <a rel="noopener noreferrer" target="_blank" href="https://faucet.superposition.so">
+          <a
+            rel="noopener noreferrer"
+            target="_blank"
+            href="https://faucet.superposition.so"
+          >
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
               SPN faucet
             </DropdownMenu.Item>
           </a>
-          <a rel="noopener noreferrer" target="_blank" href="https://faucet.quicknode.com/arbitrum/sepolia">
+          <a
+            rel="noopener noreferrer"
+            target="_blank"
+            href="https://faucet.quicknode.com/arbitrum/sepolia"
+          >
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
               Arbitrum Sepolia ETH faucet
             </DropdownMenu.Item>
@@ -55,12 +63,20 @@ export const FaucetDropdown = () => {
             </DropdownMenu.Item>
           </a>
           */}
-          <a rel="noopener noreferrer" target="_blank" href="https://sepolia.arbiscan.io/address/0x980b62da83eff3d4576c647993b0c1d7faf17c73#writeProxyContract#F5">
+          <a
+            rel="noopener noreferrer"
+            target="_blank"
+            href="https://sepolia.arbiscan.io/address/0x980b62da83eff3d4576c647993b0c1d7faf17c73#writeProxyContract#F5"
+          >
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
               Arbitrum Sepolia Create WETH
             </DropdownMenu.Item>
           </a>
-          <a rel="noopener noreferrer" target="_blank" href="https://faucet.circle.com/">
+          <a
+            rel="noopener noreferrer"
+            target="_blank"
+            href="https://faucet.circle.com/"
+          >
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
               Arbitrum Sepolia USDC faucet
             </DropdownMenu.Item>
