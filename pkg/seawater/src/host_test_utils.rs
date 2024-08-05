@@ -60,7 +60,7 @@ pub trait StorageNew {
     fn new(i: U256, v: u8) -> Self;
 }
 
-///! Set up the storage access, controlling for parallel use. Makes
+///! Set up the storage access, controlling for parallel use.
 pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     sender: Option<[u8; 20]>,
     slots: Option<HashMap<&str, &str>>,
@@ -96,9 +96,7 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     for (key, value) in slots_map {
         test_shims::insert_word(key.clone(), value.clone())
     }
-    let mut pools = P::new(U256::ZERO, 0);
-    let res = f(&mut pools);
-    res
+    f(&mut P::new(U256::ZERO, 0))
 }
 
 #[test]

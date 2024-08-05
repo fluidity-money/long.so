@@ -1261,6 +1261,8 @@ mod test {
                     100000000000,
                 )?;
 
+                contract.enable_pool_579_D_A658(token_addr, true)?;
+
                 let lower_tick = test_utils::encode_tick(50);
                 let upper_tick = test_utils::encode_tick(150);
                 let liquidity_delta = 20000;
@@ -1301,6 +1303,8 @@ mod test {
                     1,
                     100000000000,
                 )?;
+
+                contract.enable_pool_579_D_A658(token_addr, true)?;
 
                 let lower_tick = 39122;
                 let upper_tick = 50108;
@@ -1510,107 +1514,6 @@ mod test {
     }
 
     #[test]
-    fn test_increase_existing_position() -> Result<(), Vec<u8>> {
-        //curl -d '{"jsonrpc":"2.0","id":1,"method":"eth_call","params":[{"data":"0x000001ea000000000000000000000000acd8c4dc161bef1cde93c14861589b35f5000a1900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000009896800000000000000000000000000000000000000000000000000000000000989680","from":"0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E","to":"0x3B5b80304dFda6bA079161acFaD648959c8745dd"},"0x5f8"]}' -H 'Content-Type: application/json' http://localhost:8547
-
-        use num_traits::ToPrimitive;
-
-        let testing_amount_0_bal = U256::from(10000000);
-        let testing_amount_1_bal = U256::from(10000000);
-
-        test_utils::with_storage::<_, Pools, _>(
-            Some(address!("3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E").into_array()), // sender
-            Some(hashmap! {
-                            "0x000000000000000000000000000000000000000000000000000000000000014d" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                            "0x0000000000000000000000000000000000000000000000000000000000000000" => "0x0000000000000000000000003f1eae7d46d88f08fc2f8ed27fcb2ab183eb2d0e",
-                            "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                            "0x17ef568e3e12ab5b9c7254a8d58478811de00f9e6eb34345acd53bf8fd09d3ec" => "0x0000000000000000000000003f1eae7d46d88f08fc2f8ed27fcb2ab183eb2d0e",
-                            "0x3b77a15f47a3e0631c64845cd046efa6f46e623465f5ed88d8f1673aa9e1a540" => "0x0000000000000000000000000000afd000000000000000000000000000004e20",
-                            "0xd69c6ce8a70c25375a33ec21ac6ba05a42b7919a0b7d24bb04d1a5bd64753058" => "0x000000000000000000000000000000000000000000004e200000c3bc000098d2",
-                            "0x3b77a15f47a3e0631c64845cd046efa6f46e623465f5ed88d8f1673aa9e1a53c" => "0x000000000000000000000000000000000000000000174876e800010000000001",
-                            "0x3b77a15f47a3e0631c64845cd046efa6f46e623465f5ed88d8f1673aa9e1a53d" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                            "0x3b77a15f47a3e0631c64845cd046efa6f46e623465f5ed88d8f1673aa9e1a53e" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                            "0x3b77a15f47a3e0631c64845cd046efa6f46e623465f5ed88d8f1673aa9e1a541" => "0x00000000000000000000000000000000000000097d9e34b457d2ebda0c06c859",
-            }),
-            Some(hashmap! {
-                address!("ACd8c4Dc161BEF1Cde93C14861589B35f5000a19") => testing_amount_0_bal,
-                address!("A8EA92c819463EFbEdDFB670FEfC881A480f0115") => testing_amount_1_bal
-            }),
-            None,
-            |contract| {
-                use crate::host_test_shims::get_sender;
-
-                let pool = address!("ACd8c4Dc161BEF1Cde93C14861589B35f5000a19");
-
-                let owner = contract.position_owners.get(U256::from(0));
-                eprintln!(
-                    "msg sender: {}, sender is equal to owner? {}",
-                    const_hex::const_encode::<20, false>(&get_sender().unwrap()).as_str(),
-                    owner == get_sender().unwrap()
-                );
-
-                let id = U256::from(0);
-
-                let cur_price = contract.sqrt_price_x967_B8_F5_F_C5(pool).unwrap();
-                let lower_price = //encodeTick(50);
-                    U256::from_limbs([474970402381366317, 4305717609, 0, 0]);
-                let upper_price = //encodeTick(150);
-                    U256::from_limbs([11121627101190020371, 4327299026, 0, 0]);
-
-                // Based on the weighting already
-
-                let desired_amount_0 = U256::from(900731);
-                let desired_amount_1 = U256::from(10001);
-
-                let existing_delta = contract
-                    .position_liquidity_8_D11_C045(pool, id)
-                    .unwrap()
-                    .to_i128()
-                    .unwrap();
-
-                let (orig_amount_0, orig_amount_1) = sqrt_price_math::get_amounts_for_delta(
-                    cur_price,
-                    lower_price,
-                    upper_price,
-                    existing_delta,
-                )
-                .unwrap();
-
-                dbg!((
-                    "test_update_position_adjust",
-                    existing_delta,
-                    orig_amount_0,
-                    orig_amount_1
-                ));
-
-                let (amount_0, amount_1) = contract.incr_position_C_1041_D_18(
-                    pool,
-                    id,
-                    U256::from(0),    // minimum token 0
-                    U256::from(0),    // minimum token 1
-                    desired_amount_0, // maximum token 0
-                    desired_amount_1, // maximum token 1
-                )?;
-
-                let current = contract.sqrt_price_x967_B8_F5_F_C5(pool)?;
-
-                dbg!((
-                    "test_update_position_adjust after incr position",
-                    current.to_string(),
-                    amount_0.to_string(),
-                    amount_1.to_string()
-                ));
-
-                let new_delta = contract.position_liquidity_8_D11_C045(pool, id).unwrap();
-
-                dbg!(("test_update_position_adjust", new_delta));
-
-                Ok(())
-            },
-        )
-    }
-
-    #[test]
     fn decr_nonexisting_position() {
         use core::str::FromStr;
 
@@ -1624,6 +1527,8 @@ mod test {
             None,
             None,
             |contract| -> Result<(), Vec<u8>> {
+                contract.ctor(msg::sender(), msg::sender())?;
+
                 contract.create_pool_D650_E2_D0(
                     token,
                     U256::from_str("792281625142643375935439503360").unwrap(), // encodeSqrtPrice(100)
@@ -1631,6 +1536,8 @@ mod test {
                     1,
                     u128::MAX,
                 )?;
+
+                contract.enable_pool_579_D_A658(token, true)?;
 
                 let id = U256::from(0);
 
@@ -1647,7 +1554,7 @@ mod test {
                             U256::from(10000),
                         )
                         .unwrap_err(),
-                    Vec::<u8>::from(Error::CheckedAbsIsNegative)
+                    Vec::<u8>::from(Error::LiquiditySub)
                 );
 
                 Ok(())
@@ -1668,6 +1575,8 @@ mod test {
             None,
             None,
             |contract| -> Result<(), Vec<u8>> {
+                contract.ctor(msg::sender(), msg::sender())?;
+
                 contract.create_pool_D650_E2_D0(
                     token,
                     U256::from_str("792281625142643375935439503360").unwrap(), // encodeSqrtPrice(100)
@@ -1675,6 +1584,8 @@ mod test {
                     1,
                     u128::MAX,
                 )?;
+
+                contract.enable_pool_579_D_A658(token, true)?;
 
                 let id = U256::from(0);
 
@@ -1845,41 +1756,6 @@ mod test {
     }
 
     #[test]
-    fn test_alex_large() {
-        //curl -d '{"jsonrpc":"2.0","id":110,"method":"eth_call","params":[{"data":"0x000001a000000000000000000000000022b9fa698b68bba071b513959794e9a47d19214c00000000000000000000000000000000000000000000000000000000000016e400000000000000000000000000000000000000000000000000cafb50642ef2cb","from":"0xFEb6034FC7dF27dF18a3a6baD5Fb94C0D3dCb6d5","to":"0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1"},"0x650116"]}' https://testnet-rpc.superposition.so
-
-        test_utils::with_storage::<_, Pools, _>(
-            Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()), // sender
-            Some(hashmap! {
-                "0x81e9c7c70971b5eb969cec21a82e6deed42e7c6736e0e83ced66d72297d9f1d7" => "0x0000000000000000000000002b4158d5fa1c37a35aedc38c5018778582f96518",
-                "0x0000000000000000000000000000000000000000000000000000000000000000" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
-                "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                "0xf42b82b4d5ac67c42febaf0390caccd037a3682ac139a1ed4fd619de14ef78d5" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
-                "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e38e" => "0x00000000000000000000000000000000d3c21bcecceda10000003c00000bb801",
-                "0x43c7047b6f73ac9bdf3c583b13c9d27a88f9a119043532e4c6cf2ae904d826c3" => "0x000000000000000000000000000000000000000000000000fffccca0fffcc4e4",
-                "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e392" => "0x000000000000000000000000fffcc8e6000000000000000000de21a1733832c8",
-                "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e38f" => "0x000000000000000000000000000000df1cca9e683759b26c91469578a8759792",
-                "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e390" => "0x0000000000000000000000000000000000000368259139fd77e922a07b898f07",
-                "0xcc8b187d2ad98d27c9c2c6011cdfcb9c446a42146d15fac18435b619451222fc" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                "0xcc8b187d2ad98d27c9c2c6011cdfcb9c446a42146d15fac18435b61945122300" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                "0x7a01cf06b22d6ba7841827bdc683d656d8832928a17fc53c7401d3656fbaa28b" => "0x00000000000000000002833f4eac997e00000000000000000002833f4eac997e",
-                "0x7a01cf06b22d6ba7841827bdc683d656d8832928a17fc53c7401d3656fbaa28c" => "0x000000000000000000000000000000ca030b692802b9f5c3f30dd30de156ffce",
-                "0x7a01cf06b22d6ba7841827bdc683d656d8832928a17fc53c7401d3656fbaa28d" => "0x00000000000000000000000000000000000003462d832d30aabb09a267e04f51",
-            }),
-            None,
-            None,
-            |contract| -> Result<(), Vec<u8>> {
-                 let token = address!("22b9fa698b68bba071b513959794e9a47d19214c");
-                 let id = U256::from(5860);
-                 //57134267992306379
-                 let delta = 57134267992306379_i128;
-                 contract.update_position_C_7_F_1_F_740(token, id, delta).unwrap();
-                 Ok(())
-            },
-        ).unwrap();
-    }
-
-    #[test]
     fn test_0f08c379a_alex_2() {
         // This test should revert since we don't have balance to handle what it's asking - correct behaviour.
 
@@ -1933,5 +1809,22 @@ mod test {
                  Ok(())
             },
         ).unwrap_err();
+    }
+
+    #[test]
+    fn eli_test_incr_position_revert() {
+        //curl -d '{"jsonrpc":"2.0","id":238,"method":"eth_call","params":[{"data":"0x00000000000000000000000000000000de104342b32bca03ec995f999181f7cf1ffc04d70000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000174876e800ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","from":"0xFEb6034FC7dF27dF18a3a6baD5Fb94C0D3dCb6d5","to":"0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1"},"0x6b3ea8"]}' https://testnet-rpc.superposition.so
+        //cast call -r https://testnet-rpc.superposition.so --block 7028392 0xA8EA92c819463EFbEdDFB670FEfC881A480f0115 'balanceOf(address)(uint256)' 0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1
+        //cast call -r https://testnet-rpc.superposition.so --block 7028392 0xde104342B32BCa03ec995f999181f7Cf1fFc04d7 'balanceOf(address)(uint256)' 0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1
+        //cast call -r https://testnet-rpc.superposition.so --block 7028392 0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1 'quote72E2ADE7(address,bool,int256,uint256)' 0xde104342b32bca03ec995f999181f7cf1ffc04d7 false 100000000000 115792089237316195423570985008687907853269984665640564039457584007913129639935
+
+        test_utils::with_storage::<_, Pools, _>(
+            Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()), // sender
+            Some(hashmap! {}),
+            None,
+            Some(hashmap! {}),
+            |contract| -> Result<(), Vec<u8>> { Ok(()) },
+        )
+        .unwrap();
     }
 }

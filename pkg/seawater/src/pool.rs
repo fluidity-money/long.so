@@ -592,6 +592,8 @@ mod test {
                 .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
                 .unwrap();
 
+            storage.enabled.set(true);
+
             let id = uint!(2_U256);
 
             storage
@@ -611,6 +613,8 @@ mod test {
             storage
                 .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
                 .unwrap();
+
+            storage.enabled.set(true);
 
             let id = uint!(2_U256);
 
@@ -632,6 +636,8 @@ mod test {
                 1,
                 u128::MAX,
             )?;
+
+            storage.enabled.set(true);
 
             let id = uint!(2_U256);
             storage
@@ -688,7 +694,10 @@ mod test {
 
             pool.init(price, 2, 1, u128::MAX)?;
 
-            assert_eq!(pool.enabled.get(), true);
+            assert_eq!(pool.enabled.get(), false);
+
+            pool.enabled.set(true);
+
             assert_eq!(pool.sqrt_price.get(), price);
 
             assert_eq!(
@@ -739,6 +748,8 @@ mod test {
             }
 
             pool.init(sqrt_price, 1, 1, u128::MAX).unwrap();
+
+            pool.enabled.set(true);
 
             match pool.swap(true, I256::unchecked_from(1), sqrt_price + U256::from(1)) {
                 Err(r) => assert_eq!(
@@ -796,6 +807,8 @@ mod test {
                 u128::MAX,
             )?;
 
+            pool.enabled.set(true);
+
             match pool.create_position(id, 11, 17) {
                 Err(r) => assert_eq!(
                     Error::InvalidTickSpacing.to_string(),
@@ -821,6 +834,8 @@ mod test {
             pool.init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
                 .unwrap();
 
+            pool.enabled.set(true);
+
             let id = uint!(2_U256);
 
             pool.create_position(id, tick_math::get_min_tick(1), tick_math::get_max_tick(1))
@@ -843,7 +858,7 @@ mod test {
                 ),
                 _ => panic!("expected PoolDisabled"),
             }
-        });
+        })
     }
 
     #[test]
@@ -892,6 +907,8 @@ mod test {
 
                         pool.init(init_price, 3000, 60 as u8, u128::MAX).unwrap();
 
+                        pool.enabled.set(true);
+
                         let id = uint!(2_U256);
 
                         let low_padded = low - low % 60;
@@ -935,6 +952,8 @@ mod test {
             // Price inside liquidity range
             test_utils::with_storage::<_, StoragePool, _>(None, None, None, None, |pool| {
                 pool.init(init_price, 3000, 60, u128::MAX).unwrap();
+
+                pool.enabled.set(true);
 
                 let lower = tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(
                     liq_price_inside[0],
