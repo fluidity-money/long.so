@@ -25,43 +25,46 @@ import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { TokenIcon } from "@/components/TokenIcon";
 
 const PositionsFragment = graphql(`
-fragment WithdrawPositionsFragment on Wallet {
-  positions {
+  fragment WithdrawPositionsFragment on Wallet {
     positions {
-      positionId
-      lower
-      upper
-      owner {
-        address
-      }
-      liquidity {
-        fusdc {
-          valueUsd
-          valueScaled
+      positions {
+        positionId
+        lower
+        upper
+        owner {
+          address
         }
-        token1 {
-          valueUsd
-          valueScaled
+        liquidity {
+          fusdc {
+            valueUsd
+            valueScaled
+          }
+          token1 {
+            valueUsd
+            valueScaled
+          }
         }
       }
     }
   }
-}
 `);
 
 export default function WithdrawLiquidity() {
   const router = useRouter();
   const params = useSearchParams();
 
-  const positionId = params.get("positionId")
+  const positionId = params.get("positionId");
 
   useEffect(() => {
     if (!positionId && typeof window !== undefined) router.back();
   }, [positionId, router]);
 
   const { address, chainId } = useAccount();
-  const expectedChainId = useChainId()
-  const isCorrectChain = useMemo(() => chainId === expectedChainId, [chainId, expectedChainId])
+  const expectedChainId = useChainId();
+  const isCorrectChain = useMemo(
+    () => chainId === expectedChainId,
+    [chainId, expectedChainId],
+  );
 
   const { open } = useWeb3Modal();
 
@@ -74,7 +77,7 @@ export default function WithdrawLiquidity() {
     setTickUpper,
     setDelta,
     deltaDisplay,
-  } = useStakeStore()
+  } = useStakeStore();
 
   // Current tick of the pool
   const { data: { result: curTickNum } = { result: 0 } } = useSimulateContract({
@@ -83,15 +86,15 @@ export default function WithdrawLiquidity() {
     functionName: "curTick181C6FD9",
     args: [token0.address],
   });
-  const curTick = BigInt(curTickNum)
+  const curTick = BigInt(curTickNum);
 
   // Current liquidity of the position
   const { data: positionLiquidity } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: 'positionLiquidity8D11C045',
-    args: [token0.address, BigInt(positionId ?? 0)]
-  })
+    functionName: "positionLiquidity8D11C045",
+    args: [token0.address, BigInt(positionId ?? 0)],
+  });
 
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
@@ -107,32 +110,36 @@ export default function WithdrawLiquidity() {
   const { data } = useGraphqlUser();
 
   const positionsData = useFragment(PositionsFragment, data?.getWallet);
-  const position = positionsData?.positions.positions.find(p => p.positionId.toString() === positionId && p.owner.address === address?.toLowerCase())
-  const { upper: upperTick, lower: lowerTick } = position || {}
+  const position = positionsData?.positions.positions.find(
+    (p) =>
+      p.positionId.toString() === positionId &&
+      p.owner.address === address?.toLowerCase(),
+  );
+  const { upper: upperTick, lower: lowerTick } = position || {};
 
   // update ticks in stakeStore based on the current position
   useEffect(() => {
-    if (lowerTick === undefined || upperTick === undefined)
-      return
-    setTickLower(lowerTick)
-    setTickUpper(upperTick)
-  }, [position])
+    if (lowerTick === undefined || upperTick === undefined) return;
+    setTickLower(lowerTick);
+    setTickUpper(upperTick);
+  }, [position]);
 
-  const positionBalance = positionLiquidity?.result ?? 0n
+  const positionBalance = positionLiquidity?.result ?? 0n;
 
   const deltaUsd = useMemo(() => {
-    if (!token0Amount || !token1Amount)
-      return "$0.00"
-    const token0AmountScaled = Number(token0Amount) * Number(tokenPrice) / 10 ** fUSDC.decimals
-    return usdFormat(token0AmountScaled + parseFloat(token1Amount))
-  }, [token0Amount, token1Amount])
+    if (!token0Amount || !token1Amount) return "$0.00";
+    const token0AmountScaled =
+      (Number(token0Amount) * Number(tokenPrice)) / 10 ** fUSDC.decimals;
+    return usdFormat(token0AmountScaled + parseFloat(token1Amount));
+  }, [token0Amount, token1Amount]);
 
   // set the delta to delta/denom
-  const setDeltaOverDenom = (denom: bigint) => setDelta((positionBalance / denom).toString(), curTick)
-  const setMaxBalance = () => setDeltaOverDenom(1n)
+  const setDeltaOverDenom = (denom: bigint) =>
+    setDelta((positionBalance / denom).toString(), curTick);
+  const setMaxBalance = () => setDeltaOverDenom(1n);
 
   // TODO when clicking on a selected balance, should it unselect and set to 0?
-  const [balancePercent, setBalancePercent] = useState('')
+  const [balancePercent, setBalancePercent] = useState("");
   const handleBalancePercentButton = (percentString: string) => {
     setBalancePercent(percentString);
     switch (percentString) {
@@ -144,16 +151,19 @@ export default function WithdrawLiquidity() {
         break;
       case "75%":
         // 50% + 25%
-        setDelta(((positionBalance / 4n) + (positionBalance / 2n)).toString(), curTick)
+        setDelta(
+          (positionBalance / 4n + positionBalance / 2n).toString(),
+          curTick,
+        );
         break;
       case "100%":
         setMaxBalance();
         break;
     }
-  }
+  };
 
   const onSubmit = () => {
-    router.push(`/stake/pool/confirm-withdraw?positionId=${positionId}`)
+    router.push(`/stake/pool/confirm-withdraw?positionId=${positionId}`);
   };
 
   return (
@@ -164,7 +174,10 @@ export default function WithdrawLiquidity() {
       >
         <motion.div className="flex flex-col" layout>
           <div className={cn("absolute -top-[15px] left-0 flex flex-row")}>
-            <TokenIcon src={token0.icon} className="size-[30px] rounded-full border-[1px] border-white" />
+            <TokenIcon
+              src={token0.icon}
+              className="size-[30px] rounded-full border-[1px] border-white"
+            />
             <Badge
               variant="outline"
               className="-ml-2 h-[30px] w-[124px] justify-between border-[3px] bg-black pl-px text-white"
@@ -211,14 +224,24 @@ export default function WithdrawLiquidity() {
               variant={"no-ring"}
               value={deltaDisplay}
               onChange={(e) => {
-                setDelta(e.target.value, curTick, positionLiquidity?.result ?? 0n)
-              }} />
+                setDelta(
+                  e.target.value,
+                  curTick,
+                  positionLiquidity?.result ?? 0n,
+                );
+              }}
+            />
           </div>
 
           <div className={"flex flex-row justify-between md:mt-[8px]"}>
             <div className={"text-2xs"}>
               Balance: {positionBalance.toString()}{" "}
-              <span onClick={setMaxBalance} className="cursor-pointer underline">Max</span>
+              <span
+                onClick={setMaxBalance}
+                className="cursor-pointer underline"
+              >
+                Max
+              </span>
             </div>
 
             <div className={"text-2xs"}>{deltaUsd}</div>
@@ -227,7 +250,7 @@ export default function WithdrawLiquidity() {
           <div className="mt-[20px] md:mt-[25px]">
             <RadioGroup.Root
               value={balancePercent}
-              onValueChange={v => handleBalancePercentButton(v)}
+              onValueChange={(v) => handleBalancePercentButton(v)}
             >
               <div className="flex flex-row gap-[6px]">
                 <RadioGroup.Item
@@ -267,33 +290,42 @@ export default function WithdrawLiquidity() {
         </div>
       </div>
 
-      {isCorrectChain ?
+      {isCorrectChain ? (
         <div className="z-10 mt-[20px] w-[318px] md:hidden">
           <Slider onSlideComplete={onSubmit}>
             <div className="text-xs font-medium">Withdraw</div>
           </Slider>
         </div>
-        :
+      ) : (
         <div className="z-10 mt-[20px] w-[318px] md:hidden">
-          <Slider className="border border-destructive" onSlideComplete={() => open({ view: "Networks" })}>
-            <div className="text-xs font-medium text-destructive">Wrong Network</div>
+          <Slider
+            className="border border-destructive"
+            onSlideComplete={() => open({ view: "Networks" })}
+          >
+            <div className="text-xs font-medium text-destructive">
+              Wrong Network
+            </div>
           </Slider>
         </div>
-      }
+      )}
 
-      {isCorrectChain ?
+      {isCorrectChain ? (
         <div className="z-10 mt-[20px] hidden md:inline">
           <Button className="h-[53.92px] w-[395px]" onClick={onSubmit}>
             Withdraw
           </Button>
         </div>
-        :
+      ) : (
         <div className="z-10 mt-[20px] hidden md:inline">
-          <Button variant="destructiveBorder" className="h-[53.92px] w-[395px]" onClick={() => open({ view: "Networks" })}>
+          <Button
+            variant="destructiveBorder"
+            className="h-[53.92px] w-[395px]"
+            onClick={() => open({ view: "Networks" })}
+          >
             Wrong Network
           </Button>
         </div>
-      }
+      )}
     </div>
   );
 }

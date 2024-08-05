@@ -1,10 +1,18 @@
 {
+  "root": true,
   "extends": [
     "next/core-web-vitals",
     "prettier",
     "plugin:tailwindcss/recommended"
   ],
-  "plugins": ["@stylistic/ts", "jest"],
+  "plugins": ["@stylistic/ts"],
+  "parser": "@typescript-eslint/parser",
+  "rules": {
+    "no-warning-comments": [
+      "error",
+      { "terms": ["todo", "fixme"], "location": "anywhere" }
+    ]
+  },
   "overrides": [
     {
       "files": ["*.ts", "*.tsx"],
@@ -14,6 +22,14 @@
       "files": ["*.graphql"],
       "parser": "@graphql-eslint/eslint-plugin",
       "plugins": ["@graphql-eslint"]
+    },
+    {
+      "files": "__tests__/**",
+      "extends": "plugin:jest/recommended"
+    },
+    {
+      "files": "e2e/**",
+      "extends": "plugin:playwright/recommended"
     }
   ]
 }

@@ -52,32 +52,35 @@ const SelectPrimeAsset = () => {
 
   const poolsData = useFragment(SelectPrimeAssetFragment, data?.pools);
 
-  const tokens: Token[] = poolsData ? poolsData?.map((pool) => ({
-    name: pool.token.name,
-    symbol: pool.token.symbol,
-    address: pool.token.address as Hash,
-    decimals: pool.token.decimals
-  })) : [];
+  const tokens: Token[] = poolsData
+    ? poolsData?.map((pool) => ({
+        name: pool.token.name,
+        symbol: pool.token.symbol,
+        address: pool.token.address as Hash,
+        decimals: pool.token.decimals,
+      }))
+    : [];
 
   /**
    * Reformat our data to match the table columns
    */
   const pools = useMemo((): Pool[] => {
-    if (showMockData) return [
-      {
-        APR: 170.23,
-        volume: "$100k",
-        duration: 150,
-        id: nanoid(),
-        tokens: [DefaultToken, fUSDC],
-        token0Name: DefaultToken.name,
-        token0Symbol: DefaultToken.symbol,
-        token0Address: DefaultToken.address,
-        token1Name: fUSDC.name,
-        token1Symbol: fUSDC.symbol,
-        token1Address: fUSDC.address,
-      },
-    ];
+    if (showMockData)
+      return [
+        {
+          APR: 170.23,
+          volume: "$100k",
+          duration: 150,
+          id: nanoid(),
+          tokens: [DefaultToken, fUSDC],
+          token0Name: DefaultToken.name,
+          token0Symbol: DefaultToken.symbol,
+          token0Address: DefaultToken.address,
+          token1Name: fUSDC.name,
+          token1Symbol: fUSDC.symbol,
+          token1Address: fUSDC.address,
+        },
+      ];
 
     if (isLoading || !poolsData) return [];
 
@@ -94,7 +97,7 @@ const SelectPrimeAsset = () => {
           name: pool.token.name,
           symbol: pool.token.symbol,
           address: pool.token.address as Hash,
-          decimals: pool.token.decimals
+          decimals: pool.token.decimals,
         },
         // assume the second token is always fUSDC
         fUSDC,
@@ -141,7 +144,7 @@ const SelectPrimeAsset = () => {
         </div>
 
         <div className={"mt-[20px] flex flex-1"}>
-          <SelectPrimeAssetTable columns={columns} data={pools} >
+          <SelectPrimeAssetTable columns={columns} data={pools}>
             <div className={"mt-[9px] flex flex-row gap-2"}>
               <Badge
                 variant={"secondary"}

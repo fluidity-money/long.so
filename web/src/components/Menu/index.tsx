@@ -85,7 +85,7 @@ const Item: React.FC<ItemProps> = ({
           "flex h-full flex-row items-center justify-center gap-2 text-base font-medium",
           {
             "iridescent-text": variant === "iridescent" && !selected,
-            "text-black": variant === "iridescent" && selected
+            "text-black": variant === "iridescent" && selected,
           },
         )}
       >

@@ -14,7 +14,15 @@ import CurrentPrice from "@/assets/icons/legend/current-price.svg";
 import LiquidityDistribution from "@/assets/icons/legend/liquidity-distribution.svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MAX_TICK, getAmount0ForLiquidity, getAmount1ForLiquidity, getLiquidityForAmount0, getLiquidityForAmount1, getSqrtRatioAtTick, sqrtPriceX96ToPrice } from "@/lib/math";
+import {
+  MAX_TICK,
+  getAmount0ForLiquidity,
+  getAmount1ForLiquidity,
+  getLiquidityForAmount0,
+  getLiquidityForAmount1,
+  getSqrtRatioAtTick,
+  sqrtPriceX96ToPrice,
+} from "@/lib/math";
 import { ammAddress } from "@/lib/addresses";
 import { createChartData } from "@/lib/chartData";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
@@ -25,7 +33,13 @@ import * as RadioGroup from "@radix-ui/react-radio-group";
 import { Input } from "@/components/ui/input";
 import { useStakeStore } from "@/stores/useStakeStore";
 import SegmentedControl from "@/components/ui/segmented-control";
-import { useAccount, useBalance, useChainId, useConnectorClient, useSimulateContract } from "wagmi";
+import {
+  useAccount,
+  useBalance,
+  useChainId,
+  useConnectorClient,
+  useSimulateContract,
+} from "wagmi";
 import {
   Tooltip,
   TooltipContent,
@@ -42,7 +56,11 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
-import { Token as TokenType, fUSDC, getTokenFromAddress } from "@/config/tokens";
+import {
+  Token as TokenType,
+  fUSDC,
+  getTokenFromAddress,
+} from "@/config/tokens";
 import { getFormattedPriceFromAmount } from "@/lib/amounts";
 import { TokenIcon } from "./TokenIcon";
 
@@ -60,13 +78,16 @@ const colorGradient = new echarts.graphic.LinearGradient(
   ],
 );
 
-type StakeFormProps = { poolId: string } & ({
-  mode: "new"
-  positionId?: never,
-} | {
-  mode: "existing",
-  positionId: number,
-});
+type StakeFormProps = { poolId: string } & (
+  | {
+      mode: "new";
+      positionId?: never;
+    }
+  | {
+      mode: "existing";
+      positionId: number;
+    }
+);
 
 const StakeFormFragment = graphql(`
   fragment StakeFormFragment on SeawaterPool {
@@ -76,15 +97,15 @@ const StakeFormFragment = graphql(`
 `);
 
 const PositionsFragment = graphql(`
-fragment DepositPositionsFragment on Wallet {
-  positions {
+  fragment DepositPositionsFragment on Wallet {
     positions {
-      positionId
-      lower
-      upper
+      positions {
+        positionId
+        lower
+        upper
+      }
     }
   }
-}
 `);
 
 export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
@@ -117,27 +138,19 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     setTickUpper,
   } = useStakeStore();
 
-
   // poolId should override tokens if we are redirected
   useEffect(() => {
-    if (!poolId)
-      return
+    if (!poolId) return;
     if (token0.address !== poolId && token1.address !== poolId) {
-      const poolToken = getTokenFromAddress(poolId)
+      const poolToken = getTokenFromAddress(poolId);
       if (!poolToken) {
-        router.push("/stake")
+        router.push("/stake");
         return;
       }
-      setToken0(poolToken)
-      setToken1(fUSDC)
+      setToken0(poolToken);
+      setToken1(fUSDC);
     }
-  }, [
-    poolId,
-    setToken0,
-    setToken1,
-    token0.address,
-    token1.address
-  ])
+  }, [poolId, setToken0, setToken1, token0.address, token1.address]);
 
   // Parse the price lower and upper, and set the ticks properly.
 
@@ -147,18 +160,21 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const poolsData = useFragment(StakeFormFragment, data?.pools);
   const poolData = poolsData?.find((pool) => pool.address === poolId);
 
-  const positionData_ = useFragment(PositionsFragment, userData?.getWallet)
-  const positionData = positionData_?.positions.positions.find(p => p.positionId === positionId)
+  const positionData_ = useFragment(PositionsFragment, userData?.getWallet);
+  const positionData = positionData_?.positions.positions.find(
+    (p) => p.positionId === positionId,
+  );
 
-  const { upper: upperTickPosition, lower: lowerTickPosition } = positionData || {
-    upper: 0,
-    lower: 0
-  };
+  const { upper: upperTickPosition, lower: lowerTickPosition } =
+    positionData || {
+      upper: 0,
+      lower: 0,
+    };
 
   useEffect(() => {
-    setTickLower(lowerTickPosition)
-    setTickUpper(upperTickPosition)
-  }, [positionData])
+    setTickLower(lowerTickPosition);
+    setTickUpper(upperTickPosition);
+  }, [positionData]);
 
   const showMockData = useFeatureFlag("ui show demo data");
 
@@ -171,7 +187,9 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const showDynamicFeesPopup = useFeatureFlag("ui show optimising fee route");
   const showSingleToken = useFeatureFlag("ui show single token stake");
   const showCampaignBanner = useFeatureFlag("ui show campaign banner");
-  const showLiquidityVisualiser = useFeatureFlag("ui show liquidity visualiser")
+  const showLiquidityVisualiser = useFeatureFlag(
+    "ui show liquidity visualiser",
+  );
 
   const onSubmit = () => {
     if (mode === "new") {
@@ -182,15 +200,19 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   };
 
   const { address, chainId } = useAccount();
-  const expectedChainId = useChainId()
-  const isCorrectChain = useMemo(() => chainId === expectedChainId, [chainId, expectedChainId])
+  const expectedChainId = useChainId();
+  const isCorrectChain = useMemo(
+    () => chainId === expectedChainId,
+    [chainId, expectedChainId],
+  );
 
   const chartRef = useRef<ReactECharts>(null);
 
   // useSimulateContract throws if connector.account is not defined
   // so we must check if it exists or use a dummy address for sqrtPriceX96
-  const { data: connector } = useConnectorClient()
-  const simulateAccount = connector?.account ?? "0x1111111111111111111111111111111111111111";
+  const { data: connector } = useConnectorClient();
+  const simulateAccount =
+    connector?.account ?? "0x1111111111111111111111111111111111111111";
 
   // Price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
@@ -211,20 +233,23 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const { data: token0Balance } = useBalance({
     address,
     token: token0.address,
-  })
+  });
 
   const { data: token1Balance } = useBalance({
     address,
     token: token1.address,
-  })
+  });
 
-  const [quotedToken, setQuotedToken] = useState<'token0' | 'token1'>('token0')
-  const quoteTokenAmount = (value: string, quotedToken: 'token0' | 'token1') => {
-    quotedToken === 'token0'
+  const [quotedToken, setQuotedToken] = useState<"token0" | "token1">("token0");
+  const quoteTokenAmount = (
+    value: string,
+    quotedToken: "token0" | "token1",
+  ) => {
+    quotedToken === "token0"
       ? setToken0Amount(value, token0Balance?.value.toString())
-      : setToken1Amount(value, token1Balance?.value.toString())
-    setQuotedToken(quotedToken)
-  }
+      : setToken1Amount(value, token1Balance?.value.toString());
+    setQuotedToken(quotedToken);
+  };
 
   // The tick spacing will determine how granular the graph is.
   const { data: curTickNum } = useSimulateContract({
@@ -233,33 +258,37 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     functionName: "curTick181C6FD9",
     args: [token0.address],
   });
-  const curTick = useMemo(() => ({ result: BigInt(curTickNum?.result ?? 0) }), [curTickNum]);
-
+  const curTick = useMemo(
+    () => ({ result: BigInt(curTickNum?.result ?? 0) }),
+    [curTickNum],
+  );
 
   useEffect(() => {
-    if (!token0AmountRaw || !curTick || tickLower === undefined || tickUpper === undefined)
-      return
-    const lower = BigInt(tickLower)
-    const upper = BigInt(tickUpper)
+    if (
+      !token0AmountRaw ||
+      !curTick ||
+      tickLower === undefined ||
+      tickUpper === undefined
+    )
+      return;
+    const lower = BigInt(tickLower);
+    const upper = BigInt(tickUpper);
 
-    const cur = curTick.result
-    const sqp = getSqrtRatioAtTick(cur)
-    const sqa = getSqrtRatioAtTick(lower)
-    const sqb = getSqrtRatioAtTick(upper)
+    const cur = curTick.result;
+    const sqp = getSqrtRatioAtTick(cur);
+    const sqa = getSqrtRatioAtTick(lower);
+    const sqb = getSqrtRatioAtTick(upper);
 
-    if (quotedToken === 'token0') {
-      const liq = getLiquidityForAmount0(cur, upper, BigInt(token0AmountRaw))
-      const newToken1Amount = getAmount1ForLiquidity(sqa, sqp, liq)
-      if (token1Balance?.value && newToken1Amount > token1Balance.value)
-        return
-      setToken1AmountRaw(newToken1Amount.toString())
-    }
-    else {
-      const liq = getLiquidityForAmount1(cur, lower, BigInt(token1AmountRaw))
-      const newToken0Amount = getAmount0ForLiquidity(sqb, sqp, liq)
-      if (token0Balance?.value && newToken0Amount > token0Balance.value)
-        return
-      setToken0AmountRaw(newToken0Amount.toString())
+    if (quotedToken === "token0") {
+      const liq = getLiquidityForAmount0(cur, upper, BigInt(token0AmountRaw));
+      const newToken1Amount = getAmount1ForLiquidity(sqa, sqp, liq);
+      if (token1Balance?.value && newToken1Amount > token1Balance.value) return;
+      setToken1AmountRaw(newToken1Amount.toString());
+    } else {
+      const liq = getLiquidityForAmount1(cur, lower, BigInt(token1AmountRaw));
+      const newToken0Amount = getAmount0ForLiquidity(sqb, sqp, liq);
+      if (token0Balance?.value && newToken0Amount > token0Balance.value) return;
+      setToken0AmountRaw(newToken0Amount.toString());
     }
   }, [
     setToken0AmountRaw,
@@ -276,10 +305,14 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   ]);
 
   const setMaxBalance = (token: TokenType) => {
-    token.address === token0.address ?
-      setToken0AmountRaw(token0Balance?.value.toString() ?? token0Amount ?? "0") :
-      setToken1AmountRaw(token1Balance?.value.toString() ?? token1Amount ?? "0")
-  }
+    token.address === token0.address
+      ? setToken0AmountRaw(
+          token0Balance?.value.toString() ?? token0Amount ?? "0",
+        )
+      : setToken1AmountRaw(
+          token1Balance?.value.toString() ?? token1Amount ?? "0",
+        );
+  };
 
   const [liquidityRangeType, setLiquidityRangeType] = useState<
     "full-range" | "auto" | "custom"
@@ -289,32 +322,41 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   useEffect(() => {
     // set the ticks to the existing ticks of the pool
     if (mode === "existing") {
-      const scale = token0.decimals - fUSDC.decimals
-      const priceLower = (1.0001 ** (tickLower ?? 0) * 10 ** scale).toFixed(fUSDC.decimals)
-      const priceHigher = (1.0001 ** (tickUpper ?? 0) * 10 ** scale).toFixed(fUSDC.decimals)
-      setPriceLower(priceLower, token0.decimals)
-      setPriceUpper(priceHigher, token0.decimals)
-      return
+      const scale = token0.decimals - fUSDC.decimals;
+      const priceLower = (1.0001 ** (tickLower ?? 0) * 10 ** scale).toFixed(
+        fUSDC.decimals,
+      );
+      const priceHigher = (1.0001 ** (tickUpper ?? 0) * 10 ** scale).toFixed(
+        fUSDC.decimals,
+      );
+      setPriceLower(priceLower, token0.decimals);
+      setPriceUpper(priceHigher, token0.decimals);
+      return;
     }
 
     if (liquidityRangeType === "full-range") {
       // lower price is 1 base fUSDC (0.000001)
-      setPriceLower(`0.${"0".repeat(token1.decimals - 1)}1`, token0.decimals)
+      setPriceLower(`0.${"0".repeat(token1.decimals - 1)}1`, token0.decimals);
       // upper price is max tick
-      setPriceUpper(String(1.0001 ** MAX_TICK), token0.decimals)
-    }
-    else if (liquidityRangeType === "auto") {
-      if (!curTick)
-        return
+      setPriceUpper(String(1.0001 ** MAX_TICK), token0.decimals);
+    } else if (liquidityRangeType === "auto") {
+      if (!curTick) return;
       // auto sets the price range to +-10% of the current tick
-      const priceAtTick = sqrtPriceX96ToPrice(getSqrtRatioAtTick(curTick.result), token0.decimals)
-      const diff = priceAtTick / 10n
-      const pu = priceAtTick + diff
-      const pl = priceAtTick - diff
-      const priceLower = (Number(pl) / 10 ** fUSDC.decimals).toFixed(fUSDC.decimals)
-      const priceUpper = (Number(pu) / 10 ** fUSDC.decimals).toFixed(fUSDC.decimals)
-      setPriceLower(priceLower, token0.decimals)
-      setPriceUpper(priceUpper, token0.decimals)
+      const priceAtTick = sqrtPriceX96ToPrice(
+        getSqrtRatioAtTick(curTick.result),
+        token0.decimals,
+      );
+      const diff = priceAtTick / 10n;
+      const pu = priceAtTick + diff;
+      const pl = priceAtTick - diff;
+      const priceLower = (Number(pl) / 10 ** fUSDC.decimals).toFixed(
+        fUSDC.decimals,
+      );
+      const priceUpper = (Number(pu) / 10 ** fUSDC.decimals).toFixed(
+        fUSDC.decimals,
+      );
+      setPriceLower(priceLower, token0.decimals);
+      setPriceUpper(priceUpper, token0.decimals);
     }
   }, [
     mode,
@@ -323,8 +365,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     setPriceLower,
     setPriceUpper,
     token1.decimals,
-    liquidityRangeType
-  ])
+    liquidityRangeType,
+  ]);
 
   const autoFeeTierRef = useRef();
   const manualFeeTierRef = useRef();
@@ -395,23 +437,20 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             // Border configuration
             ...(liquidityRangeType === "custom"
               ? {
-                borderColor: "#EBEBEB", // Border color
-                borderWidth: 1, // Border width
-                borderType: "dashed", // Border type
-              }
+                  borderColor: "#EBEBEB", // Border color
+                  borderWidth: 1, // Border width
+                  borderType: "dashed", // Border type
+                }
               : {
-                borderColor: "#1E1E1E", // Border color
-                borderWidth: 1, // Border width
-                borderType: "solid", // Border type
-              }),
+                  borderColor: "#1E1E1E", // Border color
+                  borderWidth: 1, // Border width
+                  borderType: "solid", // Border type
+                }),
           },
         },
       ],
     };
-  }, [
-    chartData,
-    liquidityRangeType
-  ]);
+  }, [chartData, liquidityRangeType]);
 
   useEffect(() => {
     if (chartRef.current) {
@@ -457,7 +496,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 flex: mode === "existing",
               })}
             >
-              <TokenIcon src={token0.icon} className="size-[30px] rounded-full border-[1px] border-white" />
+              <TokenIcon
+                src={token0.icon}
+                className="size-[30px] rounded-full border-[1px] border-white"
+              />
               <Badge
                 variant="outline"
                 className="-ml-2 h-[30px] justify-between border-[3px] bg-black pl-px text-white"
@@ -521,7 +563,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 autoFocus
                 variant={"no-ring"}
                 value={token0Amount}
-                onChange={(e) => quoteTokenAmount(e.target.value, 'token0')}
+                onChange={(e) => quoteTokenAmount(e.target.value, "token0")}
               />
 
               <Link
@@ -532,7 +574,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   variant="outline"
                   className="flex h-[26px] cursor-pointer flex-row justify-between gap-1 pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base"
                 >
-                  <TokenIcon src={token0.icon} className="size-[20px] invert md:size-[25px]" />
+                  <TokenIcon
+                    src={token0.icon}
+                    className="size-[20px] invert md:size-[25px]"
+                  />
                   <div>{token0.symbol}</div>
                   <ArrowDown className="h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
                 </Badge>
@@ -541,25 +586,28 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
             <div className="mt-[5px] flex w-full flex-row items-center justify-between">
               <div className="text-2xs md:text-gray-1">
-                ${token0.address === fUSDC.address ? token0Amount : getFormattedPriceFromAmount(token0Amount, tokenPrice, fUSDC.decimals)}
+                $
+                {token0.address === fUSDC.address
+                  ? token0Amount
+                  : getFormattedPriceFromAmount(
+                      token0Amount,
+                      tokenPrice,
+                      fUSDC.decimals,
+                    )}
               </div>
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
-                {
-                  token0Balance && (
-                    <>
-                      <div>
-                        Balance:{" "}
-                        {(token0Balance.formatted)}
-                      </div>
-                      <div
-                        className="cursor-pointer underline"
-                        onClick={() => setMaxBalance(token0)}
-                      >
-                        Max
-                      </div>
-                    </>
-                  )}
+                {token0Balance && (
+                  <>
+                    <div>Balance: {token0Balance.formatted}</div>
+                    <div
+                      className="cursor-pointer underline"
+                      onClick={() => setMaxBalance(token0)}
+                    >
+                      Max
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
@@ -585,14 +633,17 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   autoFocus
                   variant={"no-ring"}
                   value={token1Amount}
-                  onChange={(e) => quoteTokenAmount(e.target.value, 'token1')}
+                  onChange={(e) => quoteTokenAmount(e.target.value, "token1")}
                 />
 
                 <Badge
                   variant="outline"
                   className="flex h-[26px] w-[82px] flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[107px] md:pl-[4px] md:text-base"
                 >
-                  <TokenIcon src={token1.icon} className="size-[20px] invert md:size-[25px]" />
+                  <TokenIcon
+                    src={token1.icon}
+                    className="size-[20px] invert md:size-[25px]"
+                  />
                   <div className="iridescent-text">ƒUSDC</div>
                   <Padlock className="ml-[2px] h-[7.53px] w-[6.45px] md:h-[10.3px] md:w-[8.82px]" />
                 </Badge>
@@ -600,15 +651,19 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
               <div className="mt-[5px] flex w-full flex-row items-center justify-between">
                 <div className="text-2xs md:text-gray-1">
-                  ${token1.address === fUSDC.address ? token1Amount : getFormattedPriceFromAmount(token1Amount, tokenPrice, fUSDC.decimals)}
+                  $
+                  {token1.address === fUSDC.address
+                    ? token1Amount
+                    : getFormattedPriceFromAmount(
+                        token1Amount,
+                        tokenPrice,
+                        fUSDC.decimals,
+                      )}
                 </div>
                 <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
                   {token1Balance && (
                     <>
-                      <div>
-                        Balance:{" "}
-                        {token1Balance.formatted}
-                      </div>
+                      <div>Balance: {token1Balance.formatted}</div>
                       <div
                         className="cursor-pointer underline"
                         onClick={() => setMaxBalance(token1)}
@@ -618,7 +673,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     </>
                   )}
                 </div>
-
               </div>
             </motion.div>
           )}
@@ -801,70 +855,76 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             <div className="flex flex-col">
               <div className="text-3xs text-gray-2 md:text-2xs">Low Price</div>
               <Input
-                className="border-b border-white text-2xs md:text-base bg-black"
-                disabled={liquidityRangeType !== "custom" || mode === "existing"}
+                className="border-b border-white bg-black text-2xs md:text-base"
+                disabled={
+                  liquidityRangeType !== "custom" || mode === "existing"
+                }
                 value={priceLower}
                 onChange={(e) => setPriceLower(e.target.value, token0.decimals)}
               />
               <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
-                <Token className="invert size-[12px]" /> fUSDC per {token0.name}
+                <Token className="size-[12px] invert" /> fUSDC per {token0.name}
               </div>
             </div>
 
             <div className="flex flex-col">
               <div className="text-3xs text-gray-2 md:text-2xs">High Price</div>
               <Input
-                className="border-b border-white text-2xs md:text-base bg-black"
-                disabled={liquidityRangeType !== "custom" || mode === "existing"}
+                className="border-b border-white bg-black text-2xs md:text-base"
+                disabled={
+                  liquidityRangeType !== "custom" || mode === "existing"
+                }
                 value={priceUpper}
                 onChange={(e) => setPriceUpper(e.target.value, token0.decimals)}
               />
               <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
-                <Token className="invert size-[12px]" /> fUSDC per {token0.name}
+                <Token className="size-[12px] invert" /> fUSDC per {token0.name}
               </div>
             </div>
           </div>
 
-          {showLiquidityVisualiser && <div className="mt-[22px]">
-            <div className="text-3xs text-gray-2 md:text-2xs">Visualiser</div>
-            <ReactECharts
-              className="mt-1"
-              opts={{
-                height: 44,
-              }}
-              style={{
-                height: 44,
-              }}
-              ref={chartRef}
-              onChartReady={(chart) => {
-                if (liquidityRangeType === "full-range") {
-                  chart.dispatchAction({
-                    type: "brush",
-                    areas: [
-                      {
-                        brushType: "lineX",
-                        coordRange: [5, 25],
-                        xAxisIndex: 0,
-                      },
-                    ],
-                  });
-                }
-              }}
-              option={chartOptions}
-            />
+          {showLiquidityVisualiser && (
+            <div className="mt-[22px]">
+              <div className="text-3xs text-gray-2 md:text-2xs">Visualiser</div>
+              <ReactECharts
+                className="mt-1"
+                opts={{
+                  height: 44,
+                }}
+                style={{
+                  height: 44,
+                }}
+                ref={chartRef}
+                onChartReady={(chart) => {
+                  if (liquidityRangeType === "full-range") {
+                    chart.dispatchAction({
+                      type: "brush",
+                      areas: [
+                        {
+                          brushType: "lineX",
+                          coordRange: [5, 25],
+                          xAxisIndex: 0,
+                        },
+                      ],
+                    });
+                  }
+                }}
+                option={chartOptions}
+              />
 
-            <div className="mt-[16px] flex flex-row justify-around text-4xs md:text-2xs">
-              <div className="flex flex-row items-center gap-1">
-                <SelectedRange /> Selected Range
-              </div>
-              <div className="flex flex-row items-center gap-1">
-                <CurrentPrice /> Current Price
-              </div>
-              <div className="flex flex-row items-center gap-1">
-                <LiquidityDistribution /> Liquidity Distribution
+              <div className="mt-[16px] flex flex-row justify-around text-4xs md:text-2xs">
+                <div className="flex flex-row items-center gap-1">
+                  <SelectedRange /> Selected Range
+                </div>
+                <div className="flex flex-row items-center gap-1">
+                  <CurrentPrice /> Current Price
+                </div>
+                <div className="flex flex-row items-center gap-1">
+                  <LiquidityDistribution /> Liquidity Distribution
+                </div>
               </div>
             </div>
-          </div>}
+          )}
         </div>
 
         <div className="mt-[21px] flex w-[318px] flex-row justify-end md:w-[392px]">
@@ -1090,7 +1150,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         </div>
 
         <div className="mt-[20px] hidden md:inline-flex md:w-[392px]">
-          {address ?
+          {address ? (
             isCorrectChain ? (
               <Button
                 className="w-full"
@@ -1103,18 +1163,17 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               <Button
                 className="w-full"
                 variant={"destructiveBorder"}
-                onClick={() => open({ view: 'Networks' })}
+                onClick={() => open({ view: "Networks" })}
                 disabled={!token0Amount}
               >
                 Wrong Network
               </Button>
             )
-            :
-            (
-              <Button className={"w-full"} onClick={() => open()}>
-                Connect Wallet
-              </Button>
-            )}
+          ) : (
+            <Button className={"w-full"} onClick={() => open()}>
+              Connect Wallet
+            </Button>
+          )}
         </div>
       </motion.div>
     </div>

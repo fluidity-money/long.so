@@ -19,7 +19,7 @@ export interface Segment<T extends string> {
   label: React.ReactNode;
   value: T;
   ref: React.MutableRefObject<any>;
-  disabled?: boolean
+  disabled?: boolean;
 }
 
 export interface SegmentedControlProps<T extends string>
@@ -84,9 +84,9 @@ const SegmentedControl = <T extends string>({
               onChange={() => onInputChange(item.value, i)}
               checked={i === activeIndex}
               name={name}
-              className={
-                cn("cursor-pointer disabled:cursor-not-allowed absolute inset-0 m-0 size-full opacity-0")
-              }
+              className={cn(
+                "absolute inset-0 m-0 size-full cursor-pointer opacity-0 disabled:cursor-not-allowed",
+              )}
             />
             <label
               id={`${name}-${item.value}`}

@@ -74,7 +74,7 @@ export function SelectPrimeAssetTable<TData, TValue>({
     },
     state: {
       globalFilter,
-      columnVisibility
+      columnVisibility,
     },
     getCoreRowModel: getCoreRowModel(),
     globalFilterFn: fuzzyFilter,
@@ -115,9 +115,9 @@ export function SelectPrimeAssetTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}
@@ -130,25 +130,31 @@ export function SelectPrimeAssetTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="border-b-0 cursor-pointer"
+                  className="cursor-pointer border-b-0"
                   onClick={() => {
                     // assume the first token is always the original
-                    const [token0] = row.original.tokens
-                    setToken0(token0)
+                    const [token0] = row.original.tokens;
+                    setToken0(token0);
                     setToken1(fUSDC);
                     router.push(`/stake/pool/create?id=${token0.address}`);
                   }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="p-0 py-[4px] text-2xs">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>
