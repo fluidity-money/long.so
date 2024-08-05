@@ -321,8 +321,17 @@ impl Pools {
 
         match swapped {
             Ok((amount_0, amount_1, _)) => {
+                // if zero_for_one, send them token1 and take token0
+                let (give_token, give_amount) = match zero_for_one {
+                    true => (FUSDC_ADDR, amount_1),
+                    false => (pool, amount_0),
+                };
+
+                erc20::give(give_token, give_amount.abs_neg()?)?;
+
                 // we always want the token that was taken from the pool, so it's always negative
                 let quote_amount = if zero_for_one { -amount_1 } else { -amount_0 };
+
                 let revert = erc20::revert_from_msg(&quote_amount.to_dec_string());
                 Err(revert)
             }
@@ -1866,6 +1875,8 @@ mod test {
 
     #[test]
     fn test_0f08c379a_alex_2() {
+        // This test should revert since we don't have balance to handle what it's asking - correct behaviour.
+
         //curl -d '{"jsonrpc":"2.0","id":238,"method":"eth_call","params":[{"data":"0x00000000000000000000000000000000de104342b32bca03ec995f999181f7cf1ffc04d70000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000174876e800ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","from":"0xFEb6034FC7dF27dF18a3a6baD5Fb94C0D3dCb6d5","to":"0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1"},"0x6b3ea8"]}' https://testnet-rpc.superposition.so
         //cast call -r https://testnet-rpc.superposition.so --block 7028392 0xA8EA92c819463EFbEdDFB670FEfC881A480f0115 'balanceOf(address)(uint256)' 0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1
         //cast call -r https://testnet-rpc.superposition.so --block 7028392 0xde104342B32BCa03ec995f999181f7Cf1fFc04d7 'balanceOf(address)(uint256)' 0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1
@@ -1899,7 +1910,10 @@ mod test {
                 "0x0531c08c13d7e1cc22a0194c3aa9402a78f465e53644da5608e58e4d6c2461c0" => "0x0000000000000000000000000000000000000000000632719ccbf4e4387b6b44",
             }),
             None,
-            None,
+            Some(hashmap! {
+                address!("A8EA92c819463EFbEdDFB670FEfC881A480f0115") => U256::from_limbs([877426729983, 0, 0, 0]),
+                address!("de104342B32BCa03ec995f999181f7Cf1fFc04d7") => U256::from_limbs([82780218574, 0, 0, 0])
+            }),
             |contract| -> Result<(), Vec<u8>> {
                  let token = address!("de104342b32bca03ec995f999181f7cf1ffc04d7");
                  let amount_in_ui = I256::from_limbs([100000000000, 0, 0, 0]);
@@ -1912,6 +1926,6 @@ mod test {
                  eprintln!("amount 0 delta: {}, amount 1 out: {}, price_before: {}, price_after: {}", amount_0_delta, amount_1_out, price_before, price_after);
                  Ok(())
             },
-        ).unwrap();
+        ).unwrap_err();
     }
 }
