@@ -190,7 +190,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   // useSimulateContract throws if connector.account is not defined
   // so we must check if it exists or use a dummy address for sqrtPriceX96
   const { data: connector } = useConnectorClient()
-  const simulateAccount = connector?.account ?? "0x0000000000000000000000000000000000000000";
+  const simulateAccount = connector?.account ?? "0x1111111111111111111111111111111111111111";
 
   // Price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({

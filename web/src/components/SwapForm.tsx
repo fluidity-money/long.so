@@ -139,7 +139,7 @@ export const SwapForm = () => {
   // useSimulateContract throws if connector.account is not defined
   // so we must check if it exists or use a dummy address for sqrtPriceX96 and quote/quote2
   const { data: connector } = useConnectorClient();
-  const simulateAccount = connector?.account ?? "0x0000000000000000000000000000000000000000";
+  const simulateAccount = connector?.account ?? "0x1111111111111111111111111111111111111111";
 
   // price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
