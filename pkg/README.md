@@ -34,7 +34,7 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 | Admin implementation           | 0x9c9e3ead905fe5407feffb22d74fe68f0af98a45 |
 
 
-#### Useful testing token deployments
+##### Useful testing token deployments
 
 |       Deployment name     |              Deployment address            |
 |---------------------------|--------------------------------------------|
@@ -94,7 +94,7 @@ the appropriate error in this table:
 If more bytes are in the error, then the issue was produced by the ERC20 token. Convert
 any error types to their selector form to see.
 
-##### Access graph
+### Access graph
 
 A publicly available graph for Longtail is available. It includes
 documentation. [https://testnet-graph.long.so](https://testnet-graph.long.so).
@@ -111,14 +111,14 @@ the addresses of the swap router, and the admin address, at compile-time.
 
 So these variables must set at compile-time, like so:
 
-### Build variables
+#### Build variables
 
 |           Name              |                   Description                 |
 |-----------------------------|---------------------------------------------- |
 | `FLU_SEAWATER_PERMIT2_ADDR` | Uniswap Permit2 router                        |
 | `FLU_SEAWATER_FUSDC_ADDR`   | USDC Super Asset to route every trade through |
 
-### Build dependencies
+#### Build dependencies
 
 |           Name          |                        Source                        |
 |-------------------------|------------------------------------------------------|
@@ -178,15 +178,15 @@ using a tracer on the chain the transaciton took place, then examining the stora
 that were accessed (perhaps by looking at `SLOAD`s), and setting it explicitly with the
 macro.
 
-## Deployment
+### Deployment
 
 You can deploy the contracts using the `deploy.sh` script.
 
-### Test deployments
+#### Test deployments
 
 Deployments on a local node can be done with `./test-deploy.sh` for simplicity.
 
-### Deployment variables
+#### Deployment variables
 
 |           Name            |                                             Description                                             |
 |---------------------------|-----------------------------------------------------------------------------------------------------|
