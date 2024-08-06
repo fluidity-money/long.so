@@ -41,6 +41,15 @@ export const FaucetDropdown = () => {
           <a
             rel="noopener noreferrer"
             target="_blank"
+            href="https://wspn.long.so/"
+          >
+            <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
+              Wrap SPN
+            </DropdownMenu.Item>
+          </a>
+          <a
+            rel="noopener noreferrer"
+            target="_blank"
             href="https://faucet.superposition.so"
           >
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
