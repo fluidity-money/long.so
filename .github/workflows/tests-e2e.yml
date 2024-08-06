@@ -49,7 +49,7 @@ jobs:
           retention-days: 30
 
       - name: Upload coverage reports to Codecov
-        if: ${{ !startsWith(github.ref_name, 'dependabot') }}
+        if: ${{ !startsWith(github.head_ref, 'dependabot') }}
         uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true 
