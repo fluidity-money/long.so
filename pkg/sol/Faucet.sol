@@ -54,7 +54,7 @@ contract Faucet is IFaucet {
             if (gasTokenAmount > 0) {
                 uint256 gas = gasTokenAmount;
                 if (isStaker) gas *= 5;
-                payable(recipient).transfer(gas);
+                bool _rc = payable(recipient).send(gas);
             }
         }
     }

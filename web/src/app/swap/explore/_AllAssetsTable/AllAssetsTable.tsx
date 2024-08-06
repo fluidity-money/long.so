@@ -84,7 +84,7 @@ export function AllAssetsTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
   });
 
-  const { token0, token1, setToken1, setToken0 } = useSwapStore();
+  const { token0, token1, setToken1, setToken0, flipTokens } = useSwapStore();
 
   const router = useRouter();
 
@@ -140,9 +140,9 @@ export function AllAssetsTable<TData, TValue>({
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 );
               })}
@@ -157,12 +157,16 @@ export function AllAssetsTable<TData, TValue>({
                 data-state={row.getIsSelected() && "selected"}
                 className=" cursor-pointer border-b-0 text-[10px] hover:bg-black md:text-xs"
                 onClick={() => {
-                  const { original: { token: rowToken } } = row
-                  const { address } = rowToken
-                  if (token === "0" && address !== token1.address) {
-                    setToken0(rowToken);
-                  } else if (token === "1" && address !== token0.address) {
-                    setToken1(rowToken);
+                  const {
+                    original: { token: rowToken },
+                  } = row;
+                  const { address } = rowToken;
+                  if (token === "0") {
+                    if (address === token1.address) flipTokens();
+                    else setToken0(rowToken);
+                  } else if (token === "1") {
+                    if (address === token0.address) flipTokens();
+                    else setToken1(rowToken);
                   }
                   router.back();
                 }}

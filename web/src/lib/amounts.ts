@@ -1,17 +1,17 @@
 // a formatted amount is a human-readable value, such as 1.445 or 20
 // a token amount is a raw amount scaled by a token's decimals, such as 1445000 or 20000000
 
-import { getSqrtRatioAtTick, sqrtPriceX96ToPrice } from "./math"
-import { usdFormat } from "./usdFormat"
+import { getSqrtRatioAtTick, sqrtPriceX96ToPrice } from "./math";
+import { usdFormat } from "./usdFormat";
 
 /**
- * @description convert a bigint formatted amount to a token amount 
+ * @description convert a bigint formatted amount to a token amount
  * @param amount - formatted amount
  * @param decimals - number of token decimals
  * @returns raw token amount
  */
 const getTokenAmountFromFormatted = (amount: bigint, decimals: number) =>
-  amount * BigInt(10 ** decimals)
+  amount * BigInt(10 ** decimals);
 
 /**
  * @description format a number amount to at most the given decimals
@@ -23,7 +23,7 @@ const getTokenAmountFromFormatted = (amount: bigint, decimals: number) =>
  * @example 1.0, 6 -> 1
  */
 const snapAmountToDecimals = (amount: number, decimals: number = 6): number =>
-  Number(amount.toFixed(decimals))
+  Number(amount.toFixed(decimals));
 
 /**
  * @description convert a token amount to a formatted amount string
@@ -31,27 +31,28 @@ const snapAmountToDecimals = (amount: number, decimals: number = 6): number =>
  * @param decimals - number of token decimals
  * @returns a formatted amount string
  */
-const getFormattedStringFromTokenAmount = (amount: string, decimals: number) => {
+const getFormattedStringFromTokenAmount = (
+  amount: string,
+  decimals: number,
+) => {
   // slice around potential decimal place
-  const a = amount.slice(0, -decimals)
-  let b = amount.slice(-decimals)
+  const a = amount.slice(0, -decimals);
+  let b = amount.slice(-decimals);
 
   // if b is only 0s, amount is either 0 or a
   // if 0, a is '' => 0
   // if a, b is 000000 => a
-  if (/^0+$/.test(b))
-    return a || b
+  if (/^0+$/.test(b)) return a || b;
 
   // trim trailing zeros from decimal part
-  b = b.replace(/0+$/, '')
+  b = b.replace(/0+$/, "");
 
   // number has a whole part
-  if (amount.length > decimals)
-    return a + '.' + b
+  if (amount.length > decimals) return a + "." + b;
 
   // number is a decimal, pad with zeros
-  return '0.' + '0'.repeat(decimals - amount.length) + b
-}
+  return "0." + "0".repeat(decimals - amount.length) + b;
+};
 
 /**
  * @description convert a formatted amount string to a raw token amount
@@ -59,25 +60,30 @@ const getFormattedStringFromTokenAmount = (amount: string, decimals: number) => 
  * @param decimals - number of token decimals
  * @returns the raw token amount
  */
-const getTokenAmountFromFormattedString = (amount: string, decimals: number): bigint => {
+const getTokenAmountFromFormattedString = (
+  amount: string,
+  decimals: number,
+): bigint => {
   // assume containing e indicates an exponential value
-  if (amount.includes('e')) {
-    return BigInt(Number(amount).toLocaleString('fullwide', { useGrouping: false }))
+  if (amount.includes("e")) {
+    return BigInt(
+      Number(amount).toLocaleString("fullwide", { useGrouping: false }),
+    );
   }
-  const [whole, dec] = amount.split('.')
+  const [whole, dec] = amount.split(".");
 
   // covert the whole portion to a token amount
-  const wholeBig = getTokenAmountFromFormatted(BigInt(whole || 0), decimals)
+  const wholeBig = getTokenAmountFromFormatted(BigInt(whole || 0), decimals);
 
   if (dec === undefined) {
-    return wholeBig
+    return wholeBig;
   }
 
   // convert the decimal portion to a token amount
-  const decimalsBig = BigInt(dec) * BigInt(10 ** (decimals - dec.length))
+  const decimalsBig = BigInt(dec) * BigInt(10 ** (decimals - dec.length));
 
-  return wholeBig + decimalsBig
-}
+  return wholeBig + decimalsBig;
+};
 
 /**
  * @description scale a formatted amount string by the price of the pool
@@ -86,19 +92,26 @@ const getTokenAmountFromFormattedString = (amount: string, decimals: number): bi
  * @param decimalsFusdc - the decimals of fUSDC
  * @returns the scaled price amount in USD
  */
-const getFormattedPriceFromAmount = (amount: string, price: string | bigint, decimalsFusdc: number): number =>
-  Number(amount) * Number(price) / 10 ** decimalsFusdc
+const getFormattedPriceFromAmount = (
+  amount: string,
+  price: string | bigint,
+  decimalsFusdc: number,
+): number => (Number(amount) * Number(price)) / 10 ** decimalsFusdc;
 
 // convert a tick to a formatted price, scaled by decimals
-const getFormattedPriceFromTick = (tick: number, decimals0: number, decimals1: number) => {
-  const ratio = getSqrtRatioAtTick(BigInt(tick))
-  const priceUnscaled = Number(sqrtPriceX96ToPrice(ratio, decimals0))
+const getFormattedPriceFromTick = (
+  tick: number,
+  decimals0: number,
+  decimals1: number,
+) => {
+  const ratio = getSqrtRatioAtTick(BigInt(tick));
+  const priceUnscaled = Number(sqrtPriceX96ToPrice(ratio, decimals0));
   // adjust for decimals
-  const scale = 10 ** -(decimals1)
-  const formattedPrice = usdFormat(priceUnscaled * scale)
+  const scale = 10 ** -decimals1;
+  const formattedPrice = usdFormat(priceUnscaled * scale);
   // display '∞ ' if the price is greater than $10e18 after scaling
-  return formattedPrice.length > 20 ? '∞ ' : formattedPrice
-}
+  return formattedPrice.length > 20 ? "∞ " : formattedPrice;
+};
 
 export {
   getFormattedStringFromTokenAmount,
@@ -106,5 +119,4 @@ export {
   getTokenAmountFromFormattedString,
   getFormattedPriceFromAmount,
   getFormattedPriceFromTick,
-}
-
+};

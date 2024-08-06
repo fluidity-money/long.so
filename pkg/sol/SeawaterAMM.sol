@@ -2,6 +2,7 @@
 pragma solidity 0.8.16;
 
 import "./ISeawaterExecutors.sol";
+
 import "./ISeawaterAMM.sol";
 
 // slots to store proxy data in
@@ -155,7 +156,7 @@ contract SeawaterAMM is ISeawaterAMM {
     // admin functions
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
-    function createPool(
+    function createPoolD650E2D0(
         address /* token */,
         uint256 /* sqrtPriceX96 */,
         uint32 /* fee */,
@@ -166,7 +167,7 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
-    function collectProtocol(
+    function collectProtocolE4E70DA4(
         address /* pool */,
         uint128 /* amount0 */,
         uint128 /* amount1 */
@@ -175,7 +176,7 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
-    function setPoolEnabled(
+    function enablePool579DA658(
         address /* pool */,
         bool /* enabled */
     ) external {
@@ -185,23 +186,23 @@ contract SeawaterAMM is ISeawaterAMM {
     // swap functions
 
     /// @inheritdoc ISeawaterExecutorSwap
-    function swap(address /* pool */, bool /* zeroForOne */, int256 /* amount */, uint256 /* priceLimit */) external returns (int256, int256) {
+    function swap904369BE(address /* pool */, bool /* zeroForOne */, int256 /* amount */, uint256 /* priceLimit */) external returns (int256, int256) {
         directDelegate(_getExecutorSwap());
     }
 
     /// @inheritdoc ISeawaterExecutorQuote
-    function quote(address /* pool */, bool /* zeroForOne */, int256 /* amount */, uint256 /* priceLimit */) external {
+    function quote72E2ADE7(address /* pool */, bool /* zeroForOne */, int256 /* amount */, uint256 /* priceLimit */) external {
         directDelegate(_getExecutorQuote());
     }
 
 
     /// @inheritdoc ISeawaterExecutorQuote
-    function quote2(address /* to */, address /* from */, uint256 /* amount */, uint256 /* minOut*/) external {
+    function quote2CD06B86E(address /* to */, address /* from */, uint256 /* amount */, uint256 /* minOut*/) external {
         directDelegate(_getExecutorQuote());
     }
 
     /// @inheritdoc ISeawaterExecutorSwapPermit2
-    function swapPermit2(
+    function swapPermit2EE84AD91(
         address /* pool */,
         bool /* zeroForOne */,
         int256 /* amount */,
@@ -215,12 +216,12 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorSwap
-    function swap2ExactIn(address /* tokenA */, address /* tokenB */, uint256 /* amountIn */, uint256 /* minAmountOut */) external returns (uint256, uint256) {
+    function swap2ExactIn41203F1D(address /* tokenA */, address /* tokenB */, uint256 /* amountIn */, uint256 /* minAmountOut */) external returns (uint256, uint256) {
         directDelegate(_getExecutorSwap());
     }
 
     /// @inheritdoc ISeawaterExecutorSwapPermit2
-    function swap2ExactInPermit2(
+    function swap2ExactInPermit236B2FDD8(
         address /* from */,
         address /* to */,
         uint256 /* amount */,
@@ -233,9 +234,9 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterAMM
-    function swapIn(address token, uint256 amountIn, uint256 minOut) external returns (int256, int256) {
+    function swapIn32502CA71(address token, uint256 amountIn, uint256 minOut) external returns (int256, int256) {
         (bool success, bytes memory data) = _getExecutorSwap().delegatecall(abi.encodeCall(
-            ISeawaterExecutorSwap.swap,
+            ISeawaterExecutorSwap.swap904369BE,
             (
                 token,
                 true,
@@ -252,9 +253,9 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterAMM
-    function swapInPermit2(address token, uint256 amountIn, uint256 minOut, uint256 nonce, uint256 deadline, uint256 maxAmount, bytes memory sig) external returns (int256, int256) {
+    function swapInPermit2CEAAB576(address token, uint256 amountIn, uint256 minOut, uint256 nonce, uint256 deadline, uint256 maxAmount, bytes memory sig) external returns (int256, int256) {
         (bool success, bytes memory data) = _getExecutorSwapPermit2().delegatecall(abi.encodeCall(
-            ISeawaterExecutorSwapPermit2.swapPermit2,
+            ISeawaterExecutorSwapPermit2.swapPermit2EE84AD91,
             (
                 token,
                 true,
@@ -275,9 +276,9 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterAMM
-    function swapOut(address token, uint256 amountIn, uint256 minOut) external returns (int256, int256) {
+    function swapOut5E08A399(address token, uint256 amountIn, uint256 minOut) external returns (int256, int256) {
         (bool success, bytes memory data) = _getExecutorSwap().delegatecall(abi.encodeCall(
-            ISeawaterExecutorSwap.swap,
+            ISeawaterExecutorSwap.swap904369BE,
             (
                 token,
                 false,
@@ -293,9 +294,9 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterAMM
-    function swapOutPermit2(address token, uint256 amountIn, uint256 minOut, uint256 nonce, uint256 deadline, uint256 maxAmount, bytes memory sig) external returns (int256, int256) {
+    function swapOutPermit23273373B(address token, uint256 amountIn, uint256 minOut, uint256 nonce, uint256 deadline, uint256 maxAmount, bytes memory sig) external returns (int256, int256) {
         (bool success, bytes memory data) = _getExecutorSwapPermit2().delegatecall(abi.encodeCall(
-            ISeawaterExecutorSwapPermit2.swapPermit2,
+            ISeawaterExecutorSwapPermit2.swapPermit2EE84AD91,
             (
                 token,
                 false,
@@ -317,78 +318,76 @@ contract SeawaterAMM is ISeawaterAMM {
     // position functions
 
     /// @inheritdoc ISeawaterExecutorPosition
-    function mintPosition(address /* token */, int32 /* lower */, int32 /* upper */) external {
+    function mintPositionBC5B086D(address /* token */, int32 /* lower */, int32 /* upper */) external returns (uint256 /* id */) {
         directDelegate(_getExecutorPosition());
     }
 
     /// @inheritdoc ISeawaterExecutorPosition
-    function burnPosition(uint256 /* id */) external {
+    function burnPositionAE401070(uint256 /* id */) external {
         directDelegate(_getExecutorPosition());
     }
 
     /// @inheritdoc ISeawaterExecutorPosition
-    function positionOwner(uint256 /* id */) external returns (address) {
+    function positionOwnerD7878480(uint256 /* id */) external returns (address) {
         directDelegate(_getExecutorPosition());
     }
 
     // called by the position manager contract!!
     /// @inheritdoc ISeawaterExecutorPosition
-    function transferPosition(uint256 /* id */, address /* from */, address /* to */) external {
+    function transferPositionEEC7A3CD(uint256 /* id */, address /* from */, address /* to */) external {
         directDelegate(_getExecutorPosition());
     }
 
     /// @inheritdoc ISeawaterExecutorPosition
-    function positionBalance(address /* user */) external returns (uint256) {
+    function positionBalance4F32C7DB(address /* user */) external returns (uint256) {
         directDelegate(_getExecutorPosition());
     }
 
     /// @inheritdoc ISeawaterExecutorPosition
-    function positionLiquidity(address /* pool */, uint256 /* id */) external returns (uint128) {
+    function positionLiquidity8D11C045(address /* pool */, uint256 /* id */) external returns (uint128) {
         directDelegate(_getExecutorPosition());
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
-    function sqrtPriceX96(address /* pool */) external returns (uint256) {
+    function sqrtPriceX967B8F5FC5(address /* pool */) external returns (uint256) {
         directDelegate(_getExecutorAdmin());
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
-    function feesOwed(address /* pool */, uint256 /* position */) external returns (uint128, uint128) {
+    function feesOwed22F28DBD(address /* pool */, uint256 /* position */) external returns (uint128, uint128) {
         directDelegate(_getExecutorAdmin());
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
-    function curTick(address /* pool */) external returns (int32) {
+    function curTick181C6FD9(address /* pool */) external returns (int32) {
         directDelegate(_getExecutorAdmin());
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
-    function tickSpacing(address /* pool */) external returns (uint8) {
+    function tickSpacing653FE28F(address /* pool */) external returns (uint8) {
         directDelegate(_getExecutorAdmin());
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
-    function feeGrowthGlobal0(address /* pool */) external returns (uint256) {
+    function feeGrowthGlobal038B5665B(address /* pool */) external returns (uint256) {
         directDelegate(_getExecutorAdmin());
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
-    function feeGrowthGlobal1(address /* pool */) external returns (uint256) {
+    function feeGrowthGlobal14EACF1BE(address /* pool */) external returns (uint256) {
         directDelegate(_getExecutorAdmin());
     }
 
     /// @inheritdoc ISeawaterExecutorPosition
-    function collect(
-        address /* pool */,
-        uint256 /* id */,
-        uint128 /* amount0 */,
-        uint128 /* amount1 */
-    ) external returns (uint128, uint128) {
+    function collect7F21947C(
+        address[] memory /* pools */,
+        uint256[] memory /* ids */
+    ) external returns (CollectResult[] memory) {
         directDelegate(_getExecutorPosition());
     }
 
     /// @inheritdoc ISeawaterExecutorUpdatePosition
-    function updatePosition(
+    function updatePositionC7F1F740(
         address /* pool */,
         uint256 /* id */,
         int128 /* delta */
@@ -397,26 +396,63 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorUpdatePosition
-    function updatePositionPermit2(
+    function incrPositionC3AC7CAA(
         address /* pool */,
         uint256 /* id */,
-        int128 /* delta */,
+        uint256 /* amount0Min */,
+        uint256 /* amount1Min */,
+        uint256 /* amount0Desired */,
+        uint256 /* amount1Desired */
+    ) external returns (uint256, uint256) {
+        directDelegate(_getExecutorUpdatePosition());
+    }
+
+    /// @inheritdoc ISeawaterExecutorUpdatePosition
+    function decrPosition09293696(
+        uint256 /* id */,
+        uint256 /* amount0Min */,
+        uint256 /* amount1Min */,
+        uint256 /* amount0Max */,
+        uint256 /* amount1Max */
+    ) external returns (uint256, uint256) {
+        directDelegate(_getExecutorUpdatePosition());
+    }
+
+    /// @inheritdoc ISeawaterExecutorUpdatePosition
+    function incrPositionPermit25468326E(
+        address /* token */,
+        uint256 /* id */,
+        uint256 /* amount0Min */,
+        uint256 /* amount1Min */,
         uint256 /* nonce0 */,
         uint256 /* deadline0 */,
-        uint256 /* maxAmount0 */,
+        uint256 /* amount0Max */,
         bytes memory /* sig0 */,
         uint256 /* nonce1 */,
         uint256 /* deadline1 */,
-        uint256 /* maxAmount1 */,
+        uint256 /* amount1Max */,
         bytes memory /* sig1 */
-    ) external returns (int256, int256) {
+    ) external returns (uint256, uint256) {
         directDelegate(_getExecutorUpdatePosition());
     }
 
     // fallback!
     fallback() external {
-        // this will revert if the fallback executor is not set!
-        directDelegate(_getExecutorFallback());
+        require(msg.data.length > 3);
+        require(msg.data[0] == 0);
+        // swaps
+        if (uint8(msg.data[2]) == 0) directDelegate(_getExecutorSwap());
+        // update positions
+        else if (uint8(msg.data[2]) == 1) directDelegate(_getExecutorUpdatePosition());
+        // positions
+        else if (uint8(msg.data[2]) == 2) directDelegate(_getExecutorPosition());
+        // admin
+        else if (uint8(msg.data[2]) == 3) directDelegate(_getExecutorAdmin());
+        // swap permit 2
+        else if (uint8(msg.data[2]) == 4) directDelegate(_getExecutorSwapPermit2());
+        // quotes
+        else if (uint8(msg.data[2]) == 5) directDelegate(_getExecutorQuote());
+        else directDelegate(_getExecutorFallback());
     }
 
     // internal functions

@@ -6,16 +6,16 @@ require (
 	github.com/99designs/gqlgen v0.17.49
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
-	github.com/ethereum/go-ethereum v1.14.5
+	github.com/ethereum/go-ethereum v1.14.7
 	github.com/getsentry/sentry-go v0.28.1
 	github.com/lib/pq v1.10.9
 	github.com/orandin/slog-gorm v1.3.2
-	github.com/pelletier/go-toml/v2 v2.0.8
-	github.com/samber/slog-sentry/v2 v2.5.0
+	github.com/pelletier/go-toml/v2 v2.2.2
+	github.com/samber/slog-sentry/v2 v2.7.0
 	github.com/stretchr/testify v1.9.0
 	github.com/vektah/gqlparser/v2 v2.5.16
 	gorm.io/driver/postgres v1.5.9
-	gorm.io/gorm v1.25.10
+	gorm.io/gorm v1.25.11
 )
 
 require (
@@ -36,7 +36,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
-	github.com/holiman/uint256 v1.2.4 // indirect
+	github.com/holiman/uint256 v1.3.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
 	github.com/jackc/pgx/v5 v5.5.5 // indirect
@@ -47,8 +47,8 @@ require (
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/samber/lo v1.38.1 // indirect
-	github.com/samber/slog-common v0.16.0 // indirect
+	github.com/samber/lo v1.44.0 // indirect
+	github.com/samber/slog-common v0.17.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
 	github.com/supranational/blst v0.3.11 // indirect

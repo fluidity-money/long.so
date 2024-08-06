@@ -6,9 +6,12 @@ import {
   getTickAtSqrtRatio,
   encodeSqrtPrice,
   getTokenAmountsNumeric,
-  getSqrtRatioAtTick
+  getSqrtRatioAtTick,
 } from "@/lib/math";
-import { getFormattedStringFromTokenAmount, getTokenAmountFromFormattedString } from "@/lib/amounts";
+import {
+  getFormattedStringFromTokenAmount,
+  getTokenAmountFromFormattedString,
+} from "@/lib/amounts";
 
 interface StakeStore {
   multiSingleToken: "multi" | "single";
@@ -68,44 +71,58 @@ export const useStakeStore = create<StakeStore>((set) => ({
   token1Amount: "",
   token0AmountRaw: "",
   token1AmountRaw: "",
-  setToken0AmountRaw: (amountRaw: string) => set(({ token0 }) => ({
-    token0AmountRaw: amountRaw,
-    token0Amount: getFormattedStringFromTokenAmount(amountRaw, token0.decimals),
-  })),
-  setToken1AmountRaw: (amountRaw: string) => set(({ token1 }) => ({
-    token1AmountRaw: amountRaw,
-    token1Amount: getFormattedStringFromTokenAmount(amountRaw, token1.decimals),
-  })),
+  setToken0AmountRaw: (amountRaw: string) =>
+    set(({ token0 }) => ({
+      token0AmountRaw: amountRaw,
+      token0Amount: getFormattedStringFromTokenAmount(
+        amountRaw,
+        token0.decimals,
+      ),
+    })),
+  setToken1AmountRaw: (amountRaw: string) =>
+    set(({ token1 }) => ({
+      token1AmountRaw: amountRaw,
+      token1Amount: getFormattedStringFromTokenAmount(
+        amountRaw,
+        token1.decimals,
+      ),
+    })),
 
   setToken0Amount: (amount, balanceRaw) => {
     set(({ token0, token0Amount, setToken0AmountRaw }) => {
-      const validNumber = !amount.includes(" ") && !isNaN(Number(amount)) || amount === "."
+      const validNumber =
+        (!amount.includes(" ") && !isNaN(Number(amount))) || amount === ".";
       // update display amount if `amount` is valid as a display number
-      if (!validNumber)
-        return { token0Amount }
+      if (!validNumber) return { token0Amount };
       try {
-        const amountRaw = getTokenAmountFromFormattedString(amount, token0.decimals)
+        const amountRaw = getTokenAmountFromFormattedString(
+          amount,
+          token0.decimals,
+        );
         // update raw amount if it doesn't exceed balance
         if (!balanceRaw || amountRaw <= BigInt(balanceRaw))
-          setToken0AmountRaw(amountRaw.toString())
-      } catch { }
-      return { token0Amount: amount }
-    })
+          setToken0AmountRaw(amountRaw.toString());
+      } catch {}
+      return { token0Amount: amount };
+    });
   },
   setToken1Amount: (amount, balanceRaw) => {
     set(({ token1, token1Amount, setToken1AmountRaw }) => {
-      const validNumber = !amount.includes(" ") && !isNaN(Number(amount)) || amount === "."
+      const validNumber =
+        (!amount.includes(" ") && !isNaN(Number(amount))) || amount === ".";
       // update display amount if `amount` is valid as a display number
-      if (!validNumber)
-        return { token1Amount }
+      if (!validNumber) return { token1Amount };
       try {
-        const amountRaw = getTokenAmountFromFormattedString(amount, token1.decimals)
+        const amountRaw = getTokenAmountFromFormattedString(
+          amount,
+          token1.decimals,
+        );
         // update raw amount if it doesn't exceed balance
         if (!balanceRaw || amountRaw <= BigInt(balanceRaw))
-          setToken1AmountRaw(amountRaw.toString())
-      } catch { }
-      return { token1Amount: amount }
-    })
+          setToken1AmountRaw(amountRaw.toString());
+      } catch {}
+      return { token1Amount: amount };
+    });
   },
 
   tickLower: MIN_TICK,
@@ -117,72 +134,73 @@ export const useStakeStore = create<StakeStore>((set) => ({
   delta: 0n,
   deltaDisplay: "0",
   setDelta: (liquidity, tick, max) => {
-    const validNumber = !liquidity.includes(" ") && !isNaN(Number(liquidity))
+    const validNumber = !liquidity.includes(" ") && !isNaN(Number(liquidity));
     // update display amount if `amount` is valid as a display number
-    if (!validNumber)
-      return
+    if (!validNumber) return;
     // always set the display value for input components
-    set({ deltaDisplay: liquidity })
+    set({ deltaDisplay: liquidity });
     set(({ tickLower, tickUpper, setToken0AmountRaw, setToken1AmountRaw }) => {
-      if (tickLower === undefined || tickUpper === undefined)
-        return {}
+      if (tickLower === undefined || tickUpper === undefined) return {};
       // try to derive the new delta and token amounts
       try {
-        const delta = BigInt(liquidity)
+        const delta = BigInt(liquidity);
         const [amount0, amount1] = getTokenAmountsNumeric(
           Number(delta),
           Number(getSqrtRatioAtTick(tick)),
           tickLower,
           tickUpper,
-        )
+        );
         if (!max || BigInt(liquidity) <= max) {
-          setToken0AmountRaw(amount0.toString())
-          setToken1AmountRaw(amount1.toString())
-          return { delta }
+          setToken0AmountRaw(amount0.toString());
+          setToken1AmountRaw(amount1.toString());
+          return { delta };
         }
-      } catch { }
-      return {}
-    })
+      } catch {}
+      return {};
+    });
   },
 
   priceLower: "0",
   priceUpper: "0",
 
   setPriceLower: (price, decimals) => {
-    const validNumber = !price.includes(" ") && !isNaN(Number(price)) || price === "."
+    const validNumber =
+      (!price.includes(" ") && !isNaN(Number(price))) || price === ".";
     // update display amount if `amount` is valid as a display number
-    if (!validNumber)
-      return
+    if (!validNumber) return;
     // Make a best effort to convert the number to a sqrt price, then to a tick.
-    const rawPrice = getTokenAmountFromFormattedString(price, fUSDC.decimals)
+    const rawPrice = getTokenAmountFromFormattedString(price, fUSDC.decimals);
     const priceN = Number(rawPrice);
     let tick = 0;
     try {
-      const newTick = getTickAtSqrtRatio(encodeSqrtPrice(priceN * 10 ** -decimals));
+      const newTick = getTickAtSqrtRatio(
+        encodeSqrtPrice(priceN * 10 ** -decimals),
+      );
       tick = newTick;
-    } catch { }
+    } catch {}
     set({
       tickLower: tick,
       priceLower: price,
     });
   },
   setPriceUpper: (price, decimals) => {
-    const validNumber = !price.includes(" ") && !isNaN(Number(price)) || price === "."
+    const validNumber =
+      (!price.includes(" ") && !isNaN(Number(price))) || price === ".";
     // update display amount if `amount` is valid as a display number
-    if (!validNumber)
-      return
+    if (!validNumber) return;
 
-    const rawPrice = getTokenAmountFromFormattedString(price, fUSDC.decimals)
+    const rawPrice = getTokenAmountFromFormattedString(price, fUSDC.decimals);
     const priceN = Number(rawPrice);
     let tick = 0;
     try {
-      const newTick = getTickAtSqrtRatio(encodeSqrtPrice(priceN * 10 ** -decimals));
+      const newTick = getTickAtSqrtRatio(
+        encodeSqrtPrice(priceN * 10 ** -decimals),
+      );
       tick = newTick;
-    } catch { }
+    } catch {}
     set({
       tickUpper: tick,
       priceUpper: price,
     });
   },
-}
-));
+}));

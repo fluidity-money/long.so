@@ -22,7 +22,10 @@ import Confirm from "@/components/sequence/Confirm";
 import { EnableSpending } from "@/components/sequence/EnableSpending";
 import { Fail } from "@/components/sequence/Fail";
 import { Success } from "@/components/sequence/Success";
-import { getFormattedPriceFromAmount, snapAmountToDecimals } from "@/lib/amounts";
+import {
+  getFormattedPriceFromAmount,
+  snapAmountToDecimals,
+} from "@/lib/amounts";
 import { fUSDC } from "@/config/tokens";
 import { RewardsBreakdown } from "./RewardsBreakdown";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
@@ -31,15 +34,14 @@ import { TokenIcon } from "./TokenIcon";
 export const ConfirmSwap = () => {
   const router = useRouter();
 
-  const showSwapBreakdown = useFeatureFlag("ui show swap breakdown")
+  const showSwapBreakdown = useFeatureFlag("ui show swap breakdown");
 
   const { address, chainId } = useAccount();
-  const expectedChainId = useChainId()
+  const expectedChainId = useChainId();
 
   useEffect(() => {
-    if (!address || chainId !== expectedChainId)
-      router.back()
-  }, [address, expectedChainId, chainId])
+    if (!address || chainId !== expectedChainId) router.back();
+  }, [address, expectedChainId, chainId]);
 
   const {
     token0,
@@ -50,20 +52,20 @@ export const ConfirmSwap = () => {
     token1Amount,
     setToken1Amount,
     gas,
-  } = useSwapStore()
+  } = useSwapStore();
 
   // price of the current pool
   const { data: token0SqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "sqrtPriceX96",
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
   });
 
   const { data: token1SqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "sqrtPriceX96",
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [token1.address],
   });
 
@@ -78,31 +80,31 @@ export const ConfirmSwap = () => {
       return {
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "swap",
+        functionName: "swap904369BE",
         args: [token1.address, false, BigInt(token0AmountRaw ?? 0), maxUint256],
-      } as const
+      } as const;
     } else if (token1.address === fUSDC.address) {
       return {
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "swap",
+        functionName: "swap904369BE",
         args: [token0.address, true, BigInt(token0AmountRaw ?? 0), maxUint256],
-      } as const
+      } as const;
     } else {
       // if both of the assets aren't fusdc, use swap2
       return {
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "swap2ExactIn",
+        functionName: "swap2ExactIn41203F1D",
         args: [
           token0.address,
           token1.address,
           BigInt(token0AmountRaw ?? 0),
           BigInt(0),
         ],
-      } as const
+      } as const;
     }
-  }, [isSwappingBaseAsset, token0AmountRaw, token0.address, token1.address])
+  }, [isSwappingBaseAsset, token0AmountRaw, token0.address, token1.address]);
 
   // set up write hooks
   const {
@@ -129,22 +131,29 @@ export const ConfirmSwap = () => {
     : 0n;
 
   const [token0AmountFloat, token1AmountFloat] = useMemo(() => {
-    const token1Float = parseFloat(token1Amount ?? "0")
-    if (token0Amount === "." || token0Amount === "")
-      return [0, token1Float]
+    const token1Float = parseFloat(token1Amount ?? "0");
+    if (token0Amount === "." || token0Amount === "") return [0, token1Float];
 
-    const token0Float = parseFloat(token0Amount ?? "0")
-    return [token0Float, token1Float]
-  }, [token0Amount, token1Amount])
+    const token0Float = parseFloat(token0Amount ?? "0");
+    return [token0Float, token1Float];
+  }, [token0Amount, token1Amount]);
 
   // a display amount representing the amount of token1 worth 1 token0 at the current exchange rate
   const token0Per1Token1 = useMemo(() => {
     if (isSwappingBaseAsset)
-      return snapAmountToDecimals(getFormattedPriceFromAmount("1", token1Price.toString(), fUSDC.decimals))
+      return snapAmountToDecimals(
+        getFormattedPriceFromAmount(
+          "1",
+          token1Price.toString(),
+          fUSDC.decimals,
+        ),
+      );
     if (isSwap1)
-      return snapAmountToDecimals(1 / Number(token0Price.toString()) * 10 ** fUSDC.decimals)
-    return snapAmountToDecimals(Number(token1Price) / Number(token0Price))
-  }, [isSwappingBaseAsset, isSwap1, token0Price, token1Price, token1])
+      return snapAmountToDecimals(
+        (1 / Number(token0Price.toString())) * 10 ** fUSDC.decimals,
+      );
+    return snapAmountToDecimals(Number(token1Price) / Number(token0Price));
+  }, [isSwappingBaseAsset, isSwap1, token0Price, token1Price, token1]);
 
   // if no token or no token amount redirect to the swap form
   useEffect(() => {
@@ -182,14 +191,13 @@ export const ConfirmSwap = () => {
   };
 
   const performSwap = useCallback(() => {
-
     writeContractSwap({
       ...swapOptions,
       // Typescript doesn't support strongly typing this with destructuring
       // https://github.com/microsoft/TypeScript/issues/46680
       // @ts-expect-error
-      args: swapOptions.args
-    })
+      args: swapOptions.args,
+    });
   }, [swapOptions, writeContractSwap]);
 
   const swapResult = useWaitForTransactionReceipt({
@@ -212,12 +220,14 @@ export const ConfirmSwap = () => {
   }
 
   if (isSwapPending || (swapData && !swapResult.data)) {
-    return <Confirm
-      text={"Swap"}
-      fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
-      toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
-      transactionHash={swapData}
-    />;
+    return (
+      <Confirm
+        text={"Swap"}
+        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+        transactionHash={swapData}
+      />
+    );
   }
 
   // success
@@ -259,9 +269,7 @@ export const ConfirmSwap = () => {
         className={cn("w-[317px] rounded-lg bg-black text-white md:w-[393px]")}
       >
         <div className="flex flex-row items-center justify-between p-[9px]">
-          <div className="p-[6px] text-3xs md:text-xs">
-            Swap Confirmation
-          </div>
+          <div className="p-[6px] text-3xs md:text-xs">Swap Confirmation</div>
           <Button
             size="esc"
             variant={"secondary"}
@@ -271,40 +279,67 @@ export const ConfirmSwap = () => {
           </Button>
         </div>
 
-        <div
-          className={cn("mt-[15px] pl-[21px]")}
-        >
-          <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">
-            Swap
-          </div>
+        <div className={cn("mt-[15px] pl-[21px]")}>
+          <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">Swap</div>
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
-            <TokenIcon src={token0.icon} className={"invert size-[24px]"} /> {snapAmountToDecimals(parseFloat(token0Amount ?? "0"))} {token0.symbol}
+            <TokenIcon src={token0.icon} className={"size-[24px] invert"} />{" "}
+            {snapAmountToDecimals(parseFloat(token0Amount ?? "0"))}{" "}
+            {token0.symbol}
           </div>
           <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">
-            = ${snapAmountToDecimals(token0.address === fUSDC.address ? token0AmountFloat : getFormattedPriceFromAmount(token0AmountFloat.toString(), token0Price, fUSDC.decimals))}</div>
-        </div>
-
-        <div
-          className={cn("mt-[23px] pl-[21px]")}
-        >
-          <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
-            <TokenIcon src={token1.icon} className={"invert size-[24px]"} /> {snapAmountToDecimals(parseFloat(token1Amount ?? "0"))} {token1.symbol}
-          </div>
-          <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">
-            = ${snapAmountToDecimals(token1.address === fUSDC.address ? token1AmountFloat : getFormattedPriceFromAmount(token1AmountFloat.toString(), token1Price, fUSDC.decimals))}
+            = $
+            {snapAmountToDecimals(
+              token0.address === fUSDC.address
+                ? token0AmountFloat
+                : getFormattedPriceFromAmount(
+                    token0AmountFloat.toString(),
+                    token0Price,
+                    fUSDC.decimals,
+                  ),
+            )}
           </div>
         </div>
 
-        <div
-          className={cn("px-[21px] mt-[29px] md:mt-[37px]")}
-        >
+        <div className={cn("mt-[23px] pl-[21px]")}>
+          <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
+            <TokenIcon src={token1.icon} className={"size-[24px] invert"} />{" "}
+            {snapAmountToDecimals(parseFloat(token1Amount ?? "0"))}{" "}
+            {token1.symbol}
+          </div>
+          <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">
+            = $
+            {snapAmountToDecimals(
+              token1.address === fUSDC.address
+                ? token1AmountFloat
+                : getFormattedPriceFromAmount(
+                    token1AmountFloat.toString(),
+                    token1Price,
+                    fUSDC.decimals,
+                  ),
+            )}
+          </div>
+        </div>
+
+        <div className={cn("mt-[29px] px-[21px] md:mt-[37px]")}>
           <div className="mt-[13px] flex flex-col gap-[5px] px-[4px] text-2xs">
             <div className="flex flex-row justify-between">
               <div>Rate</div>
               <div className="flex flex-row">
-                {`1 ${token1.symbol} = ${token0Per1Token1} ${token0.symbol}`}&nbsp;
+                {`1 ${token1.symbol} = ${token0Per1Token1} ${token0.symbol}`}
+                &nbsp;
                 <div className="text-2xs text-gray-2 md:text-xs">
-                  (${token1.address === fUSDC.address ? "1.00" : snapAmountToDecimals(getFormattedPriceFromAmount("1", token1Price, fUSDC.decimals), 2)})
+                  ($
+                  {token1.address === fUSDC.address
+                    ? "1.00"
+                    : snapAmountToDecimals(
+                        getFormattedPriceFromAmount(
+                          "1",
+                          token1Price,
+                          fUSDC.decimals,
+                        ),
+                        2,
+                      )}
+                  )
                 </div>
               </div>
             </div>

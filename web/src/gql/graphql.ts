@@ -1,19 +1,32 @@
 /* eslint-disable */
-import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+import { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/core";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
-export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+export type Exact<T extends { [key: string]: unknown }> = {
+  [K in keyof T]: T[K];
+};
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]?: Maybe<T[SubKey]>;
+};
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]: Maybe<T[SubKey]>;
+};
+export type MakeEmpty<
+  T extends { [key: string]: unknown },
+  K extends keyof T,
+> = { [_ in K]?: never };
+export type Incremental<T> =
+  | T
+  | {
+      [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never;
+    };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string; output: string; }
-  String: { input: string; output: string; }
-  Boolean: { input: boolean; output: boolean; }
-  Int: { input: number; output: number; }
-  Float: { input: number; output: number; }
+  ID: { input: string; output: string };
+  String: { input: string; output: string };
+  Boolean: { input: boolean; output: boolean };
+  Int: { input: number; output: number };
+  Float: { input: number; output: number };
 };
 
 /**
@@ -22,36 +35,36 @@ export type Scalars = {
  * Contains information relevant to making contract and UI display decisions.
  */
 export type Amount = {
-  __typename?: 'Amount';
+  __typename?: "Amount";
   /**
    * Decimals of the token that was traded. Available for simplicity, and for the backend's
    * interaction with the scaling of the number.
    */
-  decimals: Scalars['Int']['output'];
+  decimals: Scalars["Int"]["output"];
   /** Timestamp that this Amount was made available at. */
-  timestamp: Scalars['Int']['output'];
+  timestamp: Scalars["Int"]["output"];
   /**
    * Token that was traded as a part of this amount. This could be the base asset (fUSDC) or
    * the quote asset (token1).
    */
   token: Token;
   /** Floating point representation of the number converted by it's decimals. */
-  valueScaled: Scalars['String']['output'];
+  valueScaled: Scalars["String"]["output"];
   /** Hex representation of the unscaled number as it was available on-chain. */
-  valueUnscaled: Scalars['String']['output'];
+  valueUnscaled: Scalars["String"]["output"];
   /** USD representation of the underlying number, converted by the last price checkpoint. */
-  valueUsd: Scalars['String']['output'];
+  valueUsd: Scalars["String"]["output"];
 };
 
 /** Get swaps for a specific pool, set up to be more granular for caching. */
 export type GetSwaps = {
-  __typename?: 'GetSwaps';
+  __typename?: "GetSwaps";
   data: SeawaterSwaps;
 };
 
 /** Get swaps for user return type, set up to allow better control of caching. */
 export type GetSwapsForUser = {
-  __typename?: 'GetSwapsForUser';
+  __typename?: "GetSwapsForUser";
   data: SeawaterSwaps;
 };
 
@@ -61,7 +74,7 @@ export type GetSwapsForUser = {
  * TvlOverTime if possible, where the USD calculation is done already.
  */
 export type LiquidityOverTime = {
-  __typename?: 'LiquidityOverTime';
+  __typename?: "LiquidityOverTime";
   /** Daily liquidity in the pool, with data available as both sides. */
   daily: Array<PairAmount>;
   /** Monthly amounts of liquidity in the pool, as 12 data points. */
@@ -83,26 +96,26 @@ export type LiquidityOverTime = {
  * of a position.
  */
 export type PairAmount = {
-  __typename?: 'PairAmount';
+  __typename?: "PairAmount";
   /** Fusdc data available for the token at the time. */
   fusdc: Amount;
   /** Timestamp of the PairAmount's existence/creation. */
-  timestamp: Scalars['Int']['output'];
+  timestamp: Scalars["Int"]["output"];
   /** Token1 data (quote asset) that's available at that time. */
   token1: Amount;
 };
 
 /** Price over time in the pool, from the checkpointed data available. */
 export type PriceOverTime = {
-  __typename?: 'PriceOverTime';
+  __typename?: "PriceOverTime";
   /** Daily price each day that was available. As 31 points of data, each representing a day. */
-  daily: Array<Scalars['String']['output']>;
+  daily: Array<Scalars["String"]["output"]>;
   /** Monthly price of data that's available, as 12 data points, each being a month. */
-  monthly: Array<Scalars['String']['output']>;
+  monthly: Array<Scalars["String"]["output"]>;
 };
 
 export type Query = {
-  __typename?: 'Query';
+  __typename?: "Query";
   /** fUSDC address that's supported by the AMM. */
   fusdc: Token;
   /**
@@ -134,52 +147,45 @@ export type Query = {
   pools: Array<SeawaterPool>;
 };
 
-
 export type QueryGetPoolArgs = {
-  token: Scalars['String']['input'];
+  token: Scalars["String"]["input"];
 };
-
 
 export type QueryGetPoolPositionsArgs = {
-  after?: InputMaybe<Scalars['Int']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  pool: Scalars['String']['input'];
+  after?: InputMaybe<Scalars["Int"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  pool: Scalars["String"]["input"];
 };
-
 
 export type QueryGetPositionArgs = {
-  id: Scalars['Int']['input'];
+  id: Scalars["Int"]["input"];
 };
-
 
 export type QueryGetPositionsArgs = {
-  after?: InputMaybe<Scalars['Int']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  wallet: Scalars['String']['input'];
+  after?: InputMaybe<Scalars["Int"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  wallet: Scalars["String"]["input"];
 };
-
 
 export type QueryGetSwapsArgs = {
-  after?: InputMaybe<Scalars['Int']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  pool: Scalars['String']['input'];
+  after?: InputMaybe<Scalars["Int"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  pool: Scalars["String"]["input"];
 };
-
 
 export type QueryGetSwapsForUserArgs = {
-  after?: InputMaybe<Scalars['Int']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  wallet: Scalars['String']['input'];
+  after?: InputMaybe<Scalars["Int"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  wallet: Scalars["String"]["input"];
 };
 
-
 export type QueryGetWalletArgs = {
-  address: Scalars['String']['input'];
+  address: Scalars["String"]["input"];
 };
 
 /** SeawaterConfig available to the pool. */
 export type SeawaterConfig = {
-  __typename?: 'SeawaterConfig';
+  __typename?: "SeawaterConfig";
   /**
    * Classification of the type of pool. Non-volatile assets like stablecoins (`STABLECOIN`)
    * should have a range of -10%-10% suggested to the user for the pool, volatile assets
@@ -190,43 +196,43 @@ export type SeawaterConfig = {
    */
   classification: SeawaterPoolClassification;
   /** Whether this pool should be displayed to frontend users. */
-  displayed: Scalars['Boolean']['output'];
+  displayed: Scalars["Boolean"]["output"];
   /** Identifier of this config. Should be config:<pool address> */
-  id: Scalars['ID']['output'];
+  id: Scalars["ID"]["output"];
   /** Pool this configuration belongs to. */
   pool: SeawaterPool;
 };
 
 /** SeawaterLiquidity available in a pool summed and grouped by ticks of 5000 at a time. */
 export type SeawaterLiquidity = {
-  __typename?: 'SeawaterLiquidity';
+  __typename?: "SeawaterLiquidity";
   /** Id internal to GraphQL for caching reasons. Made up of `liq:tick-from:tick-to`. */
-  id: Scalars['ID']['output'];
+  id: Scalars["ID"]["output"];
   /** USD value of the liquidity in this range. Implemented as amount0 + (amount1 * price). */
-  liquidity: Scalars['String']['output'];
+  liquidity: Scalars["String"]["output"];
   /** Median point price of token1's asset. */
-  price: Scalars['String']['output'];
+  price: Scalars["String"]["output"];
   /** Lower tick that this group and sum of positions is made up of. */
-  tickLower: Scalars['Int']['output'];
+  tickLower: Scalars["Int"]["output"];
   /** Upper tick that this group and sum of positions is made up of. */
-  tickUpper: Scalars['Int']['output'];
+  tickUpper: Scalars["Int"]["output"];
 };
 
 /** Seawater pool available for swapping via the AMM. */
 export type SeawaterPool = {
-  __typename?: 'SeawaterPool';
+  __typename?: "SeawaterPool";
   /** Address of the pool, and of the token that's traded. */
-  address: Scalars['String']['output'];
+  address: Scalars["String"]["output"];
   /** Amounts currently contained in this pool. */
   amounts: PairAmount;
   /** Configuration details available to this pool. Should be mostly static. */
   config: SeawaterConfig;
   /** TODO */
-  earnedFeesAPRFUSDC: Array<Scalars['String']['output']>;
+  earnedFeesAPRFUSDC: Array<Scalars["String"]["output"]>;
   /** TODO */
-  earnedFeesAPRToken1: Array<Scalars['String']['output']>;
+  earnedFeesAPRToken1: Array<Scalars["String"]["output"]>;
   /** Id for quick caching, in the form of `pool:address`. */
-  id: Scalars['ID']['output'];
+  id: Scalars["ID"]["output"];
   /**
    * Liquidity available in a pool, with only 20 elements being returned encompassing the
    * tick ranges subdivided.
@@ -244,7 +250,7 @@ export type SeawaterPool = {
    * Information on the current price, last cached. Determined by the last tick of a trade
    * that was made.
    */
-  price: Scalars['String']['output'];
+  price: Scalars["String"]["output"];
   /** Historical price over time data that's available. */
   priceOverTime: PriceOverTime;
   /** Super incentives available in this pool. */
@@ -252,7 +258,7 @@ export type SeawaterPool = {
   /** Swaps that were made using this pool. */
   swaps: SeawaterSwaps;
   /** Tick spacing of the current pool, useful for graph rendering. */
-  tickSpacing: Scalars['String']['output'];
+  tickSpacing: Scalars["String"]["output"];
   /** More token information about the counter asset that's available. */
   token: Token;
   /** The USD value of assets in the pool over time. Cheaper to access than liquidityOverTime. */
@@ -268,32 +274,29 @@ export type SeawaterPool = {
   yieldOverTime: YieldOverTime;
 };
 
-
 /** Seawater pool available for swapping via the AMM. */
 export type SeawaterPoolPositionsArgs = {
-  after?: InputMaybe<Scalars['Int']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars["Int"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
 };
-
 
 /** Seawater pool available for swapping via the AMM. */
 export type SeawaterPoolPositionsForUserArgs = {
-  after?: InputMaybe<Scalars['Int']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  wallet: Scalars['String']['input'];
+  after?: InputMaybe<Scalars["Int"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  wallet: Scalars["String"]["input"];
 };
-
 
 /** Seawater pool available for swapping via the AMM. */
 export type SeawaterPoolSwapsArgs = {
-  after?: InputMaybe<Scalars['Int']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars["Int"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
 export enum SeawaterPoolClassification {
-  Stablecoin = 'STABLECOIN',
-  Unknown = 'UNKNOWN',
-  Volatile = 'VOLATILE'
+  Stablecoin = "STABLECOIN",
+  Unknown = "UNKNOWN",
+  Volatile = "VOLATILE",
 }
 
 /**
@@ -301,23 +304,23 @@ export enum SeawaterPoolClassification {
  * position by looking at the median of the lower, and upper tick.
  */
 export type SeawaterPosition = {
-  __typename?: 'SeawaterPosition';
+  __typename?: "SeawaterPosition";
   /** Creation timestamp of the position. */
-  created: Scalars['Int']['output'];
+  created: Scalars["Int"]["output"];
   /** Id of the GraphQL object, for caching reasons. Made up of `positionId (pos:positionId)`. */
-  id: Scalars['ID']['output'];
+  id: Scalars["ID"]["output"];
   /** Liquidity available in this specific position. */
   liquidity: PairAmount;
   /** Lower tick of this position. */
-  lower: Scalars['Int']['output'];
+  lower: Scalars["Int"]["output"];
   /** Owner of the position. A wallet address. */
   owner: Wallet;
   /** Pool that this position belongs to. */
   pool: SeawaterPool;
   /** Position Id in the contract of the user's position that they own. Used for a cursor. */
-  positionId: Scalars['Int']['output'];
+  positionId: Scalars["Int"]["output"];
   /** Upper tick of this position. */
-  upper: Scalars['Int']['output'];
+  upper: Scalars["Int"]["output"];
 };
 
 /**
@@ -325,9 +328,9 @@ export type SeawaterPosition = {
  * Cached aggressively.
  */
 export type SeawaterPositionsGlobal = {
-  __typename?: 'SeawaterPositionsGlobal';
+  __typename?: "SeawaterPositionsGlobal";
   /** ID available for this for caching reasons. Should be posglobal:from:to. */
-  id: Scalars['ID']['output'];
+  id: Scalars["ID"]["output"];
   next: SeawaterPositionsGlobal;
   /** The positions associated with this data. */
   positions: Array<SeawaterPosition>;
@@ -338,13 +341,12 @@ export type SeawaterPositionsGlobal = {
   sum?: Maybe<Array<PairAmount>>;
 };
 
-
 /**
  * Pagination-friendly way of viewing the current state of the positions available in a pool.
  * Cached aggressively.
  */
 export type SeawaterPositionsGlobalNextArgs = {
-  first?: InputMaybe<Scalars['Int']['input']>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
 /**
@@ -352,9 +354,9 @@ export type SeawaterPositionsGlobalNextArgs = {
  * Not cached so aggressively!
  */
 export type SeawaterPositionsUser = {
-  __typename?: 'SeawaterPositionsUser';
+  __typename?: "SeawaterPositionsUser";
   /** ID available for this for caching reasons. Should be posuser:from:to. */
-  id: Scalars['ID']['output'];
+  id: Scalars["ID"]["output"];
   next: SeawaterPositionsUser;
   /** The positions associated with this data. */
   positions: Array<SeawaterPosition>;
@@ -365,18 +367,17 @@ export type SeawaterPositionsUser = {
   sum?: Maybe<Array<PairAmount>>;
 };
 
-
 /**
  * Pagination-friendly way of viewing the current state of the positions available in a pool.
  * Not cached so aggressively!
  */
 export type SeawaterPositionsUserNextArgs = {
-  first?: InputMaybe<Scalars['Int']['input']>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
 /** Swap that was made by a user. */
 export type SeawaterSwap = {
-  __typename?: 'SeawaterSwap';
+  __typename?: "SeawaterSwap";
   /** The asset and volume that was sent to be exchanged for the other asset. */
   amountIn: Amount;
   /** The asset and volume that was exchanged for by the other asset. */
@@ -386,7 +387,7 @@ export type SeawaterSwap = {
   /** Sender of the swap. */
   sender: Wallet;
   /** Timestamp of when this swap occured. */
-  timestamp: Scalars['Int']['output'];
+  timestamp: Scalars["Int"]["output"];
 };
 
 /**
@@ -394,7 +395,7 @@ export type SeawaterSwap = {
  * came from, where it's at with pagination with the position ids.
  */
 export type SeawaterSwaps = {
-  __typename?: 'SeawaterSwaps';
+  __typename?: "SeawaterSwaps";
   next: SeawaterSwaps;
   /** The sum of these value in these swaps per unique pool, if possible to collect. */
   sum?: Maybe<Array<PairAmount>>;
@@ -402,32 +403,31 @@ export type SeawaterSwaps = {
   swaps: Array<SeawaterSwap>;
 };
 
-
 /**
  * Pagination-friendly way to quickly receive swaps made somewhere. Knows internally where it
  * came from, where it's at with pagination with the position ids.
  */
 export type SeawaterSwapsNextArgs = {
-  first?: InputMaybe<Scalars['Int']['input']>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
 /** Token that's available to trade via the AMM. */
 export type Token = {
-  __typename?: 'Token';
+  __typename?: "Token";
   /** Address of the token. */
-  address: Scalars['String']['output'];
+  address: Scalars["String"]["output"];
   /** Decimals used by the token. */
-  decimals: Scalars['Int']['output'];
+  decimals: Scalars["Int"]["output"];
   /** A simple ID in the form of the address of the token for GraphQL caching. */
-  id: Scalars['ID']['output'];
+  id: Scalars["ID"]["output"];
   /** Image of the token that's stored on a URL somewhere. Loaded from the browser. */
-  image: Scalars['String']['output'];
+  image: Scalars["String"]["output"];
   /** Name of the token. */
-  name: Scalars['String']['output'];
+  name: Scalars["String"]["output"];
   /** Symbol of the token. */
-  symbol: Scalars['String']['output'];
+  symbol: Scalars["String"]["output"];
   /** Total supply of the token, in the form of base10. */
-  totalSupply: Scalars['String']['output'];
+  totalSupply: Scalars["String"]["output"];
 };
 
 /**
@@ -438,31 +438,31 @@ export type Token = {
  * amount per token (by adding PairAmounts together). This is simpler, and faster.
  */
 export type TvlOverTime = {
-  __typename?: 'TvlOverTime';
+  __typename?: "TvlOverTime";
   /**
    * A month's worth of TVL data in the form of a stringified floating point number (31
    * items.)
    */
-  daily: Array<Scalars['String']['output']>;
+  daily: Array<Scalars["String"]["output"]>;
   /**
    * Monthly data of the TVL, of the last 12 months, in the form of 12 items. Stringified
    * floating point representation of the amount.
    */
-  monthly: Array<Scalars['String']['output']>;
+  monthly: Array<Scalars["String"]["output"]>;
 };
 
 /** Utility incentives given out by the Fluidity Labs team, or a partner via the DAO. */
 export type UtilityIncentive = {
-  __typename?: 'UtilityIncentive';
+  __typename?: "UtilityIncentive";
   /** Amount given out in the form of a floating point number. TODO. */
-  amountGivenOut: Scalars['String']['output'];
+  amountGivenOut: Scalars["String"]["output"];
   /** Maximum amount that was given out historically. TODO. */
-  maximumAmount: Scalars['String']['output'];
+  maximumAmount: Scalars["String"]["output"];
 };
 
 /** Volume that was made in the pool over time, in a daily and monthly metric. */
 export type VolumeOverTime = {
-  __typename?: 'VolumeOverTime';
+  __typename?: "VolumeOverTime";
   /** Daily volume for a month. */
   daily: Array<PairAmount>;
   /** Monthly volume for the last 12 months. */
@@ -471,25 +471,24 @@ export type VolumeOverTime = {
 
 /** Wallet information as it's owned by a user. */
 export type Wallet = {
-  __typename?: 'Wallet';
+  __typename?: "Wallet";
   /** Address of this wallet. */
-  address: Scalars['String']['output'];
+  address: Scalars["String"]["output"];
   /**
    * Balances of tokens held by the user, based on information collected by the backend when
    * this is requested.
    */
   balances: Array<Amount>;
   /** Id for GraphQL caching. Simply the user's address. */
-  id: Scalars['ID']['output'];
+  id: Scalars["ID"]["output"];
   /** Positions opened by the user in the AMM. */
   positions: SeawaterPositionsUser;
 };
 
-
 /** Wallet information as it's owned by a user. */
 export type WalletPositionsArgs = {
-  after?: InputMaybe<Scalars['Int']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars["Int"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
 /**
@@ -497,72 +496,2736 @@ export type WalletPositionsArgs = {
  * by the Fluidity worker.
  */
 export type YieldOverTime = {
-  __typename?: 'YieldOverTime';
+  __typename?: "YieldOverTime";
   /** Daily yield paid out, as 31 action points to represent a month. */
   daily: Array<PairAmount>;
   /** Monthly yield paid, as 12 item points of data to represent a year. */
   monthly: Array<PairAmount>;
 };
 
-export type AllPoolsFragmentFragment = { __typename?: 'SeawaterPool', address: string, token: { __typename?: 'Token', name: string, decimals: number }, volumeOverTime: { __typename?: 'VolumeOverTime', daily: Array<{ __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueScaled: string } }> }, tvlOverTime: { __typename?: 'TvlOverTime', daily: Array<string> }, liquidityOverTime: { __typename?: 'LiquidityOverTime', daily: Array<{ __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueScaled: string } }> }, liquidityIncentives: { __typename?: 'Amount', valueUsd: string }, superIncentives: { __typename?: 'Amount', valueUsd: string }, positions: { __typename?: 'SeawaterPositionsGlobal', positions: Array<{ __typename?: 'SeawaterPosition', lower: number, upper: number }> } } & { ' $fragmentName'?: 'AllPoolsFragmentFragment' };
+export type AllPoolsFragmentFragment = {
+  __typename?: "SeawaterPool";
+  address: string;
+  token: { __typename?: "Token"; name: string; decimals: number };
+  volumeOverTime: {
+    __typename?: "VolumeOverTime";
+    daily: Array<{
+      __typename?: "PairAmount";
+      fusdc: { __typename?: "Amount"; valueScaled: string };
+    }>;
+  };
+  tvlOverTime: { __typename?: "TvlOverTime"; daily: Array<string> };
+  liquidityOverTime: {
+    __typename?: "LiquidityOverTime";
+    daily: Array<{
+      __typename?: "PairAmount";
+      fusdc: { __typename?: "Amount"; valueScaled: string };
+    }>;
+  };
+  liquidityIncentives: { __typename?: "Amount"; valueUsd: string };
+  superIncentives: { __typename?: "Amount"; valueUsd: string };
+  positions: {
+    __typename?: "SeawaterPositionsGlobal";
+    positions: Array<{
+      __typename?: "SeawaterPosition";
+      lower: number;
+      upper: number;
+    }>;
+  };
+} & { " $fragmentName"?: "AllPoolsFragmentFragment" };
 
-export type MyPositionsWalletFragmentFragment = { __typename?: 'Wallet', id: string, positions: { __typename?: 'SeawaterPositionsUser', positions: Array<{ __typename?: 'SeawaterPosition', positionId: number, pool: { __typename?: 'SeawaterPool', token: { __typename?: 'Token', name: string, address: string, symbol: string, decimals: number } }, liquidity: { __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueUsd: string }, token1: { __typename?: 'Amount', valueUsd: string } } }> } } & { ' $fragmentName'?: 'MyPositionsWalletFragmentFragment' };
+export type MyPositionsWalletFragmentFragment = {
+  __typename?: "Wallet";
+  id: string;
+  positions: {
+    __typename?: "SeawaterPositionsUser";
+    positions: Array<{
+      __typename?: "SeawaterPosition";
+      positionId: number;
+      pool: {
+        __typename?: "SeawaterPool";
+        token: {
+          __typename?: "Token";
+          name: string;
+          address: string;
+          symbol: string;
+          decimals: number;
+        };
+      };
+      liquidity: {
+        __typename?: "PairAmount";
+        fusdc: { __typename?: "Amount"; valueUsd: string };
+        token1: { __typename?: "Amount"; valueUsd: string };
+      };
+    }>;
+  };
+} & { " $fragmentName"?: "MyPositionsWalletFragmentFragment" };
 
-export type SelectPrimeAssetFragmentFragment = { __typename?: 'SeawaterPool', address: string, volumeOverTime: { __typename?: 'VolumeOverTime', daily: Array<{ __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueUsd: string } }> }, token: { __typename?: 'Token', name: string, symbol: string, address: string, decimals: number } } & { ' $fragmentName'?: 'SelectPrimeAssetFragmentFragment' };
+export type SelectPrimeAssetFragmentFragment = {
+  __typename?: "SeawaterPool";
+  address: string;
+  volumeOverTime: {
+    __typename?: "VolumeOverTime";
+    daily: Array<{
+      __typename?: "PairAmount";
+      fusdc: { __typename?: "Amount"; valueUsd: string };
+    }>;
+  };
+  token: {
+    __typename?: "Token";
+    name: string;
+    symbol: string;
+    address: string;
+    decimals: number;
+  };
+} & { " $fragmentName"?: "SelectPrimeAssetFragmentFragment" };
 
-export type ManagePoolFragmentFragment = { __typename?: 'SeawaterPool', address: string, id: string, earnedFeesAPRFUSDC: Array<string>, liquidity: Array<{ __typename?: 'SeawaterLiquidity', liquidity: string }>, token: { __typename?: 'Token', symbol: string, name: string, decimals: number }, liquidityIncentives: { __typename?: 'Amount', valueScaled: string }, superIncentives: { __typename?: 'Amount', valueScaled: string }, utilityIncentives: Array<{ __typename?: 'UtilityIncentive', amountGivenOut: string, maximumAmount: string }> } & { ' $fragmentName'?: 'ManagePoolFragmentFragment' };
+export type ManagePoolFragmentFragment = {
+  __typename?: "SeawaterPool";
+  address: string;
+  id: string;
+  earnedFeesAPRFUSDC: Array<string>;
+  liquidity: Array<{ __typename?: "SeawaterLiquidity"; liquidity: string }>;
+  token: {
+    __typename?: "Token";
+    symbol: string;
+    name: string;
+    decimals: number;
+  };
+  liquidityIncentives: { __typename?: "Amount"; valueScaled: string };
+  superIncentives: { __typename?: "Amount"; valueScaled: string };
+  utilityIncentives: Array<{
+    __typename?: "UtilityIncentive";
+    amountGivenOut: string;
+    maximumAmount: string;
+  }>;
+} & { " $fragmentName"?: "ManagePoolFragmentFragment" };
 
-export type PositionsFragmentFragment = { __typename?: 'Wallet', positions: { __typename?: 'SeawaterPositionsUser', positions: Array<{ __typename?: 'SeawaterPosition', positionId: number, lower: number, upper: number, pool: { __typename?: 'SeawaterPool', address: string }, liquidity: { __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueUsd: string }, token1: { __typename?: 'Amount', valueUsd: string } } }> } } & { ' $fragmentName'?: 'PositionsFragmentFragment' };
+export type PositionsFragmentFragment = {
+  __typename?: "Wallet";
+  positions: {
+    __typename?: "SeawaterPositionsUser";
+    positions: Array<{
+      __typename?: "SeawaterPosition";
+      positionId: number;
+      lower: number;
+      upper: number;
+      pool: { __typename?: "SeawaterPool"; address: string };
+      liquidity: {
+        __typename?: "PairAmount";
+        fusdc: { __typename?: "Amount"; valueUsd: string };
+        token1: { __typename?: "Amount"; valueUsd: string };
+      };
+    }>;
+  };
+} & { " $fragmentName"?: "PositionsFragmentFragment" };
 
-export type WithdrawPositionsFragmentFragment = { __typename?: 'Wallet', positions: { __typename?: 'SeawaterPositionsUser', positions: Array<{ __typename?: 'SeawaterPosition', positionId: number, lower: number, upper: number, owner: { __typename?: 'Wallet', address: string }, liquidity: { __typename?: 'PairAmount', fusdc: { __typename?: 'Amount', valueUsd: string, valueScaled: string }, token1: { __typename?: 'Amount', valueUsd: string, valueScaled: string } } }> } } & { ' $fragmentName'?: 'WithdrawPositionsFragmentFragment' };
+export type WithdrawPositionsFragmentFragment = {
+  __typename?: "Wallet";
+  positions: {
+    __typename?: "SeawaterPositionsUser";
+    positions: Array<{
+      __typename?: "SeawaterPosition";
+      positionId: number;
+      lower: number;
+      upper: number;
+      owner: { __typename?: "Wallet"; address: string };
+      liquidity: {
+        __typename?: "PairAmount";
+        fusdc: { __typename?: "Amount"; valueUsd: string; valueScaled: string };
+        token1: {
+          __typename?: "Amount";
+          valueUsd: string;
+          valueScaled: string;
+        };
+      };
+    }>;
+  };
+} & { " $fragmentName"?: "WithdrawPositionsFragmentFragment" };
 
-export type SwapExploreFragmentFragment = { __typename?: 'SeawaterPool', price: string, token: { __typename?: 'Token', name: string, symbol: string, address: string, decimals: number } } & { ' $fragmentName'?: 'SwapExploreFragmentFragment' };
+export type SwapExploreFragmentFragment = {
+  __typename?: "SeawaterPool";
+  price: string;
+  token: {
+    __typename?: "Token";
+    name: string;
+    symbol: string;
+    address: string;
+    decimals: number;
+  };
+} & { " $fragmentName"?: "SwapExploreFragmentFragment" };
 
-export type MyPositionsInventoryWalletFragmentFragment = { __typename?: 'Wallet', id: string, positions: { __typename?: 'SeawaterPositionsUser', positions: Array<{ __typename?: 'SeawaterPosition', id: string, pool: { __typename?: 'SeawaterPool', token: { __typename?: 'Token', name: string, address: string, symbol: string } } }> } } & { ' $fragmentName'?: 'MyPositionsInventoryWalletFragmentFragment' };
+export type MyPositionsInventoryWalletFragmentFragment = {
+  __typename?: "Wallet";
+  id: string;
+  positions: {
+    __typename?: "SeawaterPositionsUser";
+    positions: Array<{
+      __typename?: "SeawaterPosition";
+      id: string;
+      pool: {
+        __typename?: "SeawaterPool";
+        token: {
+          __typename?: "Token";
+          name: string;
+          address: string;
+          symbol: string;
+        };
+      };
+    }>;
+  };
+} & { " $fragmentName"?: "MyPositionsInventoryWalletFragmentFragment" };
 
-export type TradeTabTransactionsFragmentFragment = { __typename?: 'SeawaterSwap', timestamp: number, amountIn: { __typename?: 'Amount', valueScaled: string, token: { __typename?: 'Token', symbol: string } }, amountOut: { __typename?: 'Amount', valueScaled: string, token: { __typename?: 'Token', symbol: string } } } & { ' $fragmentName'?: 'TradeTabTransactionsFragmentFragment' };
+export type TradeTabTransactionsFragmentFragment = {
+  __typename?: "SeawaterSwap";
+  timestamp: number;
+  amountIn: {
+    __typename?: "Amount";
+    valueScaled: string;
+    token: { __typename?: "Token"; symbol: string };
+  };
+  amountOut: {
+    __typename?: "Amount";
+    valueScaled: string;
+    token: { __typename?: "Token"; symbol: string };
+  };
+} & { " $fragmentName"?: "TradeTabTransactionsFragmentFragment" };
 
-export type StakeFormFragmentFragment = { __typename?: 'SeawaterPool', address: string, earnedFeesAPRFUSDC: Array<string> } & { ' $fragmentName'?: 'StakeFormFragmentFragment' };
+export type StakeFormFragmentFragment = {
+  __typename?: "SeawaterPool";
+  address: string;
+  earnedFeesAPRFUSDC: Array<string>;
+} & { " $fragmentName"?: "StakeFormFragmentFragment" };
 
-export type DepositPositionsFragmentFragment = { __typename?: 'Wallet', positions: { __typename?: 'SeawaterPositionsUser', positions: Array<{ __typename?: 'SeawaterPosition', positionId: number, lower: number, upper: number }> } } & { ' $fragmentName'?: 'DepositPositionsFragmentFragment' };
+export type DepositPositionsFragmentFragment = {
+  __typename?: "Wallet";
+  positions: {
+    __typename?: "SeawaterPositionsUser";
+    positions: Array<{
+      __typename?: "SeawaterPosition";
+      positionId: number;
+      lower: number;
+      upper: number;
+    }>;
+  };
+} & { " $fragmentName"?: "DepositPositionsFragmentFragment" };
 
-export type SwapFormFragmentFragment = { __typename?: 'SeawaterPool', address: string, earnedFeesAPRFUSDC: Array<string>, earnedFeesAPRToken1: Array<string>, token: { __typename?: 'Token', address: string, decimals: number, name: string, symbol: string } } & { ' $fragmentName'?: 'SwapFormFragmentFragment' };
+export type SwapFormFragmentFragment = {
+  __typename?: "SeawaterPool";
+  address: string;
+  earnedFeesAPRFUSDC: Array<string>;
+  earnedFeesAPRToken1: Array<string>;
+  token: {
+    __typename?: "Token";
+    address: string;
+    decimals: number;
+    name: string;
+    symbol: string;
+  };
+} & { " $fragmentName"?: "SwapFormFragmentFragment" };
 
-export type SwapProPoolFragmentFragment = { __typename?: 'SeawaterPool', address: string, token: { __typename?: 'Token', address: string, symbol: string }, liquidity: Array<{ __typename?: 'SeawaterLiquidity', liquidity: string }>, priceOverTime: { __typename?: 'PriceOverTime', daily: Array<string>, monthly: Array<string> }, volumeOverTime: { __typename?: 'VolumeOverTime', monthly: Array<{ __typename?: 'PairAmount', token1: { __typename?: 'Amount', timestamp: number, valueUsd: string }, fusdc: { __typename?: 'Amount', timestamp: number, valueUsd: string } }>, daily: Array<{ __typename?: 'PairAmount', token1: { __typename?: 'Amount', timestamp: number, valueUsd: string }, fusdc: { __typename?: 'Amount', timestamp: number, valueUsd: string } }> }, liquidityOverTime: { __typename?: 'LiquidityOverTime', daily: Array<{ __typename?: 'PairAmount', timestamp: number, fusdc: { __typename?: 'Amount', valueUsd: string } }>, monthly: Array<{ __typename?: 'PairAmount', timestamp: number, fusdc: { __typename?: 'Amount', valueUsd: string } }> }, swaps: { __typename?: 'SeawaterSwaps', swaps: Array<{ __typename?: 'SeawaterSwap', timestamp: number, amountIn: { __typename?: 'Amount', valueScaled: string, token: { __typename?: 'Token', symbol: string } }, amountOut: { __typename?: 'Amount', valueScaled: string, token: { __typename?: 'Token', symbol: string } } }> } } & { ' $fragmentName'?: 'SwapProPoolFragmentFragment' };
+export type SwapProPoolFragmentFragment = {
+  __typename?: "SeawaterPool";
+  address: string;
+  token: { __typename?: "Token"; address: string; symbol: string };
+  liquidity: Array<{ __typename?: "SeawaterLiquidity"; liquidity: string }>;
+  priceOverTime: {
+    __typename?: "PriceOverTime";
+    daily: Array<string>;
+    monthly: Array<string>;
+  };
+  volumeOverTime: {
+    __typename?: "VolumeOverTime";
+    monthly: Array<{
+      __typename?: "PairAmount";
+      token1: { __typename?: "Amount"; timestamp: number; valueUsd: string };
+      fusdc: { __typename?: "Amount"; timestamp: number; valueUsd: string };
+    }>;
+    daily: Array<{
+      __typename?: "PairAmount";
+      token1: { __typename?: "Amount"; timestamp: number; valueUsd: string };
+      fusdc: { __typename?: "Amount"; timestamp: number; valueUsd: string };
+    }>;
+  };
+  liquidityOverTime: {
+    __typename?: "LiquidityOverTime";
+    daily: Array<{
+      __typename?: "PairAmount";
+      timestamp: number;
+      fusdc: { __typename?: "Amount"; valueUsd: string };
+    }>;
+    monthly: Array<{
+      __typename?: "PairAmount";
+      timestamp: number;
+      fusdc: { __typename?: "Amount"; valueUsd: string };
+    }>;
+  };
+  swaps: {
+    __typename?: "SeawaterSwaps";
+    swaps: Array<{
+      __typename?: "SeawaterSwap";
+      timestamp: number;
+      amountIn: {
+        __typename?: "Amount";
+        valueScaled: string;
+        token: { __typename?: "Token"; symbol: string };
+      };
+      amountOut: {
+        __typename?: "Amount";
+        valueScaled: string;
+        token: { __typename?: "Token"; symbol: string };
+      };
+    }>;
+  };
+} & { " $fragmentName"?: "SwapProPoolFragmentFragment" };
 
-export type AllDataQueryVariables = Exact<{ [key: string]: never; }>;
+export type AllDataQueryVariables = Exact<{ [key: string]: never }>;
 
-
-export type AllDataQuery = { __typename?: 'Query', pools: Array<(
-    { __typename?: 'SeawaterPool', address: string }
-    & { ' $fragmentRefs'?: { 'SwapProPoolFragmentFragment': SwapProPoolFragmentFragment;'AllPoolsFragmentFragment': AllPoolsFragmentFragment;'SelectPrimeAssetFragmentFragment': SelectPrimeAssetFragmentFragment;'SwapExploreFragmentFragment': SwapExploreFragmentFragment;'ManagePoolFragmentFragment': ManagePoolFragmentFragment;'SwapFormFragmentFragment': SwapFormFragmentFragment;'StakeFormFragmentFragment': StakeFormFragmentFragment } }
-  )> };
+export type AllDataQuery = {
+  __typename?: "Query";
+  pools: Array<
+    { __typename?: "SeawaterPool"; address: string } & {
+      " $fragmentRefs"?: {
+        SwapProPoolFragmentFragment: SwapProPoolFragmentFragment;
+        AllPoolsFragmentFragment: AllPoolsFragmentFragment;
+        SelectPrimeAssetFragmentFragment: SelectPrimeAssetFragmentFragment;
+        SwapExploreFragmentFragment: SwapExploreFragmentFragment;
+        ManagePoolFragmentFragment: ManagePoolFragmentFragment;
+        SwapFormFragmentFragment: SwapFormFragmentFragment;
+        StakeFormFragmentFragment: StakeFormFragmentFragment;
+      };
+    }
+  >;
+};
 
 export type ForUserQueryVariables = Exact<{
-  wallet: Scalars['String']['input'];
+  wallet: Scalars["String"]["input"];
 }>;
 
+export type ForUserQuery = {
+  __typename?: "Query";
+  getSwapsForUser: {
+    __typename?: "GetSwapsForUser";
+    data: {
+      __typename?: "SeawaterSwaps";
+      swaps: Array<
+        { __typename?: "SeawaterSwap" } & {
+          " $fragmentRefs"?: {
+            TradeTabTransactionsFragmentFragment: TradeTabTransactionsFragmentFragment;
+          };
+        }
+      >;
+    };
+  };
+  getWallet?:
+    | ({ __typename?: "Wallet" } & {
+        " $fragmentRefs"?: {
+          MyPositionsWalletFragmentFragment: MyPositionsWalletFragmentFragment;
+          MyPositionsInventoryWalletFragmentFragment: MyPositionsInventoryWalletFragmentFragment;
+          PositionsFragmentFragment: PositionsFragmentFragment;
+          WithdrawPositionsFragmentFragment: WithdrawPositionsFragmentFragment;
+          DepositPositionsFragmentFragment: DepositPositionsFragmentFragment;
+        };
+      })
+    | null;
+};
 
-export type ForUserQuery = { __typename?: 'Query', getSwapsForUser: { __typename?: 'GetSwapsForUser', data: { __typename?: 'SeawaterSwaps', swaps: Array<(
-        { __typename?: 'SeawaterSwap' }
-        & { ' $fragmentRefs'?: { 'TradeTabTransactionsFragmentFragment': TradeTabTransactionsFragmentFragment } }
-      )> } }, getWallet?: (
-    { __typename?: 'Wallet' }
-    & { ' $fragmentRefs'?: { 'MyPositionsWalletFragmentFragment': MyPositionsWalletFragmentFragment;'MyPositionsInventoryWalletFragmentFragment': MyPositionsInventoryWalletFragmentFragment;'PositionsFragmentFragment': PositionsFragmentFragment;'WithdrawPositionsFragmentFragment': WithdrawPositionsFragmentFragment;'DepositPositionsFragmentFragment': DepositPositionsFragmentFragment } }
-  ) | null };
-
-export const AllPoolsFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AllPoolsFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterPool"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"decimals"}}]}},{"kind":"Field","name":{"kind":"Name","value":"volumeOverTime"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"daily"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"tvlOverTime"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"daily"}}]}},{"kind":"Field","name":{"kind":"Name","value":"liquidityOverTime"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"daily"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"liquidityIncentives"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"superIncentives"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"lower"}},{"kind":"Field","name":{"kind":"Name","value":"upper"}}]}}]}}]}}]} as unknown as DocumentNode<AllPoolsFragmentFragment, unknown>;
-export const MyPositionsWalletFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MyPositionsWalletFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Wallet"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positionId"}},{"kind":"Field","name":{"kind":"Name","value":"pool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"symbol"}},{"kind":"Field","name":{"kind":"Name","value":"decimals"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"liquidity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token1"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<MyPositionsWalletFragmentFragment, unknown>;
-export const SelectPrimeAssetFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SelectPrimeAssetFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterPool"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"volumeOverTime"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"daily"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"symbol"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"decimals"}}]}}]}}]} as unknown as DocumentNode<SelectPrimeAssetFragmentFragment, unknown>;
-export const ManagePoolFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ManagePoolFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterPool"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"liquidity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"liquidity"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"symbol"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"decimals"}}]}},{"kind":"Field","name":{"kind":"Name","value":"liquidityIncentives"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}},{"kind":"Field","name":{"kind":"Name","value":"superIncentives"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}},{"kind":"Field","name":{"kind":"Name","value":"utilityIncentives"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"amountGivenOut"}},{"kind":"Field","name":{"kind":"Name","value":"maximumAmount"}}]}},{"kind":"Field","name":{"kind":"Name","value":"earnedFeesAPRFUSDC"}}]}}]} as unknown as DocumentNode<ManagePoolFragmentFragment, unknown>;
-export const PositionsFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PositionsFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Wallet"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positionId"}},{"kind":"Field","name":{"kind":"Name","value":"pool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}}]}},{"kind":"Field","name":{"kind":"Name","value":"lower"}},{"kind":"Field","name":{"kind":"Name","value":"upper"}},{"kind":"Field","name":{"kind":"Name","value":"liquidity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token1"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<PositionsFragmentFragment, unknown>;
-export const WithdrawPositionsFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"WithdrawPositionsFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Wallet"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positionId"}},{"kind":"Field","name":{"kind":"Name","value":"lower"}},{"kind":"Field","name":{"kind":"Name","value":"upper"}},{"kind":"Field","name":{"kind":"Name","value":"owner"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}}]}},{"kind":"Field","name":{"kind":"Name","value":"liquidity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}},{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token1"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}},{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<WithdrawPositionsFragmentFragment, unknown>;
-export const SwapExploreFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SwapExploreFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterPool"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"symbol"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"decimals"}}]}},{"kind":"Field","name":{"kind":"Name","value":"price"}}]}}]} as unknown as DocumentNode<SwapExploreFragmentFragment, unknown>;
-export const MyPositionsInventoryWalletFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MyPositionsInventoryWalletFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Wallet"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"symbol"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<MyPositionsInventoryWalletFragmentFragment, unknown>;
-export const TradeTabTransactionsFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TradeTabTransactionsFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterSwap"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"amountIn"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"symbol"}}]}},{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}},{"kind":"Field","name":{"kind":"Name","value":"amountOut"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"symbol"}}]}},{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}}]}}]} as unknown as DocumentNode<TradeTabTransactionsFragmentFragment, unknown>;
-export const StakeFormFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"StakeFormFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterPool"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"earnedFeesAPRFUSDC"}}]}}]} as unknown as DocumentNode<StakeFormFragmentFragment, unknown>;
-export const DepositPositionsFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DepositPositionsFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Wallet"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positionId"}},{"kind":"Field","name":{"kind":"Name","value":"lower"}},{"kind":"Field","name":{"kind":"Name","value":"upper"}}]}}]}}]}}]} as unknown as DocumentNode<DepositPositionsFragmentFragment, unknown>;
-export const SwapFormFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SwapFormFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterPool"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"earnedFeesAPRFUSDC"}},{"kind":"Field","name":{"kind":"Name","value":"earnedFeesAPRToken1"}},{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"decimals"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"symbol"}}]}}]}}]} as unknown as DocumentNode<SwapFormFragmentFragment, unknown>;
-export const SwapProPoolFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SwapProPoolFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterPool"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"symbol"}}]}},{"kind":"Field","name":{"kind":"Name","value":"liquidity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"liquidity"}}]}},{"kind":"Field","name":{"kind":"Name","value":"priceOverTime"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"daily"}},{"kind":"Field","name":{"kind":"Name","value":"monthly"}}]}},{"kind":"Field","name":{"kind":"Name","value":"volumeOverTime"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"monthly"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token1"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"daily"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token1"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"liquidityOverTime"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"daily"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"monthly"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"swaps"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"swaps"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"amountIn"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}},{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"symbol"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"amountOut"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}},{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"symbol"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<SwapProPoolFragmentFragment, unknown>;
-export const AllDataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"AllData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pools"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"SwapProPoolFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"AllPoolsFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"SelectPrimeAssetFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"SwapExploreFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"ManagePoolFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"SwapFormFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"StakeFormFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SwapProPoolFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterPool"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"symbol"}}]}},{"kind":"Field","name":{"kind":"Name","value":"liquidity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"liquidity"}}]}},{"kind":"Field","name":{"kind":"Name","value":"priceOverTime"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"daily"}},{"kind":"Field","name":{"kind":"Name","value":"monthly"}}]}},{"kind":"Field","name":{"kind":"Name","value":"volumeOverTime"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"monthly"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token1"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"daily"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token1"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"liquidityOverTime"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"daily"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"monthly"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"swaps"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"swaps"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"amountIn"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}},{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"symbol"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"amountOut"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}},{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"symbol"}}]}}]}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AllPoolsFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterPool"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"decimals"}}]}},{"kind":"Field","name":{"kind":"Name","value":"volumeOverTime"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"daily"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"tvlOverTime"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"daily"}}]}},{"kind":"Field","name":{"kind":"Name","value":"liquidityOverTime"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"daily"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"liquidityIncentives"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"superIncentives"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"lower"}},{"kind":"Field","name":{"kind":"Name","value":"upper"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SelectPrimeAssetFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterPool"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"volumeOverTime"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"daily"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"symbol"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"decimals"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SwapExploreFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterPool"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"symbol"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"decimals"}}]}},{"kind":"Field","name":{"kind":"Name","value":"price"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ManagePoolFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterPool"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"liquidity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"liquidity"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"symbol"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"decimals"}}]}},{"kind":"Field","name":{"kind":"Name","value":"liquidityIncentives"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}},{"kind":"Field","name":{"kind":"Name","value":"superIncentives"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}},{"kind":"Field","name":{"kind":"Name","value":"utilityIncentives"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"amountGivenOut"}},{"kind":"Field","name":{"kind":"Name","value":"maximumAmount"}}]}},{"kind":"Field","name":{"kind":"Name","value":"earnedFeesAPRFUSDC"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SwapFormFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterPool"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"earnedFeesAPRFUSDC"}},{"kind":"Field","name":{"kind":"Name","value":"earnedFeesAPRToken1"}},{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"decimals"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"symbol"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"StakeFormFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterPool"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"earnedFeesAPRFUSDC"}}]}}]} as unknown as DocumentNode<AllDataQuery, AllDataQueryVariables>;
-export const ForUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ForUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"wallet"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getSwapsForUser"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"wallet"},"value":{"kind":"Variable","name":{"kind":"Name","value":"wallet"}}},{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"10"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"swaps"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TradeTabTransactionsFragment"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"getWallet"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"address"},"value":{"kind":"Variable","name":{"kind":"Name","value":"wallet"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MyPositionsWalletFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"MyPositionsInventoryWalletFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"PositionsFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"WithdrawPositionsFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"DepositPositionsFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TradeTabTransactionsFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SeawaterSwap"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"timestamp"}},{"kind":"Field","name":{"kind":"Name","value":"amountIn"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"symbol"}}]}},{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}},{"kind":"Field","name":{"kind":"Name","value":"amountOut"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"symbol"}}]}},{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MyPositionsWalletFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Wallet"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positionId"}},{"kind":"Field","name":{"kind":"Name","value":"pool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"symbol"}},{"kind":"Field","name":{"kind":"Name","value":"decimals"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"liquidity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token1"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}}]}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MyPositionsInventoryWalletFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Wallet"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"symbol"}}]}}]}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PositionsFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Wallet"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positionId"}},{"kind":"Field","name":{"kind":"Name","value":"pool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}}]}},{"kind":"Field","name":{"kind":"Name","value":"lower"}},{"kind":"Field","name":{"kind":"Name","value":"upper"}},{"kind":"Field","name":{"kind":"Name","value":"liquidity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token1"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}}]}}]}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"WithdrawPositionsFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Wallet"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positionId"}},{"kind":"Field","name":{"kind":"Name","value":"lower"}},{"kind":"Field","name":{"kind":"Name","value":"upper"}},{"kind":"Field","name":{"kind":"Name","value":"owner"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}}]}},{"kind":"Field","name":{"kind":"Name","value":"liquidity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fusdc"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}},{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}},{"kind":"Field","name":{"kind":"Name","value":"token1"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"valueUsd"}},{"kind":"Field","name":{"kind":"Name","value":"valueScaled"}}]}}]}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DepositPositionsFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Wallet"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"positionId"}},{"kind":"Field","name":{"kind":"Name","value":"lower"}},{"kind":"Field","name":{"kind":"Name","value":"upper"}}]}}]}}]}}]} as unknown as DocumentNode<ForUserQuery, ForUserQueryVariables>;
+export const AllPoolsFragmentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AllPoolsFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterPool" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "address" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "token" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "decimals" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "volumeOverTime" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "daily" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "fusdc" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueScaled" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "tvlOverTime" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "daily" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "liquidityOverTime" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "daily" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "fusdc" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueScaled" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "liquidityIncentives" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "valueUsd" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "superIncentives" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "valueUsd" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "positions" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "positions" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "lower" } },
+                      { kind: "Field", name: { kind: "Name", value: "upper" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AllPoolsFragmentFragment, unknown>;
+export const MyPositionsWalletFragmentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "MyPositionsWalletFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "Wallet" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "positions" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "positions" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "positionId" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "pool" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "token" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "name" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "address" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "symbol" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "decimals" },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "liquidity" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "fusdc" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "valueUsd" },
+                                  },
+                                ],
+                              },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "token1" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "valueUsd" },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<MyPositionsWalletFragmentFragment, unknown>;
+export const SelectPrimeAssetFragmentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SelectPrimeAssetFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterPool" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "address" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "volumeOverTime" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "daily" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "fusdc" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueUsd" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "token" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "symbol" } },
+                { kind: "Field", name: { kind: "Name", value: "address" } },
+                { kind: "Field", name: { kind: "Name", value: "decimals" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SelectPrimeAssetFragmentFragment, unknown>;
+export const ManagePoolFragmentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ManagePoolFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterPool" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "address" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "liquidity" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "liquidity" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "token" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "symbol" } },
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "decimals" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "liquidityIncentives" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "valueScaled" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "superIncentives" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "valueScaled" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "utilityIncentives" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "amountGivenOut" },
+                },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "maximumAmount" },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "earnedFeesAPRFUSDC" },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ManagePoolFragmentFragment, unknown>;
+export const PositionsFragmentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "PositionsFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "Wallet" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "positions" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "positions" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "positionId" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "pool" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "address" },
+                            },
+                          ],
+                        },
+                      },
+                      { kind: "Field", name: { kind: "Name", value: "lower" } },
+                      { kind: "Field", name: { kind: "Name", value: "upper" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "liquidity" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "fusdc" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "valueUsd" },
+                                  },
+                                ],
+                              },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "token1" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "valueUsd" },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<PositionsFragmentFragment, unknown>;
+export const WithdrawPositionsFragmentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "WithdrawPositionsFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "Wallet" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "positions" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "positions" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "positionId" },
+                      },
+                      { kind: "Field", name: { kind: "Name", value: "lower" } },
+                      { kind: "Field", name: { kind: "Name", value: "upper" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "owner" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "address" },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "liquidity" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "fusdc" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "valueUsd" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: {
+                                      kind: "Name",
+                                      value: "valueScaled",
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "token1" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "valueUsd" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: {
+                                      kind: "Name",
+                                      value: "valueScaled",
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<WithdrawPositionsFragmentFragment, unknown>;
+export const SwapExploreFragmentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SwapExploreFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterPool" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "token" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "symbol" } },
+                { kind: "Field", name: { kind: "Name", value: "address" } },
+                { kind: "Field", name: { kind: "Name", value: "decimals" } },
+              ],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "price" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SwapExploreFragmentFragment, unknown>;
+export const MyPositionsInventoryWalletFragmentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "MyPositionsInventoryWalletFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "Wallet" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "positions" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "positions" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "pool" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "token" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "name" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "address" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "symbol" },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  MyPositionsInventoryWalletFragmentFragment,
+  unknown
+>;
+export const TradeTabTransactionsFragmentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "TradeTabTransactionsFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterSwap" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "timestamp" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "amountIn" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "token" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "symbol" },
+                      },
+                    ],
+                  },
+                },
+                { kind: "Field", name: { kind: "Name", value: "valueScaled" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "amountOut" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "token" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "symbol" },
+                      },
+                    ],
+                  },
+                },
+                { kind: "Field", name: { kind: "Name", value: "valueScaled" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<TradeTabTransactionsFragmentFragment, unknown>;
+export const StakeFormFragmentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "StakeFormFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterPool" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "address" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "earnedFeesAPRFUSDC" },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<StakeFormFragmentFragment, unknown>;
+export const DepositPositionsFragmentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "DepositPositionsFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "Wallet" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "positions" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "positions" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "positionId" },
+                      },
+                      { kind: "Field", name: { kind: "Name", value: "lower" } },
+                      { kind: "Field", name: { kind: "Name", value: "upper" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DepositPositionsFragmentFragment, unknown>;
+export const SwapFormFragmentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SwapFormFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterPool" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "address" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "earnedFeesAPRFUSDC" },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "earnedFeesAPRToken1" },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "token" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "address" } },
+                { kind: "Field", name: { kind: "Name", value: "decimals" } },
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "symbol" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SwapFormFragmentFragment, unknown>;
+export const SwapProPoolFragmentFragmentDoc = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SwapProPoolFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterPool" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "address" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "token" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "address" } },
+                { kind: "Field", name: { kind: "Name", value: "symbol" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "liquidity" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "liquidity" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "priceOverTime" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "daily" } },
+                { kind: "Field", name: { kind: "Name", value: "monthly" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "volumeOverTime" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "monthly" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "token1" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "timestamp" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueUsd" },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "fusdc" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "timestamp" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueUsd" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "daily" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "token1" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "timestamp" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueUsd" },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "fusdc" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "timestamp" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueUsd" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "liquidityOverTime" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "daily" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "timestamp" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "fusdc" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueUsd" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "monthly" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "timestamp" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "fusdc" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueUsd" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "swaps" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "swaps" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "timestamp" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "amountIn" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueScaled" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "token" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "symbol" },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "amountOut" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueScaled" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "token" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "symbol" },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<SwapProPoolFragmentFragment, unknown>;
+export const AllDataDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "AllData" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "pools" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "address" } },
+                {
+                  kind: "FragmentSpread",
+                  name: { kind: "Name", value: "SwapProPoolFragment" },
+                },
+                {
+                  kind: "FragmentSpread",
+                  name: { kind: "Name", value: "AllPoolsFragment" },
+                },
+                {
+                  kind: "FragmentSpread",
+                  name: { kind: "Name", value: "SelectPrimeAssetFragment" },
+                },
+                {
+                  kind: "FragmentSpread",
+                  name: { kind: "Name", value: "SwapExploreFragment" },
+                },
+                {
+                  kind: "FragmentSpread",
+                  name: { kind: "Name", value: "ManagePoolFragment" },
+                },
+                {
+                  kind: "FragmentSpread",
+                  name: { kind: "Name", value: "SwapFormFragment" },
+                },
+                {
+                  kind: "FragmentSpread",
+                  name: { kind: "Name", value: "StakeFormFragment" },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SwapProPoolFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterPool" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "address" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "token" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "address" } },
+                { kind: "Field", name: { kind: "Name", value: "symbol" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "liquidity" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "liquidity" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "priceOverTime" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "daily" } },
+                { kind: "Field", name: { kind: "Name", value: "monthly" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "volumeOverTime" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "monthly" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "token1" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "timestamp" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueUsd" },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "fusdc" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "timestamp" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueUsd" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "daily" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "token1" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "timestamp" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueUsd" },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "fusdc" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "timestamp" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueUsd" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "liquidityOverTime" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "daily" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "timestamp" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "fusdc" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueUsd" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "monthly" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "timestamp" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "fusdc" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueUsd" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "swaps" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "swaps" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "timestamp" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "amountIn" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueScaled" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "token" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "symbol" },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "amountOut" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueScaled" },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "token" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "symbol" },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "AllPoolsFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterPool" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "address" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "token" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "decimals" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "volumeOverTime" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "daily" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "fusdc" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueScaled" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "tvlOverTime" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "daily" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "liquidityOverTime" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "daily" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "fusdc" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueScaled" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "liquidityIncentives" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "valueUsd" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "superIncentives" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "valueUsd" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "positions" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "positions" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "lower" } },
+                      { kind: "Field", name: { kind: "Name", value: "upper" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SelectPrimeAssetFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterPool" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "address" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "volumeOverTime" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "daily" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "fusdc" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "valueUsd" },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "token" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "symbol" } },
+                { kind: "Field", name: { kind: "Name", value: "address" } },
+                { kind: "Field", name: { kind: "Name", value: "decimals" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SwapExploreFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterPool" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "token" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "symbol" } },
+                { kind: "Field", name: { kind: "Name", value: "address" } },
+                { kind: "Field", name: { kind: "Name", value: "decimals" } },
+              ],
+            },
+          },
+          { kind: "Field", name: { kind: "Name", value: "price" } },
+        ],
+      },
+    },
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "ManagePoolFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterPool" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "address" } },
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "liquidity" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "liquidity" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "token" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "symbol" } },
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "decimals" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "liquidityIncentives" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "valueScaled" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "superIncentives" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "valueScaled" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "utilityIncentives" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "amountGivenOut" },
+                },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "maximumAmount" },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "earnedFeesAPRFUSDC" },
+          },
+        ],
+      },
+    },
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "SwapFormFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterPool" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "address" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "earnedFeesAPRFUSDC" },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "earnedFeesAPRToken1" },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "token" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "address" } },
+                { kind: "Field", name: { kind: "Name", value: "decimals" } },
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "symbol" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "StakeFormFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterPool" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "address" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "earnedFeesAPRFUSDC" },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AllDataQuery, AllDataQueryVariables>;
+export const ForUserDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "ForUser" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: {
+            kind: "Variable",
+            name: { kind: "Name", value: "wallet" },
+          },
+          type: {
+            kind: "NonNullType",
+            type: {
+              kind: "NamedType",
+              name: { kind: "Name", value: "String" },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "getSwapsForUser" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "wallet" },
+                value: {
+                  kind: "Variable",
+                  name: { kind: "Name", value: "wallet" },
+                },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "IntValue", value: "10" },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "data" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "swaps" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "FragmentSpread",
+                              name: {
+                                kind: "Name",
+                                value: "TradeTabTransactionsFragment",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "getWallet" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "address" },
+                value: {
+                  kind: "Variable",
+                  name: { kind: "Name", value: "wallet" },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "FragmentSpread",
+                  name: { kind: "Name", value: "MyPositionsWalletFragment" },
+                },
+                {
+                  kind: "FragmentSpread",
+                  name: {
+                    kind: "Name",
+                    value: "MyPositionsInventoryWalletFragment",
+                  },
+                },
+                {
+                  kind: "FragmentSpread",
+                  name: { kind: "Name", value: "PositionsFragment" },
+                },
+                {
+                  kind: "FragmentSpread",
+                  name: { kind: "Name", value: "WithdrawPositionsFragment" },
+                },
+                {
+                  kind: "FragmentSpread",
+                  name: { kind: "Name", value: "DepositPositionsFragment" },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "TradeTabTransactionsFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "SeawaterSwap" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "timestamp" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "amountIn" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "token" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "symbol" },
+                      },
+                    ],
+                  },
+                },
+                { kind: "Field", name: { kind: "Name", value: "valueScaled" } },
+              ],
+            },
+          },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "amountOut" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "token" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "symbol" },
+                      },
+                    ],
+                  },
+                },
+                { kind: "Field", name: { kind: "Name", value: "valueScaled" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "MyPositionsWalletFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "Wallet" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "positions" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "positions" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "positionId" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "pool" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "token" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "name" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "address" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "symbol" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "decimals" },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "liquidity" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "fusdc" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "valueUsd" },
+                                  },
+                                ],
+                              },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "token1" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "valueUsd" },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "MyPositionsInventoryWalletFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "Wallet" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "id" } },
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "positions" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "positions" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "pool" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "token" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "name" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "address" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "symbol" },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "PositionsFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "Wallet" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "positions" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "positions" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "positionId" },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "pool" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "address" },
+                            },
+                          ],
+                        },
+                      },
+                      { kind: "Field", name: { kind: "Name", value: "lower" } },
+                      { kind: "Field", name: { kind: "Name", value: "upper" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "liquidity" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "fusdc" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "valueUsd" },
+                                  },
+                                ],
+                              },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "token1" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "valueUsd" },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "WithdrawPositionsFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "Wallet" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "positions" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "positions" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "positionId" },
+                      },
+                      { kind: "Field", name: { kind: "Name", value: "lower" } },
+                      { kind: "Field", name: { kind: "Name", value: "upper" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "owner" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "address" },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "liquidity" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "fusdc" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "valueUsd" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: {
+                                      kind: "Name",
+                                      value: "valueScaled",
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "token1" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "valueUsd" },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: {
+                                      kind: "Name",
+                                      value: "valueScaled",
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      kind: "FragmentDefinition",
+      name: { kind: "Name", value: "DepositPositionsFragment" },
+      typeCondition: {
+        kind: "NamedType",
+        name: { kind: "Name", value: "Wallet" },
+      },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "positions" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "positions" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "positionId" },
+                      },
+                      { kind: "Field", name: { kind: "Name", value: "lower" } },
+                      { kind: "Field", name: { kind: "Name", value: "upper" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ForUserQuery, ForUserQueryVariables>;

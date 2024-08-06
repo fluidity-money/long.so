@@ -1,49 +1,49 @@
 export const output = {
-  "abi": [
+  abi: [
     {
-      "type": "function",
-      "name": "claimAmount",
-      "inputs": [],
-      "outputs": [],
-      "stateMutability": "nonpayable"
+      type: "function",
+      name: "claimAmount",
+      inputs: [],
+      outputs: [],
+      stateMutability: "nonpayable",
     },
     {
-      "type": "function",
-      "name": "timeUntilNextClaim",
-      "inputs": [
+      type: "function",
+      name: "timeUntilNextClaim",
+      inputs: [
         {
-          "name": "_recipient",
-          "type": "address",
-          "internalType": "address"
-        }
+          name: "_recipient",
+          type: "address",
+          internalType: "address",
+        },
       ],
-      "outputs": [
+      outputs: [
         {
-          "name": "",
-          "type": "uint256",
-          "internalType": "uint256"
-        }
+          name: "",
+          type: "uint256",
+          internalType: "uint256",
+        },
       ],
-      "stateMutability": "view"
+      stateMutability: "view",
     },
     {
-      "type": "function",
-      "name": "isMember",
-      "inputs": [
+      type: "function",
+      name: "isMember",
+      inputs: [
         {
-          "name": "_recipient",
-          "type": "address",
-          "internalType": "address"
-        }
+          name: "_recipient",
+          type: "address",
+          internalType: "address",
+        },
       ],
-      "outputs": [
+      outputs: [
         {
-          "name": "",
-          "type": "bool",
-          "internalType": "bool"
-        }
+          name: "",
+          type: "bool",
+          internalType: "bool",
+        },
       ],
-      "stateMutability": "view"
-    }
+      stateMutability: "view",
+    },
   ],
 } as const;

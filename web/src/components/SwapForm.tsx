@@ -25,6 +25,7 @@ import {
   useClient,
   useChainId,
   useWalletClient,
+  useConnectorClient,
 } from "wagmi";
 import { formatEther, maxUint256 } from "viem";
 import { useWalletInfo, useWeb3Modal } from "@web3modal/wagmi/react";
@@ -37,10 +38,14 @@ import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 import { useToast } from "@/components/ui/use-toast";
 import { estimateContractGas } from "viem/actions";
-import { getFormattedPriceFromAmount, snapAmountToDecimals } from "@/lib/amounts";
+import {
+  getFormattedPriceFromAmount,
+  snapAmountToDecimals,
+} from "@/lib/amounts";
 import { RewardsBreakdown } from "@/components/RewardsBreakdown";
 import { useRouter } from "next/navigation";
 import { TokenIcon } from "./TokenIcon";
+import { config } from "@/config";
 
 const SwapFormFragment = graphql(`
   fragment SwapFormFragment on SeawaterPool {
@@ -69,7 +74,7 @@ export const SwapForm = () => {
   const showSuperloopPopover = useFeatureFlag("ui show superloop");
   const showCampaignBanner = useFeatureFlag("ui show campaign banner");
   const showMockData = useFeatureFlag("ui show demo data");
-  const showSwapBreakdown = useFeatureFlag("ui show swap breakdown")
+  const showSwapBreakdown = useFeatureFlag("ui show swap breakdown");
 
   useEffect(() => {
     if (!welcome) {
@@ -93,20 +98,18 @@ export const SwapForm = () => {
   const { data } = useGraphqlGlobal();
 
   const [token0AmountFloat, token1AmountFloat] = useMemo(() => {
-    const token1Float = parseFloat(token1Amount ?? "0")
-    if (token0Amount === "." || token0Amount === "")
-      return [0, token1Float]
+    const token1Float = parseFloat(token1Amount ?? "0");
+    if (token0Amount === "." || token0Amount === "") return [0, token1Float];
 
-    const token0Float = parseFloat(token0Amount ?? "0")
-    return [token0Float, token1Float]
-  }, [token0Amount, token1Amount])
+    const token0Float = parseFloat(token0Amount ?? "0");
+    return [token0Float, token1Float];
+  }, [token0Amount, token1Amount]);
 
   // priceRatio is the amount of token0 worth 1 token1 for the current swap inputs
   const priceRatio = useMemo(() => {
-    if (token1AmountFloat === 0)
-      return 0
-    return token0AmountFloat / token1AmountFloat
-  }, [token0AmountFloat, token1AmountFloat])
+    if (token1AmountFloat === 0) return 0;
+    return token0AmountFloat / token1AmountFloat;
+  }, [token0AmountFloat, token1AmountFloat]);
 
   const poolsData = useFragment(SwapFormFragment, data?.pools);
 
@@ -121,8 +124,11 @@ export const SwapForm = () => {
   }, [poolsData, token0.address, token1.address]);
 
   const { address, chainId } = useAccount();
-  const expectedChainId = useChainId()
-  const isCorrectChain = useMemo(() => chainId === expectedChainId, [chainId, expectedChainId])
+  const expectedChainId = useChainId();
+  const isCorrectChain = useMemo(
+    () => chainId === expectedChainId,
+    [chainId, expectedChainId],
+  );
 
   // the user is currently swapping the "base" asset, the fUSDC
   // asset, into the other.
@@ -134,18 +140,26 @@ export const SwapForm = () => {
   // the pool currently in use's price
   const poolAddress = isSwappingBaseAsset ? token1!.address : token0.address;
 
+  // useSimulateContract throws if connector.account is not defined
+  // so we must check if it exists or use a dummy address for sqrtPriceX96 and quote/quote2
+  const { data: connector } = useConnectorClient();
+  const simulateAccount =
+    connector?.account ?? "0x1111111111111111111111111111111111111111";
+
   // price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "sqrtPriceX96",
+    account: simulateAccount,
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [poolAddress],
   });
 
   const { data: token1SqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "sqrtPriceX96",
+    account: simulateAccount,
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [token1.address],
   });
 
@@ -160,19 +174,19 @@ export const SwapForm = () => {
   const { data: token0Balance } = useBalance({
     address,
     token: token0.address,
-  })
+  });
 
   const { data: token1Balance } = useBalance({
     address,
     token: token1.address,
-  })
-
+  });
 
   const { error: quote1Error, isLoading: quote1IsLoading } =
     useSimulateContract({
       address: ammAddress,
+      account: simulateAccount,
       abi: seawaterContract.abi,
-      functionName: "quote",
+      functionName: "quote72E2ADE7",
       args: [
         poolAddress,
         token1.address === fUSDC.address,
@@ -186,7 +200,7 @@ export const SwapForm = () => {
       },
     });
 
-  const client = useClient()
+  const client = useClient();
 
   const swapOptions = useMemo(() => {
     if (isSwappingBaseAsset) {
@@ -194,37 +208,36 @@ export const SwapForm = () => {
       return {
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "swap",
+        functionName: "swap904369BE",
         args: [token1.address, false, BigInt(token0AmountRaw ?? 0), maxUint256],
-      } as const
+      } as const;
     } else if (token1.address === fUSDC.address) {
       return {
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "swap",
+        functionName: "swap904369BE",
         args: [token0.address, true, BigInt(token0AmountRaw ?? 0), maxUint256],
-      } as const
+      } as const;
     } else {
       // if both of the assets aren't fusdc, use swap2
       return {
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "swap2ExactIn",
+        functionName: "swap2ExactIn41203F1D",
         args: [
           token0.address,
           token1.address,
           BigInt(token0AmountRaw ?? 0),
           BigInt(0),
         ],
-      } as const
+      } as const;
     }
-  }, [isSwappingBaseAsset, token0AmountRaw, token0.address, token1.address])
+  }, [isSwappingBaseAsset, token0AmountRaw, token0.address, token1.address]);
 
   // TODO this is in ETH(/SPN), not USD
   useEffect(() => {
     (async () => {
-      if (!client || !address)
-        return
+      if (!client || !address) return;
       try {
         const estimatedGas = await estimateContractGas(client, {
           ...swapOptions,
@@ -233,17 +246,18 @@ export const SwapForm = () => {
           // @ts-expect-error
           args: swapOptions.args,
           account: address,
-        })
-        setGas(estimatedGas)
-      } catch { }
-    })()
-  }, [address, client, token1, token0AmountRaw, swapOptions])
+        });
+        setGas(estimatedGas);
+      } catch {}
+    })();
+  }, [address, client, token1, token0AmountRaw, swapOptions]);
 
   const { error: quote2Error, isLoading: quote2IsLoading } =
     useSimulateContract({
       address: ammAddress,
       abi: seawaterContract.abi,
-      functionName: "quote2",
+      account: simulateAccount,
+      functionName: "quote2CD06B86E",
       args: [
         token0.address,
         token1.address,
@@ -262,15 +276,23 @@ export const SwapForm = () => {
    * Parse the quote amount from the error message
    */
   const [quoteAmount, quoteIsLoading] = useMemo(() => {
-    const quoteError = isSwap1 ? quote1Error : quote2Error
-    const quoteIsLoading = isSwap1 ? quote1IsLoading : quote2IsLoading
+    const quoteError = isSwap1 ? quote1Error : quote2Error;
+    const quoteIsLoading = isSwap1 ? quote1IsLoading : quote2IsLoading;
     const [, quoteAmountString] =
       quoteError?.message.match(
         /reverted with the following reason:\n(.+)\n/,
       ) || [];
 
     return [BigInt(quoteAmountString ?? 0), quoteIsLoading];
-  }, [token0, token1, isSwap1, quote1Error, quote1IsLoading, quote2Error, quote2IsLoading]);
+  }, [
+    token0,
+    token1,
+    isSwap1,
+    quote1Error,
+    quote1IsLoading,
+    quote2Error,
+    quote2IsLoading,
+  ]);
 
   // update the token1 amount when the quote amount changes
   useEffect(() => {
@@ -278,17 +300,17 @@ export const SwapForm = () => {
   }, [quoteAmount, setToken1AmountRaw]);
 
   const setMaxBalance = () => {
-    setToken0AmountRaw(token0Balance?.value.toString() ?? token0Amount ?? "0")
-  }
+    setToken0AmountRaw(token0Balance?.value.toString() ?? token0Amount ?? "0");
+  };
 
   const { open } = useWeb3Modal();
 
   // make user confirm before receiving 0 tokens from a swap
-  const [allowZeroSwap, setAllowZeroSwap] = useState(false)
+  const [allowZeroSwap, setAllowZeroSwap] = useState(false);
 
   useEffect(() => {
-    setAllowZeroSwap(false)
-  }, [token0, token1, token0AmountFloat, token1AmountFloat])
+    setAllowZeroSwap(false);
+  }, [token0, token1, token0AmountFloat, token1AmountFloat]);
 
   /**
    * Approve the AMM to spend the token
@@ -310,11 +332,11 @@ export const SwapForm = () => {
         title: "Zero Value Swap",
         description: `This swap will result in you receiving 0 ${token1.symbol}. Press "Swap" again to make the swap anyway.`,
       });
-      setAllowZeroSwap(true)
+      setAllowZeroSwap(true);
       return;
     }
 
-    router.push(`/swap/confirm`)
+    router.push(`/swap/confirm`);
   };
 
   return (
@@ -386,15 +408,23 @@ export const SwapForm = () => {
                   variant={"no-ring"}
                   placeholder={welcome ? "1024.82" : undefined}
                   value={token0Amount}
-                  onChange={(e) => setToken0Amount(e.target.value, token0Balance?.value.toString())}
+                  onChange={(e) =>
+                    setToken0Amount(
+                      e.target.value,
+                      token0Balance?.value.toString(),
+                    )
+                  }
                 />
 
                 <Link href={"/swap/explore?token=0"}>
                   <Badge
                     variant="outline"
-                    className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base w-max space-x-1"
+                    className="flex h-[26px] w-max cursor-pointer flex-row justify-between space-x-1 pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base"
                   >
-                    <TokenIcon className="size-[20px] md:size-[25px]" src={token0.icon} />
+                    <TokenIcon
+                      className="size-[20px] md:size-[25px]"
+                      src={token0.icon}
+                    />
                     <div>{token0.symbol}</div>
                     <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
                   </Badge>
@@ -403,7 +433,16 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${snapAmountToDecimals(token0.address === fUSDC.address ? token0AmountFloat : getFormattedPriceFromAmount(token0AmountFloat.toString(), token0Price, fUSDC.decimals))}
+                  $
+                  {snapAmountToDecimals(
+                    token0.address === fUSDC.address
+                      ? token0AmountFloat
+                      : getFormattedPriceFromAmount(
+                          token0AmountFloat.toString(),
+                          token0Price,
+                          fUSDC.decimals,
+                        ),
+                  )}
                 </div>
 
                 <div
@@ -412,12 +451,14 @@ export const SwapForm = () => {
                   }
                 >
                   {token0Balance && (
-                    <div>
-                      Balance:{" "}
-                      {token0Balance.formatted}
-                    </div>
+                    <div>Balance: {token0Balance.formatted}</div>
                   )}
-                  <div onClick={setMaxBalance} className={"cursor-pointer underline"}>Max</div>
+                  <div
+                    onClick={setMaxBalance}
+                    className={"cursor-pointer underline"}
+                  >
+                    Max
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -468,9 +509,12 @@ export const SwapForm = () => {
                 <Link href={"/swap/explore?token=1"}>
                   <Badge
                     variant="outline"
-                    className="flex h-[26px] cursor-pointer flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base space-x-1"
+                    className="flex h-[26px] cursor-pointer flex-row justify-between space-x-1 pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base"
                   >
-                    <TokenIcon className="size-[20px] md:size-[25px]" src={token1.icon} />
+                    <TokenIcon
+                      className="size-[20px] md:size-[25px]"
+                      src={token1.icon}
+                    />
                     <div>{token1.symbol}</div>
                     <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
                   </Badge>
@@ -479,7 +523,16 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  ${snapAmountToDecimals(token1.address === fUSDC.address ? token1AmountFloat : getFormattedPriceFromAmount(token1AmountFloat.toString(), token1Price, fUSDC.decimals))}
+                  $
+                  {snapAmountToDecimals(
+                    token1.address === fUSDC.address
+                      ? token1AmountFloat
+                      : getFormattedPriceFromAmount(
+                          token1AmountFloat.toString(),
+                          token1Price,
+                          fUSDC.decimals,
+                        ),
+                  )}
                 </div>
 
                 <div
@@ -488,10 +541,7 @@ export const SwapForm = () => {
                   }
                 >
                   {token1Balance && (
-                    <div>
-                      Balance:{" "}
-                      {token1Balance.formatted}
-                    </div>
+                    <div>Balance: {token1Balance.formatted}</div>
                   )}
                 </div>
               </div>
@@ -519,7 +569,8 @@ export const SwapForm = () => {
                   hidden: breakdownHidden,
                 })}
               >
-                {priceRatio} {token0.symbol} ≈ {token1AmountFloat === 0 ? "0" : "1"} {token1.symbol}
+                {priceRatio} {token0.symbol} ≈{" "}
+                {token1AmountFloat === 0 ? "0" : "1"} {token1.symbol}
               </div>
 
               <div className={"cursor-pointer text-[10px] md:text-[12px]"}>
@@ -527,7 +578,7 @@ export const SwapForm = () => {
                   onClick={() => setBreakdownHidden((v) => !v)}
                   className="flex cursor-pointer flex-row"
                 >
-                  {showSwapBreakdown ?
+                  {showSwapBreakdown ? (
                     breakdownHidden ? (
                       <>
                         <div className="underline">See breakdown</div>
@@ -538,8 +589,10 @@ export const SwapForm = () => {
                         <div className="underline">Hide breakdown</div>
                         <div className="ml-1 rotate-90">{"<-"}</div>
                       </>
-                    ) : <></>
-                  }
+                    )
+                  ) : (
+                    <></>
+                  )}
                 </div>
               </div>
             </div>
@@ -596,30 +649,34 @@ export const SwapForm = () => {
               </div>
             </Badge>
             <RewardsBreakdown hidden={breakdownHidden} />
-            {address ?
+            {address ? (
               isCorrectChain ? (
                 <Button
-                  className={cn("mt-[20px] h-[53.92px] w-full inline-flex", token1AmountFloat === 0 && !allowZeroSwap && "opacity-50")}
+                  className={cn(
+                    "mt-[20px] inline-flex h-[53.92px] w-full",
+                    token1AmountFloat === 0 && !allowZeroSwap && "opacity-50",
+                  )}
                   onClick={onSubmit}
                 >
                   Swap
                 </Button>
               ) : (
                 <Button
-                  className={"mt-[20px] h-[53.92px] w-full inline-flex"} 
+                  className={"mt-[20px] inline-flex h-[53.92px] w-full"}
                   variant={"destructiveBorder"}
-                  onClick={() => open({ view: 'Networks' })}
+                  onClick={() => open({ view: "Networks" })}
                 >
                   Wrong Network
                 </Button>
-              ) : (
-                <Button
-                  className={"mt-[20px] h-[53.92px] w-full inline-flex"}
-                  onClick={() => open()}
-                >
-                  Connect Wallet
-                </Button>
-              )}
+              )
+            ) : (
+              <Button
+                className={"mt-[20px] inline-flex h-[53.92px] w-full"}
+                onClick={() => open()}
+              >
+                Connect Wallet
+              </Button>
+            )}
           </motion.div>
         </div>
       </motion.div>

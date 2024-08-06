@@ -24,7 +24,7 @@ export type Pool = {
   annualPercentageYield: number;
   claimable: boolean;
   boosted?: boolean;
-  liquidityRange: [string, string]
+  liquidityRange: [string, string];
 };
 
 export const columns: ColumnDef<Pool>[] = [
@@ -32,12 +32,12 @@ export const columns: ColumnDef<Pool>[] = [
     accessorKey: "tokens",
     header: "Pair",
     cell: ({ row }) => {
-      const token = getTokenFromAddress(row.original.id)
+      const token = getTokenFromAddress(row.original.id);
       return (
         <Link href={`/stake/pool?id=${row.original.id}`}>
           <Badge className="h-[35.61px] cursor-pointer gap-1 pl-1 text-2xs md:text-xs">
             <div className={"flex flex-row items-center"}>
-              <TokenIcon src={token?.icon} className="rounded-lg size-[25px]" />
+              <TokenIcon src={token?.icon} className="size-[25px] rounded-lg" />
               <TokenIridescent className={"-ml-2 mb-3 size-[18px]"} />
             </div>
             <div className={"iridescent-text flex flex-row items-center gap-2"}>

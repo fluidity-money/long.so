@@ -20,7 +20,7 @@ export const USDC: Token = {
   symbol: "USDC",
   decimals: 6,
   icon: "/icons/usd-coin-usdc-logo.svg",
-}
+};
 
 export const WETH: Token = {
   name: "Wrapped Ethereum",
@@ -28,7 +28,7 @@ export const WETH: Token = {
   symbol: "WETH",
   decimals: 18,
   icon: "/icons/ethereum-eth-logo.svg",
-}
+};
 
 export const WSPN: Token = {
   name: "Wrapped Superposition",
@@ -36,27 +36,21 @@ export const WSPN: Token = {
   symbol: "WSPN",
   decimals: 18,
   icon: "/icons/ICON_BLACK.png",
+};
 
-}
-
-export const CAT: Token = {
-  name: "Cat Coin",
-  address: "0x09f7156aae9c903f90b1cb1e312582c4f208a759",
-  symbol: "CAT",
+export const CATBUX: Token = {
+  name: "CATBUX",
+  address: "0x36c116a8851869cf8a99b3bda0fad42453d32b99",
+  symbol: "BUX",
   decimals: 18,
-}
+  icon: "/icons/cbux.svg",
+};
 
-const allTokens: Token[] = [
-  fUSDC,
-  USDC,
-  WSPN,
-  WETH,
-  CAT,
-];
+const allTokens: Token[] = [fUSDC, USDC, WSPN, WETH, CATBUX];
 
 export const DefaultToken = USDC;
 
 export const getTokenFromAddress = (address_: string): Token | undefined =>
-  allTokens.find(({ address }) => address === address_)
+  allTokens.find(({ address }) => address === address_);
 
 export const mockTokens: Token[] = [DefaultToken];

@@ -5,12 +5,13 @@ import { http } from "viem";
 import { arbitrumStylusTestnet } from "./arbitrumStylusTestnet";
 
 // Get projectId at https://cloud.walletconnect.com
-export const projectId = process.env.NEXT_PUBLIC_LONGTAIL_WALLETCONNECT_PROJECT_ID;
+export const projectId =
+  process.env.NEXT_PUBLIC_LONGTAIL_WALLETCONNECT_PROJECT_ID;
 
 if (!projectId) throw new Error("Project ID is not defined");
 
 const metadata = {
-  name: "Long Tail",
+  name: "Longtail",
   description: "",
   url: "https://long.so",
   icons: [""],

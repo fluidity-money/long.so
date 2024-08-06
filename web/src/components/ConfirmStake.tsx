@@ -14,7 +14,11 @@ import {
   useWriteContract,
 } from "wagmi";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
-import { sqrtPriceX96ToPrice, getLiquidityForAmounts, snapTickToSpacing } from "@/lib/math";
+import {
+  sqrtPriceX96ToPrice,
+  getLiquidityForAmounts,
+  snapTickToSpacing,
+} from "@/lib/math";
 import { useEffect, useCallback, useMemo } from "react";
 import { erc20Abi, Hash, hexToBigInt, maxUint256 } from "viem";
 import { ammAddress } from "@/lib/addresses";
@@ -27,24 +31,25 @@ import { getFormattedPriceFromAmount } from "@/lib/amounts";
 import { fUSDC } from "@/config/tokens";
 import { TokenIcon } from "./TokenIcon";
 
-type ConfirmStakeProps = {
-  mode: "new"
-  positionId?: never,
-} | {
-  mode: "existing",
-  positionId: number,
-};
+type ConfirmStakeProps =
+  | {
+      mode: "new";
+      positionId?: never;
+    }
+  | {
+      mode: "existing";
+      positionId: number;
+    };
 
 export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const router = useRouter();
 
   const { address, chainId } = useAccount();
-  const expectedChainId = useChainId()
+  const expectedChainId = useChainId();
 
   useEffect(() => {
-    if (!address || chainId !== expectedChainId)
-      router.back()
-  }, [address, expectedChainId, chainId])
+    if (!address || chainId !== expectedChainId) router.back();
+  }, [address, expectedChainId, chainId]);
 
   const {
     token0,
@@ -56,13 +61,13 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     tickLower,
     tickUpper,
     multiSingleToken,
-  } = useStakeStore()
+  } = useStakeStore();
 
   // Price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "sqrtPriceX96",
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
   });
 
@@ -100,15 +105,15 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const { data: curTickNum } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "curTick",
+    functionName: "curTick181C6FD9",
     args: [token0.address],
   });
-  const curTick = { result: BigInt(curTickNum?.result ?? 0) }
+  const curTick = { result: BigInt(curTickNum?.result ?? 0) };
 
   const { data: tickSpacing } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "tickSpacing",
+    functionName: "tickSpacing653FE28F",
     args: [token0.address],
   });
 
@@ -144,15 +149,19 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   console.log(updatePositionError);
   console.log(mintData);
 
-  const delta = useMemo(() =>
-    (!curTick || tickLower === undefined || tickUpper === undefined) ? 0n :
-      getLiquidityForAmounts(
-        curTick.result,
-        BigInt(tickLower),
-        BigInt(tickUpper),
-        BigInt(token0AmountRaw),
-        BigInt(token1AmountRaw),
-      ), [curTick, tickLower, tickUpper, token0AmountRaw, token1AmountRaw]);
+  const delta = useMemo(
+    () =>
+      !curTick || tickLower === undefined || tickUpper === undefined
+        ? 0n
+        : getLiquidityForAmounts(
+            curTick.result,
+            BigInt(tickLower),
+            BigInt(tickUpper),
+            BigInt(token0AmountRaw),
+            BigInt(token1AmountRaw),
+          ),
+    [curTick, tickLower, tickUpper, token0AmountRaw, token1AmountRaw],
+  );
 
   /**
    * Create a new position in the AMM.
@@ -160,22 +169,27 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
    * Step 1. Mint a new position
    */
   const createPosition = () => {
-    if (tickLower === undefined || tickUpper === undefined || tickLower >= tickUpper || !tickSpacing)
-      return
+    if (
+      tickLower === undefined ||
+      tickUpper === undefined ||
+      tickLower >= tickUpper ||
+      !tickSpacing
+    )
+      return;
 
     const { result: spacing } = tickSpacing;
 
     // snap ticks to spacing
-    const lower = snapTickToSpacing(tickLower, spacing)
-    const upper = snapTickToSpacing(tickUpper, spacing)
+    const lower = snapTickToSpacing(tickLower, spacing);
+    const upper = snapTickToSpacing(tickUpper, spacing);
 
     writeContractMint({
       address: ammAddress,
       abi: seawaterContract.abi,
-      functionName: "mintPosition",
+      functionName: "mintPositionBC5B086D",
       args: [token0.address, lower, upper],
     });
-  }
+  };
 
   // wait for the mintPosition transaction to complete
   const result = useWaitForTransactionReceipt({
@@ -190,15 +204,11 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
       writeContractUpdatePosition({
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "updatePosition",
+        functionName: "updatePositionC7F1F740",
         args: [token0.address, id, delta],
       });
     },
-    [
-      writeContractUpdatePosition,
-      delta,
-      token0,
-    ],
+    [writeContractUpdatePosition, delta, token0],
   );
 
   /**
@@ -254,7 +264,9 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     if (!mintPositionId) return;
 
     approveToken0();
-  }, [approveToken0, mintPositionId]);
+    // including approveToken0 in this dependency array causes changes in allowance data
+    // to retrigger the staking flow, as allowance data is a dependency of approveToken0
+  }, [mintPositionId]);
 
   // wait for the approval transaction to complete
   const approvalToken0Result = useWaitForTransactionReceipt({
@@ -265,7 +277,9 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   useEffect(() => {
     if (!approvalToken0Result.data || !mintPositionId) return;
     approveToken1();
-  }, [approveToken1, approvalToken0Result.data, mintPositionId]);
+    // including approveToken1 in this dependency array causes changes in allowance data
+    // to retrigger the staking flow, as allowance data is a dependency of approveToken1
+  }, [approvalToken0Result.data, mintPositionId]);
 
   const approvalToken1Result = useWaitForTransactionReceipt({
     hash: approvalDataToken1,
@@ -284,12 +298,14 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
 
   // step 1 pending
   if (isMintPending || (mintData && result?.isPending)) {
-    return <Confirm
-      text={"Stake"}
-      fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
-      toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
-      transactionHash={mintData}
-    />;
+    return (
+      <Confirm
+        text={"Stake"}
+        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+        transactionHash={mintData}
+      />
+    );
   }
 
   // step 2 pending
@@ -323,25 +339,30 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     isUpdatePositionPending ||
     (updatePositionData && updatePositionResult?.isPending)
   ) {
-    return <Confirm
-      text={"Stake"}
-      fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
-      toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
-      transactionHash={updatePositionData}
-    />;
+    return (
+      <Confirm
+        text={"Stake"}
+        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+        transactionHash={updatePositionData}
+      />
+    );
   }
 
   // success
   if (updatePositionResult.data) {
-    return <Success
-      transactionHash={updatePositionResult.data.transactionHash}
-      onDone={() => {
-        resetUpdatePosition()
-        resetApproveToken0()
-        resetApproveToken1()
-        updatePositionResult.refetch()
-      }}
-    />;
+    return (
+      <Success
+        transactionHash={updatePositionResult.data.transactionHash}
+        onDone={() => {
+          resetUpdatePosition();
+          resetApproveToken0();
+          resetApproveToken1();
+          updatePositionResult.refetch();
+          router.push("/stake");
+        }}
+      />
+    );
   }
 
   // error
@@ -399,7 +420,12 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
             </span>
           </div>
           <div className="mt-[4px] text-2xl font-medium md:text-3xl">
-            ${getFormattedPriceFromAmount(token0Amount, tokenPrice, fUSDC.decimals) + Number(token1Amount)}
+            $
+            {getFormattedPriceFromAmount(
+              token0Amount,
+              tokenPrice,
+              fUSDC.decimals,
+            ) + Number(token1Amount)}
           </div>
           <div className="mt-[4px] text-3xs font-medium text-gray-2 md:text-2xs">
             The amount is split into{" "}
@@ -446,7 +472,10 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
                 <div className="text-3xs md:text-2xs">{token0.symbol}</div>
                 <div className="flex  flex-row items-center justify-between">
                   <div className="flex flex-row items-center gap-1 text-sm md:gap-2 md:text-2xl">
-                    <TokenIcon src={token0.icon} className={"invert size-[16px]"} />
+                    <TokenIcon
+                      src={token0.icon}
+                      className={"size-[16px] invert"}
+                    />
                     <div>{token0Amount}</div>
                   </div>
                   <div className="text-3xs text-gray-2 md:text-xs">50%</div>
@@ -480,9 +509,17 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
             {token0.symbol}
           </div>
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
-            <TokenIcon src={token0.icon} className={"invert size-[24px]"} /> {token0Amount}
+            <TokenIcon src={token0.icon} className={"size-[24px] invert"} />{" "}
+            {token0Amount}
           </div>
-          <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">= ${getFormattedPriceFromAmount(token0Amount, tokenPrice, fUSDC.decimals)}</div>
+          <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">
+            = $
+            {getFormattedPriceFromAmount(
+              token0Amount,
+              tokenPrice,
+              fUSDC.decimals,
+            )}
+          </div>
         </div>
 
         <div
@@ -492,7 +529,8 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
         >
           <div className="text-3xs font-medium md:text-2xs">ƒUSDC</div>
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
-            <TokenIcon src={token1.icon} className={"invert size-[24px]"} /> {token1Amount}
+            <TokenIcon src={token1.icon} className={"size-[24px] invert"} />{" "}
+            {token1Amount}
           </div>
           <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">
             = ${token1Amount}
@@ -581,7 +619,11 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
           <Button
             variant={"secondary"}
             className="w-full max-w-[350px]"
-            onClick={() => { mode === "new" ? createPosition() : updatePosition(BigInt(positionId)) }}
+            onClick={() => {
+              mode === "new"
+                ? createPosition()
+                : updatePosition(BigInt(positionId));
+            }}
           >
             Confirm Stake
           </Button>

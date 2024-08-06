@@ -1,7 +1,6 @@
 use libseawater::types::{U256Extension, U256};
 use std::ops::{Add, BitAnd, BitOrAssign, BitXor, Div, Mul, MulAssign};
 
-use libseawater::maths::full_math::*;
 use libseawater::{
     error::Error,
     maths::utils::{RUINT_ONE, RUINT_THREE, RUINT_TWO, RUINT_ZERO},
@@ -14,7 +13,7 @@ pub fn mul_div(a: U256, b: U256, mut denominator: U256) -> Result<U256, Error> {
     // then use the Chinese Remainder Theorem to reconstruct
     // the 512 bit result. The result is stored in two 256
     // variables such that product = prod1 * 2**256 + prod0
-    let mm = mul_mod(a, b, U256::MAX);
+    let mm = a.mul_mod(b, U256::MAX);
 
     let mut prod_0 = a.overflowing_mul(b).0; // Least significant 256 bits of the product
     let mut prod_1 = mm
@@ -24,11 +23,11 @@ pub fn mul_div(a: U256, b: U256, mut denominator: U256) -> Result<U256, Error> {
         .0;
 
     // Handle non-overflow cases, 256 by 256 division
-    if prod_1 == RUINT_ZERO {
-        if denominator == RUINT_ZERO {
+    if prod_1 == U256::ZERO {
+        if denominator == U256::ZERO {
             return Err(Error::DenominatorIsZero);
         }
-        return Ok(prod_0.div(denominator));
+        return Ok(U256::from_limbs(*prod_0.div(denominator).as_limbs()));
     }
 
     // Make sure the result is less than 2**256.
@@ -44,7 +43,7 @@ pub fn mul_div(a: U256, b: U256, mut denominator: U256) -> Result<U256, Error> {
 
     // Make division exact by subtracting the remainder from [prod1 prod0]
     // Compute remainder using mulmod
-    let remainder = mul_mod(a, b, denominator);
+    let remainder = a.mul_mod(b, denominator);
 
     // Subtract 256 bit number from 512 bit number
     prod_1 = prod_1
@@ -55,7 +54,7 @@ pub fn mul_div(a: U256, b: U256, mut denominator: U256) -> Result<U256, Error> {
     // Factor powers of two out of denominator
     // Compute largest power of two divisor of denominator.
     // Always >= 1.
-    let mut twos = RUINT_ZERO
+    let mut twos = U256::ZERO
         .overflowing_sub(denominator)
         .0
         .bitand(denominator);
@@ -70,6 +69,7 @@ pub fn mul_div(a: U256, b: U256, mut denominator: U256) -> Result<U256, Error> {
     // Shift in bits from prod1 into prod0. For this we need
     // to flip `twos` such that it is 2**256 / twos.
     // If twos is zero, then it becomes one
+
     twos = (RUINT_ZERO.overflowing_sub(twos).0.wrapping_div(twos)).add(RUINT_ONE);
 
     prod_0.bitor_assign(prod_1 * twos);
@@ -78,7 +78,7 @@ pub fn mul_div(a: U256, b: U256, mut denominator: U256) -> Result<U256, Error> {
     // Now that denominator is an odd number, it has an inverse
     // modulo 2**256 such that denominator * inv = 1 mod 2**256.
     // Compute the inverse by starting with a seed that is correct
-    // correct for four bits. That is, denominator * inv = 1 mod 2**4
+    // for four bits. That is, denominator * inv = 1 mod 2**4
 
     let mut inv = RUINT_THREE.mul(denominator).bitxor(RUINT_TWO);
 
@@ -86,23 +86,21 @@ pub fn mul_div(a: U256, b: U256, mut denominator: U256) -> Result<U256, Error> {
     // Thanks to Hensel's lifting lemma, this also works in modular
     // arithmetic, doubling the correct bits in each step.
 
-    for _ in 0..6 {
-        inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**8
-    }
-    //inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**16
-    //inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**32
-    //inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**64
-    //inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**128
-    //inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**256
+    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**8
+    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**16
+    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**32
+    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**64
+    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**128
+    inv.mul_assign(RUINT_TWO - denominator * inv); // inverse mod 2**256
 
     // Because the division is now exact we can divide by multiplying
     // with the modular inverse of denominator. This will give us the
-    // correct result modulo 2**256. Since the precoditions guarantee
+    // correct result modulo 2**256. Since the preconditions guarantee
     // that the outcome is less than 2**256, this is the final result.
     // We don't need to compute the high bits of the result and prod1
     // is no longer required.
 
-    Ok(prod_0 * inv)
+    Ok(U256::from_le_slice((prod_0 * inv).as_le_slice()))
 }
 
 pub fn mul_div_rounding_up(a: U256, b: U256, denominator: U256) -> Result<U256, Error> {

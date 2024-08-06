@@ -6,7 +6,13 @@ import { useStakeStore } from "@/stores/useStakeStore";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect } from "react";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
-import { useAccount, useChainId, useSimulateContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useChainId,
+  useSimulateContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
 import { fUSDC } from "@/config/tokens";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { getFormattedPriceFromAmount } from "@/lib/amounts";
@@ -22,31 +28,47 @@ export default function ConfirmWithdrawLiquidity() {
   const positionId = params.get("positionId") ?? "0";
 
   const { address, chainId } = useAccount();
-  const expectedChainId = useChainId()
+  const expectedChainId = useChainId();
 
   useEffect(() => {
-    if (!address || chainId !== expectedChainId)
-      router.back()
-  }, [address, expectedChainId, chainId])
+    if (!address || chainId !== expectedChainId) router.back();
+  }, [address, expectedChainId, chainId]);
 
-  const {
-    token0,
-    token0Amount,
-    token0AmountRaw,
-    token1,
-    token1Amount,
-    delta,
-  } = useStakeStore();
+  const { token0, token0Amount, token0AmountRaw, token1, token1Amount, delta } =
+    useStakeStore();
+
+  // Current liquidity of the position
+  const { data: positionLiquidity } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "positionLiquidity8D11C045",
+    args: [token0.address, BigInt(positionId ?? 0)],
+  });
+
+  const isWithdrawingEntirePosition = positionLiquidity?.result === delta;
 
   const {
     writeContract: writeContractUpdatePosition,
     data: updatePositionData,
     error: updatePositionError,
     isPending: isUpdatePositionPending,
+    reset: resetUpdatePosition,
   } = useWriteContract();
 
   const updatePositionResult = useWaitForTransactionReceipt({
     hash: updatePositionData,
+  });
+
+  const {
+    writeContract: writeContractCollect,
+    data: collectData,
+    error: collectError,
+    isPending: isCollectPending,
+    reset: resetCollect,
+  } = useWriteContract();
+
+  const collectResult = useWaitForTransactionReceipt({
+    hash: collectData,
   });
 
   const updatePosition = useCallback(
@@ -54,18 +76,30 @@ export default function ConfirmWithdrawLiquidity() {
       writeContractUpdatePosition({
         address: ammAddress,
         abi: seawaterContract.abi,
-        functionName: "updatePosition",
+        functionName: "updatePositionC7F1F740",
         args: [token0.address, id, -delta],
       });
     },
     [delta, writeContractUpdatePosition, token0AmountRaw, token0],
   );
 
+  const collect = useCallback(
+    (id: bigint) => {
+      writeContractCollect({
+        address: ammAddress,
+        abi: seawaterContract.abi,
+        functionName: "collect7F21947C",
+        args: [[token0.address], [BigInt(id ?? 0)]],
+      });
+    },
+    [writeContractCollect, token0],
+  );
+
   // price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "sqrtPriceX96",
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address === fUSDC.address ? token1.address : token0.address],
   });
 
@@ -73,28 +107,79 @@ export default function ConfirmWithdrawLiquidity() {
     ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
     : 0n;
 
-  // step 1 pending
-  if (isUpdatePositionPending || (updatePositionData && updatePositionResult?.isPending)) {
-    return <Confirm
-      text={"Withdrawal"}
-      fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
-      toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
-      transactionHash={updatePositionData}
-    />;
+  const { data: unclaimedRewardsData } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "collect7F21947C",
+    args: [[token0.address], [BigInt(positionId ?? 0)]],
+  });
+
+  const confirmWithdraw = (id: bigint) => {
+    const [{ amount0, amount1 }] = unclaimedRewardsData?.result || [
+      { amount0: 0, amount1: 0 },
+    ];
+    if (isWithdrawingEntirePosition && (amount0 > 0 || amount1 > 0)) {
+      collect(id);
+    } else {
+      updatePosition(BigInt(positionId));
+    }
+  };
+
+  // once yield is collected, update position
+  useEffect(() => {
+    if (!collectResult.data || !isWithdrawingEntirePosition) return;
+    updatePosition(BigInt(positionId));
+  }, [updatePosition, positionId, collectResult.data]);
+
+  // step 1 - collect yield from position if emptying entire balance
+  if (
+    isWithdrawingEntirePosition &&
+    (isCollectPending || (collectData && collectResult?.isPending))
+  ) {
+    return (
+      <Confirm
+        text={"Yield Collection"}
+        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+        transactionHash={updatePositionData}
+      />
+    );
+  }
+
+  // step 2 - update position
+  if (
+    isUpdatePositionPending ||
+    (updatePositionData && updatePositionResult?.isPending)
+  ) {
+    return (
+      <Confirm
+        text={"Withdrawal"}
+        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+        transactionHash={updatePositionData}
+      />
+    );
   }
 
   // success
   if (updatePositionResult.data) {
-    return <Success transactionHash={updatePositionResult.data.transactionHash} />;
+    return (
+      <Success
+        onDone={() => {
+          resetUpdatePosition();
+          resetCollect();
+          router.push("/stake");
+        }}
+        transactionHash={updatePositionResult.data?.transactionHash}
+      />
+    );
   }
 
   // error
-  if (
-    updatePositionError
-  ) {
-    return <Fail text={(updatePositionError as any)?.shortMessage} />;
+  if (updatePositionError || collectError) {
+    const error = updatePositionError || collectError;
+    return <Fail text={(error as any)?.shortMessage} />;
   }
-
 
   return (
     <div className="z-10 flex flex-col items-center">
@@ -118,17 +203,37 @@ export default function ConfirmWithdrawLiquidity() {
         <div className="mt-[26px] px-[21px]">
           <div className="text-[8px] font-semibold">{token0.symbol}</div>
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
-            <TokenIcon src={token0.icon} className={"invert size-[24px]"} /> {token0Amount}
+            <TokenIcon src={token0.icon} className={"size-[24px] invert"} />{" "}
+            {token0Amount}
           </div>
-          <div className="text-[10px] text-neutral-400">= ${token0.address === fUSDC.address ? token0Amount : getFormattedPriceFromAmount(token0Amount, tokenPrice, fUSDC.decimals)}</div>
+          <div className="text-[10px] text-neutral-400">
+            = $
+            {token0.address === fUSDC.address
+              ? token0Amount
+              : getFormattedPriceFromAmount(
+                  token0Amount,
+                  tokenPrice,
+                  fUSDC.decimals,
+                )}
+          </div>
         </div>
 
         <div className="mt-[23px] px-[21px]">
           <div className={"text-[8px] font-semibold"}>{token1.symbol}</div>
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
-            <TokenIcon src={token1.icon} className={"invert size-[24px]"} /> {token1Amount}
+            <TokenIcon src={token1.icon} className={"size-[24px] invert"} />{" "}
+            {token1Amount}
           </div>
-          <div className="text-[10px] text-neutral-400">= ${token1.address === fUSDC.address ? token1Amount : getFormattedPriceFromAmount(token1Amount, tokenPrice, fUSDC.decimals)}</div>
+          <div className="text-[10px] text-neutral-400">
+            = $
+            {token1.address === fUSDC.address
+              ? token1Amount
+              : getFormattedPriceFromAmount(
+                  token1Amount,
+                  tokenPrice,
+                  fUSDC.decimals,
+                )}
+          </div>
         </div>
 
         <div>
@@ -154,7 +259,9 @@ export default function ConfirmWithdrawLiquidity() {
           <Button
             variant="secondary"
             className="h-10 w-[286px] md:h-10 md:w-[365px]"
-            onClick={() => { updatePosition(BigInt(positionId)) }}
+            onClick={() => {
+              confirmWithdraw(BigInt(positionId));
+            }}
           >
             Confirm Withdrawal
           </Button>

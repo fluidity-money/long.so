@@ -12,20 +12,30 @@ import { format, subDays } from "date-fns";
 import ReactECharts from "echarts-for-react";
 import Link from "next/link";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usdFormat } from "@/lib/usdFormat";
 import { fUSDC, getTokenFromAddress } from "@/config/tokens";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getFormattedPriceFromTick } from "@/lib/amounts";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  getFormattedPriceFromAmount,
+  getFormattedPriceFromTick,
+} from "@/lib/amounts";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { ammAddress } from "@/lib/addresses";
-import { useSimulateContract } from "wagmi";
+import { useSimulateContract, useWriteContract } from "wagmi";
 import { getTokenAmountsNumeric, sqrtPriceX96ToPrice } from "@/lib/math";
 import { TokenIcon } from "@/components/TokenIcon";
+import { maxUint128 } from "viem";
 
 const ManagePoolFragment = graphql(`
   fragment ManagePoolFragment on SeawaterPool {
@@ -54,26 +64,26 @@ const ManagePoolFragment = graphql(`
 `);
 
 const PositionsFragment = graphql(`
-fragment PositionsFragment on Wallet {
-  positions {
+  fragment PositionsFragment on Wallet {
     positions {
-      positionId
-      pool {
-        address
-      }
-      lower
-      upper
-      liquidity {
-        fusdc {
-          valueUsd
+      positions {
+        positionId
+        pool {
+          address
         }
-        token1 {
-          valueUsd
+        lower
+        upper
+        liquidity {
+          fusdc {
+            valueUsd
+          }
+          token1 {
+            valueUsd
+          }
         }
       }
     }
   }
-}
 `);
 
 export default function PoolPage() {
@@ -89,87 +99,89 @@ export default function PoolPage() {
   const { data: globalData } = useGraphqlGlobal();
   const { data: userData } = useGraphqlUser();
   const allPoolsData = useFragment(ManagePoolFragment, globalData?.pools);
-  const positionsData_ = useFragment(PositionsFragment, userData?.getWallet)
-  const positionsData = useMemo(() =>
-    positionsData_?.positions.positions.filter(p =>
-      p.pool.address === id &&
-      (parseFloat(p.liquidity.fusdc.valueUsd) + parseFloat(p.liquidity.token1.valueUsd)) > 0
-    ),
-    [id, positionsData_]
+  const positionsData_ = useFragment(PositionsFragment, userData?.getWallet);
+  const positionsData = useMemo(
+    () =>
+      positionsData_?.positions.positions.filter(
+        (p) =>
+          p.pool.address === id &&
+          parseFloat(p.liquidity.fusdc.valueUsd) +
+            parseFloat(p.liquidity.token1.valueUsd) >
+            0,
+      ),
+    [id, positionsData_],
   );
 
-  const {
-    token0,
-    token1,
-    setToken0,
-    setToken1,
-  } = useStakeStore()
+  const { token0, token1, setToken0, setToken1 } = useStakeStore();
 
-  const {
-    setToken0: setToken0Swap,
-    setToken1: setToken1Swap,
-  } = useSwapStore();
+  const { setToken0: setToken0Swap, setToken1: setToken1Swap } = useSwapStore();
 
   useEffect(() => {
-    if (!id)
-      return
-    const token = getTokenFromAddress(id)
-    if (!token)
-      return
+    if (!id) return;
+    const token = getTokenFromAddress(id);
+    if (!token) return;
     // Graph is rendered by SwapPro, which uses the swap store
     // So we have to set both of these.
-    setToken0(token)
-    setToken1(fUSDC)
-    setToken0Swap(token)
-    setToken1Swap(fUSDC)
-  }, [id])
+    setToken0(token);
+    setToken1(fUSDC);
+    setToken0Swap(token);
+    setToken1Swap(fUSDC);
+  }, [id]);
 
   const poolData = allPoolsData?.find((pool) => pool.id === id);
 
   // positionId_ is the internal position ID, used to look up a position to actually use and display
-  const [positionId_, setPositionId_] = useState<number | undefined>()
+  const [positionId_, setPositionId_] = useState<number | undefined>();
 
   // position is the currently selected position based on
   // the internal ID and query parameters
   const position = useMemo(() => {
     if (positionId_ !== undefined)
-      return positionsData?.find(p => p.positionId === positionId_)
+      return positionsData?.find((p) => p.positionId === positionId_);
     if (positionIdParam)
-      return positionsData?.find(p => p.positionId === positionIdParam)
-    return positionsData?.[0]
-  }, [poolData, positionId_, positionIdParam])
+      return positionsData?.find((p) => p.positionId === positionIdParam);
+    return positionsData?.[0];
+  }, [poolData, positionId_, positionIdParam]);
 
-  const { positionId, upper: upperTick, lower: lowerTick } = position || {}
+  const { positionId, upper: upperTick, lower: lowerTick } = position || {};
 
-  const poolBalance = useMemo(() => (
-    usdFormat(positionsData ?
-      positionsData.reduce((total, { liquidity: { fusdc, token1 } }) =>
-        total + parseFloat(fusdc.valueUsd) + parseFloat(token1.valueUsd),
-        0) :
-      0
-    )), [poolData])
+  const poolBalance = useMemo(
+    () =>
+      usdFormat(
+        positionsData
+          ? positionsData.reduce(
+              (total, { liquidity: { fusdc, token1 } }) =>
+                total +
+                parseFloat(fusdc.valueUsd) +
+                parseFloat(token1.valueUsd),
+              0,
+            )
+          : 0,
+      ),
+    [poolData],
+  );
 
   // Current liquidity of the position
   const { data: positionLiquidity } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: 'positionLiquidity',
-    args: [token0.address, BigInt(positionId ?? 0)]
-  })
+    functionName: "positionLiquidity8D11C045",
+    args: [token0.address, BigInt(positionId ?? 0)],
+  });
 
   // Current tick of the pool
   const { data: { result: curTickNum } = { result: 0 } } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "curTick",
+    functionName: "curTick181C6FD9",
     args: [token0.address],
   });
-  const curTick = BigInt(curTickNum)
+  const curTick = BigInt(curTickNum);
 
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
-    functionName: "sqrtPriceX96",
+    functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
   });
 
@@ -177,17 +189,66 @@ export default function PoolPage() {
     ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
     : 0n;
 
+  const {
+    writeContract: writeContractCollect,
+    data: collectData,
+    error: collectError,
+    isPending: isCollectPending,
+  } = useWriteContract();
+
+  const { data: unclaimedRewardsData } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "collect7F21947C",
+    args: [[token0.address], [BigInt(positionId ?? 0)]],
+  });
+
+  const unclaimedRewards = useMemo(() => {
+    if (!unclaimedRewardsData || !positionId) return "$0.00";
+
+    const [{ amount0, amount1 }] = unclaimedRewardsData.result || [
+      { amount0: 0n, amount1: 0n },
+    ];
+    const token0AmountScaled =
+      (Number(amount0) * Number(tokenPrice)) /
+      10 ** (token0.decimals + fUSDC.decimals);
+    const token1AmountScaled = Number(amount1) / 10 ** fUSDC.decimals;
+    return usdFormat(token0AmountScaled + token1AmountScaled);
+  }, [unclaimedRewardsData]);
+
+  const collect = useCallback(
+    (id: bigint) => {
+      writeContractCollect({
+        address: ammAddress,
+        abi: seawaterContract.abi,
+        functionName: "collect7F21947C",
+        args: [[token0.address], [id]],
+      });
+    },
+    [writeContractCollect, token0],
+  );
+
   const positionBalance = useMemo(() => {
-    if (!positionLiquidity || !position)
-      return 0
-    const [amount0, amount1] = getTokenAmountsNumeric(Number(positionLiquidity.result), Number(curTick), position.lower, position.upper)
-    return usdFormat((amount0 * Number(tokenPrice) / 10 ** (token0.decimals + fUSDC.decimals)) + (amount1 / 10 ** token1.decimals))
-  }, [position, positionLiquidity, tokenPrice, token0, token1, curTick])
+    if (!positionLiquidity || !position) return 0;
+    const [amount0, amount1] = getTokenAmountsNumeric(
+      Number(positionLiquidity.result),
+      Number(curTick),
+      position.lower,
+      position.upper,
+    );
+    return usdFormat(
+      (amount0 * Number(tokenPrice)) /
+        10 ** (token0.decimals + fUSDC.decimals) +
+        amount1 / 10 ** token1.decimals,
+    );
+  }, [position, positionLiquidity, tokenPrice, token0, token1, curTick]);
 
   const showMockData = useFeatureFlag("ui show demo data");
   const showBoostIncentives = useFeatureFlag("ui show boost incentives");
   const showUtilityIncentives = useFeatureFlag("ui show utility incentives");
-  const showLiquidityIncentives = useFeatureFlag("ui show liquidity incentives");
+  const showLiquidityIncentives = useFeatureFlag(
+    "ui show liquidity incentives",
+  );
   const showSuperIncentives = useFeatureFlag("ui show super incentives");
   const showLiveUtilityRewards = useFeatureFlag("ui show live utility rewards");
   const showTokensGivenOut = useFeatureFlag("ui show tokens given out");
@@ -237,7 +298,10 @@ export default function PoolPage() {
 
               <div className="mt-px flex flex-row items-center justify-between px-4">
                 <div className="flex flex-row items-center">
-                  <TokenIcon src={token0.icon} className={"size-[24px] invert"} />
+                  <TokenIcon
+                    src={token0.icon}
+                    className={"size-[24px] invert"}
+                  />
                   <Badge className="iridescent z-20 -ml-1 flex flex-row gap-2 border-4 border-black pl-1 text-black">
                     <Token className={"size-[24px]"} />
                     <div className="text-nowrap text-sm">
@@ -266,11 +330,8 @@ export default function PoolPage() {
 
               <div className="flex flex-col gap-8 p-4">
                 <div className="flex flex-row gap-2">
-                  {!position ?
-                    <Link
-                      href={`/stake/pool/create?id=${id}`}
-                      legacyBehavior
-                    >
+                  {!position ? (
+                    <Link href={`/stake/pool/create?id=${id}`} legacyBehavior>
                       <Button
                         variant="secondary"
                         className="flex-1 text-3xs md:text-2xs"
@@ -278,7 +339,8 @@ export default function PoolPage() {
                       >
                         + Create New Position
                       </Button>
-                    </Link> :
+                    </Link>
+                  ) : (
                     <>
                       <Link
                         href={`/stake/pool/add-liquidity?id=${id}&positionId=${positionId}`}
@@ -305,7 +367,7 @@ export default function PoolPage() {
                         </Button>
                       </Link>
                     </>
-                  }
+                  )}
                 </div>
 
                 <div className="flex flex-row gap-2">
@@ -323,51 +385,59 @@ export default function PoolPage() {
                     </div>
                     <div className="text-xl md:text-2xl">
                       {/* TODO:get unclaimed rewards */}
-                      {showMockData ? "$52,420" : usdFormat(0)}
+                      {showMockData ? "$52,420" : unclaimedRewards}
                     </div>
                   </div>
-
-                  {showClaimYield && (
-                    <div>
-                      <Button
-                        variant="secondary"
-                        className="h-[19px] w-[75px] px-[27px] py-[5px] md:h-[22px] md:w-[92px]"
-                        size="sm"
-                      >
-                        <div className="text-3xs">Claim Yield</div>
-                      </Button>
-                    </div>
-                  )}
                 </div>
                 <div className="flex flex-row gap-2">
                   <div className="flex flex-1 flex-col">
-                    <div className="text-3xs md:text-2xs">Current Position Range</div>
+                    <div className="text-3xs md:text-2xs">
+                      Current Position Range
+                    </div>
                     <div className="text-xl md:text-2xl">
-                      {lowerTick ? getFormattedPriceFromTick(lowerTick, token0.decimals, token1.decimals) : usdFormat(0)}
+                      {lowerTick
+                        ? getFormattedPriceFromTick(
+                            lowerTick,
+                            token0.decimals,
+                            token1.decimals,
+                          )
+                        : usdFormat(0)}
                       -
-                      {upperTick ? getFormattedPriceFromTick(upperTick, token0.decimals, token1.decimals) : usdFormat(0)}
+                      {upperTick
+                        ? getFormattedPriceFromTick(
+                            upperTick,
+                            token0.decimals,
+                            token1.decimals,
+                          )
+                        : usdFormat(0)}
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col">
-                    <div className="text-3xs md:text-2xs">Current Position Balance</div>
-                    <div className="text-xl md:text-2xl">
-                      {positionBalance}
+                    <div className="text-3xs md:text-2xs">
+                      Current Position Balance
                     </div>
+                    <div className="text-xl md:text-2xl">{positionBalance}</div>
                   </div>
                 </div>
                 <div className="flex flex-row gap-2">
                   <div className="flex flex-1 flex-col">
                     <div className="text-3xs md:text-2xs">Select Position</div>
-                    <Select value={`${positionId}`} onValueChange={value => setPositionId_(Number(value))} defaultValue={`${position?.positionId}`}>
+                    <Select
+                      value={`${positionId}`}
+                      onValueChange={(value) => setPositionId_(Number(value))}
+                      defaultValue={`${position?.positionId}`}
+                    >
                       <SelectTrigger className="h-6 w-auto border-0 bg-black p-0 text-[12px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {positionsData?.map(position => (
+                        {positionsData?.map((position) => (
                           <SelectItem
                             key={`${position.positionId}`}
                             value={`${position.positionId}`}
-                          >{position.positionId}</SelectItem>
+                          >
+                            {position.positionId}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -472,12 +542,13 @@ export default function PoolPage() {
                         <div className="text-3xs">
                           {showMockData
                             ? 200
-                            : poolData?.utilityIncentives[0]?.amountGivenOut ?? 0}
+                            : poolData?.utilityIncentives[0]?.amountGivenOut ??
+                              0}
                           /
                           {showMockData
                             ? "1,000"
                             : poolData?.utilityIncentives[0]?.maximumAmount ??
-                            0}{" "}
+                              0}{" "}
                           tokens given out
                         </div>
                         <Line
@@ -485,13 +556,13 @@ export default function PoolPage() {
                             showMockData
                               ? 20
                               : parseFloat(
-                                poolData?.utilityIncentives[0]
-                                  ?.amountGivenOut ?? "0",
-                              ) /
-                              parseFloat(
-                                poolData?.utilityIncentives[0]?.maximumAmount ??
-                                "0",
-                              )
+                                  poolData?.utilityIncentives[0]
+                                    ?.amountGivenOut ?? "0",
+                                ) /
+                                parseFloat(
+                                  poolData?.utilityIncentives[0]
+                                    ?.maximumAmount ?? "0",
+                                )
                           }
                           strokeColor="#EBEBEB"
                           strokeWidth={4}
@@ -503,6 +574,29 @@ export default function PoolPage() {
                     )}
 
                     <div className="flex flex-1" />
+                    {showClaimYield && (
+                      <div>
+                        <Button
+                          variant={collectError ? "destructive" : "secondary"}
+                          className="h-[19px] w-[75px] px-[27px] py-[5px] md:h-[22px] md:w-[92px]"
+                          size="sm"
+                          disabled={!!collectData || isCollectPending}
+                          onClick={() =>
+                            positionId && collect(BigInt(positionId))
+                          }
+                        >
+                          <div className="text-3xs">
+                            {collectError
+                              ? "Failed"
+                              : collectData
+                                ? "Claimed!"
+                                : isCollectPending
+                                  ? "Claiming..."
+                                  : "Claim Yield"}
+                          </div>
+                        </Button>
+                      </div>
+                    )}
 
                     {showBoostIncentives && (
                       <div>

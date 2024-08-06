@@ -3,6 +3,10 @@
 use crate::error::*;
 use crate::maths::liquidity_math;
 use crate::types::*;
+
+#[cfg(feature = "testing-dbg")]
+use crate::current_test;
+
 use stylus_sdk::prelude::*;
 use stylus_sdk::storage::*;
 
@@ -123,46 +127,111 @@ impl StorageTicks {
         let upper = self.ticks.get(upper_tick);
 
         let (fee_growth_below_0, fee_growth_below_1) = if cur_tick >= lower_tick {
+            #[cfg(feature = "testing-dbg")]
+            dbg!((
+                "cur_tick >= lower_tick",
+                current_test!(),
+                lower.fee_growth_outside_0.get().to_string(),
+                lower.fee_growth_outside_1.get().to_string()
+            ));
+
             (
                 lower.fee_growth_outside_0.get(),
                 lower.fee_growth_outside_1.get(),
             )
         } else {
+            #[cfg(feature = "testing-dbg")]
+            dbg!((
+                "cur_tick < lower_tick",
+                current_test!(),
+                fee_growth_global_0,
+                fee_growth_global_1,
+                lower.fee_growth_outside_0.get().to_string(),
+                lower.fee_growth_outside_1.get().to_string()
+            ));
+
             (
                 fee_growth_global_0
                     .checked_sub(lower.fee_growth_outside_0.get())
-                    .ok_or(Error::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSubTick)?,
                 fee_growth_global_1
                     .checked_sub(lower.fee_growth_outside_1.get())
-                    .ok_or(Error::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSubTick)?,
             )
         };
 
         let (fee_growth_above_0, fee_growth_above_1) = if cur_tick < upper_tick {
+            #[cfg(feature = "testing-dbg")]
+            dbg!((
+                "cur_tick < upper_tick",
+                current_test!(),
+                upper.fee_growth_outside_0.get().to_string(),
+                upper.fee_growth_outside_1.get().to_string()
+            ));
+
             (
                 upper.fee_growth_outside_0.get(),
                 upper.fee_growth_outside_1.get(),
             )
         } else {
+            #[cfg(feature = "testing-dbg")]
+            dbg!((
+                "cur_tick >= upper_tick",
+                current_test!(),
+                fee_growth_global_0,
+                fee_growth_global_1,
+                upper.fee_growth_outside_0.get(),
+                upper.fee_growth_outside_1.get()
+            ));
+
             (
                 fee_growth_global_0
                     .checked_sub(upper.fee_growth_outside_0.get())
-                    .ok_or(Error::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSubTick)?,
                 fee_growth_global_1
                     .checked_sub(upper.fee_growth_outside_1.get())
-                    .ok_or(Error::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSubTick)?,
             )
         };
+
+        #[cfg(feature = "testing-dbg")] // REMOVEME
+        {
+            if *fee_growth_global_0 < fee_growth_below_0 {
+                dbg!((
+                    "fee_growth_global_0 < fee_growth_below_0",
+                    current_test!(),
+                    fee_growth_global_0.to_string(),
+                    fee_growth_below_0.to_string()
+                ));
+            }
+            let fee_growth_global_0 = fee_growth_global_0.checked_sub(fee_growth_below_0).unwrap();
+            if fee_growth_global_0 < fee_growth_above_0 {
+                dbg!((
+                    "fee_growth_global_0 < fee_growth_above_0",
+                    current_test!(),
+                    fee_growth_global_0.to_string(),
+                    fee_growth_above_0.to_string()
+                ));
+            }
+        }
+
+        dbg!((
+            "final stage checked sub below",
+            current_test!(),
+            fee_growth_global_0
+                .checked_sub(fee_growth_below_0)
+                .and_then(|x| x.checked_sub(fee_growth_above_0))
+        ));
 
         Ok((
             fee_growth_global_0
                 .checked_sub(fee_growth_below_0)
                 .and_then(|x| x.checked_sub(fee_growth_above_0))
-                .ok_or(Error::FeeGrowthSub)?,
+                .ok_or(Error::FeeGrowthSubTick)?,
             fee_growth_global_1
                 .checked_sub(fee_growth_below_1)
                 .and_then(|x| x.checked_sub(fee_growth_above_1))
-                .ok_or(Error::FeeGrowthSub)?,
+                .ok_or(Error::FeeGrowthSubTick)?,
         ))
     }
 

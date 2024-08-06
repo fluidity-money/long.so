@@ -69,7 +69,7 @@ func main() {
 		},
 	}))
 	http.Handle("/", corsMiddleware{srv})
-	http.Handle("/playground", playground.Handler("Long Tail playground", "/"))
+	http.Handle("/playground", playground.Handler("Longtail playground", "/"))
 	switch typ := os.Getenv(EnvBackendType); typ {
 	case "lambda":
 		lambda.Start(httpadapter.New(http.DefaultServeMux).ProxyWithContext)

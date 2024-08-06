@@ -1,5 +1,4 @@
-///! Side-effect free functions for simple testing. Optionally configured
-///! with a pre-existing state.
+///! Functions for testing including the setup function for storage.
 use std::collections::HashMap;
 
 use stylus_sdk::storage::StorageCache;
@@ -18,6 +17,11 @@ macro_rules! current_test {
         // tests are configured to run multithreaded
         std::thread::current().name().unwrap()
     };
+}
+
+pub fn decode_sqrt_price_num(sqrt_price_x96: U256, denom: u64) -> U256 {
+    let numerator = sqrt_price_x96.pow(U256::from(2)) * U256::from(denom);
+    numerator >> 192
 }
 
 // encodes a a/b price as a sqrt.q96 price
@@ -55,7 +59,7 @@ pub trait StorageNew {
     fn new(i: U256, v: u8) -> Self;
 }
 
-///! Set up the storage access, controlling for parallel use. Makes
+///! Set up the storage access, controlling for parallel use.
 pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     sender: Option<[u8; 20]>,
     slots: Option<HashMap<&str, &str>>,
@@ -63,23 +67,21 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     amm_bals: Option<HashMap<Address, U256>>,
     f: F,
 ) -> T {
+    StorageCache::clear();
+    test_shims::reset_storage();
     let slots_map: HashMap<[u8; 32], [u8; 32]> = match slots {
-        Some(items) => {
-            items
-                .iter()
-                .map(|(key, value)| -> ([u8; 32], [u8; 32]) {
-                    // avoid poisoning the lock if we fail to do this here.
-                    (
-                        const_hex::const_decode_to_array::<32>(key.as_bytes())
-                            .expect(format!("failed to decode key: {:?}", key).as_str()),
-                        const_hex::const_decode_to_array::<32>(value.as_bytes()).unwrap(),
-                    )
-                })
-                .collect()
-        }
+        Some(items) => items
+            .iter()
+            .map(|(key, value)| -> ([u8; 32], [u8; 32]) {
+                (
+                    const_hex::const_decode_to_array::<32>(key.as_bytes())
+                        .expect(format!("failed to decode key: {:?}", key).as_str()),
+                    const_hex::const_decode_to_array::<32>(value.as_bytes()).unwrap(),
+                )
+            })
+            .collect(),
         None => HashMap::new(),
     };
-
     if let Some(v) = sender {
         test_shims::set_sender(v);
     }
@@ -92,11 +94,7 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     for (key, value) in slots_map {
         test_shims::insert_word(key.clone(), value.clone())
     }
-    let mut pools = P::new(U256::ZERO, 0);
-    let res = f(&mut pools);
-    StorageCache::clear();
-    test_shims::reset_storage();
-    res
+    f(&mut P::new(U256::ZERO, 0))
 }
 
 #[test]
