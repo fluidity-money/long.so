@@ -21,9 +21,9 @@ const documents = {
     types.SelectPrimeAssetFragmentFragmentDoc,
   "\n  fragment ManagePoolFragment on SeawaterPool {\n    address\n    id\n    liquidity {\n      liquidity\n    }\n    token {\n      symbol\n      name\n      decimals\n    }\n    liquidityIncentives {\n      valueScaled\n    }\n    superIncentives {\n      valueScaled\n    }\n    utilityIncentives {\n      amountGivenOut\n      maximumAmount\n    }\n    earnedFeesAPRFUSDC\n  }\n":
     types.ManagePoolFragmentFragmentDoc,
-  "\nfragment PositionsFragment on Wallet {\n  positions {\n    positions {\n      positionId\n      pool {\n        address\n      }\n      lower\n      upper\n      liquidity {\n        fusdc {\n          valueUsd\n        }\n        token1 {\n          valueUsd\n        }\n      }\n    }\n  }\n}\n":
+  "\n  fragment PositionsFragment on Wallet {\n    positions {\n      positions {\n        positionId\n        pool {\n          address\n        }\n        lower\n        upper\n        liquidity {\n          fusdc {\n            valueUsd\n          }\n          token1 {\n            valueUsd\n          }\n        }\n      }\n    }\n  }\n":
     types.PositionsFragmentFragmentDoc,
-  "\nfragment WithdrawPositionsFragment on Wallet {\n  positions {\n    positions {\n      positionId\n      lower\n      upper\n      owner {\n        address\n      }\n      liquidity {\n        fusdc {\n          valueUsd\n          valueScaled\n        }\n        token1 {\n          valueUsd\n          valueScaled\n        }\n      }\n    }\n  }\n}\n":
+  "\n  fragment WithdrawPositionsFragment on Wallet {\n    positions {\n      positions {\n        positionId\n        lower\n        upper\n        owner {\n          address\n        }\n        liquidity {\n          fusdc {\n            valueUsd\n            valueScaled\n          }\n          token1 {\n            valueUsd\n            valueScaled\n          }\n        }\n      }\n    }\n  }\n":
     types.WithdrawPositionsFragmentFragmentDoc,
   "\n  fragment SwapExploreFragment on SeawaterPool {\n    token {\n      name\n      symbol\n      address\n      decimals\n    }\n    price\n  }\n":
     types.SwapExploreFragmentFragmentDoc,
@@ -33,7 +33,7 @@ const documents = {
     types.TradeTabTransactionsFragmentFragmentDoc,
   "\n  fragment StakeFormFragment on SeawaterPool {\n    address\n    earnedFeesAPRFUSDC\n  }\n":
     types.StakeFormFragmentFragmentDoc,
-  "\nfragment DepositPositionsFragment on Wallet {\n  positions {\n    positions {\n      positionId\n      lower\n      upper\n    }\n  }\n}\n":
+  "\n  fragment DepositPositionsFragment on Wallet {\n    positions {\n      positions {\n        positionId\n        lower\n        upper\n      }\n    }\n  }\n":
     types.DepositPositionsFragmentFragmentDoc,
   "\n  fragment SwapFormFragment on SeawaterPool {\n    address\n    earnedFeesAPRFUSDC\n    earnedFeesAPRToken1\n    token {\n      address\n      decimals\n      name\n      symbol\n    }\n  }\n":
     types.SwapFormFragmentFragmentDoc,
@@ -87,14 +87,14 @@ export function graphql(
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: "\nfragment PositionsFragment on Wallet {\n  positions {\n    positions {\n      positionId\n      pool {\n        address\n      }\n      lower\n      upper\n      liquidity {\n        fusdc {\n          valueUsd\n        }\n        token1 {\n          valueUsd\n        }\n      }\n    }\n  }\n}\n",
-): (typeof documents)["\nfragment PositionsFragment on Wallet {\n  positions {\n    positions {\n      positionId\n      pool {\n        address\n      }\n      lower\n      upper\n      liquidity {\n        fusdc {\n          valueUsd\n        }\n        token1 {\n          valueUsd\n        }\n      }\n    }\n  }\n}\n"];
+  source: "\n  fragment PositionsFragment on Wallet {\n    positions {\n      positions {\n        positionId\n        pool {\n          address\n        }\n        lower\n        upper\n        liquidity {\n          fusdc {\n            valueUsd\n          }\n          token1 {\n            valueUsd\n          }\n        }\n      }\n    }\n  }\n",
+): (typeof documents)["\n  fragment PositionsFragment on Wallet {\n    positions {\n      positions {\n        positionId\n        pool {\n          address\n        }\n        lower\n        upper\n        liquidity {\n          fusdc {\n            valueUsd\n          }\n          token1 {\n            valueUsd\n          }\n        }\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: "\nfragment WithdrawPositionsFragment on Wallet {\n  positions {\n    positions {\n      positionId\n      lower\n      upper\n      owner {\n        address\n      }\n      liquidity {\n        fusdc {\n          valueUsd\n          valueScaled\n        }\n        token1 {\n          valueUsd\n          valueScaled\n        }\n      }\n    }\n  }\n}\n",
-): (typeof documents)["\nfragment WithdrawPositionsFragment on Wallet {\n  positions {\n    positions {\n      positionId\n      lower\n      upper\n      owner {\n        address\n      }\n      liquidity {\n        fusdc {\n          valueUsd\n          valueScaled\n        }\n        token1 {\n          valueUsd\n          valueScaled\n        }\n      }\n    }\n  }\n}\n"];
+  source: "\n  fragment WithdrawPositionsFragment on Wallet {\n    positions {\n      positions {\n        positionId\n        lower\n        upper\n        owner {\n          address\n        }\n        liquidity {\n          fusdc {\n            valueUsd\n            valueScaled\n          }\n          token1 {\n            valueUsd\n            valueScaled\n          }\n        }\n      }\n    }\n  }\n",
+): (typeof documents)["\n  fragment WithdrawPositionsFragment on Wallet {\n    positions {\n      positions {\n        positionId\n        lower\n        upper\n        owner {\n          address\n        }\n        liquidity {\n          fusdc {\n            valueUsd\n            valueScaled\n          }\n          token1 {\n            valueUsd\n            valueScaled\n          }\n        }\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -123,8 +123,8 @@ export function graphql(
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: "\nfragment DepositPositionsFragment on Wallet {\n  positions {\n    positions {\n      positionId\n      lower\n      upper\n    }\n  }\n}\n",
-): (typeof documents)["\nfragment DepositPositionsFragment on Wallet {\n  positions {\n    positions {\n      positionId\n      lower\n      upper\n    }\n  }\n}\n"];
+  source: "\n  fragment DepositPositionsFragment on Wallet {\n    positions {\n      positions {\n        positionId\n        lower\n        upper\n      }\n    }\n  }\n",
+): (typeof documents)["\n  fragment DepositPositionsFragment on Wallet {\n    positions {\n      positions {\n        positionId\n        lower\n        upper\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
