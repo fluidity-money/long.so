@@ -153,10 +153,10 @@ impl StorageTicks {
             (
                 fee_growth_global_0
                     .checked_sub(lower.fee_growth_outside_0.get())
-                    .ok_or(Error::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSubTick)?,
                 fee_growth_global_1
                     .checked_sub(lower.fee_growth_outside_1.get())
-                    .ok_or(Error::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSubTick)?,
             )
         };
 
@@ -187,10 +187,10 @@ impl StorageTicks {
             (
                 fee_growth_global_0
                     .checked_sub(upper.fee_growth_outside_0.get())
-                    .ok_or(Error::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSubTick)?,
                 fee_growth_global_1
                     .checked_sub(upper.fee_growth_outside_1.get())
-                    .ok_or(Error::FeeGrowthSub)?,
+                    .ok_or(Error::FeeGrowthSubTick)?,
             )
         };
 
@@ -215,15 +215,23 @@ impl StorageTicks {
             }
         }
 
+        dbg!((
+            "final stage checked sub below",
+            current_test!(),
+            fee_growth_global_0
+                .checked_sub(fee_growth_below_0)
+                .and_then(|x| x.checked_sub(fee_growth_above_0))
+        ));
+
         Ok((
             fee_growth_global_0
                 .checked_sub(fee_growth_below_0)
                 .and_then(|x| x.checked_sub(fee_growth_above_0))
-                .ok_or(Error::FeeGrowthSub)?,
+                .ok_or(Error::FeeGrowthSubTick)?,
             fee_growth_global_1
                 .checked_sub(fee_growth_below_1)
                 .and_then(|x| x.checked_sub(fee_growth_above_1))
-                .ok_or(Error::FeeGrowthSub)?,
+                .ok_or(Error::FeeGrowthSubTick)?,
         ))
     }
 

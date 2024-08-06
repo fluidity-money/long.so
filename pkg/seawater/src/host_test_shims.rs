@@ -11,8 +11,6 @@ use crate::{Address, U256};
 #[allow(unused_imports)]
 use crate::current_test;
 
-static DEFAULT_SENDER: [u8; 20] = [0; 20];
-
 #[no_mangle]
 pub extern "C" fn native_keccak256(bytes: *const u8, len: usize, output: *mut u8) {
     // SAFETY
@@ -41,8 +39,8 @@ pub mod storage {
     pub type WordHashMap = HashMap<Word, Word>;
 
     thread_local! {
-        pub static CURRENT_SENDER: RefCell<Option<[u8; 20]>> =
-            RefCell::new(None);
+        pub static CURRENT_SENDER: RefCell<[u8; 20]> =
+            RefCell::new([0; 20]);
 
         pub static STORAGE: RefCell<WordHashMap> = RefCell::new(HashMap::new());
 
@@ -116,10 +114,7 @@ pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
 #[no_mangle]
 pub unsafe extern "C" fn msg_sender(sender: *mut u8) {
     // copy the currently defined sender and return the pointer, or default
-    let addr = storage::CURRENT_SENDER.with(|addr| match addr.borrow().clone() {
-        Some(a) => a,
-        None => DEFAULT_SENDER,
-    });
+    let addr = storage::CURRENT_SENDER.with(|addr| addr.borrow().clone());
 
     #[cfg(feature = "testing-dbg")]
     dbg!((
@@ -128,7 +123,9 @@ pub unsafe extern "C" fn msg_sender(sender: *mut u8) {
         const_hex::const_encode::<20, false>(&addr).as_str(),
     ));
 
-    std::ptr::copy(addr.as_ptr(), sender, 20);
+    let b: *mut u8 = Box::into_raw(Box::new(addr)) as *mut _;
+
+    std::ptr::copy(b, sender, 20);
 }
 
 #[no_mangle]
@@ -140,12 +137,12 @@ pub unsafe extern "C" fn emit_log(_pointer: *const u8, _len: usize, _: usize) {
     }
 }
 
-pub fn get_sender() -> Option<[u8; 20]> {
+pub fn get_sender() -> [u8; 20] {
     storage::CURRENT_SENDER.with(|sender| *sender.borrow())
 }
 
 pub fn set_sender(new_sender: [u8; 20]) {
-    storage::CURRENT_SENDER.with(|sender| *sender.borrow_mut() = Some(new_sender));
+    storage::CURRENT_SENDER.with(|sender| *sender.borrow_mut() = new_sender);
 }
 
 pub fn set_caller_bals(items: HashMap<Address, U256>) {
@@ -162,7 +159,7 @@ pub fn insert_word(key: storage::Word, value: storage::Word) {
 
 pub fn reset_storage() {
     storage::STORAGE.with(|storage| storage.borrow_mut().clear());
-    storage::CURRENT_SENDER.with(|sender| *sender.borrow_mut() = None);
+    storage::CURRENT_SENDER.with(|sender| *sender.borrow_mut() = [0; 20]);
     storage::CALLER_BALS.with(|bals| bals.borrow_mut().clear());
     storage::AMM_BALS.with(|bals| bals.borrow_mut().clear());
 }

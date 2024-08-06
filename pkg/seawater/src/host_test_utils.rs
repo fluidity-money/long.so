@@ -1,5 +1,4 @@
-///! Side-effect free functions for simple testing. Optionally configured
-///! with a pre-existing state.
+///! Functions for testing including the setup function for storage.
 use std::collections::HashMap;
 
 use stylus_sdk::storage::StorageCache;
@@ -83,7 +82,6 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
             .collect(),
         None => HashMap::new(),
     };
-
     if let Some(v) = sender {
         test_shims::set_sender(v);
     }

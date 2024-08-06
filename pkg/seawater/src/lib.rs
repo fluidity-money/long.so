@@ -858,7 +858,7 @@ impl Pools {
     /// Refreshes and updates liquidity in a position, transferring tokens from the user with a restriction on the amount taken.
     /// See [Self::adjust_position_internal].
     #[allow(non_snake_case)]
-    pub fn incr_position_C_1041_D_18(
+    pub fn incr_position_C_3_A_C_7_C_A_A(
         &mut self,
         pool: Address,
         id: U256,
@@ -882,7 +882,7 @@ impl Pools {
     /// Refreshes and updates liquidity in a position, transferring tokens to the user with restrictions.
     /// See [Self::adjust_position_internal].
     #[allow(non_snake_case)]
-    pub fn decr_position_F_C_C_D_4896(
+    pub fn decr_position_09293696(
         &mut self,
         pool: Address,
         id: U256,
@@ -1064,6 +1064,11 @@ impl Pools {
     pub fn tick_spacing_653_F_E28_F(&self, pool: Address) -> Result<u8, Revert> {
         // converted to i32 for automatic abi encoding
         Ok(self.pools.getter(pool).get_tick_spacing().sys())
+    }
+
+    #[allow(non_snake_case)]
+    pub fn fee_B_B_3_C_F_608(&self, pool: Address) -> Result<u32, Revert> {
+        Ok(self.pools.getter(pool).get_fee())
     }
 
     /// Getter method for getting the fee growth for token 0
@@ -1545,7 +1550,7 @@ mod test {
 
                 assert_eq!(
                     contract
-                        .decr_position_F_C_C_D_4896(
+                        .decr_position_09293696(
                             token,
                             id,
                             U256::zero(),
@@ -1591,7 +1596,7 @@ mod test {
 
                 contract.mint_position_B_C5_B086_D(token, -887272, 887272)?;
 
-                let (amount_0_taken, amount_1_taken) = contract.incr_position_C_1041_D_18(
+                let (amount_0_taken, amount_1_taken) = contract.incr_position_C_3_A_C_7_C_A_A(
                     token,
                     id,
                     U256::zero(),
@@ -1603,7 +1608,7 @@ mod test {
                 // Took some amount off the amount to take, since the taking rounds
                 // up, and the removal rounds down.
 
-                contract.decr_position_F_C_C_D_4896(
+                contract.decr_position_09293696(
                     token,
                     id,
                     U256::from(998),
@@ -1667,17 +1672,27 @@ mod test {
         test_utils::with_storage::<_, Pools, _>(
             Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()), // sender
             Some(hashmap! {
-                "0x81e9c7c70971b5eb969cec21a82e6deed42e7c6736e0e83ced66d72297d9f1d7" => "0x0000000000000000000000002b4158d5fa1c37a35aedc38c5018778582f96518",
                 "0x0000000000000000000000000000000000000000000000000000000000000000" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
-                "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-                "0x830d8ac5b57f386d159b0fe8f38030b1491866ba79d0ef9d011fbf2934391286" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
-                "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e392" => "0x000000000000000000000000fffcd03b00000000000000000021f18cc0777544",
-                "0x9777d3d8106751edcbd161850d58ac0568e8ccdaa496416b38ce8766d0f43dc7" => "0x000000000000000000000000000000000000000000000000fffcd3e4fffccc28",
                 "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e38e" => "0x00000000000000000000000000000000d3c21bcecceda10000003c00000bb801",
                 "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e38f" => "0x000000000000000000000000000000cb0390d6100490f63f7f7eea00c57729f9",
                 "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e390" => "0x0000000000000000000000000000000000000346dd57f57ca689b26e8097f476",
+                "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e392" => "0x000000000000000000000000fffcd03b00000000000000000021f18cc0777544",
                 "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e393" => "0x00000000000000000000000000000000000000000001e9e96d7a34fd85eae8d9",
-            }),
+                "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "0x81e9c7c70971b5eb969cec21a82e6deed42e7c6736e0e83ced66d72297d9f1d7" => "0x0000000000000000000000002b4158d5fa1c37a35aedc38c5018778582f96518",
+                "0x82caad41943cad78d11370ed20b2b5987170ccd3281840e2d8b33cec638c739c" => "0x000000000000000000001f23059fc0ce000000000000000000001f23059fc0ce",
+                "0x82caad41943cad78d11370ed20b2b5987170ccd3281840e2d8b33cec638c739d" => "0x000000000000000000000000000000c8bf088f0c4f2795f8c7115662b99fa813",
+                "0x82caad41943cad78d11370ed20b2b5987170ccd3281840e2d8b33cec638c739e" => "0x000000000000000000000000000000000000033eb616ef0d7044988577cf002d",
+                "0x82caad41943cad78d11370ed20b2b5987170ccd3281840e2d8b33cec638c73a0" => "0x0000000000000000000000000000000000000000000000000000000000000001",
+                "0x830d8ac5b57f386d159b0fe8f38030b1491866ba79d0ef9d011fbf2934391286" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
+                "0x9777d3d8106751edcbd161850d58ac0568e8ccdaa496416b38ce8766d0f43dc7" => "0x000000000000000000000000000000000000000000000000fffcd3e4fffccc28",
+                "0x9777d3d8106751edcbd161850d58ac0568e8ccdaa496416b38ce8766d0f43dc8" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "0x9777d3d8106751edcbd161850d58ac0568e8ccdaa496416b38ce8766d0f43dc9" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "0xbbac0133cfaf5a642a8b781b0299f03f9768f30560c8792fef327372895fb118" => "0xffffffffffffffffffffda2df47c2b2b0000000000000000000025d20b83d4d5",
+                "0xbbac0133cfaf5a642a8b781b0299f03f9768f30560c8792fef327372895fb119" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "0xbbac0133cfaf5a642a8b781b0299f03f9768f30560c8792fef327372895fb11a" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "0xbbac0133cfaf5a642a8b781b0299f03f9768f30560c8792fef327372895fb11c" => "0x0000000000000000000000000000000000000000000000000000000000000001",
+}),
             Some(hashmap! {
             	address!("A8EA92c819463EFbEdDFB670FEfC881A480f0115") => U256::from_limbs([10000000000000000000, 5, 0, 0]),
             	address!("22b9fa698b68bBA071B513959794E9a47d19214c") => U256::from_limbs([9000000000, 1842, 0, 0])
@@ -1748,7 +1763,7 @@ mod test {
 
                 eprintln!("token0 desired: {}, token1 desired: {}, token0 min: {}, token1 min: {}", token_0_desired, token_1_desired, token_0_min, token_1_min);
 
-                contract.incr_position_C_1041_D_18(token, id, token_0_min, token_1_min, token_0_desired, token_1_desired)?;
+                contract.incr_position_C_3_A_C_7_C_A_A(token, id, token_0_min, token_1_min, token_0_desired, token_1_desired)?;
 
                  Ok(())
             },
@@ -1812,19 +1827,45 @@ mod test {
     }
 
     #[test]
-    fn eli_test_incr_position_revert() {
-        //curl -d '{"jsonrpc":"2.0","id":238,"method":"eth_call","params":[{"data":"0x00000000000000000000000000000000de104342b32bca03ec995f999181f7cf1ffc04d70000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000174876e800ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","from":"0xFEb6034FC7dF27dF18a3a6baD5Fb94C0D3dCb6d5","to":"0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1"},"0x6b3ea8"]}' https://testnet-rpc.superposition.so
-        //cast call -r https://testnet-rpc.superposition.so --block 7028392 0xA8EA92c819463EFbEdDFB670FEfC881A480f0115 'balanceOf(address)(uint256)' 0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1
-        //cast call -r https://testnet-rpc.superposition.so --block 7028392 0xde104342B32BCa03ec995f999181f7Cf1fFc04d7 'balanceOf(address)(uint256)' 0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1
-        //cast call -r https://testnet-rpc.superposition.so --block 7028392 0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1 'quote72E2ADE7(address,bool,int256,uint256)' 0xde104342b32bca03ec995f999181f7cf1ffc04d7 false 100000000000 115792089237316195423570985008687907853269984665640564039457584007913129639935
+    fn incr_position_fee_growth_tick() {
+        //curl -d '{"jsonrpc":"2.0","method":"eth_call","id":123,"params":[{"from": "0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5", "to": "0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1", "data": "0x0000010200000000000000000000000022b9fa698b68bba071b513959794e9a47d19214c000000000000000000000000000000000000000000000000000000000000e8530000000000000000000000000000000000000000000000000b1a2bc2ec500000000000000000000000000000000000000000000000000000000000000414a37c0000000000000000000000000000000000000000000000000c7d713b49da000000000000000000000000000000000000000000000000000000000000049737eb"}, "0x7001e5"]}' https://testnet-rpc.superposition.so
 
         test_utils::with_storage::<_, Pools, _>(
             Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()), // sender
-            Some(hashmap! {}),
+            Some(hashmap! {
+                    "0x0000000000000000000000000000000000000000000000000000000000000000" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
+                    "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e38e" => "0x00000000000000000000000000000000d3c21bcecceda10000003c00000bb801",
+                    "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e38f" => "0x000000000000000000000000000002946e618fc1c100eb2ece23c766dc7fe332",
+                    "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e390" => "0x00000000000000000000000000000000000003e430416229f385847e3438b6a0",
+                    "0x2094fc11ba78df2b7ed9c7631680af7cf7bd4803bac5c7331fb2686e5c11e392" => "0x000000000000000000000000fffc729800000000000000000e000843c6b7e857",
+                    "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "0x441db1f4a15f63dd7988db6d518ae69b05a4bd5f528ae8589d82253ea85c9bcb" => "0x000000000000000000000000000000000000000000000000fffc7660fffc6e68",
+                    "0x606b7cbac0ee9fcaadc6dc1a873e9053536063080567030e6f1bbeeecc7c5b99" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "0x606b7cbac0ee9fcaadc6dc1a873e9053536063080567030e6f1bbeeecc7c5b9d" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "0x81e9c7c70971b5eb969cec21a82e6deed42e7c6736e0e83ced66d72297d9f1d7" => "0x000000000000000000000000eb365e1d8113e2dc89eaffeb0eb8655de541e068",
+                    "0x9082b893d81e13a22d3a20bb475d762420aa82b1b423048886c8649938325d80" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "0xc26292c271d836cef11934ee150114f8ac724da089d6e3a3a515a1943495adf9" => "0x0000000000000000000258aa211fc79e0000000000000000000258aa211fc79e",
+                    "0xc26292c271d836cef11934ee150114f8ac724da089d6e3a3a515a1943495adfa" => "0x000000000000000000000000000002340f77a54003eed89b1a97894b15c82a7c",
+                    "0xc26292c271d836cef11934ee150114f8ac724da089d6e3a3a515a1943495adfb" => "0x00000000000000000000000000000000000003ccff159d3a26244013f0917ad0",
+                    "0x09082b893d81e13a22d3a20bb475d762420aa82b1b423048886c8649938325d8" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
+            }),
             None,
-            Some(hashmap! {}),
-            |contract| -> Result<(), Vec<u8>> { Ok(()) },
-        )
-        .unwrap();
+            None,
+            |contract| -> Result<(), Vec<u8>> {
+                let token = address!("22b9fa698b68bba071b513959794e9a47d19214c");
+                let fee_global_0 = contract.fee_growth_global_0_38_B5665_B(token)?;
+                let fee_global_1 = contract.fee_growth_global_1_E_A_C_F1_B_E(token)?;
+                let starting_fee = contract.fee_B_B_3_C_F_608(token)?;
+                eprintln!("starting fee: {}, token: {}, fee global 0: {}, fee global 1: {}", starting_fee, token, fee_global_0, fee_global_1);
+                contract.incr_position_C_3_A_C_7_C_A_A(
+                    token,
+                    U256::from(59475),
+                    U256::from_limbs([762939453125, 0, 0, 0]),
+                    U256::from_limbs([68461436, 0, 0, 0]),
+                    U256::from_limbs([13732910156250, 0, 0, 0]),
+                    U256::from_limbs([77019115, 0, 0, 0]),
+                ).map(|_| ())
+            },
+        ).unwrap();
     }
 }

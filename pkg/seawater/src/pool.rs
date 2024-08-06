@@ -538,6 +538,10 @@ impl StoragePool {
         self.cur_tick.get()
     }
 
+    pub fn get_fee(&self) -> u32 {
+        self.fee.get().sys()
+    }
+
     ///! Get a position given. This is a helper function for testing.
     pub fn get_position(&self, id: U256) -> StorageGuard<'_, position::StoragePositionInfo> {
         self.positions.positions.get(id)

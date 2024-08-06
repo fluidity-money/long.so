@@ -396,7 +396,7 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorUpdatePosition
-    function incrPositionC1041D18(
+    function incrPositionC3AC7CAA(
         address /* pool */,
         uint256 /* id */,
         uint256 /* amount0Min */,
@@ -408,7 +408,7 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorUpdatePosition
-    function decrPositionFCCD4896(
+    function decrPosition09293696(
         uint256 /* id */,
         uint256 /* amount0Min */,
         uint256 /* amount1Min */,

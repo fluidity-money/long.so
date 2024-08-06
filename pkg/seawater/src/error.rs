@@ -123,8 +123,8 @@ pub enum Error {
     LiquidityTooHigh,
 
     // 14 (0x0e)
-    #[error("Fee growth sub overflow")]
-    FeeGrowthSub,
+    #[error("Fee growth sub overflow position")]
+    FeeGrowthSubPos,
 
     // 15 (0x0f)
     #[error("ERC20 call reverted")]
@@ -225,6 +225,10 @@ pub enum Error {
     // 39 (0x27)
     #[error("Liquidity that was taken is too low")]
     LiqResultTooLow,
+
+    // 40 (0x28)
+    #[error("Fee growth sub overflow tick")]
+    FeeGrowthSubTick,
 }
 
 impl From<Error> for Vec<u8> {

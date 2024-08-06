@@ -136,9 +136,9 @@ export const output = {
       stateMutability: "nonpayable",
     },
     {
-      type: "function",
-      name: "decrPositionFCCD4896",
-      inputs: [
+      "type": "function",
+      "name": "decrPosition09293696",
+      "inputs": [
         {
           name: "id",
           type: "uint256",
@@ -265,9 +265,9 @@ export const output = {
       stateMutability: "nonpayable",
     },
     {
-      type: "function",
-      name: "incrPositionC1041D18",
-      inputs: [
+      "type": "function",
+      "name": "incrPositionC3AC7CAA",
+      "inputs": [
         {
           name: "pool",
           type: "address",
