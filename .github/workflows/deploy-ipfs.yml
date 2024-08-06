@@ -7,10 +7,15 @@ on:
       - development
     paths:
       - 'web/**'
+  workflow_run:
+    workflows: ["Playwright E2E Tests", "Jest Unit Tests"]
+    types:
+      - completed
 
 jobs:
   deploy-to-ipfs:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment: mainnet
     env:
       NEXT_PUBLIC_LONGTAIL_GRAPHQL_URL: https://testnet-graph.long.so
