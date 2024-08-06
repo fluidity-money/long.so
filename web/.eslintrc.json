@@ -7,12 +7,6 @@
   ],
   "plugins": ["@stylistic/ts"],
   "parser": "@typescript-eslint/parser",
-  "rules": {
-    "no-warning-comments": [
-      "error",
-      { "terms": ["todo", "fixme"], "location": "anywhere" }
-    ]
-  },
   "overrides": [
     {
       "files": ["*.ts", "*.tsx"],
