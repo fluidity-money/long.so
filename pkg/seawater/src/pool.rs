@@ -571,6 +571,10 @@ impl StoragePool {
         self.enabled.set(enabled)
     }
 
+    pub fn set_sqrt_price(&mut self, new_price: U256) {
+        self.sqrt_price.set(new_price);
+    }
+
     pub fn get_enabled(&self) -> bool {
         self.enabled.get()
     }

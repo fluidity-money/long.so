@@ -258,6 +258,11 @@ interface ISeawaterExecutorAdminExposed {
     /// @return the tick spacing of the pool
     function tickSpacing653FE28F(address pool) external returns (uint8);
 
+    /// @notice gets the fee for a specific pool
+    /// @param pool to get the fee for
+    /// @return the fee for the pool
+    function feeBB3CF608(address pool) external returns (uint32);
+
     /// @notice gets the fee growth for token 0
     /// @param pool to get from
     /// @return the fee growth for the other token
@@ -266,12 +271,17 @@ interface ISeawaterExecutorAdminExposed {
     /// @notice gets the fee growth for token 1
     /// @param pool to get from
     /// @return the fee growth for fUSDC
-    function feeGrowthGlobal14EACF1BE(address pool) external returns (uint256);
+    function feeGrowthGlobal1A33A5A1B(address pool) external returns (uint256);
 
     /// @notice enables or disables a pool
     /// @param pool the pool to enable or disable
     /// @param enabled true to enable to pool, false to disable it
     function enablePool579DA658(address pool, bool enabled) external;
+
+    /// @notice set the sqrt price for a pool in the event of misconfiguration.
+    /// @param pool to set
+    /// @param price to use as the starting place
+    function setSqrtPriceFF4DB98C(address pool,uint256 price) external;
 }
 
 interface ISeawaterExecutorAdmin  is ISeawaterExecutorAdminExposed {

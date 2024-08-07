@@ -215,6 +215,7 @@ impl StorageTicks {
             }
         }
 
+        #[cfg(feature = "testing-dbg")]
         dbg!((
             "final stage checked sub below",
             current_test!(),

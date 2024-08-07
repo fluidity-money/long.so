@@ -1079,8 +1079,28 @@ impl Pools {
 
     /// Getter method for getting the fee growth for token 1
     #[allow(non_snake_case)]
-    pub fn fee_growth_global_1_E_A_C_F1_B_E(&self, pool: Address) -> Result<U256, Revert> {
+    pub fn fee_growth_global_1_A_33_A_5_A_1_B(&self, pool: Address) -> Result<U256, Revert> {
         Ok(self.pools.getter(pool).get_fee_growth_global_1())
+    }
+
+    /// Set the sqrt price for a pool. Only useful if the pool was
+    /// misconfigured (intentionally or otherwise) at the beginning of the
+    /// pool's life. Be careful with this!
+    #[allow(non_snake_case)]
+    pub fn set_sqrt_price_F_F_4_D_B_98_C(
+        &mut self,
+        pool: Address,
+        new_price: U256,
+    ) -> Result<(), Revert> {
+        assert_eq_or!(
+            msg::sender(),
+            self.seawater_admin.get(),
+            Error::SeawaterAdminOnly
+        );
+
+        self.pools.setter(pool).set_sqrt_price(new_price);
+
+        Ok(())
     }
 
     /// Collects protocol fees from the AMM. Only usable by the seawater admin.

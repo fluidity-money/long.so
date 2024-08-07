@@ -183,6 +183,11 @@ contract SeawaterAMM is ISeawaterAMM {
         directDelegate(_getExecutorAdmin());
     }
 
+    /// @inheritdoc ISeawaterExecutorAdminExposed
+    function setSqrtPriceFF4DB98C(address /* pool */, uint256 /* price */) external {
+        directDelegate(_getExecutorAdmin());
+    }
+
     // swap functions
 
     /// @inheritdoc ISeawaterExecutorSwap
@@ -369,12 +374,17 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
+    function feeBB3CF608(address /* pool */) external returns (uint32) {
+        directDelegate(_getExecutorAdmin());
+    }
+
+    /// @inheritdoc ISeawaterExecutorAdminExposed
     function feeGrowthGlobal038B5665B(address /* pool */) external returns (uint256) {
         directDelegate(_getExecutorAdmin());
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
-    function feeGrowthGlobal14EACF1BE(address /* pool */) external returns (uint256) {
+    function feeGrowthGlobal1A33A5A1B(address /*pool */) external returns (uint256) {
         directDelegate(_getExecutorAdmin());
     }
 
