@@ -81,6 +81,6 @@ export const useGraphqlUser = () => {
     queryKey: ["graphql", address ?? ""],
     queryFn: () =>
       request(graphqlEndpoint!, graphqlQueryUser, { wallet: address ?? "" }),
-    refetchInterval: 60 * 1000, // 1 minute
+    refetchInterval: 20 * 1000, // 20 seconds
   });
 };
