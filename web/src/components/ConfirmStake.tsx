@@ -30,22 +30,25 @@ import { Success } from "@/components/sequence/Success";
 import { getFormattedPriceFromAmount } from "@/lib/amounts";
 import { fUSDC } from "@/config/tokens";
 import { TokenIcon } from "./TokenIcon";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 type ConfirmStakeProps =
   | {
-      mode: "new";
-      positionId?: never;
-    }
+    mode: "new";
+    positionId?: never;
+  }
   | {
-      mode: "existing";
-      positionId: number;
-    };
+    mode: "existing";
+    positionId: number;
+  };
 
 export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const router = useRouter();
 
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
+  const showBoostIncentives = useFeatureFlag("ui show boost incentives");
+  const showStakeApy = useFeatureFlag("ui show stake apy");
 
   useEffect(() => {
     if (!address || chainId !== expectedChainId) router.back();
@@ -116,6 +119,15 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     functionName: "tickSpacing653FE28F",
     args: [token0.address],
   });
+
+  const { data: fee } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "feeBB3CF608",
+    args: [token0.address],
+  });
+
+  const feeDisplay = fee?.result ? (100 / fee.result).toFixed(2) : "???"
 
   // set up write contract hooks
   const {
@@ -388,6 +400,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
           "md:h-[685px]": mode === "existing",
           "md:h-[673px]": mode === "new",
           "md:h-[770px]": multiSingleToken === "single",
+          "md:h-[500px]": !showBoostIncentives,
         })}
       >
         <div className="flex flex-row items-center justify-between p-[9px]">

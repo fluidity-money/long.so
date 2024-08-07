@@ -80,13 +80,13 @@ const colorGradient = new echarts.graphic.LinearGradient(
 
 type StakeFormProps = { poolId: string } & (
   | {
-      mode: "new";
-      positionId?: never;
-    }
+    mode: "new";
+    positionId?: never;
+  }
   | {
-      mode: "existing";
-      positionId: number;
-    }
+    mode: "existing";
+    positionId: number;
+  }
 );
 
 const StakeFormFragment = graphql(`
@@ -190,6 +190,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const showLiquidityVisualiser = useFeatureFlag(
     "ui show liquidity visualiser",
   );
+  const showBoostIncentives = useFeatureFlag("ui show boost incentives");
 
   const onSubmit = () => {
     if (mode === "new") {
@@ -226,6 +227,15 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const tokenPrice = poolSqrtPriceX96
     ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
     : 0n;
+
+  const { data: fee } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "feeBB3CF608",
+    args: [token0.address],
+  });
+
+  const feeDisplay = fee?.result ? (100 / fee.result).toFixed(2) : "???"
 
   // in this context, token0 is actually token1. It's converted to token1
   // when we use it.
@@ -1069,7 +1079,9 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
           </div>
         </div>
 
-        <div className="mt-[15px] h-[210px] w-[318px] rounded-lg bg-black px-[11px] pt-[16px] text-xs text-white md:w-[392px]">
+        <div className={cn("mt-[15px] h-[210px] w-[318px] rounded-lg bg-black px-[11px] pt-[16px] text-xs text-white md:w-[392px]", {
+          "h-[120px]": !showBoostIncentives,
+        })}>
           <div>Yield Breakdown</div>
 
           <div className="mt-[14px] flex w-full flex-col gap-[5px] pl-[5px] text-2xs">
@@ -1079,29 +1091,33 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               <div className={"flex flex-row items-center"}>
                 <Token />
                 <Token className={"-ml-1 mr-1"} />
-                $0 - $21.72
+                {feeDisplay}%
               </div>
             </div>
 
-            <div className="flex flex-row justify-between">
-              <div>Liquidity Boosts</div>
+            {showBoostIncentives &&
+              <>
+                <div className="flex flex-row justify-between">
+                  <div>Liquidity Boosts</div>
 
-              <div className={"flex flex-row items-center"}>
-                <Token />
-                <Token className={"-ml-1 mr-1"} />
-                $0.20 - $13.06
-              </div>
-            </div>
+                  <div className={"flex flex-row items-center"}>
+                    <Token />
+                    <Token className={"-ml-1 mr-1"} />
+                    $0.20 - $13.06
+                  </div>
+                </div>
 
-            <div className="flex flex-row justify-between">
-              <div>Super Boosts</div>
+                <div className="flex flex-row justify-between">
+                  <div>Super Boosts</div>
 
-              <div className={"flex flex-row items-center"}>
-                <Token />
-                <Token className={"-ml-1 mr-1"} />
-                $5.91 - $8.34
-              </div>
-            </div>
+                  <div className={"flex flex-row items-center"}>
+                    <Token />
+                    <Token className={"-ml-1 mr-1"} />
+                    $5.91 - $8.34
+                  </div>
+                </div>
+              </>
+            }
           </div>
 
           <div className={"mt-[20px] flex flex-row justify-between pl-[5px]"}>
@@ -1114,33 +1130,37 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               <Token />
               <Token className={"-ml-1"} />
               <Token className={"-ml-1 mr-1"} />
-              <div>$6.11 - $33.12</div>
+              <div>???</div>
             </Badge>
           </div>
 
-          <div className="mt-[20px] flex flex-row gap-1 text-2xs">
-            <div className="flex w-[3%] flex-col">
-              <div>3%</div>
-              <div className="h-1 w-full rounded bg-white"></div>
-            </div>
+          {showBoostIncentives &&
+            <>
+              <div className="mt-[20px] flex flex-row gap-1 text-2xs">
+                <div className="flex w-[3%] flex-col">
+                  <div>3%</div>
+                  <div className="h-1 w-full rounded bg-white"></div>
+                </div>
 
-            <div className="flex w-[7%] flex-col items-center">
-              <div>7%</div>
-              <div className="h-1 w-full rounded bg-white"></div>
-            </div>
+                <div className="flex w-[7%] flex-col items-center">
+                  <div>7%</div>
+                  <div className="h-1 w-full rounded bg-white"></div>
+                </div>
 
-            <div className="flex w-[30%] flex-col items-center">
-              <div>30%</div>
-              <div className="h-1 w-full rounded bg-white"></div>
-              <div>Super Boosts</div>
-            </div>
+                <div className="flex w-[30%] flex-col items-center">
+                  <div>30%</div>
+                  <div className="h-1 w-full rounded bg-white"></div>
+                  <div>Super Boosts</div>
+                </div>
 
-            <div className="flex w-3/5 flex-col items-center">
-              <div>60%</div>
-              <div className="iridescent h-1 w-full rounded"></div>
-              <div>Utility Boosts</div>
-            </div>
-          </div>
+                <div className="flex w-3/5 flex-col items-center">
+                  <div>60%</div>
+                  <div className="iridescent h-1 w-full rounded"></div>
+                  <div>Utility Boosts</div>
+                </div>
+              </div>
+            </>
+          }
         </div>
 
         <div className="mt-[20px] w-[318px] md:hidden">

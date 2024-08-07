@@ -199,6 +199,25 @@ export const output = {
     },
     {
       type: "function",
+      name: "feeBB3CF608",
+      inputs: [
+        {
+          name: "pool",
+          type: "address",
+          internalType: "address",
+        },
+      ],
+      outputs: [
+        {
+          name: "",
+          type: "uint32",
+          internalType: "uint32",
+        },
+      ],
+      stateMutability: "nonpayable",
+    },
+    {
+      type: "function",
       name: "feeGrowthGlobal038B5665B",
       inputs: [
         {
