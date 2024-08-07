@@ -573,60 +573,72 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
           <div className="mt-[13px] flex flex-col gap-[5px] px-[4px] text-2xs">
             <div className="flex flex-row justify-between">
               <div>Fees</div>
-              <div>5%</div>
+              <div>{feeDisplay}%</div>
             </div>
 
-            <div className="flex flex-row justify-between">
-              <div>Protocol Boosts</div>
-              <div>3.5%</div>
-            </div>
+            {showBoostIncentives &&
+              <>
+                <div className="flex flex-row justify-between">
+                  <div>Protocol Boosts</div>
+                  <div>3.5%</div>
+                </div>
 
-            <div className="flex flex-row justify-between">
-              <div>Super Boosts</div>
-              <div>2%</div>
-            </div>
+                <div className="flex flex-row justify-between">
+                  <div>Super Boosts</div>
+                  <div>2%</div>
+                </div>
+              </>
+            }
 
-            <div className="mt-[15px] flex flex-row justify-between">
-              <div>APY</div>
-              <div className="iridescent rounded px-1 text-black">12.09%</div>
-            </div>
+            {showStakeApy &&
+              <>
+                <div className="mt-[15px] flex flex-row justify-between">
+                  <div>APY</div>
+                  <div className="iridescent rounded px-1 text-black">12.09%</div>
+                </div>
 
-            <div className="flex flex-row justify-between">
-              <div>Yield</div>
-              <div>$247.88</div>
-            </div>
+                <div className="flex flex-row justify-between">
+                  <div>Yield</div>
+                  <div>$247.88</div>
+                </div>
+              </>
+            }
           </div>
         </div>
 
-        <div className="mt-[20px] px-[21px]">
-          <div className="text-3xs">Yield Composition</div>
+        {showBoostIncentives &&
+          <>
+            <div className="mt-[20px] px-[21px]">
+              <div className="text-3xs">Yield Composition</div>
 
-          <div className="mt-[20px] flex flex-row gap-1 text-2xs">
-            <div className="flex w-[3%] flex-col gap-1">
-              <div>3%</div>
-              <div className="h-1 w-full rounded bg-white"></div>
-              <div className="text-4xs md:hidden">Fees</div>
-            </div>
+              <div className="mt-[20px] flex flex-row gap-1 text-2xs">
+                <div className="flex w-[3%] flex-col gap-1">
+                  <div>3%</div>
+                  <div className="h-1 w-full rounded bg-white"></div>
+                  <div className="text-4xs md:hidden">Fees</div>
+                </div>
 
-            <div className="flex w-[7%] flex-col items-center gap-1">
-              <div>7%</div>
-              <div className="h-1 w-full rounded bg-white"></div>
-              <div className="text-4xs md:hidden">Protocol Boosts</div>
-            </div>
+                <div className="flex w-[7%] flex-col items-center gap-1">
+                  <div>7%</div>
+                  <div className="h-1 w-full rounded bg-white"></div>
+                  <div className="text-4xs md:hidden">Protocol Boosts</div>
+                </div>
 
-            <div className="flex w-[30%] flex-col items-center gap-1">
-              <div>30%</div>
-              <div className="h-1 w-full rounded bg-white"></div>
-              <div className="text-4xs md:text-3xs">Super Boosts</div>
-            </div>
+                <div className="flex w-[30%] flex-col items-center gap-1">
+                  <div>30%</div>
+                  <div className="h-1 w-full rounded bg-white"></div>
+                  <div className="text-4xs md:text-3xs">Super Boosts</div>
+                </div>
 
-            <div className="flex w-3/5 flex-col items-center gap-1">
-              <div>60%</div>
-              <div className="iridescent h-1 w-full rounded"></div>
-              <div className="text-4xs md:text-3xs">Utility Boosts</div>
+                <div className="flex w-3/5 flex-col items-center gap-1">
+                  <div>60%</div>
+                  <div className="iridescent h-1 w-full rounded"></div>
+                  <div className="text-4xs md:text-3xs">Utility Boosts</div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </>
+        }
 
         <div className=" flex flex-col items-center p-[15px]">
           <Button
