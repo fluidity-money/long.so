@@ -50,9 +50,9 @@ func Entry(f features.F, config config.C, thirdwebFactoryAddr types.Address, sho
 		thirdwebAddr = ethCommon.HexToAddress(thirdwebFactoryAddr.String())
 	)
 	if shouldPoll {
-		IngestPolling(f, c, db,ingestorPagination, pollWait,  thirdwebAddr, seawaterAddr)
+		IngestPolling(f, c, db,ingestorPagination, pollWait,  seawaterAddr, thirdwebAddr)
 	} else {
-		IngestWebsocket(f, c, db, thirdwebAddr, seawaterAddr)
+		IngestWebsocket(f, c, db, seawaterAddr, thirdwebAddr)
 	}
 }
 
