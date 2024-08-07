@@ -100,7 +100,7 @@ type Query {
   ): GetSwaps!
 
   """
-  getSwapsForUser by the user across every pool we track.
+  Get swaps for a user across every pool we track.
   """
   getSwapsForUser(
     """
@@ -116,6 +116,16 @@ type Query {
     """
     after: Int
   ): GetSwapsForUser!
+
+  """
+  Get a Thirdweb smart account with the owner address given.
+  """
+  getSmartAccount(
+      """
+      Wallet to use as the owner.
+      """
+      wallet: String!
+  ): [Wallet!]!
 }
 
 """
