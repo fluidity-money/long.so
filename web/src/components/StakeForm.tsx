@@ -50,7 +50,6 @@ import Gas from "@/assets/icons/gas.svg";
 import Link from "next/link";
 import Menu from "@/components/Menu";
 import Index from "@/components/Slider";
-import { erc20Abi } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
@@ -80,13 +79,13 @@ const colorGradient = new echarts.graphic.LinearGradient(
 
 type StakeFormProps = { poolId: string } & (
   | {
-    mode: "new";
-    positionId?: never;
-  }
+      mode: "new";
+      positionId?: never;
+    }
   | {
-    mode: "existing";
-    positionId: number;
-  }
+      mode: "existing";
+      positionId: number;
+    }
 );
 
 const StakeFormFragment = graphql(`
@@ -235,7 +234,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     args: [token0.address],
   });
 
-  const feeDisplay = fee?.result ? (100 / fee.result).toFixed(2) : "???"
+  const feeDisplay = fee?.result ? (100 / fee.result).toFixed(2) : "???";
 
   // in this context, token0 is actually token1. It's converted to token1
   // when we use it.
@@ -508,7 +507,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             >
               <TokenIcon
                 src={token0.icon}
-                className="size-[30px] rounded-full border-[1px] border-white"
+                className="size-[30px] rounded-full border border-white"
               />
               <Badge
                 variant="outline"
@@ -1079,9 +1078,14 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
           </div>
         </div>
 
-        <div className={cn("mt-[15px] h-[210px] w-[318px] rounded-lg bg-black px-[11px] pt-[16px] text-xs text-white md:w-[392px]", {
-          "h-[120px]": !showBoostIncentives,
-        })}>
+        <div
+          className={cn(
+            "mt-[15px] h-[210px] w-[318px] rounded-lg bg-black px-[11px] pt-[16px] text-xs text-white md:w-[392px]",
+            {
+              "h-[120px]": !showBoostIncentives,
+            },
+          )}
+        >
           <div>Yield Breakdown</div>
 
           <div className="mt-[14px] flex w-full flex-col gap-[5px] pl-[5px] text-2xs">
@@ -1095,7 +1099,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               </div>
             </div>
 
-            {showBoostIncentives &&
+            {showBoostIncentives && (
               <>
                 <div className="flex flex-row justify-between">
                   <div>Liquidity Boosts</div>
@@ -1117,7 +1121,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   </div>
                 </div>
               </>
-            }
+            )}
           </div>
 
           <div className={"mt-[20px] flex flex-row justify-between pl-[5px]"}>
@@ -1134,7 +1138,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             </Badge>
           </div>
 
-          {showBoostIncentives &&
+          {showBoostIncentives && (
             <>
               <div className="mt-[20px] flex flex-row gap-1 text-2xs">
                 <div className="flex w-[3%] flex-col">
@@ -1160,7 +1164,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 </div>
               </div>
             </>
-          }
+          )}
         </div>
 
         <div className="mt-[20px] w-[318px] md:hidden">
