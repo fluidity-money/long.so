@@ -290,11 +290,11 @@ func handleLogCallback(seawaterAddr, thirdwebAddr ethCommon.Address, l ethTypes.
 	if err != nil {
 		return fmt.Errorf("failed to process topic for table %#v: %v", table, err)
 	}
-	if isSeawater {
-		// Make sure that the log came from the Seawater contract.
-		if seawaterAddr != emitterAddr {
-			slog.Warn("ignoring a Seawater log from a sender that wasn't seawater",
+	if isThirdweb {
+		if thirdwebAddr != emitterAddr {
+			slog.Warn("ignoring a Thirdweb log from a sender that wasn't thirdweb",
 				"seawater address", seawaterAddr,
+				"thirdweb address", thirdwebAddr,
 				"emitter address", emitterAddr,
 				"topic0", topic0,
 				"transaction hash", transactionHash,
@@ -302,11 +302,11 @@ func handleLogCallback(seawaterAddr, thirdwebAddr ethCommon.Address, l ethTypes.
 			return nil
 		}
 	}
-	if isThirdweb {
-		if thirdwebAddr != emitterAddr {
-			slog.Warn("ignoring a Thirdweb log from a sender that wasn't thirdweb",
+	if isSeawater {
+		// Make sure that the log came from the Seawater contract.
+		if seawaterAddr != emitterAddr {
+			slog.Warn("ignoring a Seawater log from a sender that wasn't seawater",
 				"seawater address", seawaterAddr,
-				"thirdweb address", thirdwebAddr,
 				"emitter address", emitterAddr,
 				"topic0", topic0,
 				"transaction hash", transactionHash,
