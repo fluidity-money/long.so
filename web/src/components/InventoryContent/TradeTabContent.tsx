@@ -59,7 +59,7 @@ export const TradeTabContent = () => {
    */
   const transactions = useFragment(
     TradeTabTransactionsFragment,
-    data?.getSwapsForUser.data.swaps,
+    data?.getSwapsForUser?.data.swaps,
   );
 
   const showMockData = useFeatureFlag("ui show demo data");
