@@ -288,7 +288,8 @@ interface ISeawaterExecutorAdmin  is ISeawaterExecutorAdminExposed {
     /// @notice constructor function
     /// @param seawaterAdmin the account with administrative power on the amm
     /// @param nftManager the account with control over NFT ownership
-    function ctor(address seawaterAdmin, address nftManager) external;
+    /// @param emergencyCouncil to use to control for pool disabling interactions
+    function ctor(address seawaterAdmin, address nftManager, address emergencyCouncil) external;
 }
 
 interface ISeawaterExecutorFallback {}

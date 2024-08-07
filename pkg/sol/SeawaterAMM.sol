@@ -69,6 +69,7 @@ contract SeawaterAMM is ISeawaterAMM {
         address _proxyAdmin,
         address _seawaterAdmin,
         address _nftManager,
+        address _emergencyCouncil,
         ISeawaterExecutorSwap _executorSwap,
         ISeawaterExecutorSwapPermit2 _executorSwapPermit2,
         ISeawaterExecutorQuote _executorQuote,
@@ -90,7 +91,7 @@ contract SeawaterAMM is ISeawaterAMM {
 
         (bool success, bytes memory data) = _getExecutorAdmin().delegatecall(abi.encodeCall(
             ISeawaterExecutorAdmin.ctor,
-            (_seawaterAdmin, _nftManager)
+            (_seawaterAdmin, _nftManager, _emergencyCouncil)
         ));
         // the string() cast here is just for typechecking, `data` is essentially arbitrary
         require(success, string(data));

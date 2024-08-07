@@ -98,6 +98,7 @@ mod shim {
 #[solidity_storage]
 #[entrypoint]
 pub struct Pools {
+    // admin that can control the settings of everything. either the DAO, or the
     seawater_admin: StorageAddress,
     // the nft manager is a privileged account that can transfer NFTs!
     nft_manager: StorageAddress,
@@ -109,6 +110,9 @@ pub struct Pools {
     position_owners: StorageMap<U256, StorageAddress>,
     // owner => count
     owned_positions: StorageMap<Address, StorageU256>,
+
+    // address that's able to activate and disable emergency mode functionality
+    emergency_council: StorageAddress,
 }
 
 impl Pools {
@@ -984,7 +988,12 @@ impl Pools {
     ///
     ///  # Errors
     ///  Requires the contract to not be initialised.
-    pub fn ctor(&mut self, seawater_admin: Address, nft_manager: Address) -> Result<(), Revert> {
+    pub fn ctor(
+        &mut self,
+        seawater_admin: Address,
+        nft_manager: Address,
+        emergency_council: Address,
+    ) -> Result<(), Revert> {
         assert_eq_or!(
             self.seawater_admin.get(),
             Address::ZERO,
@@ -993,6 +1002,7 @@ impl Pools {
 
         self.seawater_admin.set(seawater_admin);
         self.nft_manager.set(nft_manager);
+        self.emergency_council.set(emergency_council);
 
         Ok(())
     }
@@ -1144,9 +1154,9 @@ impl Pools {
     /// Requires the user to be the seawater admin.
     #[allow(non_snake_case)]
     pub fn enable_pool_579_D_A658(&mut self, pool: Address, enabled: bool) -> Result<(), Revert> {
-        assert_eq_or!(
-            msg::sender(),
-            self.seawater_admin.get(),
+        assert_or!(
+            self.seawater_admin.get() == msg::sender()
+                || self.emergency_council.get() == msg::sender(),
             Error::SeawaterAdminOnly
         );
 
