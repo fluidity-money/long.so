@@ -8,6 +8,7 @@ import (
 	"github.com/fluidity-money/long.so/lib/setup"
 
 	"github.com/fluidity-money/long.so/lib/config"
+	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/features"
 
 	_ "github.com/lib/pq"
@@ -23,6 +24,7 @@ const (
 	EnvIngestorShouldPoll   = "SPN_INGESTOR_SHOULD_POLL"
 	EnvPaginationBlockCount = "SPN_INGESTOR_PAGINATION_BLOCK_COUNT"
 	EnvPaginationPollWait   = "SPN_INGESTOR_PAGINATION_POLL_WAIT"
+	EnvThirdwebAddr         = "SPN_THIRDWEB_ACCOUNT_FACTORY_ADDR"
 )
 
 const (
@@ -88,9 +90,11 @@ func main() {
 		}
 		ingestorPollWait = int(i)
 	}
+	thirdwebFactoryAddr := types.AddressFromString(os.Getenv(EnvThirdwebAddr))
 	Entry(
 		features.Get(),
 		config,
+		thirdwebFactoryAddr,
 		ingestorShouldPoll,
 		ingestorPagination,
 		ingestorPollWait,

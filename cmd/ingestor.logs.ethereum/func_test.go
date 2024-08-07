@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/fluidity-money/long.so/lib/events/seawater"
+	"github.com/fluidity-money/long.so/lib/events/thirdweb"
 	"github.com/fluidity-money/long.so/lib/types"
 
 	ethCommon "github.com/ethereum/go-ethereum/common"
@@ -35,7 +36,8 @@ func TestHandleLogCallbackNewPool(t *testing.T) {
 }`)
 	var l ethTypes.Log
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
-	handleLogCallback(seawaterAddr, l, func(table string, a any) error {
+	wasRun := false
+	handleLogCallback(seawaterAddr, seawaterAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_seawater_newpool", table, "table not equal")
 		// This test is captured in a unit test, so we can focus on just testing
 		// this one field.
@@ -46,8 +48,10 @@ func TestHandleLogCallbackNewPool(t *testing.T) {
 			newPool.Token,
 			"token not equal",
 		)
+		wasRun = true
 		return nil
 	})
+	assert.True(t, wasRun)
 }
 
 func TestHandleLogCallbackUpdatePositionLiquidity(t *testing.T) {
@@ -70,7 +74,8 @@ func TestHandleLogCallbackUpdatePositionLiquidity(t *testing.T) {
 }`)
 	var l ethTypes.Log
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
-	handleLogCallback(seawaterAddr, l, func(table string, a any) error {
+	wasRun := false
+	handleLogCallback(seawaterAddr, seawaterAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_seawater_updatepositionliquidity", table, "table not equal")
 		// This test is captured in a unit test, so we can focus on just testing
 		// this one field.
@@ -91,8 +96,10 @@ func TestHandleLogCallbackUpdatePositionLiquidity(t *testing.T) {
 			updatePositionLiq.Token1,
 			"token not equal",
 		)
+		wasRun = true
 		return nil
 	})
+	assert.True(t, wasRun)
 }
 
 func TestHandleLogCallbackMintPosition(t *testing.T) {
@@ -117,7 +124,8 @@ func TestHandleLogCallbackMintPosition(t *testing.T) {
 }`)
 	var l ethTypes.Log
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
-	handleLogCallback(seawaterAddr, l, func(table string, a any) error {
+	wasRun := false
+	handleLogCallback(seawaterAddr, seawaterAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_seawater_mintposition", table, "table not equal")
 		// This test is captured in a unit test, so we can focus on just testing
 		// this one field.
@@ -128,8 +136,10 @@ func TestHandleLogCallbackMintPosition(t *testing.T) {
 			newPool.Owner,
 			"token not equal",
 		)
+		wasRun = true
 		return nil
 	})
+	assert.True(t, wasRun)
 }
 
 func TestHandleLogCallbackSwap1(t *testing.T) {
@@ -153,7 +163,8 @@ func TestHandleLogCallbackSwap1(t *testing.T) {
 }`)
 	var l ethTypes.Log
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
-	handleLogCallback(seawaterAddr, l, func(table string, a any) error {
+	wasRun := false
+	handleLogCallback(seawaterAddr, seawaterAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_seawater_swap1", table, "table not equal")
 		// This test is captured in a unit test, so we can focus on just testing
 		// this one field.
@@ -164,8 +175,52 @@ func TestHandleLogCallbackSwap1(t *testing.T) {
 			newPool.User,
 			"token not equal",
 		)
+		wasRun = true
 		return nil
 	})
+	assert.True(t, wasRun)
+}
+
+func TestHandleLogCallbackAccountCreated(t *testing.T) {
+	// Test the new pool handling code.
+	thirdwebAddr := ethCommon.HexToAddress("0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00")
+	s := strings.NewReader(`
+{
+	"address": "0x85e23b94e7f5e9cc1ff78bce78cfb15b81f0df00",
+	"blockHash": "0xd6a09be6b519ca1495769a13e600573bdfb828893b18778bc982b5a59077fb51",
+	"blockNumber": "0x728175",
+	"data": "0x",
+	"logIndex": "0x3",
+	"removed": false,
+	"topics": [
+		"0xac631f3001b55ea1509cf3d7e74898f85392a61a76e8149181ae1259622dabc8",
+		"0x000000000000000000000000c84b8d602a9566a20a5e9b46896a5f81587d9c65",
+		"0x000000000000000000000000838ea3cf94d18c535fe653238b3a53c4a8c10e19"
+	],
+	"transactionHash": "0x4b1cedd2ac6032e9ceb3eea070ab87a8103054562b085dada6d33db3a6627485",
+	"transactionIndex": "0x1"
+}`)
+	var l ethTypes.Log
+	wasRun := false
+	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
+	handleLogCallback(thirdwebAddr, thirdwebAddr, l, func(table string, a any) error {
+		assert.Equalf(t, "events_thirdweb_accountcreated", table, "table not equal")
+		accountCreated, ok := a.(*thirdweb.AccountCreated)
+		assert.Truef(t, ok, "AccountCreated type coercion not true")
+		assert.Equalf(t,
+			types.AddressFromString("0xc84b8d602a9566a20a5e9b46896a5f81587d9c65"),
+			accountCreated.Account,
+			"account not equal",
+		)
+		assert.Equalf(t,
+			types.AddressFromString("0x838ea3cf94d18c535fe653238b3a53c4a8c10e19"),
+			accountCreated.AccountAdmin,
+			"account admin not equal",
+		)
+		wasRun = true
+		return nil
+	})
+	assert.True(t, wasRun)
 }
 
 func TestCurrentEventIds(t *testing.T) {
@@ -179,6 +234,7 @@ func TestCurrentEventIds(t *testing.T) {
 		"0xcb076a66f4dca163de39a4023de987ca633a005767c796b3772e3462c573e339": false,
 		"0xd3593b1fa4a2b80431faf29b3fb80cd1ef82a2b65128a650c625c4ed8d1b4d92": false,
 		"0xd500e81443925d03f2ac45364aa32d71b4bbd8f697bc7b8fc5a4accc4601b54b": false,
+		"0xac631f3001b55ea1509cf3d7e74898f85392a61a76e8149181ae1259622dabc8": false,
 	}
 	for _, id := range FilterTopics[0] {
 		currentIds[id.Hex()] = true
