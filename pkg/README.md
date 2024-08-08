@@ -90,6 +90,8 @@ the appropriate error in this table:
 | 36 | 0x24 | Invalid tick                                                                            |
 | 37 | 0x25 | Pool enabled when it should be disabled for this action                                 |
 | 38 | 0x26 | Position is empty when it shouldn't be                                                  |
+| 39 | 0x27 | Liquidity that was almost taken was too low when it didn't need to be                   |
+| 40 | 0x28 | Fee growth that tried to be calculated was bad internally for a tick                    |
 
 If more bytes are in the error, then the issue was produced by the ERC20 token. Convert
 any error types to their selector form to see.
