@@ -2,14 +2,14 @@ package main
 
 import (
 	"log/slog"
+	"math/rand"
 	"os"
-	"strconv"
 
 	"github.com/fluidity-money/long.so/lib/setup"
 
 	"github.com/fluidity-money/long.so/lib/config"
-	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/features"
+	"github.com/fluidity-money/long.so/lib/types"
 
 	_ "github.com/lib/pq"
 
@@ -28,12 +28,16 @@ const (
 )
 
 const (
-	// DefaultPaginationBlockCount to increase the last known block tracked
+	// DefaultPaginationBlockCountMin to use as the minimum number of blocks
+	// to increase by.
+	DefaultPaginationBlockCountMin = 1000
+
+	// DefaultPaginationBlockCountMax to increase the last known block tracked
 	// by with.
-	DefaultPaginationBlockCount = 10_000
+	DefaultPaginationBlockCountMax = 5000
 
 	// DefaultPaginationPollWait to wait between polls.
-	DefaultPaginationPollWait = 2 // Seconds
+	DefaultPaginationPollWait = 4 // Seconds
 )
 
 func main() {
@@ -54,42 +58,13 @@ func main() {
 	/* Ingestor-specific configuration. */
 	ingestorShouldPoll := os.Getenv(EnvIngestorShouldPoll) != ""
 	slog.Info("ingestor should poll?", "status", ingestorShouldPoll)
-	var ingestorPagination uint64
-	ingestorPagination_ := os.Getenv(EnvPaginationBlockCount)
-	if ingestorPagination_ == "" {
-		slog.Info("using the default pagination count",
-			"default amount", DefaultPaginationBlockCount,
-		)
-		ingestorPagination = DefaultPaginationBlockCount
-	} else {
-		var err error
-		ingestorPagination, err = strconv.ParseUint(ingestorPagination_, 10, 64)
-		if err != nil {
-			setup.Exitf(
-				"failed to parse pagination block increase, string is %#v: %v",
-				ingestorPagination_,
-				err,
-			)
-		}
-	}
-	var ingestorPollWait int
-	ingestorPollWait_ := os.Getenv(EnvPaginationPollWait)
-	if ingestorPollWait_ == "" {
-		slog.Info("using the ingestor polling seconds wait",
-			"default amount", DefaultPaginationPollWait,
-		)
-		ingestorPollWait = DefaultPaginationPollWait
-	} else {
-		i, err := strconv.ParseInt(ingestorPollWait_, 10, 32)
-		if err != nil {
-			setup.Exitf(
-				"failed to parse pagination poll wait, string is %#v: %v",
-				ingestorPollWait_,
-				err,
-			)
-		}
-		ingestorPollWait = int(i)
-	}
+	ingestorPagination := rand.Intn(DefaultPaginationBlockCountMax-DefaultPaginationBlockCountMin) + DefaultPaginationBlockCountMin
+	slog.Info("polling configuration",
+		"poll wait time amount", DefaultPaginationPollWait,
+		"pagination block count min", DefaultPaginationBlockCountMin,
+		"pagination block count max", DefaultPaginationBlockCountMax,
+		"pagination count", ingestorPagination,
+	)
 	thirdwebFactoryAddr := types.AddressFromString(os.Getenv(EnvThirdwebAddr))
 	Entry(
 		features.Get(),
@@ -97,7 +72,7 @@ func main() {
 		thirdwebFactoryAddr,
 		ingestorShouldPoll,
 		ingestorPagination,
-		ingestorPollWait,
+		DefaultPaginationPollWait,
 		c,
 		db,
 	)

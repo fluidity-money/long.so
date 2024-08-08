@@ -44,7 +44,7 @@ var FilterTopics = [][]ethCommon.Hash{{ // Matches any of these in the first top
 // Entry function, using the database to determine if polling should be
 // used exclusively to receive logs, polling only for catchup, or
 // exclusively websockets.
-func Entry(f features.F, config config.C, thirdwebFactoryAddr types.Address, shouldPoll bool, ingestorPagination uint64, pollWait int, c *ethclient.Client, db *gorm.DB) {
+func Entry(f features.F, config config.C, thirdwebFactoryAddr types.Address, shouldPoll bool, ingestorPagination int, pollWait int, c *ethclient.Client, db *gorm.DB) {
 	var (
 		seawaterAddr = ethCommon.HexToAddress(config.SeawaterAddr.String())
 		thirdwebAddr = ethCommon.HexToAddress(thirdwebFactoryAddr.String())
@@ -60,14 +60,17 @@ func Entry(f features.F, config config.C, thirdwebFactoryAddr types.Address, sho
 // receive log updates. Checks the database first to determine where the
 // last point is before continuing. Assumes ethclient is HTTP.
 // Uses the IngestBlockRange function to do all the lifting.
-func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagination uint64, ingestorPollWait int, seawaterAddr, thirdwebAddr ethCommon.Address) {
+func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagination, ingestorPollWait int, seawaterAddr, thirdwebAddr ethCommon.Address) {
+	if ingestorPagination <= 0 {
+		panic("bad ingestor pagination")
+	}
 	for {
 		// Start by finding the latest block number.
 		from, err := getLastBlockCheckpointed(db)
 		if err != nil {
 			setup.Exitf("failed to get the last block checkpoint: %v", err)
 		}
-		to := from + ingestorPagination
+		to := from + uint64(ingestorPagination)
 		from++ // Increase the starting block by 1 so we always get the next block.
 		slog.Info("latest block checkpoint",
 			"from", from,
