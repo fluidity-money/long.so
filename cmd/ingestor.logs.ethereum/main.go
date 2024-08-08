@@ -20,12 +20,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-const (
-	EnvIngestorShouldPoll   = "SPN_INGESTOR_SHOULD_POLL"
-	EnvPaginationBlockCount = "SPN_INGESTOR_PAGINATION_BLOCK_COUNT"
-	EnvPaginationPollWait   = "SPN_INGESTOR_PAGINATION_POLL_WAIT"
-	EnvThirdwebAddr         = "SPN_THIRDWEB_ACCOUNT_FACTORY_ADDR"
-)
+const EnvThirdwebAddr = "SPN_THIRDWEB_ACCOUNT_FACTORY_ADDR"
 
 const (
 	// DefaultPaginationBlockCountMin to use as the minimum number of blocks
@@ -55,9 +50,6 @@ func main() {
 		setup.Exitf("websocket dial: %v", err)
 	}
 	defer c.Close()
-	/* Ingestor-specific configuration. */
-	ingestorShouldPoll := os.Getenv(EnvIngestorShouldPoll) != ""
-	slog.Info("ingestor should poll?", "status", ingestorShouldPoll)
 	ingestorPagination := rand.Intn(DefaultPaginationBlockCountMax-DefaultPaginationBlockCountMin) + DefaultPaginationBlockCountMin
 	slog.Info("polling configuration",
 		"poll wait time amount", DefaultPaginationPollWait,
@@ -70,7 +62,6 @@ func main() {
 		features.Get(),
 		config,
 		thirdwebFactoryAddr,
-		ingestorShouldPoll,
 		ingestorPagination,
 		DefaultPaginationPollWait,
 		c,

@@ -168,16 +168,49 @@ func TestHandleLogCallbackSwap1(t *testing.T) {
 		assert.Equalf(t, "events_seawater_swap1", table, "table not equal")
 		// This test is captured in a unit test, so we can focus on just testing
 		// this one field.
-		newPool, ok := a.(*seawater.Swap1)
+		swap1, ok := a.(*seawater.Swap1)
 		assert.Truef(t, ok, "Swap1 type coercion not true")
 		assert.Equalf(t,
 			types.AddressFromString("0xFEb6034FC7dF27dF18a3a6baD5Fb94C0D3dCb6d5"),
-			newPool.User,
+			swap1.User,
 			"token not equal",
 		)
 		wasRun = true
 		return nil
 	})
+	assert.True(t, wasRun)
+}
+
+func TestHandleLogCallbackSwap2(t *testing.T) {
+	seawaterAddr := ethCommon.HexToAddress("0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1")
+	s := strings.NewReader(`
+{
+	"address": "0xe13fec14abfbaa5b185cfb46670a56bf072e13b1",
+	"blockHash": "0xfa2557048aba87af6b0ae1a3ddd87b665cf03b208544c4b57f9cd30c06482f39",
+	"blockNumber": "0x760c3d",
+	"data": "0x00000000000000000000000000000000000000000000000ad78ebc5ac6200000000000000000000000000000000000000000000000000000000000001009539600000000000000000000000000000000000000000000000000000002f06f4a04fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc6a9d0000000000000000000000000000000000000000000000000000000000009656",
+	"logIndex": "0x2",
+	"removed": false,
+	"topics": [
+		"0xd3593b1fa4a2b80431faf29b3fb80cd1ef82a2b65128a650c625c4ed8d1b4d92",
+		"0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
+		"0x00000000000000000000000022b9fa698b68bba071b513959794e9a47d19214c",
+		"0x0000000000000000000000006437fdc89ced41941b97a9f1f8992d88718c81c5"
+	],
+	"transactionHash": "0x5fedbc94388f657cbb527989af55f596665d06d68f71643c4fe41a83cfdbe643",
+	"transactionIndex": "0x1"
+}`)
+	var l ethTypes.Log
+	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
+	wasRun := false
+	err := handleLogCallback(seawaterAddr, seawaterAddr, l, func(table string, a any) error {
+		assert.Equalf(t, "events_seawater_swap2", table, "table not equal")
+		_, ok := a.(*seawater.Swap2)
+		assert.Truef(t, ok, "Swap2 type coercion not true")
+		wasRun = true
+		return nil
+	})
+	assert.Nil(t, err)
 	assert.True(t, wasRun)
 }
 
