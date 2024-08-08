@@ -24,7 +24,6 @@ import {
   sqrtPriceX96ToPrice,
 } from "@/lib/math";
 import { ammAddress } from "@/lib/addresses";
-import { createChartData } from "@/lib/chartData";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { useRouter } from "next/navigation";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -92,6 +91,18 @@ const StakeFormFragment = graphql(`
   fragment StakeFormFragment on SeawaterPool {
     address
     earnedFeesAPRFUSDC
+    config {
+      classification
+    }
+    priceOverTime {
+      daily
+    }
+    liquidity {
+      tickLower
+      tickUpper
+      price
+      liquidity
+    }
   }
 `);
 
@@ -158,6 +169,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   const poolsData = useFragment(StakeFormFragment, data?.pools);
   const poolData = poolsData?.find((pool) => pool.address === poolId);
+  const dailyPrices = poolData?.priceOverTime.daily.map((price) =>
+    parseFloat(price),
+  );
+  const graphLPData = poolData?.liquidity;
 
   const positionData_ = useFragment(PositionsFragment, userData?.getWallet);
   const positionData = positionData_?.positions.positions.find(
@@ -355,22 +370,35 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         getSqrtRatioAtTick(curTick.result),
         token0.decimals,
       );
-      const diff = priceAtTick / 10n;
-      const pu = priceAtTick + diff;
-      const pl = priceAtTick - diff;
-      const priceLower = (Number(pl) / 10 ** fUSDC.decimals).toFixed(
-        fUSDC.decimals,
-      );
-      const priceUpper = (Number(pu) / 10 ** fUSDC.decimals).toFixed(
-        fUSDC.decimals,
-      );
+      let priceLower: string;
+      let priceUpper: string;
+      if (
+        poolData?.config.classification === "VOLATILE" &&
+        dailyPrices &&
+        dailyPrices.length >= 2
+      ) {
+        const lastSevenDays = dailyPrices.reverse().slice(0, 7);
+
+        priceLower = Math.min(...lastSevenDays).toFixed(fUSDC.decimals);
+        priceUpper = Math.max(...lastSevenDays).toFixed(fUSDC.decimals);
+      } else {
+        const diff = priceAtTick / 10n;
+        const pu = priceAtTick + diff;
+        const pl = priceAtTick - diff;
+        priceLower = (Number(pl) / 10 ** fUSDC.decimals).toFixed(
+          fUSDC.decimals,
+        );
+        priceUpper = (Number(pu) / 10 ** fUSDC.decimals).toFixed(
+          fUSDC.decimals,
+        );
+      }
+
       setPriceLower(priceLower, token0.decimals);
       setPriceUpper(priceUpper, token0.decimals);
     }
   }, [
     mode,
     curTick,
-    positionData,
     setPriceLower,
     setPriceUpper,
     token1.decimals,
@@ -379,9 +407,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   const autoFeeTierRef = useRef();
   const manualFeeTierRef = useRef();
-
-  // @TODO: use the graph data for this
-  const chartData = createChartData([1000n]);
 
   const chartOptions = useMemo(() => {
     return {
@@ -417,7 +442,11 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       },
       xAxis: {
         type: "category",
-        data: chartData.map((d) => format(d.date, "P")),
+        data: graphLPData
+          ? graphLPData.map(
+              ({ tickLower, tickUpper }) => `${tickLower}-${tickUpper}`,
+            )
+          : [],
         show: false,
         axisPointer: {
           label: {
@@ -436,7 +465,9 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       },
       series: [
         {
-          data: chartData.map((d) => d.pv),
+          data: graphLPData
+            ? graphLPData.map((item) => parseFloat(item.liquidity))
+            : [],
           type: "bar",
           barWidth: "90%", // Adjust bar width (can be in pixels e.g., '20px')
           barGap: "5%",
@@ -459,7 +490,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         },
       ],
     };
-  }, [chartData, liquidityRangeType]);
+  }, [graphLPData, liquidityRangeType]);
 
   useEffect(() => {
     if (chartRef.current) {
