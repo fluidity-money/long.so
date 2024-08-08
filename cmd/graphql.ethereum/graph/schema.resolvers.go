@@ -12,14 +12,17 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
-	graphErc20 "github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
 	"github.com/fluidity-money/long.so/lib/config"
 	"github.com/fluidity-money/long.so/lib/features"
 	"github.com/fluidity-money/long.so/lib/math"
 	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/erc20"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
+	"github.com/fluidity-money/long.so/lib/events/thirdweb"
+
+	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
+	graphErc20 "github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
+
 	"gorm.io/gorm"
 )
 
@@ -393,6 +396,28 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 		Swaps:  d,
 	}
 	return
+}
+
+// GetSmartAccount is the resolver for the getSmartAccount field.
+func (r *queryResolver) GetSmartAccount(ctx context.Context, wallet string) ([]model.Wallet, error) {
+	if wallet == "" {
+		return nil, fmt.Errorf("empty wallet")
+	}
+	var accountCreations []thirdweb.AccountCreated
+	err := r.DB.Table("events_thirdweb_accountcreated").
+		Where("account_admin = ?", wallet).
+		Scan(&accountCreations).
+		Error
+	if err != nil {
+		return nil, err
+	}
+	wallets := make([]model.Wallet, len(accountCreations))
+	for i, a := range accountCreations {
+		wallets[i] = model.Wallet{
+			Address: a.Account,
+		}
+	}
+	return wallets, nil
 }
 
 // ID is the resolver for the id field.

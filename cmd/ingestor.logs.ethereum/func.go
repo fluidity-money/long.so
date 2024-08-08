@@ -44,30 +44,29 @@ var FilterTopics = [][]ethCommon.Hash{{ // Matches any of these in the first top
 // Entry function, using the database to determine if polling should be
 // used exclusively to receive logs, polling only for catchup, or
 // exclusively websockets.
-func Entry(f features.F, config config.C, thirdwebFactoryAddr types.Address, shouldPoll bool, ingestorPagination uint64, pollWait int, c *ethclient.Client, db *gorm.DB) {
+func Entry(f features.F, config config.C, thirdwebFactoryAddr types.Address, ingestorPagination int, pollWait int, c *ethclient.Client, db *gorm.DB) {
 	var (
 		seawaterAddr = ethCommon.HexToAddress(config.SeawaterAddr.String())
 		thirdwebAddr = ethCommon.HexToAddress(thirdwebFactoryAddr.String())
 	)
-	if shouldPoll {
-		IngestPolling(f, c, db,ingestorPagination, pollWait,  seawaterAddr, thirdwebAddr)
-	} else {
-		IngestWebsocket(f, c, db, seawaterAddr, thirdwebAddr)
-	}
+	IngestPolling(f, c, db,ingestorPagination, pollWait,  seawaterAddr, thirdwebAddr)
 }
 
 // IngestPolling by repeatedly polling the Geth RPC for changes to
 // receive log updates. Checks the database first to determine where the
 // last point is before continuing. Assumes ethclient is HTTP.
 // Uses the IngestBlockRange function to do all the lifting.
-func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagination uint64, ingestorPollWait int, seawaterAddr, thirdwebAddr ethCommon.Address) {
+func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagination, ingestorPollWait int, seawaterAddr, thirdwebAddr ethCommon.Address) {
+	if ingestorPagination <= 0 {
+		panic("bad ingestor pagination")
+	}
 	for {
 		// Start by finding the latest block number.
 		from, err := getLastBlockCheckpointed(db)
 		if err != nil {
 			setup.Exitf("failed to get the last block checkpoint: %v", err)
 		}
-		to := from + ingestorPagination
+		to := from + uint64(ingestorPagination)
 		from++ // Increase the starting block by 1 so we always get the next block.
 		slog.Info("latest block checkpoint",
 			"from", from,
@@ -121,55 +120,11 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 	}
 }
 
-// IngestWebsocket from the websocket provided, using the handleLog function
-// to write records found to the database. Assumes that the ethclient
-// provided is a websocket. Also updates the checkpoints to track the latest block.
-func IngestWebsocket(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAddr, thirdwebAddr ethCommon.Address) {
-	filter := ethereum.FilterQuery{
-		Topics: FilterTopics,
-	}
-	var (
-		logs   = make(chan ethTypes.Log)
-		errors = make(chan error)
-	)
-	go func() {
-		subscription, err := c.SubscribeFilterLogs(context.Background(), filter, logs)
-		if err != nil {
-			setup.Exitf("eth log subscription: %v", err)
-		}
-		err = <-subscription.Err()
-		errors <- err
-	}()
-	for {
-		select {
-		case err := <-errors:
-			setup.Exitf("subscription error: %v", err)
-		case l := <-logs:
-			// Figure out what kind of log this is, and then insert it into the database.
-			err := db.Transaction(func(db *gorm.DB) error {
-				if err := handleLog(db, seawaterAddr, thirdwebAddr, l); err != nil {
-					return fmt.Errorf("failed to handle a database log: %v", err)
-				}
-				// Update the checkpoint here. Assuming the log here's block number is the latest.
-				if err := updateCheckpoint(db, l.BlockNumber); err != nil {
-					return fmt.Errorf("failed to update a checkpoint: %v", err)
-				}
-				return nil
-			})
-			if err != nil {
-				setup.Exitf("failed to handle a database log: %v", err)
-			}
-			heartbeat.Pulse() // Report that we're alive.
-		}
-	}
-}
-
 func handleLog(db *gorm.DB, seawaterAddr, thirdwebAddr ethCommon.Address, l ethTypes.Log) error {
-	handleLogCallback(seawaterAddr, thirdwebAddr, l, func(t string, a any) error {
+	return handleLogCallback(seawaterAddr, thirdwebAddr, l, func(t string, a any) error {
 		// Use the database connection as the callback to insert this log.
 		return databaseInsertLog(db, t, a)
 	})
-	return nil
 }
 func handleLogCallback(seawaterAddr, thirdwebAddr ethCommon.Address, l ethTypes.Log, cb func(table string, l any) error) error {
 	var topic1, topic2, topic3 ethCommon.Hash

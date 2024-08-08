@@ -82,9 +82,9 @@ type (
 	Swap2 struct {
 		events.Event
 
-		User        types.Address        `json:"user_"`
-		From        types.Address        `json:"from_"`
-		To          types.Address        `json:"to_"`
+		User        types.Address        `gorm:"column:user_"`
+		From        types.Address        `gorm:"column:from_"`
+		To          types.Address        `gorm:"column:to_"`
 		AmountIn    types.UnscaledNumber `json:"amountIn"`
 		AmountOut   types.UnscaledNumber `json:"amountOut"`
 		FluidVolume types.UnscaledNumber `json:"fluidVolume"`

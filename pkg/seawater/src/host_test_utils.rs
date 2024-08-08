@@ -69,19 +69,6 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
 ) -> T {
     StorageCache::clear();
     test_shims::reset_storage();
-    let slots_map: HashMap<[u8; 32], [u8; 32]> = match slots {
-        Some(items) => items
-            .iter()
-            .map(|(key, value)| -> ([u8; 32], [u8; 32]) {
-                (
-                    const_hex::const_decode_to_array::<32>(key.as_bytes())
-                        .expect(format!("failed to decode key: {:?}", key).as_str()),
-                    const_hex::const_decode_to_array::<32>(value.as_bytes()).unwrap(),
-                )
-            })
-            .collect(),
-        None => HashMap::new(),
-    };
     if let Some(v) = sender {
         test_shims::set_sender(v);
     }
@@ -91,10 +78,21 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     if let Some(items) = amm_bals {
         test_shims::set_amm_bals(items);
     }
-    for (key, value) in slots_map {
-        test_shims::insert_word(key.clone(), value.clone())
+    if let Some(items) = slots {
+        set_storage(items);
     }
     f(&mut P::new(U256::ZERO, 0))
+}
+
+///! Set the slot storage with a hashmap for the current thread.
+pub fn set_storage(items: HashMap<&str, &str>) {
+    for (key, value) in items {
+        test_shims::insert_word(
+            const_hex::const_decode_to_array::<32>(key.as_bytes())
+                .expect(format!("failed to decode key: {:?}", key).as_str()),
+            const_hex::const_decode_to_array::<32>(value.as_bytes()).unwrap(),
+        );
+    }
 }
 
 #[test]

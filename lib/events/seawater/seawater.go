@@ -188,11 +188,11 @@ func UnpackSwap2(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*Swap2, error
 	if !ok {
 		return nil, fmt.Errorf("bad fluidVolume: %T", i[3])
 	}
-	finalTick0, ok := i[3].(*big.Int)
+	finalTick0, ok := i[3].(int32)
 	if !ok {
 		return nil, fmt.Errorf("bad finalTick0: %T", i[4])
 	}
-	finalTick1, ok := i[4].(*big.Int)
+	finalTick1, ok := i[4].(int32)
 	if !ok {
 		return nil, fmt.Errorf("bad finalTick1: %T", i[5])
 	}
@@ -203,8 +203,8 @@ func UnpackSwap2(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*Swap2, error
 		AmountIn:    types.UnscaledNumberFromBig(amountIn),
 		AmountOut:   types.UnscaledNumberFromBig(amountOut),
 		FluidVolume: types.UnscaledNumberFromBig(fluidVolume),
-		FinalTick0:  types.NumberFromBig(finalTick0),
-		FinalTick1:  types.NumberFromBig(finalTick1),
+		FinalTick0:  types.NumberFromInt64(int64(finalTick0)),
+		FinalTick1:  types.NumberFromInt64(int64(finalTick1)),
 	}, nil
 }
 
