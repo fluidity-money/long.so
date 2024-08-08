@@ -860,34 +860,38 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             />
           </div>
 
-          <div className="mt-[22px] flex flex-row items-center justify-between px-[5px] md:mt-[24px] md:w-[270px]">
+          <div className="mt-[22px] flex flex-row items-center justify-between gap-6 px-[5px] md:mt-[24px] md:w-[270px]">
             <div className="flex flex-col">
               <div className="text-3xs text-gray-2 md:text-2xs">Low Price</div>
               <Input
-                className="border-b border-white bg-black text-2xs md:text-base"
+                className="rounded-none border-x-0 border-b border-t-0 border-b-white bg-black px-0 text-2xs font-semibold md:text-sm"
                 disabled={
                   liquidityRangeType !== "custom" || mode === "existing"
                 }
+                variant={"no-ring"}
                 value={priceLower}
                 onChange={(e) => setPriceLower(e.target.value, token0.decimals)}
               />
-              <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
-                <Token className="size-[12px] invert" /> fUSDC per {token0.name}
+              <div className="mt-1 flex flex-row items-start gap-1 text-3xs font-semibold">
+                <Token className="size-[12px]  invert" /> fUSDC per{" "}
+                {token0.name}
               </div>
             </div>
 
             <div className="flex flex-col">
               <div className="text-3xs text-gray-2 md:text-2xs">High Price</div>
               <Input
-                className="border-b border-white bg-black text-2xs md:text-base"
+                variant={"no-ring"}
+                className="rounded-none border-x-0 border-b border-t-0 border-b-white bg-black px-0 text-2xs font-semibold md:text-sm"
                 disabled={
                   liquidityRangeType !== "custom" || mode === "existing"
                 }
                 value={priceUpper}
                 onChange={(e) => setPriceUpper(e.target.value, token0.decimals)}
               />
-              <div className="mt-1 flex flex-row items-center gap-1 text-3xs">
-                <Token className="size-[12px] invert" /> fUSDC per {token0.name}
+              <div className="mt-1 flex flex-row items-start gap-1 text-3xs font-semibold">
+                <Token className="size-[12px]  invert" /> fUSDC per{" "}
+                {token0.name}
               </div>
             </div>
           </div>
