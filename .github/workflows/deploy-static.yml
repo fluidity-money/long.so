@@ -6,11 +6,6 @@ on:
       - development
     paths:
       - 'static/**'
-  pull_request:
-    branches:
-      - development
-    paths:
-      - 'static/**'
 
 jobs:
   deploy-static:

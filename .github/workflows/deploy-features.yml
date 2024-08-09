@@ -6,11 +6,6 @@ on:
       - development
     paths:
       - 'features/**'
-  pull_request:
-    branches:
-      - development
-    paths:
-      - 'features/**'
 
 jobs:
   deploy-features:

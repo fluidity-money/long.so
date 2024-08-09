@@ -57,7 +57,11 @@ func main() {
 		"pagination block count max", DefaultPaginationBlockCountMax,
 		"pagination count", ingestorPagination,
 	)
-	thirdwebFactoryAddr := types.AddressFromString(os.Getenv(EnvThirdwebAddr))
+	thirdwebFactoryAddr_ := os.Getenv(EnvThirdwebAddr)
+	if thirdwebFactoryAddr_ == "" {
+		setup.Exitf("%v not set", EnvThirdwebAddr)
+	}
+	thirdwebFactoryAddr := types.AddressFromString(thirdwebFactoryAddr_)
 	Entry(
 		features.Get(),
 		config,

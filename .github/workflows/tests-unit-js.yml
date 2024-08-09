@@ -2,14 +2,11 @@ name: Jest Unit Tests
 
 on:
   push:
-    branches: 
+    branches:
       - development
-    paths: 
+    paths:
       - 'web/**'
       - '.github/workflows/tests-unit-js.yml'
-  pull_request:
-    branches: 
-      - development
 
 jobs:
   test:
@@ -46,7 +43,7 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
-          flags: unittests 
+          flags: unittests
           name: js-unit-tests
           token: ${{ secrets.CODECOV_TOKEN }}
-          verbose: true 
+          verbose: true

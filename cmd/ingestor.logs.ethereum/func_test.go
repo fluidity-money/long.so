@@ -55,7 +55,6 @@ func TestHandleLogCallbackNewPool(t *testing.T) {
 }
 
 func TestHandleLogCallbackUpdatePositionLiquidity(t *testing.T) {
-	// Test the new pool handling code.
 	seawaterAddr := ethCommon.HexToAddress("0x839c5cf32d9bc2cd46027691d2941410251ed557")
 	s := strings.NewReader(`
 {
@@ -77,8 +76,6 @@ func TestHandleLogCallbackUpdatePositionLiquidity(t *testing.T) {
 	wasRun := false
 	handleLogCallback(seawaterAddr, seawaterAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_seawater_updatepositionliquidity", table, "table not equal")
-		// This test is captured in a unit test, so we can focus on just testing
-		// this one field.
 		updatePositionLiq, ok := a.(*seawater.UpdatePositionLiquidity)
 		assert.Truef(t, ok, "UpdatePositionLiquidity type coercion not true")
 		assert.Equalf(t,
@@ -103,7 +100,6 @@ func TestHandleLogCallbackUpdatePositionLiquidity(t *testing.T) {
 }
 
 func TestHandleLogCallbackMintPosition(t *testing.T) {
-	// Test the new pool handling code.
 	seawaterAddr := ethCommon.HexToAddress("0x40e659f4eB2fdA398ce0860aFB74701d4977E530")
 	s := strings.NewReader(`
 {
@@ -127,8 +123,6 @@ func TestHandleLogCallbackMintPosition(t *testing.T) {
 	wasRun := false
 	handleLogCallback(seawaterAddr, seawaterAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_seawater_mintposition", table, "table not equal")
-		// This test is captured in a unit test, so we can focus on just testing
-		// this one field.
 		newPool, ok := a.(*seawater.MintPosition)
 		assert.Truef(t, ok, "MintPosition type coercion not true")
 		assert.Equalf(t,
@@ -143,7 +137,6 @@ func TestHandleLogCallbackMintPosition(t *testing.T) {
 }
 
 func TestHandleLogCallbackSwap1(t *testing.T) {
-	// Test the new pool handling code.
 	seawaterAddr := ethCommon.HexToAddress("0x40e659f4eB2fdA398ce0860aFB74701d4977E530")
 	s := strings.NewReader(`
 {
@@ -215,7 +208,6 @@ func TestHandleLogCallbackSwap2(t *testing.T) {
 }
 
 func TestHandleLogCallbackAccountCreated(t *testing.T) {
-	// Test the new pool handling code.
 	thirdwebAddr := ethCommon.HexToAddress("0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00")
 	s := strings.NewReader(`
 {
