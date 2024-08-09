@@ -1,12 +1,7 @@
 name: Jest Unit Tests
 
 on:
-  push:
-    branches:
-      - development
-    paths:
-      - 'web/**'
-      - '.github/workflows/tests-unit-js.yml'
+  workflow_call:
 
 jobs:
   test:

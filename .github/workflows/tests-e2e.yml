@@ -1,15 +1,7 @@
 name: Playwright E2E Tests
 
 on:
-  push:
-    branches:
-      - development
-    paths: 
-      - 'web/**'
-      - '.github/workflows/tests-e2e.yml'
-  pull_request:
-    branches:
-      - development
+  workflow_call:
 
 jobs:
   test:
