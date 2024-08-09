@@ -34,13 +34,13 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 type ConfirmStakeProps =
   | {
-    mode: "new";
-    positionId?: never;
-  }
+      mode: "new";
+      positionId?: never;
+    }
   | {
-    mode: "existing";
-    positionId: number;
-  };
+      mode: "existing";
+      positionId: number;
+    };
 
 export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const router = useRouter();
@@ -127,7 +127,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     args: [token0.address],
   });
 
-  const feeDisplay = fee?.result ? (100 / fee.result).toFixed(2) : "???"
+  const feeDisplay = fee?.result ? (100 / fee.result).toFixed(2) : "???";
 
   // set up write contract hooks
   const {
@@ -576,7 +576,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
               <div>{feeDisplay}%</div>
             </div>
 
-            {showBoostIncentives &&
+            {showBoostIncentives && (
               <>
                 <div className="flex flex-row justify-between">
                   <div>Protocol Boosts</div>
@@ -588,13 +588,15 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
                   <div>2%</div>
                 </div>
               </>
-            }
+            )}
 
-            {showStakeApy &&
+            {showStakeApy && (
               <>
                 <div className="mt-[15px] flex flex-row justify-between">
                   <div>APY</div>
-                  <div className="iridescent rounded px-1 text-black">12.09%</div>
+                  <div className="iridescent rounded px-1 text-black">
+                    12.09%
+                  </div>
                 </div>
 
                 <div className="flex flex-row justify-between">
@@ -602,11 +604,11 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
                   <div>$247.88</div>
                 </div>
               </>
-            }
+            )}
           </div>
         </div>
 
-        {showBoostIncentives &&
+        {showBoostIncentives && (
           <>
             <div className="mt-[20px] px-[21px]">
               <div className="text-3xs">Yield Composition</div>
@@ -638,7 +640,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
               </div>
             </div>
           </>
-        }
+        )}
 
         <div className=" flex flex-col items-center p-[15px]">
           <Button
