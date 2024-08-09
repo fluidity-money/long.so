@@ -891,7 +891,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             />
           </div>
 
-          <div className="mt-[22px] flex flex-row items-center justify-between gap-6 px-[5px] md:mt-[24px] md:w-[270px]">
+          <div className="mt-[22px] flex flex-row items-start justify-between gap-6 px-[5px] md:mt-[24px] md:w-[270px]">
             <div className="flex flex-col">
               <div className="text-3xs text-gray-2 md:text-2xs">Low Price</div>
               <Input
@@ -903,7 +903,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 value={priceLower}
                 onChange={(e) => setPriceLower(e.target.value, token0.decimals)}
               />
-              <div className="mt-1 flex flex-row items-start gap-1 text-3xs font-semibold">
+              <div className="mt-1 flex flex-row items-start gap-1 whitespace-nowrap text-3xs font-semibold">
                 <Token className="size-[12px]  invert" /> fUSDC per{" "}
                 {token0.name}
               </div>
@@ -911,16 +911,23 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
             <div className="flex flex-col">
               <div className="text-3xs text-gray-2 md:text-2xs">High Price</div>
+
               <Input
                 variant={"no-ring"}
-                className="rounded-none border-x-0 border-b border-t-0 border-b-white bg-black px-0 text-2xs font-semibold md:text-sm"
+                className={cn(
+                  liquidityRangeType === "full-range"
+                    ? "md:text-2xl"
+                    : "md:text-sm",
+                  "rounded-none border-x-0 border-b border-t-0 border-b-white bg-black px-0 text-2xs font-semibold ",
+                )}
                 disabled={
                   liquidityRangeType !== "custom" || mode === "existing"
                 }
-                value={priceUpper}
+                value={liquidityRangeType === "full-range" ? "∞" : priceUpper}
                 onChange={(e) => setPriceUpper(e.target.value, token0.decimals)}
               />
-              <div className="mt-1 flex flex-row items-start gap-1 text-3xs font-semibold">
+
+              <div className="mt-1 flex flex-row items-start gap-1 whitespace-nowrap text-3xs font-semibold">
                 <Token className="size-[12px]  invert" /> fUSDC per{" "}
                 {token0.name}
               </div>
