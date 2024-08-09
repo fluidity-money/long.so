@@ -185,6 +185,14 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
+    function authoriseEnabler5B17C274(
+        address /* enabler */,
+        bool /* enabled */
+    ) external {
+        directDelegate(_getExecutorAdmin());
+    }
+
+    /// @inheritdoc ISeawaterExecutorAdminExposed
     function setSqrtPriceFF4DB98C(address /* pool */, uint256 /* price */) external {
         directDelegate(_getExecutorAdmin());
     }

@@ -113,6 +113,9 @@ pub struct Pools {
 
     // address that's able to activate and disable emergency mode functionality
     emergency_council: StorageAddress,
+
+    // authorised enablers to create new pools, and enable them
+    authorised_enablers: StorageMap<Address, StorageBool>,
 }
 
 impl Pools {
@@ -1148,7 +1151,7 @@ impl Pools {
         Ok((token_0, token_1))
     }
 
-    /// Changes if a pool is enabled. Only usable by the seawater admin.
+    /// Changes if a pool is enabled. Only usable by the seawater admin, or the emergency council, or the
     ///
     /// # Errors
     /// Requires the user to be the seawater admin.
@@ -1156,11 +1159,33 @@ impl Pools {
     pub fn enable_pool_579_D_A658(&mut self, pool: Address, enabled: bool) -> Result<(), Revert> {
         assert_or!(
             self.seawater_admin.get() == msg::sender()
-                || self.emergency_council.get() == msg::sender(),
+                || self.emergency_council.get() == msg::sender()
+                || self.authorised_enablers.get(msg::sender()),
             Error::SeawaterAdminOnly
         );
 
+        assert_or!(
+            self.emergency_council.get() == msg::sender() && !enabled,
+            Error::SeawaterEmergencyOnlyDisable // Emergency council can only disable
+        );
+
         Ok(self.pools.setter(pool).set_enabled(enabled))
+    }
+
+    #[allow(non_snake_case)]
+    pub fn authorise_enabler_5_B_17_C_274(
+        &mut self,
+        enabler: Address,
+        enabled: bool,
+    ) -> Result<(), Revert> {
+        assert_or!(
+            self.seawater_admin.get() == msg::sender(),
+            Error::SeawaterAdminOnly
+        );
+
+        self.authorised_enablers.setter(enabler).set(enabled);
+
+        Ok(())
     }
 }
 

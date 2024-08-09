@@ -278,6 +278,10 @@ interface ISeawaterExecutorAdminExposed {
     /// @param enabled true to enable to pool, false to disable it
     function enablePool579DA658(address pool, bool enabled) external;
 
+    /// @notice authorise an address to create and enable pools on its own
+    /// @param enabled to set their status
+    function authoriseEnabler5B17C274(address enabler, bool enabled) external;
+
     /// @notice set the sqrt price for a pool in the event of misconfiguration.
     /// @param pool to set
     /// @param price to use as the starting place
