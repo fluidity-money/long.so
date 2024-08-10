@@ -3,10 +3,6 @@
 # Uses several environment variables to skip deployment where it's possible! Please read the
 # source of this script before using!
 
-ownership_nfts_name="Superposition-AMM-NFTs"
-ownership_nfts_symbol="SAN"
-ownership_nfts_token_uri="https://static.long.so/nft.png"
-
 log() {
 	>&2 echo $@
 }
@@ -61,15 +57,6 @@ seawater_proxy="$(\
 [ -z "$seawater_proxy" ] && err "Failed to deploy seawater_proxy"
 log "Seawater proxy deployed to $seawater_proxy"
 
-seawater_nft_manager="$(\
-	sh deploy-solidity.sh "OwnershipNFTs" --constructor-args \
-		"$ownership_nfts_name" \
-		"$ownership_nfts_symbol" \
-		"$ownership_nfts_token_uri" \
-		"$seawater_proxy")"
-[ -z "$seawater_nft_manager" ] && err "Failed to deploy seawater_nft_manager"
-log "Seawater NFT manager deployed to $seawater_nft_manager"
-
 cat <<EOF
 {
 	"seawater_proxy": "$seawater_proxy",
@@ -81,9 +68,6 @@ cat <<EOF
 	"seawater_update_positions_impl": "$SEAWATER_UPDATE_POSITIONS",
 	"seawater_admin_impl": "$SEAWATER_ADMIN",
 	"seawater_proxy_admin": "$SEAWATER_PROXY_ADMIN",
-	"ownership_nfts_name": "$ownership_nfts_name",
-	"ownership_nfts_symbol": "$ownership_nfts_symbol",
-	"ownership_nfts_token_uri": "$ownership_nfts_token_uri",
 	"seawater_fusdc_addr": "$FLU_SEAWATER_FUSDC_ADDR"
 }
 EOF
