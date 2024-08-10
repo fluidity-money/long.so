@@ -13,6 +13,7 @@ err() {
 }
 
 [ -z "$SEAWATER_PROXY_ADMIN" ] && err "SEAWATER_PROXY_ADMIN unset"
+[ -z "$SEAWATER_EMERGENCY_COUNCIL" ] && err "SEAWATER_EMERGENCY_COUNCIL unset"
 [ -z "$STYLUS_ENDPOINT" ] && err "STYLUS_ENDPOINT unset"
 [ -z "$STYLUS_PRIVATE_KEY" ] && err "STYLUS_PRIVATE_KEY unset"
 [ -z "$FLU_SEAWATER_FUSDC_ADDR" ] && err "FLU_SEAWATER_FUSDC_ADDR unset"
@@ -46,14 +47,14 @@ seawater_proxy="$(\
 		"$SEAWATER_PROXY_ADMIN" \
 		"$SEAWATER_PROXY_ADMIN" \
 		"$(cast --address-zero)" \
+		"$SEAWATER_EMERGENCY_COUNCIL" \
 		"$SEAWATER_SWAPS" \
 		"$SEAWATER_SWAP_PERMIT2" \
 		"$SEAWATER_QUOTES" \
 		"$SEAWATER_POSITIONS" \
 		"$SEAWATER_UPDATE_POSITIONS" \
 		"$SEAWATER_ADMIN" \
-		"$(cast --address-zero)" \
-		"$FLU_SEAWATER_FUSDC_ADDR")"
+		"$(cast --address-zero)")"
 [ -z "$seawater_proxy" ] && err "Failed to deploy seawater_proxy"
 log "Seawater proxy deployed to $seawater_proxy"
 
