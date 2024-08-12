@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   MAX_TICK,
+  MIN_TICK,
   getAmount0ForLiquidity,
   getAmount1ForLiquidity,
   getLiquidityForAmount0,
@@ -289,7 +290,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   useEffect(() => {
     if (
-      !token0AmountRaw ||
       !curTick ||
       tickLower === undefined ||
       tickUpper === undefined
