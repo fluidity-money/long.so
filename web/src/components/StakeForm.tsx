@@ -358,11 +358,11 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       return;
     }
 
+    // set the ticks to min and max, ignoring display prices
+    // which will be shown as infinity
     if (liquidityRangeType === "full-range") {
-      // lower price is 1 base fUSDC (0.000001)
-      setPriceLower(`0.${"0".repeat(token1.decimals - 1)}1`, token0.decimals);
-      // upper price is max tick
-      setPriceUpper(String(1.0001 ** MAX_TICK), token0.decimals);
+      setTickLower(MIN_TICK)
+      setTickUpper(MAX_TICK)
     } else if (liquidityRangeType === "auto") {
       if (!curTick) return;
       // auto sets the price range to +-10% of the current tick
@@ -900,7 +900,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   liquidityRangeType !== "custom" || mode === "existing"
                 }
                 variant={"no-ring"}
-                value={priceLower}
+                value={liquidityRangeType === "full-range" ? "-∞" : priceLower}
                 onChange={(e) => setPriceLower(e.target.value, token0.decimals)}
               />
               <div className="mt-1 flex flex-row items-start gap-1 whitespace-nowrap text-3xs font-semibold">
