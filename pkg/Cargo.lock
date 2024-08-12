@@ -557,6 +557,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
+name = "leo"
+version = "0.1.0"
+dependencies = [
+ "alloy-sol-types",
+ "const-hex",
+ "keccak-const",
+ "lol_alloc",
+ "num-traits",
+ "proptest",
+ "rand",
+ "ruint",
+ "ruint-macro",
+ "stylus-sdk",
+ "thiserror",
+ "tiny-keccak",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.154"
 source = "registry+https://github.com/rust-lang/crates.io-index"

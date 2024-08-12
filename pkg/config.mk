@@ -20,5 +20,7 @@ OUT_SEAWATER_SWAP_PERMIT2 := seawater-swap-permit2.wasm
 OUT_SEAWATER_QUOTES := seawater-quotes.wasm
 OUT_SEAWATER_MIGRATIONS := seawater-migrations.wasm
 
+OUT_LEO := leo.wasm
+
 OUT_SEAWATER_AMM := out/SeawaterAMM.sol/SeawaterAMM.json
 OUT_OWNERSHIP_NFTS := out/OwnershipNFTs.sol/OwnershipNFTs.json

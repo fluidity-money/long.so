@@ -28,6 +28,8 @@ swaps: ${OUT_SEAWATER_SWAPS}
 quotes: ${OUT_SEAWATER_QUOTES}
 migrations: ${OUT_SEAWATER_MIGRATIONS}
 
+leo: ${OUT_LEO}
+
 stylus: admin positions update-positions swaps swap-permit2 quotes migrations
 
 amm-entrypoint: ${OUT_SEAWATER_AMM}
@@ -42,8 +44,8 @@ CARGO_BUILD_STYLUS := \
 		-Z unstable-options \
 		--release \
 		--target wasm32-unknown-unknown \
-		--package seawater \
-		--artifact-dir .
+		--artifact-dir . \
+		--package
 
 FORGE_BUILD := forge build
 DOCKER_BUILD := docker build
@@ -52,45 +54,50 @@ DOCKER_BUILD := docker build
 
 ${OUT_SEAWATER_ADMIN}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_ADMIN}
-	@${CARGO_BUILD_STYLUS} --features admin
+	@${CARGO_BUILD_STYLUS} seawater --features admin
 	@mv seawater.wasm ${OUT_SEAWATER_ADMIN}
 	@rm -f liblibseawater.rlib
 
 ${OUT_SEAWATER_POSITIONS}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_POSITIONS}
-	@${CARGO_BUILD_STYLUS} --features positions
+	@${CARGO_BUILD_STYLUS} seawater --features positions
 	@mv seawater.wasm ${OUT_SEAWATER_POSITIONS}
 	@rm -f liblibseawater.rlib
 
 ${OUT_SEAWATER_UPDATE_POSITIONS}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_UPDATE_POSITIONS}
-	@${CARGO_BUILD_STYLUS} --features update_positions
+	@${CARGO_BUILD_STYLUS} seawater --features update_positions
 	@mv seawater.wasm ${OUT_SEAWATER_UPDATE_POSITIONS}
 	@rm -f liblibseawater.rlib
 
 ${OUT_SEAWATER_SWAPS}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_SWAPS}
-	@${CARGO_BUILD_STYLUS} --features swaps
+	@${CARGO_BUILD_STYLUS} seawater --features swaps
 	@mv seawater.wasm ${OUT_SEAWATER_SWAPS}
 	@rm -f liblibseawater.rlib
 
 ${OUT_SEAWATER_SWAP_PERMIT2}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_SWAP_PERMIT2}
-	@${CARGO_BUILD_STYLUS} --features swap_permit2
+	@${CARGO_BUILD_STYLUS} seawater --features swap_permit2
 	@mv seawater.wasm ${OUT_SEAWATER_SWAP_PERMIT2}
 	@rm -f liblibseawater.rlib
 
 ${OUT_SEAWATER_QUOTES}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_QUOTES}
-	@${CARGO_BUILD_STYLUS} --features quotes
+	@${CARGO_BUILD_STYLUS} seawater --features quotes
 	@mv seawater.wasm ${OUT_SEAWATER_QUOTES}
 	@rm -f liblibseawater.rlib
 
 ${OUT_SEAWATER_MIGRATIONS}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_MIGRATIONS}
-	@${CARGO_BUILD_STYLUS} --features migrations
+	@${CARGO_BUILD_STYLUS} seawater --features migrations
 	@mv seawater.wasm ${OUT_SEAWATER_MIGRATIONS}
 	@rm -f liblibseawater.rlib
+
+${OUT_LEO}: ${FILES_RUST}
+	@rm -f ${OUT_LEO}
+	@${CARGO_BUILD_STYLUS} leo
+	@rm -f liblibleo.rlib
 
 ### SOLIDITY
 
