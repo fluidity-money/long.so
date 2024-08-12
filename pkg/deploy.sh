@@ -61,7 +61,6 @@ log "Seawater proxy deployed to $seawater_proxy"
 cat <<EOF
 {
 	"seawater_proxy": "$seawater_proxy",
-	"seawater_nft_manager": "$seawater_nft_manager",
 	"seawater_swaps_impl": "$SEAWATER_SWAPS",
 	"seawater_swap_permit2_impl": "$SEAWATER_SWAP_PERMIT2",
 	"seawater_quotes_impl": "$SEAWATER_QUOTES",

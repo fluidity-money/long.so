@@ -197,6 +197,16 @@ contract SeawaterAMM is ISeawaterAMM {
         directDelegate(_getExecutorAdmin());
     }
 
+    /// @inheritdoc ISeawaterExecutorAdminExposed
+    function updateNftManager9BDF41F6(address /* manager */) external {
+        directDelegate(_getExecutorAdmin());
+    }
+
+    /// @inheritdoc ISeawaterExecutorAdminExposed
+    function updateEmergencyCouncil7D0C1C58(address /* council */) external {
+        directDelegate(_getExecutorAdmin());
+    }
+
     // swap functions
 
     /// @inheritdoc ISeawaterExecutorSwap

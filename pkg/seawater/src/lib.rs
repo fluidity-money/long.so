@@ -1117,6 +1117,38 @@ impl Pools {
         Ok(())
     }
 
+    /// Update the NFT manager that has trusted access to moving tokens on
+    /// behalf of users.
+    #[allow(non_snake_case)]
+    pub fn update_nft_manager_9_B_D_F_41_F_6(&mut self, manager: Address) -> Result<(), Revert> {
+        assert_eq_or!(
+            msg::sender(),
+            self.seawater_admin.get(),
+            Error::SeawaterAdminOnly
+        );
+
+        self.nft_manager.set(manager);
+
+        Ok(())
+    }
+
+    /// Update the emergency council that can disable the pools.
+    #[allow(non_snake_case)]
+    pub fn update_emergency_council_7_D_0_C_1_C_58(
+        &mut self,
+        manager: Address,
+    ) -> Result<(), Revert> {
+        assert_eq_or!(
+            msg::sender(),
+            self.seawater_admin.get(),
+            Error::SeawaterAdminOnly
+        );
+
+        self.nft_manager.set(manager);
+
+        Ok(())
+    }
+
     /// Collects protocol fees from the AMM. Only usable by the seawater admin.
     ///
     /// # Errors
@@ -1133,6 +1165,7 @@ impl Pools {
             self.seawater_admin.get(),
             Error::SeawaterAdminOnly
         );
+
         let (token_0, token_1) = self
             .pools
             .setter(pool)

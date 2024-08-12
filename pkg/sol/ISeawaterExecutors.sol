@@ -285,7 +285,15 @@ interface ISeawaterExecutorAdminExposed {
     /// @notice set the sqrt price for a pool in the event of misconfiguration.
     /// @param pool to set
     /// @param price to use as the starting place
-    function setSqrtPriceFF4DB98C(address pool,uint256 price) external;
+    function setSqrtPriceFF4DB98C(address pool, uint256 price) external;
+
+    /// @notice set the NFT manager.
+    /// @param manager address to set to in its new form
+    function updateNftManager9BDF41F6(address manager) external;
+
+    /// @notice updateEmergencyCouncil to a new address.
+    /// @param newCouncil to set the emergency council to
+    function updateEmergencyCouncil7D0C1C58(address newCouncil) external;
 }
 
 interface ISeawaterExecutorAdmin  is ISeawaterExecutorAdminExposed {
