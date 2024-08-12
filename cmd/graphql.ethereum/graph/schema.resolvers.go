@@ -12,17 +12,15 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
+	graphErc20 "github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
 	"github.com/fluidity-money/long.so/lib/config"
+	"github.com/fluidity-money/long.so/lib/events/thirdweb"
 	"github.com/fluidity-money/long.so/lib/features"
 	"github.com/fluidity-money/long.so/lib/math"
 	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/erc20"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
-	"github.com/fluidity-money/long.so/lib/events/thirdweb"
-
-	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
-	graphErc20 "github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
-
 	"gorm.io/gorm"
 )
 
@@ -816,44 +814,24 @@ func (r *seawaterPoolResolver) EarnedFeesAPRToken1(ctx context.Context, obj *sea
 }
 
 // LiquidityIncentives is the resolver for the liquidityIncentives field.
-func (r *seawaterPoolResolver) LiquidityIncentives(ctx context.Context, obj *seawater.Pool) (amount model.Amount, err error) {
+func (r *seawaterPoolResolver) LiquidityIncentives(ctx context.Context, obj *seawater.Pool) (amount model.LiquidityIncentives, err error) {
 	if obj == nil {
 		return amount, fmt.Errorf("empty pool")
 	}
-	if r.F.Is(features.FeatureGraphqlMockGraph) {
-		MockDelay(r.F)
-		return MockAmount(), nil
-	}
-	amount = model.Amount{
-		Token:         obj.Token,
-		Decimals:      int(obj.Decimals),
-		Timestamp:     int(time.Now().Unix()),
-		ValueUnscaled: types.EmptyUnscaledNumber(),
-	}
-	return amount, nil // TODO
+	panic("TODO")
 }
 
 // SuperIncentives is the resolver for the superIncentives field.
-func (r *seawaterPoolResolver) SuperIncentives(ctx context.Context, obj *seawater.Pool) (amount model.Amount, err error) {
+func (r *seawaterPoolResolver) SuperIncentives(ctx context.Context, obj *seawater.Pool) (amount model.SuperIncentives, err error) {
 	if obj == nil {
 		return amount, fmt.Errorf("empty pool")
 	}
-	if r.F.Is(features.FeatureGraphqlMockGraph) {
-		MockDelay(r.F)
-		return MockAmount(), nil
-	}
-	amount = model.Amount{
-		Token:         obj.Token,
-		Decimals:      int(obj.Decimals),
-		Timestamp:     int(time.Now().Unix()),
-		ValueUnscaled: types.EmptyUnscaledNumber(),
-	}
-	return amount, nil // TODO
+	panic("TODO")
 }
 
 // UtilityIncentives is the resolver for the utilityIncentives field.
 func (r *seawaterPoolResolver) UtilityIncentives(ctx context.Context, obj *seawater.Pool) ([]model.UtilityIncentive, error) {
-	return nil, nil // TODO
+	panic("TODO")
 }
 
 // Positions is the resolver for the positions field.

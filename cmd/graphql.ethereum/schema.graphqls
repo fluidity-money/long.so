@@ -195,14 +195,14 @@ type SeawaterPool {
   earnedFeesAPRToken1: [String!]!
 
   """
-  Liquidity incentives currently available for this pool. In the form of what's available.
+  Liquidity incentives currently available for this pool.
   """
-  liquidityIncentives: Amount!
+  liquidityIncentives: LiquidityIncentives!
 
   """
   Super incentives available in this pool.
   """
-  superIncentives: Amount!
+  superIncentives: SuperIncentives!
 
   """
   Utility incentives available in this pool.
@@ -711,4 +711,39 @@ type UtilityIncentive {
   Maximum amount that was given out historically. TODO.
   """
   maximumAmount: String!
+}
+
+"""
+Liquidity incentives available in this pool that's distributed partly on-chain with
+snapshotting done off-chain.
+"""
+type LiquidityIncentives {
+    """
+    Pool that these rewards are enabled for.
+    """
+    pool: SeawaterPool!
+
+    """
+    Maximum supply to be distributed of the rewards.
+    """
+    supply: PairAmount!
+
+    """
+    Distribution amount released per day.
+    """
+    distribution: PairAmount!
+
+    """
+    Suggested APY based on the LP tokens locked in the pool, combined
+    with the emissions schedule.
+    """
+    suggestedApy: String!
+}
+
+"""
+Super (utility) incentives powered by Fluidity. Historical endpoint for knowing
+what was rewarded.
+"""
+type SuperIncentives {
+  amount: PairAmount!
 }

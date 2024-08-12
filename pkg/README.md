@@ -196,3 +196,10 @@ Deployments on a local node can be done with `./test-deploy.sh` for simplicity.
 | `STYLUS_ENDPOINT`         | URL to access the Stylus node.                                                                      |
 | `STYLUS_PRIVATE_KEY`      | Private key to use for deployment.                                                                  |
 | `FLU_SEAWATER_FUSDC_ADDR` | Super USDC address to use as the base asset for each pool.                                          |
+
+## Leo
+
+Leo (also known as the Seawater Rewards Manager) is a contract that allows users to vest their LP
+tokens in the form of a transferFrom using the NFTManager contract. Leo remembers
+who owns the LP NFTs it has, and does things like collect fees on the behalf of the owner,
+and knows to do so when determining "real yield" mixed with fees earned for LPing.

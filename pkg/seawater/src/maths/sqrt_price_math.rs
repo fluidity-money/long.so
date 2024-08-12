@@ -280,7 +280,7 @@ pub fn get_liquidity_for_amount_0(
     let intermediate = mul_div(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, Q96)?;
     let res = mul_div(amount, intermediate, sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96)?;
     res.to_u128()
-        .map_or_else(|| Err(Error::LiquidityAmountTooWide), |v| Ok(v))
+        .map_or_else(|| Err(Error::LiquidityAmountTooWide), Ok)
 }
 
 /// Calculates the liquidity in the form of the delta number for amount0. Refer to
@@ -295,7 +295,7 @@ pub fn get_liquidity_for_amount_1(
     };
     let res = mul_div(amount, Q96, sqrt_ratio_b_x_96 - sqrt_ratio_a_x_96)?;
     res.to_u128()
-        .map_or_else(|| Err(Error::LiquidityAmountTooWide), |v| Ok(v))
+        .map_or_else(|| Err(Error::LiquidityAmountTooWide), Ok)
 }
 
 pub fn get_liquidity_for_amounts(

@@ -2,6 +2,10 @@
 
 package model
 
+import (
+	"github.com/fluidity-money/long.so/lib/types/seawater"
+)
+
 // Get swaps for a specific pool, set up to be more granular for caching.
 type GetSwaps struct {
 	Data SeawaterSwaps `json:"data"`
@@ -10,6 +14,20 @@ type GetSwaps struct {
 // Get swaps for user return type, set up to allow better control of caching.
 type GetSwapsForUser struct {
 	Data SeawaterSwaps `json:"data"`
+}
+
+// Liquidity incentives available in this pool that's distributed partly on-chain with
+// snapshotting done off-chain.
+type LiquidityIncentives struct {
+	// Pool that these rewards are enabled for.
+	Pool seawater.Pool `json:"pool"`
+	// Maximum supply to be distributed of the rewards.
+	Supply PairAmount `json:"supply"`
+	// Distribution amount released per day.
+	Distribution PairAmount `json:"distribution"`
+	// Suggested APY based on the LP tokens locked in the pool, combined
+	// with the emissions schedule.
+	SuggestedApy string `json:"suggestedApy"`
 }
 
 // Liquidity over time available in the pool, in the form of PairAmount, so it's possible to
@@ -52,6 +70,12 @@ type PriceOverTime struct {
 }
 
 type Query struct {
+}
+
+// Super (utility) incentives powered by Fluidity. Historical endpoint for knowing
+// what was rewarded.
+type SuperIncentives struct {
+	Amount PairAmount `json:"amount"`
 }
 
 // TVL over time available in the pool, in the form of just the USD amount, if the client is

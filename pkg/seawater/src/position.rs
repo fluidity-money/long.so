@@ -31,6 +31,7 @@ impl StoragePositions {
     /// # Calling requirements
     /// Requires that `id` has not been initialised before, and that `low` and `up` are in the
     /// correct order.
+    #[allow(clippy::new_ret_no_self)]
     pub fn new(&mut self, id: U256, low: i32, up: i32) {
         let mut info = self.positions.setter(id);
         info.lower.set(I32::lib(&low));

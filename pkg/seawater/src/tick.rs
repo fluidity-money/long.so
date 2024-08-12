@@ -58,6 +58,7 @@ pub struct StorageTicks {
 impl StorageTicks {
     /// Updates a tick with liquidity and fee data, initialising it if it was not before. Returns
     /// if the tick changed activation state.
+    #[allow(clippy::too_many_arguments)]
     pub fn update(
         &mut self,
         tick: i32,

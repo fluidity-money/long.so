@@ -15,6 +15,7 @@ pub const fn selector(name: &[u8]) -> [u8; 4] {
 
 /// Extracts a 256 bit word from a data stream, returning the word and the remaining data.
 pub fn take_word(data: &[u8]) -> (&[u8; 32], &[u8]) {
+    #[allow(clippy::unwrap_used)]
     data.split_first_chunk::<32>().unwrap()
 }
 
@@ -67,6 +68,7 @@ gen_parse_int!(parse_i128, i128);
 
 /// Extracts a 32 bit selector from a data stream, returning the selector and the remaining data.
 pub fn parse_selector(data: &[u8]) -> (u32, &[u8]) {
+    #[allow(clippy::unwrap_used)]
     let (selector, data) = data.split_first_chunk::<4>().unwrap();
     (u32::from_be_bytes(*selector), data)
 }
@@ -115,6 +117,7 @@ pub fn parse_selector(data: &[u8]) -> (u32, &[u8]) {
 /// ```
 pub fn parse_bytes(data: &[u8]) -> (&[u8], &[u8]) {
     let (len, data) = parse_u256(data);
+    #[allow(clippy::unwrap_used)]
     let len: usize = len.try_into().unwrap();
     // padded_len is the total length
     let padded_len = len.next_multiple_of(32);

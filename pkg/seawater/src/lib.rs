@@ -200,7 +200,7 @@ impl Pools {
     ) -> Result<(U256, U256, U256, I256, i32, i32), Revert> {
         let original_amount = amount;
 
-        let amount = I256::try_from(amount).unwrap();
+        let amount = I256::try_from(amount).map_err(|_| Error::SwapResultTooHigh)?;
 
         // swap in -> usdc
         let (amount_in, interim_usdc_out, final_tick_in) = pools.pools.setter(from).swap(
@@ -674,7 +674,7 @@ impl Pools {
         }
 
         evm::log(events::UpdatePositionLiquidity {
-            id: id,
+            id,
             token0: token_0,
             token1: token_1,
         });
@@ -682,6 +682,7 @@ impl Pools {
         Ok((token_0, token_1))
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn adjust_position_internal(
         &mut self,
         pool: Address,
@@ -707,7 +708,7 @@ impl Pools {
         )?;
 
         evm::log(events::UpdatePositionLiquidity {
-            id: id,
+            id,
             token0: amount_0,
             token1: amount_1,
         });
@@ -1169,7 +1170,8 @@ impl Pools {
             Error::SeawaterEmergencyOnlyDisable // Emergency council can only disable
         );
 
-        Ok(self.pools.setter(pool).set_enabled(enabled))
+        self.pools.setter(pool).set_enabled(enabled);
+        Ok(())
     }
 
     #[allow(non_snake_case)]
@@ -1214,7 +1216,7 @@ impl Pools {
             Error::SeawaterAdminOnly
         );
 
-        erc20::give(token, amount).unwrap();
+        erc20::give(token, amount)?;
 
         Ok(())
     }

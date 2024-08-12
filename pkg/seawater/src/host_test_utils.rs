@@ -89,8 +89,9 @@ pub fn set_storage(items: HashMap<&str, &str>) {
     for (key, value) in items {
         test_shims::insert_word(
             const_hex::const_decode_to_array::<32>(key.as_bytes())
-                .expect(format!("failed to decode key: {:?}", key).as_str()),
-            const_hex::const_decode_to_array::<32>(value.as_bytes()).unwrap(),
+                .unwrap_or_else(|_| panic!("failed to decode key: {:?}", key)),
+            const_hex::const_decode_to_array::<32>(value.as_bytes())
+                .unwrap_or_else(|_| panic!("failed to decode value: {:?}", value)),
         );
     }
 }

@@ -82,7 +82,8 @@ impl StoragePool {
         let max_tick = tick_math::get_max_tick(spacing);
         assert_or!(low >= min_tick && low <= max_tick, Error::InvalidTick);
         assert_or!(up >= min_tick && up <= max_tick, Error::InvalidTick);
-        Ok(self.positions.new(id, low, up))
+        self.positions.new(id, low, up);
+        Ok(())
     }
 
     /// Updates a position in this pool, refreshing fees earned and updating liquidity.
@@ -253,7 +254,7 @@ impl StoragePool {
             amount_1,          // amount_1
         )?
         .to_i128()
-        .map_or_else(|| Err(Error::LiquidityAmountTooWide), |v| Ok(v))?;
+        .map_or_else(|| Err(Error::LiquidityAmountTooWide), Ok)?;
 
         if giving {
             // If we're giving, then we need to take from the delta.
@@ -542,7 +543,7 @@ impl StoragePool {
         self.fee.get().sys()
     }
 
-    ///! Get a position given. This is a helper function for testing.
+    // Get a position given. This is a helper function for testing.
     pub fn get_position(&self, id: U256) -> StorageGuard<'_, position::StoragePositionInfo> {
         self.positions.positions.get(id)
     }

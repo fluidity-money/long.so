@@ -12,7 +12,7 @@ use crate::{Address, U256};
 use crate::current_test;
 
 #[no_mangle]
-pub extern "C" fn native_keccak256(bytes: *const u8, len: usize, output: *mut u8) {
+pub unsafe extern "C" fn native_keccak256(bytes: *const u8, len: usize, output: *mut u8) {
     // SAFETY
     // stylus promises `bytes` will have length `len`, `output` will have length one word
     use std::slice;
@@ -40,7 +40,7 @@ pub mod storage {
 
     thread_local! {
         pub static CURRENT_SENDER: RefCell<[u8; 20]> =
-            RefCell::new([0; 20]);
+            const { RefCell::new([0; 20]) };
 
         pub static STORAGE: RefCell<WordHashMap> = RefCell::new(HashMap::new());
 
@@ -63,7 +63,7 @@ pub mod storage {
 }
 
 #[no_mangle]
-pub extern "C" fn storage_store_bytes32(key: *const u8, value: *const u8) {
+pub unsafe extern "C" fn storage_store_bytes32(key: *const u8, value: *const u8) {
     let (key, value) = unsafe {
         // SAFETY - stylus insists these will both be valid words
         (storage::read_word(key), storage::read_word(value))
@@ -73,7 +73,7 @@ pub extern "C" fn storage_store_bytes32(key: *const u8, value: *const u8) {
 }
 
 #[no_mangle]
-pub extern "C" fn storage_cache_bytes32(key: *const u8, value: *const u8) {
+pub unsafe extern "C" fn storage_cache_bytes32(key: *const u8, value: *const u8) {
     // do the same as storage... for now. if the tests are more comprehensive
     // this may need to change.
     storage_store_bytes32(key, value);
@@ -85,7 +85,7 @@ pub extern "C" fn storage_flush_cache(_clear: bool) {
 }
 
 #[no_mangle]
-pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
+pub unsafe extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
     #[allow(unused_imports)]
     use crate::current_test;
 
@@ -114,7 +114,7 @@ pub extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
 #[no_mangle]
 pub unsafe extern "C" fn msg_sender(sender: *mut u8) {
     // copy the currently defined sender and return the pointer, or default
-    let addr = storage::CURRENT_SENDER.with(|addr| addr.borrow().clone());
+    let addr = storage::CURRENT_SENDER.with(|addr| *addr.borrow());
 
     #[cfg(feature = "testing-dbg")]
     dbg!((
@@ -169,7 +169,7 @@ pub fn take_caller_bal(token: Address, amt: U256) -> Result<(), U256> {
         Some(caller_bal) => {
             let (leftover, overflow) = caller_bal.overflowing_sub(amt);
             if overflow {
-                Err(amt.checked_sub(caller_bal.clone()).unwrap())
+                Err(amt.checked_sub(*caller_bal).expect("No caller balance"))
             } else {
                 *caller_bal = leftover;
                 Ok(())
@@ -186,7 +186,9 @@ pub fn take_amm_bal(token: Address, amt: U256) -> Result<(), U256> {
         Some(amm_bal) => {
             let (leftover, overflow) = amm_bal.overflowing_sub(amt);
             if overflow {
-                Err(amt.checked_sub(amm_bal.clone()).unwrap())
+                Err(amt
+                    .checked_sub(*amm_bal)
+                    .expect("Took balance from the amm"))
             } else {
                 *amm_bal = leftover;
                 Ok(())
