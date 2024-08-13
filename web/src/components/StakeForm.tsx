@@ -508,7 +508,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
           borderRadius: [5, 5, 0, 0],
           ...chartStyles.borderSet[liquidityRangeType],
         },
-        selectedMode: "multiple",
+        selectedMode: liquidityRangeType === "auto" ? "multiple" : false,
         select: {
           itemStyle: {
             color: chartStyles.select.color[liquidityRangeType],
@@ -547,6 +547,15 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         command: "clear",
         areas: [],
       });
+      // Clear selection, again for auto range to display auto range
+      chart.dispatchAction({
+        type: "unselect",
+        seriesIndex: 0,
+        dataIndex: Array.from(
+          { length: graphLPData?.length ?? 0 },
+          (_, i) => i,
+        ),
+      });
       if (liquidityRangeType === "auto") {
         chart.dispatchAction({
           type: "select",
@@ -566,13 +575,33 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         });
       }
     }
-  }, [liquidityRangeType, chart, lowIndex, highIndex]);
+  }, [liquidityRangeType, chart, lowIndex, highIndex, graphLPData?.length]);
 
   useEffect(() => {
-    chart?.on("brushEnd", function (e) {
-      console.log("Brushed clear", e);
+    chart?.on("brushEnd", function ({ areas }: any) {
+      if (!graphLPData) return;
+
+      const lowerIndex = areas[0].coordRange[0];
+      const upperIndex = areas[0].coordRange[1];
+
+      setPriceLower(
+        (1.0001 ** graphLPData[lowerIndex].tickLower).toFixed(fUSDC.decimals),
+        token0.decimals,
+      );
+      setPriceUpper(
+        (1.0001 ** graphLPData[upperIndex].tickUpper).toFixed(fUSDC.decimals),
+        token0.decimals,
+      );
     });
-  }, [chart, lowIndex, highIndex]);
+  }, [
+    chart,
+    lowIndex,
+    highIndex,
+    graphLPData,
+    token0.decimals,
+    setPriceLower,
+    setPriceUpper,
+  ]);
 
   return (
     <div className="z-10 flex flex-col items-center">
