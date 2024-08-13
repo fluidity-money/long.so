@@ -72,6 +72,11 @@ type PriceOverTime struct {
 type Query struct {
 }
 
+type Served struct {
+	// Timestamp of the creation of the served request.
+	Timestamp int `json:"timestamp"`
+}
+
 // Super (utility) incentives powered by Fluidity. Historical endpoint for knowing
 // what was rewarded.
 type SuperIncentives struct {

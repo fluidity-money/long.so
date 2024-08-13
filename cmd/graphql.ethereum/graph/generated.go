@@ -108,6 +108,7 @@ type ComplexityRoot struct {
 		GetSwapsForUser  func(childComplexity int, wallet string, first *int, after *int) int
 		GetWallet        func(childComplexity int, address string) int
 		Pools            func(childComplexity int) int
+		Served           func(childComplexity int) int
 	}
 
 	SeawaterConfig struct {
@@ -188,6 +189,10 @@ type ComplexityRoot struct {
 		Swaps func(childComplexity int) int
 	}
 
+	Served struct {
+		Timestamp func(childComplexity int) int
+	}
+
 	SuperIncentives struct {
 		Amount func(childComplexity int) int
 	}
@@ -238,6 +243,7 @@ type AmountResolver interface {
 	ValueUsd(ctx context.Context, obj *model.Amount) (string, error)
 }
 type QueryResolver interface {
+	Served(ctx context.Context) (model.Served, error)
 	Fusdc(ctx context.Context) (model.Token, error)
 	Pools(ctx context.Context) ([]seawater.Pool, error)
 	GetPool(ctx context.Context, token string) (*seawater.Pool, error)
@@ -589,6 +595,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Pools(childComplexity), true
+
+	case "Query.served":
+		if e.complexity.Query.Served == nil {
+			break
+		}
+
+		return e.complexity.Query.Served(childComplexity), true
 
 	case "SeawaterConfig.classification":
 		if e.complexity.SeawaterConfig.Classification == nil {
@@ -998,6 +1011,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SeawaterSwaps.Swaps(childComplexity), true
 
+	case "Served.timestamp":
+		if e.complexity.Served.Timestamp == nil {
+			break
+		}
+
+		return e.complexity.Served.Timestamp(childComplexity), true
+
 	case "SuperIncentives.amount":
 		if e.complexity.SuperIncentives.Amount == nil {
 			break
@@ -1234,6 +1254,12 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var sources = []*ast.Source{
 	{Name: "../schema.graphqls", Input: `
 type Query {
+
+  """
+  Metadata of the current request.
+  """
+  served: Served!
+
   """
   fUSDC address that's supported by the AMM.
   """
@@ -1474,6 +1500,13 @@ type SeawaterPool {
   to the frontend. Can be used to hint how the display of the tick selection should work.
   """
   config: SeawaterConfig!
+}
+
+type Served {
+  """
+  Timestamp of the creation of the served request.
+  """
+  timestamp: Int!
 }
 
 """
@@ -3351,6 +3384,54 @@ func (ec *executionContext) fieldContext_PriceOverTime_monthly(_ context.Context
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_served(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_served(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Served(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.Served)
+	fc.Result = res
+	return ec.marshalNServed2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐServed(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_served(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "timestamp":
+				return ec.fieldContext_Served_timestamp(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Served", field.Name)
 		},
 	}
 	return fc, nil
@@ -7019,6 +7100,50 @@ func (ec *executionContext) fieldContext_SeawaterSwaps_next(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Served_timestamp(ctx context.Context, field graphql.CollectedField, obj *model.Served) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Served_timestamp(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Timestamp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Served_timestamp(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Served",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _SuperIncentives_amount(ctx context.Context, field graphql.CollectedField, obj *model.SuperIncentives) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_SuperIncentives_amount(ctx, field)
 	if err != nil {
@@ -10231,6 +10356,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "served":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_served(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "fusdc":
 			field := field
 
@@ -12432,6 +12579,45 @@ func (ec *executionContext) _SeawaterSwaps(ctx context.Context, sel ast.Selectio
 	return out
 }
 
+var servedImplementors = []string{"Served"}
+
+func (ec *executionContext) _Served(ctx context.Context, sel ast.SelectionSet, obj *model.Served) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, servedImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Served")
+		case "timestamp":
+			out.Values[i] = ec._Served_timestamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var superIncentivesImplementors = []string{"SuperIncentives"}
 
 func (ec *executionContext) _SuperIncentives(ctx context.Context, sel ast.SelectionSet, obj *model.SuperIncentives) graphql.Marshaler {
@@ -13727,6 +13913,10 @@ func (ec *executionContext) marshalNSeawaterSwap2ᚕgithubᚗcomᚋfluidityᚑmo
 
 func (ec *executionContext) marshalNSeawaterSwaps2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterSwaps(ctx context.Context, sel ast.SelectionSet, v model.SeawaterSwaps) graphql.Marshaler {
 	return ec._SeawaterSwaps(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNServed2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐServed(ctx context.Context, sel ast.SelectionSet, v model.Served) graphql.Marshaler {
+	return ec._Served(ctx, sel, &v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

@@ -1,5 +1,11 @@
 
 type Query {
+
+  """
+  Metadata of the current request.
+  """
+  served: Served!
+
   """
   fUSDC address that's supported by the AMM.
   """
@@ -240,6 +246,13 @@ type SeawaterPool {
   to the frontend. Can be used to hint how the display of the tick selection should work.
   """
   config: SeawaterConfig!
+}
+
+type Served {
+  """
+  Timestamp of the creation of the served request.
+  """
+  timestamp: Int!
 }
 
 """

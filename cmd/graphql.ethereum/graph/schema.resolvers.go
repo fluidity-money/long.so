@@ -148,6 +148,13 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	return price.FloatString(5), nil
 }
 
+// Served is the resolver for the served field.
+func (r *queryResolver) Served(ctx context.Context) (model.Served, error) {
+	return model.Served{
+		Timestamp: int(time.Now().Unix()),
+	}, nil
+}
+
 // Fusdc is the resolver for the fusdc field.
 func (r *queryResolver) Fusdc(ctx context.Context) (t model.Token, err error) {
 	return model.Token{erc20.Erc20{
