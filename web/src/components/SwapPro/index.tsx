@@ -1,5 +1,6 @@
 "use client";
 
+import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { useSwapPro } from "@/stores/useSwapPro";
 import { TypographyH3 } from "@/components/ui/typography";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,10 @@ import { SwapProPoolFragment } from "@/components/SwapPro/SwapProPoolFragment";
 import { useMemo } from "react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usdFormat } from "@/lib/usdFormat";
+import { useConnectorClient, useSimulateContract } from "wagmi";
+import { ammAddress } from "@/lib/addresses";
+import { sqrtPriceX96ToPrice } from "@/lib/math";
+import { fUSDC } from "@/config/tokens";
 
 const variants = {
   hidden: { opacity: 0, width: 0 },
@@ -73,13 +78,53 @@ export const SwapPro = ({
       usdFormat(
         poolSwapPro
           ? poolSwapPro.liquidity.reduce(
-              (total, { liquidity }) => total + parseFloat(liquidity),
-              0,
-            )
+            (total, { liquidity }) => total + parseFloat(liquidity),
+            0,
+          )
           : 0,
       ),
     [poolSwapPro],
   );
+
+  // useSimulateContract throws if connector.account is not defined
+  // so we must check if it exists or use a dummy address for sqrtPriceX96 and quote/quote2
+  const { data: connector } = useConnectorClient();
+  const simulateAccount =
+    connector?.account ?? "0x1111111111111111111111111111111111111111";
+
+  const { data: token0SqrtPriceX96 } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    account: simulateAccount,
+    functionName: "sqrtPriceX967B8F5FC5",
+    args: [token0.address],
+  });
+
+  const { data: token1SqrtPriceX96 } = useSimulateContract({
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    account: simulateAccount,
+    functionName: "sqrtPriceX967B8F5FC5",
+    args: [token1.address],
+  });
+
+  const formattedTokenPrice = useMemo(() => {
+    const token0Price = token0SqrtPriceX96
+      ? Number(sqrtPriceX96ToPrice(token0SqrtPriceX96.result, token0.decimals)) / 10 ** fUSDC.decimals
+      : 0
+    const token1Price = token1SqrtPriceX96
+      ? Number(sqrtPriceX96ToPrice(token1SqrtPriceX96.result, token1.decimals)) / 10 ** fUSDC.decimals
+      : 0
+
+    switch (fUSDC.address) {
+      case token0.address:
+        return usdFormat(token1Price)
+      case token1.address:
+        return usdFormat(token0Price)
+      default:
+        return `${usdFormat(token0Price)}/${usdFormat(token1Price)}`
+    }
+  }, [token0, token1, token0SqrtPriceX96, token1SqrtPriceX96])
 
   const transactions = poolSwapPro?.swaps.swaps;
 
@@ -161,7 +206,7 @@ export const SwapPro = ({
           </TypographyH3>
         )}
 
-        {poolSwapPro && <Graph pool={poolSwapPro} />}
+        {poolSwapPro && <Graph pool={poolSwapPro} currentPrice={formattedTokenPrice} />}
 
         <div className="hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:flex">
           <div>

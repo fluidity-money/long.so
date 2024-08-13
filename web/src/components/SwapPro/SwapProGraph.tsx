@@ -20,7 +20,7 @@ const durationToDays = {
   ALL: 52,
 };
 
-export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
+export const Graph = ({ pool, currentPrice }: { pool?: SwapProPoolFragmentFragment, currentPrice: string }) => {
   const [activeGraphType, setActiveGraphType] = useState<
     "price" | "volume" | "liquidity"
   >("volume");
@@ -62,7 +62,7 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
       const last = slicedData?.at(-1);
       const header = usdFormat(
         parseFloat(last?.fusdc.valueUsd ?? "0") +
-          parseFloat(last?.token1.valueUsd ?? "0"),
+        parseFloat(last?.token1.valueUsd ?? "0"),
       );
 
       return [
@@ -84,10 +84,6 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
         slicedData = slicedData?.slice(0, durationToDays[duration]);
       }
 
-      const last = slicedData?.at(0);
-
-      const header = usdFormat(parseFloat(last ?? "0"));
-
       return [
         slicedData
           // reformat pool data to match expected graph data
@@ -96,7 +92,7 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
             value: parseFloat(d),
           }))
           .reverse(),
-        header,
+        currentPrice,
       ];
     }
 
@@ -126,7 +122,7 @@ export const Graph = ({ pool }: { pool?: SwapProPoolFragmentFragment }) => {
 
     // should never reach here
     return [];
-  }, [showMockData, swapProGraphMockData, pool, activeGraphType, duration]);
+  }, [showMockData, swapProGraphMockData, pool, activeGraphType, duration, currentPrice]);
 
   return (
     <>
