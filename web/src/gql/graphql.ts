@@ -287,6 +287,8 @@ export type SeawaterPool = {
   price: Scalars['String']['output'];
   /** Historical price over time data that's available. */
   priceOverTime: PriceOverTime;
+  /** Metadata of the current request. */
+  served: Served;
   /** Swaps that were made using this pool. */
   swaps: SeawaterSwaps;
   /** Tick spacing of the current pool, useful for graph rendering. */
@@ -349,6 +351,8 @@ export type SeawaterPosition = {
   pool: SeawaterPool;
   /** Position Id in the contract of the user's position that they own. Used for a cursor. */
   positionId: Scalars['Int']['output'];
+  /** Metadata of the current request. */
+  served: Served;
   /** Upper tick of this position. */
   upper: Scalars['Int']['output'];
 };
@@ -418,6 +422,8 @@ export type SeawaterSwap = {
   pool: SeawaterPool;
   /** Sender of the swap. */
   sender: Wallet;
+  /** Metadata of the current request. */
+  served: Served;
   /** Timestamp of when this swap occured. */
   timestamp: Scalars['Int']['output'];
 };
