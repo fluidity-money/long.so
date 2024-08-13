@@ -86,10 +86,14 @@ export const AllPoolsFragment = graphql(`
       }
     }
     liquidityIncentives {
-      valueUsd
-    }
-    superIncentives {
-      valueUsd
+      supply {
+        token1 {
+          valueUsd
+        }
+        fusdc {
+          valueUsd
+        }
+      }
     }
     positions {
       positions {
@@ -156,9 +160,7 @@ export const AllPools = () => {
         // assume that the first daily value is the current value
         volume: volume,
         totalValueLocked: totalValueLocked,
-        rewards:
-          parseFloat(pool.liquidityIncentives.valueUsd) +
-          parseFloat(pool.superIncentives.valueUsd),
+        rewards: 0, // should display the accumulated supply of the rewards
         liquidityRange,
         // TODO: I don't know where to get the following info from
         boosted: false,
@@ -204,16 +206,21 @@ export const AllPools = () => {
                   ? "-"
                   : showDemoData
                     ? "200k"
-                    : // sum the liquidity and super incentives of all pools
+                    : // sum the liquidity incentives of all pools
                       usdFormat(
                         sum(
                           poolsData?.map(
                             (pool) =>
-                              parseFloat(pool.liquidityIncentives.valueUsd) +
-                              parseFloat(pool.superIncentives.valueUsd),
+                              sum(
+                                pool.liquidityIncentives.map((incentive) =>
+                                  parseFloat(incentive.supply.fusdc.valueUsd) +
+                                  parseFloat(incentive.supply.token1.valueUsd)
+                                )
+                              )
+                            )
                           ),
-                        ),
-                      )}
+                        )
+                      }
               </div>
             </div>
 

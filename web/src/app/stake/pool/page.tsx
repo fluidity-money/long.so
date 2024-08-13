@@ -50,14 +50,8 @@ const ManagePoolFragment = graphql(`
       decimals
     }
     liquidityIncentives {
-      valueScaled
-    }
-    superIncentives {
-      valueScaled
-    }
-    utilityIncentives {
-      amountGivenOut
-      maximumAmount
+      suggestedApyFusdc
+      suggestedApyToken1
     }
     earnedFeesAPRFUSDC
   }
@@ -271,6 +265,10 @@ export default function PoolPage() {
   // this should only be the case when the data is initially loading, or an invalid id is passed
   // TODO: provide feedback for invalid IDs
   if (!showMockData && !poolData) return null;
+
+  const superIncentives = 0;
+
+  const liquidityIncentivesApy = 0;
 
   return (
     <div className="flex w-full flex-col">
@@ -488,11 +486,11 @@ export default function PoolPage() {
                             {/* TODO: is the liquidity incentives value a percentage? data is not a range */}
                             {showMockData
                               ? 15
-                              : poolData?.liquidityIncentives.valueScaled}
+                              : liquidityIncentivesApy}
                             % ~{" "}
                             {showMockData
                               ? 25
-                              : poolData?.liquidityIncentives.valueScaled}
+                              : ""}
                             %
                           </div>
                         </div>
@@ -506,13 +504,9 @@ export default function PoolPage() {
                         <div className="flex flex-row items-center gap-2">
                           <Token size="small" />
                           <div>
-                            {showMockData
-                              ? 20
-                              : poolData?.superIncentives.valueScaled}
+                            {showMockData ? 20 : superIncentives}
                             % ~{" "}
-                            {showMockData
-                              ? 30
-                              : poolData?.superIncentives.valueScaled}
+                            {showMockData ? 30 : superIncentives}
                             %
                           </div>
                         </div>
@@ -542,27 +536,18 @@ export default function PoolPage() {
                         <div className="text-3xs">
                           {showMockData
                             ? 200
-                            : poolData?.utilityIncentives[0]?.amountGivenOut ??
-                              0}
+                            : 0}
                           /
                           {showMockData
                             ? "1,000"
-                            : poolData?.utilityIncentives[0]?.maximumAmount ??
-                              0}{" "}
+                            : 0}{" "}
                           tokens given out
                         </div>
                         <Line
                           percent={
                             showMockData
                               ? 20
-                              : parseFloat(
-                                  poolData?.utilityIncentives[0]
-                                    ?.amountGivenOut ?? "0",
-                                ) /
-                                parseFloat(
-                                  poolData?.utilityIncentives[0]
-                                    ?.maximumAmount ?? "0",
-                                )
+                              : 0
                           }
                           strokeColor="#EBEBEB"
                           strokeWidth={4}

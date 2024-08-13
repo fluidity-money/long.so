@@ -185,8 +185,7 @@ type SeawaterPool {
   tvlOverTime: TvlOverTime!
 
   """
-  Yield paid by the pool over time. Yield is fees paid to the pool, as well as yield from
-  using Fluid Assets on the pool (Utility Mining and otherwise.)
+  Yield paid by the pool over time. Yield is fees paid to the pool via fees taken.
   """
   yieldOverTime: YieldOverTime!
 
@@ -203,17 +202,7 @@ type SeawaterPool {
   """
   Liquidity incentives currently available for this pool.
   """
-  liquidityIncentives: LiquidityIncentives!
-
-  """
-  Super incentives available in this pool.
-  """
-  superIncentives: SuperIncentives!
-
-  """
-  Utility incentives available in this pool.
-  """
-  utilityIncentives: [UtilityIncentive!]!
+  liquidityIncentives: [LiquidityIncentives!]!
 
   """
   Positions available in this pool. Cached aggressively.
@@ -712,51 +701,44 @@ type Token {
 }
 
 """
-Utility incentives given out by the Fluidity Labs team, or a partner via the DAO.
-"""
-type UtilityIncentive {
-  """
-  Amount given out in the form of a floating point number. TODO.
-  """
-  amountGivenOut: String!
-
-  """
-  Maximum amount that was given out historically. TODO.
-  """
-  maximumAmount: String!
-}
-
-"""
 Liquidity incentives available in this pool that's distributed partly on-chain with
 snapshotting done off-chain.
 """
 type LiquidityIncentives {
-    """
-    Pool that these rewards are enabled for.
-    """
-    pool: SeawaterPool!
+  """
+  Pool that these rewards are enabled for.
+  """
+  pool: SeawaterPool!
 
-    """
-    Maximum supply to be distributed of the rewards.
-    """
-    supply: PairAmount!
+  """
+  Timestamp that begins this liquidity mining campaign.
+  """
+  fromTimestamp: Int!
 
-    """
-    Distribution amount released per day.
-    """
-    distribution: PairAmount!
+  """
+  Timestamp that ends this liquidity mining campaign.
+  """
+  endTimestamp: Int!
 
-    """
-    Suggested APY based on the LP tokens locked in the pool, combined
-    with the emissions schedule.
-    """
-    suggestedApy: String!
-}
+  """
+  Maximum supply to be distributed of the rewards.
+  """
+  supply: PairAmount!
 
-"""
-Super (utility) incentives powered by Fluidity. Historical endpoint for knowing
-what was rewarded.
-"""
-type SuperIncentives {
-  amount: PairAmount!
+  """
+  Distribution amount released per day.
+  """
+  distribution: PairAmount!
+
+  """
+  Suggested APY percent for fUSDC based on the LP tokens locked in the pool, combined with
+  the emissions schedule.
+  """
+  suggestedApyFusdc: String!
+
+  """
+  Suggested APY percent for token 1 based on the LP tokens locked in the pool, combined
+  with the emissions schedule.
+  """
+  suggestedApyToken1: String!
 }

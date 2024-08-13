@@ -821,24 +821,11 @@ func (r *seawaterPoolResolver) EarnedFeesAPRToken1(ctx context.Context, obj *sea
 }
 
 // LiquidityIncentives is the resolver for the liquidityIncentives field.
-func (r *seawaterPoolResolver) LiquidityIncentives(ctx context.Context, obj *seawater.Pool) (amount model.LiquidityIncentives, err error) {
+func (r *seawaterPoolResolver) LiquidityIncentives(ctx context.Context, obj *seawater.Pool) (amount []model.LiquidityIncentives, err error) {
 	if obj == nil {
 		return amount, fmt.Errorf("empty pool")
 	}
-	panic("TODO")
-}
-
-// SuperIncentives is the resolver for the superIncentives field.
-func (r *seawaterPoolResolver) SuperIncentives(ctx context.Context, obj *seawater.Pool) (amount model.SuperIncentives, err error) {
-	if obj == nil {
-		return amount, fmt.Errorf("empty pool")
-	}
-	panic("TODO")
-}
-
-// UtilityIncentives is the resolver for the utilityIncentives field.
-func (r *seawaterPoolResolver) UtilityIncentives(ctx context.Context, obj *seawater.Pool) ([]model.UtilityIncentive, error) {
-	panic("TODO")
+	return []model.LiquidityIncentives{}, nil
 }
 
 // Positions is the resolver for the positions field.

@@ -21,13 +21,20 @@ type GetSwapsForUser struct {
 type LiquidityIncentives struct {
 	// Pool that these rewards are enabled for.
 	Pool seawater.Pool `json:"pool"`
+	// Timestamp that begins this liquidity mining campaign.
+	FromTimestamp int `json:"fromTimestamp"`
+	// Timestamp that ends this liquidity mining campaign.
+	EndTimestamp int `json:"endTimestamp"`
 	// Maximum supply to be distributed of the rewards.
 	Supply PairAmount `json:"supply"`
 	// Distribution amount released per day.
 	Distribution PairAmount `json:"distribution"`
-	// Suggested APY based on the LP tokens locked in the pool, combined
+	// Suggested APY percent for fUSDC based on the LP tokens locked in the pool, combined with
+	// the emissions schedule.
+	SuggestedApyFusdc string `json:"suggestedApyFusdc"`
+	// Suggested APY percent for token 1 based on the LP tokens locked in the pool, combined
 	// with the emissions schedule.
-	SuggestedApy string `json:"suggestedApy"`
+	SuggestedApyToken1 string `json:"suggestedApyToken1"`
 }
 
 // Liquidity over time available in the pool, in the form of PairAmount, so it's possible to
@@ -77,12 +84,6 @@ type Served struct {
 	Timestamp int `json:"timestamp"`
 }
 
-// Super (utility) incentives powered by Fluidity. Historical endpoint for knowing
-// what was rewarded.
-type SuperIncentives struct {
-	Amount PairAmount `json:"amount"`
-}
-
 // TVL over time available in the pool, in the form of just the USD amount, if the client is
 // so inclined to request this data.
 //
@@ -95,14 +96,6 @@ type TvlOverTime struct {
 	// Monthly data of the TVL, of the last 12 months, in the form of 12 items. Stringified
 	// floating point representation of the amount.
 	Monthly []string `json:"monthly"`
-}
-
-// Utility incentives given out by the Fluidity Labs team, or a partner via the DAO.
-type UtilityIncentive struct {
-	// Amount given out in the form of a floating point number. TODO.
-	AmountGivenOut string `json:"amountGivenOut"`
-	// Maximum amount that was given out historically. TODO.
-	MaximumAmount string `json:"maximumAmount"`
 }
 
 // Volume that was made in the pool over time, in a daily and monthly metric.
