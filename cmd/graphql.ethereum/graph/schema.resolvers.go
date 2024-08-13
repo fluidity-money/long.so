@@ -463,6 +463,13 @@ func (r *seawaterLiquidityResolver) TickUpper(ctx context.Context, obj *model.Se
 	return
 }
 
+// Served is the resolver for the served field.
+func (r *seawaterPoolResolver) Served(ctx context.Context, obj *seawater.Pool) (model.Served, error) {
+	return model.Served{
+		Timestamp: int(time.Now().Unix()),
+	}, nil
+}
+
 // ID is the resolver for the id field.
 func (r *seawaterPoolResolver) ID(ctx context.Context, obj *seawater.Pool) (string, error) {
 	if obj == nil {
@@ -1023,6 +1030,13 @@ func (r *seawaterPoolResolver) Config(ctx context.Context, obj *seawater.Pool) (
 	return model.SeawaterConfig{obj.Token, c}, nil
 }
 
+// Served is the resolver for the served field.
+func (r *seawaterPositionResolver) Served(ctx context.Context, obj *seawater.Position) (model.Served, error) {
+	return model.Served{
+		Timestamp: int(time.Now().Unix()),
+	}, nil
+}
+
 // ID is the resolver for the id field.
 func (r *seawaterPositionResolver) ID(ctx context.Context, obj *seawater.Position) (string, error) {
 	if obj == nil {
@@ -1369,6 +1383,13 @@ func (r *seawaterPositionsUserResolver) Next(ctx context.Context, obj *model.Sea
 		Pool:      obj.Pool,
 		Wallet:    obj.Wallet,
 		Positions: pos,
+	}, nil
+}
+
+// Served is the resolver for the served field.
+func (r *seawaterSwapResolver) Served(ctx context.Context, obj *model.SeawaterSwap) (model.Served, error) {
+	return model.Served{
+		Timestamp: int(time.Now().Unix()),
 	}, nil
 }
 

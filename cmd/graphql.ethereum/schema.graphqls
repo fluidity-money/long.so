@@ -139,6 +139,11 @@ Seawater pool available for swapping via the AMM.
 """
 type SeawaterPool {
   """
+  Metadata of the current request.
+  """
+  served: Served!
+
+  """
   Id for quick caching, in the form of `pool:address`.
   """
   id: ID!
@@ -458,6 +463,11 @@ position by looking at the median of the lower, and upper tick.
 """
 type SeawaterPosition {
   """
+  Metadata of the current request.
+  """
+  served: Served!
+
+  """
   Id of the GraphQL object, for caching reasons. Made up of `positionId (pos:positionId)`.
   """
   id: ID!
@@ -502,6 +512,11 @@ type SeawaterPosition {
 Swap that was made by a user.
 """
 type SeawaterSwap {
+  """
+  Metadata of the current request.
+  """
+  served: Served!
+
   """
   Timestamp of when this swap occured.
   """
