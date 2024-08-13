@@ -2,9 +2,9 @@ name: Go Unit Tests
 
 on:
   push:
-    branches: 
+    branches:
       - development
-    paths: 
+    paths:
       - 'pkg/**'
       - 'web/**'
       - 'cmd/**'
@@ -31,6 +31,9 @@ jobs:
 
       - name: Install Go dependencies
         run: go mod tidy
+
+      - name: Copy the configuration for pools toml file
+        run: cp pools.toml cmd/graphql.ethereum
 
       - name: Run Go tests and generate coverage report
         run: go test ./... -coverprofile=coverage-go.txt -covermode=count
