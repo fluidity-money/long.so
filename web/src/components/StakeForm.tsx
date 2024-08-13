@@ -7,7 +7,6 @@ import Padlock from "@/assets/icons/padlock.svg";
 import Token from "@/assets/icons/token.svg";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReactECharts from "echarts-for-react";
-import { format } from "date-fns";
 import * as echarts from "echarts/core";
 import SelectedRange from "@/assets/icons/legend/selected-range.svg";
 import CurrentPrice from "@/assets/icons/legend/current-price.svg";
@@ -174,7 +173,20 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     parseFloat(price),
   );
   const graphLPData = poolData?.liquidity;
+  const graphLPDataSerie = graphLPData?.map((item) =>
+    parseFloat(item.liquidity),
+  );
+  const graphLPDataXAxis = graphLPData?.map(({ tickLower, tickUpper }) => {
+    // const scale = token0.decimals - fUSDC.decimals;
+    const priceLower = (1.0001 ** (tickLower ?? 0))
+      //* 10 ** scale
+      .toFixed(fUSDC.decimals);
+    const priceHigher = (1.0001 ** (tickUpper ?? 0))
+      //* 10 ** scale
+      .toFixed(fUSDC.decimals);
 
+    return `${priceLower}-${priceHigher}`;
+  });
   const positionData_ = useFragment(PositionsFragment, userData?.getWallet);
   const positionData = positionData_?.positions.positions.find(
     (p) => p.positionId === positionId,
@@ -289,12 +301,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   );
 
   useEffect(() => {
-    if (
-      !curTick ||
-      tickLower === undefined ||
-      tickUpper === undefined
-    )
-      return;
+    if (!curTick || tickLower === undefined || tickUpper === undefined) return;
     const lower = BigInt(tickLower);
     const upper = BigInt(tickUpper);
 
@@ -361,8 +368,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     // set the ticks to min and max, ignoring display prices
     // which will be shown as infinity
     if (liquidityRangeType === "full-range") {
-      setTickLower(MIN_TICK)
-      setTickUpper(MAX_TICK)
+      setTickLower(MIN_TICK);
+      setTickUpper(MAX_TICK);
     } else if (liquidityRangeType === "auto") {
       if (!curTick) return;
       // auto sets the price range to +-10% of the current tick
@@ -407,117 +414,165 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   const autoFeeTierRef = useRef();
   const manualFeeTierRef = useRef();
-
-  const chartOptions = useMemo(() => {
-    return {
-      grid: {
-        left: "0", // or a small value like '10px'
-        right: "0", // or a small value
-        top: "0", // or a small value
-        bottom: "0", // or a small value
+  const chart = chartRef.current?.getEchartsInstance();
+  const chartStyles = {
+    color: {
+      "full-range": colorGradient,
+      auto: "transparent",
+      custom: "white",
+    },
+    borderSet: {
+      "full-range": {
+        borderColor: "#1E1E1E",
+        borderWidth: 1,
+        borderType: "solid",
       },
-      tooltip: {
-        trigger: "axis", // Trigger tooltip on axis movement
-        axisPointer: {
-          type: "cross", // Display crosshair style pointers
+      auto: {
+        borderColor: "#EBEBEB",
+        borderWidth: 1,
+        borderType: "dashed",
+      },
+      custom: {
+        borderColor: "#EBEBEB",
+        borderWidth: 1,
+        borderType: "dashed",
+      },
+    },
+    select: {
+      color: {
+        "full-range": colorGradient,
+        auto: "white",
+        custom: "white",
+      },
+    },
+  };
+  const chartOptions = {
+    grid: {
+      left: "0", // or a small value like '10px'
+      right: "0", // or a small value
+      top: "0", // or a small value
+      bottom: "0", // or a small value
+    },
+    tooltip: {
+      trigger: "axis", // Trigger tooltip on axis movement
+      axisPointer: {
+        type: "cross", // Display crosshair style pointers
+      },
+      borderWidth: 0,
+      backgroundColor: "#EBEBEB",
+      textStyle: {
+        color: "#1E1E1E",
+      },
+      formatter:
+        "<div class='flex flex-col items-center'>${c} <div class='text-gray-2 text-center w-full'>{b}</div></div>",
+    },
+    toolbox: {
+      show: false,
+    },
+    brush: {
+      show: liquidityRangeType === "custom",
+      xAxisIndex: "all",
+      brushLink: "all",
+      outOfBrush: {
+        color: "#1E1E1E",
+      },
+    },
+    xAxis: {
+      type: "category",
+      data: graphLPDataXAxis,
+      show: false,
+      axisPointer: {
+        label: {
+          show: false,
         },
-        borderWidth: 0,
-        backgroundColor: "#EBEBEB",
-        textStyle: {
-          color: "#1E1E1E",
-        },
-        formatter:
-          "<div class='flex flex-col items-center'>${c} <div class='text-gray-2 text-center w-full'>{b}</div></div>",
       },
-      toolbox: {
-        show: false,
-      },
-      brush: {
-        show: liquidityRangeType === "custom",
-        xAxisIndex: "all",
-        brushLink: "all",
-        outOfBrush: {
-          color: "#1E1E1E",
+    },
+    yAxis: {
+      type: "value",
+      show: false,
+      axisPointer: {
+        label: {
+          show: false,
         },
       },
-      xAxis: {
-        type: "category",
-        data: graphLPData
-          ? graphLPData.map(
-              ({ tickLower, tickUpper }) => `${tickLower}-${tickUpper}`,
-            )
-          : [],
-        show: false,
-        axisPointer: {
-          label: {
-            show: false,
-          },
+    },
+    series: [
+      {
+        data: graphLPDataSerie,
+        type: "bar",
+        barWidth: "90%", // Adjust bar width (can be in pixels e.g., '20px')
+        barGap: "5%",
+        silent: true,
+        itemStyle: {
+          color: chartStyles.color[liquidityRangeType],
+          borderRadius: [5, 5, 0, 0],
+          ...chartStyles.borderSet[liquidityRangeType],
         },
-      },
-      yAxis: {
-        type: "value",
-        show: false,
-        axisPointer: {
-          label: {
-            show: false,
-          },
-        },
-      },
-      series: [
-        {
-          data: graphLPData
-            ? graphLPData.map((item) => parseFloat(item.liquidity))
-            : [],
-          type: "bar",
-          barWidth: "90%", // Adjust bar width (can be in pixels e.g., '20px')
-          barGap: "5%",
+        selectedMode: "multiple",
+        select: {
           itemStyle: {
-            color: colorGradient,
-            borderRadius: [5, 5, 0, 0], // Specify radius for all corners
-            // Border configuration
-            ...(liquidityRangeType === "custom"
-              ? {
-                  borderColor: "#EBEBEB", // Border color
-                  borderWidth: 1, // Border width
-                  borderType: "dashed", // Border type
-                }
-              : {
-                  borderColor: "#1E1E1E", // Border color
-                  borderWidth: 1, // Border width
-                  borderType: "solid", // Border type
-                }),
+            color: chartStyles.select.color[liquidityRangeType],
+            borderWidth: 0,
           },
         },
-      ],
-    };
-  }, [graphLPData, liquidityRangeType]);
+        emphasis: {
+          itemStyle: {
+            color: "white",
+            borderWidth: 0,
+          },
+        },
+      },
+    ],
+  };
+  chart?.setOption(chartOptions);
+
+  const { open } = useWeb3Modal();
+
+  const lowIndex = graphLPData?.findIndex(
+    (item) =>
+      parseFloat(priceLower) <= 1.0001 ** item.tickUpper &&
+      parseFloat(priceLower) >= 1.0001 ** item.tickLower,
+  );
+  const highIndex = graphLPData?.findLastIndex(
+    (item) =>
+      parseFloat(priceUpper) <= 1.0001 ** item.tickUpper &&
+      parseFloat(priceUpper) >= 1.0001 ** item.tickLower,
+  );
 
   useEffect(() => {
-    if (chartRef.current) {
-      const chart = chartRef.current.getEchartsInstance();
-      chart.setOption(chartOptions);
-
-      if (liquidityRangeType === "custom") {
+    if (chart) {
+      //  Clear the brush selection on every liquidityRangeType change
+      chart.dispatchAction({
+        type: "brush",
+        command: "clear",
+        areas: [],
+      });
+      if (liquidityRangeType === "auto") {
+        chart.dispatchAction({
+          type: "select",
+          seriesIndex: 0,
+          dataIndex: [lowIndex, highIndex],
+        });
+      } else if (liquidityRangeType === "custom") {
         chart.dispatchAction({
           type: "brush",
           areas: [
             {
               brushType: "lineX",
-              coordRange: [5, 25],
+              coordRange: [lowIndex, highIndex],
               xAxisIndex: 0,
             },
           ],
         });
-      } else {
-        chart.dispatchAction({
-          type: "brush",
-          areas: [],
-        });
       }
     }
-  }, [chartOptions, liquidityRangeType]);
+  }, [liquidityRangeType, chart, lowIndex, highIndex]);
 
-  const { open } = useWeb3Modal();
+  useEffect(() => {
+    chart?.on("brushEnd", function (e) {
+      console.log("Brushed clear", e);
+    });
+  }, [chart, lowIndex, highIndex]);
 
   return (
     <div className="z-10 flex flex-col items-center">
@@ -895,7 +950,12 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             <div className="flex flex-col">
               <div className="text-3xs text-gray-2 md:text-2xs">Low Price</div>
               <Input
-                className="rounded-none border-x-0 border-b border-t-0 border-b-white bg-black px-0 text-2xs font-semibold md:text-sm"
+                className={cn(
+                  liquidityRangeType === "full-range"
+                    ? "md:text-2xl"
+                    : "md:text-sm",
+                  "rounded-none border-x-0 border-b border-t-0 border-b-white bg-black px-0 text-2xs font-semibold",
+                )}
                 disabled={
                   liquidityRangeType !== "custom" || mode === "existing"
                 }
@@ -946,20 +1006,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   height: 44,
                 }}
                 ref={chartRef}
-                onChartReady={(chart) => {
-                  if (liquidityRangeType === "full-range") {
-                    chart.dispatchAction({
-                      type: "brush",
-                      areas: [
-                        {
-                          brushType: "lineX",
-                          coordRange: [5, 25],
-                          xAxisIndex: 0,
-                        },
-                      ],
-                    });
-                  }
-                }}
                 option={chartOptions}
               />
 
