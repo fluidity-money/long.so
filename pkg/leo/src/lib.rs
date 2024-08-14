@@ -76,10 +76,16 @@ pub struct StorageCampaign {
 #[solidity_storage]
 pub struct StoragePosition {
     owner: StorageAddress,
+
     timestamp: StorageU64,
+
     token: StorageAddress,
+
     tick_lower: StorageI32,
     tick_upper: StorageI32,
+
+    amount: StorageU256,
+
     // Indexes of the position of the current status per campaign that's updated
     offsets: StorageMap<B8, StorageU256>,
 }
@@ -101,6 +107,7 @@ impl Leo {
         position.tick_upper.set(longtail::tick_upper(pool, id)?);
         // Also increase the global count for LP available for this pool.
         let position_liq = longtail::position_liquidity(pool, id)?;
+        position.amount.set(position_liq);
         let existing_liq = self.liquidity.getter(pool).get();
         self.liquidity
             .setter(pool)
@@ -199,7 +206,15 @@ impl Leo {
                 // Looks like we're eligible! Calculate the rewards the user is owed, then use a
                 // erc20 send. Then adjust the timestamp for the user for this
                 // campaign so they can't claim this again and receive the same rewards.
-                (campaign.token.get(), U256::ZERO)
+                let global_liq = self.liquidity.getter(pool).get();
+                let rewards = maths::calc_rewards(
+                    global_liq,
+                    position.amount.get(),
+                    campaign.per_second.get(),
+                );
+                let token = campaign.token.get();
+                erc20::give(token, rewards).unwrap();
+                (token, rewards)
             })
             .collect())
     }
