@@ -33,7 +33,7 @@ import { useStakeStore } from "@/stores/useStakeStore";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { ammAddress } from "@/lib/addresses";
 import { useSimulateContract, useWriteContract } from "wagmi";
-import { getTokenAmountsNumeric, sqrtPriceX96ToPrice } from "@/lib/math";
+import { getSqrtRatioAtTick, getTokenAmountsNumeric, sqrtPriceX96ToPrice } from "@/lib/math";
 import { TokenIcon } from "@/components/TokenIcon";
 import { maxUint128 } from "viem";
 
@@ -226,7 +226,7 @@ export default function PoolPage() {
     if (!positionLiquidity || !position) return 0;
     const [amount0, amount1] = getTokenAmountsNumeric(
       Number(positionLiquidity.result),
-      Number(curTick),
+      Number(getSqrtRatioAtTick(curTick)),
       position.lower,
       position.upper,
     );
