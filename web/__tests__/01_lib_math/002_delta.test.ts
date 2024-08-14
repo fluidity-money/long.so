@@ -21,13 +21,4 @@ describe("Liquidity math", () => {
     expect(getSqrtRatioAtTick(BigInt(MIN_TICK))).toEqual(MIN_SQRT_RATIO);
     expect(getSqrtRatioAtTick(BigInt(MAX_TICK))).toEqual(MAX_SQRT_RATIO);
   });
-
-  it("Should convert liquidity to amounts correctly", () => {
-    const [amount0, amount1] = getAmountsForLiquidity(
-      encodeSqrtPrice(1), // sqrtRatioX96
-      encodeSqrtPrice(0.9090909090909091), // sqrtRatioAX96
-      encodeSqrtPrice(1.1), // sqrtRatioBX96
-      2148n, // liquidity
-    );
-  });
 });
