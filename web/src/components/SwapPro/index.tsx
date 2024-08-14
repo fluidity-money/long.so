@@ -78,9 +78,9 @@ export const SwapPro = ({
       usdFormat(
         poolSwapPro
           ? poolSwapPro.liquidity.reduce(
-            (total, { liquidity }) => total + parseFloat(liquidity),
-            0,
-          )
+              (total, { liquidity }) => total + parseFloat(liquidity),
+              0,
+            )
           : 0,
       ),
     [poolSwapPro],
@@ -110,21 +110,27 @@ export const SwapPro = ({
 
   const formattedTokenPrice = useMemo(() => {
     const token0Price = token0SqrtPriceX96
-      ? Number(sqrtPriceX96ToPrice(token0SqrtPriceX96.result, token0.decimals)) / 10 ** fUSDC.decimals
-      : 0
+      ? Number(
+          sqrtPriceX96ToPrice(token0SqrtPriceX96.result, token0.decimals),
+        ) /
+        10 ** fUSDC.decimals
+      : 0;
     const token1Price = token1SqrtPriceX96
-      ? Number(sqrtPriceX96ToPrice(token1SqrtPriceX96.result, token1.decimals)) / 10 ** fUSDC.decimals
-      : 0
+      ? Number(
+          sqrtPriceX96ToPrice(token1SqrtPriceX96.result, token1.decimals),
+        ) /
+        10 ** fUSDC.decimals
+      : 0;
 
     switch (fUSDC.address) {
       case token0.address:
-        return usdFormat(token1Price)
+        return usdFormat(token1Price);
       case token1.address:
-        return usdFormat(token0Price)
+        return usdFormat(token0Price);
       default:
-        return `${usdFormat(token0Price)}/${usdFormat(token1Price)}`
+        return `${usdFormat(token0Price)}/${usdFormat(token1Price)}`;
     }
-  }, [token0, token1, token0SqrtPriceX96, token1SqrtPriceX96])
+  }, [token0, token1, token0SqrtPriceX96, token1SqrtPriceX96]);
 
   const transactions = poolSwapPro?.swaps.swaps;
 
@@ -206,7 +212,9 @@ export const SwapPro = ({
           </TypographyH3>
         )}
 
-        {poolSwapPro && <Graph pool={poolSwapPro} currentPrice={formattedTokenPrice} />}
+        {poolSwapPro && (
+          <Graph pool={poolSwapPro} currentPrice={formattedTokenPrice} />
+        )}
 
         <div className="hidden w-full flex-row flex-wrap items-center justify-between gap-2 md:flex">
           <div>

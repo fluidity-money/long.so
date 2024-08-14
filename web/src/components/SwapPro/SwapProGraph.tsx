@@ -20,7 +20,13 @@ const durationToDays = {
   ALL: 52,
 };
 
-export const Graph = ({ pool, currentPrice }: { pool?: SwapProPoolFragmentFragment, currentPrice: string }) => {
+export const Graph = ({
+  pool,
+  currentPrice,
+}: {
+  pool?: SwapProPoolFragmentFragment;
+  currentPrice: string;
+}) => {
   const [activeGraphType, setActiveGraphType] = useState<
     "price" | "volume" | "liquidity"
   >("volume");
@@ -62,7 +68,7 @@ export const Graph = ({ pool, currentPrice }: { pool?: SwapProPoolFragmentFragme
       const last = slicedData?.at(-1);
       const header = usdFormat(
         parseFloat(last?.fusdc.valueUsd ?? "0") +
-        parseFloat(last?.token1.valueUsd ?? "0"),
+          parseFloat(last?.token1.valueUsd ?? "0"),
       );
 
       return [
@@ -122,7 +128,14 @@ export const Graph = ({ pool, currentPrice }: { pool?: SwapProPoolFragmentFragme
 
     // should never reach here
     return [];
-  }, [showMockData, swapProGraphMockData, pool, activeGraphType, duration, currentPrice]);
+  }, [
+    showMockData,
+    swapProGraphMockData,
+    pool,
+    activeGraphType,
+    duration,
+    currentPrice,
+  ]);
 
   return (
     <>

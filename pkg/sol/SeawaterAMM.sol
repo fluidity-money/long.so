@@ -359,7 +359,11 @@ contract SeawaterAMM is ISeawaterAMM {
 
     // called by the position manager contract!!
     /// @inheritdoc ISeawaterExecutorPosition
-    function transferPositionEEC7A3CD(uint256 /* id */, address /* from */, address /* to */) external {
+    function transferPositionEEC7A3CD(
+        uint256 /* id */,
+        address /* from */,
+        address /* to */
+    ) external {
         directDelegate(_getExecutorPosition());
     }
 
@@ -369,18 +373,27 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorPosition
-    function positionLiquidity8D11C045(address /* pool */, uint256 /* id */) external returns (uint128) {
+    function positionLiquidity8D11C045(
+        address /* pool */,
+        uint256 /* id */
+    ) external returns (uint128) {
         directDelegate(_getExecutorPosition());
     }
 
     /// @inheritdoc ISeawaterExecutorPosition
-    function positionTickLower1FECE0B6(address /* pool */, uint256 /* id */) external returns (int32) {
-        directDelegate(_getExecutorAdmin());
+    function positionTickLower2F77CCE1(
+        address /* pool */,
+        uint256 /* id */
+    ) external returns (int32) {
+        directDelegate(_getExecutorPosition());
     }
 
     /// @inheritdoc ISeawaterExecutorPosition
-    function positionTickUpper713EE49A(address /* pool */, uint256 /* id */) external returns (int32) {
-        directDelegate(_getExecutorAdmin());
+    function positionTickUpper67FD55BA(
+        address /* pool */,
+        uint256 /* id */
+    ) external returns (int32) {
+        directDelegate(_getExecutorPosition());
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
@@ -389,7 +402,10 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
-    function feesOwed22F28DBD(address /* pool */, uint256 /* position */) external returns (uint128, uint128) {
+    function feesOwed22F28DBD(
+        address /* pool */,
+        uint256 /* position */
+    ) external returns (uint128, uint128) {
         directDelegate(_getExecutorAdmin());
     }
 

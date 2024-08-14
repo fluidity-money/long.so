@@ -145,13 +145,13 @@ interface ISeawaterExecutorPosition {
     /// @param pool the position belongs to
     /// @param id of the position
     /// @return the lower tick of the position given
-    function positionTickLower1FECE0B6(address pool, uint256 id) external returns (int32);
+    function positionTickLower2F77CCE1(address pool, uint256 id) external returns (int32);
 
     /// @notice get the upper tick of the position id
     /// @param pool the position belongs to
     /// @param id of the position
     /// @return the lower tick of the position given
-    function positionTickUpper713EE49A(address pool, uint256 id) external returns (int32);
+    function positionTickUpper67FD55BA(address pool, uint256 id) external returns (int32);
 
     /// @notice collect a single position's yield
     /// @param pool the position belongs to

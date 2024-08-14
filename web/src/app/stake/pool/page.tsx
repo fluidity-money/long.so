@@ -33,7 +33,11 @@ import { useStakeStore } from "@/stores/useStakeStore";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { ammAddress } from "@/lib/addresses";
 import { useSimulateContract, useWriteContract } from "wagmi";
-import { getSqrtRatioAtTick, getTokenAmountsNumeric, sqrtPriceX96ToPrice } from "@/lib/math";
+import {
+  getSqrtRatioAtTick,
+  getTokenAmountsNumeric,
+  sqrtPriceX96ToPrice,
+} from "@/lib/math";
 import { TokenIcon } from "@/components/TokenIcon";
 import { maxUint128 } from "viem";
 
@@ -480,14 +484,7 @@ export default function PoolPage() {
                           </div>
                           <div>
                             {/* TODO: is the liquidity incentives value a percentage? data is not a range */}
-                            {showMockData
-                              ? 15
-                              : 0}
-                            % ~{" "}
-                            {showMockData
-                              ? 25
-                              : ""}
-                            %
+                            {showMockData ? 15 : 0}% ~ {showMockData ? 25 : ""}%
                           </div>
                         </div>
                       </div>
@@ -500,10 +497,8 @@ export default function PoolPage() {
                         <div className="flex flex-row items-center gap-2">
                           <Token size="small" />
                           <div>
-                            {showMockData ? 20 : superIncentives}
-                            % ~{" "}
-                            {showMockData ? 30 : superIncentives}
-                            %
+                            {showMockData ? 20 : superIncentives}% ~{" "}
+                            {showMockData ? 30 : superIncentives}%
                           </div>
                         </div>
                       </div>
@@ -530,21 +525,11 @@ export default function PoolPage() {
                     {showTokensGivenOut && (
                       <div className="flex flex-col gap-1">
                         <div className="text-3xs">
-                          {showMockData
-                            ? 200
-                            : 0}
-                          /
-                          {showMockData
-                            ? "1,000"
-                            : 0}{" "}
+                          {showMockData ? 200 : 0}/{showMockData ? "1,000" : 0}{" "}
                           tokens given out
                         </div>
                         <Line
-                          percent={
-                            showMockData
-                              ? 20
-                              : 0
-                          }
+                          percent={showMockData ? 20 : 0}
                           strokeColor="#EBEBEB"
                           strokeWidth={4}
                           className="rounded-full border border-white"

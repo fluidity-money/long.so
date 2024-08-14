@@ -232,6 +232,9 @@ func (a *Address) UnmarshalJSON(b []byte) error {
 func DataFromString(s string) Data {
 	return Data(strings.ToLower(s))
 }
+func DataFromBytes(b []byte) Data{
+	return Data("0x"+hex.EncodeToString(b))
+}
 func (a Data) String() string {
 	return strings.ToLower(string(a))
 }

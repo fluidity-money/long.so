@@ -572,7 +572,7 @@ impl Pools {
         Ok(liquidity.sys())
     }
 
-    pub fn position_tick_lower_1_F_E_C_E_0_B_6(
+    pub fn position_tick_lower_2_F_77_C_C_E_1(
         &self,
         pool: Address,
         id: U256,
@@ -581,7 +581,11 @@ impl Pools {
         Ok(lower.sys())
     }
 
-    pub fn position_tick_upper_713_E_E_49_A(&self, pool: Address, id: U256) -> Result<i32, Revert> {
+    pub fn position_tick_upper_67_F_D_55_B_A(
+        &self,
+        pool: Address,
+        id: U256,
+    ) -> Result<i32, Revert> {
         let lower = self.pools.getter(pool).get_position_tick_upper(id);
         Ok(lower.sys())
     }

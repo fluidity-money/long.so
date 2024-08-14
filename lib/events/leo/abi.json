@@ -10,13 +10,7 @@
 				"internalType": "bytes8"
 			},
 			{
-				"name": "oldBal",
-				"type": "uint256",
-				"indexed": true,
-				"internalType": "uint256"
-			},
-			{
-				"name": "newBal",
+				"name": "newMaximum",
 				"type": "uint256",
 				"indexed": true,
 				"internalType": "uint256"
@@ -35,7 +29,7 @@
 				"internalType": "bytes8"
 			},
 			{
-				"name": "owner",
+				"name": "pool",
 				"type": "address",
 				"indexed": true,
 				"internalType": "address"
@@ -54,9 +48,9 @@
 			},
 			{
 				"name": "times",
-				"type": "uint128",
+				"type": "uint256",
 				"indexed": false,
-				"internalType": "uint128"
+				"internalType": "uint256"
 			}
 		],
 		"anonymous": false

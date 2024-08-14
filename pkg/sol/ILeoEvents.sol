@@ -12,6 +12,6 @@ interface ILeoEvents {
         address indexed pool,
         address indexed token,
         uint256 details, // [tick lower, tick upper, owner],
-        uint128 times // [starting, ending]
+        uint256 times // [starting, ending]
     );
 }

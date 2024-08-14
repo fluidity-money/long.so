@@ -192,11 +192,8 @@ export const AllPools = () => {
             <div className="flex flex-col">
               <div className="text-3xs md:text-2xs">Incentives</div>
               <div className="text-2xl md:text-3xl">
-                {!showIncentives
-                  ? "-"
-                  : showDemoData
-                    ? "200k"
-                    : 0 // sum the liquidity incentives of all pools
+                {
+                  !showIncentives ? "-" : showDemoData ? "200k" : 0 // sum the liquidity incentives of all pools
                 }
               </div>
             </div>
