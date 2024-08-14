@@ -1,4 +1,4 @@
-use stylus_sdk::alloy_primitives::{Address, U256};
+use stylus_sdk::alloy_primitives::U256;
 
 pub fn take_position(id: U256) -> Result<(), Vec<u8>> {
     Ok(())

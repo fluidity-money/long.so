@@ -176,18 +176,21 @@ impl Leo {
             .map(|&campaign_id| {
                 // We can assume the campaign exists due to the later
                 // check for 0 amounts sent, and the seconds being 0 if
-                // this is empty causing that.
+                // this is empty causing that. Mutable so we can bump the amount distributed
+                // for the campaign and error out if we've sent too much later.
                 let mut position = self.positions.setter(position_id);
                 let offset = position.offsets.setter(campaign_id).get();
-                let ongoing_campaigns = &self.campaigns.getter(pool).ongoing;
-                let campaign_versions = ongoing_campaigns.getter(campaign_id);
-                let mut campaign = campaign_versions.get(offset);
+                let ongoing_campaigns = &mut self.campaigns.setter(pool).ongoing;
+                let mut campaign_versions = ongoing_campaigns.setter(campaign_id);
+                let mut campaign = campaign_versions.setter(offset);
                 // Did we start our position after this campaign ended? If we have, we must
                 // bump the offset so we can be eligible for its next iteration.
+                // We can assume the campaign started because of the consistency
+                // in the campaign creation.
                 loop {
                     // We need to iterate through this to be sure.
                     if campaign.ending.get() < position.timestamp.get() {
-                        campaign = campaign_versions.get(offset + U256::from(1));
+                        campaign = campaign_versions.setter(offset + U256::from(1));
                         position
                             .offsets
                             .setter(campaign_id)
@@ -207,11 +210,19 @@ impl Leo {
                 // erc20 send. Then adjust the timestamp for the user for this
                 // campaign so they can't claim this again and receive the same rewards.
                 let global_liq = self.liquidity.getter(pool).get();
-                let rewards = maths::calc_rewards(
+                let base_rewards = maths::calc_base_rewards(
                     global_liq,
                     position.amount.get(),
                     campaign.per_second.get(),
                 );
+                let seconds_since = U64::from(block::timestamp()) - campaign.started.get();
+                let rewards = base_rewards * U256::from(seconds_since);
+                // Track what's sent, and do a last-minute sanity check to make sure we don't
+                // send more than we should.
+                let new_distributed = campaign.distributed.get() + rewards;
+                campaign.distributed.set(new_distributed);
+                assert!(campaign.pool_amount.get() > new_distributed);
+                // Now send the actual rewards, and return.
                 let token = campaign.token.get();
                 erc20::give(token, rewards).unwrap();
                 (token, rewards)
