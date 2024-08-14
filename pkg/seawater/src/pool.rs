@@ -529,6 +529,14 @@ impl StoragePool {
         self.positions.positions.getter(id).liquidity.get()
     }
 
+    pub fn get_position_tick_lower(&self, id: U256) -> I32 {
+        self.positions.positions.getter(id).tick_lower.get()
+    }
+
+    pub fn get_position_tick_upper(&self, id: U256) -> I32 {
+        self.positions.positions.getter(id).tick_upper.get()
+    }
+
     /// Gets the current pool price.
     pub fn get_sqrt_price(&self) -> U256 {
         self.sqrt_price.get()

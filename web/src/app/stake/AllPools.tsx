@@ -85,16 +85,6 @@ export const AllPoolsFragment = graphql(`
         }
       }
     }
-    liquidityIncentives {
-      supply {
-        token1 {
-          valueUsd
-        }
-        fusdc {
-          valueUsd
-        }
-      }
-    }
     positions {
       positions {
         lower
@@ -206,21 +196,8 @@ export const AllPools = () => {
                   ? "-"
                   : showDemoData
                     ? "200k"
-                    : // sum the liquidity incentives of all pools
-                      usdFormat(
-                        sum(
-                          poolsData?.map(
-                            (pool) =>
-                              sum(
-                                pool.liquidityIncentives.map((incentive) =>
-                                  parseFloat(incentive.supply.fusdc.valueUsd) +
-                                  parseFloat(incentive.supply.token1.valueUsd)
-                                )
-                              )
-                            )
-                          ),
-                        )
-                      }
+                    : 0 // sum the liquidity incentives of all pools
+                }
               </div>
             </div>
 

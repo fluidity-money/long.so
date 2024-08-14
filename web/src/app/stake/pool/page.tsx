@@ -49,10 +49,6 @@ const ManagePoolFragment = graphql(`
       name
       decimals
     }
-    liquidityIncentives {
-      suggestedApyFusdc
-      suggestedApyToken1
-    }
     earnedFeesAPRFUSDC
   }
 `);
@@ -268,7 +264,7 @@ export default function PoolPage() {
 
   const superIncentives = 0;
 
-  const liquidityIncentivesApy = 0;
+  const liquidityCampaignsApy = 0;
 
   return (
     <div className="flex w-full flex-col">
@@ -486,7 +482,7 @@ export default function PoolPage() {
                             {/* TODO: is the liquidity incentives value a percentage? data is not a range */}
                             {showMockData
                               ? 15
-                              : liquidityIncentivesApy}
+                              : 0}
                             % ~{" "}
                             {showMockData
                               ? 25

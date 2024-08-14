@@ -74,14 +74,16 @@ type ComplexityRoot struct {
 		Data func(childComplexity int) int
 	}
 
-	LiquidityIncentives struct {
-		Distribution       func(childComplexity int) int
-		EndTimestamp       func(childComplexity int) int
-		FromTimestamp      func(childComplexity int) int
-		Pool               func(childComplexity int) int
-		SuggestedApyFusdc  func(childComplexity int) int
-		SuggestedApyToken1 func(childComplexity int) int
-		Supply             func(childComplexity int) int
+	LiquidityCampaign struct {
+		CampaignID    func(childComplexity int) int
+		EndTimestamp  func(childComplexity int) int
+		FromTimestamp func(childComplexity int) int
+		MaximumAmount func(childComplexity int) int
+		Owner         func(childComplexity int) int
+		PerSecond     func(childComplexity int) int
+		Pool          func(childComplexity int) int
+		TickLower     func(childComplexity int) int
+		TickUpper     func(childComplexity int) int
 	}
 
 	LiquidityOverTime struct {
@@ -137,12 +139,13 @@ type ComplexityRoot struct {
 		EarnedFeesAprfusdc  func(childComplexity int) int
 		ID                  func(childComplexity int) int
 		Liquidity           func(childComplexity int) int
-		LiquidityIncentives func(childComplexity int) int
+		LiquidityCampaigns  func(childComplexity int) int
 		LiquidityOverTime   func(childComplexity int) int
 		Positions           func(childComplexity int, first *int, after *int) int
 		PositionsForUser    func(childComplexity int, wallet string, first *int, after *int) int
 		Price               func(childComplexity int) int
 		PriceOverTime       func(childComplexity int) int
+		Served              func(childComplexity int) int
 		Swaps               func(childComplexity int, first *int, after *int) int
 		TickSpacing         func(childComplexity int) int
 		Token               func(childComplexity int) int
@@ -271,7 +274,7 @@ type SeawaterPoolResolver interface {
 	YieldOverTime(ctx context.Context, obj *seawater.Pool) (model.YieldOverTime, error)
 	EarnedFeesAprfusdc(ctx context.Context, obj *seawater.Pool) ([]string, error)
 	EarnedFeesAPRToken1(ctx context.Context, obj *seawater.Pool) ([]string, error)
-	LiquidityIncentives(ctx context.Context, obj *seawater.Pool) ([]model.LiquidityIncentives, error)
+	LiquidityCampaigns(ctx context.Context, obj *seawater.Pool) ([]model.LiquidityCampaign, error)
 	Positions(ctx context.Context, obj *seawater.Pool, first *int, after *int) (model.SeawaterPositionsGlobal, error)
 	PositionsForUser(ctx context.Context, obj *seawater.Pool, wallet string, first *int, after *int) (model.SeawaterPositionsUser, error)
 	Liquidity(ctx context.Context, obj *seawater.Pool) ([]model.SeawaterLiquidity, error)
@@ -404,54 +407,68 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.GetSwapsForUser.Data(childComplexity), true
 
-	case "LiquidityIncentives.distribution":
-		if e.complexity.LiquidityIncentives.Distribution == nil {
+	case "LiquidityCampaign.campaignId":
+		if e.complexity.LiquidityCampaign.CampaignID == nil {
 			break
 		}
 
-		return e.complexity.LiquidityIncentives.Distribution(childComplexity), true
+		return e.complexity.LiquidityCampaign.CampaignID(childComplexity), true
 
-	case "LiquidityIncentives.endTimestamp":
-		if e.complexity.LiquidityIncentives.EndTimestamp == nil {
+	case "LiquidityCampaign.endTimestamp":
+		if e.complexity.LiquidityCampaign.EndTimestamp == nil {
 			break
 		}
 
-		return e.complexity.LiquidityIncentives.EndTimestamp(childComplexity), true
+		return e.complexity.LiquidityCampaign.EndTimestamp(childComplexity), true
 
-	case "LiquidityIncentives.fromTimestamp":
-		if e.complexity.LiquidityIncentives.FromTimestamp == nil {
+	case "LiquidityCampaign.fromTimestamp":
+		if e.complexity.LiquidityCampaign.FromTimestamp == nil {
 			break
 		}
 
-		return e.complexity.LiquidityIncentives.FromTimestamp(childComplexity), true
+		return e.complexity.LiquidityCampaign.FromTimestamp(childComplexity), true
 
-	case "LiquidityIncentives.pool":
-		if e.complexity.LiquidityIncentives.Pool == nil {
+	case "LiquidityCampaign.maximumAmount":
+		if e.complexity.LiquidityCampaign.MaximumAmount == nil {
 			break
 		}
 
-		return e.complexity.LiquidityIncentives.Pool(childComplexity), true
+		return e.complexity.LiquidityCampaign.MaximumAmount(childComplexity), true
 
-	case "LiquidityIncentives.suggestedApyFusdc":
-		if e.complexity.LiquidityIncentives.SuggestedApyFusdc == nil {
+	case "LiquidityCampaign.owner":
+		if e.complexity.LiquidityCampaign.Owner == nil {
 			break
 		}
 
-		return e.complexity.LiquidityIncentives.SuggestedApyFusdc(childComplexity), true
+		return e.complexity.LiquidityCampaign.Owner(childComplexity), true
 
-	case "LiquidityIncentives.suggestedApyToken1":
-		if e.complexity.LiquidityIncentives.SuggestedApyToken1 == nil {
+	case "LiquidityCampaign.perSecond":
+		if e.complexity.LiquidityCampaign.PerSecond == nil {
 			break
 		}
 
-		return e.complexity.LiquidityIncentives.SuggestedApyToken1(childComplexity), true
+		return e.complexity.LiquidityCampaign.PerSecond(childComplexity), true
 
-	case "LiquidityIncentives.supply":
-		if e.complexity.LiquidityIncentives.Supply == nil {
+	case "LiquidityCampaign.pool":
+		if e.complexity.LiquidityCampaign.Pool == nil {
 			break
 		}
 
-		return e.complexity.LiquidityIncentives.Supply(childComplexity), true
+		return e.complexity.LiquidityCampaign.Pool(childComplexity), true
+
+	case "LiquidityCampaign.tickLower":
+		if e.complexity.LiquidityCampaign.TickLower == nil {
+			break
+		}
+
+		return e.complexity.LiquidityCampaign.TickLower(childComplexity), true
+
+	case "LiquidityCampaign.tickUpper":
+		if e.complexity.LiquidityCampaign.TickUpper == nil {
+			break
+		}
+
+		return e.complexity.LiquidityCampaign.TickUpper(childComplexity), true
 
 	case "LiquidityOverTime.daily":
 		if e.complexity.LiquidityOverTime.Daily == nil {
@@ -731,12 +748,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SeawaterPool.Liquidity(childComplexity), true
 
-	case "SeawaterPool.liquidityIncentives":
-		if e.complexity.SeawaterPool.LiquidityIncentives == nil {
+	case "SeawaterPool.liquidityCampaigns":
+		if e.complexity.SeawaterPool.LiquidityCampaigns == nil {
 			break
 		}
 
-		return e.complexity.SeawaterPool.LiquidityIncentives(childComplexity), true
+		return e.complexity.SeawaterPool.LiquidityCampaigns(childComplexity), true
 
 	case "SeawaterPool.liquidityOverTime":
 		if e.complexity.SeawaterPool.LiquidityOverTime == nil {
@@ -782,6 +799,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SeawaterPool.PriceOverTime(childComplexity), true
+
+	case "SeawaterPool.served":
+		if e.complexity.SeawaterPool.Served == nil {
+			break
+		}
+
+		return e.complexity.SeawaterPool.Served(childComplexity), true
 
 	case "SeawaterPool.swaps":
 		if e.complexity.SeawaterPool.Swaps == nil {
@@ -1454,9 +1478,9 @@ type SeawaterPool {
   earnedFeesAPRToken1: [String!]!
 
   """
-  Liquidity incentives currently available for this pool.
+  Liquidity campaigns currently available for this pool.
   """
-  liquidityIncentives: [LiquidityIncentives!]!
+  liquidityCampaigns: [LiquidityCampaign!]!
 
   """
   Positions available in this pool. Cached aggressively.
@@ -1965,14 +1989,39 @@ type Token {
 }
 
 """
-Liquidity incentives available in this pool that's distributed partly on-chain with
-snapshotting done off-chain.
+Liquidity campaigns available in this pool that's distributed on-chain.
 """
-type LiquidityIncentives {
+type LiquidityCampaign {
   """
-  Pool that these rewards are enabled for.
+  Campaign ID to identify the campaign with a contract call.
   """
-  pool: SeawaterPool!
+  campaignId: String!
+
+  """
+  Owner of the incentive campaign, they can pause, cancel, and update the campaigns.
+  """
+  owner: SeawaterPositionsUser!
+
+  """
+  Lower tick that this position incentivises.
+  """
+  tickLower: Int!
+
+  """
+  Upper tick that this position incentivises.
+  """
+  tickUpper: Int!
+
+  """
+  Amount of token that's released per second.
+  """
+  perSecond: Amount!
+
+  """
+  Maximum amount of the token that can be distributed over all time. The token that's sent
+  is contained within.
+  """
+  maximumAmount: Amount!
 
   """
   Timestamp that begins this liquidity mining campaign.
@@ -1985,26 +2034,9 @@ type LiquidityIncentives {
   endTimestamp: Int!
 
   """
-  Maximum supply to be distributed of the rewards.
+  Pool that these rewards are enabled for.
   """
-  supply: PairAmount!
-
-  """
-  Distribution amount released per day.
-  """
-  distribution: PairAmount!
-
-  """
-  Suggested APY percent for fUSDC based on the LP tokens locked in the pool, combined with
-  the emissions schedule.
-  """
-  suggestedApyFusdc: String!
-
-  """
-  Suggested APY percent for token 1 based on the LP tokens locked in the pool, combined
-  with the emissions schedule.
-  """
-  suggestedApyToken1: String!
+  pool: SeawaterPool!
 }
 `, BuiltIn: false},
 }
@@ -2793,8 +2825,398 @@ func (ec *executionContext) fieldContext_GetSwapsForUser_data(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _LiquidityIncentives_pool(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityIncentives) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LiquidityIncentives_pool(ctx, field)
+func (ec *executionContext) _LiquidityCampaign_campaignId(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityCampaign) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LiquidityCampaign_campaignId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CampaignID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LiquidityCampaign_campaignId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LiquidityCampaign",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LiquidityCampaign_owner(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityCampaign) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LiquidityCampaign_owner(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Owner, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.SeawaterPositionsUser)
+	fc.Result = res
+	return ec.marshalNSeawaterPositionsUser2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐSeawaterPositionsUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LiquidityCampaign_owner(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LiquidityCampaign",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_SeawaterPositionsUser_id(ctx, field)
+			case "positions":
+				return ec.fieldContext_SeawaterPositionsUser_positions(ctx, field)
+			case "sum":
+				return ec.fieldContext_SeawaterPositionsUser_sum(ctx, field)
+			case "next":
+				return ec.fieldContext_SeawaterPositionsUser_next(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SeawaterPositionsUser", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LiquidityCampaign_tickLower(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityCampaign) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LiquidityCampaign_tickLower(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TickLower, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LiquidityCampaign_tickLower(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LiquidityCampaign",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LiquidityCampaign_tickUpper(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityCampaign) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LiquidityCampaign_tickUpper(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TickUpper, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LiquidityCampaign_tickUpper(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LiquidityCampaign",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LiquidityCampaign_perSecond(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityCampaign) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LiquidityCampaign_perSecond(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PerSecond, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.Amount)
+	fc.Result = res
+	return ec.marshalNAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐAmount(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LiquidityCampaign_perSecond(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LiquidityCampaign",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "token":
+				return ec.fieldContext_Amount_token(ctx, field)
+			case "decimals":
+				return ec.fieldContext_Amount_decimals(ctx, field)
+			case "timestamp":
+				return ec.fieldContext_Amount_timestamp(ctx, field)
+			case "valueUnscaled":
+				return ec.fieldContext_Amount_valueUnscaled(ctx, field)
+			case "valueScaled":
+				return ec.fieldContext_Amount_valueScaled(ctx, field)
+			case "valueUsd":
+				return ec.fieldContext_Amount_valueUsd(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Amount", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LiquidityCampaign_maximumAmount(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityCampaign) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LiquidityCampaign_maximumAmount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MaximumAmount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.Amount)
+	fc.Result = res
+	return ec.marshalNAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐAmount(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LiquidityCampaign_maximumAmount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LiquidityCampaign",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "token":
+				return ec.fieldContext_Amount_token(ctx, field)
+			case "decimals":
+				return ec.fieldContext_Amount_decimals(ctx, field)
+			case "timestamp":
+				return ec.fieldContext_Amount_timestamp(ctx, field)
+			case "valueUnscaled":
+				return ec.fieldContext_Amount_valueUnscaled(ctx, field)
+			case "valueScaled":
+				return ec.fieldContext_Amount_valueScaled(ctx, field)
+			case "valueUsd":
+				return ec.fieldContext_Amount_valueUsd(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Amount", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LiquidityCampaign_fromTimestamp(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityCampaign) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LiquidityCampaign_fromTimestamp(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FromTimestamp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LiquidityCampaign_fromTimestamp(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LiquidityCampaign",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LiquidityCampaign_endTimestamp(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityCampaign) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LiquidityCampaign_endTimestamp(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EndTimestamp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LiquidityCampaign_endTimestamp(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LiquidityCampaign",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LiquidityCampaign_pool(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityCampaign) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LiquidityCampaign_pool(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2824,9 +3246,9 @@ func (ec *executionContext) _LiquidityIncentives_pool(ctx context.Context, field
 	return ec.marshalNSeawaterPool2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋlibᚋtypesᚋseawaterᚐPool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_LiquidityIncentives_pool(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_LiquidityCampaign_pool(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "LiquidityIncentives",
+		Object:     "LiquidityCampaign",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -2858,8 +3280,8 @@ func (ec *executionContext) fieldContext_LiquidityIncentives_pool(_ context.Cont
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRFUSDC(ctx, field)
 			case "earnedFeesAPRToken1":
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
-			case "liquidityIncentives":
-				return ec.fieldContext_SeawaterPool_liquidityIncentives(ctx, field)
+			case "liquidityCampaigns":
+				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
 				return ec.fieldContext_SeawaterPool_positions(ctx, field)
 			case "positionsForUser":
@@ -2874,286 +3296,6 @@ func (ec *executionContext) fieldContext_LiquidityIncentives_pool(_ context.Cont
 				return ec.fieldContext_SeawaterPool_config(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SeawaterPool", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LiquidityIncentives_fromTimestamp(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityIncentives) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LiquidityIncentives_fromTimestamp(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.FromTimestamp, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LiquidityIncentives_fromTimestamp(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LiquidityIncentives",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LiquidityIncentives_endTimestamp(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityIncentives) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LiquidityIncentives_endTimestamp(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.EndTimestamp, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LiquidityIncentives_endTimestamp(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LiquidityIncentives",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LiquidityIncentives_supply(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityIncentives) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LiquidityIncentives_supply(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Supply, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.PairAmount)
-	fc.Result = res
-	return ec.marshalNPairAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmount(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LiquidityIncentives_supply(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LiquidityIncentives",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "timestamp":
-				return ec.fieldContext_PairAmount_timestamp(ctx, field)
-			case "fusdc":
-				return ec.fieldContext_PairAmount_fusdc(ctx, field)
-			case "token1":
-				return ec.fieldContext_PairAmount_token1(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PairAmount", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LiquidityIncentives_distribution(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityIncentives) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LiquidityIncentives_distribution(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Distribution, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.PairAmount)
-	fc.Result = res
-	return ec.marshalNPairAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmount(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LiquidityIncentives_distribution(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LiquidityIncentives",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "timestamp":
-				return ec.fieldContext_PairAmount_timestamp(ctx, field)
-			case "fusdc":
-				return ec.fieldContext_PairAmount_fusdc(ctx, field)
-			case "token1":
-				return ec.fieldContext_PairAmount_token1(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PairAmount", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LiquidityIncentives_suggestedApyFusdc(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityIncentives) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LiquidityIncentives_suggestedApyFusdc(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.SuggestedApyFusdc, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LiquidityIncentives_suggestedApyFusdc(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LiquidityIncentives",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LiquidityIncentives_suggestedApyToken1(ctx context.Context, field graphql.CollectedField, obj *model.LiquidityIncentives) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LiquidityIncentives_suggestedApyToken1(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.SuggestedApyToken1, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LiquidityIncentives_suggestedApyToken1(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LiquidityIncentives",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3684,8 +3826,8 @@ func (ec *executionContext) fieldContext_Query_pools(_ context.Context, field gr
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRFUSDC(ctx, field)
 			case "earnedFeesAPRToken1":
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
-			case "liquidityIncentives":
-				return ec.fieldContext_SeawaterPool_liquidityIncentives(ctx, field)
+			case "liquidityCampaigns":
+				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
 				return ec.fieldContext_SeawaterPool_positions(ctx, field)
 			case "positionsForUser":
@@ -3767,8 +3909,8 @@ func (ec *executionContext) fieldContext_Query_getPool(ctx context.Context, fiel
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRFUSDC(ctx, field)
 			case "earnedFeesAPRToken1":
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
-			case "liquidityIncentives":
-				return ec.fieldContext_SeawaterPool_liquidityIncentives(ctx, field)
+			case "liquidityCampaigns":
+				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
 				return ec.fieldContext_SeawaterPool_positions(ctx, field)
 			case "positionsForUser":
@@ -4484,8 +4626,8 @@ func (ec *executionContext) fieldContext_SeawaterConfig_pool(_ context.Context, 
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRFUSDC(ctx, field)
 			case "earnedFeesAPRToken1":
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
-			case "liquidityIncentives":
-				return ec.fieldContext_SeawaterPool_liquidityIncentives(ctx, field)
+			case "liquidityCampaigns":
+				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
 				return ec.fieldContext_SeawaterPool_positions(ctx, field)
 			case "positionsForUser":
@@ -5435,8 +5577,8 @@ func (ec *executionContext) fieldContext_SeawaterPool_earnedFeesAPRToken1(_ cont
 	return fc, nil
 }
 
-func (ec *executionContext) _SeawaterPool_liquidityIncentives(ctx context.Context, field graphql.CollectedField, obj *seawater.Pool) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SeawaterPool_liquidityIncentives(ctx, field)
+func (ec *executionContext) _SeawaterPool_liquidityCampaigns(ctx context.Context, field graphql.CollectedField, obj *seawater.Pool) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5449,7 +5591,7 @@ func (ec *executionContext) _SeawaterPool_liquidityIncentives(ctx context.Contex
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.SeawaterPool().LiquidityIncentives(rctx, obj)
+		return ec.resolvers.SeawaterPool().LiquidityCampaigns(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5461,12 +5603,12 @@ func (ec *executionContext) _SeawaterPool_liquidityIncentives(ctx context.Contex
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]model.LiquidityIncentives)
+	res := resTmp.([]model.LiquidityCampaign)
 	fc.Result = res
-	return ec.marshalNLiquidityIncentives2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐLiquidityIncentivesᚄ(ctx, field.Selections, res)
+	return ec.marshalNLiquidityCampaign2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐLiquidityCampaignᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_SeawaterPool_liquidityIncentives(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_SeawaterPool_liquidityCampaigns(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPool",
 		Field:      field,
@@ -5474,22 +5616,26 @@ func (ec *executionContext) fieldContext_SeawaterPool_liquidityIncentives(_ cont
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "pool":
-				return ec.fieldContext_LiquidityIncentives_pool(ctx, field)
+			case "campaignId":
+				return ec.fieldContext_LiquidityCampaign_campaignId(ctx, field)
+			case "owner":
+				return ec.fieldContext_LiquidityCampaign_owner(ctx, field)
+			case "tickLower":
+				return ec.fieldContext_LiquidityCampaign_tickLower(ctx, field)
+			case "tickUpper":
+				return ec.fieldContext_LiquidityCampaign_tickUpper(ctx, field)
+			case "perSecond":
+				return ec.fieldContext_LiquidityCampaign_perSecond(ctx, field)
+			case "maximumAmount":
+				return ec.fieldContext_LiquidityCampaign_maximumAmount(ctx, field)
 			case "fromTimestamp":
-				return ec.fieldContext_LiquidityIncentives_fromTimestamp(ctx, field)
+				return ec.fieldContext_LiquidityCampaign_fromTimestamp(ctx, field)
 			case "endTimestamp":
-				return ec.fieldContext_LiquidityIncentives_endTimestamp(ctx, field)
-			case "supply":
-				return ec.fieldContext_LiquidityIncentives_supply(ctx, field)
-			case "distribution":
-				return ec.fieldContext_LiquidityIncentives_distribution(ctx, field)
-			case "suggestedApyFusdc":
-				return ec.fieldContext_LiquidityIncentives_suggestedApyFusdc(ctx, field)
-			case "suggestedApyToken1":
-				return ec.fieldContext_LiquidityIncentives_suggestedApyToken1(ctx, field)
+				return ec.fieldContext_LiquidityCampaign_endTimestamp(ctx, field)
+			case "pool":
+				return ec.fieldContext_LiquidityCampaign_pool(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type LiquidityIncentives", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type LiquidityCampaign", field.Name)
 		},
 	}
 	return fc, nil
@@ -6149,8 +6295,8 @@ func (ec *executionContext) fieldContext_SeawaterPosition_pool(_ context.Context
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRFUSDC(ctx, field)
 			case "earnedFeesAPRToken1":
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
-			case "liquidityIncentives":
-				return ec.fieldContext_SeawaterPool_liquidityIncentives(ctx, field)
+			case "liquidityCampaigns":
+				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
 				return ec.fieldContext_SeawaterPool_positions(ctx, field)
 			case "positionsForUser":
@@ -6911,8 +7057,8 @@ func (ec *executionContext) fieldContext_SeawaterSwap_pool(_ context.Context, fi
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRFUSDC(ctx, field)
 			case "earnedFeesAPRToken1":
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
-			case "liquidityIncentives":
-				return ec.fieldContext_SeawaterPool_liquidityIncentives(ctx, field)
+			case "liquidityCampaigns":
+				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
 				return ec.fieldContext_SeawaterPool_positions(ctx, field)
 			case "positionsForUser":
@@ -10178,49 +10324,59 @@ func (ec *executionContext) _GetSwapsForUser(ctx context.Context, sel ast.Select
 	return out
 }
 
-var liquidityIncentivesImplementors = []string{"LiquidityIncentives"}
+var liquidityCampaignImplementors = []string{"LiquidityCampaign"}
 
-func (ec *executionContext) _LiquidityIncentives(ctx context.Context, sel ast.SelectionSet, obj *model.LiquidityIncentives) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, liquidityIncentivesImplementors)
+func (ec *executionContext) _LiquidityCampaign(ctx context.Context, sel ast.SelectionSet, obj *model.LiquidityCampaign) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, liquidityCampaignImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("LiquidityIncentives")
-		case "pool":
-			out.Values[i] = ec._LiquidityIncentives_pool(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("LiquidityCampaign")
+		case "campaignId":
+			out.Values[i] = ec._LiquidityCampaign_campaignId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "owner":
+			out.Values[i] = ec._LiquidityCampaign_owner(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "tickLower":
+			out.Values[i] = ec._LiquidityCampaign_tickLower(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "tickUpper":
+			out.Values[i] = ec._LiquidityCampaign_tickUpper(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "perSecond":
+			out.Values[i] = ec._LiquidityCampaign_perSecond(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "maximumAmount":
+			out.Values[i] = ec._LiquidityCampaign_maximumAmount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "fromTimestamp":
-			out.Values[i] = ec._LiquidityIncentives_fromTimestamp(ctx, field, obj)
+			out.Values[i] = ec._LiquidityCampaign_fromTimestamp(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "endTimestamp":
-			out.Values[i] = ec._LiquidityIncentives_endTimestamp(ctx, field, obj)
+			out.Values[i] = ec._LiquidityCampaign_endTimestamp(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "supply":
-			out.Values[i] = ec._LiquidityIncentives_supply(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "distribution":
-			out.Values[i] = ec._LiquidityIncentives_distribution(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "suggestedApyFusdc":
-			out.Values[i] = ec._LiquidityIncentives_suggestedApyFusdc(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "suggestedApyToken1":
-			out.Values[i] = ec._LiquidityIncentives_suggestedApyToken1(ctx, field, obj)
+		case "pool":
+			out.Values[i] = ec._LiquidityCampaign_pool(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -11383,7 +11539,7 @@ func (ec *executionContext) _SeawaterPool(ctx context.Context, sel ast.Selection
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "liquidityIncentives":
+		case "liquidityCampaigns":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -11392,7 +11548,7 @@ func (ec *executionContext) _SeawaterPool(ctx context.Context, sel ast.Selection
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._SeawaterPool_liquidityIncentives(ctx, field, obj)
+				res = ec._SeawaterPool_liquidityCampaigns(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -13631,11 +13787,11 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNLiquidityIncentives2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐLiquidityIncentives(ctx context.Context, sel ast.SelectionSet, v model.LiquidityIncentives) graphql.Marshaler {
-	return ec._LiquidityIncentives(ctx, sel, &v)
+func (ec *executionContext) marshalNLiquidityCampaign2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐLiquidityCampaign(ctx context.Context, sel ast.SelectionSet, v model.LiquidityCampaign) graphql.Marshaler {
+	return ec._LiquidityCampaign(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNLiquidityIncentives2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐLiquidityIncentivesᚄ(ctx context.Context, sel ast.SelectionSet, v []model.LiquidityIncentives) graphql.Marshaler {
+func (ec *executionContext) marshalNLiquidityCampaign2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐLiquidityCampaignᚄ(ctx context.Context, sel ast.SelectionSet, v []model.LiquidityCampaign) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -13659,7 +13815,7 @@ func (ec *executionContext) marshalNLiquidityIncentives2ᚕgithubᚗcomᚋfluidi
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNLiquidityIncentives2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐLiquidityIncentives(ctx, sel, v[i])
+			ret[i] = ec.marshalNLiquidityCampaign2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐLiquidityCampaign(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

@@ -136,10 +136,22 @@ interface ISeawaterExecutorPosition {
     function positionBalance4F32C7DB(address user) external returns (uint256);
 
     /// @notice gets the amount of liquidity in a position
-    /// @param pool the pool the position belongs to
+    /// @param pool the position belongs to
     /// @param id the id of the position
     /// @return the amount of liquidity contained in the position
     function positionLiquidity8D11C045(address pool, uint256 id) external returns (uint128);
+
+    /// @notice get the lower tick of the position id
+    /// @param pool the position belongs to
+    /// @param id of the position
+    /// @return the lower tick of the position given
+    function positionTickLower1FECE0B6(address pool, uint256 id) external returns (int32);
+
+    /// @notice get the upper tick of the position id
+    /// @param pool the position belongs to
+    /// @param id of the position
+    /// @return the lower tick of the position given
+    function positionTickUpper713EE49A(address pool, uint256 id) external returns (int32);
 
     /// @notice collect a single position's yield
     /// @param pool the position belongs to

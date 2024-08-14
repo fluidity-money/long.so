@@ -569,8 +569,21 @@ impl Pools {
     #[allow(non_snake_case)]
     pub fn position_liquidity_8_D11_C045(&self, pool: Address, id: U256) -> Result<u128, Revert> {
         let liquidity = self.pools.getter(pool).get_position_liquidity(id);
-
         Ok(liquidity.sys())
+    }
+
+    pub fn position_tick_lower_1_F_E_C_E_0_B_6(
+        &self,
+        pool: Address,
+        id: U256,
+    ) -> Result<i32, Revert> {
+        let lower = self.pools.getter(pool).get_position_tick_lower(id);
+        Ok(lower.sys())
+    }
+
+    pub fn position_tick_upper_713_E_E_49_A(&self, pool: Address, id: U256) -> Result<i32, Revert> {
+        let lower = self.pools.getter(pool).get_position_tick_upper(id);
+        Ok(lower.sys())
     }
 
     #[allow(non_snake_case)]

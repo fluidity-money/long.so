@@ -205,9 +205,9 @@ type SeawaterPool {
   earnedFeesAPRToken1: [String!]!
 
   """
-  Liquidity incentives currently available for this pool.
+  Liquidity campaigns currently available for this pool.
   """
-  liquidityIncentives: [LiquidityIncentives!]!
+  liquidityCampaigns: [LiquidityCampaign!]!
 
   """
   Positions available in this pool. Cached aggressively.
@@ -716,14 +716,39 @@ type Token {
 }
 
 """
-Liquidity incentives available in this pool that's distributed partly on-chain with
-snapshotting done off-chain.
+Liquidity campaigns available in this pool that's distributed on-chain.
 """
-type LiquidityIncentives {
+type LiquidityCampaign {
   """
-  Pool that these rewards are enabled for.
+  Campaign ID to identify the campaign with a contract call.
   """
-  pool: SeawaterPool!
+  campaignId: String!
+
+  """
+  Owner of the incentive campaign, they can pause, cancel, and update the campaigns.
+  """
+  owner: SeawaterPositionsUser!
+
+  """
+  Lower tick that this position incentivises.
+  """
+  tickLower: Int!
+
+  """
+  Upper tick that this position incentivises.
+  """
+  tickUpper: Int!
+
+  """
+  Amount of token that's released per second.
+  """
+  perSecond: Amount!
+
+  """
+  Maximum amount of the token that can be distributed over all time. The token that's sent
+  is contained within.
+  """
+  maximumAmount: Amount!
 
   """
   Timestamp that begins this liquidity mining campaign.
@@ -736,24 +761,7 @@ type LiquidityIncentives {
   endTimestamp: Int!
 
   """
-  Maximum supply to be distributed of the rewards.
+  Pool that these rewards are enabled for.
   """
-  supply: PairAmount!
-
-  """
-  Distribution amount released per day.
-  """
-  distribution: PairAmount!
-
-  """
-  Suggested APY percent for fUSDC based on the LP tokens locked in the pool, combined with
-  the emissions schedule.
-  """
-  suggestedApyFusdc: String!
-
-  """
-  Suggested APY percent for token 1 based on the LP tokens locked in the pool, combined
-  with the emissions schedule.
-  """
-  suggestedApyToken1: String!
+  pool: SeawaterPool!
 }

@@ -1,0 +1,64 @@
+[
+	{
+		"type": "event",
+		"name": "CampaignBalanceUpdated",
+		"inputs": [
+			{
+				"name": "identifier",
+				"type": "bytes8",
+				"indexed": true,
+				"internalType": "bytes8"
+			},
+			{
+				"name": "oldBal",
+				"type": "uint256",
+				"indexed": true,
+				"internalType": "uint256"
+			},
+			{
+				"name": "newBal",
+				"type": "uint256",
+				"indexed": true,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "CampaignCreated",
+		"inputs": [
+			{
+				"name": "identifier",
+				"type": "bytes8",
+				"indexed": true,
+				"internalType": "bytes8"
+			},
+			{
+				"name": "owner",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "token",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "details",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "times",
+				"type": "uint128",
+				"indexed": false,
+				"internalType": "uint128"
+			}
+		],
+		"anonymous": false
+	}
+]

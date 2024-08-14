@@ -827,12 +827,9 @@ func (r *seawaterPoolResolver) EarnedFeesAPRToken1(ctx context.Context, obj *sea
 	return nil, nil // TODO
 }
 
-// LiquidityIncentives is the resolver for the liquidityIncentives field.
-func (r *seawaterPoolResolver) LiquidityIncentives(ctx context.Context, obj *seawater.Pool) (amount []model.LiquidityIncentives, err error) {
-	if obj == nil {
-		return amount, fmt.Errorf("empty pool")
-	}
-	return []model.LiquidityIncentives{}, nil
+// LiquidityCampaigns is the resolver for the liquidityCampaigns field.
+func (r *seawaterPoolResolver) LiquidityCampaigns(ctx context.Context, obj *seawater.Pool) ([]model.LiquidityCampaign, error) {
+	panic(fmt.Errorf("not implemented: LiquidityCampaigns - liquidityCampaigns"))
 }
 
 // Positions is the resolver for the positions field.

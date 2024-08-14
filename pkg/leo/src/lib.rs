@@ -3,15 +3,17 @@
 
 use stylus_sdk::{
     alloy_primitives::{aliases::*, *},
-    block, msg,
+    block, evm, msg,
     prelude::*,
     storage::*,
 };
 
 pub mod erc20;
+pub mod events;
 pub mod longtail;
 pub mod maths;
 pub mod nft_manager;
+pub mod utils;
 
 extern crate alloc;
 #[cfg(target_arch = "wasm32")]
@@ -26,10 +28,15 @@ mod allocator {
 #[solidity_storage]
 #[entrypoint]
 pub struct Leo {
+    enabled: StorageBool,
+
     emergency_council: StorageAddress,
 
     // pool => campaign id => campaign[]
     campaigns: StorageMap<Address, StorageCampaigns>,
+
+    // campaign id => campaign balance
+    campaign_balances: StorageMap<B8, StorageCampaignBal>,
 
     // position id => position
     positions: StorageMap<U256, StoragePosition>,
@@ -46,6 +53,18 @@ pub struct StorageCampaigns {
 }
 
 #[solidity_storage]
+pub struct StorageCampaignBal {
+    // Owner of the campaign balance so we don't have any abuse.
+    owner: StorageAddress,
+
+    // Amount that can be distributed.
+    maximum: StorageU256,
+
+    // Amount that was already distributed.
+    distributed: StorageU256,
+}
+
+#[solidity_storage]
 pub struct StorageCampaign {
     // The lower tick that the position should be LP'd in for them to be eligible.
     tick_lower: StorageI32,
@@ -59,14 +78,8 @@ pub struct StorageCampaign {
     // Token to distribute with this campaign.
     token: StorageAddress,
 
-    // Maximum amount of the asset to distribute.
-    pool_amount: StorageU256,
-
-    // Distributed amount.
-    distributed: StorageU256,
-
-    // The timestamp of when this campaign started.
-    started: StorageU64,
+    // The timestamp of when this campaign is starting.
+    starting: StorageU64,
 
     // The timestamp of when this campaign ended. May be modified
     // if updates are made to the existing campaign.
@@ -84,7 +97,7 @@ pub struct StoragePosition {
     tick_lower: StorageI32,
     tick_upper: StorageI32,
 
-    amount: StorageU256,
+    liquidity: StorageU256,
 
     // Indexes of the position of the current status per campaign that's updated
     offsets: StorageMap<B8, StorageU256>,
@@ -98,16 +111,20 @@ impl Leo {
     pub fn vest_position(&mut self, pool: Address, id: U256) -> Result<(), Vec<u8>> {
         // Just to be safe, check if we already have this position tracked.
         assert!(self.positions.get(id).timestamp.get().is_zero());
+
         nft_manager::take_position(id)?;
+
+        // Start to set everything related to the position.
         let mut position = self.positions.setter(id);
         position.owner.set(msg::sender());
         position.timestamp.set(U64::from(block::timestamp()));
         position.token.set(pool);
         position.tick_lower.set(longtail::tick_lower(pool, id)?);
         position.tick_upper.set(longtail::tick_upper(pool, id)?);
+
         // Also increase the global count for LP available for this pool.
         let position_liq = longtail::position_liquidity(pool, id)?;
-        position.amount.set(position_liq);
+        position.liquidity.set(position_liq);
         let existing_liq = self.liquidity.getter(pool).get();
         self.liquidity
             .setter(pool)
@@ -126,7 +143,7 @@ impl Leo {
         tick_upper: i32,
         per_second: U256,
         token: Address,
-        maximum: U256,
+        extra_max: U256,
         starting: u64,
         ending: u64,
     ) -> Result<(), Vec<u8>> {
@@ -134,16 +151,51 @@ impl Leo {
         let mut pool_campaigns = self.campaigns.setter(pool);
         let mut pool_campaigns_ongoing = pool_campaigns.ongoing.setter(identifier);
         let mut campaign = pool_campaigns_ongoing.setter(U256::ZERO);
+
         // Make sure this campaign doesn't exist already.
         assert!(campaign.per_second.is_zero());
+
+        // Make sure the sender owns the campaign balance.
+        let campaign_bal_owner = self.campaign_balances.getter(identifier).owner.get();
+        assert!(campaign_bal_owner == Address::ZERO); // Or if it didn't exist already.
+        assert!(campaign_bal_owner == msg::sender());
+
+        // Set everything related to the pool.
         campaign.tick_lower.set(I32::try_from(tick_lower).unwrap());
         campaign.tick_upper.set(I32::try_from(tick_upper).unwrap());
         campaign.token.set(token);
-        campaign.pool_amount.set(maximum);
-        campaign.started.set(U64::try_from(starting).unwrap());
+        campaign.starting.set(U64::try_from(starting).unwrap());
         campaign.ending.set(U64::try_from(ending).unwrap());
-        // Take the token's amounts for the campaign.
-        erc20::take(pool, maximum)
+
+        let mut campaign_bal = self.campaign_balances.setter(identifier);
+        campaign_bal.owner.set(msg::sender());
+
+        if !extra_max.is_zero() {
+            let existing_maximum = campaign_bal.maximum.get();
+            let new_maximum = existing_maximum + extra_max;
+            campaign_bal.maximum.set(new_maximum);
+
+            // Take the token's amounts for the campaign.
+            erc20::take(pool, new_maximum)?;
+
+            evm::log(events::CampaignBalanceUpdated {
+                identifier: identifier.as_slice().try_into().unwrap(),
+                newMaximum: new_maximum,
+            });
+        }
+
+        // Pack the words for CampaignCreated, and then emit that event.
+        utils::emit_campaign_created(
+            identifier,
+            pool,
+            msg::sender(),
+            token,
+            extra_max,
+            starting,
+            ending,
+        );
+
+        Ok(())
     }
 
     // Collect the token rewards paid by Seawater for LP'ing in this
@@ -183,6 +235,7 @@ impl Leo {
                 let ongoing_campaigns = &mut self.campaigns.setter(pool).ongoing;
                 let mut campaign_versions = ongoing_campaigns.setter(campaign_id);
                 let mut campaign = campaign_versions.setter(offset);
+
                 // Did we start our position after this campaign ended? If we have, we must
                 // bump the offset so we can be eligible for its next iteration.
                 // We can assume the campaign started because of the consistency
@@ -199,32 +252,39 @@ impl Leo {
                         break;
                     }
                 }
+
                 // Does the campaign apply to the token that this position is for?
                 assert!(campaign.token.get() == position.token.get());
+
                 // If the campaign is non-existent, then the amount per second should be 0,
                 // so we will earn 0 with the math.
                 // Are we in the valid tick range?
                 assert!(campaign.tick_lower.get() < position.tick_lower.get());
                 assert!(campaign.tick_upper.get() > position.tick_upper.get());
+
                 // Looks like we're eligible! Calculate the rewards the user is owed, then use a
                 // erc20 send. Then adjust the timestamp for the user for this
                 // campaign so they can't claim this again and receive the same rewards.
                 let global_liq = self.liquidity.getter(pool).get();
                 let base_rewards = maths::calc_base_rewards(
                     global_liq,
-                    position.amount.get(),
+                    position.liquidity.get(),
                     campaign.per_second.get(),
                 );
                 let timestamp = U64::from(block::timestamp());
-                let seconds_since = timestamp - campaign.started.get();
+                let seconds_since = timestamp - campaign.starting.get();
                 let rewards = base_rewards * U256::from(seconds_since);
+
                 // Track what's sent, and do a last-minute sanity check to make sure we don't
                 // send more than we should.
-                let new_distributed = campaign.distributed.get() + rewards;
-                campaign.distributed.set(new_distributed);
-                assert!(campaign.pool_amount.get() > new_distributed);
+                let mut campaign_bal = self.campaign_balances.setter(campaign_id);
+                let new_distributed = campaign_bal.distributed.get() + rewards;
+                campaign_bal.distributed.set(new_distributed);
+                assert!(campaign_bal.maximum.get() > new_distributed);
+
                 // Update the position's creation time so we don't double up on their rewards.
                 position.timestamp.set(timestamp);
+
                 // Now send the actual rewards, and return.
                 let token = campaign.token.get();
                 erc20::give(token, rewards).unwrap();
@@ -235,10 +295,14 @@ impl Leo {
 
     // Divest LP positions from this contract, sending them back to the
     // original owner.
-    pub fn divest_positions(&mut self, position_ids: Vec<U256>) -> Result<(), Vec<u8>> {
-        for id in position_ids {
+    pub fn divest_positions(&mut self, position_ids: Vec<(Address, U256)>) -> Result<(), Vec<u8>> {
+        for (pool, id) in position_ids {
             // Check if the user owns this position.
             assert!(self.positions.getter(id).owner.get() == msg::sender());
+            let existing_liq = self.liquidity.getter(pool).get();
+            self.liquidity
+                .setter(pool)
+                .set(existing_liq - self.positions.getter(id).liquidity.get());
             nft_manager::give_position(id).unwrap();
         }
         Ok(())

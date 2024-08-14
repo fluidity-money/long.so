@@ -16,25 +16,27 @@ type GetSwapsForUser struct {
 	Data SeawaterSwaps `json:"data"`
 }
 
-// Liquidity incentives available in this pool that's distributed partly on-chain with
-// snapshotting done off-chain.
-type LiquidityIncentives struct {
-	// Pool that these rewards are enabled for.
-	Pool seawater.Pool `json:"pool"`
+// Liquidity campaigns available in this pool that's distributed on-chain.
+type LiquidityCampaign struct {
+	// Campaign ID to identify the campaign with a contract call.
+	CampaignID string `json:"campaignId"`
+	// Owner of the incentive campaign, they can pause, cancel, and update the campaigns.
+	Owner SeawaterPositionsUser `json:"owner"`
+	// Lower tick that this position incentivises.
+	TickLower int `json:"tickLower"`
+	// Upper tick that this position incentivises.
+	TickUpper int `json:"tickUpper"`
+	// Amount of token that's released per second.
+	PerSecond Amount `json:"perSecond"`
+	// Maximum amount of the token that can be distributed over all time. The token that's sent
+	// is contained within.
+	MaximumAmount Amount `json:"maximumAmount"`
 	// Timestamp that begins this liquidity mining campaign.
 	FromTimestamp int `json:"fromTimestamp"`
 	// Timestamp that ends this liquidity mining campaign.
 	EndTimestamp int `json:"endTimestamp"`
-	// Maximum supply to be distributed of the rewards.
-	Supply PairAmount `json:"supply"`
-	// Distribution amount released per day.
-	Distribution PairAmount `json:"distribution"`
-	// Suggested APY percent for fUSDC based on the LP tokens locked in the pool, combined with
-	// the emissions schedule.
-	SuggestedApyFusdc string `json:"suggestedApyFusdc"`
-	// Suggested APY percent for token 1 based on the LP tokens locked in the pool, combined
-	// with the emissions schedule.
-	SuggestedApyToken1 string `json:"suggestedApyToken1"`
+	// Pool that these rewards are enabled for.
+	Pool seawater.Pool `json:"pool"`
 }
 
 // Liquidity over time available in the pool, in the form of PairAmount, so it's possible to
