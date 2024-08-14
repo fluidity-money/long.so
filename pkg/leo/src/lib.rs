@@ -215,13 +215,16 @@ impl Leo {
                     position.amount.get(),
                     campaign.per_second.get(),
                 );
-                let seconds_since = U64::from(block::timestamp()) - campaign.started.get();
+                let timestamp = U64::from(block::timestamp());
+                let seconds_since = timestamp - campaign.started.get();
                 let rewards = base_rewards * U256::from(seconds_since);
                 // Track what's sent, and do a last-minute sanity check to make sure we don't
                 // send more than we should.
                 let new_distributed = campaign.distributed.get() + rewards;
                 campaign.distributed.set(new_distributed);
                 assert!(campaign.pool_amount.get() > new_distributed);
+                // Update the position's creation time so we don't double up on their rewards.
+                position.timestamp.set(timestamp);
                 // Now send the actual rewards, and return.
                 let token = campaign.token.get();
                 erc20::give(token, rewards).unwrap();

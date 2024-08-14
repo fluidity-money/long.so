@@ -1,7 +1,7 @@
 use stylus_sdk::alloy_primitives::U256;
 
 /// Returns `a * b / c` and if the result had carry. Copied from Seawater.
-pub fn _mul_div(a: U256, b: U256, mut denom_and_rem: U256) -> (U256, bool) {
+pub fn _mul_div(a: U256, b: U256, mut denom_and_rem: U256) -> U256 {
     assert!(!denom_and_rem.is_zero());
 
     let mut mul_and_quo = a.widening_mul::<256, 4, 512, 8>(b);
@@ -15,9 +15,9 @@ pub fn _mul_div(a: U256, b: U256, mut denom_and_rem: U256) -> (U256, bool) {
 
     let has_carry = denom_and_rem != U256::ZERO;
 
-    (U256::from_limbs_slice(&limbs[0..4]), has_carry)
+    U256::from_limbs_slice(&limbs[0..4])
 }
 
 pub fn calc_base_rewards(pool_lp: U256, our_lp: U256, rewards_per_sec: U256) -> U256 {
-    _mul_div(pool_lp, our_lp, rewards_per_sec).0
+    _mul_div(pool_lp, our_lp, rewards_per_sec)
 }
