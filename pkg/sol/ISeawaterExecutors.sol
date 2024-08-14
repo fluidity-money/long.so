@@ -141,6 +141,17 @@ interface ISeawaterExecutorPosition {
     /// @return the amount of liquidity contained in the position
     function positionLiquidity8D11C045(address pool, uint256 id) external returns (uint128);
 
+    /// @notice collect a single position's yield
+    /// @param pool the position belongs to
+    /// @param id of the position to use
+    /// @param recipient of the money that's earned
+    /// @return amount0 and amount1
+    function collectSingleTo720C50FF(
+        address pool,
+        uint256 id,
+        address recipient
+    ) external returns (uint128 amount0, uint128 amount1);
+
     /// @notice collects fees from from positions
     /// @param pools to claim accumulated yield from
     /// @param ids to claim the positions of
@@ -230,11 +241,13 @@ interface ISeawaterExecutorAdminExposed {
     /// @param pool the pool to collect fees for
     /// @param amount0 the maximum amount of token0 fees to collect
     /// @param amount1 the maximum amount of token1 fees to collect
+    /// @param recipient of the funds that're earned
     /// @return the amount of token0 and token1 fees collected
-    function collectProtocolE4E70DA4(
+    function collectProtocol7540FA9F(
         address pool,
         uint128 amount0,
-        uint128 amount1
+        uint128 amount1,
+        address recipient
     ) external returns (uint128, uint128);
 
     /// @notice feesOwed to a position ID given.

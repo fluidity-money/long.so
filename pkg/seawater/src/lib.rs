@@ -162,7 +162,7 @@ impl Pools {
         };
 
         erc20::take(take_token, take_amount.abs_pos()?, permit2)?;
-        erc20::give(give_token, give_amount.abs_neg()?)?;
+        erc20::transfer_to_sender(give_token, give_amount.abs_neg()?)?;
 
         let amount_0_abs = amount_0
             .checked_abs()
@@ -261,7 +261,7 @@ impl Pools {
 
         // transfer tokens
         erc20::take(from, original_amount, permit2)?;
-        erc20::give(to, amount_out)?;
+        erc20::transfer_to_sender(to, amount_out)?;
 
         evm::log(events::Swap2 {
             user: msg::sender(),
@@ -334,7 +334,7 @@ impl Pools {
                     false => (pool, amount_0),
                 };
 
-                erc20::give(give_token, give_amount.abs_neg()?)?;
+                erc20::transfer_to_sender(give_token, give_amount.abs_neg()?)?;
 
                 // we always want the token that was taken from the pool, so it's always negative
                 let quote_amount = if zero_for_one { -amount_1 } else { -amount_0 };
@@ -362,7 +362,7 @@ impl Pools {
 
         match swapped {
             Ok((_, _, amount_out, _, _, _)) => {
-                erc20::give(to, amount_out)?;
+                erc20::transfer_to_sender(to, amount_out)?;
                 let revert = erc20::revert_from_msg(&amount_out.to_string());
                 Err(revert)
             }
@@ -573,6 +573,36 @@ impl Pools {
         Ok(liquidity.sys())
     }
 
+    #[allow(non_snake_case)]
+    pub fn collect_single_to_720_C_50_F_F(
+        &mut self,
+        pool: Address,
+        id: U256,
+        recipient: Address,
+    ) -> Result<(u128, u128), Revert> {
+        assert_eq_or!(
+            msg::sender(),
+            self.position_owners.get(id),
+            Error::PositionOwnerOnly
+        );
+
+        let res = self.pools.setter(pool).collect(id)?;
+        let (token_0, token_1) = res;
+
+        evm::log(events::CollectFees {
+            id,
+            pool,
+            to: msg::sender(),
+            amount0: token_0,
+            amount1: token_1,
+        });
+
+        erc20::transfer_to_addr(pool, recipient, U256::from(token_0))?;
+        erc20::transfer_to_addr(FUSDC_ADDR, recipient, U256::from(token_1))?;
+
+        Ok(res)
+    }
+
     /// Collects AMM fees from a position, and triggers a release of fluid LP rewards.
     /// Only usable by the position's owner.
     ///
@@ -594,33 +624,11 @@ impl Pools {
     ) -> Result<Vec<(u128, u128)>, Revert> {
         assert_eq!(ids.len(), pools.len());
 
-        let mut sends = Vec::with_capacity(ids.len());
-
-        for (i, (&pool, &id)) in pools.iter().zip(ids.iter()).enumerate() {
-            assert_eq_or!(
-                msg::sender(),
-                self.position_owners.get(id),
-                Error::PositionOwnerOnly
-            );
-
-            let res = self.pools.setter(pool).collect(id)?;
-            let (token_0, token_1) = res;
-
-            evm::log(events::CollectFees {
-                id,
-                pool,
-                to: msg::sender(),
-                amount0: token_0,
-                amount1: token_1,
-            });
-
-            erc20::give(pool, U256::from(token_0))?;
-            erc20::give(FUSDC_ADDR, U256::from(token_1))?;
-
-            sends[i] = res;
-        }
-
-        Ok(sends)
+        pools
+            .iter()
+            .zip(ids.iter())
+            .map(|(&pool, &id)| self.collect_single_to_720_C_50_F_F(pool, id, msg::sender()))
+            .collect::<Result<Vec<(u128, u128)>, Revert>>()
     }
 }
 
@@ -661,8 +669,8 @@ impl Pools {
         dbg!(("update position taking", current_test!(), token_0, token_1));
 
         if delta < 0 {
-            erc20::give(pool, token_0.abs_neg()?)?;
-            erc20::give(FUSDC_ADDR, token_1.abs_neg()?)?;
+            erc20::transfer_to_sender(pool, token_0.abs_neg()?)?;
+            erc20::transfer_to_sender(FUSDC_ADDR, token_1.abs_neg()?)?;
         } else {
             let (permit_0, permit_1) = match permit2 {
                 Some((permit_0, permit_1)) => (Some(permit_0), Some(permit_1)),
@@ -833,8 +841,8 @@ impl Pools {
         ));
 
         if giving {
-            erc20::give(pool, amount_0)?;
-            erc20::give(FUSDC_ADDR, amount_1)?;
+            erc20::transfer_to_sender(pool, amount_0)?;
+            erc20::transfer_to_sender(FUSDC_ADDR, amount_1)?;
         } else {
             let (permit_0, permit_1) = match permit2 {
                 Some((permit_0, permit_1)) => (Some(permit_0), Some(permit_1)),
@@ -1154,11 +1162,12 @@ impl Pools {
     /// # Errors
     /// Requires the user to be the seawater admin. Requires the pool to be enabled.
     #[allow(non_snake_case)]
-    pub fn collect_protocol_E4_E70_D_A4(
+    pub fn collect_protocol_7540_F_A_9_F(
         &mut self,
         pool: Address,
         amount_0: u128,
         amount_1: u128,
+        recipient: Address,
     ) -> Result<(u128, u128), Revert> {
         assert_eq_or!(
             msg::sender(),
@@ -1171,12 +1180,12 @@ impl Pools {
             .setter(pool)
             .collect_protocol(amount_0, amount_1)?;
 
-        erc20::give(pool, U256::from(token_0))?;
-        erc20::give(FUSDC_ADDR, U256::from(token_1))?;
+        erc20::transfer_to_addr(recipient, pool, U256::from(token_0))?;
+        erc20::transfer_to_addr(recipient, FUSDC_ADDR, U256::from(token_1))?;
 
         evm::log(events::CollectProtocolFees {
             pool,
-            to: msg::sender(),
+            to: recipient,
             amount0: token_0,
             amount1: token_1,
         });
@@ -1249,7 +1258,7 @@ impl Pools {
             Error::SeawaterAdminOnly
         );
 
-        erc20::give(token, amount)?;
+        erc20::transfer_to_sender(token, amount)?;
 
         Ok(())
     }

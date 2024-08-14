@@ -136,7 +136,7 @@ pub fn exchange(token: Address, amount: I256) -> Result<(), Error> {
         Ok(()) // we don't need to take anything!
     } else if amount.is_negative() {
         // send tokens to the user (giving)
-        give(token, amount.abs_neg()?)
+        transfer_to_sender(token, amount.abs_neg()?)
     } else {
         // take tokens from the user
         take_transfer_from(token, amount.abs_pos()?)
@@ -147,8 +147,16 @@ pub fn exchange(token: Address, amount: I256) -> Result<(), Error> {
 ///
 /// # Side effects
 /// Transfers ERC20 tokens to the transaction sender.
-pub fn give(token: Address, amount: U256) -> Result<(), Error> {
+pub fn transfer_to_sender(token: Address, amount: U256) -> Result<(), Error> {
     safe_transfer(token, msg::sender(), amount)
+}
+
+/// Sends ERC20 tokens to a specific recipient.
+///
+/// # Side effects
+/// Transfers ERC20 tokens to a recipient.
+pub fn transfer_to_addr(token: Address, recipient: Address, amount: U256) -> Result<(), Error> {
+    safe_transfer(token, recipient, amount)
 }
 
 /// Send ERC20 tokens to a specific address.

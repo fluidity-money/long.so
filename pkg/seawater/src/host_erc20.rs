@@ -29,7 +29,7 @@ pub fn take_transfer_from(_token: Address, _amount: U256) -> Result<(), Error> {
 }
 
 /// Pretends to give users tokens. Only useful for testing.
-pub fn give(_token: Address, _amount: U256) -> Result<(), Error> {
+pub fn transfer_to_sender(_token: Address, _amount: U256) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg")]
     dbg!(("give", current_test!(), _token, _amount));
     host_test_shims::take_amm_bal(_token, _amount).map_err(

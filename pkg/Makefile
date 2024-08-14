@@ -3,7 +3,7 @@ include config.mk
 
 .PHONY: \
 	build \
-	stylus \
+	seawater \
 	admin \
 	positions \
 	update-positions \
@@ -11,6 +11,7 @@ include config.mk
 	swap-permit2 \
 	quotes \
 	migrations \
+	leo \
 	solidity \
 	amm-entrypoint \
 	ownership-nfts \
@@ -18,7 +19,7 @@ include config.mk
 
 all: build
 
-build: solidity stylus
+build: solidity seawater leo
 
 admin: ${OUT_SEAWATER_ADMIN}
 positions: ${OUT_SEAWATER_POSITIONS}
@@ -30,7 +31,7 @@ migrations: ${OUT_SEAWATER_MIGRATIONS}
 
 leo: ${OUT_LEO}
 
-stylus: admin positions update-positions swaps swap-permit2 quotes migrations
+seawater: admin positions update-positions swaps swap-permit2 quotes migrations
 
 amm-entrypoint: ${OUT_SEAWATER_AMM}
 ownership-nfts: ${OUT_OWNERSHIP_NFTS}
