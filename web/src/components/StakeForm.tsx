@@ -6,11 +6,6 @@ import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import Padlock from "@/assets/icons/padlock.svg";
 import Token from "@/assets/icons/token.svg";
 import { useEffect, useMemo, useRef, useState } from "react";
-import ReactECharts from "echarts-for-react";
-import * as echarts from "echarts/core";
-import SelectedRange from "@/assets/icons/legend/selected-range.svg";
-import CurrentPrice from "@/assets/icons/legend/current-price.svg";
-import LiquidityDistribution from "@/assets/icons/legend/liquidity-distribution.svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -61,20 +56,7 @@ import {
 } from "@/config/tokens";
 import { getFormattedPriceFromAmount } from "@/lib/amounts";
 import { TokenIcon } from "./TokenIcon";
-
-const colorGradient = new echarts.graphic.LinearGradient(
-  0,
-  0,
-  0,
-  1, // Gradient direction from top(0,0) to bottom(0,1)
-  [
-    { offset: 0, color: "rgba(243, 184, 216, 1)" },
-    { offset: 0.25, color: "rgba(183, 147, 233,1)" },
-    { offset: 0.5, color: "rgba(159, 212, 243, 1)" },
-    { offset: 0.75, color: "rgba(255, 210, 196,1)" },
-    { offset: 1, color: "rgba(251, 243, 243, 1)" },
-  ],
-);
+import LiquidityRangeVisualizer from "./LiquidityRangeVisualizer";
 
 type StakeFormProps = { poolId: string } & (
   | {
@@ -168,25 +150,12 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const { data: userData } = useGraphqlUser();
 
   const poolsData = useFragment(StakeFormFragment, data?.pools);
-  const poolData = poolsData?.find((pool) => pool.address === poolId);
+  const poolData = poolsData?.find(
+    (pool) => pool.address === poolId || pool.address === token0.address,
+  );
   const dailyPrices = poolData?.priceOverTime.daily.map((price) =>
     parseFloat(price),
   );
-  const graphLPData = poolData?.liquidity;
-  const graphLPDataSerie = graphLPData?.map((item) =>
-    parseFloat(item.liquidity),
-  );
-  const graphLPDataXAxis = graphLPData?.map(({ tickLower, tickUpper }) => {
-    // const scale = token0.decimals - fUSDC.decimals;
-    const priceLower = (1.0001 ** (tickLower ?? 0))
-      //* 10 ** scale
-      .toFixed(fUSDC.decimals);
-    const priceHigher = (1.0001 ** (tickUpper ?? 0))
-      //* 10 ** scale
-      .toFixed(fUSDC.decimals);
-
-    return `${priceLower}-${priceHigher}`;
-  });
   const positionData_ = useFragment(PositionsFragment, userData?.getWallet);
   const positionData = positionData_?.positions.positions.find(
     (p) => p.positionId === positionId,
@@ -214,9 +183,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const showDynamicFeesPopup = useFeatureFlag("ui show optimising fee route");
   const showSingleToken = useFeatureFlag("ui show single token stake");
   const showCampaignBanner = useFeatureFlag("ui show campaign banner");
-  const showLiquidityVisualiser = useFeatureFlag(
-    "ui show liquidity visualiser",
-  );
+
   const showBoostIncentives = useFeatureFlag("ui show boost incentives");
 
   const onSubmit = () => {
@@ -233,8 +200,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     () => chainId === expectedChainId,
     [chainId, expectedChainId],
   );
-
-  const chartRef = useRef<ReactECharts>(null);
 
   // useSimulateContract throws if connector.account is not defined
   // so we must check if it exists or use a dummy address for sqrtPriceX96
@@ -414,194 +379,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   const autoFeeTierRef = useRef();
   const manualFeeTierRef = useRef();
-  const chart = chartRef.current?.getEchartsInstance();
-  const chartStyles = {
-    color: {
-      "full-range": colorGradient,
-      auto: "transparent",
-      custom: "white",
-    },
-    borderSet: {
-      "full-range": {
-        borderColor: "#1E1E1E",
-        borderWidth: 1,
-        borderType: "solid",
-      },
-      auto: {
-        borderColor: "#EBEBEB",
-        borderWidth: 1,
-        borderType: "dashed",
-      },
-      custom: {
-        borderColor: "#EBEBEB",
-        borderWidth: 1,
-        borderType: "dashed",
-      },
-    },
-    select: {
-      color: {
-        "full-range": colorGradient,
-        auto: "white",
-        custom: "white",
-      },
-    },
-  };
-  const chartOptions = {
-    grid: {
-      left: "0", // or a small value like '10px'
-      right: "0", // or a small value
-      top: "0", // or a small value
-      bottom: "0", // or a small value
-    },
-    tooltip: {
-      trigger: "axis", // Trigger tooltip on axis movement
-      axisPointer: {
-        type: "cross", // Display crosshair style pointers
-      },
-      borderWidth: 0,
-      backgroundColor: "#EBEBEB",
-      textStyle: {
-        color: "#1E1E1E",
-      },
-      formatter:
-        "<div class='flex flex-col items-center'>${c} <div class='text-gray-2 text-center w-full'>{b}</div></div>",
-    },
-    toolbox: {
-      show: false,
-    },
-    brush: {
-      show: liquidityRangeType === "custom",
-      xAxisIndex: "all",
-      brushLink: "all",
-      outOfBrush: {
-        color: "#1E1E1E",
-      },
-    },
-    xAxis: {
-      type: "category",
-      data: graphLPDataXAxis,
-      show: false,
-      axisPointer: {
-        label: {
-          show: false,
-        },
-      },
-    },
-    yAxis: {
-      type: "value",
-      show: false,
-      axisPointer: {
-        label: {
-          show: false,
-        },
-      },
-    },
-    series: [
-      {
-        data: graphLPDataSerie,
-        type: "bar",
-        barWidth: "90%", // Adjust bar width (can be in pixels e.g., '20px')
-        barGap: "5%",
-        silent: true,
-        itemStyle: {
-          color: chartStyles.color[liquidityRangeType],
-          borderRadius: [5, 5, 0, 0],
-          ...chartStyles.borderSet[liquidityRangeType],
-        },
-        selectedMode: liquidityRangeType === "auto" ? "multiple" : false,
-        select: {
-          itemStyle: {
-            color: chartStyles.select.color[liquidityRangeType],
-            borderWidth: 0,
-          },
-        },
-        emphasis: {
-          itemStyle: {
-            color: "white",
-            borderWidth: 0,
-          },
-        },
-      },
-    ],
-  };
-  chart?.setOption(chartOptions);
 
   const { open } = useWeb3Modal();
-
-  const lowIndex = graphLPData?.findIndex(
-    (item) =>
-      parseFloat(priceLower) <= 1.0001 ** item.tickUpper &&
-      parseFloat(priceLower) >= 1.0001 ** item.tickLower,
-  );
-  const highIndex = graphLPData?.findLastIndex(
-    (item) =>
-      parseFloat(priceUpper) <= 1.0001 ** item.tickUpper &&
-      parseFloat(priceUpper) >= 1.0001 ** item.tickLower,
-  );
-
-  useEffect(() => {
-    if (chart) {
-      //  Clear the brush selection on every liquidityRangeType change
-      chart.dispatchAction({
-        type: "brush",
-        command: "clear",
-        areas: [],
-      });
-      // Clear selection, again for auto range to display auto range
-      chart.dispatchAction({
-        type: "unselect",
-        seriesIndex: 0,
-        dataIndex: Array.from(
-          { length: graphLPData?.length ?? 0 },
-          (_, i) => i,
-        ),
-      });
-      if (liquidityRangeType === "auto") {
-        chart.dispatchAction({
-          type: "select",
-          seriesIndex: 0,
-          dataIndex: [lowIndex, highIndex],
-        });
-      } else if (liquidityRangeType === "custom") {
-        chart.dispatchAction({
-          type: "brush",
-          areas: [
-            {
-              brushType: "lineX",
-              coordRange: [lowIndex, highIndex],
-              xAxisIndex: 0,
-            },
-          ],
-        });
-      }
-    }
-  }, [liquidityRangeType, chart, lowIndex, highIndex, graphLPData?.length]);
-
-  useEffect(() => {
-    chart?.on("brushEnd", function ({ areas }: any) {
-      if (!graphLPData) return;
-
-      const lowerIndex = areas[0].coordRange[0];
-      const upperIndex = areas[0].coordRange[1];
-
-      setPriceLower(
-        (1.0001 ** graphLPData[lowerIndex].tickLower).toFixed(fUSDC.decimals),
-        token0.decimals,
-      );
-      setPriceUpper(
-        (1.0001 ** graphLPData[upperIndex].tickUpper).toFixed(fUSDC.decimals),
-        token0.decimals,
-      );
-    });
-  }, [
-    chart,
-    lowIndex,
-    highIndex,
-    graphLPData,
-    token0.decimals,
-    setPriceLower,
-    setPriceUpper,
-  ]);
 
   return (
     <div className="z-10 flex flex-col items-center">
@@ -647,7 +426,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     selected={multiSingleToken === "multi"}
                     onClick={() => setMultiSingleToken("multi")}
                   >
-                    <div className="text-nowrap px-1 text-3xs font-medium md:text-2xs">
+                    <div className="text-3xs md:text-2xs text-nowrap px-1 font-medium">
                       Multi-Token
                     </div>
                   </Menu.Item>
@@ -657,7 +436,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     onClick={() => setMultiSingleToken("single")}
                     variant={"iridescent"}
                   >
-                    <div className="text-nowrap px-1 text-3xs font-medium md:text-2xs">
+                    <div className="text-3xs md:text-2xs text-nowrap px-1 font-medium">
                       Single-Token
                     </div>
                   </Menu.Item>
@@ -720,7 +499,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     )}
               </div>
 
-              <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
+              <div className="text-3xs md:text-2xs flex flex-row gap-[8px]">
                 {token0Balance && (
                   <>
                     <div>Balance: {token0Balance.formatted}</div>
@@ -784,7 +563,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                         fUSDC.decimals,
                       )}
                 </div>
-                <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
+                <div className="text-3xs md:text-2xs flex flex-row gap-[8px]">
                   {token1Balance && (
                     <>
                       <div>Balance: {token1Balance.formatted}</div>
@@ -862,13 +641,13 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   </div>
                   <Badge
                     variant="iridescent"
-                    className="h-[10px] px-[7px] text-4xs font-normal md:h-[12px] md:text-3xs"
+                    className="text-4xs md:text-3xs h-[10px] px-[7px] font-normal md:h-[12px]"
                   >
                     Fee Percentage
                   </Badge>
                 </div>
 
-                <div className="iridescent-text w-[200px] text-3xs md:w-[247px] md:text-2xs">
+                <div className="iridescent-text text-3xs md:text-2xs w-[200px] md:w-[247px]">
                   The protocol automatically adjust your fees in order to
                   maximise rewards and reduce impermanent loss
                 </div>
@@ -887,52 +666,52 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 >
                   <RadioGroup.Item
                     value="0.01"
-                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                    className="hover:bg-gray-0 flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.01%</div>
-                    <div className="text-center text-3xs text-gray-2 ">
+                    <div className="text-3xs text-gray-2 text-center ">
                       Best for Very <br /> Stable Pairs
                     </div>
-                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                    <div className="text-4xs text-gray-2 md:text-3xs rounded bg-[#D8D8D8] px-1">
                       (0% popularity)
                     </div>
                   </RadioGroup.Item>
 
                   <RadioGroup.Item
                     value={"0.05"}
-                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                    className="hover:bg-gray-0 flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.05%</div>
-                    <div className="text-center text-3xs text-gray-2 ">
+                    <div className="text-3xs text-gray-2 text-center ">
                       Best for <br /> Stable Pairs
                     </div>
-                    <div className="iridescent rounded bg-[#D8D8D8] px-1 text-4xs text-black md:text-3xs">
+                    <div className="iridescent text-4xs md:text-3xs rounded bg-[#D8D8D8] px-1 text-black">
                       (99% popularity)
                     </div>
                   </RadioGroup.Item>
 
                   <RadioGroup.Item
                     value={"0.10"}
-                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                    className="hover:bg-gray-0 flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.10%</div>
-                    <div className="text-center text-3xs text-gray-2 ">
+                    <div className="text-3xs text-gray-2 text-center ">
                       Best for <br /> Stable Pairs
                     </div>
-                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                    <div className="text-4xs text-gray-2 md:text-3xs rounded bg-[#D8D8D8] px-1">
                       (0% popularity)
                     </div>
                   </RadioGroup.Item>
 
                   <RadioGroup.Item
                     value={"0.15"}
-                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                    className="hover:bg-gray-0 flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.15%</div>
-                    <div className="text-center text-3xs text-gray-2 ">
+                    <div className="text-3xs text-gray-2 text-center ">
                       Best for <br /> Stable Pairs
                     </div>
-                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                    <div className="text-4xs text-gray-2 md:text-3xs rounded bg-[#D8D8D8] px-1">
                       (0% popularity)
                     </div>
                   </RadioGroup.Item>
@@ -992,7 +771,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 value={liquidityRangeType === "full-range" ? "-∞" : priceLower}
                 onChange={(e) => setPriceLower(e.target.value, token0.decimals)}
               />
-              <div className="mt-1 flex flex-row items-start gap-1 whitespace-nowrap text-3xs font-semibold">
+              <div className="text-3xs mt-1 flex flex-row items-start gap-1 whitespace-nowrap font-semibold">
                 <Token className="size-[12px]  invert" /> fUSDC per{" "}
                 {token0.name}
               </div>
@@ -1016,43 +795,22 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 onChange={(e) => setPriceUpper(e.target.value, token0.decimals)}
               />
 
-              <div className="mt-1 flex flex-row items-start gap-1 whitespace-nowrap text-3xs font-semibold">
+              <div className="text-3xs mt-1 flex flex-row items-start gap-1 whitespace-nowrap font-semibold">
                 <Token className="size-[12px]  invert" /> fUSDC per{" "}
                 {token0.name}
               </div>
             </div>
           </div>
 
-          {showLiquidityVisualiser && (
-            <div className="mt-[22px]">
-              <div className="text-3xs text-gray-2 md:text-2xs">Visualiser</div>
-              <ReactECharts
-                className="mt-1"
-                opts={{
-                  height: 44,
-                }}
-                style={{
-                  height: 44,
-                }}
-                ref={chartRef}
-                option={chartOptions}
-              />
-
-              <div className="mt-[16px] flex flex-row justify-around text-4xs md:text-2xs">
-                <div className="flex flex-row items-center gap-1">
-                  <SelectedRange /> Selected Range
-                </div>
-                <div className="flex flex-row items-center gap-1">
-                  <CurrentPrice /> Current Price
-                </div>
-                <div className="flex flex-row items-center gap-1">
-                  <LiquidityDistribution /> Liquidity Distribution
-                </div>
-              </div>
-            </div>
-          )}
+          {poolData?.liquidity ? (
+            <LiquidityRangeVisualizer
+              liquidityRangeType={liquidityRangeType}
+              poolDataLiquidity={poolData.liquidity}
+              currentPrice={tokenPrice}
+              tokenDecimals={token0.decimals}
+            />
+          ) : null}
         </div>
-
         <div className="mt-[21px] flex w-[318px] flex-row justify-end md:w-[392px]">
           <div
             onClick={() => setBreakdownHidden((v) => !v)}
@@ -1061,12 +819,12 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             {breakdownHidden ? (
               <>
                 <div className="text-2xs underline">Show Breakdown</div>
-                <div className="ml-1 rotate-90 text-2xs">{"<-"}</div>
+                <div className="text-2xs ml-1 rotate-90">{"<-"}</div>
               </>
             ) : (
               <>
                 <div className="text-2xs underline">Hide breakdown</div>
-                <div className="ml-1 rotate-90 text-2xs">{"->"}</div>
+                <div className="text-2xs ml-1 rotate-90">{"->"}</div>
               </>
             )}
           </div>
@@ -1135,7 +893,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge className="h-[17px] px-1 text-2xs font-normal">
+                  <Badge className="text-2xs h-[17px] px-1 font-normal">
                     <Token />
                     <Token className={"-ml-1"} />
                     <Token className={"-ml-1 mr-1"} />
@@ -1205,7 +963,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         >
           <div>Yield Breakdown</div>
 
-          <div className="mt-[14px] flex w-full flex-col gap-[5px] pl-[5px] text-2xs">
+          <div className="text-2xs mt-[14px] flex w-full flex-col gap-[5px] pl-[5px]">
             <div className="flex flex-row justify-between">
               <div>Pool Fees</div>
 
@@ -1246,7 +1004,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
             <Badge
               variant="iridescent"
-              className="h-[17px] px-1 text-2xs font-normal"
+              className="text-2xs h-[17px] px-1 font-normal"
             >
               <Token />
               <Token className={"-ml-1"} />
@@ -1257,7 +1015,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
           {showBoostIncentives && (
             <>
-              <div className="mt-[20px] flex flex-row gap-1 text-2xs">
+              <div className="text-2xs mt-[20px] flex flex-row gap-1">
                 <div className="flex w-[3%] flex-col">
                   <div>3%</div>
                   <div className="h-1 w-full rounded bg-white"></div>
