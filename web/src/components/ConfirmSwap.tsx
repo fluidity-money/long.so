@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { motion } from "framer-motion";
@@ -39,10 +39,6 @@ export const ConfirmSwap = () => {
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
 
-  useEffect(() => {
-    if (!address || chainId !== expectedChainId) router.back();
-  }, [address, expectedChainId, chainId]);
-
   const {
     token0,
     token1,
@@ -53,6 +49,9 @@ export const ConfirmSwap = () => {
     setToken1Amount,
     gas,
   } = useSwapStore();
+
+  if (!address || chainId !== expectedChainId || !(token0 && token0Amount))
+    redirect("/");
 
   // price of the current pool
   const { data: token0SqrtPriceX96 } = useSimulateContract({
@@ -154,13 +153,6 @@ export const ConfirmSwap = () => {
       );
     return snapAmountToDecimals(Number(token1Price) / Number(token0Price));
   }, [isSwappingBaseAsset, isSwap1, token0Price, token1Price, token1]);
-
-  // if no token or no token amount redirect to the swap form
-  useEffect(() => {
-    if (token0 && token0Amount) return;
-
-    router.push("/");
-  }, [router, token0, token0Amount]);
 
   // read the allowance of the token
   const { data: allowanceData } = useSimulateContract({
