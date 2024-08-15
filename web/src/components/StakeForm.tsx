@@ -426,7 +426,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     selected={multiSingleToken === "multi"}
                     onClick={() => setMultiSingleToken("multi")}
                   >
-                    <div className="text-3xs md:text-2xs text-nowrap px-1 font-medium">
+                    <div className="text-nowrap px-1 text-3xs font-medium md:text-2xs">
                       Multi-Token
                     </div>
                   </Menu.Item>
@@ -436,7 +436,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     onClick={() => setMultiSingleToken("single")}
                     variant={"iridescent"}
                   >
-                    <div className="text-3xs md:text-2xs text-nowrap px-1 font-medium">
+                    <div className="text-nowrap px-1 text-3xs font-medium md:text-2xs">
                       Single-Token
                     </div>
                   </Menu.Item>
@@ -499,7 +499,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     )}
               </div>
 
-              <div className="text-3xs md:text-2xs flex flex-row gap-[8px]">
+              <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
                 {token0Balance && (
                   <>
                     <div>Balance: {token0Balance.formatted}</div>
@@ -563,7 +563,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                         fUSDC.decimals,
                       )}
                 </div>
-                <div className="text-3xs md:text-2xs flex flex-row gap-[8px]">
+                <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
                   {token1Balance && (
                     <>
                       <div>Balance: {token1Balance.formatted}</div>
@@ -641,13 +641,13 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   </div>
                   <Badge
                     variant="iridescent"
-                    className="text-4xs md:text-3xs h-[10px] px-[7px] font-normal md:h-[12px]"
+                    className="h-[10px] px-[7px] text-4xs font-normal md:h-[12px] md:text-3xs"
                   >
                     Fee Percentage
                   </Badge>
                 </div>
 
-                <div className="iridescent-text text-3xs md:text-2xs w-[200px] md:w-[247px]">
+                <div className="iridescent-text w-[200px] text-3xs md:w-[247px] md:text-2xs">
                   The protocol automatically adjust your fees in order to
                   maximise rewards and reduce impermanent loss
                 </div>
@@ -666,52 +666,52 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 >
                   <RadioGroup.Item
                     value="0.01"
-                    className="hover:bg-gray-0 flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.01%</div>
-                    <div className="text-3xs text-gray-2 text-center ">
+                    <div className="text-center text-3xs text-gray-2 ">
                       Best for Very <br /> Stable Pairs
                     </div>
-                    <div className="text-4xs text-gray-2 md:text-3xs rounded bg-[#D8D8D8] px-1">
+                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
                       (0% popularity)
                     </div>
                   </RadioGroup.Item>
 
                   <RadioGroup.Item
                     value={"0.05"}
-                    className="hover:bg-gray-0 flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.05%</div>
-                    <div className="text-3xs text-gray-2 text-center ">
+                    <div className="text-center text-3xs text-gray-2 ">
                       Best for <br /> Stable Pairs
                     </div>
-                    <div className="iridescent text-4xs md:text-3xs rounded bg-[#D8D8D8] px-1 text-black">
+                    <div className="iridescent rounded bg-[#D8D8D8] px-1 text-4xs text-black md:text-3xs">
                       (99% popularity)
                     </div>
                   </RadioGroup.Item>
 
                   <RadioGroup.Item
                     value={"0.10"}
-                    className="hover:bg-gray-0 flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.10%</div>
-                    <div className="text-3xs text-gray-2 text-center ">
+                    <div className="text-center text-3xs text-gray-2 ">
                       Best for <br /> Stable Pairs
                     </div>
-                    <div className="text-4xs text-gray-2 md:text-3xs rounded bg-[#D8D8D8] px-1">
+                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
                       (0% popularity)
                     </div>
                   </RadioGroup.Item>
 
                   <RadioGroup.Item
                     value={"0.15"}
-                    className="hover:bg-gray-0 flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.15%</div>
-                    <div className="text-3xs text-gray-2 text-center ">
+                    <div className="text-center text-3xs text-gray-2 ">
                       Best for <br /> Stable Pairs
                     </div>
-                    <div className="text-4xs text-gray-2 md:text-3xs rounded bg-[#D8D8D8] px-1">
+                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
                       (0% popularity)
                     </div>
                   </RadioGroup.Item>
@@ -771,7 +771,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 value={liquidityRangeType === "full-range" ? "-∞" : priceLower}
                 onChange={(e) => setPriceLower(e.target.value, token0.decimals)}
               />
-              <div className="text-3xs mt-1 flex flex-row items-start gap-1 whitespace-nowrap font-semibold">
+              <div className="mt-1 flex flex-row items-start gap-1 whitespace-nowrap text-3xs font-semibold">
                 <Token className="size-[12px]  invert" /> fUSDC per{" "}
                 {token0.name}
               </div>
@@ -795,7 +795,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 onChange={(e) => setPriceUpper(e.target.value, token0.decimals)}
               />
 
-              <div className="text-3xs mt-1 flex flex-row items-start gap-1 whitespace-nowrap font-semibold">
+              <div className="mt-1 flex flex-row items-start gap-1 whitespace-nowrap text-3xs font-semibold">
                 <Token className="size-[12px]  invert" /> fUSDC per{" "}
                 {token0.name}
               </div>
@@ -819,12 +819,12 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             {breakdownHidden ? (
               <>
                 <div className="text-2xs underline">Show Breakdown</div>
-                <div className="text-2xs ml-1 rotate-90">{"<-"}</div>
+                <div className="ml-1 rotate-90 text-2xs">{"<-"}</div>
               </>
             ) : (
               <>
                 <div className="text-2xs underline">Hide breakdown</div>
-                <div className="text-2xs ml-1 rotate-90">{"->"}</div>
+                <div className="ml-1 rotate-90 text-2xs">{"->"}</div>
               </>
             )}
           </div>
@@ -893,7 +893,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge className="text-2xs h-[17px] px-1 font-normal">
+                  <Badge className="h-[17px] px-1 text-2xs font-normal">
                     <Token />
                     <Token className={"-ml-1"} />
                     <Token className={"-ml-1 mr-1"} />
@@ -963,7 +963,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         >
           <div>Yield Breakdown</div>
 
-          <div className="text-2xs mt-[14px] flex w-full flex-col gap-[5px] pl-[5px]">
+          <div className="mt-[14px] flex w-full flex-col gap-[5px] pl-[5px] text-2xs">
             <div className="flex flex-row justify-between">
               <div>Pool Fees</div>
 
@@ -1004,7 +1004,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
             <Badge
               variant="iridescent"
-              className="text-2xs h-[17px] px-1 font-normal"
+              className="h-[17px] px-1 text-2xs font-normal"
             >
               <Token />
               <Token className={"-ml-1"} />
@@ -1015,7 +1015,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
           {showBoostIncentives && (
             <>
-              <div className="text-2xs mt-[20px] flex flex-row gap-1">
+              <div className="mt-[20px] flex flex-row gap-1 text-2xs">
                 <div className="flex w-[3%] flex-col">
                   <div>3%</div>
                   <div className="h-1 w-full rounded bg-white"></div>

@@ -102,7 +102,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
         // update raw amount if it doesn't exceed balance
         if (!balanceRaw || amountRaw <= BigInt(balanceRaw))
           setToken0AmountRaw(amountRaw.toString());
-      } catch { }
+      } catch {}
       return { token0Amount: amount };
     });
   },
@@ -120,7 +120,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
         // update raw amount if it doesn't exceed balance
         if (!balanceRaw || amountRaw <= BigInt(balanceRaw))
           setToken1AmountRaw(amountRaw.toString());
-      } catch { }
+      } catch {}
       return { token1Amount: amount };
     });
   },
@@ -155,7 +155,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
           setToken1AmountRaw(amount1.toString());
           return { delta };
         }
-      } catch { }
+      } catch {}
       return {};
     });
   },
@@ -177,7 +177,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
         encodeSqrtPrice(priceN * 10 ** -decimals),
       );
       tick = newTick;
-    } catch { }
+    } catch {}
     set({
       tickLower: tick,
       priceLower: price,
@@ -197,7 +197,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
         encodeSqrtPrice(priceN * 10 ** -decimals),
       );
       tick = newTick;
-    } catch { }
+    } catch {}
     set({
       tickUpper: tick,
       priceUpper: price,

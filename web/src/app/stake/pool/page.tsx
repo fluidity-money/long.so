@@ -25,9 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  getFormattedPriceFromTick,
-} from "@/lib/amounts";
+import { getFormattedPriceFromTick } from "@/lib/amounts";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { ammAddress } from "@/lib/addresses";
@@ -68,15 +66,15 @@ export default function PoolPage() {
 
   const { data: globalData } = useGraphqlGlobal();
   const allPoolsData = useFragment(ManagePoolFragment, globalData?.pools);
-  const { positions: positionsData_, updatePositionLocal } = usePositions()
+  const { positions: positionsData_, updatePositionLocal } = usePositions();
   const positionsData = useMemo(
     () =>
       positionsData_.filter(
         (p) =>
           p.pool.token.address === id &&
           parseFloat(p.liquidity.fusdc.valueUsd) +
-          parseFloat(p.liquidity.token1.valueUsd) >
-          0,
+            parseFloat(p.liquidity.token1.valueUsd) >
+            0,
       ),
     [id, positionsData_],
   );
@@ -119,12 +117,12 @@ export default function PoolPage() {
       usdFormat(
         positionsData
           ? positionsData.reduce(
-            (total, { liquidity: { fusdc, token1 } }) =>
-              total +
-              parseFloat(fusdc.valueUsd) +
-              parseFloat(token1.valueUsd),
-            0,
-          )
+              (total, { liquidity: { fusdc, token1 } }) =>
+                total +
+                parseFloat(fusdc.valueUsd) +
+                parseFloat(token1.valueUsd),
+              0,
+            )
           : 0,
       ),
     [poolData],
@@ -207,8 +205,8 @@ export default function PoolPage() {
     );
     return usdFormat(
       (amount0 * Number(tokenPrice)) /
-      10 ** (token0.decimals + fUSDC.decimals) +
-      amount1 / 10 ** token1.decimals,
+        10 ** (token0.decimals + fUSDC.decimals) +
+        amount1 / 10 ** token1.decimals,
     );
   }, [position, positionLiquidity, tokenPrice, token0, token1, curTick]);
 
@@ -370,18 +368,18 @@ export default function PoolPage() {
                     <div className="text-xl md:text-2xl">
                       {lowerTick
                         ? getFormattedPriceFromTick(
-                          lowerTick,
-                          token0.decimals,
-                          token1.decimals,
-                        )
+                            lowerTick,
+                            token0.decimals,
+                            token1.decimals,
+                          )
                         : usdFormat(0)}
                       -
                       {upperTick
                         ? getFormattedPriceFromTick(
-                          upperTick,
-                          token0.decimals,
-                          token1.decimals,
-                        )
+                            upperTick,
+                            token0.decimals,
+                            token1.decimals,
+                          )
                         : usdFormat(0)}
                     </div>
                   </div>

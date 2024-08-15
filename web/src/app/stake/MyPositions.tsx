@@ -69,14 +69,14 @@ export const MyPositions = () => {
   const showDemoData = useFeatureFlag("ui show demo data");
   const showClaimAllYield = useFeatureFlag("ui show claim all yield");
 
-  const { positions: walletData } = usePositions()
+  const { positions: walletData } = usePositions();
 
   // this is every position, with their respective pools
   const pools = useMemo((): Pool[] | undefined => {
     if (showDemoData && address) return mockMyPositions;
 
-    return walletData.
-      map((position) => ({
+    return walletData
+      .map((position) => ({
         positionId: position.positionId,
         id: position.pool.token.address,
         duration: 0,

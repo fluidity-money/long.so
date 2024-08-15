@@ -15,7 +15,10 @@ import {
 } from "wagmi";
 import { fUSDC } from "@/config/tokens";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
-import { getFormattedPriceFromAmount, getUsdTokenAmountsForPosition } from "@/lib/amounts";
+import {
+  getFormattedPriceFromAmount,
+  getUsdTokenAmountsForPosition,
+} from "@/lib/amounts";
 import Confirm from "@/components/sequence/Confirm";
 import { Success } from "@/components/sequence/Success";
 import { Fail } from "@/components/sequence/Fail";
@@ -38,7 +41,7 @@ export default function ConfirmWithdrawLiquidity() {
   const { token0, token0Amount, token0AmountRaw, token1, token1Amount, delta } =
     useStakeStore();
 
-  const { positions, updatePositionLocal } = usePositions()
+  const { positions, updatePositionLocal } = usePositions();
 
   // Current liquidity of the position
   const { data: positionLiquidity } = useSimulateContract({
@@ -136,13 +139,19 @@ export default function ConfirmWithdrawLiquidity() {
 
   useEffect(() => {
     if (updatePositionResult.isSuccess) {
-      const position = positions.find(p => p.positionId === Number(positionId))
+      const position = positions.find(
+        (p) => p.positionId === Number(positionId),
+      );
       if (position) {
-        getUsdTokenAmountsForPosition(position, token0, Number(tokenPrice)).then(([amount0, amount1]) =>
+        getUsdTokenAmountsForPosition(
+          position,
+          token0,
+          Number(tokenPrice),
+        ).then(([amount0, amount1]) =>
           updatePositionLocal({
             ...position,
             served: {
-              timestamp: Math.round(new Date().getTime() / 1000)
+              timestamp: Math.round(new Date().getTime() / 1000),
             },
             liquidity: {
               fusdc: {
@@ -150,14 +159,13 @@ export default function ConfirmWithdrawLiquidity() {
               },
               token1: {
                 valueUsd: String(amount0),
-              }
-            }
-          })
-        )
+              },
+            },
+          }),
+        );
       }
     }
-  }, [updatePositionResult.isSuccess])
-
+  }, [updatePositionResult.isSuccess]);
 
   // step 1 - collect yield from position if emptying entire balance
   if (
@@ -239,10 +247,10 @@ export default function ConfirmWithdrawLiquidity() {
             {token0.address === fUSDC.address
               ? token0Amount
               : getFormattedPriceFromAmount(
-                token0Amount,
-                tokenPrice,
-                fUSDC.decimals,
-              )}
+                  token0Amount,
+                  tokenPrice,
+                  fUSDC.decimals,
+                )}
           </div>
         </div>
 
@@ -257,10 +265,10 @@ export default function ConfirmWithdrawLiquidity() {
             {token1.address === fUSDC.address
               ? token1Amount
               : getFormattedPriceFromAmount(
-                token1Amount,
-                tokenPrice,
-                fUSDC.decimals,
-              )}
+                  token1Amount,
+                  tokenPrice,
+                  fUSDC.decimals,
+                )}
           </div>
         </div>
 

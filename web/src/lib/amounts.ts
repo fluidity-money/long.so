@@ -3,7 +3,11 @@
 
 import { Position } from "@/hooks/usePostions";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
-import { getSqrtRatioAtTick, getTokenAmountsNumeric, sqrtPriceX96ToPrice } from "./math";
+import {
+  getSqrtRatioAtTick,
+  getTokenAmountsNumeric,
+  sqrtPriceX96ToPrice,
+} from "./math";
 import { usdFormat } from "./usdFormat";
 import { simulateContract } from "wagmi/actions";
 import { config } from "@/config";
@@ -119,13 +123,17 @@ const getFormattedPriceFromTick = (
   return formattedPrice.length > 20 ? "∞ " : formattedPrice;
 };
 
-const getUsdTokenAmountsForPosition = async (position: Pick<Position, 'positionId' | 'lower' | 'upper'>, token0: Token, tokenPrice: number): Promise<[number, number]> => {
+const getUsdTokenAmountsForPosition = async (
+  position: Pick<Position, "positionId" | "lower" | "upper">,
+  token0: Token,
+  tokenPrice: number,
+): Promise<[number, number]> => {
   const positionLiquidity = await simulateContract(config, {
     address: ammAddress,
     abi: seawaterContract.abi,
     functionName: "positionLiquidity8D11C045",
     args: [token0.address, BigInt(position.positionId)],
-  })
+  });
   const curTick = await simulateContract(config, {
     address: ammAddress,
     abi: seawaterContract.abi,
@@ -139,11 +147,12 @@ const getUsdTokenAmountsForPosition = async (position: Pick<Position, 'positionI
     position.lower,
     position.upper,
   );
-  const amount0 = amount0Unscaled * tokenPrice / 10 ** (token0.decimals + fUSDC.decimals)
-  const amount1 = amount1Unscaled / 10 ** fUSDC.decimals
+  const amount0 =
+    (amount0Unscaled * tokenPrice) / 10 ** (token0.decimals + fUSDC.decimals);
+  const amount1 = amount1Unscaled / 10 ** fUSDC.decimals;
 
-  return [amount0, amount1]
-}
+  return [amount0, amount1];
+};
 
 export {
   getFormattedStringFromTokenAmount,

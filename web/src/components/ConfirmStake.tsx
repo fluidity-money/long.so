@@ -27,7 +27,10 @@ import Confirm from "@/components/sequence/Confirm";
 import { EnableSpending } from "@/components/sequence/EnableSpending";
 import { Fail } from "@/components/sequence/Fail";
 import { Success } from "@/components/sequence/Success";
-import { getFormattedPriceFromAmount, getUsdTokenAmountsForPosition } from "@/lib/amounts";
+import {
+  getFormattedPriceFromAmount,
+  getUsdTokenAmountsForPosition,
+} from "@/lib/amounts";
 import { fUSDC } from "@/config/tokens";
 import { TokenIcon } from "./TokenIcon";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
@@ -35,13 +38,13 @@ import { usePositions } from "@/hooks/usePostions";
 
 type ConfirmStakeProps =
   | {
-    mode: "new";
-    positionId?: never;
-  }
+      mode: "new";
+      positionId?: never;
+    }
   | {
-    mode: "existing";
-    positionId: number;
-  };
+      mode: "existing";
+      positionId: number;
+    };
 
 export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const router = useRouter();
@@ -67,7 +70,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     multiSingleToken,
   } = useStakeStore();
 
-  const { positions, updatePositionLocal } = usePositions()
+  const { positions, updatePositionLocal } = usePositions();
 
   // Price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
@@ -169,12 +172,12 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
       !curTick || tickLower === undefined || tickUpper === undefined
         ? 0n
         : getLiquidityForAmounts(
-          curTick.result,
-          BigInt(tickLower),
-          BigInt(tickUpper),
-          BigInt(token0AmountRaw),
-          BigInt(token1AmountRaw),
-        ),
+            curTick.result,
+            BigInt(tickLower),
+            BigInt(tickUpper),
+            BigInt(token0AmountRaw),
+            BigInt(token1AmountRaw),
+          ),
     [curTick, tickLower, tickUpper, token0AmountRaw, token1AmountRaw],
   );
 
@@ -312,21 +315,25 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   });
   useEffect(() => {
     if (updatePositionResult.isSuccess) {
-      const id = positionId ?? Number(mintPositionId)
+      const id = positionId ?? Number(mintPositionId);
       if (id && tickLower && tickUpper) {
-        const position = positions.find(p => p.positionId === id) ?? {
+        const position = positions.find((p) => p.positionId === id) ?? {
           positionId: id,
           pool: {
             token: token0,
           },
           lower: tickLower,
           upper: tickUpper,
-        }
-        getUsdTokenAmountsForPosition(position, token0, Number(tokenPrice)).then(([amount0, amount1]) =>
+        };
+        getUsdTokenAmountsForPosition(
+          position,
+          token0,
+          Number(tokenPrice),
+        ).then(([amount0, amount1]) =>
           updatePositionLocal({
             ...position,
             served: {
-              timestamp: Math.round(new Date().getTime() / 1000)
+              timestamp: Math.round(new Date().getTime() / 1000),
             },
             liquidity: {
               fusdc: {
@@ -334,14 +341,13 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
               },
               token1: {
                 valueUsd: String(amount0),
-              }
-            }
-          })
-        )
+              },
+            },
+          }),
+        );
       }
-
     }
-  }, [updatePositionResult.isSuccess])
+  }, [updatePositionResult.isSuccess]);
 
   // step 1 pending
   if (isMintPending || (mintData && result?.isPending)) {
@@ -386,27 +392,30 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     isUpdatePositionPending ||
     (updatePositionData && updatePositionResult?.isPending)
   ) {
-    return <Confirm
-      text={"Stake"}
-      fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
-      toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
-      transactionHash={updatePositionData}
-    />;
+    return (
+      <Confirm
+        text={"Stake"}
+        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+        transactionHash={updatePositionData}
+      />
+    );
   }
-
 
   // success
   if (updatePositionResult.data) {
-    return <Success
-      transactionHash={updatePositionResult.data.transactionHash}
-      onDone={() => {
-        resetUpdatePosition()
-        resetApproveToken0()
-        resetApproveToken1()
-        updatePositionResult.refetch()
-        router.push("/stake")
-      }}
-    />;
+    return (
+      <Success
+        transactionHash={updatePositionResult.data.transactionHash}
+        onDone={() => {
+          resetUpdatePosition();
+          resetApproveToken0();
+          resetApproveToken1();
+          updatePositionResult.refetch();
+          router.push("/stake");
+        }}
+      />
+    );
   }
 
   // error
