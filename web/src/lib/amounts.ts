@@ -1,8 +1,14 @@
 // a formatted amount is a human-readable value, such as 1.445 or 20
 // a token amount is a raw amount scaled by a token's decimals, such as 1445000 or 20000000
 
-import { getSqrtRatioAtTick, sqrtPriceX96ToPrice } from "./math";
+import { Position } from "@/stores/usePositionStore";
+import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
+import { getSqrtRatioAtTick, getTokenAmountsNumeric, sqrtPriceX96ToPrice } from "./math";
 import { usdFormat } from "./usdFormat";
+import { simulateContract } from "wagmi/actions";
+import { config } from "@/config";
+import { ammAddress } from "./addresses";
+import { fUSDC, Token } from "@/config/tokens";
 
 /**
  * @description convert a bigint formatted amount to a token amount
@@ -113,10 +119,37 @@ const getFormattedPriceFromTick = (
   return formattedPrice.length > 20 ? "∞ " : formattedPrice;
 };
 
+const getUsdTokenAmountsForPosition = async (position: Position, token0: Token, tokenPrice: number): Promise<[number, number]> => {
+  const positionLiquidity = await simulateContract(config, {
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "positionLiquidity8D11C045",
+    args: [token0.address, BigInt(position.positionId)],
+  })
+  const curTick = await simulateContract(config, {
+    address: ammAddress,
+    abi: seawaterContract.abi,
+    functionName: "curTick181C6FD9",
+    args: [token0.address],
+  });
+
+  const [amount0Unscaled, amount1Unscaled] = getTokenAmountsNumeric(
+    Number(positionLiquidity.result),
+    Number(getSqrtRatioAtTick(BigInt(curTick.result))),
+    position.lower,
+    position.upper,
+  );
+  const amount0 = amount0Unscaled * tokenPrice / 10 ** (token0.decimals + fUSDC.decimals)
+  const amount1 = amount1Unscaled / 10 ** fUSDC.decimals
+
+  return [amount0, amount1]
+}
+
 export {
   getFormattedStringFromTokenAmount,
   snapAmountToDecimals,
   getTokenAmountFromFormattedString,
   getFormattedPriceFromAmount,
   getFormattedPriceFromTick,
+  getUsdTokenAmountsForPosition,
 };

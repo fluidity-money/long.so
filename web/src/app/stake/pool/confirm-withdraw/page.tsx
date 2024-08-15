@@ -15,11 +15,12 @@ import {
 } from "wagmi";
 import { fUSDC } from "@/config/tokens";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
-import { getFormattedPriceFromAmount } from "@/lib/amounts";
+import { getFormattedPriceFromAmount, getUsdTokenAmountsForPosition } from "@/lib/amounts";
 import Confirm from "@/components/sequence/Confirm";
 import { Success } from "@/components/sequence/Success";
 import { Fail } from "@/components/sequence/Fail";
 import { TokenIcon } from "@/components/TokenIcon";
+import { usePositions } from "@/hooks/usePostions";
 
 export default function ConfirmWithdrawLiquidity() {
   const router = useRouter();
@@ -36,6 +37,8 @@ export default function ConfirmWithdrawLiquidity() {
 
   const { token0, token0Amount, token0AmountRaw, token1, token1Amount, delta } =
     useStakeStore();
+
+  const { positions, updatePositionLocal } = usePositions()
 
   // Current liquidity of the position
   const { data: positionLiquidity } = useSimulateContract({
@@ -165,7 +168,25 @@ export default function ConfirmWithdrawLiquidity() {
   if (updatePositionResult.data) {
     return (
       <Success
-        onDone={() => {
+        onDone={async () => {
+          const position = positions.find(p => p.positionId === Number(positionId))
+          if (position) {
+            const [amount0, amount1] = await getUsdTokenAmountsForPosition(position, token0, Number(tokenPrice))
+            updatePositionLocal({
+              ...position,
+              served: {
+                timestamp: Math.round(new Date().getTime() / 1000)
+              },
+              liquidity: {
+                fusdc: {
+                  valueUsd: String(amount1),
+                },
+                token1: {
+                  valueUsd: String(amount0),
+                }
+              }
+            })
+          }
           resetUpdatePosition();
           resetCollect();
           router.push("/stake");
@@ -211,10 +232,10 @@ export default function ConfirmWithdrawLiquidity() {
             {token0.address === fUSDC.address
               ? token0Amount
               : getFormattedPriceFromAmount(
-                  token0Amount,
-                  tokenPrice,
-                  fUSDC.decimals,
-                )}
+                token0Amount,
+                tokenPrice,
+                fUSDC.decimals,
+              )}
           </div>
         </div>
 
@@ -229,10 +250,10 @@ export default function ConfirmWithdrawLiquidity() {
             {token1.address === fUSDC.address
               ? token1Amount
               : getFormattedPriceFromAmount(
-                  token1Amount,
-                  tokenPrice,
-                  fUSDC.decimals,
-                )}
+                token1Amount,
+                tokenPrice,
+                fUSDC.decimals,
+              )}
           </div>
         </div>
 

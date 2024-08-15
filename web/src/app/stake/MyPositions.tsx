@@ -27,6 +27,7 @@ import { TokenIcon } from "@/components/TokenIcon";
 import { ammAddress } from "@/lib/addresses";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
+import { usePositions } from "@/hooks/usePostions";
 
 const MyPositionsWalletFragment = graphql(`
   fragment MyPositionsWalletFragment on Wallet {
@@ -68,16 +69,14 @@ export const MyPositions = () => {
   const showDemoData = useFeatureFlag("ui show demo data");
   const showClaimAllYield = useFeatureFlag("ui show claim all yield");
 
-  const { data } = useGraphqlUser();
-
-  const walletData = useFragment(MyPositionsWalletFragment, data?.getWallet);
+  const { positions: walletData } = usePositions()
 
   // this is every position, with their respective pools
   const pools = useMemo((): Pool[] | undefined => {
     if (showDemoData && address) return mockMyPositions;
 
-    return walletData?.positions?.positions
-      ?.map((position) => ({
+    return walletData.
+      map((position) => ({
         positionId: position.positionId,
         id: position.pool.token.address,
         duration: 0,

@@ -14,7 +14,7 @@ import Link from "next/link";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { graphql, useFragment } from "@/gql";
-import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
+import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usdFormat } from "@/lib/usdFormat";
 import { fUSDC, getTokenFromAddress } from "@/config/tokens";
@@ -26,7 +26,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  getFormattedPriceFromAmount,
   getFormattedPriceFromTick,
 } from "@/lib/amounts";
 import { useStakeStore } from "@/stores/useStakeStore";
@@ -39,7 +38,7 @@ import {
   sqrtPriceX96ToPrice,
 } from "@/lib/math";
 import { TokenIcon } from "@/components/TokenIcon";
-import { maxUint128 } from "viem";
+import { usePositions } from "@/hooks/usePostions";
 
 const ManagePoolFragment = graphql(`
   fragment ManagePoolFragment on SeawaterPool {
@@ -57,29 +56,6 @@ const ManagePoolFragment = graphql(`
   }
 `);
 
-const PositionsFragment = graphql(`
-  fragment PositionsFragment on Wallet {
-    positions {
-      positions {
-        positionId
-        pool {
-          address
-        }
-        lower
-        upper
-        liquidity {
-          fusdc {
-            valueUsd
-          }
-          token1 {
-            valueUsd
-          }
-        }
-      }
-    }
-  }
-`);
-
 export default function PoolPage() {
   const router = useRouter();
 
@@ -91,17 +67,16 @@ export default function PoolPage() {
   const positionIdParam = Number(params.get("positionId"));
 
   const { data: globalData } = useGraphqlGlobal();
-  const { data: userData } = useGraphqlUser();
   const allPoolsData = useFragment(ManagePoolFragment, globalData?.pools);
-  const positionsData_ = useFragment(PositionsFragment, userData?.getWallet);
+  const { positions: positionsData_, updatePositionLocal } = usePositions()
   const positionsData = useMemo(
     () =>
-      positionsData_?.positions.positions.filter(
+      positionsData_.filter(
         (p) =>
-          p.pool.address === id &&
+          p.pool.token.address === id &&
           parseFloat(p.liquidity.fusdc.valueUsd) +
-            parseFloat(p.liquidity.token1.valueUsd) >
-            0,
+          parseFloat(p.liquidity.token1.valueUsd) >
+          0,
       ),
     [id, positionsData_],
   );
@@ -135,7 +110,7 @@ export default function PoolPage() {
     if (positionIdParam)
       return positionsData?.find((p) => p.positionId === positionIdParam);
     return positionsData?.[0];
-  }, [poolData, positionId_, positionIdParam]);
+  }, [positionId_, positionIdParam]);
 
   const { positionId, upper: upperTick, lower: lowerTick } = position || {};
 
@@ -144,12 +119,12 @@ export default function PoolPage() {
       usdFormat(
         positionsData
           ? positionsData.reduce(
-              (total, { liquidity: { fusdc, token1 } }) =>
-                total +
-                parseFloat(fusdc.valueUsd) +
-                parseFloat(token1.valueUsd),
-              0,
-            )
+            (total, { liquidity: { fusdc, token1 } }) =>
+              total +
+              parseFloat(fusdc.valueUsd) +
+              parseFloat(token1.valueUsd),
+            0,
+          )
           : 0,
       ),
     [poolData],
@@ -232,8 +207,8 @@ export default function PoolPage() {
     );
     return usdFormat(
       (amount0 * Number(tokenPrice)) /
-        10 ** (token0.decimals + fUSDC.decimals) +
-        amount1 / 10 ** token1.decimals,
+      10 ** (token0.decimals + fUSDC.decimals) +
+      amount1 / 10 ** token1.decimals,
     );
   }, [position, positionLiquidity, tokenPrice, token0, token1, curTick]);
 
@@ -395,18 +370,18 @@ export default function PoolPage() {
                     <div className="text-xl md:text-2xl">
                       {lowerTick
                         ? getFormattedPriceFromTick(
-                            lowerTick,
-                            token0.decimals,
-                            token1.decimals,
-                          )
+                          lowerTick,
+                          token0.decimals,
+                          token1.decimals,
+                        )
                         : usdFormat(0)}
                       -
                       {upperTick
                         ? getFormattedPriceFromTick(
-                            upperTick,
-                            token0.decimals,
-                            token1.decimals,
-                          )
+                          upperTick,
+                          token0.decimals,
+                          token1.decimals,
+                        )
                         : usdFormat(0)}
                     </div>
                   </div>
