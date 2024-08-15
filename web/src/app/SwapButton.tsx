@@ -22,6 +22,6 @@ export const SwapButton = ({ onClick }: { onClick?: () => void }) => (
     className="z-10 flex size-[40px] cursor-pointer items-center justify-center bg-white"
     onClick={onClick}
   >
-    <Swap className="w-[10px]" />
+    <Swap className="h-[17px] w-[11px]" />
   </motion.div>
 );

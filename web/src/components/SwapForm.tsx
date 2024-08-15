@@ -487,7 +487,7 @@ export const SwapForm = () => {
               }
               onClick={flipTokens}
             >
-              <Swap />
+              <Swap className="h-[17px] w-[11px]" />
             </Button>
 
             <div className="mt-[-12px] flex h-[102px] w-[317px] flex-col justify-between rounded-lg bg-black pb-[19px] pl-[21px] pr-[15px] pt-[17px] text-white md:mt-[-15px] md:h-[126.37px] md:w-[392.42px] md:pl-[25px] md:pr-[20px] md:pt-[22px]">
