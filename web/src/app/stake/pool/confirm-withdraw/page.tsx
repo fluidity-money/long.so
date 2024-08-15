@@ -134,6 +134,31 @@ export default function ConfirmWithdrawLiquidity() {
     updatePosition(BigInt(positionId));
   }, [updatePosition, positionId, collectResult.data]);
 
+  useEffect(() => {
+    if (updatePositionResult.isSuccess) {
+      const position = positions.find(p => p.positionId === Number(positionId))
+      if (position) {
+        getUsdTokenAmountsForPosition(position, token0, Number(tokenPrice)).then(([amount0, amount1]) =>
+          updatePositionLocal({
+            ...position,
+            served: {
+              timestamp: Math.round(new Date().getTime() / 1000)
+            },
+            liquidity: {
+              fusdc: {
+                valueUsd: String(amount1),
+              },
+              token1: {
+                valueUsd: String(amount0),
+              }
+            }
+          })
+        )
+      }
+    }
+  }, [updatePositionResult.isSuccess])
+
+
   // step 1 - collect yield from position if emptying entire balance
   if (
     isWithdrawingEntirePosition &&
@@ -168,25 +193,7 @@ export default function ConfirmWithdrawLiquidity() {
   if (updatePositionResult.data) {
     return (
       <Success
-        onDone={async () => {
-          const position = positions.find(p => p.positionId === Number(positionId))
-          if (position) {
-            const [amount0, amount1] = await getUsdTokenAmountsForPosition(position, token0, Number(tokenPrice))
-            updatePositionLocal({
-              ...position,
-              served: {
-                timestamp: Math.round(new Date().getTime() / 1000)
-              },
-              liquidity: {
-                fusdc: {
-                  valueUsd: String(amount1),
-                },
-                token1: {
-                  valueUsd: String(amount0),
-                }
-              }
-            })
-          }
+        onDone={() => {
           resetUpdatePosition();
           resetCollect();
           router.push("/stake");

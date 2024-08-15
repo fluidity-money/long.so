@@ -310,6 +310,38 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const updatePositionResult = useWaitForTransactionReceipt({
     hash: updatePositionData,
   });
+  useEffect(() => {
+    if (updatePositionResult.isSuccess) {
+      const id = positionId ?? Number(mintPositionId)
+      if (id && tickLower && tickUpper) {
+        const position = positions.find(p => p.positionId === id) ?? {
+          positionId: id,
+          pool: {
+            token: token0,
+          },
+          lower: tickLower,
+          upper: tickUpper,
+        }
+        getUsdTokenAmountsForPosition(position, token0, Number(tokenPrice)).then(([amount0, amount1]) =>
+          updatePositionLocal({
+            ...position,
+            served: {
+              timestamp: Math.round(new Date().getTime() / 1000)
+            },
+            liquidity: {
+              fusdc: {
+                valueUsd: String(amount1),
+              },
+              token1: {
+                valueUsd: String(amount0),
+              }
+            }
+          })
+        )
+      }
+
+    }
+  }, [updatePositionResult.isSuccess])
 
   // step 1 pending
   if (isMintPending || (mintData && result?.isPending)) {
@@ -362,29 +394,12 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     />;
   }
 
+
   // success
   if (updatePositionResult.data) {
     return <Success
       transactionHash={updatePositionResult.data.transactionHash}
-      onDone={async () => {
-        const position = positions.find(p => p.positionId === positionId)
-        if (position) {
-          const [amount0, amount1] = await getUsdTokenAmountsForPosition(position, token0, Number(tokenPrice))
-          updatePositionLocal({
-            ...position,
-            served: {
-              timestamp: Math.round(new Date().getTime() / 1000)
-            },
-            liquidity: {
-              fusdc: {
-                valueUsd: String(amount1),
-              },
-              token1: {
-                valueUsd: String(amount0),
-              }
-            }
-          })
-        }
+      onDone={() => {
         resetUpdatePosition()
         resetApproveToken0()
         resetApproveToken1()

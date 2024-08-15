@@ -119,7 +119,7 @@ const getFormattedPriceFromTick = (
   return formattedPrice.length > 20 ? "∞ " : formattedPrice;
 };
 
-const getUsdTokenAmountsForPosition = async (position: Position, token0: Token, tokenPrice: number): Promise<[number, number]> => {
+const getUsdTokenAmountsForPosition = async (position: Pick<Position, 'positionId' | 'lower' | 'upper'>, token0: Token, tokenPrice: number): Promise<[number, number]> => {
   const positionLiquidity = await simulateContract(config, {
     address: ammAddress,
     abi: seawaterContract.abi,
