@@ -45,7 +45,6 @@ import {
 import { RewardsBreakdown } from "@/components/RewardsBreakdown";
 import { useRouter } from "next/navigation";
 import { TokenIcon } from "./TokenIcon";
-import { config } from "@/config";
 
 const SwapFormFragment = graphql(`
   fragment SwapFormFragment on SeawaterPool {
@@ -640,9 +639,9 @@ export const SwapForm = () => {
                 },
               )}
             >
-              <Token className={"size-[20px]"} />
-              <Token className={"-ml-2 size-[20px]"} />
-              <Token className={"-ml-2 mr-2 size-[20px]"} />
+              <TokenIcon className="size-5 " />
+              <TokenIcon className="-ml-1 size-5 " />
+              <TokenIcon className="-ml-1.5 size-5 " />
 
               <div className={"iridescent-text text-[12px] md:text-[14px]"}>
                 Earn up to $100 for making this trade!
