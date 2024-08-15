@@ -1,7 +1,7 @@
 // a formatted amount is a human-readable value, such as 1.445 or 20
 // a token amount is a raw amount scaled by a token's decimals, such as 1445000 or 20000000
 
-import { Position } from "@/stores/usePositionStore";
+import { Position } from "@/hooks/usePostions";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { getSqrtRatioAtTick, getTokenAmountsNumeric, sqrtPriceX96ToPrice } from "./math";
 import { usdFormat } from "./usdFormat";
