@@ -714,7 +714,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
           </AnimatePresence>
         )}
 
-        <div className="mt-[20px] h-[212px] w-[318px] rounded-lg bg-black px-[20px] py-[11px] text-white md:h-[248px] md:w-[392px]">
+        <div className="mt-[20px] w-[318px] rounded-lg bg-black px-[20px] py-[11px] text-white md:w-[392px]">
           <div className="flex w-full flex-row items-center justify-between">
             <div className="text-3xs md:text-2xs">Liquidity Range</div>
 
