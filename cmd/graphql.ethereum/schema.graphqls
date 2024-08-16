@@ -17,6 +17,16 @@ type Query {
   pools: [SeawaterPool!]!
 
   """
+  Campaigns actively running with Leo on Longtail pools.
+  """
+  activeLiquidityCampaigns: [LiquidityCampaign!]!
+
+  """
+  Campaigns slated to begin with Leo with Longtail pools in the future.
+  """
+  upcomingLiquidityCampaigns: [LiquidityCampaign!]!
+
+  """
   Get a pool using the address of token1 that's in the pool.
 
   Follows the same caching behaviour as the pools endpoint.

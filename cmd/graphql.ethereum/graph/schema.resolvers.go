@@ -148,6 +148,41 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 	return price.FloatString(5), nil
 }
 
+// CampaignID is the resolver for the campaignId field.
+func (r *liquidityCampaignResolver) CampaignID(ctx context.Context, obj *model.LiquidityCampaign) (string, error) {
+	panic(fmt.Errorf("not implemented: CampaignID - campaignId"))
+}
+
+// Owner is the resolver for the owner field.
+func (r *liquidityCampaignResolver) Owner(ctx context.Context, obj *model.LiquidityCampaign) (model.SeawaterPositionsUser, error) {
+	panic(fmt.Errorf("not implemented: Owner - owner"))
+}
+
+// PerSecond is the resolver for the perSecond field.
+func (r *liquidityCampaignResolver) PerSecond(ctx context.Context, obj *model.LiquidityCampaign) (model.Amount, error) {
+	panic(fmt.Errorf("not implemented: PerSecond - perSecond"))
+}
+
+// MaximumAmount is the resolver for the maximumAmount field.
+func (r *liquidityCampaignResolver) MaximumAmount(ctx context.Context, obj *model.LiquidityCampaign) (model.Amount, error) {
+	panic(fmt.Errorf("not implemented: MaximumAmount - maximumAmount"))
+}
+
+// FromTimestamp is the resolver for the fromTimestamp field.
+func (r *liquidityCampaignResolver) FromTimestamp(ctx context.Context, obj *model.LiquidityCampaign) (int, error) {
+	panic(fmt.Errorf("not implemented: FromTimestamp - fromTimestamp"))
+}
+
+// EndTimestamp is the resolver for the endTimestamp field.
+func (r *liquidityCampaignResolver) EndTimestamp(ctx context.Context, obj *model.LiquidityCampaign) (int, error) {
+	panic(fmt.Errorf("not implemented: EndTimestamp - endTimestamp"))
+}
+
+// Pool is the resolver for the pool field.
+func (r *liquidityCampaignResolver) Pool(ctx context.Context, obj *model.LiquidityCampaign) (seawater.Pool, error) {
+	panic(fmt.Errorf("not implemented: Pool - pool"))
+}
+
 // Served is the resolver for the served field.
 func (r *queryResolver) Served(ctx context.Context) (model.Served, error) {
 	return model.Served{
@@ -174,7 +209,37 @@ func (r *queryResolver) Pools(ctx context.Context) (pools []seawater.Pool, err e
 		return
 	}
 	err = r.DB.Table("events_seawater_newpool").Scan(&pools).Error
-	return pools, err
+	return
+}
+
+// ActiveLiquidityCampaigns is the resolver for the activeLiquidityCampaigns field.
+func (r *queryResolver) ActiveLiquidityCampaigns(ctx context.Context) (campaigns []model.LiquidityCampaign, err error) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
+		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
+			MockDelay(r.F)
+			return nil
+		})
+		campaigns = MockCampaigns()
+		return
+	}
+	// TODO
+	//err = r.DB.Table("leo_active_campaigns_1").Scan(&campaigns).Error
+	return
+}
+
+// UpcomingLiquidityCampaigns is the resolver for the upcomingLiquidityCampaigns field.
+func (r *queryResolver) UpcomingLiquidityCampaigns(ctx context.Context) (campaigns []model.LiquidityCampaign, err error) {
+	if r.F.Is(features.FeatureGraphqlMockGraph) {
+		r.F.On(features.FeatureGraphqlMockGraphDataDelay, func() error {
+			MockDelay(r.F)
+			return nil
+		})
+		campaigns = MockCampaigns()
+		return
+	}
+	// TODO
+	//err = r.DB.Table("leo_upcoming_campaigns_1").Scan(&campaigns).Error
+	return
 }
 
 // GetPool is the resolver for the getPool field.
@@ -1616,6 +1681,11 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 // Amount returns AmountResolver implementation.
 func (r *Resolver) Amount() AmountResolver { return &amountResolver{r} }
 
+// LiquidityCampaign returns LiquidityCampaignResolver implementation.
+func (r *Resolver) LiquidityCampaign() LiquidityCampaignResolver {
+	return &liquidityCampaignResolver{r}
+}
+
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
@@ -1656,6 +1726,7 @@ func (r *Resolver) Token() TokenResolver { return &tokenResolver{r} }
 func (r *Resolver) Wallet() WalletResolver { return &walletResolver{r} }
 
 type amountResolver struct{ *Resolver }
+type liquidityCampaignResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type seawaterConfigResolver struct{ *Resolver }
 type seawaterLiquidityResolver struct{ *Resolver }

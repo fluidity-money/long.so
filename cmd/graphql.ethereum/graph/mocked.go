@@ -319,6 +319,18 @@ func MockLiquidity(fusdc, token types.Address) (liquidity []model.SeawaterLiquid
 	return
 }
 
+func MockCampaigns() []model.LiquidityCampaign {
+	return []model.LiquidityCampaign{{
+		Pool: types.AddressFromString("0x65dfe41220c438bf069bbce9eb66b087fe65db36"),
+		Token: Tokens["0x65dfe41220c438bf069bbce9eb66b087fe65db36"].Address,
+		TickLower: -10,
+		TickUpper: 100,
+		Owner: types.AddressFromString("0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5"),
+		Starting: time.Now(),
+		Ending: time.Now().Add(100 * time.Hour),
+	}}
+}
+
 func randomBoolean() bool {
 	b := make([]byte, 1)
 	if _, err := rand.Read(b); err != nil {

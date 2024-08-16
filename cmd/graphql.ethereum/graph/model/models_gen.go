@@ -2,10 +2,6 @@
 
 package model
 
-import (
-	"github.com/fluidity-money/long.so/lib/types/seawater"
-)
-
 // Get swaps for a specific pool, set up to be more granular for caching.
 type GetSwaps struct {
 	Data SeawaterSwaps `json:"data"`
@@ -14,29 +10,6 @@ type GetSwaps struct {
 // Get swaps for user return type, set up to allow better control of caching.
 type GetSwapsForUser struct {
 	Data SeawaterSwaps `json:"data"`
-}
-
-// Liquidity campaigns available in this pool that's distributed on-chain.
-type LiquidityCampaign struct {
-	// Campaign ID to identify the campaign with a contract call.
-	CampaignID string `json:"campaignId"`
-	// Owner of the incentive campaign, they can pause, cancel, and update the campaigns.
-	Owner SeawaterPositionsUser `json:"owner"`
-	// Lower tick that this position incentivises.
-	TickLower int `json:"tickLower"`
-	// Upper tick that this position incentivises.
-	TickUpper int `json:"tickUpper"`
-	// Amount of token that's released per second.
-	PerSecond Amount `json:"perSecond"`
-	// Maximum amount of the token that can be distributed over all time. The token that's sent
-	// is contained within.
-	MaximumAmount Amount `json:"maximumAmount"`
-	// Timestamp that begins this liquidity mining campaign.
-	FromTimestamp int `json:"fromTimestamp"`
-	// Timestamp that ends this liquidity mining campaign.
-	EndTimestamp int `json:"endTimestamp"`
-	// Pool that these rewards are enabled for.
-	Pool seawater.Pool `json:"pool"`
 }
 
 // Liquidity over time available in the pool, in the form of PairAmount, so it's possible to
