@@ -73,6 +73,7 @@ const StakeFormFragment = graphql(`
   fragment StakeFormFragment on SeawaterPool {
     address
     earnedFeesAPRFUSDC
+    fee
     config {
       classification
     }
@@ -220,14 +221,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
     : 0n;
 
-  const { data: fee } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
-    functionName: "feeBB3CF608",
-    args: [token0.address],
-  });
-
-  const feeDisplay = fee?.result ? (100 / fee.result).toFixed(2) : "???";
+  const feeDisplay = poolData?.fee ? (100 / poolData.fee).toFixed(2) : "???";
 
   // in this context, token0 is actually token1. It's converted to token1
   // when we use it.
@@ -637,7 +631,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               >
                 <div className="flex flex-col items-center gap-[3px]">
                   <div className="iridescent-text text-xs font-medium md:text-sm">
-                    0 ~ 0.3%
+                    {feeDisplay}%
                   </div>
                   <Badge
                     variant="iridescent"
