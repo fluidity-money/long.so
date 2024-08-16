@@ -280,6 +280,10 @@ impl Leo {
         Ok(())
     }
 
+    pub fn cancel_campaign(&mut self, pool: Address, id: CampaignId) -> Result<(), Vec<u8>> {
+        self.update_campaign(pool, id, 0, 0, U256::ZERO, U256::ZERO, U256::ZERO, 0, 0)
+    }
+
     /// Return campaign details, of the form the lower tick, the upper tick,
     /// the amount sent per second in the campaign, the token that's being
     /// distributed, and the amount distributed so far, as well as the maximum

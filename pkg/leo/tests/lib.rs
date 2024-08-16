@@ -68,7 +68,7 @@ mod proptesting {
 
     proptest! {
         #[test]
-        fn test(
+        fn proptest_full_story(
             mut tick_lower in MIN_TICK..MAX_TICK,
             mut tick_upper in MIN_TICK..MAX_TICK,
             per_second in any::<[u64; 4]>(),

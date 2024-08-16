@@ -33,7 +33,7 @@ jobs:
         run: go mod tidy
 
       - name: Copy the configuration for pools toml file
-        run: cp pools.toml cmd/graphql.ethereum
+        run: cp config/pools.toml cmd/graphql.ethereum
 
       - name: Run Go tests and generate coverage report
         run: go test ./... -coverprofile=coverage-go.txt -covermode=count
