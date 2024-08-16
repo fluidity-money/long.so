@@ -137,6 +137,7 @@ type ComplexityRoot struct {
 		Config              func(childComplexity int) int
 		EarnedFeesAPRToken1 func(childComplexity int) int
 		EarnedFeesAprfusdc  func(childComplexity int) int
+		Fee                 func(childComplexity int) int
 		ID                  func(childComplexity int) int
 		Liquidity           func(childComplexity int) int
 		LiquidityCampaigns  func(childComplexity int) int
@@ -263,6 +264,7 @@ type SeawaterLiquidityResolver interface {
 type SeawaterPoolResolver interface {
 	Served(ctx context.Context, obj *seawater.Pool) (model.Served, error)
 	ID(ctx context.Context, obj *seawater.Pool) (string, error)
+	Fee(ctx context.Context, obj *seawater.Pool) (int, error)
 	Address(ctx context.Context, obj *seawater.Pool) (string, error)
 	TickSpacing(ctx context.Context, obj *seawater.Pool) (string, error)
 	Token(ctx context.Context, obj *seawater.Pool) (model.Token, error)
@@ -733,6 +735,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SeawaterPool.EarnedFeesAprfusdc(childComplexity), true
+
+	case "SeawaterPool.fee":
+		if e.complexity.SeawaterPool.Fee == nil {
+			break
+		}
+
+		return e.complexity.SeawaterPool.Fee(childComplexity), true
 
 	case "SeawaterPool.id":
 		if e.complexity.SeawaterPool.ID == nil {
@@ -1420,6 +1429,11 @@ type SeawaterPool {
   Id for quick caching, in the form of ` + "`" + `pool:address` + "`" + `.
   """
   id: ID!
+
+  """
+  Pool Fee, that taken every trade.
+  """
+  fee: Int!
 
   """
   Address of the pool, and of the token that's traded.
@@ -3258,6 +3272,8 @@ func (ec *executionContext) fieldContext_LiquidityCampaign_pool(_ context.Contex
 				return ec.fieldContext_SeawaterPool_served(ctx, field)
 			case "id":
 				return ec.fieldContext_SeawaterPool_id(ctx, field)
+			case "fee":
+				return ec.fieldContext_SeawaterPool_fee(ctx, field)
 			case "address":
 				return ec.fieldContext_SeawaterPool_address(ctx, field)
 			case "tickSpacing":
@@ -3804,6 +3820,8 @@ func (ec *executionContext) fieldContext_Query_pools(_ context.Context, field gr
 				return ec.fieldContext_SeawaterPool_served(ctx, field)
 			case "id":
 				return ec.fieldContext_SeawaterPool_id(ctx, field)
+			case "fee":
+				return ec.fieldContext_SeawaterPool_fee(ctx, field)
 			case "address":
 				return ec.fieldContext_SeawaterPool_address(ctx, field)
 			case "tickSpacing":
@@ -3887,6 +3905,8 @@ func (ec *executionContext) fieldContext_Query_getPool(ctx context.Context, fiel
 				return ec.fieldContext_SeawaterPool_served(ctx, field)
 			case "id":
 				return ec.fieldContext_SeawaterPool_id(ctx, field)
+			case "fee":
+				return ec.fieldContext_SeawaterPool_fee(ctx, field)
 			case "address":
 				return ec.fieldContext_SeawaterPool_address(ctx, field)
 			case "tickSpacing":
@@ -4604,6 +4624,8 @@ func (ec *executionContext) fieldContext_SeawaterConfig_pool(_ context.Context, 
 				return ec.fieldContext_SeawaterPool_served(ctx, field)
 			case "id":
 				return ec.fieldContext_SeawaterPool_id(ctx, field)
+			case "fee":
+				return ec.fieldContext_SeawaterPool_fee(ctx, field)
 			case "address":
 				return ec.fieldContext_SeawaterPool_address(ctx, field)
 			case "tickSpacing":
@@ -5042,6 +5064,50 @@ func (ec *executionContext) fieldContext_SeawaterPool_id(_ context.Context, fiel
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SeawaterPool_fee(ctx context.Context, field graphql.CollectedField, obj *seawater.Pool) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterPool_fee(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.SeawaterPool().Fee(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SeawaterPool_fee(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SeawaterPool",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -6273,6 +6339,8 @@ func (ec *executionContext) fieldContext_SeawaterPosition_pool(_ context.Context
 				return ec.fieldContext_SeawaterPool_served(ctx, field)
 			case "id":
 				return ec.fieldContext_SeawaterPool_id(ctx, field)
+			case "fee":
+				return ec.fieldContext_SeawaterPool_fee(ctx, field)
 			case "address":
 				return ec.fieldContext_SeawaterPool_address(ctx, field)
 			case "tickSpacing":
@@ -7035,6 +7103,8 @@ func (ec *executionContext) fieldContext_SeawaterSwap_pool(_ context.Context, fi
 				return ec.fieldContext_SeawaterPool_served(ctx, field)
 			case "id":
 				return ec.fieldContext_SeawaterPool_id(ctx, field)
+			case "fee":
+				return ec.fieldContext_SeawaterPool_fee(ctx, field)
 			case "address":
 				return ec.fieldContext_SeawaterPool_address(ctx, field)
 			case "tickSpacing":
@@ -11117,6 +11187,42 @@ func (ec *executionContext) _SeawaterPool(ctx context.Context, sel ast.Selection
 					}
 				}()
 				res = ec._SeawaterPool_id(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "fee":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SeawaterPool_fee(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

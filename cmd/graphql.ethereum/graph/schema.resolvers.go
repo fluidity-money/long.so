@@ -478,6 +478,14 @@ func (r *seawaterPoolResolver) ID(ctx context.Context, obj *seawater.Pool) (stri
 	return obj.Token.String(), nil
 }
 
+// Fee is the resolver for the fee field.
+func (r *seawaterPoolResolver) Fee(ctx context.Context, obj *seawater.Pool) (int, error) {
+	if obj == nil {
+		return 0, fmt.Errorf("no pool obj")
+	}
+	return int(obj.Fee.Int64()), nil
+}
+
 // Address is the resolver for the address field.
 func (r *seawaterPoolResolver) Address(ctx context.Context, obj *seawater.Pool) (string, error) {
 	if obj == nil {

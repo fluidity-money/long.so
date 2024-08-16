@@ -149,6 +149,11 @@ type SeawaterPool {
   id: ID!
 
   """
+  Pool fee, that taken every trade.
+  """
+  fee: Int!
+
+  """
   Address of the pool, and of the token that's traded.
   """
   address: String!
