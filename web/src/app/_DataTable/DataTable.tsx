@@ -38,8 +38,14 @@ export function DataTable<TData, TValue>({
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="border-b-0">
               {headerGroup.headers.map((header) => {
+                if (!header.column.columnDef.header) return null;
+                console.log("ASDSAD", (header.column.columnDef as any).colSpan);
                 return (
-                  <TableHead key={header.id} className="text-sm text-black">
+                  <TableHead
+                    key={header.id}
+                    className="text-sm text-black"
+                    colSpan={(header.column.columnDef as any).colSpan}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(

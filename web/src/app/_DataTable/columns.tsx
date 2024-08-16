@@ -25,20 +25,39 @@ const AmountHeader = () => {
   );
 };
 
-export const columns: ColumnDef<Transaction>[] = [
+export const columns: (ColumnDef<Transaction> & { colSpan?: number })[] = [
   {
     accessorKey: "value",
     header: "Value",
     cell: ({ row }) => usdFormat(row.original.value),
   },
   {
-    id: "amount",
+    id: "amountFrom",
     header: () => <AmountHeader />,
+    colSpan: 3,
     cell: ({ row }) => {
       return (
         <div className="flex flex-row items-center gap-2">
           <Token />
-          {row.original.amountFrom} {"->"} <Token size="small" />
+          {row.original.amountFrom}
+        </div>
+      );
+    },
+  },
+  {
+    id: "amountIcon",
+    header: undefined,
+    cell: () => {
+      return <span>{"->"}</span>;
+    },
+  },
+  {
+    id: "amountTo",
+    header: undefined,
+    cell: ({ row }) => {
+      return (
+        <div className="flex flex-row items-center gap-2">
+          <Token size="small" />
           {row.original.amountTo}
         </div>
       );
