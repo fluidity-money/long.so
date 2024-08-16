@@ -273,6 +273,8 @@ impl Leo {
             });
         }
 
+        events::emit_campaign_updated(identifier, pool, tick_lower, tick_upper, starting, ending);
+
         Ok(())
     }
 

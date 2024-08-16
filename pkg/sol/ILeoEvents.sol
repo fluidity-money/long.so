@@ -14,4 +14,11 @@ interface ILeoEvents {
         uint256 details, // [tick lower, tick upper, owner],
         uint256 times // [starting, ending]
     );
+
+    event CampaignUpdated(
+        bytes8 indexed identifier,
+        address indexed pool,
+        uint256 indexed perSecond,
+        uint256 extras // [tick lower, tick upper, starting, ending]
+    );
 }

@@ -38,3 +38,17 @@ func TestUnpackTimes(t *testing.T) {
 	assert.Equalf(t, uint64(5000), starting, "starting not equal")
 	assert.Equalf(t, uint64(545464), ending, "ending not equal")
 }
+
+func TestUnpackExtras(t *testing.T) {
+//29230032814334249381340450918364660083204158393161
+	tickLower, tickUpper, starting, ending := unpackExtras(new(big.Int).SetBits([]big.Word{
+		2889,
+		1888,
+		85899346119,
+		0,
+	}))
+	assert.Equalf(t, int32(20), tickLower, "lower is wrong")
+	assert.Equalf(t, int32(199), tickUpper, "upper is wrong")
+	assert.Equalf(t, uint64(1888), starting, "starting is wrong")
+	assert.Equalf(t, uint64(2889), ending, "ending is wrong")
+}

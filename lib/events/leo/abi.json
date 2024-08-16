@@ -54,5 +54,36 @@
 			}
 		],
 		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "CampaignUpdated",
+		"inputs": [
+			{
+				"name": "identifier",
+				"type": "bytes8",
+				"indexed": true,
+				"internalType": "bytes8"
+			},
+			{
+				"name": "pool",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "perSecond",
+				"type": "uint256",
+				"indexed": true,
+				"internalType": "uint256"
+			},
+			{
+				"name": "extras",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
 	}
 ]
