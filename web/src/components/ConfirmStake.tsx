@@ -68,6 +68,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     tickLower,
     tickUpper,
     multiSingleToken,
+    feePercentage,
   } = useStakeStore();
 
   const { positions, updatePositionLocal } = usePositions();
@@ -125,15 +126,6 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     functionName: "tickSpacing653FE28F",
     args: [token0.address],
   });
-
-  const { data: fee } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
-    functionName: "feeBB3CF608",
-    args: [token0.address],
-  });
-
-  const feeDisplay = fee?.result ? (100 / fee.result).toFixed(2) : "???";
 
   // set up write contract hooks
   const {
@@ -205,6 +197,16 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
       args: [token0.address, lower, upper],
     });
   };
+
+  const usdTokenOPrice = getFormattedPriceFromAmount(
+    token0Amount,
+    tokenPrice,
+    fUSDC.decimals,
+  );
+
+  const usdTokenOPriceWReward =
+    getFormattedPriceFromAmount(token0Amount, tokenPrice, fUSDC.decimals) +
+    Number(token1Amount);
 
   // wait for the mintPosition transaction to complete
   const result = useWaitForTransactionReceipt({
@@ -469,12 +471,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
             </span>
           </div>
           <div className="mt-[4px] text-2xl font-medium md:text-3xl">
-            $
-            {getFormattedPriceFromAmount(
-              token0Amount,
-              tokenPrice,
-              fUSDC.decimals,
-            ) + Number(token1Amount)}
+            ${usdTokenOPriceWReward}
           </div>
           <div className="mt-[4px] text-3xs font-medium text-gray-2 md:text-2xs">
             The amount is split into{" "}
@@ -562,12 +559,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
             {token0Amount}
           </div>
           <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">
-            = $
-            {getFormattedPriceFromAmount(
-              token0Amount,
-              tokenPrice,
-              fUSDC.decimals,
-            )}
+            = ${usdTokenOPrice}
           </div>
         </div>
 
@@ -609,7 +601,10 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
           <div className="mt-[13px] flex flex-col gap-[5px] px-[4px] text-2xs">
             <div className="flex flex-row justify-between">
               <div>Fees</div>
-              <div>{feeDisplay}%</div>
+              <div>
+                Pool Fee {+feePercentage.toFixed(2)}% ={" "}
+                {(usdTokenOPrice * feePercentage).toFixed(2)}$
+              </div>
             </div>
 
             {showBoostIncentives && (

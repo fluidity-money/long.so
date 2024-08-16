@@ -55,6 +55,10 @@ interface StakeStore {
   // parse and set from a display amount
   setPriceLower: (tick: string, decimals: number) => void;
   setPriceUpper: (tick: string, decimals: number) => void;
+
+  // fee Percentage taken from graph
+  feePercentage: number;
+  setFeePercentage: (fee: number) => void;
 }
 
 export const useStakeStore = create<StakeStore>((set) => ({
@@ -203,4 +207,6 @@ export const useStakeStore = create<StakeStore>((set) => ({
       priceUpper: price,
     });
   },
+  feePercentage: 0,
+  setFeePercentage: (fee) => set({ feePercentage: 100 / fee }),
 }));

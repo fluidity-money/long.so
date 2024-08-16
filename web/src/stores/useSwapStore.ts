@@ -30,6 +30,10 @@ interface SwapStore {
 
   gas: bigint;
   setGas: (amount: bigint) => void;
+
+  // fee Percentage taken from graph
+  feePercentage: number;
+  setFeePercentage: (fee: number) => void;
 }
 
 export const useSwapStore = create<SwapStore>((set) => ({
@@ -117,7 +121,8 @@ export const useSwapStore = create<SwapStore>((set) => ({
       return { token1Amount: amount };
     });
   },
-
   gas: 0n,
   setGas: (gas) => set({ gas }),
+  feePercentage: 0,
+  setFeePercentage: (fee) => set({ feePercentage: 100 / fee }),
 }));

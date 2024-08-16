@@ -129,6 +129,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     tickUpper,
     setTickLower,
     setTickUpper,
+    feePercentage,
+    setFeePercentage,
   } = useStakeStore();
 
   // poolId should override tokens if we are redirected
@@ -154,6 +156,13 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const poolData = poolsData?.find(
     (pool) => pool.address === poolId || pool.address === token0.address,
   );
+
+  useEffect(() => {
+    if (poolData?.fee) {
+      setFeePercentage(poolData.fee);
+    }
+  }, [poolData?.fee, setFeePercentage]);
+
   const dailyPrices = poolData?.priceOverTime.daily.map((price) =>
     parseFloat(price),
   );
@@ -220,8 +229,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const tokenPrice = poolSqrtPriceX96
     ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
     : 0n;
-
-  const feeDisplay = poolData?.fee ? (100 / poolData.fee).toFixed(2) : "???";
 
   // in this context, token0 is actually token1. It's converted to token1
   // when we use it.
@@ -303,6 +310,16 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
           token1Balance?.value.toString() ?? token1Amount ?? "0",
         );
   };
+
+  const usdPriceToken0 =
+    token0.address === fUSDC.address
+      ? parseFloat(token0Amount)
+      : getFormattedPriceFromAmount(token0Amount, tokenPrice, fUSDC.decimals);
+
+  const usdPriceToken1 =
+    token1.address === fUSDC.address
+      ? parseFloat(token1Amount)
+      : getFormattedPriceFromAmount(token1Amount, tokenPrice, fUSDC.decimals);
 
   const [liquidityRangeType, setLiquidityRangeType] = useState<
     "full-range" | "auto" | "custom"
@@ -482,16 +499,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             </div>
 
             <div className="mt-[5px] flex w-full flex-row items-center justify-between">
-              <div className="text-2xs md:text-gray-1">
-                $
-                {token0.address === fUSDC.address
-                  ? token0Amount
-                  : getFormattedPriceFromAmount(
-                      token0Amount,
-                      tokenPrice,
-                      fUSDC.decimals,
-                    )}
-              </div>
+              <div className="text-2xs md:text-gray-1">${usdPriceToken0}</div>
 
               <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
                 {token0Balance && (
@@ -547,16 +555,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               </div>
 
               <div className="mt-[5px] flex w-full flex-row items-center justify-between">
-                <div className="text-2xs md:text-gray-1">
-                  $
-                  {token1.address === fUSDC.address
-                    ? token1Amount
-                    : getFormattedPriceFromAmount(
-                        token1Amount,
-                        tokenPrice,
-                        fUSDC.decimals,
-                      )}
-                </div>
+                <div className="text-2xs md:text-gray-1">${usdPriceToken1}</div>
                 <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
                   {token1Balance && (
                     <>
@@ -631,7 +630,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               >
                 <div className="flex flex-col items-center gap-[3px]">
                   <div className="iridescent-text text-xs font-medium md:text-sm">
-                    {feeDisplay}%
+                    {+feePercentage.toFixed(2)}%
                   </div>
                   <Badge
                     variant="iridescent"
@@ -855,7 +854,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                         "flex w-[55.23px] flex-col items-center gap-[4px]"
                       }
                     >
-                      <div>$0.15</div>
+                      <div>
+                        {/* {+feePercentage.toFixed(2)}% ={" "} */}
+                        {+(feePercentage * usdPriceToken0).toFixed(2)}$
+                      </div>
                       <div
                         className={
                           "h-[3px] w-full rounded-[1px] bg-neutral-400"
@@ -964,7 +966,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               <div className={"flex flex-row items-center"}>
                 <Token />
                 <Token className={"-ml-1 mr-1"} />
-                {feeDisplay}%
+                {feePercentage.toFixed(2)}%
               </div>
             </div>
 

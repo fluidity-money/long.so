@@ -24,11 +24,10 @@ import {
   useSimulateContract,
   useClient,
   useChainId,
-  useWalletClient,
   useConnectorClient,
 } from "wagmi";
 import { formatEther, maxUint256 } from "viem";
-import { useWalletInfo, useWeb3Modal } from "@web3modal/wagmi/react";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { ammAddress } from "@/lib/addresses";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { fUSDC } from "@/config/tokens";
@@ -49,6 +48,7 @@ import { TokenIcon } from "./TokenIcon";
 const SwapFormFragment = graphql(`
   fragment SwapFormFragment on SeawaterPool {
     address
+    fee
     earnedFeesAPRFUSDC
     earnedFeesAPRToken1
     token {
@@ -93,6 +93,8 @@ export const SwapForm = () => {
     setToken1AmountRaw,
     gas,
     setGas,
+    feePercentage,
+    setFeePercentage,
   } = useSwapStore();
   const { data } = useGraphqlGlobal();
 
@@ -121,6 +123,12 @@ export const SwapForm = () => {
       );
     });
   }, [poolsData, token0.address, token1.address]);
+
+  useEffect(() => {
+    if (poolData?.fee) {
+      setFeePercentage(poolData.fee);
+    }
+  }, [poolData?.fee, setFeePercentage]);
 
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
@@ -246,10 +254,13 @@ export const SwapForm = () => {
           args: swapOptions.args,
           account: address,
         });
+        console.log("GAASs", estimatedGas);
         setGas(estimatedGas);
-      } catch {}
+      } catch (e) {
+        console.error(e);
+      }
     })();
-  }, [address, client, token1, token0AmountRaw, swapOptions]);
+  }, [address, client, token1, token0AmountRaw, setGas, swapOptions]);
 
   const { error: quote2Error, isLoading: quote2IsLoading } =
     useSimulateContract({
@@ -304,6 +315,25 @@ export const SwapForm = () => {
 
   const { open } = useWeb3Modal();
 
+  const usdPriceToken0 = snapAmountToDecimals(
+    token0.address === fUSDC.address
+      ? token0AmountFloat
+      : getFormattedPriceFromAmount(
+          token0AmountFloat.toString(),
+          token0Price,
+          fUSDC.decimals,
+        ),
+  );
+
+  const usdPriceToken1 = snapAmountToDecimals(
+    token1.address === fUSDC.address
+      ? token1AmountFloat
+      : getFormattedPriceFromAmount(
+          token1AmountFloat.toString(),
+          token1Price,
+          fUSDC.decimals,
+        ),
+  );
   // make user confirm before receiving 0 tokens from a swap
   const [allowZeroSwap, setAllowZeroSwap] = useState(false);
 
@@ -432,16 +462,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  $
-                  {snapAmountToDecimals(
-                    token0.address === fUSDC.address
-                      ? token0AmountFloat
-                      : getFormattedPriceFromAmount(
-                          token0AmountFloat.toString(),
-                          token0Price,
-                          fUSDC.decimals,
-                        ),
-                  )}
+                  ${usdPriceToken0}
                 </div>
 
                 <div
@@ -522,16 +543,7 @@ export const SwapForm = () => {
 
               <div className={"flex flex-row items-center justify-between"}>
                 <div className={"text-[10px] text-zinc-400"}>
-                  $
-                  {snapAmountToDecimals(
-                    token1.address === fUSDC.address
-                      ? token1AmountFloat
-                      : getFormattedPriceFromAmount(
-                          token1AmountFloat.toString(),
-                          token1Price,
-                          fUSDC.decimals,
-                        ),
-                  )}
+                  ${usdPriceToken1}
                 </div>
 
                 <div
@@ -608,8 +620,14 @@ export const SwapForm = () => {
               <div className={"flex flex-row justify-between"}>
                 <div>Fees</div>
                 <div className={"flex flex-row items-center gap-1"}>
-                  <Gas /> {formatEther(gas)} SPN
+                  Gas <Gas /> {formatEther(gas)} SPN
                 </div>
+              </div>
+              <div className={"flex flex-row justify-end"}>
+                <span>
+                  Pool Fee {+feePercentage.toFixed(2)}% ={" "}
+                  {(usdPriceToken0 * feePercentage).toFixed(2)}$
+                </span>
               </div>
               <div className={"flex flex-row justify-between"}>
                 <div>Rewards</div>
