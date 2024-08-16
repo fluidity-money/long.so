@@ -428,13 +428,14 @@ impl Leo {
                 // Since we're continuing, we figure out what the user is owed, and we set the
                 // timestamp to the ending of this campaign. Clamp the timestamp to the ending
                 // time.
-                let secs_since = U64::max(campaign.ending.get(), timestamp) - campaign_starting;
+                let clamped_secs_since =
+                    U64::min(campaign.ending.get(), timestamp) - campaign_starting;
                 let base_rewards = maths::calc_base_rewards(
                     self.liquidity.getter(pool).get(), // Pool LP
                     position_liquidity,                // User LP
                     campaign.per_second.get(),         // Campaign rewards per sec
                 );
-                let rewards = base_rewards * U256::from(secs_since);
+                let rewards = base_rewards * U256::from(clamped_secs_since);
                 owed.push((campaign_token, rewards));
 
                 // Use the minimum of the existing current timestamp or the ending timestamp.

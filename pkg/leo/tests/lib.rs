@@ -61,7 +61,9 @@ mod proptesting {
 
     const POOL: Address = Address::ZERO;
     const CAMPAIGN_ID: FixedBytes<8> = FixedBytes::ZERO;
+
     const POS_ID: U256 = U256::ZERO;
+    const POS_ID_OTHER: U256 = U256::from_limbs([1, 0, 0, 0]);
 
     const MIN_TICK: i32 = -887272;
     const MAX_TICK: i32 = -MIN_TICK;
@@ -76,10 +78,12 @@ mod proptesting {
             expected_starting in 0..libleo::host::current_timestamp(),
             expected_ending in any::<u64>(),
             secs_in in 1..u64::MAX,
-            position_lp in any::<[u64; 4]>()
+            position_lp in any::<[u64; 4]>(),
+            other_position_lp in any::<[u64; 4]>()
         ) {
             let starting_pool = U256::from_limbs(starting_pool);
             let position_lp = U256::from_limbs(position_lp);
+            let other_position_lp = U256::from_limbs(other_position_lp);
 
             if starting_pool.is_zero() || position_lp.is_zero() {
                 return Ok(())
@@ -92,9 +96,11 @@ mod proptesting {
             let per_second = U256::from(per_second);
 
             libleo::host::with_storage::<_, libleo::Leo, _>(
-                &[(POOL, POS_ID, tick_lower, tick_upper, position_lp)],
+                &[
+                  (POOL, POS_ID, tick_lower, tick_upper, position_lp),
+                  (POOL, POS_ID_OTHER, 0, 0, other_position_lp)
+                ],
                 |leo| {
-                    let seconds_since = block::timestamp() - expected_starting;
                     let expected_ending = expected_starting + expected_ending;
 
                     libleo::host::advance_time(secs_in);
@@ -115,13 +121,27 @@ mod proptesting {
 
                     assert_eq!(leo.pool_lp(POOL).unwrap(), U256::ZERO);
 
+                    leo.vest_position(POOL, POS_ID_OTHER).unwrap();
+
+                    assert_eq!(leo.pool_lp(POOL).unwrap(), other_position_lp);
+
                     leo.vest_position(POOL, POS_ID).unwrap();
 
-                    assert_eq!(leo.pool_lp(POOL).unwrap(), position_lp);
+                    assert_eq!(leo.pool_lp(POOL).unwrap(), other_position_lp + position_lp);
 
-                    let reward = leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID]).unwrap()[0];
+                    let reward = leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID]).unwrap()[0].1;
 
-                    eprintln!("block timestamp: {}, seconds_since: {seconds_since}, expected start: {expected_starting}, per second {per_second}, reward: {:?}", block::timestamp(), reward);
+                    // We take either when the campaign ended, or the current timestamp
+                    let clamped_campaign_ending =
+                        u64::min(expected_ending, block::timestamp());
+
+                    let seconds_since = clamped_campaign_ending - expected_starting;
+
+                    let expected_reward =
+                      libleo::maths::calc_base_rewards(other_position_lp + position_lp, position_lp, per_second) *
+                      U256::from(seconds_since);
+
+                    assert_eq!(expected_reward.to_string(), reward.to_string());
                 },
             )
         }
