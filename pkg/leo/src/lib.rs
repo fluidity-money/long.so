@@ -35,6 +35,8 @@ type CampaignId = FixedBytes<8>;
 #[solidity_storage]
 #[entrypoint]
 pub struct Leo {
+    version: StorageU8,
+
     enabled: StorageBool,
 
     emergency_council: StorageAddress,
@@ -112,6 +114,14 @@ pub struct StoragePosition {
 
 #[external]
 impl Leo {
+    pub fn ctor(&mut self, emergency: Address) -> Result<(), Vec<u8>> {
+        assert!(self.version.get().is_zero());
+        self.emergency_council.set(emergency);
+        self.version.set(U8::from(1));
+        self.enabled.set(true);
+        Ok(())
+    }
+
     // Take a user's LP NFT using the NFT Manager, also recording the
     // pool they LP'd, including the timestamp when they deposited it
     // here. This also serves as the time it was last updated.
@@ -154,6 +164,8 @@ impl Leo {
         starting: u64,
         ending: u64,
     ) -> Result<(), Vec<u8>> {
+        assert!(self.enabled.get());
+
         // Take the ERC20 from the user for the maximum run of the campaign.
         let mut pool_campaigns = self.campaigns.setter(pool);
         let mut pool_campaigns_ongoing = pool_campaigns.ongoing.setter(identifier);
@@ -185,7 +197,7 @@ impl Leo {
             campaign_bal.maximum.set(new_maximum);
 
             // Take the token's amounts for the campaign.
-            erc20::take(pool, new_maximum)?;
+            erc20::take(pool, extra_max)?;
 
             evm::log(events::CampaignBalanceUpdated {
                 identifier: identifier.as_slice().try_into().unwrap(),
@@ -204,6 +216,62 @@ impl Leo {
             starting,
             ending,
         );
+
+        Ok(())
+    }
+
+    /// Update a campaign by taking the last campaign versions item, and
+    /// setting the ending timestamp to the current timestamp, then inserting
+    /// a new record to the campaign versions array with the settings we
+    /// requested.
+    pub fn update_campaign(
+        &mut self,
+        identifier: CampaignId,
+        pool: Address,
+        tick_lower: i32,
+        tick_upper: i32,
+        per_second: U256,
+        extra_max: U256,
+        starting: u64,
+        ending: u64,
+    ) -> Result<(), Vec<u8>> {
+        assert!(self.enabled.get());
+        assert_eq!(
+            self.campaign_balances.getter(identifier).owner.get(),
+            msg::sender()
+        );
+        // Push to the campaign versions the new content, setting the previous
+        // campaign's ending timestamp to the current timestamp.
+        let ongoing_campaigns = &mut self.campaigns.setter(pool).ongoing;
+        let mut campaign_versions = ongoing_campaigns.setter(identifier);
+        let campaign_versions_len = campaign_versions.len();
+        assert!(campaign_versions_len > 0);
+        campaign_versions
+            .setter(campaign_versions_len - 1)
+            .unwrap()
+            .ending
+            .set(U64::from(block::timestamp()));
+        let mut campaign = campaign_versions.grow();
+        campaign.tick_lower.set(I32::try_from(tick_lower).unwrap());
+        campaign.tick_upper.set(I32::try_from(tick_upper).unwrap());
+        campaign.per_second.set(per_second);
+        campaign.starting.set(U64::try_from(starting).unwrap());
+        campaign.ending.set(U64::try_from(ending).unwrap());
+
+        if !extra_max.is_zero() {
+            let mut campaign_bal = self.campaign_balances.setter(identifier);
+            let existing_maximum = campaign_bal.maximum.get();
+            let new_maximum = existing_maximum + extra_max;
+            campaign_bal.maximum.set(new_maximum);
+
+            // Take the token's amounts for the campaign.
+            erc20::take(pool, extra_max)?;
+
+            evm::log(events::CampaignBalanceUpdated {
+                identifier: identifier.as_slice().try_into().unwrap(),
+                newMaximum: new_maximum,
+            });
+        }
 
         Ok(())
     }
@@ -238,6 +306,7 @@ impl Leo {
     // Collect the token rewards paid by Seawater for LP'ing in this
     // position, then send to the user.
     pub fn collect_pool_rewards(&self, pool: Address, id: U256) -> Result<(u128, u128), Vec<u8>> {
+        assert!(self.enabled.get());
         assert!(self.positions.get(id).owner.get() == msg::sender());
         let (amount_0, amount_1) = seawater::collect_yield_single_to(id, pool, msg::sender());
         Ok((amount_0, amount_1))
@@ -257,6 +326,7 @@ impl Leo {
         position_id: U256,
         campaign_ids: Vec<CampaignId>,
     ) -> Result<Vec<(Address, U256)>, Vec<u8>> {
+        assert!(self.enabled.get());
         assert!(self.positions.getter(position_id).owner.get() == msg::sender());
 
         // Iterate through every copy of the campaign details until we pass the ending.
@@ -354,6 +424,7 @@ impl Leo {
     // Divest LP positions from this contract, sending them back to the
     // original owner.
     pub fn divest_positions(&mut self, position_ids: Vec<(Address, U256)>) -> Result<(), Vec<u8>> {
+        assert!(self.enabled.get());
         for (pool, id) in position_ids {
             // Check if the user owns this position.
             assert!(self.positions.getter(id).owner.get() == msg::sender());

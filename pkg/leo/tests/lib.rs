@@ -1,7 +1,6 @@
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod testing {
     use libleo;
-    use proptest::prelude::*;
 
     use stylus_sdk::{
         alloy_primitives::{address, Address, FixedBytes, U256},
@@ -19,6 +18,8 @@ mod testing {
             |leo| {
                 let expected_starting = block::timestamp();
                 let expected_ending = expected_starting + 1000;
+
+                leo.ctor(Address::ZERO).unwrap();
 
                 leo.create_campaign(
                     CAMPAIGN_ID,       // Identifier
@@ -89,14 +90,16 @@ mod proptesting {
 
                     libleo::host::advance_time(secs_in);
 
+                    leo.ctor(Address::ZERO).unwrap();
+
                     leo.create_campaign(
                         CAMPAIGN_ID,       // Identifier
                         POOL,              // Pool
                         -20,               // Tick lower
                         100,               // Tick upper
-                        U256::from(2),     // Per second distribution
+                        per_second,        // Per second distribution
                         POOL,              // Token to send
-                        U256::from(100),   // Starting pool of liquidity
+                        starting_pool,     // Starting pool of liquidity
                         expected_starting, // Starting timestamp
                         expected_ending,   // Ending timestamp
                     ).unwrap();

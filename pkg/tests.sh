@@ -6,4 +6,5 @@ export \
 
 cargo test --features testing
 
-#node --test --loader tsx ethers-tests/test.ts
+#node --test --loader tsx ethers-tests/seawater.ts
+#node --test --loader tsx ethers-tests/leo.ts
