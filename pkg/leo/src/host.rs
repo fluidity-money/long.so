@@ -117,6 +117,14 @@ pub fn advance_time(secs: u64) {
     CURRENT_TIME.with(|t| *t.borrow_mut() += secs)
 }
 
+// Helper function for getting the actual timestamp, not the cached value.
+pub fn current_timestamp() -> u64 {
+    time::SystemTime::now()
+        .duration_since(time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+}
+
 ///! Set up the storage access.
 pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     pos_info: &[(Address, U256, i32, i32, U256)],
@@ -126,10 +134,7 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     reset_storage();
     CURRENT_TIME.with(|t| {
         let mut ts = t.borrow_mut();
-        *ts = time::SystemTime::now()
-            .duration_since(time::UNIX_EPOCH)
-            .unwrap()
-            .as_secs();
+        *ts = current_timestamp();
     });
     POSITIONS.with(|positions| {
         let mut h = positions.borrow_mut();

@@ -71,21 +71,30 @@ mod proptesting {
         fn proptest_full_story(
             mut tick_lower in MIN_TICK..MAX_TICK,
             mut tick_upper in MIN_TICK..MAX_TICK,
-            per_second in any::<[u64; 4]>(),
+            per_second in 1..u64::MAX,
             starting_pool in any::<[u64; 4]>(),
+            expected_starting in 0..libleo::host::current_timestamp(),
             expected_ending in any::<u64>(),
-            secs_in in any::<u64>()
+            secs_in in 1..u64::MAX,
+            position_lp in any::<[u64; 4]>()
         ) {
+            let starting_pool = U256::from_limbs(starting_pool);
+            let position_lp = U256::from_limbs(position_lp);
+
+            if starting_pool.is_zero() || position_lp.is_zero() {
+                return Ok(())
+            }
+
             if tick_upper < tick_lower {
                 (tick_lower, tick_upper) = (tick_upper, tick_lower);
             }
-            let per_second = U256::from_limbs(per_second);
-            let starting_pool = U256::from_limbs(starting_pool);
+
+            let per_second = U256::from(per_second);
 
             libleo::host::with_storage::<_, libleo::Leo, _>(
-                &[(POOL, POS_ID, tick_lower, tick_upper, U256::ZERO)],
+                &[(POOL, POS_ID, tick_lower, tick_upper, position_lp)],
                 |leo| {
-                    let expected_starting = block::timestamp();
+                    let seconds_since = block::timestamp() - expected_starting;
                     let expected_ending = expected_starting + expected_ending;
 
                     libleo::host::advance_time(secs_in);
@@ -95,8 +104,8 @@ mod proptesting {
                     leo.create_campaign(
                         CAMPAIGN_ID,       // Identifier
                         POOL,              // Pool
-                        -20,               // Tick lower
-                        100,               // Tick upper
+                        tick_lower,        // Tick lower
+                        tick_upper,        // Tick upper
                         per_second,        // Per second distribution
                         POOL,              // Token to send
                         starting_pool,     // Starting pool of liquidity
@@ -104,9 +113,15 @@ mod proptesting {
                         expected_ending,   // Ending timestamp
                     ).unwrap();
 
+                    assert_eq!(leo.pool_lp(POOL).unwrap(), U256::ZERO);
+
                     leo.vest_position(POOL, POS_ID).unwrap();
 
-                    leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID]).unwrap();
+                    assert_eq!(leo.pool_lp(POOL).unwrap(), position_lp);
+
+                    let reward = leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID]).unwrap()[0];
+
+                    eprintln!("block timestamp: {}, seconds_since: {seconds_since}, expected start: {expected_starting}, per second {per_second}, reward: {:?}", block::timestamp(), reward);
                 },
             )
         }

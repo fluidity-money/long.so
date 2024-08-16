@@ -166,6 +166,9 @@ impl Leo {
     ) -> Result<(), Vec<u8>> {
         assert!(self.enabled.get());
 
+        // Sanity checks to prevent junk campaigns from being made.
+        assert!(!per_second.is_zero());
+
         // Take the ERC20 from the user for the maximum run of the campaign.
         let mut pool_campaigns = self.campaigns.setter(pool);
         let mut pool_campaigns_ongoing = pool_campaigns.ongoing.setter(identifier);
@@ -236,10 +239,16 @@ impl Leo {
         ending: u64,
     ) -> Result<(), Vec<u8>> {
         assert!(self.enabled.get());
+
+        // Make sure we're the actual owner of the campaign globally!
         assert_eq!(
             self.campaign_balances.getter(identifier).owner.get(),
             msg::sender()
         );
+
+        // Sanity checks to prevent junk campaigns from being made.
+        assert!(!per_second.is_zero());
+
         // Push to the campaign versions the new content, setting the previous
         // campaign's ending timestamp to the current timestamp.
         let ongoing_campaigns = &mut self.campaigns.setter(pool).ongoing;
@@ -281,7 +290,7 @@ impl Leo {
     }
 
     pub fn cancel_campaign(&mut self, pool: Address, id: CampaignId) -> Result<(), Vec<u8>> {
-        self.update_campaign(pool, id, 0, 0, U256::ZERO, U256::ZERO, U256::ZERO, 0, 0)
+        self.update_campaign(id, pool, 0, 0, U256::ZERO, U256::ZERO, 0, 0)
     }
 
     /// Return campaign details, of the form the lower tick, the upper tick,
@@ -309,6 +318,10 @@ impl Leo {
             u64::from_le_bytes(campaign.starting.get().to_le_bytes()),
             u64::from_le_bytes(campaign.ending.get().to_le_bytes()),
         ))
+    }
+
+    pub fn pool_lp(&self, pool: Address) -> Result<U256, Vec<u8>> {
+        Ok(self.liquidity.getter(pool).get())
     }
 
     // Collect the token rewards paid by Seawater for LP'ing in this
@@ -353,8 +366,17 @@ impl Leo {
             let campaigns = &self.campaigns;
             let campaigns_ongoing = &campaigns.getter(pool).ongoing;
             let campaign_versions = campaigns_ongoing.getter(campaign_id);
-            let campaign_token = self.campaign_balances.getter(campaign_id).token.get();
-            let mut distributed = self.campaign_balances.getter(campaign_id).distributed.get();
+
+            let campaign_bal = self.campaign_balances.getter(campaign_id);
+            let campaign_token = campaign_bal.token.get();
+            let campaign_maximum = campaign_bal.maximum.get();
+
+            // Weird issues could come up if the campaign maximum is empty.
+            assert!(!campaign_maximum.is_zero());
+
+            // The amount distributed in this campaign, mutable in a way that
+            // lets us set it later.
+            let mut distributed = self.campaign_balances.setter(campaign_id).distributed.get();
 
             // We have the correct token for this campaign?
             assert_eq!(campaign_token, position_token);
@@ -363,7 +385,15 @@ impl Leo {
             let mut cur_timestamp = None; // Set the timestamp with the first ending period.
 
             loop {
-                let campaign = campaign_versions.getter(offset).unwrap();
+                let next_campaign = campaign_versions.getter(offset);
+
+                if next_campaign.is_none() {
+                    offsets.set(offset);
+                    break;
+                }
+
+                let campaign = next_campaign.unwrap();
+
                 let campaign_starting = campaign.starting.get();
                 let campaign_ending = campaign.ending.get();
 
@@ -373,16 +403,13 @@ impl Leo {
                     .unwrap_or_else(|| U64::min(campaign_ending, U64::from(block::timestamp())));
 
                 if timestamp.is_zero() {
-                    // We should terminate.
+                    // We should terminate, the campaign was cancelled.
                     offsets.set(offset);
                     break;
                 }
 
                 // If we've hit the point where the list has ended, it's time to terminate.
-                let should_terminate = timestamp < campaign_starting
-                    || campaign_starting.is_zero()
-                    || campaign_ending.is_zero();
-                if should_terminate {
+                if timestamp < campaign_starting {
                     offsets.set(offset); // Update the position offset to the current.
                     break;
                 }
