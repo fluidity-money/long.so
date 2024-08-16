@@ -27,6 +27,7 @@ num-traits.workspace = true
 [dev-dependencies]
 rand = "0.8.5"
 proptest = "1.5.0"
+const-hex.workspace = true
 
 [features]
 export-abi = ["stylus-sdk/export-abi"]

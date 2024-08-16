@@ -20,7 +20,10 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-const EnvThirdwebAddr = "SPN_THIRDWEB_ACCOUNT_FACTORY_ADDR"
+const (
+	EnvThirdwebAddr = "SPN_THIRDWEB_ACCOUNT_FACTORY_ADDR"
+	EnvLeoAddr = "SPN_LEO_ADDR"
+)
 
 const (
 	// DefaultPaginationBlockCountMin to use as the minimum number of blocks
@@ -62,10 +65,16 @@ func main() {
 		setup.Exitf("%v not set", EnvThirdwebAddr)
 	}
 	thirdwebFactoryAddr := types.AddressFromString(thirdwebFactoryAddr_)
+	leoAddr_ := os.Getenv(EnvLeoAddr)
+	if leoAddr_ == "" {
+		setup.Exitf("%v not set", EnvLeoAddr)
+	}
+	leoAddr := types.AddressFromString(leoAddr_)
 	Entry(
 		features.Get(),
 		config,
 		thirdwebFactoryAddr,
+		leoAddr,
 		ingestorPagination,
 		DefaultPaginationPollWait,
 		c,

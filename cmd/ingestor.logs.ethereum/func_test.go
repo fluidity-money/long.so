@@ -15,6 +15,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// EmptyAddr for testing reasons
+var EmptyAddr ethCommon.Address
+
 func TestHandleLogCallbackNewPool(t *testing.T) {
 	// Test the new pool handling code.
 	seawaterAddr := ethCommon.HexToAddress("0x0fFC26C47FeD8C54AF2f0872cc51d79D173730a8")
@@ -37,7 +40,7 @@ func TestHandleLogCallbackNewPool(t *testing.T) {
 	var l ethTypes.Log
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
 	wasRun := false
-	handleLogCallback(seawaterAddr, seawaterAddr, l, func(table string, a any) error {
+	handleLogCallback(seawaterAddr, EmptyAddr, EmptyAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_seawater_newpool", table, "table not equal")
 		// This test is captured in a unit test, so we can focus on just testing
 		// this one field.
@@ -74,7 +77,7 @@ func TestHandleLogCallbackUpdatePositionLiquidity(t *testing.T) {
 	var l ethTypes.Log
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
 	wasRun := false
-	handleLogCallback(seawaterAddr, seawaterAddr, l, func(table string, a any) error {
+	handleLogCallback(seawaterAddr, EmptyAddr, EmptyAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_seawater_updatepositionliquidity", table, "table not equal")
 		updatePositionLiq, ok := a.(*seawater.UpdatePositionLiquidity)
 		assert.Truef(t, ok, "UpdatePositionLiquidity type coercion not true")
@@ -121,7 +124,7 @@ func TestHandleLogCallbackMintPosition(t *testing.T) {
 	var l ethTypes.Log
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
 	wasRun := false
-	handleLogCallback(seawaterAddr, seawaterAddr, l, func(table string, a any) error {
+	handleLogCallback(seawaterAddr, EmptyAddr, EmptyAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_seawater_mintposition", table, "table not equal")
 		newPool, ok := a.(*seawater.MintPosition)
 		assert.Truef(t, ok, "MintPosition type coercion not true")
@@ -157,7 +160,7 @@ func TestHandleLogCallbackSwap1(t *testing.T) {
 	var l ethTypes.Log
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
 	wasRun := false
-	handleLogCallback(seawaterAddr, seawaterAddr, l, func(table string, a any) error {
+	handleLogCallback(seawaterAddr, EmptyAddr, EmptyAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_seawater_swap1", table, "table not equal")
 		// This test is captured in a unit test, so we can focus on just testing
 		// this one field.
@@ -196,7 +199,7 @@ func TestHandleLogCallbackSwap2(t *testing.T) {
 	var l ethTypes.Log
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
 	wasRun := false
-	err := handleLogCallback(seawaterAddr, seawaterAddr, l, func(table string, a any) error {
+	err := handleLogCallback(seawaterAddr, EmptyAddr, EmptyAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_seawater_swap2", table, "table not equal")
 		_, ok := a.(*seawater.Swap2)
 		assert.Truef(t, ok, "Swap2 type coercion not true")
@@ -228,7 +231,7 @@ func TestHandleLogCallbackAccountCreated(t *testing.T) {
 	var l ethTypes.Log
 	wasRun := false
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
-	handleLogCallback(thirdwebAddr, thirdwebAddr, l, func(table string, a any) error {
+	handleLogCallback(EmptyAddr, thirdwebAddr, EmptyAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_thirdweb_accountcreated", table, "table not equal")
 		accountCreated, ok := a.(*thirdweb.AccountCreated)
 		assert.Truef(t, ok, "AccountCreated type coercion not true")

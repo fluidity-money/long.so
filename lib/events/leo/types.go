@@ -6,11 +6,11 @@ import (
 )
 
 type (
-	CampaignBalUpdated struct {
+	CampaignBalanceUpdated struct {
 		events.Event
 
 		Identifier types.Data `json:"identifier"`
-		NewMaximum *big.Int   `json:"newMaximum"`
+		NewMaximum types.UnscaledNumber   `json:"newMaximum"`
 	}
 
 	// CampaignCreated, unpacked in the local function with some of

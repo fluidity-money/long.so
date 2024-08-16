@@ -435,7 +435,7 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorPosition
-    function collectSingleTo720C50FF(
+    function collectSingleTo6D76575F(
         address /* pool */,
         uint256 /* id */,
         address /* recipient */

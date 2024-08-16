@@ -158,7 +158,7 @@ interface ISeawaterExecutorPosition {
     /// @param id of the position to use
     /// @param recipient of the money that's earned
     /// @return amount0 and amount1
-    function collectSingleTo720C50FF(
+    function collectSingleTo6D76575F(
         address pool,
         uint256 id,
         address recipient

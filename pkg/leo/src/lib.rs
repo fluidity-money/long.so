@@ -8,12 +8,17 @@ use stylus_sdk::{
     storage::*,
 };
 
+pub mod calldata;
 pub mod erc20;
 pub mod events;
-pub mod longtail;
 pub mod maths;
 pub mod nft_manager;
-pub mod utils;
+pub mod seawater;
+
+mod immutables;
+
+#[cfg(not(target_arch = "wasm32"))]
+pub mod host;
 
 extern crate alloc;
 #[cfg(target_arch = "wasm32")]
@@ -24,6 +29,8 @@ mod allocator {
     static ALLOCATOR: AssumeSingleThreaded<FreeListAllocator> =
         unsafe { AssumeSingleThreaded::new(FreeListAllocator::new()) };
 }
+
+type CampaignId = FixedBytes<8>;
 
 #[solidity_storage]
 #[entrypoint]
@@ -36,7 +43,7 @@ pub struct Leo {
     campaigns: StorageMap<Address, StorageCampaigns>,
 
     // campaign id => campaign balance
-    campaign_balances: StorageMap<B8, StorageCampaignBal>,
+    campaign_balances: StorageMap<CampaignId, StorageCampaignBal>,
 
     // position id => position
     positions: StorageMap<U256, StoragePosition>,
@@ -49,13 +56,16 @@ pub struct Leo {
 pub struct StorageCampaigns {
     // Ongoing campaigns. We don't use a map since the seconds will
     // default to 0 so it'll return 0 for amounts calculated.
-    ongoing: StorageMap<B8, StorageMap<U256, StorageCampaign>>,
+    ongoing: StorageMap<CampaignId, StorageVec<StorageCampaign>>,
 }
 
 #[solidity_storage]
 pub struct StorageCampaignBal {
     // Owner of the campaign balance so we don't have any abuse.
     owner: StorageAddress,
+
+    // Token being distributed.
+    token: StorageAddress,
 
     // Amount that can be distributed.
     maximum: StorageU256,
@@ -74,9 +84,6 @@ pub struct StorageCampaign {
 
     // Amount of token emitted per second.
     per_second: StorageU256,
-
-    // Token to distribute with this campaign.
-    token: StorageAddress,
 
     // The timestamp of when this campaign is starting.
     starting: StorageU64,
@@ -100,7 +107,7 @@ pub struct StoragePosition {
     liquidity: StorageU256,
 
     // Indexes of the position of the current status per campaign that's updated
-    offsets: StorageMap<B8, StorageU256>,
+    offsets: StorageMap<CampaignId, StorageU256>,
 }
 
 #[external]
@@ -112,18 +119,18 @@ impl Leo {
         // Just to be safe, check if we already have this position tracked.
         assert!(self.positions.get(id).timestamp.get().is_zero());
 
-        nft_manager::take_position(id)?;
+        nft_manager::take_position(id);
 
         // Start to set everything related to the position.
         let mut position = self.positions.setter(id);
         position.owner.set(msg::sender());
         position.timestamp.set(U64::from(block::timestamp()));
         position.token.set(pool);
-        position.tick_lower.set(longtail::tick_lower(pool, id)?);
-        position.tick_upper.set(longtail::tick_upper(pool, id)?);
+        position.tick_lower.set(seawater::tick_lower(pool, id));
+        position.tick_upper.set(seawater::tick_upper(pool, id));
 
         // Also increase the global count for LP available for this pool.
-        let position_liq = longtail::position_liquidity(pool, id)?;
+        let position_liq = seawater::position_liquidity(pool, id);
         position.liquidity.set(position_liq);
         let existing_liq = self.liquidity.getter(pool).get();
         self.liquidity
@@ -137,7 +144,7 @@ impl Leo {
     // contract for later distribution.
     pub fn create_campaign(
         &mut self,
-        identifier: B8,
+        identifier: CampaignId,
         pool: Address,
         tick_lower: i32,
         tick_upper: i32,
@@ -150,10 +157,11 @@ impl Leo {
         // Take the ERC20 from the user for the maximum run of the campaign.
         let mut pool_campaigns = self.campaigns.setter(pool);
         let mut pool_campaigns_ongoing = pool_campaigns.ongoing.setter(identifier);
-        let mut campaign = pool_campaigns_ongoing.setter(U256::ZERO);
 
         // Make sure this campaign doesn't exist already.
-        assert!(campaign.per_second.is_zero());
+        assert!(pool_campaigns_ongoing.is_empty());
+
+        let mut campaign = pool_campaigns_ongoing.grow();
 
         // Make sure the sender owns the campaign balance.
         let campaign_bal_owner = self.campaign_balances.getter(identifier).owner.get();
@@ -163,12 +171,13 @@ impl Leo {
         // Set everything related to the pool.
         campaign.tick_lower.set(I32::try_from(tick_lower).unwrap());
         campaign.tick_upper.set(I32::try_from(tick_upper).unwrap());
-        campaign.token.set(token);
+        campaign.per_second.set(per_second);
         campaign.starting.set(U64::try_from(starting).unwrap());
         campaign.ending.set(U64::try_from(ending).unwrap());
 
         let mut campaign_bal = self.campaign_balances.setter(identifier);
         campaign_bal.owner.set(msg::sender());
+        campaign_bal.token.set(token);
 
         if !extra_max.is_zero() {
             let existing_maximum = campaign_bal.maximum.get();
@@ -185,12 +194,13 @@ impl Leo {
         }
 
         // Pack the words for CampaignCreated, and then emit that event.
-        utils::emit_campaign_created(
+        events::emit_campaign_created(
             identifier,
             pool,
-            msg::sender(),
             token,
-            extra_max,
+            msg::sender(),
+            tick_lower,
+            tick_upper,
             starting,
             ending,
         );
@@ -198,11 +208,38 @@ impl Leo {
         Ok(())
     }
 
+    /// Return campaign details, of the form the lower tick, the upper tick,
+    /// the amount sent per second in the campaign, the token that's being
+    /// distributed, and the amount distributed so far, as well as the maximum
+    /// amount, and the starting and ending timestamp.
+    pub fn campaign_details(
+        &self,
+        pool: Address,
+        id: CampaignId,
+    ) -> Result<(i32, i32, U256, Address, U256, U256, u64, u64), Vec<u8>> {
+        let len = self.campaigns.getter(pool).ongoing.getter(id).len();
+        assert!(len > 0);
+        let campaigns = self.campaigns.getter(pool);
+        let campaigns_ongoing = &campaigns.ongoing.getter(id);
+        let campaign = campaigns_ongoing.getter(len - 1).unwrap();
+        let campaign_bal = self.campaign_balances.getter(id);
+        Ok((
+            i32::from_le_bytes(campaign.tick_lower.get().to_le_bytes()),
+            i32::from_le_bytes(campaign.tick_upper.get().to_le_bytes()),
+            campaign.per_second.get(),
+            campaign_bal.token.get(),
+            campaign_bal.distributed.get(),
+            campaign_bal.maximum.get(),
+            u64::from_le_bytes(campaign.starting.get().to_le_bytes()),
+            u64::from_le_bytes(campaign.ending.get().to_le_bytes()),
+        ))
+    }
+
     // Collect the token rewards paid by Seawater for LP'ing in this
     // position, then send to the user.
     pub fn collect_pool_rewards(&self, pool: Address, id: U256) -> Result<(u128, u128), Vec<u8>> {
         assert!(self.positions.get(id).owner.get() == msg::sender());
-        let (amount_0, amount_1) = longtail::collect_yield_single_to(pool, id, msg::sender())?;
+        let (amount_0, amount_1) = seawater::collect_yield_single_to(id, pool, msg::sender());
         Ok((amount_0, amount_1))
     }
 
@@ -218,79 +255,100 @@ impl Leo {
         &mut self,
         pool: Address,
         position_id: U256,
-        campaign_ids: Vec<B8>,
+        campaign_ids: Vec<CampaignId>,
     ) -> Result<Vec<(Address, U256)>, Vec<u8>> {
         assert!(self.positions.getter(position_id).owner.get() == msg::sender());
-        // Take the current position, then check if they're eligible for the campaigns
-        // they included.
-        Ok(campaign_ids
-            .iter()
-            .map(|&campaign_id| {
-                // We can assume the campaign exists due to the later
-                // check for 0 amounts sent, and the seconds being 0 if
-                // this is empty causing that. Mutable so we can bump the amount distributed
-                // for the campaign and error out if we've sent too much later.
-                let mut position = self.positions.setter(position_id);
-                let offset = position.offsets.setter(campaign_id).get();
-                let ongoing_campaigns = &mut self.campaigns.setter(pool).ongoing;
-                let mut campaign_versions = ongoing_campaigns.setter(campaign_id);
-                let mut campaign = campaign_versions.setter(offset);
 
-                // Did we start our position after this campaign ended? If we have, we must
-                // bump the offset so we can be eligible for its next iteration.
-                // We can assume the campaign started because of the consistency
-                // in the campaign creation.
-                loop {
-                    // We need to iterate through this to be sure.
-                    if campaign.ending.get() < position.timestamp.get() {
-                        campaign = campaign_versions.setter(offset + U256::from(1));
-                        position
-                            .offsets
-                            .setter(campaign_id)
-                            .set(offset + U256::from(1));
-                    } else {
-                        break;
-                    }
+        // Iterate through every copy of the campaign details until we pass the ending.
+        let mut position = self.positions.setter(position_id);
+        let position_tick_lower = position.tick_lower.get();
+        let position_tick_upper = position.tick_upper.get();
+        let position_liquidity = position.liquidity.get();
+        let position_token = position.token.get();
+
+        // Track amounts owed to this array to return.
+        let mut owed = Vec::new();
+
+        for campaign_id in campaign_ids {
+            let mut offsets = position.offsets.setter(campaign_id);
+            let first_offset = offsets.get();
+            let campaigns = &self.campaigns;
+            let campaigns_ongoing = &campaigns.getter(pool).ongoing;
+            let campaign_versions = campaigns_ongoing.getter(campaign_id);
+            let campaign_token = self.campaign_balances.getter(campaign_id).token.get();
+            let mut distributed = self.campaign_balances.getter(campaign_id).distributed.get();
+
+            // We have the correct token for this campaign?
+            assert_eq!(campaign_token, position_token);
+
+            let mut offset = first_offset;
+            let mut cur_timestamp = None; // Set the timestamp with the first ending period.
+
+            loop {
+                let campaign = campaign_versions.getter(offset).unwrap();
+                let campaign_starting = campaign.starting.get();
+                let campaign_ending = campaign.ending.get();
+
+                // Set the timestamp to either the ending timestamp for the current campaign,
+                // or the block timestamp.
+                let timestamp = cur_timestamp
+                    .unwrap_or_else(|| U64::min(campaign_ending, U64::from(block::timestamp())));
+
+                if timestamp.is_zero() {
+                    // We should terminate.
+                    offsets.set(offset);
+                    break;
                 }
 
-                // Does the campaign apply to the token that this position is for?
-                assert!(campaign.token.get() == position.token.get());
+                // If we've hit the point where the list has ended, it's time to terminate.
+                let should_terminate = timestamp < campaign_starting
+                    || campaign_starting.is_zero()
+                    || campaign_ending.is_zero();
+                if should_terminate {
+                    offsets.set(offset); // Update the position offset to the current.
+                    break;
+                }
 
-                // If the campaign is non-existent, then the amount per second should be 0,
-                // so we will earn 0 with the math.
-                // Are we in the valid tick range?
-                assert!(campaign.tick_lower.get() < position.tick_lower.get());
-                assert!(campaign.tick_upper.get() > position.tick_upper.get());
+                // Our position is above the lower tick?
+                let position_is_above_lowest = campaign.tick_lower.get() >= position_tick_lower;
 
-                // Looks like we're eligible! Calculate the rewards the user is owed, then use a
-                // erc20 send. Then adjust the timestamp for the user for this
-                // campaign so they can't claim this again and receive the same rewards.
-                let global_liq = self.liquidity.getter(pool).get();
+                // Our position is below the upper tick?
+                let position_is_below_highest = campaign.tick_upper.get() <= position_tick_upper;
+
+                let should_continue = position_is_above_lowest && position_is_below_highest;
+                if !should_continue {
+                    offset += U256::from(1);
+                    continue;
+                }
+                // Since we're continuing, we figure out what the user is owed, and we set the
+                // timestamp to the ending of this campaign. Clamp the timestamp to the ending
+                // time.
+                let secs_since = U64::max(campaign.ending.get(), timestamp) - campaign_starting;
                 let base_rewards = maths::calc_base_rewards(
-                    global_liq,
-                    position.liquidity.get(),
-                    campaign.per_second.get(),
+                    self.liquidity.getter(pool).get(), // Pool LP
+                    position_liquidity,                // User LP
+                    campaign.per_second.get(),         // Campaign rewards per sec
                 );
-                let timestamp = U64::from(block::timestamp());
-                let seconds_since = timestamp - campaign.starting.get();
-                let rewards = base_rewards * U256::from(seconds_since);
+                let rewards = base_rewards * U256::from(secs_since);
+                owed.push((campaign_token, rewards));
 
-                // Track what's sent, and do a last-minute sanity check to make sure we don't
-                // send more than we should.
-                let mut campaign_bal = self.campaign_balances.setter(campaign_id);
-                let new_distributed = campaign_bal.distributed.get() + rewards;
-                campaign_bal.distributed.set(new_distributed);
-                assert!(campaign_bal.maximum.get() > new_distributed);
+                // Use the minimum of the existing current timestamp or the ending timestamp.
+                cur_timestamp = Some(U64::min(timestamp, campaign_ending));
+                offset += U256::from(1);
+                distributed += rewards;
 
-                // Update the position's creation time so we don't double up on their rewards.
-                position.timestamp.set(timestamp);
+                // Extra protection incase we blow past the amount that should be allocated somehow.
+                assert!(distributed < self.campaign_balances.getter(campaign_id).maximum.get());
 
-                // Now send the actual rewards, and return.
-                let token = campaign.token.get();
-                erc20::give(token, rewards).unwrap();
-                (token, rewards)
-            })
-            .collect())
+                // Update what we've sent out so far!
+                self.campaign_balances
+                    .setter(campaign_id)
+                    .distributed
+                    .set(distributed);
+            }
+        }
+
+        Ok(owed)
     }
 
     // Divest LP positions from this contract, sending them back to the
@@ -303,8 +361,18 @@ impl Leo {
             self.liquidity
                 .setter(pool)
                 .set(existing_liq - self.positions.getter(id).liquidity.get());
-            nft_manager::give_position(id).unwrap();
+            nft_manager::give_position(id);
         }
         Ok(())
+    }
+}
+
+pub trait StorageNew {
+    fn new(i: U256, v: u8) -> Self;
+}
+
+impl StorageNew for Leo {
+    fn new(i: U256, v: u8) -> Self {
+        unsafe { <Self as stylus_sdk::storage::StorageType>::new(i, v) }
     }
 }

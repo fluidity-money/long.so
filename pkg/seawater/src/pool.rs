@@ -530,11 +530,11 @@ impl StoragePool {
     }
 
     pub fn get_position_tick_lower(&self, id: U256) -> I32 {
-        self.positions.positions.getter(id).tick_lower.get()
+        self.positions.positions.getter(id).lower.get()
     }
 
     pub fn get_position_tick_upper(&self, id: U256) -> I32 {
-        self.positions.positions.getter(id).tick_upper.get()
+        self.positions.positions.getter(id).upper.get()
     }
 
     /// Gets the current pool price.

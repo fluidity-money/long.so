@@ -572,6 +572,7 @@ impl Pools {
         Ok(liquidity.sys())
     }
 
+    #[allow(non_snake_case)]
     pub fn position_tick_lower_2_F_77_C_C_E_1(
         &self,
         pool: Address,
@@ -581,6 +582,7 @@ impl Pools {
         Ok(lower.sys())
     }
 
+    #[allow(non_snake_case)]
     pub fn position_tick_upper_67_F_D_55_B_A(
         &self,
         pool: Address,
@@ -591,7 +593,7 @@ impl Pools {
     }
 
     #[allow(non_snake_case)]
-    pub fn collect_single_to_720_C_50_F_F(
+    pub fn collect_single_to_6_D_76575_F(
         &mut self,
         pool: Address,
         id: U256,
@@ -644,7 +646,7 @@ impl Pools {
         pools
             .iter()
             .zip(ids.iter())
-            .map(|(&pool, &id)| self.collect_single_to_720_C_50_F_F(pool, id, msg::sender()))
+            .map(|(&pool, &id)| self.collect_single_to_6_D_76575_F(pool, id, msg::sender()))
             .collect::<Result<Vec<(u128, u128)>, Revert>>()
     }
 }
