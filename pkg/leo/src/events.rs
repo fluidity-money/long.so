@@ -42,6 +42,7 @@ fn pack_times(starting: u64, ending: u64) -> U256 {
 pub fn emit_campaign_updated(
     identifier: FixedBytes<8>,
     pool: Address,
+    per_second: U256,
     tick_lower: i32,
     tick_upper: i32,
     starting: u64,
@@ -49,6 +50,7 @@ pub fn emit_campaign_updated(
 ) {
     evm::log(CampaignUpdated {
         identifier: identifier.as_slice().try_into().unwrap(),
+        perSecond: per_second,
         pool,
         extras: pack_extras(tick_lower, tick_upper, starting, ending),
     });
