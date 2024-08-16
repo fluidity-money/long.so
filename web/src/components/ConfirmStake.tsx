@@ -164,9 +164,6 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     reset: resetUpdatePosition,
   } = useWriteContract();
 
-  console.log(updatePositionError);
-  console.log(mintData);
-
   const delta = useMemo(
     () =>
       !curTick || tickLower === undefined || tickUpper === undefined
@@ -235,7 +232,6 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
    * Step 3. Approve token 1
    */
   const approveToken1 = useCallback(() => {
-    console.log("approving token1");
     if (
       !allowanceDataToken1?.result ||
       allowanceDataToken1.result < BigInt(token1AmountRaw)
@@ -261,7 +257,6 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
    * Step 2. Approve token 0
    */
   const approveToken0 = useCallback(() => {
-    console.log("approving token0");
     if (
       !allowanceDataToken0?.result ||
       allowanceDataToken0.result < BigInt(token1AmountRaw)

@@ -98,8 +98,6 @@ export const MyPositions = () => {
       .filter((position) => position.staked > 0);
   }, [showDemoData, address, walletData]);
 
-  console.log(pools);
-
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,

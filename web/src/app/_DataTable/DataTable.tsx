@@ -39,7 +39,6 @@ export function DataTable<TData, TValue>({
             <TableRow key={headerGroup.id} className="border-b-0">
               {headerGroup.headers.map((header) => {
                 if (!header.column.columnDef.header) return null;
-                console.log("ASDSAD", (header.column.columnDef as any).colSpan);
                 return (
                   <TableHead
                     key={header.id}

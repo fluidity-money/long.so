@@ -121,8 +121,6 @@ export const TradeTabContent = () => {
     [transactionHistoryData],
   );
 
-  console.log("transactions", transactions);
-
   const [duration, setDuration] = useState<"7D" | "1M" | "6M" | "1Y" | "ALL">(
     "7D",
   );
