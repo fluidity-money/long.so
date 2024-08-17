@@ -47,6 +47,105 @@ mod testing {
             },
         )
     }
+
+    #[test]
+    fn lower_tick_out_of_range() {
+        libleo::host::with_storage::<_, libleo::Leo, _>(
+            &[(POOL, POS_ID, -10, 100, U256::ZERO)],
+            |leo| {
+                leo.ctor(Address::ZERO).unwrap();
+
+                leo.create_campaign(
+                    CAMPAIGN_ID,                // Identifier
+                    POOL,                       // Pool
+                    0,                          // Tick lower
+                    1,                          // Tick upper
+                    U256::from(100),            // Per second distribution
+                    POOL,                       // Token to send
+                    U256::from(100),            // Starting pool of liquidity
+                    block::timestamp() - 20000, // Starting timestamp
+                    block::timestamp() + 1000,  // Ending timestamp
+                )
+                .unwrap();
+
+                leo.vest_position(POOL, POS_ID).unwrap();
+
+                assert!(
+                    leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+                        .unwrap()
+                        .len()
+                        == 0
+                );
+            },
+        )
+    }
+
+    #[test]
+    fn upper_tick_out_of_range() {
+        libleo::host::with_storage::<_, libleo::Leo, _>(
+            &[(POOL, POS_ID, 0, 100, U256::ZERO)],
+            |leo| {
+                leo.ctor(Address::ZERO).unwrap();
+
+                leo.create_campaign(
+                    CAMPAIGN_ID,                // Identifier
+                    POOL,                       // Pool
+                    0,                          // Tick lower
+                    1,                          // Tick upper
+                    U256::from(100),            // Per second distribution
+                    POOL,                       // Token to send
+                    U256::from(100),            // Starting pool of liquidity
+                    block::timestamp() - 20000, // Starting timestamp
+                    block::timestamp() + 1000,  // Ending timestamp
+                )
+                .unwrap();
+
+                leo.vest_position(POOL, POS_ID).unwrap();
+
+                assert!(
+                    leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+                        .unwrap()
+                        .len()
+                        == 0
+                );
+            },
+        )
+    }
+
+    #[test]
+    fn campaign_created_claimed_then_updated_claim_again() {
+        libleo::host::with_storage::<_, libleo::Leo, _>(
+            &[(POOL, POS_ID, -10, 100, U256::ZERO)],
+            |leo| {
+                let expected_starting = block::timestamp();
+                let expected_ending = expected_starting + 1000;
+
+                leo.ctor(Address::ZERO).unwrap();
+
+                // Someone goes to create a campaign.
+
+                leo.create_campaign(
+                    CAMPAIGN_ID,       // Identifier
+                    POOL,              // Pool
+                    -20,               // Tick lower
+                    100,               // Tick upper
+                    U256::from(2),     // Per second distribution
+                    POOL,              // Token to send
+                    U256::from(100),   // Starting pool of liquidity
+                    expected_starting, // Starting timestamp
+                    expected_ending,   // Ending timestamp
+                )
+                .unwrap();
+
+                libleo::host::advance_time(28910);
+
+                // Someone claims from it...
+
+                leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+                    .unwrap();
+            },
+        )
+    }
 }
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
@@ -142,6 +241,15 @@ mod proptesting {
                       U256::from(seconds_since);
 
                     assert_eq!(expected_reward.to_string(), reward.to_string());
+
+                    //assert_eq!(
+                    //    leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID]).unwrap().len(),
+                    //    0
+                    //);
+
+                    let (_, _, _, _, distributed, _, _, _) =
+                        leo.campaign_details(POOL, CAMPAIGN_ID).unwrap();
+                    assert_eq!(distributed, expected_reward);
                 },
             )
         }
