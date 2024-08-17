@@ -1486,6 +1486,14 @@ func (r *seawaterSwapResolver) Pool(ctx context.Context, obj *model.SeawaterSwap
 	return *pool, nil
 }
 
+// TransactionHash is the resolver for the transactionHash field.
+func (r *seawaterSwapResolver) TransactionHash(ctx context.Context, obj *model.SeawaterSwap) (string, error) {
+	if obj == nil {
+		return "", fmt.Errorf("empty swap")
+	}
+	return obj.TransactionHash.String(), nil
+}
+
 // Sender is the resolver for the sender field.
 func (r *seawaterSwapResolver) Sender(ctx context.Context, obj *model.SeawaterSwap) (model.Wallet, error) {
 	if obj == nil {

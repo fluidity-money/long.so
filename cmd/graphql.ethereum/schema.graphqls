@@ -543,6 +543,11 @@ type SeawaterSwap {
   pool: SeawaterPool!
 
   """
+  Transaction hash swap is operated on.
+  """
+  transactionHash: String!
+
+  """
   Sender of the swap.
   """
   sender: Wallet!

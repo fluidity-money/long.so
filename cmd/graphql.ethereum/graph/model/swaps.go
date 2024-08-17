@@ -15,4 +15,5 @@ type SeawaterSwap struct {
 	TokenOutDecimals int                  `json:"tokenOutDecimals"`
 	AmountIn         types.UnscaledNumber `json:"amountIn"`
 	AmountOut        types.UnscaledNumber `json:"amountOut"`
+	TransactionHash  types.Hash           `json:"transactionHash"`
 }

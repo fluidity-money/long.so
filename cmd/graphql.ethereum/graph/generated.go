@@ -185,12 +185,13 @@ type ComplexityRoot struct {
 	}
 
 	SeawaterSwap struct {
-		AmountIn  func(childComplexity int) int
-		AmountOut func(childComplexity int) int
-		Pool      func(childComplexity int) int
-		Sender    func(childComplexity int) int
-		Served    func(childComplexity int) int
-		Timestamp func(childComplexity int) int
+		AmountIn        func(childComplexity int) int
+		AmountOut       func(childComplexity int) int
+		Pool            func(childComplexity int) int
+		Sender          func(childComplexity int) int
+		Served          func(childComplexity int) int
+		Timestamp       func(childComplexity int) int
+		TransactionHash func(childComplexity int) int
 	}
 
 	SeawaterSwaps struct {
@@ -326,6 +327,7 @@ type SeawaterSwapResolver interface {
 	Served(ctx context.Context, obj *model.SeawaterSwap) (model.Served, error)
 	Timestamp(ctx context.Context, obj *model.SeawaterSwap) (int, error)
 	Pool(ctx context.Context, obj *model.SeawaterSwap) (seawater.Pool, error)
+	TransactionHash(ctx context.Context, obj *model.SeawaterSwap) (string, error)
 	Sender(ctx context.Context, obj *model.SeawaterSwap) (model.Wallet, error)
 	AmountIn(ctx context.Context, obj *model.SeawaterSwap) (model.Amount, error)
 	AmountOut(ctx context.Context, obj *model.SeawaterSwap) (model.Amount, error)
@@ -1062,6 +1064,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SeawaterSwap.Timestamp(childComplexity), true
+
+	case "SeawaterSwap.transactionHash":
+		if e.complexity.SeawaterSwap.TransactionHash == nil {
+			break
+		}
+
+		return e.complexity.SeawaterSwap.TransactionHash(childComplexity), true
 
 	case "SeawaterSwaps.next":
 		if e.complexity.SeawaterSwaps.Next == nil {
@@ -1852,6 +1861,11 @@ type SeawaterSwap {
   Pool that was used to make the swap.
   """
   pool: SeawaterPool!
+
+  """
+  Transaction hash swap is operated on.
+  """
+  transactionHash: String!
 
   """
   Sender of the swap.
@@ -7315,6 +7329,50 @@ func (ec *executionContext) fieldContext_SeawaterSwap_pool(_ context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _SeawaterSwap_transactionHash(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterSwap) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterSwap_transactionHash(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.SeawaterSwap().TransactionHash(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SeawaterSwap_transactionHash(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SeawaterSwap",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _SeawaterSwap_sender(ctx context.Context, field graphql.CollectedField, obj *model.SeawaterSwap) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_SeawaterSwap_sender(ctx, field)
 	if err != nil {
@@ -7579,6 +7637,8 @@ func (ec *executionContext) fieldContext_SeawaterSwaps_swaps(_ context.Context, 
 				return ec.fieldContext_SeawaterSwap_timestamp(ctx, field)
 			case "pool":
 				return ec.fieldContext_SeawaterSwap_pool(ctx, field)
+			case "transactionHash":
+				return ec.fieldContext_SeawaterSwap_transactionHash(ctx, field)
 			case "sender":
 				return ec.fieldContext_SeawaterSwap_sender(ctx, field)
 			case "amountIn":
@@ -13087,6 +13147,42 @@ func (ec *executionContext) _SeawaterSwap(ctx context.Context, sel ast.Selection
 					}
 				}()
 				res = ec._SeawaterSwap_pool(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "transactionHash":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SeawaterSwap_transactionHash(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
