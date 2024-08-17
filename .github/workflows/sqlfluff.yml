@@ -4,16 +4,18 @@ on:
   push:
     branches:
       - development
+    paths:
+      - 'db/migrations/**'
   pull_request:
     branches:
       - development
+    paths:
+      - 'db/migrations/**'
 
 jobs:
   sqlfluff:
     name: sqlfluff
     runs-on: ubuntu-latest
-    if: |
-      contains(github.event.pull_request.changed_files, 'db/migrations/')
     steps:
       - uses: actions/checkout@v2
       - uses: yu-iskw/action-sqlfluff@v3.7.0
