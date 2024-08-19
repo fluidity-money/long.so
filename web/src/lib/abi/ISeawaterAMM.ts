@@ -2,6 +2,24 @@ export const output = {
   abi: [
     {
       type: "function",
+      name: "authoriseEnabler5B17C274",
+      inputs: [
+        {
+          name: "enabler",
+          type: "address",
+          internalType: "address",
+        },
+        {
+          name: "enabled",
+          type: "bool",
+          internalType: "bool",
+        },
+      ],
+      outputs: [],
+      stateMutability: "nonpayable",
+    },
+    {
+      type: "function",
       name: "burnPositionAE401070",
       inputs: [
         {
@@ -51,7 +69,7 @@ export const output = {
     },
     {
       type: "function",
-      name: "collectProtocolE4E70DA4",
+      name: "collectProtocol7540FA9F",
       inputs: [
         {
           name: "pool",
@@ -68,6 +86,11 @@ export const output = {
           type: "uint128",
           internalType: "uint128",
         },
+        {
+          name: "recipient",
+          type: "address",
+          internalType: "address",
+        },
       ],
       outputs: [
         {
@@ -77,6 +100,40 @@ export const output = {
         },
         {
           name: "",
+          type: "uint128",
+          internalType: "uint128",
+        },
+      ],
+      stateMutability: "nonpayable",
+    },
+    {
+      type: "function",
+      name: "collectSingleTo6D76575F",
+      inputs: [
+        {
+          name: "pool",
+          type: "address",
+          internalType: "address",
+        },
+        {
+          name: "id",
+          type: "uint256",
+          internalType: "uint256",
+        },
+        {
+          name: "recipient",
+          type: "address",
+          internalType: "address",
+        },
+      ],
+      outputs: [
+        {
+          name: "amount0",
+          type: "uint128",
+          internalType: "uint128",
+        },
+        {
+          name: "amount1",
           type: "uint128",
           internalType: "uint128",
         },
@@ -136,9 +193,9 @@ export const output = {
       stateMutability: "nonpayable",
     },
     {
-      "type": "function",
-      "name": "decrPosition09293696",
-      "inputs": [
+      type: "function",
+      name: "decrPosition09293696",
+      inputs: [
         {
           name: "id",
           type: "uint256",
@@ -237,7 +294,7 @@ export const output = {
     },
     {
       type: "function",
-      name: "feeGrowthGlobal14EACF1BE",
+      name: "feeGrowthGlobal1A33A5A1B",
       inputs: [
         {
           name: "pool",
@@ -284,9 +341,9 @@ export const output = {
       stateMutability: "nonpayable",
     },
     {
-      "type": "function",
-      "name": "incrPositionC3AC7CAA",
-      "inputs": [
+      type: "function",
+      name: "incrPositionC3AC7CAA",
+      inputs: [
         {
           name: "pool",
           type: "address",
@@ -504,6 +561,54 @@ export const output = {
     },
     {
       type: "function",
+      name: "positionTickLower2F77CCE1",
+      inputs: [
+        {
+          name: "pool",
+          type: "address",
+          internalType: "address",
+        },
+        {
+          name: "id",
+          type: "uint256",
+          internalType: "uint256",
+        },
+      ],
+      outputs: [
+        {
+          name: "",
+          type: "int32",
+          internalType: "int32",
+        },
+      ],
+      stateMutability: "nonpayable",
+    },
+    {
+      type: "function",
+      name: "positionTickUpper67FD55BA",
+      inputs: [
+        {
+          name: "pool",
+          type: "address",
+          internalType: "address",
+        },
+        {
+          name: "id",
+          type: "uint256",
+          internalType: "uint256",
+        },
+      ],
+      outputs: [
+        {
+          name: "",
+          type: "int32",
+          internalType: "int32",
+        },
+      ],
+      stateMutability: "nonpayable",
+    },
+    {
+      type: "function",
       name: "quote2CD06B86E",
       inputs: [
         {
@@ -551,6 +656,24 @@ export const output = {
         },
         {
           name: "priceLimit",
+          type: "uint256",
+          internalType: "uint256",
+        },
+      ],
+      outputs: [],
+      stateMutability: "nonpayable",
+    },
+    {
+      type: "function",
+      name: "setSqrtPriceFF4DB98C",
+      inputs: [
+        {
+          name: "pool",
+          type: "address",
+          internalType: "address",
+        },
+        {
+          name: "price",
           type: "uint256",
           internalType: "uint256",
         },
@@ -979,6 +1102,32 @@ export const output = {
         },
         {
           name: "to",
+          type: "address",
+          internalType: "address",
+        },
+      ],
+      outputs: [],
+      stateMutability: "nonpayable",
+    },
+    {
+      type: "function",
+      name: "updateEmergencyCouncil7D0C1C58",
+      inputs: [
+        {
+          name: "newCouncil",
+          type: "address",
+          internalType: "address",
+        },
+      ],
+      outputs: [],
+      stateMutability: "nonpayable",
+    },
+    {
+      type: "function",
+      name: "updateNftManager9BDF41F6",
+      inputs: [
+        {
+          name: "manager",
           type: "address",
           internalType: "address",
         },
