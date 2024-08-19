@@ -138,7 +138,7 @@ So these variables must set at compile-time, like so:
 Testing is done either on-chain with the live Ethers-powered environment
 (at the time of writing, there is no native on-chain testing with a
 forking suite), or via a hosted test using cargo features with the
-testing flag.
+testing flag. `tests.sh` is provided to run both test suites.
 
 #### Testing dependencies
 

@@ -418,7 +418,7 @@ impl Leo {
         let mut owed = Vec::new();
 
         for campaign_id in campaign_ids {
-            let mut offsets = position.offsets.setter(campaign_id);
+            let offsets = position.offsets.getter(campaign_id);
             let mut offset = offsets.get();
             let campaigns = &self.campaigns;
             let campaigns_ongoing = &campaigns.getter(pool).ongoing;
