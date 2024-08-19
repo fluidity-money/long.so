@@ -248,10 +248,10 @@ export default function ConfirmWithdrawLiquidity() {
             {token0.address === fUSDC.address
               ? token0Amount
               : getFormattedPriceFromAmount(
-                token0Amount,
-                tokenPrice,
-                fUSDC.decimals,
-              )}
+                  token0Amount,
+                  tokenPrice,
+                  fUSDC.decimals,
+                )}
           </div>
         </div>
 
@@ -266,10 +266,10 @@ export default function ConfirmWithdrawLiquidity() {
             {token1.address === fUSDC.address
               ? token1Amount
               : getFormattedPriceFromAmount(
-                token1Amount,
-                tokenPrice,
-                fUSDC.decimals,
-              )}
+                  token1Amount,
+                  tokenPrice,
+                  fUSDC.decimals,
+                )}
           </div>
         </div>
 

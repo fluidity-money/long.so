@@ -8,7 +8,7 @@ import { persist } from "zustand/middleware";
 // Position partially defines the remote Position type with necessary fields
 export type Position = {
   // the age at which the position was created
-  created: number
+  created: number;
   // the age at which the request was created and cached
   served: {
     timestamp: number;
@@ -120,26 +120,22 @@ export const usePositions = () => {
   const { positions, updatePositionLocal, updatePositionsFromGraph } =
     usePositionStore();
 
-  useEffect(
-    () => {
-      if (!positionsData)
-        return
-      updatePositionsFromGraph(
-        // postprocess this to assert that the nested address type is correct
-        positionsData.positions.positions.map((p) => ({
-          ...p,
-          pool: {
-            ...p.pool,
-            token: {
-              ...p.pool.token,
-              address: p.pool.token.address as `0x${string}`,
-            },
+  useEffect(() => {
+    if (!positionsData) return;
+    updatePositionsFromGraph(
+      // postprocess this to assert that the nested address type is correct
+      positionsData.positions.positions.map((p) => ({
+        ...p,
+        pool: {
+          ...p.pool,
+          token: {
+            ...p.pool.token,
+            address: p.pool.token.address as `0x${string}`,
           },
-        })),
-      )
-    },
-    [positionsData],
-  );
+        },
+      })),
+    );
+  }, [positionsData]);
 
   return {
     positions: Object.values(positions),
