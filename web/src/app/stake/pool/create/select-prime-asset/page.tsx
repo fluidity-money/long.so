@@ -20,6 +20,7 @@ import { Hash } from "viem";
 import { usdFormat } from "@/lib/usdFormat";
 import { graphql, useFragment } from "@/gql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { useDetectClickOutside } from "react-detect-click-outside";
 
 const SelectPrimeAssetFragment = graphql(`
   fragment SelectPrimeAssetFragment on SeawaterPool {
@@ -42,6 +43,10 @@ const SelectPrimeAssetFragment = graphql(`
 
 const SelectPrimeAsset = () => {
   const router = useRouter();
+
+  const ref = useDetectClickOutside({
+    onTriggered: () => router.back(),
+  });
 
   const [boostedPools, setBoostedPools] = useState(false);
   const [myAssets, setMyAssets] = useState(false);
@@ -116,6 +121,7 @@ const SelectPrimeAsset = () => {
       <motion.div
         layoutId={"modal"}
         className="flex h-[514px] w-[318px] flex-col rounded-lg bg-black px-[12px] pb-[12px] pt-[9px] text-white md:h-[547px] md:w-[393px]"
+        ref={ref}
       >
         <div className={"flex flex-row items-center justify-between"}>
           <div className={"text-[10px]"}>Select Prime Asset</div>

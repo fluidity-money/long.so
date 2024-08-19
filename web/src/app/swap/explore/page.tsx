@@ -23,6 +23,7 @@ import { useAccount } from "wagmi";
 import { config } from "@/config";
 import { getFormattedStringFromTokenAmount } from "@/lib/amounts";
 import { SwapExploreFragmentFragment } from "@/gql/graphql";
+import { useDetectClickOutside } from "react-detect-click-outside";
 
 const SwapExploreFragment = graphql(`
   fragment SwapExploreFragment on SeawaterPool {
@@ -44,6 +45,10 @@ const ExplorePage = () => {
   const { address } = useAccount();
 
   const searchParams = useSearchParams();
+
+  const ref = useDetectClickOutside({
+    onTriggered: () => router.back(),
+  });
 
   const token = searchParams.get("token") as "0" | "1";
 
@@ -120,6 +125,7 @@ const ExplorePage = () => {
     <div className={"flex flex-col items-center overflow-y-auto"}>
       <motion.div
         layoutId={"modal"}
+        ref={ref}
         className={
           "h-[509px] w-[325px] rounded-lg bg-black p-[10px] text-white md:h-[559px] md:w-[393px]"
         }
