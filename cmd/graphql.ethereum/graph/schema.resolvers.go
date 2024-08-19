@@ -394,7 +394,7 @@ func (r *queryResolver) GetSwaps(ctx context.Context, pool string, first *int, a
 	var d []model.SeawaterSwap
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_pool_1(?, ?, ?, ?, ?)",
+		"SELECT * FROM seawater_swaps_pool_2(?, ?, ?, ?, ?)",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		poolAddress,
@@ -441,7 +441,7 @@ func (r *queryResolver) GetSwapsForUser(ctx context.Context, wallet string, firs
 	var d []model.SeawaterSwap
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_user_1(?, ?, ?, ?, ?)",
+		"SELECT * FROM seawater_swaps_user_2(?, ?, ?, ?, ?)",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		walletAddress,
@@ -1040,7 +1040,7 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 	}
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_pool_1(?, ?, ?, ?, ?)",
+		"SELECT * FROM seawater_swaps_pool_2(?, ?, ?, ?, ?)",
 		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		obj.Token,

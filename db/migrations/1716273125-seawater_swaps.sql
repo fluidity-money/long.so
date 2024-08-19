@@ -27,7 +27,6 @@ SELECT
 		swaps.token_out,
 		swaps.amount_in,
 		swaps.amount_out,
-		swaps.transaction_hash,
 	COALESCE(toPool.decimals, fusdcDecimals) AS token_out_decimals,
 	COALESCE(fromPool.decimals, fusdcDecimals) AS token_in_decimals
 FROM (
@@ -38,8 +37,7 @@ FROM (
 		from_ AS token_in,
 		to_ AS token_out,
 		amount_in,
-		amount_out,
-		transaction_hash
+		amount_out
 	FROM
 		events_seawater_swap2
 	UNION ALL
@@ -62,8 +60,7 @@ FROM (
 		CASE
 			WHEN zero_for_one THEN amount1
 			ELSE amount0
-		END AS amount_out,
-		transaction_hash
+		END AS amount_out
 	FROM
 		events_seawater_swap1
 ) swaps
