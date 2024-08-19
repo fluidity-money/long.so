@@ -55,6 +55,7 @@ export const SwapProPoolFragment = graphql(`
     }
     swaps {
       swaps {
+        transactionHash
         timestamp
         amountIn {
           valueScaled
