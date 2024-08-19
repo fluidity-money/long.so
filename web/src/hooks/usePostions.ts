@@ -1,7 +1,7 @@
 import { Token } from "@/config/tokens";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlUser } from "@/hooks/useGraphql";
-import { useMemo } from "react";
+import { useCallback } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -120,7 +120,7 @@ export const usePositions = () => {
   const { positions, updatePositionLocal, updatePositionsFromGraph } =
     usePositionStore();
 
-  useMemo(
+  useCallback(
     () =>
       positionsData &&
       updatePositionsFromGraph(
