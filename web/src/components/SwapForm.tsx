@@ -625,8 +625,8 @@ export const SwapForm = () => {
               </div>
               <div className={"flex flex-row justify-end"}>
                 <span>
-                  Pool Fee {+feePercentage.toFixed(2)}% ={" "}
-                  {(usdPriceToken0 * feePercentage).toFixed(2)}$
+                  Pool Fee {+feePercentage.toFixed(6)}% ={" "}
+                  {+(usdPriceToken0 * feePercentage).toFixed(6)}$
                 </span>
               </div>
               <div className={"flex flex-row justify-between"}>
@@ -675,7 +675,10 @@ export const SwapForm = () => {
                   )}
                   onClick={onSubmit}
                 >
-                  {(!quoteIsLoading && token0AmountFloat > 0 && token1AmountFloat === 0 && !allowZeroSwap)
+                  {!quoteIsLoading &&
+                  token0AmountFloat > 0 &&
+                  token1AmountFloat === 0 &&
+                  !allowZeroSwap
                     ? "Not Enough Liquidity"
                     : "Swap"}
                 </Button>

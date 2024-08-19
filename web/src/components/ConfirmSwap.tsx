@@ -352,8 +352,8 @@ export const ConfirmSwap = () => {
             </div>
             <div className="flex flex-row justify-end">
               <span>
-                Pool Fee {+feePercentage.toFixed(2)}% ={" "}
-                {(usdPriceToken0 * feePercentage).toFixed(2)}$
+                Pool Fee {+feePercentage.toFixed(6)}% ={" "}
+                {+(usdPriceToken0 * feePercentage).toFixed(6)}$
               </span>
             </div>
 

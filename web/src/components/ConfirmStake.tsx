@@ -603,8 +603,8 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
             <div className="flex flex-row justify-between">
               <div>Fees</div>
               <div>
-                Pool Fee {+feePercentage.toFixed(2)}% ={" "}
-                {(usdTokenOPrice * feePercentage).toFixed(2)}$
+                Pool Fee {+feePercentage.toFixed(6)}% ={" "}
+                {+(usdTokenOPrice * feePercentage).toFixed(6)}$
               </div>
             </div>
 

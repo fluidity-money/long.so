@@ -208,5 +208,5 @@ export const useStakeStore = create<StakeStore>((set) => ({
     });
   },
   feePercentage: 0,
-  setFeePercentage: (fee) => set({ feePercentage: 100 / fee }),
+  setFeePercentage: (fee) => set({ feePercentage: 100 / (fee * 100) }),
 }));
