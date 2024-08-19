@@ -675,8 +675,7 @@ export const SwapForm = () => {
                   )}
                   onClick={onSubmit}
                 >
-                  {token0AmountFloat === 0 ||
-                  (token1AmountFloat === 0 && !allowZeroSwap)
+                  {(!quoteIsLoading && token0AmountFloat > 0 && token1AmountFloat === 0 && !allowZeroSwap)
                     ? "Not Enough Liquidity"
                     : "Swap"}
                 </Button>
