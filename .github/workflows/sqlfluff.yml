@@ -6,6 +6,7 @@ on:
       - development
     paths:
       - 'db/migrations/**'
+      - '.github/workflows/sqlfluff.yml'
   pull_request:
     branches:
       - development
@@ -25,6 +26,7 @@ jobs:
           sqlfluff_version: "3.0.6"
           paths: '${{ github.workspace }}/db/migrations'
           level: 'info'
+          github_base_ref: 'development'
       - name: 'Show outputs (Optional)'
         shell: bash
         run: |
