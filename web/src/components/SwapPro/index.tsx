@@ -169,6 +169,7 @@ export const SwapPro = ({
           time: new Date(transaction.timestamp * 1000),
           amountFrom: parseFloat(transaction.amountIn.valueScaled),
           amountTo: parseFloat(transaction.amountOut.valueScaled),
+          transactionHash: transaction.transactionHash,
         };
       })
       .sort((a, b) => (a.time > b.time ? -1 : a.time === b.time ? 0 : 1));

@@ -63,7 +63,16 @@ export function DataTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                className="border-b-0"
+                className="group cursor-pointer border-b-0 hover:bg-black hover:text-white"
+                onClick={() => {
+                  const transactionHash = (row.original as any).transactionHash; // Access the transactionHash from row data
+                  const blockExplorerUrl = `https://testnet-explorer.superposition.so/tx/${transactionHash}`; // Replace with your block explorer URL
+                  window.open(
+                    blockExplorerUrl,
+                    "_blank",
+                    "noopener,noreferrer",
+                  );
+                }}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id} className="p-1 text-xs">

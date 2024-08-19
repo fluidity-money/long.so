@@ -68,7 +68,7 @@ export const columns: (ColumnDef<Transaction> & { colSpan?: number })[] = [
     header: "Rewards",
     cell: ({ row }) => {
       return (
-        <Badge className="pl-0.5">
+        <Badge className="pl-0.5 group-hover:border group-hover:border-white">
           <Token size="small" />
           <div className="ml-2">{row.original.rewards}</div>
         </Badge>

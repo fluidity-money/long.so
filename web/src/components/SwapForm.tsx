@@ -254,7 +254,6 @@ export const SwapForm = () => {
           args: swapOptions.args,
           account: address,
         });
-        console.log("GAASs", estimatedGas);
         setGas(estimatedGas);
       } catch (e) {
         console.error(e);
