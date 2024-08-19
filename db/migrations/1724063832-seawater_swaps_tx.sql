@@ -85,7 +85,7 @@ LEFT JOIN events_seawater_newpool toPool
 	ON swaps.token_out = toPool.token;
 $$;
 
-CREATE FUNCTION seawater_swaps_pool_3(
+CREATE FUNCTION seawater_swaps_pool_2(
 	fusdcAddress ADDRESS,
 	fusdcDecimals HUGEINT,
 	filter ADDRESS,
