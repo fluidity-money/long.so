@@ -7,7 +7,9 @@ import { persist } from "zustand/middleware";
 
 // Position partially defines the remote Position type with necessary fields
 export type Position = {
-  // the age at which this was created, not received
+  // the age at which the position was created
+  created: number
+  // the age at which the request was created and cached
   served: {
     timestamp: number;
   };
@@ -84,6 +86,7 @@ const PositionsFragment = graphql(`
     id
     positions {
       positions {
+        created
         served {
           timestamp
         }

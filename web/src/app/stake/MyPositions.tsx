@@ -29,33 +29,6 @@ import { useStakeStore } from "@/stores/useStakeStore";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { usePositions } from "@/hooks/usePostions";
 
-const MyPositionsWalletFragment = graphql(`
-  fragment MyPositionsWalletFragment on Wallet {
-    id
-    positions {
-      positions {
-        positionId
-        pool {
-          token {
-            name
-            address
-            symbol
-            decimals
-          }
-        }
-        liquidity {
-          fusdc {
-            valueUsd
-          }
-          token1 {
-            valueUsd
-          }
-        }
-      }
-    }
-  }
-`);
-
 export const MyPositions = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
 
@@ -79,7 +52,12 @@ export const MyPositions = () => {
       .map((position) => ({
         positionId: position.positionId,
         id: position.pool.token.address,
-        duration: 0,
+        duration: Math.round(
+          // now - created
+          (new Date().valueOf() - new Date(position.created * 1000).valueOf())
+          // converted to minutes
+          / 1000 / 60
+        ),
         tokens: [
           fUSDC,
           {

@@ -329,6 +329,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
         ).then(([amount0, amount1]) =>
           updatePositionLocal({
             ...position,
+            created: Math.round(new Date().getTime() / 1000),
             served: {
               timestamp: Math.round(new Date().getTime() / 1000),
             },

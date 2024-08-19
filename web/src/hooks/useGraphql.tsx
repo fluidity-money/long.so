@@ -47,7 +47,6 @@ export const graphqlQueryUser = graphql(`
 
     getWallet(address: $wallet) {
       # add wallet fragments here
-      ...MyPositionsWalletFragment
       ...MyPositionsInventoryWalletFragment
       ...PositionsFragment
       ...WithdrawPositionsFragment
