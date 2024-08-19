@@ -186,7 +186,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   const router = useRouter();
 
-  useHotkeys("esc", () => router.back());
+  useHotkeys("esc", () => router.back(), { enableOnFormTags: ["INPUT"] });
 
   const showManualFees = useFeatureFlag("ui show manual fees");
   const showFeeTier = useFeatureFlag("ui show fee tier");
