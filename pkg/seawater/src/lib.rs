@@ -1226,10 +1226,13 @@ impl Pools {
             Error::SeawaterAdminOnly
         );
 
-        assert_or!(
-            self.emergency_council.get() == msg::sender() && !enabled,
-            Error::SeawaterEmergencyOnlyDisable // Emergency council can only disable
-        );
+        if self.emergency_council.get() == msg::sender()
+            && self.seawater_admin.get() != msg::sender()
+            && enabled
+        {
+            // Emergency council can only disable!
+            return Err(Error::SeawaterEmergencyOnlyDisable.into());
+        }
 
         self.pools.setter(pool).set_enabled(enabled);
         Ok(())

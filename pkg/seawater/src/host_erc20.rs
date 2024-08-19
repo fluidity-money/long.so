@@ -39,7 +39,7 @@ pub fn transfer_to_sender(_token: Address, _amount: U256) -> Result<(), Error> {
 
 /// Does the same thing as [transfer_to_sender] for testing reasons.
 pub fn transfer_to_addr(_addr: Address, _token: Address, _amount: U256) -> Result<(), Error> {
-    transfer_to_sender(_token, _amount);
+    transfer_to_sender(_token, _amount)
 }
 
 /// Pretends to give a specific address tokens.

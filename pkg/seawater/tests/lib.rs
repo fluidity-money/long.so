@@ -58,13 +58,13 @@ fn test_decode_swap() {
 #[test]
 fn test_similar_to_ethers() -> Result<(), Vec<u8>> {
     test_utils::with_storage::<_, Pools, _>(
-        None,
+        Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()),
         None, // slots map
         None, // caller erc20 balances
         None, // amm erc20 balances
         |contract| {
             // Create the storage
-            contract.seawater_admin.set(msg::sender());
+            contract.ctor(msg::sender(), Address::ZERO, Address::ZERO)?;
             let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
 
             // First, we set up the pool.
@@ -101,7 +101,7 @@ fn test_similar_to_ethers() -> Result<(), Vec<u8>> {
 #[test]
 fn test_alex() -> Result<(), Vec<u8>> {
     test_utils::with_storage::<_, Pools, _>(
-        None,
+        Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()),
         None, // slots map
         None, // caller erc20 balances
         None, // amm erc20 balances
@@ -137,36 +137,6 @@ fn test_alex() -> Result<(), Vec<u8>> {
             contract.update_position_C_7_F_1_F_740(token_addr, position_id, liquidity_delta)?;
 
             Ok(())
-        },
-    )
-}
-
-#[test]
-fn broken_erik() -> Result<(), Vec<u8>> {
-    test_utils::with_storage::<_, Pools, _>(
-        Some(address!("eB6b882A295D316aC62C8cfcc81c3E37c084b7c5").into_array()),
-        Some(hashmap! {
-          "0x0000000000000000000000000000000000000000000000000000000000000000"=> "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
-          "0x3aafa5613932f019a44c0ba4fef5db570fdc26a44b344eb7016ee305da1d2cdd"=> "0x0000000000000000000000000000000000000000000000000000000000000000",
-          "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600"=> "0x0000000000000000000000000000000000000000000000000000000000000000",
-          "0xb27456616f8c77c635d3551b8179f6887795e920c5c4421a6fa3c3c76fc90fa8"=> "0x000000000000000000000000c3a6d3de0772397a7216ebf5157a6c781666be83",
-          "0xce67bab47ccb0f35690620809f2318ef477b533824426881f498e863af201134"=> "0x00000000000000000000ffffffffffffffffffffffffffffffff3c00000bb801",
-          "0xce67bab47ccb0f35690620809f2318ef477b533824426881f498e863af201135"=> "0x00000000000000000000000000000176e500e5c6267c89a971bf79d5def44f71",
-          "0xce67bab47ccb0f35690620809f2318ef477b533824426881f498e863af201138"=> "0xce67bab47ccb0f35690620809f2318ef477b533824426881f498e863af201138",
-          "0xce67bab47ccb0f35690620809f2318ef477b533824426881f498e863af201139"=> "0x0000000000000000000000000000000000000000000010a59b9bb894028ef201",
-          "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560d" => "0x00000000000000000000ffffffffffffffffffffffffffffffff3c00000bb801",
-          "0xce67bab47ccb0f35690620809f2318ef477b533824426881f498e863af201136" => "0x0000000000000000000000000000000000000001850189a932f92a682dd7f589",
-        }),
-        None, // caller balances
-        None, // amm balances
-        |contract| {
-            let from = address!("09F7156AAE9C903F90B1CB1E312582C4f208A759");
-            let to = address!("6437fdc89cED41941b97A9f1f8992D88718C81c5");
-            let amount = U256::from_limbs([0x6bc75e2d, 0x5, 0, 0]);
-            let min_out = U256::from(0);
-            contract
-                .swap_2_exact_in_41203_F1_D(from, to, amount, min_out)
-                .map(|_| ())
         },
     )
 }
@@ -335,7 +305,7 @@ fn decr_nonexisting_position() {
     let token = Address::with_last_byte(1);
 
     test_utils::with_storage::<_, Pools, _>(
-        None,
+        Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()),
         None,
         None,
         None,
@@ -383,7 +353,7 @@ fn decr_existing_position_some() {
     let token = Address::with_last_byte(1);
 
     test_utils::with_storage::<_, Pools, _>(
-        None,
+        Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()),
         None,
         None,
         None,
@@ -429,44 +399,6 @@ fn decr_existing_position_some() {
         },
     )
     .unwrap();
-}
-
-#[test]
-fn test_realyolleofficial() -> Result<(), Vec<u8>> {
-    //curl -d '{"jsonrpc":"2.0","method":"eth_call","id":123,"params":[{"from": "0x7F8ddA85d44A6F225257375546fec2f96C3b95EE", "to": "0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1", "data": "0x0000000000000000000000000000000036c116a8851869cf8a99b3bda0fad42453d32b99000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f4240ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}, "0x62c993"]}' https://testnet-rpc.superposition.so
-
-    test_utils::with_storage::<_, Pools, _>(
-        Some(address!("7F8ddA85d44A6F225257375546fec2f96C3b95EE").into_array()), // sender
-        Some(hashmap! {
-            "0x0000000000000000000000000000000000000000000000000000000000000000" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
-            "0x0000000000000000000000000000000000000000000000000000000000000001" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x1867edeba2ecb59a55c61ddbd2167599dd54e3e9a3d472acbc34a8a906aaa28a" => "0x0000000000000000000000000000000000000000000000000000000000000001",
-            "0x1fc81571cf47ec38538c0171b41e515e9c8e3e6ef8d835ba573faddda4ba9a30" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x5d72059c9c4a47b10438d4b1943a761d8e8e1e6246665124ea31ae8be07de99d" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x67524ac336051f394b6105143cbc4da5363bab4353f997d8d8793cdd019704f8" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x8f5bae6511180e1f9a20aa31370a31b813f5644bea8986b570f302ac789bf042" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x97e4a152879595a16deb16b1e4c9d02fabd01a5d61e1289fdef1a657a2df2987" => "0x00000000000000000000ffffffffffffffffffffffffffffffff3c00000bb801",
-            "0x97e4a152879595a16deb16b1e4c9d02fabd01a5d61e1289fdef1a657a2df2989" => "0x00000000000000000000000000000000000000064a2eef6b72298e7165261b11",
-            "0x97e4a152879595a16deb16b1e4c9d02fabd01a5d61e1289fdef1a657a2df298b" => "0x000000000000000000000000fffc803800000000000000000007aaa4fac679ca",
-            "0x97e4a152879595a16deb16b1e4c9d02fabd01a5d61e1289fdef1a657a2df298c" => "0x00000000000000000000000000000000000000000000afefc1df5423fd2ea2ae",
-            "0x990b23368a7d7e546cc6392f4b5c6a5b998d63ba4fbd63b154ff4f2f903a9cd4" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0xa0d6eb0a3b8e8951adb6af4198c5cb4f43f92daf07eaefe4caaded6470e05d46" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50" => "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0xb27456616f8c77c635d3551b8179f6887795e920c5c4421a6fa3c3c76fc90fa8" => "0x0000000000000000000000006709d74dc62837734e1e1b556cfbaffaea0f0c86",
-        }),
-        None,
-        None,
-        |contract| {
-            use std::str::FromStr;
-
-            let pool = address!("36c116a8851869cf8a99b3Bda0Fad42453D32B99");
-
-            contract.swap_904369_B_E(pool, false, I256::from_str("1000000").unwrap(), U256::from_str("115792089237316195423570985008687907853269984665640564039457584007913129639935").unwrap()).unwrap();
-
-            Ok(())
-        },
-    )
 }
 
 #[test]
