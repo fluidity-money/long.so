@@ -1,7 +1,7 @@
 import { Token } from "@/config/tokens";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlUser } from "@/hooks/useGraphql";
-import { useMemo } from "react";
+import { useEffect } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -120,9 +120,10 @@ export const usePositions = () => {
   const { positions, updatePositionLocal, updatePositionsFromGraph } =
     usePositionStore();
 
-  useMemo(
-    () =>
-      positionsData &&
+  useEffect(
+    () => {
+      if (!positionsData)
+        return
       updatePositionsFromGraph(
         // postprocess this to assert that the nested address type is correct
         positionsData.positions.positions.map((p) => ({
@@ -135,7 +136,8 @@ export const usePositions = () => {
             },
           },
         })),
-      ),
+      )
+    },
     [positionsData],
   );
 
