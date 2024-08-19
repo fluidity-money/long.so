@@ -114,10 +114,8 @@ export default async function RootLayout({
 
           <footer className="w-full self-end p-8">
             <div className="flex flex-row justify-between">
-              <div className="grid grid-cols-1 gap-x-[10px]">
-                <small>
-                  <a href="https://x.com/superpositionso">𝕏</a>
-                </small>
+              <div className="flex items-center gap-x-[10px]">
+                <a href="https://x.com/superpositionso">𝕏</a>
                 <a href="https://discord.gg/VjUWjRQP8y">
                   <Discord />
                 </a>
