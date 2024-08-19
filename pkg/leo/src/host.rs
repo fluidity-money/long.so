@@ -6,10 +6,7 @@ use std::time;
 
 use crate::StorageNew;
 
-use stylus_sdk::{
-    alloy_primitives::{Address, U256},
-    storage::StorageCache,
-};
+use stylus_sdk::alloy_primitives::{Address, U256};
 
 const WORD_BYTES: usize = 32;
 pub type Word = [u8; WORD_BYTES];
@@ -113,10 +110,6 @@ pub fn position_liquidity(id: U256) -> Option<U256> {
     POSITIONS.with(|p| p.borrow().get(&id).map(|(_, _, _, l)| *l))
 }
 
-pub fn advance_time(secs: u64) {
-    CURRENT_TIME.with(|t| *t.borrow_mut() += secs)
-}
-
 // Helper function for getting the actual timestamp, not the cached value.
 pub fn current_timestamp() -> u64 {
     time::SystemTime::now()
@@ -130,7 +123,6 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     pos_info: &[(Address, U256, i32, i32, U256)],
     f: F,
 ) -> T {
-    StorageCache::clear();
     reset_storage();
     CURRENT_TIME.with(|t| {
         let mut ts = t.borrow_mut();

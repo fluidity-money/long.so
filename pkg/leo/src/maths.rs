@@ -1,6 +1,7 @@
 use stylus_sdk::alloy_primitives::U256;
 
-/// Returns `a * b / c` and if the result had carry. Copied from Seawater.
+/// Returns `a * b / c` and if the result had carry. Copied from Seawater and Result
+/// removed.
 pub fn _mul_div(a: U256, b: U256, mut denom_and_rem: U256) -> U256 {
     assert!(!denom_and_rem.is_zero());
 

@@ -136,6 +136,9 @@ impl Leo {
             Error::PositionAlreadyExists
         );
 
+        let position_liq = seawater::position_liquidity(pool, id);
+        assert_or!(!position_liq.is_zero(), Error::PositionHasNoLiquidity);
+
         nft_manager::take_position(id);
 
         // Start to set everything related to the position.
@@ -147,7 +150,6 @@ impl Leo {
         position.tick_upper.set(seawater::tick_upper(pool, id));
 
         // Also increase the global count for LP available for this pool.
-        let position_liq = seawater::position_liquidity(pool, id);
         position.liquidity.set(position_liq);
         let existing_liq = self.liquidity.getter(pool).get();
         self.liquidity
@@ -193,11 +195,19 @@ impl Leo {
         assert_or!(campaign_bal_owner == msg::sender(), Error::NotCampaignOwner);
 
         // Set everything related to the pool.
-        campaign.tick_lower.set(I32::try_from(tick_lower).unwrap());
-        campaign.tick_upper.set(I32::try_from(tick_upper).unwrap());
+        campaign
+            .tick_lower
+            .set(I32::from_le_bytes(tick_lower.to_le_bytes()));
+        campaign
+            .tick_upper
+            .set(I32::from_le_bytes(tick_upper.to_le_bytes()));
         campaign.per_second.set(per_second);
-        campaign.starting.set(U64::try_from(starting).unwrap());
-        campaign.ending.set(U64::try_from(ending).unwrap());
+        campaign
+            .starting
+            .set(U64::from_le_bytes(starting.to_le_bytes()));
+        campaign
+            .ending
+            .set(U64::from_le_bytes(ending.to_le_bytes()));
 
         let mut campaign_bal = self.campaign_balances.setter(identifier);
         campaign_bal.owner.set(msg::sender());
@@ -235,7 +245,10 @@ impl Leo {
     /// Update a campaign by taking the last campaign versions item, and
     /// setting the ending timestamp to the current timestamp, then inserting
     /// a new record to the campaign versions array with the settings we
-    /// requested.
+    /// requested. Allows 0 to be provided, which is the equivalent of
+    /// cancelling the campaign if it's provided, except as starting, though
+    /// ending is checked to be 0, and if it is, then [update_position] won't
+    /// work.
     pub fn update_campaign(
         &mut self,
         identifier: CampaignId,
@@ -254,27 +267,35 @@ impl Leo {
             self.campaign_balances.getter(identifier).owner.get(),
             msg::sender()
         );
-
-        // Sanity checks to prevent junk campaigns from being made.
         assert_or!(!per_second.is_zero(), Error::BadCampaignConfig);
+        assert_or!(starting >= block::timestamp(), Error::BadCampaignConfig);
+        assert_or!(ending > block::timestamp(), Error::BadCampaignConfig);
 
         // Push to the campaign versions the new content, setting the previous
         // campaign's ending timestamp to the current timestamp.
         let ongoing_campaigns = &mut self.campaigns.setter(pool).ongoing;
         let mut campaign_versions = ongoing_campaigns.setter(identifier);
         let campaign_versions_len = campaign_versions.len();
-        assert_or!(campaign_versions_len > 0, Error::NoCampaign);
+        assert_or!(!campaign_versions.is_empty(), Error::NoCampaign);
         campaign_versions
             .setter(campaign_versions_len - 1)
             .unwrap()
             .ending
             .set(U64::from(block::timestamp()));
         let mut campaign = campaign_versions.grow();
-        campaign.tick_lower.set(I32::try_from(tick_lower).unwrap());
-        campaign.tick_upper.set(I32::try_from(tick_upper).unwrap());
+        campaign
+            .tick_lower
+            .set(I32::from_le_bytes(tick_lower.to_le_bytes()));
+        campaign
+            .tick_upper
+            .set(I32::from_le_bytes(tick_upper.to_le_bytes()));
         campaign.per_second.set(per_second);
-        campaign.starting.set(U64::try_from(starting).unwrap());
-        campaign.ending.set(U64::try_from(ending).unwrap());
+        campaign
+            .starting
+            .set(U64::from_le_bytes(starting.to_le_bytes()));
+        campaign
+            .ending
+            .set(U64::from_le_bytes(ending.to_le_bytes()));
 
         if !extra_max.is_zero() {
             let mut campaign_bal = self.campaign_balances.setter(identifier);
@@ -298,8 +319,28 @@ impl Leo {
         Ok(())
     }
 
-    pub fn cancel_campaign(&mut self, pool: Address, id: CampaignId) -> Result<(), Vec<u8>> {
-        self.update_campaign(id, pool, 0, 0, U256::ZERO, U256::ZERO, 0, 0)
+    pub fn cancel_campaign(
+        &mut self,
+        pool: Address,
+        identifier: CampaignId,
+    ) -> Result<(), Vec<u8>> {
+        assert_or!(self.enabled.get(), Error::NotEnabled);
+        assert_eq!(
+            self.campaign_balances.getter(identifier).owner.get(),
+            msg::sender()
+        );
+        let ongoing_campaigns = &mut self.campaigns.setter(pool).ongoing;
+        let mut campaign_versions = ongoing_campaigns.setter(identifier);
+        let campaign_versions_len = campaign_versions.len();
+        assert_or!(!campaign_versions.is_empty(), Error::NoCampaign);
+        campaign_versions
+            .setter(campaign_versions_len - 1)
+            .unwrap()
+            .ending
+            .set(U64::from(block::timestamp()));
+        campaign_versions.grow(); // Grow with an empty value so it's 0 for all!
+        events::emit_campaign_updated(identifier, pool, U256::ZERO, 0, 0, 0, 0);
+        Ok(())
     }
 
     /// Return campaign details, of the form the lower tick, the upper tick,
@@ -370,6 +411,7 @@ impl Leo {
         let position_tick_lower = position.tick_lower.get();
         let position_tick_upper = position.tick_upper.get();
         let position_liquidity = position.liquidity.get();
+
         let position_token = position.token.get();
 
         // Track amounts owed to this array to return.
@@ -377,7 +419,7 @@ impl Leo {
 
         for campaign_id in campaign_ids {
             let mut offsets = position.offsets.setter(campaign_id);
-            let first_offset = offsets.get();
+            let mut offset = offsets.get();
             let campaigns = &self.campaigns;
             let campaigns_ongoing = &campaigns.getter(pool).ongoing;
             let campaign_versions = campaigns_ongoing.getter(campaign_id);
@@ -393,59 +435,70 @@ impl Leo {
             // lets us set it later.
             let mut distributed = self.campaign_balances.setter(campaign_id).distributed.get();
 
-            // We have the correct token for this campaign?
-            assert_eq!(campaign_token, position_token);
-
-            let mut offset = first_offset;
             let mut cur_timestamp = U64::from(block::timestamp());
 
             loop {
-                let next_campaign = campaign_versions.getter(offset);
+                eprintln!("offset: {offset}, cur timestamp: {cur_timestamp}");
 
-                if next_campaign.is_none() {
-                    offsets.set(offset);
+                let campaign_updates = campaign_versions.getter(offset);
+
+                eprintln!("campaign offset is some? {}", campaign_updates.is_some());
+
+                if campaign_updates.is_none() {
                     break;
                 }
 
-                let campaign = next_campaign.ok_or(Error::CampaignFinished)?;
+                let campaign = campaign_updates.unwrap();
 
                 let campaign_starting = campaign.starting.get();
                 let campaign_ending = campaign.ending.get();
 
+                eprintln!("campaign starting offset {offset}, starting: {campaign_starting}, ending {campaign_ending}, current timestamp: {}", block::timestamp());
+
                 if campaign_ending.is_zero() {
                     // We should terminate, the campaign was cancelled.
-                    offsets.set(offset);
                     break;
+                }
+
+                // If we've exceeded or are equal to the ending date of
+                // the campaign, we assume it's finished.
+                if cur_timestamp >= campaign_ending {
+                    offset += U256::from(1);
+                    continue;
                 }
 
                 // Set the timestamp to either the ending timestamp for the current campaign,
                 // or the block timestamp.
-                let timestamp = U64::min(campaign_ending, cur_timestamp);
+                let clamped_timestamp = U64::min(campaign_ending, cur_timestamp);
 
                 // If this campaign hasn't started, we need to terminate so the user can wait.
-                if timestamp < campaign_starting {
+                if clamped_timestamp < campaign_starting {
                     break;
                 }
 
-                // Our position is above the lower tick?
-                let position_is_below_lowest = position_tick_lower < campaign.tick_lower.get();
-
-                // Our position is below the upper tick?
-                let position_is_above_highest = position_tick_upper > campaign.tick_upper.get();
-
                 // Go to the next campaign iteration, hoping that an update might take place
                 // that makes the user eligible.
-                let should_go_to_next = position_is_below_lowest || position_is_above_highest;
-                if should_go_to_next {
+                let should_skip = position_tick_lower < campaign.tick_lower.get()
+                    || position_tick_upper > campaign.tick_upper.get();
+                if should_skip {
+                    eprintln!("sholud skip?");
                     offset += U256::from(1);
                     continue;
                 }
 
                 // Since we're continuing, we figure out what the user is owed, and we set the
-                // timestamp to the ending of this campaign. Clamp the timestamp to the ending
-                // time.
-                let clamped_timestamp = U64::min(timestamp, campaign_ending);
+                // timestamp to the ending of this campaign.
                 let clamped_secs_since = clamped_timestamp - campaign_starting;
+
+                if clamped_secs_since <= U64::ZERO {
+                    break;
+                }
+
+                eprintln!(
+                    "pool lp: {}, position liquidity: {position_liquidity}, campaign per sec: {}, secs since {clamped_secs_since}, campaign starting: {campaign_starting}, current timestamp: {cur_timestamp}",
+                    self.liquidity.getter(pool).get(),
+                    campaign.per_second.get(),
+                );
 
                 let base_rewards = maths::calc_base_rewards(
                     self.liquidity.getter(pool).get(), // Pool LP
@@ -458,7 +511,6 @@ impl Leo {
 
                 // Use the minimum of the existing current timestamp or the ending timestamp.
                 cur_timestamp = clamped_timestamp;
-                offset += U256::from(1);
                 distributed += rewards;
 
                 // Extra protection incase we blow past the amount that should be allocated somehow.
@@ -466,6 +518,9 @@ impl Leo {
                     distributed < self.campaign_balances.getter(campaign_id).maximum.get(),
                     Error::CampaignDistributedCompletely
                 );
+
+                // Since we made it to the end of this campaign for now, break out.
+                break;
             }
 
             // Update the position's tracked last claim timestamp.
@@ -504,6 +559,45 @@ impl Leo {
             .setter(pool)
             .set(existing_liq - self.positions.getter(position_id).liquidity.get());
         nft_manager::give_position(position_id);
+        Ok(())
+    }
+
+    #[cfg(all(feature = "testing", not(target_arch = "wasm32")))]
+    pub fn admin_reduce_pos_time(&mut self, id: U256, secs: u64) -> Result<(), Vec<u8>> {
+        let ts = self.positions.setter(id).timestamp.get();
+        self.positions
+            .setter(id)
+            .timestamp
+            .set(ts - U64::from(secs));
+        Ok(())
+    }
+
+    #[cfg(all(feature = "testing", not(target_arch = "wasm32")))]
+    pub fn admin_reduce_campaign_starting_last_iteration(
+        &mut self,
+        pool: Address,
+        id: FixedBytes<8>,
+        secs: u64,
+    ) -> Result<(), Vec<u8>> {
+        let campaigns = self.campaigns.getter(pool).ongoing.getter(id);
+        let len = self.campaigns.getter(pool).ongoing.getter(id).len();
+        let starting = self
+            .campaigns
+            .setter(pool)
+            .ongoing
+            .setter(id)
+            .setter(len - 1)
+            .unwrap()
+            .starting
+            .get();
+        self.campaigns
+            .setter(pool)
+            .ongoing
+            .setter(id)
+            .setter(len - 1)
+            .unwrap()
+            .starting
+            .set(starting - U64::from(secs));
         Ok(())
     }
 }

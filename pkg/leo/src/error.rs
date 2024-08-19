@@ -68,6 +68,11 @@ pub enum Error {
     // 10 (0x0a)
     #[error("Sender is not the campaign owner")]
     NotCampaignOwner,
+
+    /// Position is empty!
+    // 11 (0x0b)
+    #[error("Position has no liquidity!")]
+    PositionHasNoLiquidity,
 }
 
 impl From<Error> for Vec<u8> {
