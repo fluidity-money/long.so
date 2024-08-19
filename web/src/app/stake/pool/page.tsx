@@ -66,15 +66,15 @@ export default function PoolPage() {
 
   const { data: globalData } = useGraphqlGlobal();
   const allPoolsData = useFragment(ManagePoolFragment, globalData?.pools);
-  const { positions: positionsData_, updatePositionLocal } = usePositions();
+  const { positions: positionsData_ } = usePositions();
   const positionsData = useMemo(
     () =>
       positionsData_.filter(
         (p) =>
           p.pool.token.address === id &&
           parseFloat(p.liquidity.fusdc.valueUsd) +
-            parseFloat(p.liquidity.token1.valueUsd) >
-            0,
+          parseFloat(p.liquidity.token1.valueUsd) >
+          0,
       ),
     [id, positionsData_],
   );
@@ -97,18 +97,15 @@ export default function PoolPage() {
 
   const poolData = allPoolsData?.find((pool) => pool.id === id);
 
-  // positionId_ is the internal position ID, used to look up a position to actually use and display
-  const [positionId_, setPositionId_] = useState<number | undefined>();
+  const setPositionId = (posId: number) => router.replace(`?id=${id}&positionId=${posId}`)
 
   // position is the currently selected position based on
-  // the internal ID and query parameters
+  // the query parameters
   const position = useMemo(() => {
-    if (positionId_ !== undefined)
-      return positionsData?.find((p) => p.positionId === positionId_);
     if (positionIdParam)
       return positionsData?.find((p) => p.positionId === positionIdParam);
     return positionsData?.[0];
-  }, [positionId_, positionIdParam]);
+  }, [positionIdParam]);
 
   const { positionId, upper: upperTick, lower: lowerTick } = position || {};
 
@@ -117,12 +114,12 @@ export default function PoolPage() {
       usdFormat(
         positionsData
           ? positionsData.reduce(
-              (total, { liquidity: { fusdc, token1 } }) =>
-                total +
-                parseFloat(fusdc.valueUsd) +
-                parseFloat(token1.valueUsd),
-              0,
-            )
+            (total, { liquidity: { fusdc, token1 } }) =>
+              total +
+              parseFloat(fusdc.valueUsd) +
+              parseFloat(token1.valueUsd),
+            0,
+          )
           : 0,
       ),
     [poolData],
@@ -205,8 +202,8 @@ export default function PoolPage() {
     );
     return usdFormat(
       (amount0 * Number(tokenPrice)) /
-        10 ** (token0.decimals + fUSDC.decimals) +
-        amount1 / 10 ** token1.decimals,
+      10 ** (token0.decimals + fUSDC.decimals) +
+      amount1 / 10 ** token1.decimals,
     );
   }, [position, positionLiquidity, tokenPrice, token0, token1, curTick]);
 
@@ -368,18 +365,18 @@ export default function PoolPage() {
                     <div className="text-xl md:text-2xl">
                       {lowerTick
                         ? getFormattedPriceFromTick(
-                            lowerTick,
-                            token0.decimals,
-                            token1.decimals,
-                          )
+                          lowerTick,
+                          token0.decimals,
+                          token1.decimals,
+                        )
                         : usdFormat(0)}
                       -
                       {upperTick
                         ? getFormattedPriceFromTick(
-                            upperTick,
-                            token0.decimals,
-                            token1.decimals,
-                          )
+                          upperTick,
+                          token0.decimals,
+                          token1.decimals,
+                        )
                         : usdFormat(0)}
                     </div>
                   </div>
@@ -395,7 +392,7 @@ export default function PoolPage() {
                     <div className="text-3xs md:text-2xs">Select Position</div>
                     <Select
                       value={`${positionId}`}
-                      onValueChange={(value) => setPositionId_(Number(value))}
+                      onValueChange={(value) => setPositionId(Number(value))}
                       defaultValue={`${position?.positionId}`}
                     >
                       <SelectTrigger className="h-6 w-auto border-0 bg-black p-0 text-[12px]">
