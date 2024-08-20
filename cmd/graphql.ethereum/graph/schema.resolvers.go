@@ -684,7 +684,7 @@ func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.
 	if err != nil {
 		return
 	}
-	err = r.DB.Table("seawater_final_ticks_monthly_2").
+	err = r.DB.Table("seawater_final_ticks_monthly_3").
 		Where("pool = ?", obj.Token).
 		Limit(maxMonths).
 		Scan(&monthly).
