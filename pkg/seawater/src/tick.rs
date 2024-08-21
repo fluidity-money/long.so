@@ -31,6 +31,14 @@ impl StorageTickBitmap {
         let mask = U256::one().wrapping_shl(bit_pos as usize);
         let bitmap = self.bitmap.get(word_pos) ^ mask;
 
+        #[cfg(feature = "testing-dbg")]
+        dbg!((
+            "inside flip",
+            mask.to_string(),
+            bitmap.to_string(),
+            word_pos
+        ));
+
         self.bitmap.setter(word_pos).set(bitmap);
     }
 }
@@ -252,7 +260,10 @@ impl StorageTicks {
         let new_fee_growth_outside_1 = fee_growth_global_1 - info.fee_growth_outside_1.get();
         info.fee_growth_outside_1.set(new_fee_growth_outside_1);
 
-        info.liquidity_net.sys()
+        let r = info.liquidity_net.sys();
+        #[cfg(feature = "testing-dbg")]
+        dbg!(("liquidity net", r));
+        r
     }
 
     /// Deletes a tick from the map, freeing storage slots.

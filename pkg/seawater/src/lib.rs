@@ -225,6 +225,15 @@ impl Pools {
         let amount_in = amount_in.abs_pos()?;
         let amount_out = amount_out.abs_neg()?;
 
+        #[cfg(feature = "testing-dbg")]
+        dbg!((
+            "inside swap_2_internal",
+            interim_usdc_out,
+            interim_usdc_in,
+            amount_out.to_string(),
+            min_out.to_string()
+        ));
+
         assert_eq_or!(interim_usdc_out, interim_usdc_in, Error::InterimSwapNotEq);
         assert_or!(amount_out >= min_out, Error::MinOutNotReached);
         Ok((
@@ -250,6 +259,13 @@ impl Pools {
         min_out: U256,
         permit2: Option<Permit2Args>,
     ) -> Result<(U256, U256), Revert> {
+        #[cfg(feature = "testing-dbg")]
+        dbg!((
+            "swap 2 internal erc20 at start",
+            amount.to_string(),
+            min_out.to_string()
+        ));
+
         let (
             original_amount,
             amount_in,
@@ -258,6 +274,13 @@ impl Pools {
             final_tick_in,
             final_tick_out,
         ) = Self::swap_2_internal(pools, from, to, amount, min_out)?;
+
+        #[cfg(feature = "testing-dbg")]
+        dbg!((
+            "swap 2 internal erc20 after internal",
+            amount_in.to_string(),
+            amount_out.to_string()
+        ));
 
         // transfer tokens
         erc20::take(from, original_amount, permit2)?;
@@ -937,78 +960,6 @@ impl Pools {
             None,
         )
     }
-
-    #[cfg(feature = "update_positions")]
-    #[raw]
-    #[selector(
-        id = "incrPositionPermit25468326E(address,uint256,uint256,uint256,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes)"
-    )]
-    /// Refreshes and increases the liquidity in a position with some protections, using permit2 to transfer tokens.
-    /// See [Self::adjust_position_internal].
-    #[allow(non_snake_case)]
-    pub fn incr_position_permit2_5468326_E(&mut self, data: &[u8]) -> RawArbResult {
-        //address,uint256,uint256,uint256,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes
-        let (pool, data) = eth_serde::parse_addr(data);
-        //uint256,uint256,uint256,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes
-        let (id, data) = eth_serde::parse_u256(data);
-        //uint256,uint256,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes
-        let (amount_0_min, data) = eth_serde::parse_u256(data);
-        //uint256,uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes
-        let (amount_1_min, data) = eth_serde::parse_u256(data);
-
-        fn parse_permit2(data: &[u8]) -> (U256, U256, U256, &[u8]) {
-            //uint256,uint256,uint256,bytes,uint256,uint256,uint256,bytes
-            let (nonce, data) = eth_serde::parse_u256(data);
-            //uint256,uint256,bytes,uint256,uint256,uint256,bytes
-            let (deadline, data) = eth_serde::parse_u256(data);
-            //uint256,bytes,uint256,uint256,uint256,bytes
-            let (token_max, data) = eth_serde::parse_u256(data);
-            //bytes,uint256,uint256,uint256,bytes
-            let (_, data) = eth_serde::take_word(data);
-
-            (nonce, deadline, token_max, data)
-        }
-
-        let (nonce_0, deadline_0, amount_0_max, data) = parse_permit2(data);
-        //uint256,uint256,uint256,bytes
-        let (nonce_1, deadline_1, amount_1_max, data) = parse_permit2(data);
-
-        let (sig_0, data) = eth_serde::parse_bytes(data);
-        let (sig_1, _) = eth_serde::parse_bytes(data);
-
-        let permit2_token_0 = Permit2Args {
-            max_amount: amount_0_max,
-            nonce: nonce_0,
-            deadline: deadline_0,
-            sig: sig_0,
-        };
-
-        let permit2_token_1 = Permit2Args {
-            max_amount: amount_1_max,
-            nonce: nonce_1,
-            deadline: deadline_1,
-            sig: sig_1,
-        };
-
-        match Pools::adjust_position_internal(
-            self,
-            pool,
-            id,
-            amount_0_min,
-            amount_1_min,
-            amount_0_max,
-            amount_1_max,
-            false,
-            Some((permit2_token_0, permit2_token_1)),
-        ) {
-            Ok((token_0, token_1)) => Some(Ok([
-                token_0.to_be_bytes::<32>(),
-                token_1.to_be_bytes::<32>(),
-            ]
-            .concat())),
-            Err(e) => Some(Err(e)),
-        }
-    }
 }
 
 /// Admin functions. Only enabled when the `admin` feature is set.
@@ -1252,6 +1203,11 @@ impl Pools {
         self.authorised_enablers.setter(enabler).set(enabled);
 
         Ok(())
+    }
+
+    #[allow(non_snake_case)]
+    pub fn swag_E_04_A_D_6_D_5(&self) -> Result<Address, Revert> {
+        Ok(FUSDC_ADDR)
     }
 }
 

@@ -403,6 +403,11 @@ fn decr_existing_position_some() {
 
 #[test]
 fn eli_incr_position() {
+    // This test was written after a real life error came up. We believe the
+    // source of this stems from a misconfiguration in the original swap code
+    // where delta could be 0, but we haven't conclusively found the reason
+    // why.
+
     //curl -d '{"jsonrpc":"2.0","method":"eth_call","id":123,"params":[{"from": "0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5", "to": "0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1", "data": "0x000001ea00000000000000000000000022b9fa698b68bba071b513959794e9a47d19214c000000000000000000000000000000000000000000000000000000000000064d0000000000000000000000000000000000000000000000006f05b59d3b20000000000000000000000000000000000000000000000000000000000001c08c19960000000000000000000000000000000000000000000000007ce66c50e284000000000000000000000000000000000000000000000000000000000001f89d9cc9"}, "0x64160b"]}' https://testnet-rpc.superposition.so
     //cast call -r https://testnet-rpc.superposition.so --block 6559243 0xA8EA92c819463EFbEdDFB670FEfC881A480f0115 'balanceOf(address)(uint256)' 0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5
     //cast call -r https://testnet-rpc.superposition.so --block 6559243 0x22b9fa698b68bBA071B513959794E9a47d19214c 'balanceOf(address)(uint256)' 0xfeb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5
@@ -605,4 +610,179 @@ fn incr_position_fee_growth_tick() {
                 ).map(|_| ())
             },
         ).unwrap();
+}
+
+#[test]
+fn ethers_suite_orchestrated_uniswap_single() {
+    test_utils::with_storage::<_, Pools, _>(
+        Some(address!("3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E").into_array()), // sender
+        None,
+        None,
+        None,
+        |contract| -> Result<(), Vec<u8>> {
+            let token0 = address!("9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
+            contract.ctor(msg::sender(), Address::ZERO, Address::ZERO)?;
+            contract.create_pool_D650_E2_D0(
+                token0,
+                U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
+                500,                                      // fee
+                10,                                       // tick spacing
+                u128::MAX,
+            )?;
+            contract.enable_pool_579_D_A658(token0, true)?;
+            contract.mint_position_B_C5_B086_D(token0, 39120, 50100)?;
+            let id = U256::ZERO;
+            contract
+                .update_position_C_7_F_1_F_740(token0, id, 20000)
+                .map(|_| ())?;
+            let (amount_out_0, amount_out_1) = contract.swap_904369_B_E(
+                token0,
+                true,
+                I256::try_from(1000_i32).unwrap(),
+                U256::MAX,
+            )?;
+            assert_eq!(amount_out_0, I256::try_from(833).unwrap());
+            assert_eq!(amount_out_1, I256::try_from(-58592).unwrap());
+            Ok(())
+        },
+    )
+    .unwrap()
+}
+
+#[test]
+fn ethers_suite_orchestrated_uniswap_single_version_2() {
+    test_utils::with_storage::<_, Pools, _>(
+        Some(address!("3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E").into_array()), // sender
+        None,
+        None,
+        None,
+        |contract| -> Result<(), Vec<u8>> {
+            let token0 = address!("9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
+            contract.ctor(msg::sender(), Address::ZERO, Address::ZERO)?;
+            contract.create_pool_D650_E2_D0(
+                token0,
+                U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
+                500,                                      // fee
+                10,                                       // tick spacing
+                u128::MAX,
+            )?;
+            contract.enable_pool_579_D_A658(token0, true)?;
+            contract.mint_position_B_C5_B086_D(token0, 39120, 50100)?;
+            let id = U256::ZERO;
+            contract
+                .update_position_C_7_F_1_F_740(token0, id, 20000)
+                .map(|_| ())?;
+            let (amount_out_0, amount_out_1) = contract.swap_904369_B_E(
+                token0,
+                false,
+                I256::try_from(9_i32).unwrap(),
+                U256::from_limbs([6743328256752651558, 17280870778742802505, 4294805859, 0])
+                    - U256::one(), //146144670348521010328727305220398882237872397034 - 1
+            )?;
+            eprintln!("amount out 0: {amount_out_0}, amount out 1: {amount_out_1}");
+            assert_eq!(amount_out_0, I256::ZERO);
+            assert_eq!(amount_out_1, I256::try_from(9).unwrap());
+            Ok(())
+        },
+    )
+    .unwrap()
+}
+
+#[test]
+fn ethers_suite_orchestrated_uniswap_two() {
+    // Why does this break?
+
+    test_utils::with_storage::<_, Pools, _>(
+        Some(address!("3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E").into_array()), // sender
+        None,
+        None,
+        None,
+        |contract| {
+            let token0 = address!("9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
+            let token1 = address!("9fE46736679d2D9a65F0992F2272dE9f3c7fa6e1");
+            contract
+                .ctor(msg::sender(), Address::ZERO, Address::ZERO)
+                .unwrap();
+            contract
+                .create_pool_D650_E2_D0(
+                    token0,
+                    U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
+                    500,                                      // fee
+                    10,                                       // tick spacing
+                    u128::MAX,
+                )
+                .unwrap();
+            contract
+                .create_pool_D650_E2_D0(
+                    token1,
+                    U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
+                    500,                                      // fee
+                    10,                                       // tick spacing
+                    u128::MAX,
+                )
+                .unwrap();
+            contract.enable_pool_579_D_A658(token0, true).unwrap();
+            contract.enable_pool_579_D_A658(token1, true).unwrap();
+            contract
+                .mint_position_B_C5_B086_D(token0, 39120, 50100)
+                .unwrap();
+            contract
+                .mint_position_B_C5_B086_D(token1, 39120, 50100)
+                .unwrap();
+            let id = U256::ZERO;
+            contract
+                .update_position_C_7_F_1_F_740(token0, id, 20000)
+                .unwrap();
+            contract
+                .update_position_C_7_F_1_F_740(token1, U256::one(), 20000)
+                .unwrap();
+            let (amount_out_0, amount_out_1) = contract
+                .swap_2_exact_in_41203_F1_D(token0, token1, U256::from(1000), U256::from(10))
+                .unwrap();
+            eprintln!("final amount out 0: {amount_out_0}, amount out 1: {amount_out_1}");
+        },
+    );
+}
+
+#[test]
+fn ethers_suite_swapping_with_permit2_blobs_no_permit2() {
+    test_utils::with_storage::<_, Pools, _>(
+        Some(address!("3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E").into_array()), // sender
+        None,
+        None,
+        None,
+        |contract| {
+            let token0 = address!("9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
+            contract
+                .ctor(msg::sender(), Address::ZERO, Address::ZERO)
+                .unwrap();
+            contract
+                .create_pool_D650_E2_D0(
+                    token0,
+                    U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
+                    500,                                      // fee
+                    10,                                       // tick spacing
+                    u128::MAX,
+                )
+                .unwrap();
+            contract.enable_pool_579_D_A658(token0, true).unwrap();
+            contract
+                .mint_position_B_C5_B086_D(token0, 39120, 50100)
+                .unwrap();
+            let id = U256::ZERO;
+            contract
+                .update_position_C_7_F_1_F_740(token0, id, 20000)
+                .unwrap();
+            let (amount_out_0, amount_out_1) = contract
+                .swap_904369_B_E(
+                    token0,
+                    true,
+                    I256::try_from(10).unwrap(),
+                    U256::from_limbs([12205810521336709120, 23524504717, 0, 0]), //433950517987477953199883681792
+                )
+                .unwrap();
+            assert_eq!(amount_out_0, I256::try_from(10).unwrap());
+            assert_eq!(amount_out_1, I256::try_from(-895).unwrap());
+        },
+    );
 }

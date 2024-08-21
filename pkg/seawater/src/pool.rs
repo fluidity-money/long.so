@@ -101,25 +101,50 @@ impl StoragePool {
         let fee_growth_global_1 = self.fee_growth_global_1.get();
         let max_liquidity_per_tick = self.max_liquidity_per_tick.get().sys();
 
-        let flip_lower = self.ticks.update(
-            lower,
-            cur_tick,
+        #[cfg(feature = "testing-dbg")]
+        dbg!((
+            "inside update_position before delta check",
             delta,
-            &fee_growth_global_0,
-            &fee_growth_global_1,
-            false,
-            max_liquidity_per_tick,
-        )?;
+            cur_tick,
+            fee_growth_global_0,
+            fee_growth_global_1,
+        ));
 
-        let flip_upper = self.ticks.update(
-            upper,
-            cur_tick,
-            delta,
-            &fee_growth_global_0,
-            &fee_growth_global_1,
-            true,
-            max_liquidity_per_tick,
-        )?;
+        let mut flipped_lower = false;
+        let mut flipped_upper = false;
+
+        if delta != 0 {
+            flipped_lower = self.ticks.update(
+                lower,
+                cur_tick,
+                delta,
+                &fee_growth_global_0,
+                &fee_growth_global_1,
+                false,
+                max_liquidity_per_tick,
+            )?;
+
+            flipped_upper = self.ticks.update(
+                upper,
+                cur_tick,
+                delta,
+                &fee_growth_global_0,
+                &fee_growth_global_1,
+                true,
+                max_liquidity_per_tick,
+            )?;
+
+            #[cfg(feature = "testing-dbg")]
+            dbg!(("before if flip lower", flipped_lower, flipped_upper));
+
+            // clear unneeded storage
+            if flipped_lower {
+                self.tick_bitmap.flip(lower, self.tick_spacing.get().sys());
+            }
+            if flipped_upper {
+                self.tick_bitmap.flip(upper, self.tick_spacing.get().sys());
+            }
+        }
 
         // update the position
         let (fee_growth_inside_0, fee_growth_inside_1) = self.ticks.get_fee_growth_inside(
@@ -133,24 +158,17 @@ impl StoragePool {
         self.positions
             .update(id, delta, fee_growth_inside_0, fee_growth_inside_1)?;
 
-        // clear unneeded storage
-        if flip_lower {
-            self.tick_bitmap.flip(lower, self.tick_spacing.get().sys());
-            if delta < 0 {
+        if delta < 0 {
+            if flipped_lower {
                 self.ticks.clear(lower);
             }
-        }
-        if flip_upper {
-            self.tick_bitmap.flip(upper, self.tick_spacing.get().sys());
-            if delta < 0 {
+            if flipped_upper {
                 self.ticks.clear(upper);
             }
         }
 
         // calculate liquidity change and the amount of each token we need
-        if delta == 0 {
-            Ok((I256::zero(), I256::zero()))
-        } else {
+        if delta != 0 {
             let (amount_0, amount_1) = if self.cur_tick.get().sys() < lower {
                 #[cfg(feature = "testing-dbg")]
                 dbg!((
@@ -227,6 +245,8 @@ impl StoragePool {
             };
 
             Ok((amount_0, amount_1))
+        } else {
+            Ok((I256::zero(), I256::zero()))
         }
     }
 
@@ -309,6 +329,14 @@ impl StoragePool {
                 }
             }
         };
+
+        #[cfg(feature = "testing-dbg")]
+        dbg!((
+            "inside swap pool function",
+            current_test!(),
+            price_limit.to_string()
+        ));
+
         // is the swap exact in or exact out
         let exact_in = amount > I256::zero();
 
@@ -349,7 +377,7 @@ impl StoragePool {
         let mut iters = 0;
         while !state.amount_remaining.is_zero() && state.price != price_limit {
             iters += 1;
-            debug_assert!(iters != 100, "swapping didn't resolve after 100 iters!");
+            debug_assert!(iters < 500);
 
             let step_initial_price = state.price;
 
@@ -366,6 +394,18 @@ impl StoragePool {
             let step_next_tick = step_next_tick.clamp(tick_math::MIN_TICK, tick_math::MAX_TICK);
 
             let step_next_price = tick_math::get_sqrt_ratio_at_tick(step_next_tick)?;
+
+            #[cfg(feature = "testing-dbg")]
+            dbg!((
+                "swapping",
+                state.amount_remaining.to_string(),
+                state.price.to_string(),
+                price_limit.to_string(),
+                iters,
+                step_next_tick,
+                step_next_tick_initialised,
+                step_next_price.to_string()
+            ));
 
             // swap til the tick is reached or the price limit is reached or the in/out amount is
             // used
