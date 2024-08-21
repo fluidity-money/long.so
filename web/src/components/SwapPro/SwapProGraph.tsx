@@ -68,7 +68,7 @@ export const Graph = ({
       const last = slicedData?.at(-1);
       const header = usdFormat(
         parseFloat(last?.fusdc.valueUsd ?? "0") +
-        parseFloat(last?.token1.valueUsd ?? "0"),
+          parseFloat(last?.token1.valueUsd ?? "0"),
       );
 
       return [
@@ -90,16 +90,17 @@ export const Graph = ({
         slicedData = slicedData?.slice(0, durationToDays[duration]);
       }
 
-      const now = new Date()
+      const now = new Date();
 
       return [
         slicedData
           // reformat pool data to match expected graph data
           ?.map((d, i) => ({
             // step each entry back by one day or month, depending on the duration key
-            date: durationKey === "daily"
-              ? new Date().setDate(now.getDate() - i)
-              : new Date().setMonth(now.getMonth() - i),
+            date:
+              durationKey === "daily"
+                ? new Date().setDate(now.getDate() - i)
+                : new Date().setMonth(now.getMonth() - i),
             value: parseFloat(d),
           }))
           .reverse(),
