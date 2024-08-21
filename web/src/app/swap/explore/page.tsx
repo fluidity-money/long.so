@@ -24,6 +24,7 @@ import { config } from "@/config";
 import { getFormattedStringFromTokenAmount } from "@/lib/amounts";
 import { SwapExploreFragmentFragment } from "@/gql/graphql";
 import { useDetectClickOutside } from "react-detect-click-outside";
+import { useHotkeys } from "react-hotkeys-hook";
 
 const SwapExploreFragment = graphql(`
   fragment SwapExploreFragment on SeawaterPool {
@@ -49,6 +50,8 @@ const ExplorePage = () => {
   const ref = useDetectClickOutside({
     onTriggered: () => router.back(),
   });
+
+  useHotkeys("esc", () => router.back(), { enableOnFormTags: ["INPUT"] });
 
   const token = searchParams.get("token") as "0" | "1";
 
