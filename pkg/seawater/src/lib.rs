@@ -1204,11 +1204,6 @@ impl Pools {
 
         Ok(())
     }
-
-    #[allow(non_snake_case)]
-    pub fn swag_E_04_A_D_6_D_5(&self) -> Result<Address, Revert> {
-        Ok(FUSDC_ADDR)
-    }
 }
 
 ///! Migrations code that should only be used in a testing environment, or in a rescue
