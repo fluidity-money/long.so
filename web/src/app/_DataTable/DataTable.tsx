@@ -15,7 +15,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -59,28 +64,53 @@ export function DataTable<TData, TValue>({
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className="group cursor-pointer border-b-0 hover:bg-black hover:text-white"
-                onClick={() => {
-                  const transactionHash = (row.original as any).transactionHash; // Access the transactionHash from row data
-                  const blockExplorerUrl = `https://testnet-explorer.superposition.so/tx/${transactionHash}`; // Replace with your block explorer URL
-                  window.open(
-                    blockExplorerUrl,
-                    "_blank",
-                    "noopener,noreferrer",
-                  );
-                }}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="p-1 text-xs">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
+            table.getRowModel().rows.map((row) => {
+              const transactionHash = (row.original as any).transactionHash; // Access the transactionHash from row data
+              const blockExplorerUrl = `https://testnet-explorer.superposition.so/tx/${transactionHash}`;
+              return (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="group  relative border-b-0 hover:bg-black hover:text-white "
+                  // onClick={() => {
+                  //   window.open(
+                  //     blockExplorerUrl,
+                  //     "_blank",
+                  //     "noopener,noreferrer",
+                  //   );
+                  // }}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="p-1 text-xs">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="absolute inset-0" disabled />
+                      <TooltipContent
+                        side={"bottom"}
+                        className="relative flex justify-center overflow-visible bg-black p-0 text-white"
+                      >
+                        <div className="absolute -top-1 z-20 border-x-4 border-b-4 border-transparent border-b-black" />
+                        <a
+                          href={blockExplorerUrl}
+                          target="_blank"
+                          className="px-3 py-1.5"
+                        >
+                          Click to view transaction details{" "}
+                          <span className="inline-block -rotate-45">-&gt;</span>
+                          {/* ↗️ */}
+                        </a>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableRow>
+              );
+            })
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
