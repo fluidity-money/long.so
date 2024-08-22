@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import TokenIridescent from "@/assets/icons/token-iridescent.svg";
 import { TokenIcon } from "@/components/TokenIcon";
 import { getTokenFromAddress } from "@/config/tokens";
+import { formatDuration, intervalToDuration } from "date-fns";
 
 export type Token = {
   name: string;
@@ -44,7 +45,10 @@ export const columns: ColumnDef<Pool>[] = [
     accessorKey: "duration",
     header: "Duration",
     cell: ({ row }) => {
-      return `${row.original.duration} mins`;
+      const duration = intervalToDuration({ start: 0, end: row.original.duration })
+      // durations are formatted as 12 years, 5 seconds, etc.
+      // so take the first two words to take the largest unit of the duration
+      return formatDuration(duration).split(' ').slice(0, 2).join(' ')
     },
   },
   {

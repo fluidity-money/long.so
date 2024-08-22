@@ -54,10 +54,7 @@ export const MyPositions = () => {
         id: position.pool.token.address,
         duration: Math.round(
           // now - created
-          (new Date().valueOf() - new Date(position.created * 1000).valueOf()) /
-            // converted to minutes
-            1000 /
-            60,
+          new Date().valueOf() - new Date(position.created * 1000).valueOf()
         ),
         tokens: [
           fUSDC,
