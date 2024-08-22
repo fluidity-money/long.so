@@ -10,5 +10,3 @@ title = "Longtail AMM contracts docs"
 repository = "https://github.com/fluidity-money/long.so"
 
 revert-strings = "debug"
-
-remappings = ["@opensezppling/=lib/openzeppelin-contracts/"]
