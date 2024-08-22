@@ -85,7 +85,6 @@ impl From<Error> for Vec<u8> {
     #[cfg(target_arch = "wasm32")]
     fn from(val: Error) -> Self {
         let id = unsafe { *<*const _>::from(&val).cast::<u8>() };
-        let mut e = vec![id];
-        e
+        vec![id]
     }
 }

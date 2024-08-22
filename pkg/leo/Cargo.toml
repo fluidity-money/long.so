@@ -32,3 +32,4 @@ const-hex.workspace = true
 [features]
 export-abi = ["stylus-sdk/export-abi"]
 testing = []
+log-events = []

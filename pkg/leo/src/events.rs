@@ -1,11 +1,12 @@
-use stylus_sdk::{
-    alloy_primitives::{Address, FixedBytes, U160, U256},
-    alloy_sol_types::sol,
-    evm,
-};
+use stylus_sdk::alloy_primitives::{Address, FixedBytes, U160, U256};
 
+#[cfg(feature = "log-events")]
+use stylus_sdk::{alloy_sol_types::sol, evm};
+
+#[cfg(feature = "log-events")]
 sol!("../sol/ILeoEvents.sol");
 
+#[cfg(feature = "log-events")]
 pub use ILeoEvents::*;
 
 pub fn emit_campaign_created(
@@ -18,6 +19,7 @@ pub fn emit_campaign_created(
     starting: u64,
     ending: u64,
 ) {
+    #[cfg(feature = "log-events")]
     evm::log(CampaignCreated {
         identifier: identifier.as_slice().try_into().unwrap(),
         pool,
@@ -48,6 +50,7 @@ pub fn emit_campaign_updated(
     starting: u64,
     ending: u64,
 ) {
+    #[cfg(feature = "log-events")]
     evm::log(CampaignUpdated {
         identifier: identifier.as_slice().try_into().unwrap(),
         perSecond: per_second,

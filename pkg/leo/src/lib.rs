@@ -3,10 +3,13 @@
 
 use stylus_sdk::{
     alloy_primitives::{aliases::*, *},
-    block, evm, msg,
+    block, msg,
     prelude::*,
     storage::*,
 };
+
+#[cfg(feature = "log-events")]
+use stylus_sdk::evm;
 
 pub mod calldata;
 pub mod erc20;
@@ -221,6 +224,7 @@ impl Leo {
             // Take the token's amounts for the campaign.
             erc20::take(pool, extra_max)?;
 
+            #[cfg(feature = "log-events")]
             evm::log(events::CampaignBalanceUpdated {
                 identifier: identifier.as_slice().try_into().unwrap(),
                 newMaximum: new_maximum,
@@ -228,6 +232,7 @@ impl Leo {
         }
 
         // Pack the words for CampaignCreated, and then emit that event.
+        #[cfg(feature = "log-events")]
         events::emit_campaign_created(
             identifier,
             pool,
@@ -306,12 +311,14 @@ impl Leo {
             // Take the token's amounts for the campaign.
             erc20::take(pool, extra_max)?;
 
+            #[cfg(feature = "log-events")]
             evm::log(events::CampaignBalanceUpdated {
                 identifier: identifier.as_slice().try_into().unwrap(),
                 newMaximum: new_maximum,
             });
         }
 
+        #[cfg(feature = "log-events")]
         events::emit_campaign_updated(
             identifier, pool, per_second, tick_lower, tick_upper, starting, ending,
         );

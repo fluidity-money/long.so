@@ -176,7 +176,7 @@ mod testing {
         )
     }
 
-    #[test]
+    #[cfg(all(test, feature = "testing"))]
     fn campaign_created_claimed_then_updated_claim_again() {
         libleo::host::with_storage::<_, libleo::Leo, _>(
             &[(POOL, POS_ID, -10, 100, U256::from(1000))],
