@@ -676,7 +676,7 @@ func (r *seawaterPoolResolver) PriceOverTime(ctx context.Context, obj *seawater.
 		return model.PriceOverTime{daily, monthly}, nil
 	}
 	var daily, monthly []model.PriceResult
-	err = r.DB.Table("seawater_final_ticks_daily_2").
+	err = r.DB.Table("seawater_final_ticks_daily_3").
 		Where("pool = ?", obj.Token).
 		Limit(maxDays).
 		Scan(&daily).
