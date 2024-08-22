@@ -76,6 +76,7 @@ export const ConnectWalletButton = () => {
       color="light"
       className="mb-1 h-[26px] text-sm"
       onClick={() => open()}
+      id="wallet-connect-btn"
     >
       Connect Wallet
     </Button>

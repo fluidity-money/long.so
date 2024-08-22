@@ -17,9 +17,15 @@ export const InventorySheet = () => {
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <div className="flex flex-row items-center justify-center gap-[10px] rounded">
+      <div
+        className="flex flex-row items-center justify-center gap-[10px] rounded"
+        id="inventory-wrapper"
+      >
         <SheetTrigger asChild>
-          <div className="cursor-pointer text-nowrap rounded p-1 text-right text-xs font-semibold text-black transition-all hover:bg-black hover:text-base hover:text-white">
+          <div
+            id="wallet-connected-btn"
+            className="cursor-pointer text-nowrap rounded p-1 text-right text-xs font-semibold text-black transition-all hover:bg-black hover:text-base hover:text-white"
+          >
             {ensName ? (
               ensName
             ) : (
@@ -36,7 +42,10 @@ export const InventorySheet = () => {
         />
       </div>
 
-      <SheetContent className="my-2 max-h-screen overflow-y-auto rounded-lg border-0 bg-black text-white">
+      <SheetContent
+        className="my-2 max-h-screen overflow-y-auto rounded-lg border-0 bg-black text-white"
+        id="inventory-content"
+      >
         <InventoryContent />
       </SheetContent>
     </Sheet>

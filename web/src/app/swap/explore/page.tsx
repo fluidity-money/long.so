@@ -48,7 +48,28 @@ const ExplorePage = () => {
   const searchParams = useSearchParams();
 
   const ref = useDetectClickOutside({
-    onTriggered: () => router.back(),
+    onTriggered: (e) => {
+      const isClickedDropdown = (e.target as any)?.tagName === "HTML";
+      const isClickedStakeButton =
+        ((e.target as any)?.offsetParent as any)?.className.includes(
+          "Menu_Item",
+        ) && (e.target as any)?.innerText === "Stake";
+      const isClickedConnectButton =
+        (e.target as any)?.id === "wallet-connected-btn" ||
+        (e.target as any)?.id === "wallet-connect-btn" ||
+        (e.target as any)?.id === "inventory-content" ||
+        (e.target as any)?.id === "sheet-overlay";
+      const isClickWeb3Modal = (e.target as any)?.tagName === "W3M-MODAL";
+      const canGoBack = !(
+        isClickedDropdown ||
+        isClickedStakeButton ||
+        isClickedConnectButton ||
+        isClickWeb3Modal
+      );
+      if (canGoBack) {
+        router.back();
+      }
+    },
   });
 
   useHotkeys("esc", () => router.back(), { enableOnFormTags: ["INPUT"] });
