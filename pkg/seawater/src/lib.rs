@@ -398,73 +398,57 @@ impl Pools {
 /// Swap functions using Permit2. Only enabled when the `swap_permit2` feature is set.
 #[cfg_attr(feature = "swap_permit2", external)]
 impl Pools {
-    // slight hack - we cfg out the whole function, since the `selector` and `raw` attributes don't
-    // actually exist, so we can't `cfg_attr` them in
     #[cfg(feature = "swap_permit2")]
-    #[selector(
-        id = "swapPermit2EE84AD91(address,bool,int256,uint256,uint256,uint256,uint256,bytes)"
-    )]
-    #[raw]
     #[allow(non_snake_case)]
-    pub fn swap_permit_2_E_E84_A_D91(&mut self, data: &[u8]) -> RawArbResult {
-        let (pool, data) = eth_serde::parse_addr(data);
-        let (zero_for_one, data) = eth_serde::parse_bool(data);
-        let (amount, data) = eth_serde::parse_i256(data);
-        let (price_limit_x96, data) = eth_serde::parse_u256(data);
-        let (nonce, data) = eth_serde::parse_u256(data);
-        let (deadline, data) = eth_serde::parse_u256(data);
-        let (max_amount, data) = eth_serde::parse_u256(data);
-        let (_, data) = eth_serde::take_word(data); // placeholder
-        let (sig, _) = eth_serde::parse_bytes(data);
-
+    pub fn swap_permit_2_E_E84_A_D91(
+        &mut self,
+        pool: Address,
+        zero_for_one: bool,
+        amount: I256,
+        price_limit_x96: U256,
+        nonce: U256,
+        deadline: U256,
+        max_amount: U256,
+        sig: Vec<u8>,
+    ) -> Result<(I256, I256), Revert> {
         let permit2_args = Permit2Args {
             max_amount,
             nonce,
             deadline,
-            sig,
+            sig: &sig,
         };
 
-        match Pools::swap_internal(
+        Pools::swap_internal(
             self,
             pool,
             zero_for_one,
             amount,
             price_limit_x96,
             Some(permit2_args),
-        ) {
-            Ok((a, b)) => Some(Ok([a.to_be_bytes::<32>(), b.to_be_bytes::<32>()].concat())),
-            Err(e) => Some(Err(e)),
-        }
+        )
     }
 
     /// Performs a two stage swap, using permit2 to transfer tokens. See [Self::swap_2_internal].
     #[cfg(feature = "swap_permit2")]
-    #[selector(
-        id = "swap2ExactInPermit236B2FDD8(address,address,uint256,uint256,uint256,uint256,bytes)"
-    )]
-    #[raw]
     #[allow(non_snake_case)]
-    pub fn swap_2_exact_in_permit_2_36_B2_F_D_D8(&mut self, data: &[u8]) -> RawArbResult {
-        let (from, data) = eth_serde::parse_addr(data);
-        let (to, data) = eth_serde::parse_addr(data);
-        let (amount, data) = eth_serde::parse_u256(data);
-        let (min_out, data) = eth_serde::parse_u256(data);
-        let (nonce, data) = eth_serde::parse_u256(data);
-        let (deadline, data) = eth_serde::parse_u256(data);
-        let (_, data) = eth_serde::take_word(data);
-        let (sig, _) = eth_serde::parse_bytes(data);
-
+    pub fn swap_2_exact_in_permit_2_36_B2_F_D_D8(
+        &mut self,
+        from: Address,
+        to: Address,
+        amount: U256,
+        min_out: U256,
+        nonce: U256,
+        deadline: U256,
+        sig: Vec<u8>,
+    ) -> Result<(U256, U256), Revert> {
         let permit2_args = Permit2Args {
             max_amount: amount,
             nonce,
             deadline,
-            sig,
+            sig: &sig,
         };
 
-        match Pools::swap_2_internal_erc20(self, from, to, amount, min_out, Some(permit2_args)) {
-            Ok((a, b)) => Some(Ok([a.to_be_bytes::<32>(), b.to_be_bytes::<32>()].concat())),
-            Err(e) => Some(Err(e)),
-        }
+        Pools::swap_2_internal_erc20(self, from, to, amount, min_out, Some(permit2_args))
     }
 }
 

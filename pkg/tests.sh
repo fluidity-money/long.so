@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 
 export \
 	SPN_GETH_URL=http://localhost:8547 \

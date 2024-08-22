@@ -1025,7 +1025,8 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stylus-proc"
 version = "0.5.0"
-source = "git+https://github.com/fluidity-money/stylus-sdk-rs?branch=feat-raw-fn#3937c45ceb010cf279209c913bd08b0f9d310801"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9f274700c5c74abfcc9068f96564615173d8fed72ea44afd1e4404bb04478c00"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -1043,7 +1044,8 @@ dependencies = [
 [[package]]
 name = "stylus-sdk"
 version = "0.5.0"
-source = "git+https://github.com/fluidity-money/stylus-sdk-rs?branch=feat-raw-fn#3937c45ceb010cf279209c913bd08b0f9d310801"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f4424e5f067b1b0922a4294efc01acaa1e36bfc7b31e6b0aed33d7221680f974"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
