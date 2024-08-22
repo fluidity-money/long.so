@@ -120,6 +120,7 @@ clean:
 		${OUT_SEAWATER_SWAPS} \
 		${OUT_SEAWATER_SWAP_PERMIT2} \
 		${OUT_SEAWATER_QUOTES} \
+		${OUT_SEAWATER_MIGRATIONS} \
 		cache \
 		target \
 		out \

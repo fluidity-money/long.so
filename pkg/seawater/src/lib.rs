@@ -54,7 +54,10 @@ use maths::tick_math;
 
 use types::{U256Extension, WrappedNative};
 
-use stylus_sdk::{evm, msg, prelude::*, storage::*};
+use stylus_sdk::{msg, prelude::*, storage::*};
+
+#[cfg(feature = "log-events")]
+use stylus_sdk::evm;
 
 #[allow(dead_code)]
 type RawArbResult = Option<Result<Vec<u8>, Vec<u8>>>;
@@ -146,7 +149,7 @@ impl Pools {
         price_limit_x96: U256,
         permit2: Option<Permit2Args>,
     ) -> Result<(I256, I256), Revert> {
-        let (amount_0, amount_1, ending_tick) =
+        let (amount_0, amount_1, _ending_tick) =
             pools
                 .pools
                 .setter(pool)
@@ -178,13 +181,14 @@ impl Pools {
             Error::SwapResultTooLow
         );
 
+        #[cfg(feature = "log-events")]
         evm::log(events::Swap1 {
             user: msg::sender(),
             pool,
             zeroForOne: zero_for_one,
             amount0: amount_0_abs,
             amount1: amount_1_abs,
-            finalTick: ending_tick,
+            finalTick: _ending_tick,
         });
 
         Ok((amount_0, amount_1))
@@ -270,9 +274,9 @@ impl Pools {
             original_amount,
             amount_in,
             amount_out,
-            interim_usdc_out,
-            final_tick_in,
-            final_tick_out,
+            _interim_usdc_out,
+            _final_tick_in,
+            _final_tick_out,
         ) = Self::swap_2_internal(pools, from, to, amount, min_out)?;
 
         #[cfg(feature = "testing-dbg")]
@@ -286,15 +290,16 @@ impl Pools {
         erc20::take(from, original_amount, permit2)?;
         erc20::transfer_to_sender(to, amount_out)?;
 
+        #[cfg(feature = "log-events")]
         evm::log(events::Swap2 {
             user: msg::sender(),
             from,
             to,
             amountIn: amount_in,
             amountOut: amount_out,
-            fluidVolume: interim_usdc_out.abs().into_raw(),
-            finalTick0: final_tick_in,
-            finalTick1: final_tick_out,
+            fluidVolume: _interim_usdc_out.abs().into_raw(),
+            finalTick0: _final_tick_in,
+            finalTick1: _final_tick_out,
         });
 
         // return amount - amount_in to the user
@@ -502,6 +507,7 @@ impl Pools {
 
         self.grant_position(owner, id);
 
+        #[cfg(feature = "log-events")]
         evm::log(events::MintPosition {
             id,
             owner,
@@ -530,6 +536,7 @@ impl Pools {
 
         self.remove_position(owner, id);
 
+        #[cfg(feature = "log-events")]
         evm::log(events::BurnPosition { owner, id });
 
         Ok(())
@@ -555,6 +562,7 @@ impl Pools {
         self.remove_position(from, id);
         self.grant_position(to, id);
 
+        #[cfg(feature = "log-events")]
         evm::log(events::TransferPosition { from, to, id });
 
         Ok(())
@@ -615,6 +623,7 @@ impl Pools {
         let res = self.pools.setter(pool).collect(id)?;
         let (token_0, token_1) = res;
 
+        #[cfg(feature = "log-events")]
         evm::log(events::CollectFees {
             id,
             pool,
@@ -707,6 +716,7 @@ impl Pools {
             erc20::take(FUSDC_ADDR, token_1.abs_pos()?, permit_1)?;
         }
 
+        #[cfg(feature = "log-events")]
         evm::log(events::UpdatePositionLiquidity {
             id,
             token0: token_0,
@@ -741,6 +751,7 @@ impl Pools {
             giving,
         )?;
 
+        #[cfg(feature = "log-events")]
         evm::log(events::UpdatePositionLiquidity {
             id,
             token0: amount_0,
@@ -1005,12 +1016,13 @@ impl Pools {
 
         // get the decimals for the asset so we can log it's decimals for the indexer
 
-        let decimals = erc20::decimals(pool)?;
+        let _decimals = erc20::decimals(pool)?;
 
+        #[cfg(feature = "log-events")]
         evm::log(events::NewPool {
             token: pool,
             fee,
-            decimals,
+            decimals: _decimals,
             tickSpacing: tick_spacing,
         });
 
@@ -1137,6 +1149,7 @@ impl Pools {
         erc20::transfer_to_addr(recipient, pool, U256::from(token_0))?;
         erc20::transfer_to_addr(recipient, FUSDC_ADDR, U256::from(token_1))?;
 
+        #[cfg(feature = "log-events")]
         evm::log(events::CollectProtocolFees {
             pool,
             to: recipient,
