@@ -99,9 +99,9 @@ export function DataTable<TData, TValue>({
                         <a
                           href={blockExplorerUrl}
                           target="_blank"
-                          className="px-3 py-1.5"
+                          className="px-3 py-1.5 text-xs"
                         >
-                          Click to view transaction details{" "}
+                          See on block explorer{" "}
                           <span className="inline-block -rotate-45">-&gt;</span>
                           {/* ↗️ */}
                         </a>
