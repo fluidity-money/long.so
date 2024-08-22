@@ -58,23 +58,12 @@ async function createPosition(
     upper: number,
     delta: BigInt,
 ) {
+    const id = await amm.mintPositionBC5B086D.staticCall(address, lower, upper);
+
     const mintResult = await amm.mintPositionBC5B086D(address, lower, upper);
+    await mintResult.wait();
 
     console.log(`mint position tx: ${mintResult.hash}`);
-
-    const [mintLog]: [mintLog: Log] = await mintResult.wait()
-    type mintEventArgs = [
-        BigInt,
-        string,
-        string,
-        BigInt,
-        BigInt,
-    ]
-
-    // has an issue with readonly typing
-    // @ts-ignore
-    const {args}  = amm.interface.parseLog(mintLog) || {}
-    const [id, /*user*/, /*pool*/, /*low*/, /*high*/] = args as unknown as mintEventArgs;
 
     const updatePositionResult = await amm.updatePositionC7F1F740(address, id, delta)
     await updatePositionResult.wait()
