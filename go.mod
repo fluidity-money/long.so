@@ -11,7 +11,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/orandin/slog-gorm v1.3.2
 	github.com/pelletier/go-toml/v2 v2.2.2
-	github.com/samber/slog-sentry/v2 v2.7.0
+	github.com/samber/slog-sentry/v2 v2.8.0
 	github.com/stretchr/testify v1.9.0
 	github.com/vektah/gqlparser/v2 v2.5.16
 	gorm.io/driver/postgres v1.5.9
