@@ -161,6 +161,11 @@ export const SwapPro = ({
       ] as Transaction[];
 
     return transactions
+      ?.filter(
+        (item) =>
+          item.amountIn.token.symbol === token0.symbol &&
+          item.amountOut.token.symbol === token1.symbol,
+      )
       ?.map((transaction) => {
         return {
           id: transaction.timestamp.toString(),
@@ -173,7 +178,7 @@ export const SwapPro = ({
         };
       })
       .sort((a, b) => (a.time > b.time ? -1 : a.time === b.time ? 0 : 1));
-  }, [transactions, showMockData]);
+  }, [transactions, token0.symbol, token1.symbol, showMockData]);
 
   return (
     <motion.div
