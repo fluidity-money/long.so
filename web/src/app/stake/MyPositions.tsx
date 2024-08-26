@@ -20,14 +20,13 @@ import SegmentedControl from "@/components/ui/segmented-control";
 import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
 import { mockMyPositions } from "@/demoData/myPositions";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-import { graphql, useFragment } from "@/gql";
-import { useGraphqlUser } from "@/hooks/useGraphql";
 import { Token, fUSDC, getTokenFromAddress } from "@/config/tokens";
 import { TokenIcon } from "@/components/TokenIcon";
 import { ammAddress } from "@/lib/addresses";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { usePositions } from "@/hooks/usePostions";
+import { LoaderIcon } from "lucide-react";
 
 export const MyPositions = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
@@ -42,7 +41,7 @@ export const MyPositions = () => {
   const showDemoData = useFeatureFlag("ui show demo data");
   const showClaimAllYield = useFeatureFlag("ui show claim all yield");
 
-  const { positions: walletData } = usePositions();
+  const { positions: walletData, isLoading } = usePositions();
 
   // this is every position, with their respective pools
   const pools = useMemo((): Pool[] | undefined => {
@@ -176,82 +175,87 @@ export const MyPositions = () => {
           "h-[300px]": expanded,
         })}
       >
-        {!pools || pools?.length === 0 ? (
-          <div className="flex min-h-[149px] flex-col items-center justify-center">
-            <div className="text-2xs">
-              Your active positions will appear here.
+        {!pools || pools?.length === 0 ?
+          isLoading ? (
+            <div className={"flex flex-col items-center  h-full justify-center"}>
+              <LoaderIcon className="size-8 animate-spin" />
             </div>
-          </div>
-        ) : displayMode === "list" ? (
-          pools && <MyPositionsTable columns={columns} data={pools} />
-        ) : (
-          <motion.div
-            layout
-            className={cn("flex flex-row items-center justify-around gap-4", {
-              "mb-4 flex-wrap": expanded,
-            })}
-          >
-            {pools?.map((pool) => (
-              <motion.div
-                layout
-                key={pool.id}
-                className="flex h-[83px] w-[77px] cursor-pointer flex-col items-center rounded-xl border border-white p-2 md:h-[120px] md:min-w-[111px] md:gap-1"
-                onClick={() =>
-                  router.push(
-                    `/stake/pool?id=${pool.id}&positionId=${pool.positionId}`,
-                  )
-                }
-              >
-                <div className="flex w-full flex-row">
-                  <div className="size-1 rounded-full bg-red-500 md:size-2" />
-                </div>
-
-                <div className="-mt-1 flex flex-col md:-mt-2">
-                  <div className="flex flex-row">
-                    <TokenIcon
-                      src={getTokenFromAddress(pool.id)?.icon}
-                      className="ml-[-2px] size-[25px] rounded-full border border-black md:size-[35px]"
-                    />
-                    <TokenIridescent className="ml-[-6px] size-[25px] rounded-full border-2 border-black md:size-[35px]" />
-                  </div>
-                  <div className="flex flex-row justify-center">
-                    <Badge
-                      variant="outline"
-                      className="z-20 -mt-1 text-nowrap bg-black p-0 px-px text-[4px] text-white md:-mt-2 md:px-[2px] md:text-3xs"
-                    >
-                      {pool.tokens[0].name}
-                      {" x "}
-                      {pool.tokens[1].name}
-                    </Badge>
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-center">
-                  <div className="text-xs md:text-sm">
-                    {usdFormat(pool.staked)}
-                  </div>
-                  <div className="mt-[-2px] text-[4px] text-gray-2 md:text-3xs">
-                    No Yield Yet
-                  </div>
-                </div>
-                <Badge
+          ) : (
+            <div className="flex min-h-[149px] flex-col items-center justify-center">
+              <div className="text-2xs">
+                Your active positions will appear here.
+              </div>
+            </div>
+          ) : displayMode === "list" ? (
+            pools && <MyPositionsTable columns={columns} data={pools} />
+          ) : (
+            <motion.div
+              layout
+              className={cn("flex flex-row items-center justify-around gap-4", {
+                "mb-4 flex-wrap": expanded,
+              })}
+            >
+              {pools?.map((pool) => (
+                <motion.div
+                  layout
+                  key={pool.id}
+                  className="flex h-[83px] w-[77px] cursor-pointer flex-col items-center rounded-xl border border-white p-2 md:h-[120px] md:min-w-[111px] md:gap-1"
                   onClick={() =>
                     router.push(
                       `/stake/pool?id=${pool.id}&positionId=${pool.positionId}`,
                     )
                   }
-                  variant="secondary"
-                  className="mt-[5px] h-6 w-full justify-center gap-1 text-nowrap p-0 px-1 text-2xs"
                 >
-                  <Position className={"size-[6px] md:size-[10px]"} />
-                  <div className="text-4xs md:text-3xs">
-                    {usdFormat(pool.staked)} Position
+                  <div className="flex w-full flex-row">
+                    <div className="size-1 rounded-full bg-red-500 md:size-2" />
                   </div>
-                </Badge>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
+
+                  <div className="-mt-1 flex flex-col md:-mt-2">
+                    <div className="flex flex-row">
+                      <TokenIcon
+                        src={getTokenFromAddress(pool.id)?.icon}
+                        className="ml-[-2px] size-[25px] rounded-full border border-black md:size-[35px]"
+                      />
+                      <TokenIridescent className="ml-[-6px] size-[25px] rounded-full border-2 border-black md:size-[35px]" />
+                    </div>
+                    <div className="flex flex-row justify-center">
+                      <Badge
+                        variant="outline"
+                        className="z-20 -mt-1 text-nowrap bg-black p-0 px-px text-[4px] text-white md:-mt-2 md:px-[2px] md:text-3xs"
+                      >
+                        {pool.tokens[0].name}
+                        {" x "}
+                        {pool.tokens[1].name}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-center">
+                    <div className="text-xs md:text-sm">
+                      {usdFormat(pool.staked)}
+                    </div>
+                    <div className="mt-[-2px] text-[4px] text-gray-2 md:text-3xs">
+                      No Yield Yet
+                    </div>
+                  </div>
+                  <Badge
+                    onClick={() =>
+                      router.push(
+                        `/stake/pool?id=${pool.id}&positionId=${pool.positionId}`,
+                      )
+                    }
+                    variant="secondary"
+                    className="mt-[5px] h-6 w-full justify-center gap-1 text-nowrap p-0 px-1 text-2xs"
+                  >
+                    <Position className={"size-[6px] md:size-[10px]"} />
+                    <div className="text-4xs md:text-3xs">
+                      {usdFormat(pool.staked)} Position
+                    </div>
+                  </Badge>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
       </div>
 
       {pools && pools.length > 0 && (
