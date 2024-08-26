@@ -1,4 +1,3 @@
-#![feature(split_array)]
 #![allow(unused_variables)]
 
 use stylus_sdk::{
