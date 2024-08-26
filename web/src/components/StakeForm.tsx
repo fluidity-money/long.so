@@ -360,7 +360,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         dailyPrices &&
         dailyPrices.length >= 2
       ) {
-        const lastSevenDays = dailyPrices.reverse().slice(0, 7);
+        const lastSevenDays = dailyPrices.slice(0, 7);
 
         priceLower = Math.min(...lastSevenDays).toFixed(fUSDC.decimals);
         priceUpper = Math.max(...lastSevenDays).toFixed(fUSDC.decimals);
