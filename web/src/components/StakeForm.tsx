@@ -255,6 +255,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const { data: curTickNum } = useSimulateContract({
     address: ammAddress,
     abi: seawaterContract.abi,
+    account: simulateAccount,
     functionName: "curTick181C6FD9",
     args: [token0.address],
   });
