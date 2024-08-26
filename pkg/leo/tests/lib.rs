@@ -285,6 +285,9 @@ mod proptesting {
                   (POOL, POS_ID_OTHER, 0, 0, other_position_lp)
                 ],
                 |leo| {
+                    let position_lp = U256::from(position_lp);
+                    let other_position_lp = U256::from(other_position_lp);
+
                     let expected_ending = expected_starting + expected_ending;
 
                     leo.ctor(Address::ZERO).unwrap();
