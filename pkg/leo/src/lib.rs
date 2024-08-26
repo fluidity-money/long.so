@@ -337,6 +337,16 @@ impl Leo {
         Ok(())
     }
 
+    pub fn campaign_revisions(
+        &self,
+        pool: Address,
+        identifier: CampaignId,
+    ) -> Result<U256, Vec<u8>> {
+        Ok(U256::from(
+            self.campaigns.getter(pool).ongoing.getter(identifier).len(),
+        ))
+    }
+
     pub fn cancel_campaign(
         &mut self,
         pool: Address,
@@ -392,18 +402,7 @@ impl Leo {
         Ok(self.liquidity.getter(pool).get())
     }
 
-    // Collect the token rewards paid by Seawater for LP'ing in this
-    // position, then send to the user.
-    pub fn collect_pool_rewards(&self, pool: Address, id: U256) -> Result<(u128, u128), Vec<u8>> {
-        assert_or!(self.enabled.get(), Error::NotEnabled);
-        assert_or!(
-            self.positions.get(id).owner.get() == msg::sender(),
-            Error::NotPositionOwner
-        );
-        seawater::collect_yield_single_to(pool, id, msg::sender())
-    }
-
-    // Return the LP rewards paid by Leo for vesting this NFT position.
+    // Return the LP and pool rewards paid by Leo for vesting this NFT position.
     // Update the current position of the user per campaign that's
     // ongoing, and send them rewards using the time that was spent in
     // each campaign setting before the update occured. An update to a
@@ -411,144 +410,149 @@ impl Leo {
     // rewards code attempts to roll over. In doing so, update the
     // timestamp to reset the rewards they've earned so far, and set them
     // to the latest version of each campaign update.
-    pub fn collect_lp_rewards(
+    pub fn collect(
         &mut self,
-        pool: Address,
-        position_id: U256,
+        position_details: Vec<(Address, U256)>,
         campaign_ids: Vec<CampaignId>,
-    ) -> Result<Vec<(Address, U256)>, Vec<u8>> {
+    ) -> Result<(Vec<(Address, u128, u128)>, Vec<(Address, U256)>), Vec<u8>> {
         assert_or!(self.enabled.get(), Error::NotEnabled);
-        assert_or!(
-            self.positions.getter(position_id).owner.get() == msg::sender(),
-            Error::NotPositionOwner
-        );
-
-        // Iterate through every copy of the campaign details until we pass the ending.
-        let mut position = self.positions.setter(position_id);
-        let position_tick_lower = position.tick_lower.get();
-        let position_tick_upper = position.tick_upper.get();
-        let position_liquidity = position.liquidity.get();
-
-        let position_token = position.token.get();
 
         // Track amounts owed to this array to return.
-        let mut owed = Vec::new();
+        let mut pool_owed = Vec::new();
+        let mut campaign_owed = Vec::new();
 
-        for campaign_id in campaign_ids {
-            let offsets = position.offsets.getter(campaign_id);
-            let mut offset = offsets.get();
-            let campaigns = &self.campaigns;
-            let campaigns_ongoing = &campaigns.getter(pool).ongoing;
-            let campaign_versions = campaigns_ongoing.getter(campaign_id);
-
-            let campaign_bal = self.campaign_balances.getter(campaign_id);
-            let campaign_token = campaign_bal.token.get();
-            let campaign_maximum = campaign_bal.maximum.get();
-
-            // Weird issues could come up if the campaign maximum is empty.
-            assert_or!(campaign_maximum > U256::ZERO, Error::CampaignMaxEmpty);
-
-            // The amount distributed in this campaign, mutable in a way that
-            // lets us set it later.
-            let mut distributed = self.campaign_balances.setter(campaign_id).distributed.get();
-
-            let mut cur_timestamp = U64::from(block::timestamp());
-
-            loop {
-                let campaign_updates = campaign_versions.getter(offset);
-
-                if campaign_updates.is_none() {
-                    break;
-                }
-
-                let campaign = campaign_updates.unwrap();
-
-                let campaign_starting = campaign.starting.get();
-                let campaign_ending = campaign.ending.get();
-
-                if campaign_ending.is_zero() {
-                    // We should terminate, the campaign was cancelled.
-                    break;
-                }
-
-                // If we've exceeded or are equal to the ending date of
-                // the campaign, we assume it's finished.
-                if cur_timestamp >= campaign_ending {
-                    offset += U256::from(1);
-                    continue;
-                }
-
-                // Set the timestamp to either the ending timestamp for the current campaign,
-                // or the block timestamp.
-                let clamped_timestamp = U64::min(campaign_ending, cur_timestamp);
-
-                // If this campaign hasn't started, we need to terminate so the user can wait.
-                if clamped_timestamp < campaign_starting {
-                    break;
-                }
-
-                // Go to the next campaign iteration, hoping that an update might take place
-                // that makes the user eligible.
-                let should_skip = position_tick_lower < campaign.tick_lower.get()
-                    || position_tick_upper > campaign.tick_upper.get();
-                if should_skip {
-                    offset += U256::from(1);
-                    continue;
-                }
-
-                // Since we're continuing, we figure out what the user is owed, and we set the
-                // timestamp to the ending of this campaign.
-                let clamped_secs_since = clamped_timestamp - campaign_starting;
-
-                if clamped_secs_since <= U64::ZERO {
-                    break;
-                }
-
-                let base_rewards = maths::calc_base_rewards(
-                    self.liquidity.getter(pool).get(), // Pool LP
-                    position_liquidity,                // User LP
-                    campaign.per_second.get(),         // Campaign rewards per sec
-                );
-
-                let rewards = base_rewards * U256::from(clamped_secs_since);
-                owed.push((campaign_token, rewards));
-
-                erc20::give(campaign_token, rewards)?;
-
-                // Use the minimum of the existing current timestamp or the ending timestamp.
-                cur_timestamp = clamped_timestamp;
-                distributed += rewards;
-
-                // Extra protection incase we blow past the amount that should be allocated somehow.
+        for (pool, position_id) in position_details {
+            for &campaign_id in &campaign_ids {
                 assert_or!(
-                    distributed < self.campaign_balances.getter(campaign_id).maximum.get(),
-                    Error::CampaignDistributedCompletely
+                    self.positions.getter(position_id).owner.get() == msg::sender(),
+                    Error::NotPositionOwner
                 );
 
-                offset += U256::from(1);
+                // Iterate through every copy of the campaign details until we pass the ending.
+                let mut position = self.positions.setter(position_id);
+                let position_tick_lower = position.tick_lower.get();
+                let position_tick_upper = position.tick_upper.get();
+                let position_liquidity = position.liquidity.get();
+
+                let position_token = position.token.get();
+
+                let offsets = position.offsets.getter(campaign_id);
+                let mut offset = offsets.get();
+                let campaigns = &self.campaigns;
+                let campaigns_ongoing = &campaigns.getter(pool).ongoing;
+                let campaign_versions = campaigns_ongoing.getter(campaign_id);
+
+                let campaign_bal = self.campaign_balances.getter(campaign_id);
+                let campaign_token = campaign_bal.token.get();
+                let campaign_maximum = campaign_bal.maximum.get();
+
+                // Weird issues could come up if the campaign maximum is empty.
+                assert_or!(campaign_maximum > U256::ZERO, Error::CampaignMaxEmpty);
+
+                // The amount distributed in this campaign, mutable in a way that
+                // lets us set it later.
+                let mut distributed = self.campaign_balances.setter(campaign_id).distributed.get();
+
+                let mut cur_timestamp = U64::from(block::timestamp());
+
+                // Call the collect yield for the position to send to the user. And track it.
+                {
+                    let (amount_0_lp, amount_1_lp) =
+                        seawater::collect_yield_single_to(pool, position_id, msg::sender())?;
+                    pool_owed.push((pool, amount_0_lp, amount_1_lp));
+                }
+
+                loop {
+                    let campaign_updates = campaign_versions.getter(offset);
+
+                    if campaign_updates.is_none() {
+                        break;
+                    }
+
+                    let campaign = campaign_updates.unwrap();
+
+                    let campaign_starting = campaign.starting.get();
+                    let campaign_ending = campaign.ending.get();
+
+                    if campaign_ending.is_zero() {
+                        // We should terminate, the campaign was cancelled.
+                        break;
+                    }
+
+                    // If we've exceeded or are equal to the ending date of
+                    // the campaign, we assume it's finished.
+                    if cur_timestamp >= campaign_ending {
+                        offset += U256::from(1);
+                        continue;
+                    }
+
+                    // Set the timestamp to either the ending timestamp for the current campaign,
+                    // or the block timestamp.
+                    let clamped_timestamp = U64::min(campaign_ending, cur_timestamp);
+
+                    // If this campaign hasn't started, we need to terminate so the user can wait.
+                    if clamped_timestamp < campaign_starting {
+                        break;
+                    }
+
+                    // Go to the next campaign iteration, hoping that an update might take place
+                    // that makes the user eligible.
+                    let should_skip = position_tick_lower < campaign.tick_lower.get()
+                        || position_tick_upper > campaign.tick_upper.get();
+                    if should_skip {
+                        offset += U256::from(1);
+                        continue;
+                    }
+
+                    // Since we're continuing, we figure out what the user is owed, and we set the
+                    // timestamp to the ending of this campaign.
+                    let clamped_secs_since = clamped_timestamp - campaign_starting;
+
+                    if clamped_secs_since <= U64::ZERO {
+                        break;
+                    }
+
+                    let base_rewards = maths::calc_base_rewards(
+                        self.liquidity.getter(pool).get(), // Pool LP
+                        position_liquidity,                // User LP
+                        campaign.per_second.get(),         // Campaign rewards per sec
+                    );
+
+                    let rewards = base_rewards * U256::from(clamped_secs_since);
+                    campaign_owed.push((campaign_token, rewards));
+
+                    erc20::give(campaign_token, rewards)?;
+
+                    // Use the minimum of the existing current timestamp or the ending timestamp.
+                    cur_timestamp = clamped_timestamp;
+                    distributed += rewards;
+
+                    // Extra protection incase we blow past the amount that should be allocated somehow.
+                    assert_or!(
+                        distributed < self.campaign_balances.getter(campaign_id).maximum.get(),
+                        Error::CampaignDistributedCompletely
+                    );
+
+                    offset += U256::from(1);
+                }
+
+                // Update the position's tracked last claim timestamp.
+                position.timestamp.set(U64::from(block::timestamp()));
+
+                // Update what we've sent out so far!
+                self.campaign_balances
+                    .setter(campaign_id)
+                    .distributed
+                    .set(distributed);
             }
-
-            // Update the position's tracked last claim timestamp.
-            position.timestamp.set(U64::from(block::timestamp()));
-
-            // Update what we've sent out so far!
-            self.campaign_balances
-                .setter(campaign_id)
-                .distributed
-                .set(distributed);
         }
 
-        Ok(owed)
+        Ok((pool_owed, campaign_owed))
     }
 
     // Divest LP positions from this contract, sending them back to the
     // original owner.
-    pub fn divest_position(
-        &mut self,
-        pool: Address,
-        position_id: U256,
-        campaigns: Vec<CampaignId>,
-    ) -> Result<(), Vec<u8>> {
+    pub fn divest_position(&mut self, pool: Address, position_id: U256) -> Result<(), Vec<u8>> {
         assert_or!(self.enabled.get(), Error::NotEnabled);
         // Check if the user owns this position. Do this even though the
         // claim LP function would do this, just incase they pass zero campaigns.
@@ -556,7 +560,6 @@ impl Leo {
             self.positions.getter(position_id).owner.get() == msg::sender(),
             Error::NotPositionOwner
         );
-        self.collect_lp_rewards(pool, position_id, campaigns)?;
         // This should be enough to zero out the position.
         self.positions.setter(position_id).owner.set(Address::ZERO);
         let existing_liq = self.liquidity.getter(pool).get();

@@ -66,8 +66,9 @@ mod testing {
             leo.vest_position(POOL, POS_ID).unwrap();
 
             assert!(
-                leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+                leo.collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID])
                     .unwrap()
+                    .1
                     .len()
                     == 0
             );
@@ -97,8 +98,9 @@ mod testing {
             .unwrap();
 
             assert!(
-                leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+                leo.collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID])
                     .unwrap()
+                    .1
                     .len()
                     == 0
             );
@@ -132,7 +134,7 @@ mod testing {
 
             // Someone claims from it...
 
-            leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+            leo.collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID])
                 .unwrap();
 
             // Then the campaign author cancels it!
@@ -142,22 +144,25 @@ mod testing {
             // Then the same user claims again, but they shouldn't receive anything.
 
             assert_eq!(
-                leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+                leo.collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID])
                     .unwrap()
+                    .1
                     .len(),
                 0
             );
 
             assert_eq!(
-                leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+                leo.collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID])
                     .unwrap()
+                    .1
                     .len(),
                 0
             );
 
             assert_eq!(
-                leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+                leo.collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID])
                     .unwrap()
+                    .1
                     .len(),
                 0
             );
@@ -192,8 +197,8 @@ mod testing {
             // Someone claims from it...
 
             let earned_rewards = leo
-                .collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
-                .unwrap()[0]
+                .collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID])
+                .unwrap().1[0]
                 .1;
 
             // Then the campaign author updates it in the future...
@@ -212,11 +217,13 @@ mod testing {
             )
             .unwrap();
 
+            assert_eq!(leo.campaign_revisions(POOL, CAMPAIGN_ID).unwrap(), U256::from(2));
+
             // Then the same user claims again.
 
             let extra_rewards = leo
-                .collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
-                .unwrap()[0]
+                .collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID])
+                .unwrap().1[0]
                 .1;
 
             leo.admin_reduce_campaign_starting_last_iteration(POOL, CAMPAIGN_ID, 200)
@@ -316,7 +323,7 @@ mod proptesting {
 
                     leo.admin_reduce_pos_time(POS_ID, 100).unwrap();
 
-                    let reward = leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID]).unwrap()[0].1;
+                    let reward = leo.collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID]).unwrap().1[0].1;
 
                     // We take either when the campaign ended, or the current timestamp
                     let clamped_campaign_ending =

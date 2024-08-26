@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use stylus_sdk::alloy_primitives::{Address, U256};
 
 use crate::calldata::*;
