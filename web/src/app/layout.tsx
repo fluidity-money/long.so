@@ -87,7 +87,7 @@ export default async function RootLayout({
           <PopulateQueryCache data={data} featuresData={featuresData} />
           <div className="iridescent-blur absolute left-1/2 top-[180px] size-full max-h-[305px] max-w-[557px] -translate-x-1/2" />
 
-          <header className="p-8">
+          <header className="z-20 p-8">
             <div className="flex w-full flex-col gap-8">
               <div className="flex flex-row items-start justify-between">
                 <div className="flex flex-row items-center gap-4">
