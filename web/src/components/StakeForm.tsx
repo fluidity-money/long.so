@@ -966,7 +966,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               <div className={"flex flex-row items-center"}>
                 <Token />
                 <Token className={"-ml-1 mr-1"} />
-                {feePercentage.toFixed(6)}%
+                {+feePercentage.toFixed(6)}%
               </div>
             </div>
 
