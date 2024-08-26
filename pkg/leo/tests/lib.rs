@@ -13,240 +13,225 @@ mod testing {
 
     #[test]
     fn campaign_creation() {
-        libleo::host::with_storage::<_, libleo::Leo, _>(
-            &[(POOL, POS_ID, -10, 100, U256::from(100))],
-            |leo| {
-                let expected_starting = block::timestamp();
-                let expected_ending = expected_starting + 1000;
+        libleo::host::with_storage::<_, libleo::Leo, _>(&[(POOL, POS_ID, -10, 100, 100)], |leo| {
+            let expected_starting = block::timestamp();
+            let expected_ending = expected_starting + 1000;
 
-                leo.ctor(Address::ZERO).unwrap();
+            leo.ctor(Address::ZERO).unwrap();
 
-                leo.create_campaign(
-                    CAMPAIGN_ID,       // Identifier
-                    POOL,              // Pool
-                    -20,               // Tick lower
-                    100,               // Tick upper
-                    U256::from(2),     // Per second distribution
-                    POOL,              // Token to send
-                    U256::from(100),   // Starting pool of liquidity
-                    expected_starting, // Starting timestamp
-                    expected_ending,   // Ending timestamp
-                )
-                .unwrap();
-                // Check that the campaign queries correctly.
-                let (lower, upper, per_second, token, distributed, maximum, starting, ending) =
-                    leo.campaign_details(POOL, CAMPAIGN_ID).unwrap();
-                assert_eq!(lower, -20);
-                assert_eq!(upper, 100);
-                assert_eq!(per_second, U256::from(2));
-                assert_eq!(token, POOL);
-                assert_eq!(distributed, U256::ZERO);
-                assert_eq!(maximum, U256::from(100));
-                assert_eq!(starting, expected_starting);
-                assert_eq!(ending, expected_ending);
-            },
-        )
+            leo.create_campaign(
+                CAMPAIGN_ID,       // Identifier
+                POOL,              // Pool
+                -20,               // Tick lower
+                100,               // Tick upper
+                U256::from(2),     // Per second distribution
+                POOL,              // Token to send
+                U256::from(100),   // Starting pool of liquidity
+                expected_starting, // Starting timestamp
+                expected_ending,   // Ending timestamp
+            )
+            .unwrap();
+            // Check that the campaign queries correctly.
+            let (lower, upper, per_second, token, distributed, maximum, starting, ending) =
+                leo.campaign_details(POOL, CAMPAIGN_ID).unwrap();
+            assert_eq!(lower, -20);
+            assert_eq!(upper, 100);
+            assert_eq!(per_second, U256::from(2));
+            assert_eq!(token, POOL);
+            assert_eq!(distributed, U256::ZERO);
+            assert_eq!(maximum, U256::from(100));
+            assert_eq!(starting, expected_starting);
+            assert_eq!(ending, expected_ending);
+        })
     }
 
     #[test]
     fn lower_tick_out_of_range() {
-        libleo::host::with_storage::<_, libleo::Leo, _>(
-            &[(POOL, POS_ID, -10, 100, U256::from(100))],
-            |leo| {
-                leo.ctor(Address::ZERO).unwrap();
+        libleo::host::with_storage::<_, libleo::Leo, _>(&[(POOL, POS_ID, -10, 100, 100)], |leo| {
+            leo.ctor(Address::ZERO).unwrap();
 
-                leo.create_campaign(
-                    CAMPAIGN_ID,                // Identifier
-                    POOL,                       // Pool
-                    0,                          // Tick lower
-                    1,                          // Tick upper
-                    U256::from(100),            // Per second distribution
-                    POOL,                       // Token to send
-                    U256::from(100),            // Starting pool of liquidity
-                    block::timestamp() - 20000, // Starting timestamp
-                    block::timestamp() + 1000,  // Ending timestamp
-                )
-                .unwrap();
+            leo.create_campaign(
+                CAMPAIGN_ID,                // Identifier
+                POOL,                       // Pool
+                0,                          // Tick lower
+                1,                          // Tick upper
+                U256::from(100),            // Per second distribution
+                POOL,                       // Token to send
+                U256::from(100),            // Starting pool of liquidity
+                block::timestamp() - 20000, // Starting timestamp
+                block::timestamp() + 1000,  // Ending timestamp
+            )
+            .unwrap();
 
-                leo.vest_position(POOL, POS_ID).unwrap();
+            leo.vest_position(POOL, POS_ID).unwrap();
 
-                assert!(
-                    leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
-                        .unwrap()
-                        .len()
-                        == 0
-                );
-            },
-        )
+            assert!(
+                leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+                    .unwrap()
+                    .len()
+                    == 0
+            );
+        })
     }
 
     #[test]
     fn upper_tick_out_of_range() {
-        libleo::host::with_storage::<_, libleo::Leo, _>(
-            &[(POOL, POS_ID, 0, 100, U256::from(1000))],
-            |leo| {
-                leo.ctor(Address::ZERO).unwrap();
+        libleo::host::with_storage::<_, libleo::Leo, _>(&[(POOL, POS_ID, 0, 100, 1000)], |leo| {
+            leo.ctor(Address::ZERO).unwrap();
 
-                leo.vest_position(POOL, POS_ID).unwrap();
+            leo.vest_position(POOL, POS_ID).unwrap();
 
-                assert!(leo.vest_position(POOL, POS_ID).is_err());
+            assert!(leo.vest_position(POOL, POS_ID).is_err());
 
-                leo.create_campaign(
-                    CAMPAIGN_ID,                // Identifier
-                    POOL,                       // Pool
-                    0,                          // Tick lower
-                    1,                          // Tick upper
-                    U256::from(100),            // Per second distribution
-                    POOL,                       // Token to send
-                    U256::from(100),            // Starting pool of liquidity
-                    block::timestamp() - 20000, // Starting timestamp
-                    block::timestamp() + 1000,  // Ending timestamp
-                )
-                .unwrap();
+            leo.create_campaign(
+                CAMPAIGN_ID,                // Identifier
+                POOL,                       // Pool
+                0,                          // Tick lower
+                1,                          // Tick upper
+                U256::from(100),            // Per second distribution
+                POOL,                       // Token to send
+                U256::from(100),            // Starting pool of liquidity
+                block::timestamp() - 20000, // Starting timestamp
+                block::timestamp() + 1000,  // Ending timestamp
+            )
+            .unwrap();
 
-                assert!(
-                    leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
-                        .unwrap()
-                        .len()
-                        == 0
-                );
-            },
-        )
+            assert!(
+                leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+                    .unwrap()
+                    .len()
+                    == 0
+            );
+        })
     }
 
     #[test]
     fn campaign_created_cancelled_then_claimed() {
-        libleo::host::with_storage::<_, libleo::Leo, _>(
-            &[(POOL, POS_ID, -10, 100, U256::from(123))],
-            |leo| {
-                let expected_starting = block::timestamp();
-                let expected_ending = expected_starting + 1000;
+        libleo::host::with_storage::<_, libleo::Leo, _>(&[(POOL, POS_ID, -10, 100, 123)], |leo| {
+            let expected_starting = block::timestamp();
+            let expected_ending = expected_starting + 1000;
 
-                leo.ctor(Address::ZERO).unwrap();
+            leo.ctor(Address::ZERO).unwrap();
 
-                leo.vest_position(POOL, POS_ID).unwrap();
+            leo.vest_position(POOL, POS_ID).unwrap();
 
-                // Someone goes to create a campaign.
+            // Someone goes to create a campaign.
 
-                leo.create_campaign(
-                    CAMPAIGN_ID,       // Identifier
-                    POOL,              // Pool
-                    -20,               // Tick lower
-                    100,               // Tick upper
-                    U256::from(2),     // Per second distribution
-                    POOL,              // Token to send
-                    U256::from(100),   // Starting pool of liquidity
-                    expected_starting, // Starting timestamp
-                    expected_ending,   // Ending timestamp
-                )
+            leo.create_campaign(
+                CAMPAIGN_ID,       // Identifier
+                POOL,              // Pool
+                -20,               // Tick lower
+                100,               // Tick upper
+                U256::from(2),     // Per second distribution
+                POOL,              // Token to send
+                U256::from(100),   // Starting pool of liquidity
+                expected_starting, // Starting timestamp
+                expected_ending,   // Ending timestamp
+            )
+            .unwrap();
+
+            // Someone claims from it...
+
+            leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
                 .unwrap();
 
-                // Someone claims from it...
+            // Then the campaign author cancels it!
 
+            leo.cancel_campaign(POOL, CAMPAIGN_ID).unwrap();
+
+            // Then the same user claims again, but they shouldn't receive anything.
+
+            assert_eq!(
                 leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
-                    .unwrap();
+                    .unwrap()
+                    .len(),
+                0
+            );
 
-                // Then the campaign author cancels it!
+            assert_eq!(
+                leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+                    .unwrap()
+                    .len(),
+                0
+            );
 
-                leo.cancel_campaign(POOL, CAMPAIGN_ID).unwrap();
-
-                // Then the same user claims again, but they shouldn't receive anything.
-
-                assert_eq!(
-                    leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
-                        .unwrap()
-                        .len(),
-                    0
-                );
-
-                assert_eq!(
-                    leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
-                        .unwrap()
-                        .len(),
-                    0
-                );
-
-                assert_eq!(
-                    leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
-                        .unwrap()
-                        .len(),
-                    0
-                );
-            },
-        )
+            assert_eq!(
+                leo.collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+                    .unwrap()
+                    .len(),
+                0
+            );
+        })
     }
 
     #[test]
     fn campaign_created_claimed_then_updated_claim_again() {
-        libleo::host::with_storage::<_, libleo::Leo, _>(
-            &[(POOL, POS_ID, -10, 100, U256::from(1000))],
-            |leo| {
-                let expected_starting = block::timestamp() - 1000;
-                let expected_ending = block::timestamp() + 1000;
+        libleo::host::with_storage::<_, libleo::Leo, _>(&[(POOL, POS_ID, -10, 100, 1000)], |leo| {
+            let expected_starting = block::timestamp() - 1000;
+            let expected_ending = block::timestamp() + 1000;
 
-                leo.ctor(Address::ZERO).unwrap();
+            leo.ctor(Address::ZERO).unwrap();
 
-                leo.vest_position(POOL, POS_ID).unwrap();
+            leo.vest_position(POOL, POS_ID).unwrap();
 
-                // Someone goes to create a campaign.
+            // Someone goes to create a campaign.
 
-                leo.create_campaign(
-                    CAMPAIGN_ID,                      // Identifier
-                    POOL,                             // Pool
-                    -20,                              // Tick lower
-                    100,                              // Tick upper
-                    U256::from(2),                    // Per second distribution
-                    POOL,                             // Token to send
-                    U256::from(1000000000000000_i64), // Starting pool of liquidity
-                    expected_starting,                // Starting timestamp
-                    expected_ending,                  // Ending timestamp
-                )
+            leo.create_campaign(
+                CAMPAIGN_ID,                      // Identifier
+                POOL,                             // Pool
+                -20,                              // Tick lower
+                100,                              // Tick upper
+                U256::from(2),                    // Per second distribution
+                POOL,                             // Token to send
+                U256::from(1000000000000000_i64), // Starting pool of liquidity
+                expected_starting,                // Starting timestamp
+                expected_ending,                  // Ending timestamp
+            )
+            .unwrap();
+
+            // Someone claims from it...
+
+            let earned_rewards = leo
+                .collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+                .unwrap()[0]
+                .1;
+
+            // Then the campaign author updates it in the future...
+
+            // It's weird if someone tries to adjust the starting time to be earlier,
+            // but it could happen, so we test it.
+            leo.update_campaign(
+                CAMPAIGN_ID,
+                POOL,
+                -10,
+                120,
+                U256::from(5),
+                U256::ZERO,
+                block::timestamp(),
+                expected_ending,
+            )
+            .unwrap();
+
+            // Then the same user claims again.
+
+            let extra_rewards = leo
+                .collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
+                .unwrap()[0]
+                .1;
+
+            leo.admin_reduce_campaign_starting_last_iteration(POOL, CAMPAIGN_ID, 200)
                 .unwrap();
 
-                // Someone claims from it...
-
-                let earned_rewards = leo
-                    .collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
-                    .unwrap()[0]
-                    .1;
-
-                // Then the campaign author updates it in the future...
-
-                // It's weird if someone tries to adjust the starting time to be earlier,
-                // but it could happen, so we test it.
-                leo.update_campaign(
-                    CAMPAIGN_ID,
-                    POOL,
-                    -10,
-                    120,
-                    U256::from(5),
-                    U256::ZERO,
-                    block::timestamp(),
-                    expected_ending,
-                )
-                .unwrap();
-
-                // Then the same user claims again.
-
-                let extra_rewards = leo
-                    .collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
-                    .unwrap()[0]
-                    .1;
-
-                leo.admin_reduce_campaign_starting_last_iteration(POOL, CAMPAIGN_ID, 200)
-                    .unwrap();
-
-                assert_eq!(
-                    extra_rewards.to_string(),
-                    (libleo::maths::calc_base_rewards(
-                        U256::from(1000),
-                        U256::from(1000),
-                        U256::from(5)
-                    ) * U256::from(1000))
-                    .to_string()
-                );
-            },
-        )
+            assert_eq!(
+                extra_rewards.to_string(),
+                (libleo::maths::calc_base_rewards(
+                    U256::from(1000),
+                    U256::from(1000),
+                    U256::from(5)
+                ) * U256::from(1000))
+                .to_string()
+            );
+        })
     }
 }
 
@@ -279,14 +264,12 @@ mod proptesting {
             expected_starting in 0..libleo::host::current_timestamp(),
             expected_ending in any::<u64>(),
             secs_in in 1..u64::MAX,
-            position_lp in any::<[u64; 4]>(),
-            other_position_lp in any::<[u64; 4]>()
+            position_lp in 1..u128::MAX,
+            other_position_lp in 1..u128::MAX,
         ) {
             let starting_pool = U256::from_limbs(starting_pool);
-            let position_lp = U256::from_limbs(position_lp) + U256::from(1);
-            let other_position_lp = U256::from_limbs(other_position_lp) + U256::from(1);
 
-            if starting_pool.is_zero() || position_lp.is_zero() {
+            if starting_pool.is_zero() || position_lp == 0 {
                 return Ok(())
             }
 
@@ -326,7 +309,7 @@ mod proptesting {
 
                     leo.vest_position(POOL, POS_ID).unwrap();
 
-                    assert_eq!(leo.pool_lp(POOL).unwrap(), other_position_lp + position_lp);
+                    assert_eq!(leo.pool_lp(POOL).unwrap(), U256::from(other_position_lp + position_lp));
 
                     leo.admin_reduce_pos_time(POS_ID, 100).unwrap();
 

@@ -17,7 +17,7 @@ thread_local! {
 
     pub static STORAGE: RefCell<HashMap<Word, Word>> = RefCell::new(HashMap::new());
 
-    pub static POSITIONS: RefCell<HashMap<U256, (Address, i32, i32, U256)>> = RefCell::new(HashMap::new());
+    pub static POSITIONS: RefCell<HashMap<U256, (Address, i32, i32, u128)>> = RefCell::new(HashMap::new());
 
     pub static CURRENT_TIME: RefCell<u64> = RefCell::new(0);
 }
@@ -109,7 +109,7 @@ pub fn position_tick_upper(id: U256) -> Option<i32> {
     POSITIONS.with(|p| p.borrow().get(&id).map(|(_, _, t, _)| *t))
 }
 
-pub fn position_liquidity(id: U256) -> Option<U256> {
+pub fn position_liquidity(id: U256) -> Option<u128> {
     POSITIONS.with(|p| p.borrow().get(&id).map(|(_, _, _, l)| *l))
 }
 
@@ -123,7 +123,7 @@ pub fn current_timestamp() -> u64 {
 
 ///! Set up the storage access.
 pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
-    pos_info: &[(Address, U256, i32, i32, U256)],
+    pos_info: &[(Address, U256, i32, i32, u128)],
     f: F,
 ) -> T {
     reset_storage();

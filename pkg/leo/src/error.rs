@@ -78,6 +78,11 @@ pub enum Error {
     // 12 (0x0c)
     #[error("ERC20 returned false")]
     ReturnedFalse,
+
+    /// Seawater returned nothing.
+    // 13 (0x0d)
+    #[error("Seawater returned nothing")]
+    SeawaterDecode,
 }
 
 impl From<Error> for Vec<u8> {

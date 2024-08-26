@@ -16,6 +16,15 @@ pub mod error;
 pub mod events;
 pub mod maths;
 pub mod nft_manager;
+
+mod calldata_seawater;
+
+#[cfg(target_arch = "wasm32")]
+mod wasm_seawater;
+
+#[cfg(not(target_arch = "wasm32"))]
+mod host_seawater;
+
 pub mod seawater;
 
 mod immutables;
@@ -138,21 +147,25 @@ impl Leo {
             Error::PositionAlreadyExists
         );
 
-        let position_liq = seawater::position_liquidity(pool, id);
-        assert_or!(!position_liq.is_zero(), Error::PositionHasNoLiquidity);
+        let position_liq = seawater::position_liquidity(pool, id)?;
+        assert_or!(position_liq > 0, Error::PositionHasNoLiquidity);
 
-        nft_manager::take_position(id);
+        nft_manager::take_position(id)?;
 
         // Start to set everything related to the position.
         let mut position = self.positions.setter(id);
         position.owner.set(msg::sender());
         position.timestamp.set(U64::from(block::timestamp()));
         position.token.set(pool);
-        position.tick_lower.set(seawater::tick_lower(pool, id));
-        position.tick_upper.set(seawater::tick_upper(pool, id));
+        position.tick_lower.set(I32::from_le_bytes(
+            seawater::tick_lower(pool, id)?.to_le_bytes(),
+        ));
+        position.tick_upper.set(I32::from_le_bytes(
+            seawater::tick_upper(pool, id)?.to_le_bytes(),
+        ));
 
         // Also increase the global count for LP available for this pool.
-        position.liquidity.set(position_liq);
+        position.liquidity.set(U256::from(position_liq));
         let existing_liq = self.liquidity.getter(pool).get();
         self.liquidity
             .setter(pool)
@@ -249,10 +262,8 @@ impl Leo {
     /// Update a campaign by taking the last campaign versions item, and
     /// setting the ending timestamp to the current timestamp, then inserting
     /// a new record to the campaign versions array with the settings we
-    /// requested. Allows 0 to be provided, which is the equivalent of
-    /// cancelling the campaign if it's provided, except as starting, though
-    /// ending is checked to be 0, and if it is, then [update_position] won't
-    /// work.
+    /// requested. Allows 0 to be provided as the ending timestamp, which is the equivalent of
+    /// cancelling the campaign if it's provided.
     pub fn update_campaign(
         &mut self,
         identifier: CampaignId,
@@ -389,8 +400,7 @@ impl Leo {
             self.positions.get(id).owner.get() == msg::sender(),
             Error::NotPositionOwner
         );
-        let (amount_0, amount_1) = seawater::collect_yield_single_to(id, pool, msg::sender());
-        Ok((amount_0, amount_1))
+        seawater::collect_yield_single_to(pool, id, msg::sender())
     }
 
     // Return the LP rewards paid by Leo for vesting this NFT position.
@@ -553,8 +563,7 @@ impl Leo {
         self.liquidity
             .setter(pool)
             .set(existing_liq - self.positions.getter(position_id).liquidity.get());
-        nft_manager::give_position(position_id);
-        Ok(())
+        nft_manager::give_position(position_id)
     }
 
     pub fn admin_reduce_pos_time(&mut self, _id: U256, _secs: u64) -> Result<(), Vec<u8>> {
