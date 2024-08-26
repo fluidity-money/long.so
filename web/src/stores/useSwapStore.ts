@@ -124,5 +124,5 @@ export const useSwapStore = create<SwapStore>((set) => ({
   gas: 0n,
   setGas: (gas) => set({ gas }),
   feePercentage: 0,
-  setFeePercentage: (fee) => set({ feePercentage: 100 / (fee * 100) }),
+  setFeePercentage: (fee) => set({ feePercentage: 100 / fee }),
 }));

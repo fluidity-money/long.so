@@ -624,8 +624,8 @@ export const SwapForm = () => {
               </div>
               <div className={"flex flex-row justify-end"}>
                 <span>
-                  Pool Fee {+feePercentage.toFixed(6)}% ={" "}
-                  {+(usdPriceToken0 * feePercentage).toFixed(6)}$
+                  Pool Fee {+feePercentage.toFixed(3)}% ={" "}
+                  {+((usdPriceToken0 * feePercentage) / 100).toFixed(6)}$
                 </span>
               </div>
               <div className={"flex flex-row justify-between"}>

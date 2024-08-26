@@ -645,7 +645,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               >
                 <div className="flex flex-col items-center gap-[3px]">
                   <div className="iridescent-text text-xs font-medium md:text-sm">
-                    {+feePercentage.toFixed(6)}%
+                    {+feePercentage.toFixed(3)}%
                   </div>
                   <Badge
                     variant="iridescent"
@@ -870,8 +870,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                       }
                     >
                       <div>
-                        {/* {+feePercentage.toFixed(6)}% ={" "} */}
-                        {+(feePercentage * usdPriceToken0).toFixed(2)}$
+                        {+((usdPriceToken0 * feePercentage) / 100).toFixed(6)}$
                       </div>
                       <div
                         className={
@@ -981,7 +980,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               <div className={"flex flex-row items-center"}>
                 <Token />
                 <Token className={"-ml-1 mr-1"} />
-                {+feePercentage.toFixed(6)}%
+                {+feePercentage.toFixed(3)}%
               </div>
             </div>
 
