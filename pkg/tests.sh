@@ -2,4 +2,4 @@
 
 export RUST_BACKTRACE=1
 
-cargo test --package seawater --features testing
+cargo test --features testing

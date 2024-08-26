@@ -1,6 +1,6 @@
 use stylus_sdk::alloy_primitives::{Address, U256};
 
-use stylus_sdk::{msg, contract, call::RawCall};
+use stylus_sdk::{call::RawCall, contract, msg};
 
 use crate::{
     calldata::{write_address, write_selector, write_u256},
@@ -22,13 +22,17 @@ pub fn give(token: Address, amount: U256) -> Result<(), Vec<u8>> {
 }
 
 fn transfer(token: Address, recipient: Address, amount: U256) -> Result<(), Vec<u8>> {
-    let mut cd = [0_u8; 4 + 32 * 2];
+    let mut cd = [0_u8; 4 + 32 * 3];
     write_selector(&mut cd, &TRANSFER_SELECTOR);
     write_address(&mut cd, 0, recipient);
     write_u256(&mut cd, 1, amount);
-    match RawCall::new().call(token, &cd)?.get(31) {
-        None | Some(1) => Ok(()),
-        Some(0) | _ => Err(Error::ReturnedFalse.into()),
+    if cfg!(target_arch = "wasm32") {
+        match RawCall::new().call(token, &cd)?.get(31) {
+            None | Some(1) => Ok(()),
+            Some(0) | _ => Err(Error::ReturnedFalse.into()),
+        }
+    } else {
+        Ok(())
     }
 }
 
@@ -38,13 +42,17 @@ fn transfer_from(
     recipient: Address,
     amount: U256,
 ) -> Result<(), Vec<u8>> {
-    let mut cd = [0_u8; 4 + 32 * 2];
+    let mut cd = [0_u8; 4 + 32 * 3];
     write_selector(&mut cd, &TRANSFER_FROM_SELECTOR);
     write_address(&mut cd, 0, sender);
     write_address(&mut cd, 1, recipient);
     write_u256(&mut cd, 2, amount);
-    match RawCall::new().call(token, &cd)?.get(31) {
-        None | Some(1) => Ok(()),
-        Some(0) | _ => Err(Error::ReturnedFalse.into()),
+    if cfg!(target_arch = "wasm32") {
+        match RawCall::new().call(token, &cd)?.get(31) {
+            None | Some(1) => Ok(()),
+            Some(0) | _ => Err(Error::ReturnedFalse.into()),
+        }
+    } else {
+        Ok(())
     }
 }

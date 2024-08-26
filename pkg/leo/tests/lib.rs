@@ -176,7 +176,7 @@ mod testing {
         )
     }
 
-    #[cfg(all(test, feature = "testing"))]
+    #[test]
     fn campaign_created_claimed_then_updated_claim_again() {
         libleo::host::with_storage::<_, libleo::Leo, _>(
             &[(POOL, POS_ID, -10, 100, U256::from(1000))],
@@ -209,8 +209,6 @@ mod testing {
                     .collect_lp_rewards(POOL, POS_ID, vec![CAMPAIGN_ID])
                     .unwrap()[0]
                     .1;
-
-                eprintln!("we're done claiming the first time");
 
                 // Then the campaign author updates it in the future...
 
@@ -252,6 +250,7 @@ mod testing {
     }
 }
 
+#[cfg(feature = "testing")]
 mod proptesting {
     use libleo;
     use proptest::prelude::*;
@@ -271,7 +270,7 @@ mod proptesting {
     const MAX_TICK: i32 = -MIN_TICK;
 
     proptest! {
-        #[cfg(all(test, feature = "testing"))]
+        #[test]
         fn proptest_full_story(
             mut tick_lower in MIN_TICK..MAX_TICK,
             mut tick_upper in MIN_TICK..MAX_TICK,

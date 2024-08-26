@@ -516,8 +516,7 @@ impl Leo {
                     Error::CampaignDistributedCompletely
                 );
 
-                // Since we made it to the end of this campaign for now, break out.
-                break;
+                offset += U256::from(1);
             }
 
             // Update the position's tracked last claim timestamp.
@@ -562,7 +561,7 @@ impl Leo {
     pub fn admin_reduce_pos_time(&mut self, _id: U256, _secs: u64) -> Result<(), Vec<u8>> {
         #[cfg(feature = "testing")]
         {
-            let ts = self.positions.setter(id).timestamp.get();
+            let ts = self.positions.setter(_id).timestamp.get();
             self.positions
                 .setter(_id)
                 .timestamp

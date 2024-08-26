@@ -98,6 +98,9 @@ pub unsafe extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
 #[no_mangle]
 pub unsafe extern "C" fn msg_sender(_sender: *mut u8) {}
 
+#[no_mangle]
+pub unsafe extern "C" fn contract_address(_addr: *mut u8) {}
+
 pub fn position_tick_lower(id: U256) -> Option<i32> {
     POSITIONS.with(|p| p.borrow().get(&id).map(|(_, t, _, _)| *t))
 }
