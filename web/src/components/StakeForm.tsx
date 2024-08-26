@@ -168,20 +168,18 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     [poolData],
   );
   const positionData_ = useFragment(PositionsFragment, userData?.getWallet);
-  const positionData = positionData_?.positions.positions.find(
-    (p) => p.positionId === positionId,
+  const positionData = useMemo(
+    () =>
+      positionData_?.positions.positions.find(
+        (p) => p.positionId === positionId,
+      ),
+    [positionData_, positionId],
   );
 
-  const { upper: upperTickPosition, lower: lowerTickPosition } =
-    positionData || {
-      upper: 0,
-      lower: 0,
-    };
-
   useEffect(() => {
-    setTickLower(lowerTickPosition);
-    setTickUpper(upperTickPosition);
-  }, [positionData]);
+    setTickLower(positionData?.lower ?? 0);
+    setTickUpper(positionData?.upper ?? 0);
+  }, [positionData?.lower, positionData?.upper, setTickLower, setTickUpper]);
 
   const showMockData = useFeatureFlag("ui show demo data");
 
@@ -328,19 +326,22 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     // set the ticks to the existing ticks of the pool
     if (mode === "existing") {
       const scale = token0.decimals - fUSDC.decimals;
-      const priceLower = (1.0001 ** (tickLower ?? 0) * 10 ** scale).toFixed(
-        fUSDC.decimals,
-      );
-      const priceHigher = (1.0001 ** (tickUpper ?? 0) * 10 ** scale).toFixed(
-        fUSDC.decimals,
-      );
+      const priceLower = (
+        1.0001 ** (positionData?.lower ?? 0) *
+        10 ** scale
+      ).toFixed(fUSDC.decimals);
+      const priceHigher = (
+        1.0001 ** (positionData?.upper ?? 0) *
+        10 ** scale
+      ).toFixed(fUSDC.decimals);
+
       setPriceLower(priceLower, token0.decimals);
       setPriceUpper(priceHigher, token0.decimals);
     }
   }, [
     mode,
-    tickLower,
-    tickUpper,
+    positionData?.lower,
+    positionData?.upper,
     setPriceLower,
     setPriceUpper,
     token0.decimals,
