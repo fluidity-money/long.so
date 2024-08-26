@@ -2,6 +2,7 @@ import { Token } from "@/config/tokens";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlUser } from "@/hooks/useGraphql";
 import { useEffect } from "react";
+import { useAccount } from "wagmi";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -116,6 +117,7 @@ const PositionsFragment = graphql(`
 
 export const usePositions = () => {
   const { data: userData } = useGraphqlUser();
+  const { address } = useAccount();
   const positionsData = useFragment(PositionsFragment, userData?.getWallet);
   const { positions, updatePositionLocal, updatePositionsFromGraph } =
     usePositionStore();
@@ -138,6 +140,8 @@ export const usePositions = () => {
   }, [positionsData]);
 
   return {
+    // loading if the user is connected but the query hasn't resolved yet
+    isLoading: address && !userData?.getWallet,
     positions: Object.values(positions),
     updatePositionLocal,
   };
