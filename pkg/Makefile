@@ -39,7 +39,7 @@ ownership-nfts: ${OUT_OWNERSHIP_NFTS}
 solidity: amm-entrypoint ownership-nfts
 
 CARGO_BUILD_STYLUS := \
-	cargo +nightly build \
+	cargo build \
 		-Z build-std=std,panic_abort \
 		-Z build-std-features=panic_immediate_abort \
 		-Z unstable-options \
