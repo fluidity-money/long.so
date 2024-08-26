@@ -105,7 +105,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const [feeTier, setFeeTier] = useState<"auto" | "manual">("auto");
 
   const [breakdownHidden, setBreakdownHidden] = useState(true);
-
+  const router = useRouter();
   const {
     multiSingleToken,
     setMultiSingleToken,
@@ -145,7 +145,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       setToken0(poolToken);
       setToken1(fUSDC);
     }
-  }, [poolId, setToken0, setToken1, token0.address, token1.address]);
+  }, [poolId, setToken0, setToken1, token0.address, token1.address, router]);
 
   // Parse the price lower and upper, and set the ticks properly.
 
@@ -163,8 +163,9 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     }
   }, [poolData?.fee, setFeePercentage]);
 
-  const dailyPrices = poolData?.priceOverTime.daily.map((price) =>
-    parseFloat(price),
+  const dailyPrices = useMemo(
+    () => poolData?.priceOverTime.daily.map((price) => parseFloat(price)),
+    [poolData],
   );
   const positionData_ = useFragment(PositionsFragment, userData?.getWallet);
   const positionData = positionData_?.positions.positions.find(
@@ -183,8 +184,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   }, [positionData]);
 
   const showMockData = useFeatureFlag("ui show demo data");
-
-  const router = useRouter();
 
   useHotkeys("esc", () => router.back(), { enableOnFormTags: ["INPUT"] });
 
@@ -325,7 +324,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     "full-range" | "auto" | "custom"
   >("auto");
 
-  // TODO these could all be more precise
   useEffect(() => {
     // set the ticks to the existing ticks of the pool
     if (mode === "existing") {
@@ -338,46 +336,56 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       );
       setPriceLower(priceLower, token0.decimals);
       setPriceUpper(priceHigher, token0.decimals);
-      return;
     }
+  }, [
+    mode,
+    tickLower,
+    tickUpper,
+    setPriceLower,
+    setPriceUpper,
+    token0.decimals,
+  ]);
 
-    // set the ticks to min and max, ignoring display prices
-    // which will be shown as infinity
-    if (liquidityRangeType === "full-range") {
-      setTickLower(MIN_TICK);
-      setTickUpper(MAX_TICK);
-    } else if (liquidityRangeType === "auto") {
-      if (!curTick) return;
-      // auto sets the price range to +-10% of the current tick
-      const priceAtTick = sqrtPriceX96ToPrice(
-        getSqrtRatioAtTick(curTick.result),
-        token0.decimals,
-      );
-      let priceLower: string;
-      let priceUpper: string;
-      if (
-        poolData?.config.classification === "VOLATILE" &&
-        dailyPrices &&
-        dailyPrices.length >= 2
-      ) {
-        const lastSevenDays = dailyPrices.slice(0, 7);
+  useEffect(() => {
+    if (mode === "new") {
+      // set the ticks to min and max, ignoring display prices
+      // which will be shown as infinity
+      if (liquidityRangeType === "full-range") {
+        setTickLower(MIN_TICK);
+        setTickUpper(MAX_TICK);
+      } else if (liquidityRangeType === "auto") {
+        if (!curTick) return;
+        // auto sets the price range to +-10% of the current tick
+        const priceAtTick = sqrtPriceX96ToPrice(
+          getSqrtRatioAtTick(curTick.result),
+          token0.decimals,
+        );
+        let priceLower: string;
+        let priceUpper: string;
+        if (
+          poolData?.config.classification === "VOLATILE" &&
+          dailyPrices &&
+          dailyPrices.length >= 2
+        ) {
+          const lastSevenDays = dailyPrices.slice(0, 7);
 
-        priceLower = Math.min(...lastSevenDays).toFixed(fUSDC.decimals);
-        priceUpper = Math.max(...lastSevenDays).toFixed(fUSDC.decimals);
-      } else {
-        const diff = priceAtTick / 10n;
-        const pu = priceAtTick + diff;
-        const pl = priceAtTick - diff;
-        priceLower = (Number(pl) / 10 ** fUSDC.decimals).toFixed(
-          fUSDC.decimals,
-        );
-        priceUpper = (Number(pu) / 10 ** fUSDC.decimals).toFixed(
-          fUSDC.decimals,
-        );
+          priceLower = Math.min(...lastSevenDays).toFixed(fUSDC.decimals);
+          priceUpper = Math.max(...lastSevenDays).toFixed(fUSDC.decimals);
+        } else {
+          const diff = priceAtTick / 10n;
+          const pu = priceAtTick + diff;
+          const pl = priceAtTick - diff;
+          priceLower = (Number(pl) / 10 ** fUSDC.decimals).toFixed(
+            fUSDC.decimals,
+          );
+          priceUpper = (Number(pu) / 10 ** fUSDC.decimals).toFixed(
+            fUSDC.decimals,
+          );
+        }
+
+        setPriceLower(priceLower, token0.decimals);
+        setPriceUpper(priceUpper, token0.decimals);
       }
-
-      setPriceLower(priceLower, token0.decimals);
-      setPriceUpper(priceUpper, token0.decimals);
     }
   }, [
     mode,
@@ -386,6 +394,11 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     setPriceUpper,
     token1.decimals,
     liquidityRangeType,
+    setTickLower,
+    setTickUpper,
+    token0.decimals,
+    poolData?.config.classification,
+    dailyPrices,
   ]);
 
   const autoFeeTierRef = useRef();
