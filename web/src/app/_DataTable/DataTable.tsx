@@ -86,28 +86,35 @@ export function DataTable<TData, TValue>({
                         cell.column.columnDef.cell,
                         cell.getContext(),
                       )}
+                      {cell.column.getIndex() === 0 ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger
+                              className="absolute inset-0"
+                              disabled
+                            />
+                            <TooltipContent
+                              side={"bottom"}
+                              className="relative flex justify-center overflow-visible bg-black p-0 text-white"
+                            >
+                              <div className="absolute -top-1 z-20 border-x-4 border-b-4 border-transparent border-b-black" />
+                              <a
+                                href={blockExplorerUrl}
+                                target="_blank"
+                                className="px-3 py-1.5 text-xs"
+                              >
+                                See on block explorer{" "}
+                                <span className="inline-block -rotate-45">
+                                  -&gt;
+                                </span>
+                                {/* ↗️ */}
+                              </a>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : null}
                     </TableCell>
                   ))}
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger className="absolute inset-0" disabled />
-                      <TooltipContent
-                        side={"bottom"}
-                        className="relative flex justify-center overflow-visible bg-black p-0 text-white"
-                      >
-                        <div className="absolute -top-1 z-20 border-x-4 border-b-4 border-transparent border-b-black" />
-                        <a
-                          href={blockExplorerUrl}
-                          target="_blank"
-                          className="px-3 py-1.5 text-xs"
-                        >
-                          See on block explorer{" "}
-                          <span className="inline-block -rotate-45">-&gt;</span>
-                          {/* ↗️ */}
-                        </a>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
                 </TableRow>
               );
             })
