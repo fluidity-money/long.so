@@ -176,6 +176,7 @@ impl Leo {
     // Create a campaign, setting its current iteration to these parameters,
     // taking the maximum balance of tokens to distribute into this
     // contract for later distribution.
+    #[allow(clippy::type_complexity)]
     pub fn create_campaign(
         &mut self,
         identifier: CampaignId,
@@ -375,6 +376,8 @@ impl Leo {
     /// the amount sent per second in the campaign, the token that's being
     /// distributed, and the amount distributed so far, as well as the maximum
     /// amount, and the starting and ending timestamp.
+    // Complex type so we don't have to do custom abi encoding.
+    #[allow(clippy::type_complexity)]
     pub fn campaign_details(
         &self,
         pool: Address,

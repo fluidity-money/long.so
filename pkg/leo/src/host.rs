@@ -19,7 +19,7 @@ thread_local! {
 
     pub static POSITIONS: RefCell<HashMap<U256, (Address, i32, i32, u128)>> = RefCell::new(HashMap::new());
 
-    pub static CURRENT_TIME: RefCell<u64> = RefCell::new(0);
+    pub static CURRENT_TIME: RefCell<u64> = const { RefCell::new(0) };
 }
 
 unsafe fn read_word(key: *const u8) -> Word {
@@ -70,7 +70,7 @@ pub unsafe extern "C" fn native_keccak256(bytes: *const u8, len: usize, output: 
 
 #[no_mangle]
 pub fn block_timestamp() -> u64 {
-    CURRENT_TIME.with(|t| t.borrow().clone())
+    CURRENT_TIME.with(|t| *t.borrow())
 }
 
 #[no_mangle]
