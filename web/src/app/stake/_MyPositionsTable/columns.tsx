@@ -45,10 +45,13 @@ export const columns: ColumnDef<Pool>[] = [
     accessorKey: "duration",
     header: "Duration",
     cell: ({ row }) => {
-      const duration = intervalToDuration({ start: 0, end: row.original.duration })
+      const duration = intervalToDuration({
+        start: 0,
+        end: row.original.duration,
+      });
       // durations are formatted as 12 years, 5 seconds, etc.
       // so take the first two words to take the largest unit of the duration
-      return formatDuration(duration).split(' ').slice(0, 2).join(' ')
+      return formatDuration(duration).split(" ").slice(0, 2).join(" ");
     },
   },
   {
