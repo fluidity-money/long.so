@@ -15,11 +15,12 @@ include config.mk
 	solidity \
 	amm-entrypoint \
 	ownership-nfts \
+	check \
 	clean
 
 all: build
 
-build: solidity seawater leo
+build: solidity seawater leo check
 
 admin: ${OUT_SEAWATER_ADMIN}
 positions: ${OUT_SEAWATER_POSITIONS}
@@ -99,6 +100,38 @@ ${OUT_LEO}: ${FILES_RUST}
 	@rm -f ${OUT_LEO}
 	@${CARGO_BUILD_STYLUS} leo
 	@rm -f liblibleo.rlib
+
+### STYLUS CHECK
+
+CARGO_CHECK_STYLUS := \
+	cargo stylus check \
+		--no-verify
+
+check: check_seawater_admin check_seawater_positions check_seawater_update_positions check_seawater_swaps check_seawater_swap_permit2 check_seawater_quotes check_seawater_migrations check_leo
+
+check_seawater_admin: ${OUT_SEAWATER_ADMIN}
+	@${CARGO_CHECK_STYLUS} --wasm-file=${OUT_SEAWATER_ADMIN}
+
+check_seawater_positions: ${OUT_SEAWATER_POSITIONS}
+	@${CARGO_CHECK_STYLUS} --wasm-file=${OUT_SEAWATER_POSITIONS}
+
+check_seawater_update_positions: ${OUT_SEAWATER_UPDATE_POSITIONS}
+	@${CARGO_CHECK_STYLUS} --wasm-file=${OUT_SEAWATER_UPDATE_POSITIONS}
+
+check_seawater_swaps: ${OUT_SEAWATER_SWAPS}
+	@${CARGO_CHECK_STYLUS} --wasm-file=${OUT_SEAWATER_SWAPS}
+
+check_seawater_swap_permit2: ${OUT_SEAWATER_SWAP_PERMIT2}
+	@${CARGO_CHECK_STYLUS} --wasm-file=${OUT_SEAWATER_SWAP_PERMIT2}
+
+check_seawater_quotes: ${OUT_SEAWATER_QUOTES}
+	@${CARGO_CHECK_STYLUS} --wasm-file=${OUT_SEAWATER_QUOTES}
+
+check_seawater_migrations: ${OUT_SEAWATER_MIGRATIONS}
+	@${CARGO_CHECK_STYLUS} --wasm-file=${OUT_SEAWATER_MIGRATIONS}
+
+check_leo: ${OUT_LEO}
+	@${CARGO_CHECK_STYLUS} --wasm-file=${OUT_LEO}
 
 ### SOLIDITY
 
