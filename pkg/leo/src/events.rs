@@ -29,6 +29,7 @@ pub fn emit_campaign_created(
     });
 }
 
+#[allow(dead_code)]
 fn pack_details(tick_lower: i32, tick_upper: i32, owner: Address) -> U256 {
     // This should be the same as coercing the bytes
     let mut packed = U256::from(tick_lower as u32) << (32 + 160);
@@ -37,10 +38,12 @@ fn pack_details(tick_lower: i32, tick_upper: i32, owner: Address) -> U256 {
     packed | U256::from(owner)
 }
 
+#[allow(dead_code)]
 fn pack_times(starting: u64, ending: u64) -> U256 {
     (U256::from(starting) << 64) | U256::from(ending)
 }
 
+#[allow(dead_code)]
 pub fn emit_campaign_updated(
     identifier: FixedBytes<8>,
     pool: Address,
@@ -59,6 +62,7 @@ pub fn emit_campaign_updated(
     });
 }
 
+#[allow(dead_code)]
 fn pack_extras(tick_lower: i32, tick_upper: i32, starting: u64, ending: u64) -> U256 {
     let mut packed = U256::from(tick_lower as u32) << (32 + 64 + 64);
     packed |= U256::from(tick_upper as u32) << (64 + 64);

@@ -1,4 +1,4 @@
-#[cfg(all(test, not(target_arch = "wasm32")))]
+#[cfg(all(test, feature = "testing"))]
 mod testing {
     use libleo;
 
@@ -252,7 +252,6 @@ mod testing {
     }
 }
 
-#[cfg(all(test, not(target_arch = "wasm32")))]
 mod proptesting {
     use libleo;
     use proptest::prelude::*;
@@ -272,7 +271,7 @@ mod proptesting {
     const MAX_TICK: i32 = -MIN_TICK;
 
     proptest! {
-        #[test]
+        #[cfg(all(test, feature = "testing"))]
         fn proptest_full_story(
             mut tick_lower in MIN_TICK..MAX_TICK,
             mut tick_upper in MIN_TICK..MAX_TICK,

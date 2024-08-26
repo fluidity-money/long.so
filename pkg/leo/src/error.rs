@@ -73,6 +73,11 @@ pub enum Error {
     // 11 (0x0b)
     #[error("Position has no liquidity!")]
     PositionHasNoLiquidity,
+
+    /// ERC20 during transfer returned false!
+    // 12 (0x0c)
+    #[error("ERC20 returned false")]
+    ReturnedFalse,
 }
 
 impl From<Error> for Vec<u8> {

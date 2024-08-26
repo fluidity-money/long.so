@@ -222,7 +222,7 @@ impl Leo {
             campaign_bal.maximum.set(new_maximum);
 
             // Take the token's amounts for the campaign.
-            erc20::take(pool, extra_max)?;
+            erc20::take(token, pool, extra_max)?;
 
             #[cfg(feature = "log-events")]
             evm::log(events::CampaignBalanceUpdated {
@@ -305,11 +305,12 @@ impl Leo {
         if !extra_max.is_zero() {
             let mut campaign_bal = self.campaign_balances.setter(identifier);
             let existing_maximum = campaign_bal.maximum.get();
+            let token = campaign_bal.token.get();
             let new_maximum = existing_maximum + extra_max;
             campaign_bal.maximum.set(new_maximum);
 
             // Take the token's amounts for the campaign.
-            erc20::take(pool, extra_max)?;
+            erc20::take(token, pool, extra_max)?;
 
             #[cfg(feature = "log-events")]
             evm::log(events::CampaignBalanceUpdated {
@@ -445,11 +446,7 @@ impl Leo {
             let mut cur_timestamp = U64::from(block::timestamp());
 
             loop {
-                eprintln!("offset: {offset}, cur timestamp: {cur_timestamp}");
-
                 let campaign_updates = campaign_versions.getter(offset);
-
-                eprintln!("campaign offset is some? {}", campaign_updates.is_some());
 
                 if campaign_updates.is_none() {
                     break;
@@ -459,8 +456,6 @@ impl Leo {
 
                 let campaign_starting = campaign.starting.get();
                 let campaign_ending = campaign.ending.get();
-
-                eprintln!("campaign starting offset {offset}, starting: {campaign_starting}, ending {campaign_ending}, current timestamp: {}", block::timestamp());
 
                 if campaign_ending.is_zero() {
                     // We should terminate, the campaign was cancelled.
@@ -488,7 +483,6 @@ impl Leo {
                 let should_skip = position_tick_lower < campaign.tick_lower.get()
                     || position_tick_upper > campaign.tick_upper.get();
                 if should_skip {
-                    eprintln!("sholud skip?");
                     offset += U256::from(1);
                     continue;
                 }
@@ -501,12 +495,6 @@ impl Leo {
                     break;
                 }
 
-                eprintln!(
-                    "pool lp: {}, position liquidity: {position_liquidity}, campaign per sec: {}, secs since {clamped_secs_since}, campaign starting: {campaign_starting}, current timestamp: {cur_timestamp}",
-                    self.liquidity.getter(pool).get(),
-                    campaign.per_second.get(),
-                );
-
                 let base_rewards = maths::calc_base_rewards(
                     self.liquidity.getter(pool).get(), // Pool LP
                     position_liquidity,                // User LP
@@ -515,6 +503,8 @@ impl Leo {
 
                 let rewards = base_rewards * U256::from(clamped_secs_since);
                 owed.push((campaign_token, rewards));
+
+                erc20::give(campaign_token, rewards)?;
 
                 // Use the minimum of the existing current timestamp or the ending timestamp.
                 cur_timestamp = clamped_timestamp;
@@ -569,42 +559,46 @@ impl Leo {
         Ok(())
     }
 
-    #[cfg(all(feature = "testing", not(target_arch = "wasm32")))]
-    pub fn admin_reduce_pos_time(&mut self, id: U256, secs: u64) -> Result<(), Vec<u8>> {
-        let ts = self.positions.setter(id).timestamp.get();
-        self.positions
-            .setter(id)
-            .timestamp
-            .set(ts - U64::from(secs));
+    pub fn admin_reduce_pos_time(&mut self, _id: U256, _secs: u64) -> Result<(), Vec<u8>> {
+        #[cfg(feature = "testing")]
+        {
+            let ts = self.positions.setter(id).timestamp.get();
+            self.positions
+                .setter(_id)
+                .timestamp
+                .set(ts - U64::from(_secs));
+        }
         Ok(())
     }
 
-    #[cfg(all(feature = "testing", not(target_arch = "wasm32")))]
     pub fn admin_reduce_campaign_starting_last_iteration(
         &mut self,
-        pool: Address,
-        id: FixedBytes<8>,
-        secs: u64,
+        _pool: Address,
+        _id: FixedBytes<8>,
+        _secs: u64,
     ) -> Result<(), Vec<u8>> {
-        let campaigns = self.campaigns.getter(pool).ongoing.getter(id);
-        let len = self.campaigns.getter(pool).ongoing.getter(id).len();
-        let starting = self
-            .campaigns
-            .setter(pool)
-            .ongoing
-            .setter(id)
-            .setter(len - 1)
-            .unwrap()
-            .starting
-            .get();
-        self.campaigns
-            .setter(pool)
-            .ongoing
-            .setter(id)
-            .setter(len - 1)
-            .unwrap()
-            .starting
-            .set(starting - U64::from(secs));
+        #[cfg(feature = "testing")]
+        {
+            let campaigns = self.campaigns.getter(_pool).ongoing.getter(_id);
+            let len = self.campaigns.getter(_pool).ongoing.getter(_id).len();
+            let starting = self
+                .campaigns
+                .setter(_pool)
+                .ongoing
+                .setter(_id)
+                .setter(len - 1)
+                .unwrap()
+                .starting
+                .get();
+            self.campaigns
+                .setter(_pool)
+                .ongoing
+                .setter(_id)
+                .setter(len - 1)
+                .unwrap()
+                .starting
+                .set(starting - U64::from(_secs));
+        }
         Ok(())
     }
 }
