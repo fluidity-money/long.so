@@ -422,6 +422,13 @@ impl Leo {
         let mut campaign_owed = Vec::new();
 
         for (pool, position_id) in position_details {
+            // Call the collect yield for the position to send to the user. And track it.
+            {
+                let (amount_0_lp, amount_1_lp) =
+                    seawater::collect_yield_single_to(pool, position_id, msg::sender())?;
+                pool_owed.push((pool, amount_0_lp, amount_1_lp));
+            }
+
             for &campaign_id in &campaign_ids {
                 assert_or!(
                     self.positions.getter(position_id).owner.get() == msg::sender(),
@@ -454,13 +461,6 @@ impl Leo {
                 let mut distributed = self.campaign_balances.setter(campaign_id).distributed.get();
 
                 let mut cur_timestamp = U64::from(block::timestamp());
-
-                // Call the collect yield for the position to send to the user. And track it.
-                {
-                    let (amount_0_lp, amount_1_lp) =
-                        seawater::collect_yield_single_to(pool, position_id, msg::sender())?;
-                    pool_owed.push((pool, amount_0_lp, amount_1_lp));
-                }
 
                 loop {
                     let campaign_updates = campaign_versions.getter(offset);

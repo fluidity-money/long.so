@@ -198,7 +198,8 @@ mod testing {
 
             let earned_rewards = leo
                 .collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID])
-                .unwrap().1[0]
+                .unwrap()
+                .1[0]
                 .1;
 
             // Then the campaign author updates it in the future...
@@ -217,13 +218,17 @@ mod testing {
             )
             .unwrap();
 
-            assert_eq!(leo.campaign_revisions(POOL, CAMPAIGN_ID).unwrap(), U256::from(2));
+            assert_eq!(
+                leo.campaign_revisions(POOL, CAMPAIGN_ID).unwrap(),
+                U256::from(2)
+            );
 
             // Then the same user claims again.
 
             let extra_rewards = leo
                 .collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID])
-                .unwrap().1[0]
+                .unwrap()
+                .1[0]
                 .1;
 
             leo.admin_reduce_campaign_starting_last_iteration(POOL, CAMPAIGN_ID, 200)
