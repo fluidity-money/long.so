@@ -53,9 +53,9 @@ export const graphqlQueryUser = graphql(`
       ...DepositPositionsFragment
     }
 
-    getNotes(wallet: $wallet) {
-      content
-      placement
+    notes(wallet: $wallet) {
+      # add notes fragments here
+      ...NotesFragment
     }
   }
 `);
