@@ -14,7 +14,7 @@ CREATE TABLE notes_1 (
 
 CREATE VIEW notes_current_1 AS
 	SELECT * from notes_1 WHERE
-		from_ > CURRENT_TIMESTAMP AND
-		to_ < CURRENT_TIMESTAMP;
+		from_ < CURRENT_TIMESTAMP AND
+		to_ > CURRENT_TIMESTAMP;
 
 -- migrate:down

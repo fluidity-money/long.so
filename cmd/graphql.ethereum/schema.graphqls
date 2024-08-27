@@ -29,7 +29,7 @@ type Query {
   """
   Get either global or user-specific presentation issue in anything SPN.
   """
-  notes(wallet: String): [Note!]!
+  getNotes(wallet: String!): [Note!]!
 
   """
   Get a pool using the address of token1 that's in the pool.

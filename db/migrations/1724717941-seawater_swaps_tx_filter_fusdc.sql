@@ -37,7 +37,7 @@ FROM (
 			transaction_hash
 		FROM
 			events_seawater_swap2
-		WHERE created_by > after AND user_ = owner AND (to_ = fusdcAddress OR from_ = fusdcAddress)
+		WHERE created_by > after AND user_ = owner
 		ORDER BY created_by DESC
 		LIMIT limit_
 	)
