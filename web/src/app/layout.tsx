@@ -11,11 +11,11 @@ import { NavigationMenu } from "@/app/_layout/NavigationMenu";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { FeatureFlagConfig } from "@/app/_layout/FeatureFlagConfig";
-import { useQueryClient } from "@tanstack/react-query";
 import request from "graphql-request";
 import { graphqlEndpoint } from "@/config/graphqlEndpoint";
 import { graphqlQueryGlobal } from "@/hooks/useGraphql";
 import PopulateQueryCache from "@/app/PopulateQueryCache";
+import BottomBanner from "@/components/Banners/BottomBanner";
 
 const title = "Longtail";
 
@@ -140,6 +140,7 @@ export default async function RootLayout({
               </small>
             </div>
           </footer>
+          <BottomBanner />
         </Provider>
       </body>
     </html>

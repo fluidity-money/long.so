@@ -10,20 +10,20 @@ const NotesFragment = graphql(`
   }
 `);
 
-export default function BottomBanner() {
+export default function TopBanner() {
   const { data } = useGraphqlUser();
   const notes = useFragment(NotesFragment, data?.notes);
-  const bottomNote = notes?.find((item) => item.placement.includes("bottom"));
+  const topNote = notes?.find((item) => item.placement.includes("top"));
   const showBanners = useFeatureFlag("ui show banners");
 
-  if (!bottomNote || !showBanners) return null;
+  if (!topNote || !showBanners) return null;
 
   return (
     <div
-      dangerouslySetInnerHTML={{ __html: bottomNote?.content }}
+      dangerouslySetInnerHTML={{ __html: topNote?.content }}
       className={cn(
         "fixed bottom-4",
-        bottomNote?.placement.includes("left") ? "left-4" : "right-4",
+        topNote?.placement.includes("left") ? "left-4" : "right-4",
       )}
     />
   );

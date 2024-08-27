@@ -152,6 +152,11 @@ export interface FeatureFlags {
    * Show liquidity range visualiser in the stake form
    */
   "ui show liquidity visualiser": boolean;
+
+  /**
+   * Show user notes in UI
+   */
+  "ui show banners": boolean;
 }
 
 /**
