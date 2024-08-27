@@ -242,6 +242,23 @@ func (r *queryResolver) UpcomingLiquidityCampaigns(ctx context.Context) (campaig
 	return
 }
 
+// GetNotes is the resolver for the getNotes field.
+func (r *queryResolver) GetNotes(ctx context.Context, wallet string) (notes []model.Note, err error) {
+	q := r.DB.Table("notes_current_1")
+	if wallet == "" {
+		err = q.
+			Where("target = NULL").
+			Scan(&notes).
+			Error
+	} else {
+		err = q.
+			Where("target = ?", wallet).
+			Scan(&notes).
+			Error
+	}
+	return
+}
+
 // GetPool is the resolver for the getPool field.
 func (r *queryResolver) GetPool(ctx context.Context, token string) (pool *seawater.Pool, err error) {
 	tokenAddress := types.AddressFromString(token)

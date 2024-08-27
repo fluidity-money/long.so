@@ -22,6 +22,15 @@ type LiquidityOverTime struct {
 	Monthly []PairAmount `json:"monthly"`
 }
 
+// Presentation info about the webapp/anything else.
+type Note struct {
+	// HTML content ready to be injected and displayed to the end user.
+	Content string `json:"content"`
+	// Placement info that might be relevant on the platform it's intended
+	// to be displayed on. Could be "top", "bottom-right" for Longtail.
+	Placement string `json:"placement"`
+}
+
 // Pair amount, with the USD value that's available within determined at the timestamp given.
 // The backend will make an effort seemingly at random to keep this consistent.
 //

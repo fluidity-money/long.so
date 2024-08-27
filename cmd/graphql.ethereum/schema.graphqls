@@ -27,6 +27,11 @@ type Query {
   upcomingLiquidityCampaigns: [LiquidityCampaign!]!
 
   """
+  Get either global or user-specific presentation issue in anything SPN.
+  """
+  getNotes(wallet: String!): [Note!]!
+
+  """
   Get a pool using the address of token1 that's in the pool.
 
   Follows the same caching behaviour as the pools endpoint.
@@ -733,6 +738,22 @@ type Token {
   Symbol of the token.
   """
   symbol: String!
+}
+
+"""
+Presentation info about the webapp/anything else.
+"""
+type Note {
+  """
+  HTML content ready to be injected and displayed to the end user.
+  """
+  content: String!
+
+  """
+  Placement info that might be relevant on the platform it's intended
+  to be displayed on. Could be "top", "bottom-right" for Longtail.
+  """
+  placement: String!
 }
 
 """
