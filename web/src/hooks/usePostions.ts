@@ -52,23 +52,26 @@ const usePositionStore = create<PositionStore>()(
         positionsLocal: {},
         updatePositionsFromGraph: (newPositions) =>
           set(({ positions, positionsLocal }) => {
-            const positionsUpdated = newPositions.reduce((existing, newPosition) => {
-              const local = positionsLocal[newPosition.positionId];
-              if (local?.served.timestamp < newPosition.served.timestamp)
+            const positionsUpdated = newPositions.reduce(
+              (existing, newPosition) => {
+                const local = positionsLocal[newPosition.positionId];
+                if (local?.served.timestamp < newPosition.served.timestamp)
+                  return {
+                    ...existing,
+                    [newPosition.positionId]: local,
+                  };
                 return {
                   ...existing,
-                  [newPosition.positionId]: local
+                  [newPosition.positionId]: newPosition,
                 };
-              return {
-                ...existing,
-                [newPosition.positionId]: newPosition
-              };
-            }, {})
+              },
+              {},
+            );
             return {
               positions: {
                 ...positions,
                 ...positionsUpdated,
-              }
+              },
             };
           }),
         updatePositionLocal: (newPosition) =>

@@ -45,8 +45,7 @@ export const columns: ColumnDef<Pool>[] = [
     accessorKey: "duration",
     header: "Duration",
     cell: ({ row }) => {
-      if (row.original.duration < 1000)
-        return "0 seconds"
+      if (row.original.duration < 1000) return "0 seconds";
       const duration = intervalToDuration({
         start: 0,
         end: row.original.duration,

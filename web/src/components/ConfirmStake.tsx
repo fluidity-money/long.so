@@ -38,13 +38,13 @@ import { usePositions } from "@/hooks/usePostions";
 
 type ConfirmStakeProps =
   | {
-    mode: "new";
-    positionId?: never;
-  }
+      mode: "new";
+      positionId?: never;
+    }
   | {
-    mode: "existing";
-    positionId: number;
-  };
+      mode: "existing";
+      positionId: number;
+    };
 
 export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const router = useRouter();
@@ -161,12 +161,12 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
       !curTick || tickLower === undefined || tickUpper === undefined
         ? 0n
         : getLiquidityForAmounts(
-          curTick.result,
-          BigInt(tickLower),
-          BigInt(tickUpper),
-          BigInt(token0AmountRaw),
-          BigInt(token1AmountRaw),
-        ),
+            curTick.result,
+            BigInt(tickLower),
+            BigInt(tickUpper),
+            BigInt(token0AmountRaw),
+            BigInt(token1AmountRaw),
+          ),
     [curTick, tickLower, tickUpper, token0AmountRaw, token1AmountRaw],
   );
 
