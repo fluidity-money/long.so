@@ -48,19 +48,27 @@ const usePositionStore = create<PositionStore>()(
   persist(
     (set) => {
       return {
-        positions: [],
+        positions: {},
         positionsLocal: {},
         updatePositionsFromGraph: (newPositions) =>
-          set(({ positionsLocal }) => {
-            const positionsUpdated = newPositions.map((newPosition) => {
+          set(({ positions, positionsLocal }) => {
+            const positionsUpdated = newPositions.reduce((existing, newPosition) => {
               const local = positionsLocal[newPosition.positionId];
               if (local?.served.timestamp < newPosition.served.timestamp)
-                return local;
-              return newPosition;
-            });
+                return {
+                  ...existing,
+                  [newPosition.positionId]: local
+                };
+              return {
+                ...existing,
+                [newPosition.positionId]: newPosition
+              };
+            }, {})
             return {
-              positionsLocal,
-              positions: positionsUpdated,
+              positions: {
+                ...positions,
+                ...positionsUpdated,
+              }
             };
           }),
         updatePositionLocal: (newPosition) =>
@@ -142,7 +150,7 @@ export const usePositions = () => {
   return {
     // loading if the user is connected but the query hasn't resolved yet
     isLoading: address && !userData?.getWallet,
-    positions: Object.values(positions),
+    positions: Object.values(positions).reverse(),
     updatePositionLocal,
   };
 };
