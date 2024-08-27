@@ -314,7 +314,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     if (updatePositionResult.isSuccess) {
       const id = positionId ?? Number(mintPositionId);
       if (id && tickLower && tickUpper) {
-        const position = positions.find((p) => p.positionId === id) ?? {
+        const position = {
           positionId: id,
           pool: {
             token: token0,

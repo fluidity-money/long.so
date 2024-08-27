@@ -38,7 +38,7 @@ export default function ConfirmWithdrawLiquidity() {
     if (!address || chainId !== expectedChainId) router.back();
   }, [address, expectedChainId, chainId]);
 
-  const { token0, token0Amount, token0AmountRaw, token1, token1Amount, delta } =
+  const { token0, token0Amount, token0AmountRaw, token1, token1Amount, delta, tickLower, tickUpper } =
     useStakeStore();
 
   const { positions, updatePositionLocal } = usePositions();
@@ -139,10 +139,15 @@ export default function ConfirmWithdrawLiquidity() {
 
   useEffect(() => {
     if (updatePositionResult.isSuccess) {
-      const position = positions.find(
-        (p) => p.positionId === Number(positionId),
-      );
-      if (position) {
+      if (tickLower && tickUpper) {
+        const position = {
+          positionId: Number(positionId),
+          pool: {
+            token: token0,
+          },
+          lower: tickLower,
+          upper: tickUpper,
+        };
         getUsdTokenAmountsForPosition(
           position,
           token0,
@@ -248,10 +253,10 @@ export default function ConfirmWithdrawLiquidity() {
             {token0.address === fUSDC.address
               ? token0Amount
               : getFormattedPriceFromAmount(
-                  token0Amount,
-                  tokenPrice,
-                  fUSDC.decimals,
-                )}
+                token0Amount,
+                tokenPrice,
+                fUSDC.decimals,
+              )}
           </div>
         </div>
 
@@ -266,10 +271,10 @@ export default function ConfirmWithdrawLiquidity() {
             {token1.address === fUSDC.address
               ? token1Amount
               : getFormattedPriceFromAmount(
-                  token1Amount,
-                  tokenPrice,
-                  fUSDC.decimals,
-                )}
+                token1Amount,
+                tokenPrice,
+                fUSDC.decimals,
+              )}
           </div>
         </div>
 
