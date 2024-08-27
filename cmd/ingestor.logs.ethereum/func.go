@@ -295,7 +295,7 @@ func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address, l 
 	}
 	// Skip Thirdweb if the defacto contract didn't create the event.
 	if isThirdweb && thirdwebAddr != emitterAddr {
-		slog.Warn("ignoring a Thirdweb log from a sender that wasn't Leo",
+		slog.Warn("ignoring a Thirdweb log from a sender that wasn't Thirdweb",
 			"seawater address", seawaterAddr,
 			"thirdweb address", thirdwebAddr,
 			"leo address", leoAddr,
