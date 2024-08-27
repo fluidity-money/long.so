@@ -252,7 +252,7 @@ func (r *queryResolver) GetNotes(ctx context.Context, wallet string) (notes []mo
 			Error
 	} else {
 		err = q.
-			Where("target = ?", wallet).
+			Where("target IS NULL OR target = ?", wallet).
 			Scan(&notes).
 			Error
 	}
