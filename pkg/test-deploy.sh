@@ -14,4 +14,4 @@ export FLU_SEAWATER_FUSDC_ADDR="$(\
 			100000000000000000000 \
 			"$SEAWATER_PROXY_ADMIN")"
 
-./deploy.sh
+./deploy-seawater.sh
