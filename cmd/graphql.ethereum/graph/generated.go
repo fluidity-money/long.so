@@ -111,7 +111,6 @@ type ComplexityRoot struct {
 	Query struct {
 		ActiveLiquidityCampaigns   func(childComplexity int) int
 		Fusdc                      func(childComplexity int) int
-		GetNotes                   func(childComplexity int, wallet string) int
 		GetPool                    func(childComplexity int, token string) int
 		GetPoolPositions           func(childComplexity int, pool string, first *int, after *int) int
 		GetPosition                func(childComplexity int, id int) int
@@ -120,6 +119,7 @@ type ComplexityRoot struct {
 		GetSwaps                   func(childComplexity int, pool string, first *int, after *int) int
 		GetSwapsForUser            func(childComplexity int, wallet string, first *int, after *int) int
 		GetWallet                  func(childComplexity int, address string) int
+		Notes                      func(childComplexity int, wallet *string) int
 		Pools                      func(childComplexity int) int
 		Served                     func(childComplexity int) int
 		UpcomingLiquidityCampaigns func(childComplexity int) int
@@ -266,7 +266,7 @@ type QueryResolver interface {
 	Pools(ctx context.Context) ([]seawater.Pool, error)
 	ActiveLiquidityCampaigns(ctx context.Context) ([]model.LiquidityCampaign, error)
 	UpcomingLiquidityCampaigns(ctx context.Context) ([]model.LiquidityCampaign, error)
-	GetNotes(ctx context.Context, wallet string) ([]model.Note, error)
+	Notes(ctx context.Context, wallet *string) ([]model.Note, error)
 	GetPool(ctx context.Context, token string) (*seawater.Pool, error)
 	GetPoolPositions(ctx context.Context, pool string, first *int, after *int) (model.SeawaterPositionsGlobal, error)
 	GetPosition(ctx context.Context, id int) (*seawater.Position, error)
@@ -573,18 +573,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Fusdc(childComplexity), true
 
-	case "Query.getNotes":
-		if e.complexity.Query.GetNotes == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getNotes_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetNotes(childComplexity, args["wallet"].(string)), true
-
 	case "Query.getPool":
 		if e.complexity.Query.GetPool == nil {
 			break
@@ -680,6 +668,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetWallet(childComplexity, args["address"].(string)), true
+
+	case "Query.notes":
+		if e.complexity.Query.Notes == nil {
+			break
+		}
+
+		args, err := ec.field_Query_notes_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Notes(childComplexity, args["wallet"].(*string)), true
 
 	case "Query.pools":
 		if e.complexity.Query.Pools == nil {
@@ -1382,7 +1382,7 @@ type Query {
   """
   Get either global or user-specific presentation issue in anything SPN.
   """
-  getNotes(wallet: String!): [Note!]!
+  notes(wallet: String): [Note!]!
 
   """
   Get a pool using the address of token1 that's in the pool.
@@ -2182,21 +2182,6 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getNotes_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["wallet"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wallet"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["wallet"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_getPoolPositions_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2386,6 +2371,21 @@ func (ec *executionContext) field_Query_getWallet_args(ctx context.Context, rawA
 		}
 	}
 	args["address"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_notes_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["wallet"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wallet"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["wallet"] = arg0
 	return args, nil
 }
 
@@ -4203,8 +4203,8 @@ func (ec *executionContext) fieldContext_Query_upcomingLiquidityCampaigns(_ cont
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getNotes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getNotes(ctx, field)
+func (ec *executionContext) _Query_notes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_notes(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -4217,7 +4217,7 @@ func (ec *executionContext) _Query_getNotes(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetNotes(rctx, fc.Args["wallet"].(string))
+		return ec.resolvers.Query().Notes(rctx, fc.Args["wallet"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4234,7 +4234,7 @@ func (ec *executionContext) _Query_getNotes(ctx context.Context, field graphql.C
 	return ec.marshalNNote2ᚕgithubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐNoteᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_getNotes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_notes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -4257,7 +4257,7 @@ func (ec *executionContext) fieldContext_Query_getNotes(ctx context.Context, fie
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getNotes_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_notes_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -11445,7 +11445,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getNotes":
+		case "notes":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -11454,7 +11454,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getNotes(ctx, field)
+				res = ec._Query_notes(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
