@@ -22,7 +22,7 @@ import (
 
 const (
 	EnvThirdwebAddr = "SPN_THIRDWEB_ACCOUNT_FACTORY_ADDR"
-	EnvLeoAddr = "SPN_LEO_ADDR"
+	EnvLeoAddr      = "SPN_LEO_ADDR"
 )
 
 const (

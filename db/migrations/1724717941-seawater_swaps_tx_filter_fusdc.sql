@@ -1,7 +1,7 @@
 -- migrate:up
 
 -- Exactly like seawater_swaps_user_2 and seawater_swaps_pool_2, except we filter for
--- fUSDC as the counterparty.
+-- fUSDC as the other token.
 
 CREATE FUNCTION seawater_swaps_user_3(
 	fusdcAddress ADDRESS,

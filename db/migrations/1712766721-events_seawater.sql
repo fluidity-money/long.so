@@ -1,7 +1,12 @@
 
 -- migrate:up
 
-CREATE EXTENSION pg_cron;
+DO $$
+BEGIN
+	IF current_database() = 'defaultdb' THEN
+		CREATE EXTENSION pg_cron;
+	END IF;
+END $$;
 
 CREATE DOMAIN HUGEINT NUMERIC(78, 0);
 
