@@ -33,6 +33,13 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 | Update position implementation | 0x41ee808f99dddb9b2e5e6fd0d80624455104d3f5 |
 | Admin implementation           | 0x9c9e3ead905fe5407feffb22d74fe68f0af98a45 |
 
+##### Leo contract deployments
+
+|     Deployment name     |              Deployment address            |
+|-------------------------|--------------------------------------------|
+| Transparent proxy admin | 0x031911526Be07aAB96a7d829A04756Cd622C8546 |
+| Transparent proxy       | 0x0a38165544D58903Ab62c38386e50a2A5379627C |
+| Implementation          | 0x44fd73f32884a47edd1694635afd51843f9292f5 |
 
 ##### Useful testing token deployments
 
