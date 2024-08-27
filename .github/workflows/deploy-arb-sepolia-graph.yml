@@ -1,4 +1,4 @@
-name: Deploy GraphQL Lambda
+name: Deploy Arbitrum Sepolia graph
 
 on:
   push:
@@ -54,5 +54,5 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ap-southeast-2
         run: |
-          aws lambda update-function-code --function-name graphql-ethereum \
+          aws lambda update-function-code --function-name arb-sepolia-graph  \
           --zip-file fileb://cmd/graphql.ethereum/bootstrap.zip >&2 >/dev/null

@@ -12,7 +12,7 @@ import (
 //go:embed pools.toml
 var poolsConfigBytes []byte
 
-// PoolsConfig loaded from pools.toml in the toplevel
+// PoolsConfig loaded from pools.toml in the toplevel.
 var PoolsConfig map[types.Address]config.Pool
 
 func init() {
