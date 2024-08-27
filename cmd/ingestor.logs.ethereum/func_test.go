@@ -264,7 +264,7 @@ func TestCurrentEventIds(t *testing.T) {
 		"0xd500e81443925d03f2ac45364aa32d71b4bbd8f697bc7b8fc5a4accc4601b54b": false,
 		"0xac631f3001b55ea1509cf3d7e74898f85392a61a76e8149181ae1259622dabc8": false,
 	}
-	for _, id := range FilterTopics[0] {
+	for _, id := range FilterTopics {
 		currentIds[id.Hex()] = true
 	}
 	for id, status := range currentIds {

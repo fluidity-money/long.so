@@ -21,8 +21,9 @@ import (
 )
 
 const (
-	EnvThirdwebAddr = "SPN_THIRDWEB_ACCOUNT_FACTORY_ADDR"
-	EnvLeoAddr      = "SPN_LEO_ADDR"
+	EnvThirdwebAddr     = "SPN_THIRDWEB_ACCOUNT_FACTORY_ADDR"
+	EnvLeoAddr          = "SPN_LEO_ADDR"
+	EnvShouldTrackErc20 = "SPN_TRACK_ERC20"
 )
 
 const (
@@ -70,11 +71,18 @@ func main() {
 		setup.Exitf("%v not set", EnvLeoAddr)
 	}
 	leoAddr := types.AddressFromString(leoAddr_)
+	shouldTrackErc20 := os.Getenv(EnvShouldTrackErc20) != ""
+	slog.Info("environment variable config",
+		"thirdweb factory addr", thirdwebFactoryAddr,
+		"leo addr", leoAddr,
+		"should track erc20?", shouldTrackErc20,
+	)
 	Entry(
 		features.Get(),
 		config,
 		thirdwebFactoryAddr,
 		leoAddr,
+		shouldTrackErc20,
 		ingestorPagination,
 		DefaultPaginationPollWait,
 		c,

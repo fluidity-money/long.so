@@ -29,8 +29,7 @@ import (
 )
 
 // FilterTopics to filter for using the Websocket/HTTP collection of logs.
-var FilterTopics = [][]ethCommon.Hash{{ // Matches any of these in the first topic position.
-	erc20.TopicTransfer,
+var FilterTopics = []ethCommon.Hash{ // Matches any of these in the first topic position.
 	thirdweb.TopicAccountCreated,
 	leo.TopicCampaignBalanceUpdated,
 	leo.TopicCampaignCreated,
@@ -44,25 +43,35 @@ var FilterTopics = [][]ethCommon.Hash{{ // Matches any of these in the first top
 	seawater.TopicCollectProtocolFees,
 	seawater.TopicSwap2,
 	seawater.TopicSwap1,
-}}
+}
 
 // Entry function, using the database to determine if polling should be
 // used exclusively to receive logs, polling only for catchup, or
 // exclusively websockets.
-func Entry(f features.F, config config.C, thirdwebFactoryAddr, leoAddr types.Address, ingestorPagination int, pollWait int, c *ethclient.Client, db *gorm.DB) {
+func Entry(f features.F, config config.C, thirdwebFactoryAddr, leoAddr types.Address, shouldTrackErc20 bool, ingestorPagination int, pollWait int, c *ethclient.Client, db *gorm.DB) {
 	var (
 		seawaterAddr = ethCommon.HexToAddress(config.SeawaterAddr.String())
 		thirdwebAddr = ethCommon.HexToAddress(thirdwebFactoryAddr.String())
 		leoAddr_ =ethCommon.HexToAddress(leoAddr.String())
 	)
-	IngestPolling(f, c, db, ingestorPagination, pollWait, seawaterAddr, thirdwebAddr, leoAddr_)
+	IngestPolling(
+		f,
+		c,
+		db,
+		ingestorPagination,
+		pollWait,
+		seawaterAddr,
+		thirdwebAddr,
+		leoAddr_,
+		shouldTrackErc20,
+	)
 }
 
 // IngestPolling by repeatedly polling the Geth RPC for changes to
 // receive log updates. Checks the database first to determine where the
 // last point is before continuing. Assumes ethclient is HTTP.
 // Uses the IngestBlockRange function to do all the lifting.
-func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagination, ingestorPollWait int, seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address) {
+func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagination, ingestorPollWait int, seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address, shouldTrackErc20 bool) {
 	if ingestorPagination <= 0 {
 		panic("bad ingestor pagination")
 	}
@@ -78,7 +87,17 @@ func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagin
 			"from", from,
 			"collecting until", to,
 		)
-		IngestBlockRange(f, c, db, seawaterAddr, thirdwebAddr, leoAddr, from, to)
+		IngestBlockRange(
+			f,
+			c,
+			db,
+			seawaterAddr,
+			thirdwebAddr,
+			leoAddr,
+			shouldTrackErc20,
+			from,
+			to,
+		)
 		slog.Info("about to sleep before polling again",
 			"poll seconds", ingestorPollWait,
 		)
@@ -91,11 +110,15 @@ func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagin
 // funciton to write records found to the database. Assumes the ethclient
 // provided is a HTTP client. Also updates the underlying last block it
 // saw into the database checkpoints. Fatals if something goes wrong.
-func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address, from, to uint64) {
+func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address, shouldTrackErc20 bool, from, to uint64) {
+	filterLogs := FilterTopics
+	if shouldTrackErc20 {
+		filterLogs = append(filterLogs, erc20.TopicTransfer)
+	}
 	logs, err := c.FilterLogs(context.Background(), ethereum.FilterQuery{
 		FromBlock: new(big.Int).SetUint64(from),
 		ToBlock:   new(big.Int).SetUint64(to),
-		Topics:    FilterTopics,
+		Topics:    [][]ethCommon.Hash{filterLogs},
 	})
 	if err != nil {
 		setup.Exitf("failed to filter logs: %v", err)
