@@ -11,7 +11,6 @@ use crate::immutables::NFT_MANAGER_ADDR;
 //transferFrom(address,address,uint256)
 const TRANSFER_FROM_POSITION_SELECTOR: [u8; 4] = [0x23, 0xb8, 0x72, 0xdd];
 
-
 fn pack_transfer_from(from: Address, to: Address, id: U256) -> [u8; 4 + 32 * 3] {
     let mut data = [0_u8; 4 + 32 * 3];
     write_selector(&mut data, &TRANSFER_FROM_POSITION_SELECTOR);
