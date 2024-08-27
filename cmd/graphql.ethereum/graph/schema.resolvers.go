@@ -243,16 +243,16 @@ func (r *queryResolver) UpcomingLiquidityCampaigns(ctx context.Context) (campaig
 }
 
 // Notes is the resolver for the notes field.
-func (r *queryResolver) Notes(ctx context.Context, wallet *string) (notes []model.Note, err error) {
+func (r *queryResolver) Notes(ctx context.Context, wallet string) (notes []model.Note, err error) {
 	q := r.DB.Table("notes_current_1")
-	if wallet == nil {
+	if wallet == "" {
 		err = q.
 			Where("target = NULL").
 			Scan(&notes).
 			Error
 	} else {
 		err = q.
-			Where("target IS NULL OR target = ?", *wallet).
+			Where("target IS NULL OR target = ?", wallet).
 			Scan(&notes).
 			Error
 	}
