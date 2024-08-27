@@ -161,11 +161,6 @@ export const SwapPro = ({
       ] as Transaction[];
 
     return transactions
-      ?.filter(
-        (item) =>
-          item.amountIn.token.symbol === token0.symbol &&
-          item.amountOut.token.symbol === token1.symbol,
-      )
       ?.map((transaction) => {
         return {
           id: transaction.timestamp.toString(),
