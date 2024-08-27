@@ -52,6 +52,11 @@ export const graphqlQueryUser = graphql(`
       ...WithdrawPositionsFragment
       ...DepositPositionsFragment
     }
+
+    getNotes(wallet: $wallet) {
+      content
+      placement
+    }
   }
 `);
 /**
