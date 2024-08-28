@@ -85,5 +85,31 @@
 			}
 		],
 		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "PositionDivested",
+		"inputs": [
+			{
+				"name": "positionId",
+				"type": "uint256",
+				"indexed": true,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "PositionVested",
+		"inputs": [
+			{
+				"name": "positionId",
+				"type": "uint256",
+				"indexed": true,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
 	}
 ]

@@ -3,9 +3,9 @@ package leo
 import (
 	"bytes"
 	_ "embed"
-	"time"
 	"fmt"
 	"math/big"
+	"time"
 
 	"github.com/fluidity-money/long.so/lib/types"
 
@@ -16,7 +16,9 @@ import (
 var (
 	TopicCampaignBalanceUpdated = abi.Events["CampaignBalanceUpdated"].ID
 	TopicCampaignCreated        = abi.Events["CampaignCreated"].ID
-	TopicCampaignUpdated = abi.Events["CampaignUpdated"].ID
+	TopicCampaignUpdated        = abi.Events["CampaignUpdated"].ID
+	TopicPositionVested         = abi.Events["PositionVested"].ID
+	TopicPositionDivested       = abi.Events["PositionDivested"].ID
 )
 
 //go:embed abi.json
@@ -80,11 +82,23 @@ func UnpackCampaignUpdated(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*Ca
 	return &CampaignUpdated{
 		Identifier: hashToBytes8Data(topic1),
 		Pool:       hashToAddr(topic2),
-		PerSecond: hashToNumber(topic3),
+		PerSecond:  hashToNumber(topic3),
 		TickLower:  tickLower,
 		TickUpper:  tickUpper,
 		Starting:   time.Unix(int64(starting), 0),
 		Ending:     time.Unix(int64(ending), 0),
+	}, nil
+}
+
+func UnpackPositionVested(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*PositionVested, error) {
+	return &PositionVested{
+		PositionId: hashToNumber(topic1),
+	}, nil
+}
+
+func UnpackPositionDivested(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*PositionDivested, error) {
+	return &PositionDivested{
+		PositionId: hashToNumber(topic1),
 	}, nil
 }
 
@@ -103,7 +117,7 @@ func hashToNumber(h ethCommon.Hash) types.Number {
 }
 
 func unpackDetails(i *big.Int) (tickLower int32, tickUpper int32, owner types.Address) {
-	tickLower = int32(new(big.Int).Rsh(i, 32 + 160).Int64())
+	tickLower = int32(new(big.Int).Rsh(i, 32+160).Int64())
 	tickUpper = int32(new(big.Int).Rsh(i, 160).Int64())
 	owner = types.AddressFromString(ethCommon.BigToAddress(i).String())
 	return
@@ -116,8 +130,8 @@ func unpackTimes(i *big.Int) (starting uint64, ending uint64) {
 }
 
 func unpackExtras(i *big.Int) (tickLower int32, tickUpper int32, starting uint64, ending uint64) {
-	tickLower = int32(new(big.Int).Rsh(i, 32 + 64 + 64).Int64())
-	tickUpper = int32(new(big.Int).Rsh(i, 64 + 64).Int64())
+	tickLower = int32(new(big.Int).Rsh(i, 32+64+64).Int64())
+	tickUpper = int32(new(big.Int).Rsh(i, 64+64).Int64())
 	starting = new(big.Int).Rsh(i, 64).Uint64()
 	ending = i.Uint64()
 	return

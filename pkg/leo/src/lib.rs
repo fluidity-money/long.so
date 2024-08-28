@@ -170,6 +170,12 @@ impl Leo {
         self.liquidity
             .setter(pool)
             .set(existing_liq + U256::from(position_liq));
+
+        #[cfg(feature = "log-events")]
+        evm::log(events::PositionVested {
+            positionId: position_id,
+        });
+
         Ok(())
     }
 
@@ -569,7 +575,15 @@ impl Leo {
         self.liquidity
             .setter(pool)
             .set(existing_liq - self.positions.getter(position_id).liquidity.get());
-        nft_manager::give_position(position_id)
+
+        nft_manager::give_position(position_id)?;
+
+        #[cfg(feature = "log-events")]
+        evm::log(events::PositionDivested {
+            positionId: position_id,
+        });
+
+        Ok(())
     }
 
     pub fn admin_reduce_pos_time(&mut self, _id: U256, _secs: u64) -> Result<(), Vec<u8>> {

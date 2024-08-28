@@ -42,4 +42,16 @@ type (
 		Starting   time.Time     `json:"starting"`
 		Ending     time.Time     `json:"ending"`
 	}
+
+	PositionVested struct {
+		events.Event
+
+		PositionId types.Number `json:"positionId"`
+	}
+
+	PositionDivested struct {
+		events.Event
+
+		PositionId types.Number `json:"positionId"`
+	}
 )

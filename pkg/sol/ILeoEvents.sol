@@ -21,4 +21,8 @@ interface ILeoEvents {
         uint256 indexed perSecond,
         uint256 extras // [tick lower, tick upper, starting, ending]
     );
+
+    event PositionVested(uint256 indexed positionId);
+
+    event PositionDivested(uint256 indexed positionId);
 }

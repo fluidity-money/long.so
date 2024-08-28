@@ -34,6 +34,8 @@ var FilterTopics = []ethCommon.Hash{ // Matches any of these in the first topic 
 	leo.TopicCampaignBalanceUpdated,
 	leo.TopicCampaignCreated,
 	leo.TopicCampaignUpdated,
+	leo.TopicPositionVested,
+	leo.TopicPositionDivested,
 	seawater.TopicMintPosition,
 	seawater.TopicBurnPosition,
 	seawater.TopicTransferPosition,
@@ -240,6 +242,18 @@ func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address, l 
 		logEvent("CampaignUpdated")
 		table = "events_leo_campaignupdated"
 		isSeawater = false
+		isLeo = true
+
+	case leo.TopicPositionVested:
+		a, err = leo.UnpackPositionVested(topic1, topic2, topic3, data)
+		logEvent("PositionVested")
+		table = "events_leo_positionvested"
+		isLeo = true
+
+	case leo.TopicPositionDivested:
+		a, err = leo.UnpackPositionDivested(topic1, topic2, topic3, data)
+		logEvent("PositionDivested")
+		table = "events_leo_positiondivested"
 		isLeo = true
 
 	case seawater.TopicMintPosition:
