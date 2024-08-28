@@ -28,6 +28,7 @@
 	"ui show trade rewards": false,
 	"ui show utility incentives": false,
 	"ui show yield over time": false,
-	"ui show liquidity visualiser": true
+	"ui show liquidity visualiser": true,
+	"ui show banners": true
 }
 
