@@ -185,3 +185,7 @@
 div[data-radix-popper-content-wrapper] {
   z-index: 10 !important;
 }
+
+.banner > img {
+  object-fit: contain;
+}
