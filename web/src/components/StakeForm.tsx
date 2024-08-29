@@ -275,12 +275,24 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     const sqb = getSqrtRatioAtTick(upper);
 
     if (quotedToken === "token0") {
-      const liq = getLiquidityForAmount0(cur, upper, BigInt(token0AmountRaw));
+      const delta = cur === upper ? 1n : 0n;
+      // delta is a guard for same lower and upper ticks
+      const liq = getLiquidityForAmount0(
+        cur + delta,
+        upper,
+        BigInt(token0AmountRaw),
+      );
       const newToken1Amount = getAmount1ForLiquidity(sqa, sqp, liq);
       if (token1Balance?.value && newToken1Amount > token1Balance.value) return;
       setToken1AmountRaw(newToken1Amount.toString());
     } else {
-      const liq = getLiquidityForAmount1(cur, lower, BigInt(token1AmountRaw));
+      // delta is a guard for same lower and upper ticks
+      const delta = cur === lower ? 1n : 0n;
+      const liq = getLiquidityForAmount1(
+        cur + delta,
+        lower,
+        BigInt(token1AmountRaw),
+      );
       const newToken0Amount = getAmount0ForLiquidity(sqb, sqp, liq);
       if (token0Balance?.value && newToken0Amount > token0Balance.value) return;
       setToken0AmountRaw(newToken0Amount.toString());
