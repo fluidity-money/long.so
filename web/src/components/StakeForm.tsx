@@ -278,7 +278,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       const delta = cur === upper ? 1n : 0n;
       // delta is a guard for same lower and upper ticks
       const liq = getLiquidityForAmount0(
-        cur + delta,
+        cur - delta,
         upper,
         BigInt(token0AmountRaw),
       );
@@ -289,7 +289,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       // delta is a guard for same lower and upper ticks
       const delta = cur === lower ? 1n : 0n;
       const liq = getLiquidityForAmount1(
-        cur + delta,
+        cur - delta,
         lower,
         BigInt(token1AmountRaw),
       );
