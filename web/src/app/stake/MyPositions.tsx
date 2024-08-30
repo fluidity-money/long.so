@@ -12,12 +12,12 @@ import { usdFormat } from "@/lib/usdFormat";
 import Position from "@/assets/icons/position.svg";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { Button } from "@/components/ui/button";
-import { nanoid } from "nanoid";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import TokenIridescent from "@/assets/icons/token-iridescent.svg";
 import SegmentedControl from "@/components/ui/segmented-control";
-import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
+import { useAccount, useSimulateContract } from "wagmi";
+import useWriteContract from "@/fixtures/wagmi/useWriteContract";
 import { mockMyPositions } from "@/demoData/myPositions";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { Token, fUSDC, getTokenFromAddress } from "@/config/tokens";
@@ -85,7 +85,7 @@ export const MyPositions = () => {
     : 0n;
 
   const {
-    writeContract: writeContractCollect,
+    writeContractAsync: writeContractCollect,
     data: collectData,
     error: collectError,
     isPending: isCollectPending,

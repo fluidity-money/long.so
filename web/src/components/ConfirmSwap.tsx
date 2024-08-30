@@ -10,8 +10,8 @@ import {
   useChainId,
   useSimulateContract,
   useWaitForTransactionReceipt,
-  useWriteContract,
 } from "wagmi";
+import useWriteContract from "@/fixtures/wagmi/useWriteContract";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { useEffect, useCallback, useMemo } from "react";
@@ -109,14 +109,14 @@ export const ConfirmSwap = () => {
 
   // set up write hooks
   const {
-    writeContract: writeContractApproval,
+    writeContractAsync: writeContractApproval,
     data: approvalData,
     error: approvalError,
     isPending: isApprovalPending,
     reset: resetApproval,
   } = useWriteContract();
   const {
-    writeContract: writeContractSwap,
+    writeContractAsync: writeContractSwap,
     data: swapData,
     error: swapError,
     isPending: isSwapPending,
@@ -207,9 +207,6 @@ export const ConfirmSwap = () => {
   const performSwap = useCallback(() => {
     writeContractSwap({
       ...swapOptions,
-      // Typescript doesn't support strongly typing this with destructuring
-      // https://github.com/microsoft/TypeScript/issues/46680
-      // @ts-expect-error
       args: swapOptions.args,
     });
   }, [swapOptions, writeContractSwap]);

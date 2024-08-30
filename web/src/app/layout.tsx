@@ -16,7 +16,7 @@ import { graphqlEndpoint } from "@/config/graphqlEndpoint";
 import { graphqlQueryGlobal } from "@/hooks/useGraphql";
 import PopulateQueryCache from "@/app/PopulateQueryCache";
 import BottomBanner from "@/components/Banners/BottomBanner";
-
+import ErrorReportingDialog from "@/components/ErrorReportingDialog";
 const title = "Longtail";
 
 const description = "Longtail is Arbitrum's cheapest and most rewarding AMM.";
@@ -141,6 +141,7 @@ export default async function RootLayout({
             </div>
           </footer>
           <BottomBanner />
+          <ErrorReportingDialog />
         </Provider>
       </body>
     </html>

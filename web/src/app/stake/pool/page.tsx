@@ -8,8 +8,6 @@ import Token from "@/assets/icons/token.svg";
 import { Badge } from "@/components/ui/badge";
 import { Line } from "rc-progress";
 import { motion } from "framer-motion";
-import { format, subDays } from "date-fns";
-import ReactECharts from "echarts-for-react";
 import Link from "next/link";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -29,7 +27,8 @@ import { getFormattedPriceFromTick } from "@/lib/amounts";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { ammAddress } from "@/lib/addresses";
-import { useSimulateContract, useWriteContract } from "wagmi";
+import { useSimulateContract } from "wagmi";
+import useWriteContract from "@/fixtures/wagmi/useWriteContract";
 import {
   getSqrtRatioAtTick,
   getTokenAmountsNumeric,

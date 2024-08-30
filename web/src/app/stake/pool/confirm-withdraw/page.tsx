@@ -11,8 +11,8 @@ import {
   useChainId,
   useSimulateContract,
   useWaitForTransactionReceipt,
-  useWriteContract,
 } from "wagmi";
+import useWriteContract from "@/fixtures/wagmi/useWriteContract";
 import { fUSDC } from "@/config/tokens";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import {
@@ -62,7 +62,7 @@ export default function ConfirmWithdrawLiquidity() {
   const isWithdrawingEntirePosition = positionLiquidity?.result === delta;
 
   const {
-    writeContract: writeContractUpdatePosition,
+    writeContractAsync: writeContractUpdatePosition,
     data: updatePositionData,
     error: updatePositionError,
     isPending: isUpdatePositionPending,
@@ -74,7 +74,7 @@ export default function ConfirmWithdrawLiquidity() {
   });
 
   const {
-    writeContract: writeContractCollect,
+    writeContractAsync: writeContractCollect,
     data: collectData,
     error: collectError,
     isPending: isCollectPending,

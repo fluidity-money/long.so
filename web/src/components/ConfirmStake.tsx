@@ -11,8 +11,8 @@ import {
   useChainId,
   useSimulateContract,
   useWaitForTransactionReceipt,
-  useWriteContract,
 } from "wagmi";
+import useWriteContract from "@/fixtures/wagmi/useWriteContract";
 import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import {
   sqrtPriceX96ToPrice,
@@ -129,27 +129,27 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
 
   // set up write contract hooks
   const {
-    writeContract: writeContractMint,
+    writeContractAsync: writeContractMint,
     data: mintData,
     error: mintError,
     isPending: isMintPending,
   } = useWriteContract();
   const {
-    writeContract: writeContractApprovalToken0,
+    writeContractAsync: writeContractApprovalToken0,
     data: approvalDataToken0,
     error: approvalErrorToken0,
     isPending: isApprovalPendingToken0,
     reset: resetApproveToken0,
   } = useWriteContract();
   const {
-    writeContract: writeContractApprovalToken1,
+    writeContractAsync: writeContractApprovalToken1,
     data: approvalDataToken1,
     error: approvalErrorToken1,
     isPending: isApprovalPendingToken1,
     reset: resetApproveToken1,
   } = useWriteContract();
   const {
-    writeContract: writeContractUpdatePosition,
+    writeContractAsync: writeContractUpdatePosition,
     data: updatePositionData,
     error: updatePositionError,
     isPending: isUpdatePositionPending,
