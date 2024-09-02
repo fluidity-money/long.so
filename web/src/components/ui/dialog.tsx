@@ -13,7 +13,7 @@ export const DialogContent = React.forwardRef<
           aria-label="Close"
           className="flex size-6 items-center justify-center rounded-md bg-white"
         >
-          <span className="text-xs">X</span>
+          <span className="text-xs">Esc</span>
         </DialogPrimitive.Close>
       </div>
       {children}

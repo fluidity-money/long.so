@@ -45,9 +45,9 @@ export default function BottomBanner() {
       ></div>
       <div
         onClick={() => setIsBannerClosed(true)}
-        className="absolute right-2 top-2 flex cursor-pointer items-center justify-center rounded-md bg-white px-3 py-1 text-sm"
+        className="absolute right-2 top-2 flex cursor-pointer items-center justify-center rounded-md bg-white px-3 py-1 text-xs"
       >
-        x
+        Esc
       </div>
     </div>
   );
