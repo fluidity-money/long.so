@@ -54,7 +54,7 @@ func Entry(f features.F, config config.C, thirdwebFactoryAddr, leoAddr types.Add
 	var (
 		seawaterAddr = ethCommon.HexToAddress(config.SeawaterAddr.String())
 		thirdwebAddr = ethCommon.HexToAddress(thirdwebFactoryAddr.String())
-		leoAddr_ =ethCommon.HexToAddress(leoAddr.String())
+		leoAddr_     = ethCommon.HexToAddress(leoAddr.String())
 	)
 	IngestPolling(
 		f,

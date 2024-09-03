@@ -6,6 +6,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"math/big"
@@ -22,9 +23,10 @@ func TestGetSlot(t *testing.T) {
 		types.AddressFromString("0xe984f758f362d255bd96601929970cef9ff19dd7"),
 		0,
 	)
+	d := "0x" + hex.EncodeToString(s)
 	assert.Equal(t,
 		"0x0000025b000000000000000000000000e984f758f362d255bd96601929970cef9ff19dd70000000000000000000000000000000000000000000000000000000000000000",
-		s,
+		d,
 		"calldata not equal",
 	)
 }
@@ -35,7 +37,7 @@ func TestReqPositionsErr(t *testing.T) {
 		"": {},
 	})
 	ctx := context.TODO()
-	_, err := reqPositions(ctx, "", d, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
+	_, err := reqPositions(ctx, "", d, 1, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
 		var buf bytes.Buffer
 		_ = json.NewEncoder(&buf).Encode(rpcResp{
 			Id:     "",
@@ -55,23 +57,24 @@ func TestReqPositionsSinglePosition(t *testing.T) {
 		Pool: types.AddressFromString("0xe984f758f362d255bd96601929970cef9ff19dd7"),
 	}
 	id := encodeId(p.Pool, p.Id)
+	rpcId := encodeRpcId(p)
 	d := packRpcPosData("", map[string]seawater.Position{id: p})
 	pool, posId, ok := decodeId(id)
-	assert.Equalf(t, p.Pool, pool, "pool not decoded")
+	assert.EqualValuesf(t, p.Pool, pool, "pool not decoded")
 	assert.Equalf(t, p.Id, posId, "id not decoded")
 	assert.Truef(t, ok, "decode id function not working")
-	r, err := reqPositions(ctx, "", d, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
+	r, err := reqPositions(ctx, "", d, 1, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
 		var buf bytes.Buffer
 		_ = json.NewEncoder(&buf).Encode([]rpcResp{{
-			Id:     id,
-			Result: "0x00000000000000000000000000000000000000000000000000000000091c2e55",
+			Id:     rpcId,
+			Result: "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000091c2e55",
 			Error:  nil,
 		}})
 		return io.NopCloser(&buf), nil
 	})
 	assert.Nilf(t, err, "req positions errored")
 	expected := []posResp{{
-		Key: id,
+		Key:   id,
 		Delta: types.NumberFromInt64(152841813),
 	}}
 	assert.Equal(t, expected, r)
@@ -97,12 +100,12 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 	resps := make(map[int]rpcResp, 100_000)
 	for _, p := range positions {
 		resps[p.Id] = rpcResp{
-			Id:     encodeId(p.Pool, p.Id),
-			Result: "0x00000000000000000000000000000000000000000000000000000000091c2e55",
+			Id:     encodeRpcId(p),
+			Result: "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000091c2e55",
 			Error:  nil,
 		}
 	}
-	posResps, err := reqPositions(ctx, "", d, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
+	posResps, err := reqPositions(ctx, "", d, 1, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
 		// Decode the data to see which transactions are being sent.
 		var buf bytes.Buffer
 		var reqs []rpcReq
@@ -111,7 +114,7 @@ func TestReqPositionsHundredThousandPositions(t *testing.T) {
 		for i, r := range reqs {
 			resps[i] = rpcResp{
 				Id:     r.Id,
-				Result: "0x00000000000000000000000000000000000000000000000000000000091c2e55",
+				Result: "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000091c2e55",
 				Error:  nil,
 			}
 		}
@@ -151,7 +154,7 @@ func TestReqPositionsHundredThousandErrors(t *testing.T) {
 			Error:  nil,
 		}
 	}
-	posResps, err := reqPositions(ctx, "", d, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
+	posResps, err := reqPositions(ctx, "", d, 1, func(url string, contentType string, r io.Reader) (io.ReadCloser, error) {
 		// Decode the data to see which transactions are being sent.
 		var buf bytes.Buffer
 		_ = json.NewEncoder(&buf).Encode([]rpcResp{{

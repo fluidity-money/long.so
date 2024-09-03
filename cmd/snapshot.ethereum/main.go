@@ -31,6 +31,8 @@ type PoolDetails struct {
 
 var Zero = new(big.Int)
 
+const multicallAddr = "0xcA11bde05977b3631167028862bE2a173976CA11"
+
 func main() {
 	defer setup.Flush()
 	config := config.Get()
@@ -50,7 +52,7 @@ func main() {
 	if err != nil {
 		setup.Exitf("seawater positions scan: %v", err)
 	}
-	slog.Debug("positions we're about to scan", "positions", positions)
+	slog.Debug("number of positions", "n", len(positions))
 	var poolDetails []PoolDetails
 	// Get the decimals for each unique pool.
 	err = db.Table("seawater_final_ticks_decimals_1").
@@ -80,7 +82,7 @@ func main() {
 	d := packRpcPosData(config.SeawaterAddr.String(), positionMap)
 	// Request from the RPC the batched lookup of this data.
 	// Makes multiple requests if the request size exceeds the current restriction.
-	resps, err := reqPositions(context.Background(), config.GethUrl, d, httpPost)
+	resps, err := reqPositions(context.Background(), config.GethUrl, d, len(positions), httpPost)
 	if err != nil {
 		setup.Exitf("positions request: %v", err)
 	}
@@ -95,7 +97,7 @@ func main() {
 		pos, ok := positionMap[r.Key]
 		if !ok {
 			slog.Info("position doesn't have any liquidity",
-				"position id", pos.Id,
+				"position id", r.Key,
 			)
 			continue
 		}

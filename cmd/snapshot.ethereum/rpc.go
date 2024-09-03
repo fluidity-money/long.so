@@ -9,28 +9,29 @@ import (
 	"io"
 	"log/slog"
 	"math/big"
-	"math/rand"
 	"strconv"
-	"strings"
 
+	"github.com/fluidity-money/long.so/lib/events/multicall"
 	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
 
+	"github.com/ethereum/go-ethereum/common"
 	ethCommon "github.com/ethereum/go-ethereum/common"
 )
 
 const (
-	// MinBatchLimit to get from the server before using multiple batches.
-	// This is the minimum that will be used.
-	MinBatchLimit = 100
+	// BatchLimit of calls to pack into a single JSON-RPC request.
+	// External RPC currently has a hard limit at 50/second.
+	BatchLimit = 18
 
-	// MaxBatchLimit to get from the server before using multiple
-	// batches. Half of the maximum amount since upstream started to
-	// choke.
-	MaxBatchLimit = 200
+	// MulticallBatchLimit for the number of calls to pack into each
+	// aggregate3 call. Exceeding 500 leads to issues with calldata size.
+	MulticallBatchLimit = 500
 
 	// WorkerCount of simultaneous requests that can be made max.
-	WorkerCount = 100
+	// External RPC currently has a hard limit at 50/second, so given that we
+	// batch 50 requests in each, we don't need additional workers for processing
+	WorkerCount = 1
 )
 
 type (
@@ -55,27 +56,47 @@ type (
 	}
 )
 
-// packRpcPosData by concatenating the pool address with the position id, so
-// we can quickly unpack it later. Assumes poolAddr, and ammAddr, are
-// correctly formatted (0x[A-Za-z0-9]{40}).
-func packRpcPosData(ammAddr string, positions map[string]seawater.Position) (req []rpcReq) {
-	req = make([]rpcReq, len(positions))
-	i := 0
-	for k, p := range positions {
-		s := getCalldata(p.Pool, p.Id)
-		req[i] = rpcReq{
-			JsonRpc: "2.0",
-			Id:      k,
-			Method:  "eth_call",
-			Params: []any{
-				map[string]string{
-					"to":   ammAddr,
-					"data": s,
-				},
-				"latest",
-			},
+// packRpcPosData to pack positions into an array of JSON-RPC requests.
+// each request is a multicall request with size MulticallBatchLimit.
+func packRpcPosData(ammAddr string, positions map[string]seawater.Position) (reqs []rpcReq) {
+	calls := make([]multicall.AggregateCall3, MulticallBatchLimit)
+	var (
+		// loop iterator as positions is a map
+		i  = 0
+		// index of the current call within the multicall request
+		c = 0
+		// ID contains position id and pool
+		// padded to allow looking up positions by offset
+		id = ""
+	)
+	for _, p := range positions {
+		calls[c] = multicall.AggregateCall3{
+			Target:   common.HexToAddress(ammAddr),
+			CallData: getCalldata(p.Pool, p.Id),
 		}
+		id += encodeRpcId(p)
 		i++
+		c++
+		if c == MulticallBatchLimit || i == len(positions) {
+			calldata, err := multicall.PackAggregate3(calls[:c])
+			if err != nil {
+				panic(err)
+			}
+			reqs = append(reqs, rpcReq{
+				JsonRpc: "2.0",
+				Id:      id,
+				Method:  "eth_call",
+				Params: []any{
+					map[string]string{
+						"to":   multicallAddr,
+						"data": "0x" + hex.EncodeToString(calldata),
+					},
+					"latest",
+				},
+			})
+			c = 0
+			id = ""
+		}
 	}
 	return
 }
@@ -88,7 +109,7 @@ type HttpReqFn func(url, contentType string, r io.Reader) (io.ReadCloser, error)
 // request is above the batch limit. If it encounters a situation where
 // anything is returned in error, it sends a done message to all the
 // Goroutines after attempting to drain them for 5 seconds.
-func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpReqFn) ([]posResp, error) {
+func reqPositions(ctx context.Context, url string, reqs []rpcReq, posCount int, makeReq HttpReqFn) ([]posResp, error) {
 	var (
 		chanReqs  = make(chan []rpcReq)
 		chanResps = make(chan posResp)
@@ -97,13 +118,11 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 	)
 	// Figure out the maximum number of goroutines that we can run to
 	// make the requests. Scaling up accordingly.
-	batchLimit := rand.Intn(MaxBatchLimit-MinBatchLimit) + MinBatchLimit
-	slog.Info("sending requests using a randomly chosen batch limit",
+	batchLimit := BatchLimit
+	slog.Info("sending requests using a predefined batch limit",
 		"batch limit", batchLimit,
 	)
-	frames := len(reqs) / batchLimit
-	workerCount := max(frames, WorkerCount)
-	for i := 0; i < workerCount; i++ {
+	for i := 0; i < WorkerCount; i++ {
 		go func() {
 			for {
 				select {
@@ -137,17 +156,39 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 							chanErrs <- fmt.Errorf(`error reported: %v`, err)
 							return
 						}
-						delta, err := types.NumberFromHex(strings.TrimPrefix(p.Result, "0x"))
+						resultBytes, err := hex.DecodeString(p.Result[2:])
 						if err != nil {
-							chanErrs <- fmt.Errorf("unpacking delta: %#v: %v", p, err)
+							chanErrs <- fmt.Errorf(`decoding hex: %v`, err)
 							return
 						}
-						r := posResp{p.Id, *delta}
-						select {
-						case <-chanDone:
-							return // Hopefully this will prevent us from going through the rest.
-						case chanResps <- r:
-							// Do nothing. We sent.
+						unpacked, err := multicall.UnpackAggregate3(resultBytes)
+						if err != nil {
+							chanErrs <- fmt.Errorf(`unpacking: %v`, err)
+							return
+						}
+						for i, result := range unpacked {
+							if !result.Success {
+								chanErrs <- fmt.Errorf(`external call failure: %v`, result)
+								return
+							}
+							h := hex.EncodeToString(result.ReturnData)
+							delta, err := types.NumberFromHex(h)
+							if err != nil {
+								chanErrs <- fmt.Errorf("unpacking delta: %#v: %v", p, err)
+								return
+							}
+							pool, id, err := decodeRpcId(p.Id, i)
+							if err != nil {
+								chanErrs <- fmt.Errorf("unpacking pos id: %#v: %v", p, err)
+								return
+							}
+							r := posResp{encodeId(types.AddressFromString(pool), id), *delta}
+							select {
+							case <-chanDone:
+								return // Hopefully this will prevent us from going through the rest.
+							case chanResps <- r:
+								// Do nothing. We sent.
+							}
 						}
 					}
 				}
@@ -188,14 +229,14 @@ func reqPositions(ctx context.Context, url string, reqs []rpcReq, makeReq HttpRe
 
 		}
 	}()
-	resps := make([]posResp, len(reqs))
+	resps := make([]posResp, posCount)
 	sleepRoutines := func() {
 		for {
 			chanDone <- true
 		}
 	}
 	// Start to unpack everything/signal the worker group if we have an error.
-	for i := 0; i < len(reqs); i++ {
+	for i := 0; i < posCount; i++ {
 		select {
 		case resp := <-chanResps:
 			resps[i] = resp
@@ -229,7 +270,28 @@ func encodeId(pool types.Address, id int) string {
 	return fmt.Sprintf("%s%x", pool, id)
 }
 
-func getCalldata(pool types.Address, posId int) string {
+// RPC ID is pool0id0pool1id1... where ID is padded to 20 characters
+// to allow for relating positions to their ID via a standard offset
+func encodeRpcId(p seawater.Position) string {
+	return p.Pool.String() + fmt.Sprintf("%020d", p.Id)
+}
+
+func decodeRpcId(p string, offset int) (string, int, error) {
+	const (
+		addrWidth = 42
+		idWidth   = 20
+	)
+	combinedWidth := addrWidth + idWidth
+	pool := p[offset*combinedWidth : offset*combinedWidth+addrWidth]
+	idPadded := p[offset*combinedWidth+addrWidth : offset*combinedWidth+addrWidth+idWidth]
+	id, err := strconv.Atoi(idPadded)
+	if err != nil {
+		return "", 0, err
+	}
+	return pool, id, nil
+}
+
+func getCalldata(pool types.Address, posId int) []byte {
 	posIdB := new(big.Int).SetInt64(int64(posId)).Bytes()
 	x := append(
 		//positionLiquidity8D11C045(address,uint256)
@@ -239,5 +301,5 @@ func getCalldata(pool types.Address, posId int) string {
 			ethCommon.LeftPadBytes(posIdB, 32)...,
 		)...,
 	)
-	return "0x" + hex.EncodeToString(x)
+	return x
 }
