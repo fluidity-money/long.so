@@ -4,11 +4,11 @@
 package setup
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"log/slog"
 	"os"
-	"context"
 	"runtime/debug"
 	"strings"
 	"time"
@@ -26,7 +26,8 @@ const (
 )
 
 type Multihandler struct {
-	sentry, json slog.Handler
+	furthestSentry slog.Level // Furthest to go with Sentry.
+	sentry, json   slog.Handler
 }
 
 func (h Multihandler) Enabled(ctx context.Context, record slog.Level) bool {
@@ -40,7 +41,7 @@ func (h Multihandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	}
 	return Multihandler{
 		sentry: s,
-		json: h.json.WithAttrs(attrs),
+		json:   h.json.WithAttrs(attrs),
 	}
 }
 func (h Multihandler) WithGroup(name string) slog.Handler {
@@ -50,11 +51,16 @@ func (h Multihandler) WithGroup(name string) slog.Handler {
 	}
 	return Multihandler{
 		sentry: s,
-		json: h.json.WithGroup(name),
+		json:   h.json.WithGroup(name),
 	}
 }
 func (h Multihandler) Handle(ctx context.Context, record slog.Record) error {
 	if s := h.sentry; s != nil {
+		// Hack here to make sure we don't log any inappropriate Sentry
+		// errors.
+		if record.Level < h.furthestSentry {
+			return nil
+		}
 		if err := s.Handle(ctx, record); err != nil {
 			return err
 		}
@@ -81,9 +87,11 @@ func init() {
 	}
 	var multihandler Multihandler
 	if dsn != "" { // DSN being set means we're using Sentry.
+		furthestSentry := slog.LevelError
+		multihandler.furthestSentry = furthestSentry
 		// We want to only track errors with Sentry.
 		multihandler.sentry = slogsentry.Option{
-			Level: slog.LevelError,
+			Level: furthestSentry,
 		}.
 			NewSentryHandler()
 	}
