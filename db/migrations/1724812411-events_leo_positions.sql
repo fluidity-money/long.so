@@ -8,7 +8,7 @@ CREATE TABLE events_leo_positionvested (
 	block_number INTEGER NOT NULL,
 	emitter_addr ADDRESS NOT NULL,
 
-	position_id HUGEINT NOT NULL,
+	position_id HUGEINT NOT NULL
 );
 
 CREATE TABLE events_leo_positiondivested (
@@ -19,7 +19,7 @@ CREATE TABLE events_leo_positiondivested (
 	block_number INTEGER NOT NULL,
 	emitter_addr ADDRESS NOT NULL,
 
-	position_id HUGEINT NOT NULL,
+	position_id HUGEINT NOT NULL
 );
 
 -- migrate:down
