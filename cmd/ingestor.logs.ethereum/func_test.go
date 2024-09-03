@@ -57,6 +57,7 @@ func TestHandleLogCallbackNewPool(t *testing.T) {
 	assert.True(t, wasRun)
 }
 
+// TestHandleLogCallbackUpdatePositionLiquidity modified to use delta intsead of token0, token1
 func TestHandleLogCallbackUpdatePositionLiquidity(t *testing.T) {
 	seawaterAddr := ethCommon.HexToAddress("0x839c5cf32d9bc2cd46027691d2941410251ed557")
 	s := strings.NewReader(`
@@ -64,12 +65,13 @@ func TestHandleLogCallbackUpdatePositionLiquidity(t *testing.T) {
 	"address": "0x839c5cf32d9bc2cd46027691d2941410251ed557",
 	"blockHash": "0xc6c5a097fa5983067a5604e557f0a748d20d6569d33ca76ec52ba242abbae864",
 	"blockNumber": "0x4fa7dc",
-	"data": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+	"data": "0x00",
 	"logIndex": "0x2",
 	"removed": false,
 	"topics": [
-		"0x555c5816cc24ae6b4a85b2e02a07ebc514a04639a07694f29ff9a0de9b650987",
-		"0x0000000000000000000000000000000000000000000000000000000000079b03"
+		"0x93e3d2c55063cf99416006c6e3d30fd2bb276086bf31138b8e69160939d172d1",
+		"0x0000000000000000000000000000000000000000000000000000000000079b03",
+		"0x0000000000000000000000000000000000000000000000000000000000079b04"
 	],
 	"transactionHash": "0x82cec4ef154ddd92f000e442db6a8710bec69c24d8d790c2398c2676e0d30704",
 	"transactionIndex": "0x1"
@@ -87,14 +89,9 @@ func TestHandleLogCallbackUpdatePositionLiquidity(t *testing.T) {
 			"position id not equal",
 		)
 		assert.Equalf(t,
-			types.EmptyUnscaledNumber(),
-			updatePositionLiq.Token0,
-			"token not equal",
-		)
-		assert.Equalf(t,
-			types.EmptyUnscaledNumber(),
-			updatePositionLiq.Token1,
-			"token not equal",
+			types.NumberFromInt64(498436),
+			updatePositionLiq.Delta,
+			"delta not equal",
 		)
 		wasRun = true
 		return nil
@@ -256,7 +253,7 @@ func TestCurrentEventIds(t *testing.T) {
 		"0x01bacdc82c3891bc884396788e83d024aafbd4e2a08341fb9c9ce422a683830f": false,
 		"0x1b15f741d045342b3dab007e75a3d20b22aaab33e294b8fcce374753a4d9cea3": false,
 		"0x4732a2a38bb86e2c4a36fcc0204c09ed254bcb6e36f7b76c0f0532a403d4b402": false,
-		"0x555c5816cc24ae6b4a85b2e02a07ebc514a04639a07694f29ff9a0de9b650987": false,
+		"0x93e3d2c55063cf99416006c6e3d30fd2bb276086bf31138b8e69160939d172d1": false,
 		"0x7b0f5059c07211d90c2400fc99ac93e0e56db5168afa91f60d178bb6dc1c73f0": false,
 		"0x95f3c86e9f05acaefa0a1c98f3eaa48aeb910a1dfa82ad7653a561eab31274cc": false,
 		"0xcb076a66f4dca163de39a4023de987ca633a005767c796b3772e3462c573e339": false,

@@ -34,9 +34,8 @@ type (
 	UpdatePositionLiquidity struct {
 		events.Event
 
-		PosId  int           `json:"pos_id"`
-		Token0 types.UnscaledNumber `json:"token0"`
-		Token1 types.UnscaledNumber `json:"token1"`
+		PosId int          `json:"pos_id"`
+		Delta types.Number `json:"delta"`
 	}
 
 	CollectFees struct {

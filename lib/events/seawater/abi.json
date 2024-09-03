@@ -288,16 +288,10 @@
 				"internalType": "uint256"
 			},
 			{
-				"name": "token0",
-				"type": "int256",
-				"indexed": false,
-				"internalType": "int256"
-			},
-			{
-				"name": "token1",
-				"type": "int256",
-				"indexed": false,
-				"internalType": "int256"
+				"name": "delta",
+				"type": "int128",
+				"indexed": true,
+				"internalType": "int128"
 			}
 		],
 		"anonymous": false

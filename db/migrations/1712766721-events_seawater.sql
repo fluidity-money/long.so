@@ -72,8 +72,7 @@ CREATE TABLE events_seawater_updatePositionLiquidity (
 
 	-- id
 	pos_id HUGEINT NOT NULL,
-	token0 HUGEINT NOT NULL,
-	token1 HUGEINT NOT NULL
+	delta HUGEINT NOT NULL
 );
 
 CREATE INDEX ON events_seawater_updatePositionLiquidity (pos_id);

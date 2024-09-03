@@ -719,8 +719,7 @@ impl Pools {
         #[cfg(feature = "log-events")]
         evm::log(events::UpdatePositionLiquidity {
             id,
-            token0: token_0,
-            token1: token_1,
+            delta,
         });
 
         Ok((token_0, token_1))
