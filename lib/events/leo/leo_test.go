@@ -34,9 +34,11 @@ func TestUnpackDetails(t *testing.T) {
 }
 
 func TestUnpackTimes(t *testing.T) {
-	starting, ending := unpackTimes(new(big.Int).SetBits([]big.Word{545464, 5000, 0, 0}))
+	//1701411834604692327378907846580747919949856
+	starting, ending, perSecond  := unpackTimes(new(big.Int).SetBits([]big.Word{32, 545464, 5000, 0}))
 	assert.Equalf(t, uint64(5000), starting, "starting not equal")
 	assert.Equalf(t, uint64(545464), ending, "ending not equal")
+	assert.Equalf(t, uint64(32), perSecond, "per second not equal")
 }
 
 func TestUnpackExtras(t *testing.T) {

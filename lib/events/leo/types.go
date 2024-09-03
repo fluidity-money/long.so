@@ -28,6 +28,7 @@ type (
 		Owner      types.Address `json:"owner"`
 		Starting   time.Time     `json:"starting"`
 		Ending     time.Time     `json:"ending"`
+		PerSecond  uint64        `json:"perSecond"`
 	}
 
 	CampaignUpdated struct {

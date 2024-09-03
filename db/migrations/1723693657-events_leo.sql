@@ -27,7 +27,8 @@ CREATE TABLE events_leo_campaigncreated (
 	tick_upper INTEGER NOT NULL,
 	owner ADDRESS NOT NULL,
 	starting TIMESTAMP WITHOUT TIME ZONE,
-	ending TIMESTAMP WITHOUT TIME ZONE
+	ending TIMESTAMP WITHOUT TIME ZONE,
+	per_second BIGINT NOT NULL
 );
 
 CREATE UNIQUE INDEX ON events_leo_campaigncreated (identifier, pool);

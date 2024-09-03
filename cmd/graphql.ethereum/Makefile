@@ -1,5 +1,5 @@
 
-EXTRA_FILES := pools.toml
+EXTRA_FILES := pools.toml bootstrap bootstrap.zip
 
 include ../golang.mk
 

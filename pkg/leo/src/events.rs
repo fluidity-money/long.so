@@ -18,6 +18,7 @@ pub fn emit_campaign_created(
     tick_upper: i32,
     starting: u64,
     ending: u64,
+    per_second: u64
 ) {
     #[cfg(feature = "log-events")]
     evm::log(CampaignCreated {
@@ -25,7 +26,7 @@ pub fn emit_campaign_created(
         pool,
         token,
         details: pack_details(tick_lower, tick_upper, owner),
-        times: pack_times(starting, ending),
+        times: pack_times(starting, ending, per_second),
     });
 }
 
@@ -39,8 +40,10 @@ fn pack_details(tick_lower: i32, tick_upper: i32, owner: Address) -> U256 {
 }
 
 #[allow(dead_code)]
-fn pack_times(starting: u64, ending: u64) -> U256 {
-    (U256::from(starting) << 64) | U256::from(ending)
+fn pack_times(starting: u64, ending: u64, per_second: u64) -> U256 {
+    let mut packed = U256::from(starting) << 64 * 2;
+    packed |= U256::from(ending) << 64;
+    packed | U256::from(per_second)
 }
 
 #[allow(dead_code)]
@@ -83,7 +86,7 @@ fn test_pack_details() {
 
 #[test]
 fn test_pack_times() {
-    dbg!(pack_times(5000, 545464));
+    dbg!(pack_times(5000, 545464, 32));
 }
 
 #[test]

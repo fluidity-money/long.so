@@ -1,5 +1,5 @@
 
-ORG_ROOT := fluidity
+ORG_ROOT := superposition
 
 INSTALL_DIR := $(or ${INSTALL_DIR},/usr/local/bin)
 

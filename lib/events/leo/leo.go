@@ -54,7 +54,7 @@ func UnpackCampaignCreated(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*Ca
 		return nil, fmt.Errorf("bad times: %T", i[1])
 	}
 	tickLower, tickUpper, owner := unpackDetails(details)
-	starting, ending := unpackTimes(times)
+	starting, ending, perSecond := unpackTimes(times)
 	return &CampaignCreated{
 		Identifier: hashToBytes8Data(topic1),
 		Pool:       hashToAddr(topic2),
@@ -64,6 +64,7 @@ func UnpackCampaignCreated(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*Ca
 		Owner:      owner,
 		Starting:   time.Unix(int64(starting), 0),
 		Ending:     time.Unix(int64(ending), 0),
+		PerSecond: perSecond,
 	}, nil
 }
 
@@ -123,9 +124,10 @@ func unpackDetails(i *big.Int) (tickLower int32, tickUpper int32, owner types.Ad
 	return
 }
 
-func unpackTimes(i *big.Int) (starting uint64, ending uint64) {
-	starting = new(big.Int).Rsh(i, 64).Uint64()
-	ending = i.Uint64()
+func unpackTimes(i *big.Int) (starting uint64, ending uint64, perSecond uint64) {
+	starting = new(big.Int).Rsh(i, 64 * 2).Uint64()
+	ending = new(big.Int).Rsh(i, 64).Uint64()
+	perSecond = i.Uint64()
 	return
 }
 
