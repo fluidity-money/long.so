@@ -99,7 +99,7 @@ func (r *mutationResolver) RequestTokens(ctx context.Context, wallet_ string, tu
 	}
 	defer attempts.Close()
 	if attempts.Next() { // If this happens, then we got a row that's bad.
-		slog.Error("too many requests made",
+		slog.Info("too many requests made",
 			"ip addr", ipAddr,
 			"submitted wallet", wallet,
 			"err", err,
