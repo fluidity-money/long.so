@@ -125,6 +125,10 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 	if err != nil {
 		setup.Exitf("failed to filter logs: %v", err)
 	}
+	blockHeight, err := c.BlockNumber(context.Background())
+	if err != nil {
+		setup.Exitf("failed to find block height: %v", err)
+	}
 	err = db.Transaction(func(db *gorm.DB) error {
 		wasChanged := false
 		biggestBlockNo := from
@@ -139,7 +143,7 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 			}
 		}
 		// If there were no logs, skip this range
-		if len(logs) == 0 {
+		if len(logs) == 0 && to < blockHeight {
 			wasChanged = true
 			biggestBlockNo = to
 		}
