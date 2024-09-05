@@ -12,10 +12,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "alloy-json-abi"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "299d2a937b6c60968df3dad2a988b0f0e03277b344639a4f7a31bd68e6285e59"
+dependencies = [
+ "alloy-primitives 0.8.0",
+ "alloy-sol-type-parser",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "alloy-primitives"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f783611babedbbe90db3478c120fb5f5daacceffc210b39adc0af4fe0da70bad"
+dependencies = [
+ "bytes",
+ "cfg-if",
+ "const-hex",
+ "derive_more",
+ "hex-literal",
+ "itoa",
+ "ruint",
+ "tiny-keccak",
+]
+
+[[package]]
+name = "alloy-primitives"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a767e59c86900dd7c3ce3ecef04f3ace5ac9631ee150beb8b7d22f7fa3bbb2d7"
 dependencies = [
  "alloy-rlp",
  "bytes",
@@ -49,8 +77,22 @@ version = "0.7.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b40397ddcdcc266f59f959770f601ce1280e699a91fc1862f29cef91707cd09"
 dependencies = [
- "alloy-sol-macro-expander",
- "alloy-sol-macro-input",
+ "alloy-sol-macro-expander 0.7.7",
+ "alloy-sol-macro-input 0.7.7",
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.75",
+]
+
+[[package]]
+name = "alloy-sol-macro"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "183bcfc0f3291d9c41a3774172ee582fb2ce6eb6569085471d8f225de7bb86fc"
+dependencies = [
+ "alloy-sol-macro-expander 0.8.0",
+ "alloy-sol-macro-input 0.8.0",
  "proc-macro-error",
  "proc-macro2",
  "quote",
@@ -63,7 +105,7 @@ version = "0.7.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "867a5469d61480fea08c7333ffeca52d5b621f5ca2e44f271b117ec1fc9a0525"
 dependencies = [
- "alloy-sol-macro-input",
+ "alloy-sol-macro-input 0.7.7",
  "const-hex",
  "heck",
  "indexmap",
@@ -71,7 +113,25 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.75",
- "syn-solidity",
+ "syn-solidity 0.7.7",
+ "tiny-keccak",
+]
+
+[[package]]
+name = "alloy-sol-macro-expander"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71c4d842beb7a6686d04125603bc57614d5ed78bf95e4753274db3db4ba95214"
+dependencies = [
+ "alloy-sol-macro-input 0.8.0",
+ "const-hex",
+ "heck",
+ "indexmap",
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.75",
+ "syn-solidity 0.8.0",
  "tiny-keccak",
 ]
 
@@ -87,7 +147,32 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.75",
- "syn-solidity",
+ "syn-solidity 0.7.7",
+]
+
+[[package]]
+name = "alloy-sol-macro-input"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1306e8d3c9e6e6ecf7a39ffaf7291e73a5f655a2defd366ee92c2efebcdf7fee"
+dependencies = [
+ "const-hex",
+ "dunce",
+ "heck",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.75",
+ "syn-solidity 0.8.0",
+]
+
+[[package]]
+name = "alloy-sol-type-parser"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f4691da83dce9c9b4c775dd701c87759f173bd3021cbf2e60cde00c5fe6d7241"
+dependencies = [
+ "serde",
+ "winnow 0.6.18",
 ]
 
 [[package]]
@@ -96,8 +181,20 @@ version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a49042c6d3b66a9fe6b2b5a8bf0d39fc2ae1ee0310a2a26ffedd79fb097878dd"
 dependencies = [
- "alloy-primitives",
- "alloy-sol-macro",
+ "alloy-primitives 0.7.6",
+ "alloy-sol-macro 0.7.7",
+ "const-hex",
+]
+
+[[package]]
+name = "alloy-sol-types"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "577e262966e92112edbd15b1b2c0947cc434d6e8311df96d3329793fe8047da9"
+dependencies = [
+ "alloy-json-abi",
+ "alloy-primitives 0.8.0",
+ "alloy-sol-macro 0.8.0",
  "const-hex",
  "serde",
 ]
@@ -320,6 +417,9 @@ name = "bytes"
 version = "1.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8318a53db07bb3f8dca91a600466bdb3f2eaadeedfdbcf02e1accbad9271ba50"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "cc"
@@ -624,6 +724,9 @@ name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "hex-literal"
@@ -733,10 +836,9 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 name = "leo"
 version = "0.1.0"
 dependencies = [
- "alloy-sol-types",
+ "alloy-sol-types 0.8.0",
  "const-hex",
  "keccak-const",
- "lol_alloc",
  "num-traits",
  "proptest",
  "rand",
@@ -766,25 +868,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78b3ae25bc7c8c38cec158d1f2757ee79e9b3740fbc7ccf0e59e4b08d793fa89"
 
 [[package]]
-name = "lock_api"
-version = "0.4.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "07af8b9cdd281b7915f413fa73f29ebd5d55d0d3f0155584dade1ff18cea1b17"
-dependencies = [
- "autocfg",
- "scopeguard",
-]
-
-[[package]]
-name = "lol_alloc"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83e5106554cabc97552dcadf54f57560ae6af3276652f82ca2be06120dc4c5dc"
-dependencies = [
- "spin",
-]
-
-[[package]]
 name = "maplit"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -795,6 +878,15 @@ name = "memchr"
 version = "2.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
+
+[[package]]
+name = "mini-alloc"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "14eacc4bfcf10da9b6d5185ef51b2dc75434afac34b4d8aabe40f6b141ee071c"
+dependencies = [
+ "cfg-if",
+]
 
 [[package]]
 name = "num-bigint"
@@ -1155,19 +1247,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "scopeguard"
-version = "1.2.0"
+name = "ryu"
+version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
+checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
 name = "seawater"
 version = "0.1.0"
 dependencies = [
- "alloy-sol-types",
+ "alloy-sol-types 0.8.0",
  "const-hex",
  "keccak-const",
- "lol_alloc",
  "maplit",
  "num-traits",
  "proptest",
@@ -1238,6 +1329,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_json"
+version = "1.0.128"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ff5456707a1de34e7e37f2a6fd3d3f808c318259cbd01ab6377795054b483d8"
+dependencies = [
+ "itoa",
+ "memchr",
+ "ryu",
+ "serde",
+]
+
+[[package]]
 name = "sha2"
 version = "0.10.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1285,15 +1388,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "spin"
-version = "0.9.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6980e8d7511241f8acf4aebddbb1ff938df5eebe98691418c4468d0b72a96a67"
-dependencies = [
- "lock_api",
-]
-
-[[package]]
 name = "spki"
 version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1311,12 +1405,12 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "stylus-proc"
-version = "0.5.2"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20dbf5e4af9b0c0f25877ff19da60ecfd721a0e8fd0a17336892a0d0521648ff"
+checksum = "9fd02e91dffe7b73df84a861c992494d6b72054bc9a17fe73e147e34e9a64ef3"
 dependencies = [
- "alloy-primitives",
- "alloy-sol-types",
+ "alloy-primitives 0.7.6",
+ "alloy-sol-types 0.7.6",
  "cfg-if",
  "convert_case 0.6.0",
  "lazy_static",
@@ -1325,22 +1419,23 @@ dependencies = [
  "regex",
  "sha3",
  "syn 1.0.109",
- "syn-solidity",
+ "syn-solidity 0.7.7",
 ]
 
 [[package]]
 name = "stylus-sdk"
-version = "0.5.2"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5426b95831da7fde45a91785cafd2121ad8e720b503f0fc7c709667cff5336cf"
+checksum = "26042693706e29fb7e3cf3d71c99534ac97fca98b6f81ba77ab658022ab2e210"
 dependencies = [
- "alloy-primitives",
- "alloy-sol-types",
+ "alloy-primitives 0.7.6",
+ "alloy-sol-types 0.7.6",
  "cfg-if",
  "derivative",
  "hex",
  "keccak-const",
  "lazy_static",
+ "mini-alloc",
  "regex",
  "stylus-proc",
 ]
@@ -1378,6 +1473,18 @@ name = "syn-solidity"
 version = "0.7.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c837dc8852cb7074e46b444afb81783140dab12c58867b49fb3898fbafedf7ea"
+dependencies = [
+ "paste",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.75",
+]
+
+[[package]]
+name = "syn-solidity"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "284c41c2919303438fcf8dede4036fd1e82d4fc0fbb2b279bd2a1442c909ca92"
 dependencies = [
  "paste",
  "proc-macro2",
@@ -1447,7 +1554,7 @@ checksum = "6a8534fd7f78b5405e860340ad6575217ce99f38d4d5c8f2442cb5ecb50090e1"
 dependencies = [
  "indexmap",
  "toml_datetime",
- "winnow",
+ "winnow 0.5.40",
 ]
 
 [[package]]
@@ -1606,6 +1713,15 @@ name = "winnow"
 version = "0.5.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f593a95398737aeed53e489c785df13f3618e41dbcd6718c6addbf1395aa6876"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
+name = "winnow"
+version = "0.6.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "68a9bda4691f099d435ad181000724da8e5899daa10713c2d432552b9ccd3a6f"
 dependencies = [
  "memchr",
 ]

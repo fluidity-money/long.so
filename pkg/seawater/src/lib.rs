@@ -56,7 +56,6 @@ use types::{U256Extension, WrappedNative};
 
 use stylus_sdk::{msg, prelude::*, storage::*};
 
-#[cfg(feature = "log-events")]
 use stylus_sdk::evm;
 
 #[allow(dead_code)]
@@ -66,15 +65,6 @@ type RawArbResult = Option<Result<Vec<u8>, Vec<u8>>>;
 type Revert = Vec<u8>;
 
 extern crate alloc;
-// only set a custom allocator if we're deploying on wasm
-#[cfg(target_arch = "wasm32")]
-mod allocator {
-    use lol_alloc::{AssumeSingleThreaded, FreeListAllocator};
-    // SAFETY: This application is single threaded, so using AssumeSingleThreaded is allowed.
-    #[global_allocator]
-    static ALLOCATOR: AssumeSingleThreaded<FreeListAllocator> =
-        unsafe { AssumeSingleThreaded::new(FreeListAllocator::new()) };
-}
 
 // we split our entrypoint functions into three sets, and call them via diamond proxies, to
 // save on binary size
@@ -98,7 +88,7 @@ mod shim {
 
 /// The root of seawater's storage. Stores variables needed globally, as well as the map of AMM
 /// pools.
-#[solidity_storage]
+#[storage]
 #[entrypoint]
 pub struct Pools {
     // admin that can control the settings of everything. either the DAO, or the
@@ -181,7 +171,6 @@ impl Pools {
             Error::SwapResultTooLow
         );
 
-        #[cfg(feature = "log-events")]
         evm::log(events::Swap1 {
             user: msg::sender(),
             pool,
@@ -290,7 +279,6 @@ impl Pools {
         erc20::take(from, original_amount, permit2)?;
         erc20::transfer_to_sender(to, amount_out)?;
 
-        #[cfg(feature = "log-events")]
         evm::log(events::Swap2 {
             user: msg::sender(),
             from,
@@ -309,7 +297,7 @@ impl Pools {
 }
 
 /// Swap functions. Only enabled when the `swaps` feature is set.
-#[cfg_attr(feature = "swaps", external)]
+#[cfg_attr(feature = "swaps", public)]
 impl Pools {
     #[allow(non_snake_case)]
     pub fn swap_904369_B_E(
@@ -336,7 +324,7 @@ impl Pools {
 }
 
 /// Quote functions. Only enabled when the `quotes` feature is set.
-#[cfg_attr(feature = "quotes", external)]
+#[cfg_attr(feature = "quotes", public)]
 impl Pools {
     /// Quote a [Self::swap]. Will revert with the result of the swap
     /// as a decimal number as the message of an `Error(string)`.
@@ -401,7 +389,7 @@ impl Pools {
 }
 
 /// Swap functions using Permit2. Only enabled when the `swap_permit2` feature is set.
-#[cfg_attr(feature = "swap_permit2", external)]
+#[cfg_attr(feature = "swap_permit2", public)]
 impl Pools {
     #[cfg(feature = "swap_permit2")]
     #[allow(non_snake_case)]
@@ -485,7 +473,7 @@ impl Pools {
 }
 
 /// Position management functions. Only enabled when the `positions` feature is set.
-#[cfg_attr(feature = "positions", external)]
+#[cfg_attr(feature = "positions", public)]
 impl Pools {
     /// Creates a new, empty position, owned by a user.
     ///
@@ -507,7 +495,6 @@ impl Pools {
 
         self.grant_position(owner, id);
 
-        #[cfg(feature = "log-events")]
         evm::log(events::MintPosition {
             id,
             owner,
@@ -536,7 +523,6 @@ impl Pools {
 
         self.remove_position(owner, id);
 
-        #[cfg(feature = "log-events")]
         evm::log(events::BurnPosition { owner, id });
 
         Ok(())
@@ -562,7 +548,6 @@ impl Pools {
         self.remove_position(from, id);
         self.grant_position(to, id);
 
-        #[cfg(feature = "log-events")]
         evm::log(events::TransferPosition { from, to, id });
 
         Ok(())
@@ -623,7 +608,6 @@ impl Pools {
         let res = self.pools.setter(pool).collect(id)?;
         let (token_0, token_1) = res;
 
-        #[cfg(feature = "log-events")]
         evm::log(events::CollectFees {
             id,
             pool,
@@ -716,7 +700,6 @@ impl Pools {
             erc20::take(FUSDC_ADDR, token_1.abs_pos()?, permit_1)?;
         }
 
-        #[cfg(feature = "log-events")]
         evm::log(events::UpdatePositionLiquidity {
             id,
             token0: token_0,
@@ -751,7 +734,6 @@ impl Pools {
             giving,
         )?;
 
-        #[cfg(feature = "log-events")]
         evm::log(events::UpdatePositionLiquidity {
             id,
             token0: amount_0,
@@ -894,7 +876,7 @@ impl Pools {
     }
 }
 
-#[cfg_attr(feature = "update_positions", external)]
+#[cfg_attr(feature = "update_positions", public)]
 impl Pools {
     /// Refreshes and updates liquidity in a position, using approvals to transfer tokens.
     /// See [Self::update_position_internal].
@@ -958,7 +940,7 @@ impl Pools {
 }
 
 /// Admin functions. Only enabled when the `admin` feature is set.
-#[cfg_attr(feature = "admin", external)]
+#[cfg_attr(feature = "admin", public)]
 impl Pools {
     /// The initialiser function for the seawater contract. Should be called in the proxy's
     /// constructor.
@@ -1018,7 +1000,6 @@ impl Pools {
 
         let _decimals = erc20::decimals(pool)?;
 
-        #[cfg(feature = "log-events")]
         evm::log(events::NewPool {
             token: pool,
             fee,
@@ -1149,7 +1130,6 @@ impl Pools {
         erc20::transfer_to_addr(recipient, pool, U256::from(token_0))?;
         erc20::transfer_to_addr(recipient, FUSDC_ADDR, U256::from(token_1))?;
 
-        #[cfg(feature = "log-events")]
         evm::log(events::CollectProtocolFees {
             pool,
             to: recipient,
@@ -1205,7 +1185,7 @@ impl Pools {
 
 ///! Migrations code that should only be used in a testing environment, or in a rescue
 ///! situation. These functions will break the internal state of the pool most likely.
-#[cfg_attr(feature = "migrations", external)]
+#[cfg_attr(feature = "migrations", public)]
 impl Pools {
     pub fn disable_pools(&mut self, pools: Vec<Address>) -> Result<(), Vec<u8>> {
         assert_eq_or!(

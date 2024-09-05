@@ -35,18 +35,10 @@ pub mod host;
 use error::Error;
 
 extern crate alloc;
-#[cfg(target_arch = "wasm32")]
-mod allocator {
-    use lol_alloc::{AssumeSingleThreaded, FreeListAllocator};
-    // SAFETY: This application is single threaded, so using AssumeSingleThreaded is allowed.
-    #[global_allocator]
-    static ALLOCATOR: AssumeSingleThreaded<FreeListAllocator> =
-        unsafe { AssumeSingleThreaded::new(FreeListAllocator::new()) };
-}
 
 type CampaignId = FixedBytes<8>;
 
-#[solidity_storage]
+#[storage]
 #[entrypoint]
 pub struct Leo {
     version: StorageU8,
@@ -68,14 +60,14 @@ pub struct Leo {
     liquidity: StorageMap<Address, StorageU256>,
 }
 
-#[solidity_storage]
+#[storage]
 pub struct StorageCampaigns {
     // Ongoing campaigns. We don't use a map since the seconds will
     // default to 0 so it'll return 0 for amounts calculated.
     ongoing: StorageMap<CampaignId, StorageVec<StorageCampaign>>,
 }
 
-#[solidity_storage]
+#[storage]
 pub struct StorageCampaignBal {
     // Owner of the campaign balance so we don't have any abuse.
     owner: StorageAddress,
@@ -90,7 +82,7 @@ pub struct StorageCampaignBal {
     distributed: StorageU256,
 }
 
-#[solidity_storage]
+#[storage]
 pub struct StorageCampaign {
     // The lower tick that the position should be LP'd in for them to be eligible.
     tick_lower: StorageI32,
@@ -109,7 +101,7 @@ pub struct StorageCampaign {
     ending: StorageU64,
 }
 
-#[solidity_storage]
+#[storage]
 pub struct StoragePosition {
     owner: StorageAddress,
 
@@ -127,7 +119,7 @@ pub struct StoragePosition {
     offsets: StorageMap<CampaignId, StorageU256>,
 }
 
-#[external]
+#[public]
 impl Leo {
     pub fn ctor(&mut self, emergency: Address) -> Result<(), Vec<u8>> {
         assert_or!(self.version.get().is_zero(), Error::AlreadySetUp);

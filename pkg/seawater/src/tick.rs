@@ -14,7 +14,7 @@ use stylus_sdk::storage::*;
 pub type TickBitmap = stylus_sdk::storage::StorageMap<i16, stylus_sdk::storage::StorageU256>;
 
 /// Container type for a [TickBitmap].
-#[solidity_storage]
+#[storage]
 pub struct StorageTickBitmap {
     pub bitmap: TickBitmap,
 }
@@ -44,7 +44,7 @@ impl StorageTickBitmap {
 }
 
 /// Storage type for details on a tick.
-#[solidity_storage]
+#[storage]
 #[derive(Erase)]
 pub struct StorageTickInfo {
     liquidity_gross: StorageU128,
@@ -58,7 +58,7 @@ pub struct StorageTickInfo {
 }
 
 /// Container type for the map of tick indexes to ticks.
-#[solidity_storage]
+#[storage]
 pub struct StorageTicks {
     pub ticks: StorageMap<i32, StorageTickInfo>,
 }
