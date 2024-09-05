@@ -13,7 +13,7 @@ name = "seawater"
 path = "src/main.rs"
 
 [dependencies]
-stylus-sdk = { workspace = true }
+stylus-sdk.workspace = true
 alloy-sol-types.workspace = true
 ruint.workspace = true
 ruint-macro.workspace = true
