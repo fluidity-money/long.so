@@ -138,11 +138,6 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 				wasChanged = true
 			}
 		}
-		// If there were no logs, skip this range
-		if len(logs) == 0 {
-			wasChanged = true
-			biggestBlockNo = to
-		}
 		// Update checkpoint here.
 		if wasChanged {
 			if err := updateCheckpoint(db, biggestBlockNo); err != nil {
