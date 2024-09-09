@@ -155,7 +155,7 @@ export function AllAssetsTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                className=" cursor-pointer border-b-0 text-[10px] hover:bg-black md:text-xs"
+                className="cursor-pointer border-b-0 text-[10px] hover:bg-black md:text-xs"
                 onClick={() => {
                   const {
                     original: { token: rowToken },

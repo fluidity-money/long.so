@@ -19,7 +19,7 @@ export const Position = ({
         <div className="absolute left-0 top-0 inline-flex items-start justify-start gap-2.5 rounded-[7px] border border-gray-200 bg-stone-900 px-[5px] pb-[5px] pt-2.5">
           <div className="relative h-[68px] w-[67px]">
             <div className="absolute left-[14px] top-0 flex h-[22.57px] w-[39.63px] flex-row">
-              <Token className={"size-[25px] "} />
+              <Token className={"size-[25px]"} />
               <Token className={"-ml-3 size-[25px]"} />
             </div>
 
@@ -69,7 +69,7 @@ export const Position = ({
               <div className="flex h-1.5 items-end justify-center">
                 <PositionIcon className={"-ml-1 h-1.5 invert"} />
               </div>
-              <div className=" text-[8px] font-medium text-gray-200">
+              <div className="text-[8px] font-medium text-gray-200">
                 {position.position}
               </div>
             </div>
@@ -79,14 +79,14 @@ export const Position = ({
           </div>
 
           <div className="relative h-[18px] w-[50px]">
-            <div className="absolute left-0 top-0  text-[6px] font-medium text-neutral-400">
+            <div className="absolute left-0 top-0 text-[6px] font-medium text-neutral-400">
               Liq. Range
             </div>
             <div className="absolute left-[32px] top-px text-right text-[5px] font-medium text-green-200">
               ●
             </div>
             <div className="absolute left-0 top-[8px] inline-flex h-2.5 w-[50px] items-center justify-start gap-[3px]">
-              <div className=" text-[8px] font-medium text-white">
+              <div className="text-[8px] font-medium text-white">
                 {position.liquidityRange}
               </div>
             </div>
@@ -96,7 +96,7 @@ export const Position = ({
           {position.pool}
         </div>
         <div className="absolute left-[53px] top-[12px] flex h-[20.65px] w-[39.93px] flex-row">
-          <Token className={"size-[25px] "} />
+          <Token className={"size-[25px]"} />
           <Token className={"-ml-3 size-[25px]"} />
         </div>
         <div className="absolute top-[52px] inline-flex w-full items-center justify-center">

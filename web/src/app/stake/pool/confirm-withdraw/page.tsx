@@ -235,7 +235,7 @@ export default function ConfirmWithdrawLiquidity() {
     <div className="z-10 flex flex-col items-center">
       <div className="h-[357px] w-[315px] rounded-lg bg-black p-[9px] text-white md:h-[357px] md:w-[394px]">
         <div className="flex flex-row items-center justify-between">
-          <div className="px-[21px]  text-[10px] font-medium">
+          <div className="px-[21px] text-[10px] font-medium">
             Withdraw Liquidity Confirmation
           </div>
           <Button

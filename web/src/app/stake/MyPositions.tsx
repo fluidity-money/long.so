@@ -177,9 +177,7 @@ export const MyPositions = () => {
       >
         {!pools || pools?.length === 0 ? (
           isLoading ? (
-            <div
-              className={"flex h-full flex-col  items-center justify-center"}
-            >
+            <div className={"flex h-full flex-col items-center justify-center"}>
               <LoaderIcon className="size-8 animate-spin" />
             </div>
           ) : (

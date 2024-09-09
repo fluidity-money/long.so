@@ -41,7 +41,7 @@ export const Welcome = () => {
 
           <div className="flex flex-col gap-4">
             <div className="flex flex-row flex-wrap items-center justify-center gap-4">
-              <div className="group h-[35px] rounded-full border border-black p-3 transition-[height] hover:h-[60px] hover:bg-black hover:text-white ">
+              <div className="group h-[35px] rounded-full border border-black p-3 transition-[height] hover:h-[60px] hover:bg-black hover:text-white">
                 <div className="flex h-full w-[320px] flex-col items-center justify-center gap-1 group-hover:w-[365px]">
                   <div className="text-sm group-hover:text-base">
                     <a
@@ -67,7 +67,7 @@ export const Welcome = () => {
                 </div>
               </div>
 
-              <div className="group h-[35px] rounded-full border border-black p-1 px-3 transition-[height] hover:h-[60px] hover:bg-black hover:text-white ">
+              <div className="group h-[35px] rounded-full border border-black p-1 px-3 transition-[height] hover:h-[60px] hover:bg-black hover:text-white">
                 <div className="flex h-full w-[345px] flex-col items-center justify-center gap-1 group-hover:w-[400px]">
                   <div className="flex flex-row items-center gap-1 text-sm group-hover:text-base">
                     <div className="group-hover:invert">
@@ -83,7 +83,7 @@ export const Welcome = () => {
                       $29,123 Trader Rewards available on every swap
                     </a>
                   </div>
-                  <div className="hidden text-xs text-gray-1 group-hover:inline-flex ">
+                  <div className="hidden text-xs text-gray-1 group-hover:inline-flex">
                     Get rewarded for every transaction you make.{" "}
                     <a
                       href="https://docs.superposition.so/superposition-testnet/super-layer/universal-shared-liquidity/longtail-amm-specs"
@@ -100,7 +100,7 @@ export const Welcome = () => {
             </div>
 
             <div className="flex flex-row justify-center">
-              <div className="group h-[35px] rounded-full border border-black p-1 px-3 transition-[height] hover:h-[60px] hover:bg-black hover:text-white ">
+              <div className="group h-[35px] rounded-full border border-black p-1 px-3 transition-[height] hover:h-[60px] hover:bg-black hover:text-white">
                 <div className="flex h-full w-[305px] flex-col items-center justify-center gap-1 group-hover:w-[350px]">
                   <div className="text-sm group-hover:text-base">
                     <a

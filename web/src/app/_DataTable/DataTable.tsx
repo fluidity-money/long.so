@@ -71,7 +71,7 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="group  relative border-b-0 hover:bg-black hover:text-white "
+                  className="group relative border-b-0 hover:bg-black hover:text-white"
                   // onClick={() => {
                   //   window.open(
                   //     blockExplorerUrl,

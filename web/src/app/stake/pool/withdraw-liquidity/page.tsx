@@ -261,19 +261,19 @@ export default function WithdrawLiquidity() {
                 </RadioGroup.Item>
                 <RadioGroup.Item
                   value={"50%"}
-                  className="inline-flex h-7 w-[65.50px] items-center justify-center gap-2.5 rounded border px-3  py-2 text-[10px] font-medium data-[state=checked]:bg-white data-[state=checked]:text-black md:w-[84.75px]"
+                  className="inline-flex h-7 w-[65.50px] items-center justify-center gap-2.5 rounded border px-3 py-2 text-[10px] font-medium data-[state=checked]:bg-white data-[state=checked]:text-black md:w-[84.75px]"
                 >
                   50%
                 </RadioGroup.Item>
                 <RadioGroup.Item
                   value={"75%"}
-                  className="inline-flex h-7 w-[65.50px] items-center justify-center gap-2.5 rounded border px-3  py-2 text-[10px] font-medium data-[state=checked]:bg-white  data-[state=checked]:text-black md:w-[84.75px]"
+                  className="inline-flex h-7 w-[65.50px] items-center justify-center gap-2.5 rounded border px-3 py-2 text-[10px] font-medium data-[state=checked]:bg-white data-[state=checked]:text-black md:w-[84.75px]"
                 >
                   75%
                 </RadioGroup.Item>
                 <RadioGroup.Item
                   value={"100%"}
-                  className="inline-flex h-7 w-[65.50px] items-center justify-center gap-2.5 rounded border px-3  py-2 text-[10px] font-medium data-[state=checked]:bg-white  data-[state=checked]:text-black md:w-[84.75px]"
+                  className="inline-flex h-7 w-[65.50px] items-center justify-center gap-2.5 rounded border px-3 py-2 text-[10px] font-medium data-[state=checked]:bg-white data-[state=checked]:text-black md:w-[84.75px]"
                 >
                   100%
                 </RadioGroup.Item>

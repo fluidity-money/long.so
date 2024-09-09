@@ -60,7 +60,7 @@ export function AllPoolsTable<TData, TValue>({
   });
 
   return (
-    <div className="rounded-lg ">
+    <div className="rounded-lg">
       <Table>
         <TableHeader className="[&_tr]:border-b-0">
           {table.getHeaderGroups().map((headerGroup) => (

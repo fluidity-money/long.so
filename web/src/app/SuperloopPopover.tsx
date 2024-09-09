@@ -72,7 +72,7 @@ export const SuperloopPopover = () => {
           </div>
 
           {maxSlippage === "custom" && (
-            <div className={"flex  w-full flex-row items-center justify-start"}>
+            <div className={"flex w-full flex-row items-center justify-start"}>
               <Input
                 placeholder={"0.5"}
                 className={
@@ -107,7 +107,7 @@ export const SuperloopPopover = () => {
           {transactionDeadline === "custom" && (
             <div
               className={
-                "mt-[6px] flex  w-full flex-row items-center justify-start gap-1"
+                "mt-[6px] flex w-full flex-row items-center justify-start gap-1"
               }
             >
               <Input

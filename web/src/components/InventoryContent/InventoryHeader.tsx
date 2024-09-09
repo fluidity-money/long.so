@@ -31,7 +31,7 @@ export const InventoryHeader = () => {
               "size-[25px] cursor-pointer items-center gap-1 px-1 transition-all",
               {
                 "bg-transparent": !settings,
-                "w-[80px] ": settings,
+                "w-[80px]": settings,
               },
             )}
             onClick={() => setSettings(!settings)}

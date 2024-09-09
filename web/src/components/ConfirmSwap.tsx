@@ -368,7 +368,7 @@ export const ConfirmSwap = () => {
 
         <RewardsBreakdown hidden={!showSwapBreakdown} />
 
-        <div className=" flex flex-col items-center p-[15px]">
+        <div className="flex flex-col items-center p-[15px]">
           <Button
             variant={"secondary"}
             className="w-full max-w-[350px]"

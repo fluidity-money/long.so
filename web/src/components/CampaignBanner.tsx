@@ -58,7 +58,7 @@ export const CampaignBanner = ({
         </div>
       </div>
 
-      <div className="cursor-pointer text-nowrap ">
+      <div className="cursor-pointer text-nowrap">
         <span className="underline">View all</span>
         {" ->"}
       </div>

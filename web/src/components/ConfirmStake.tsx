@@ -517,7 +517,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
             <div className="flex flex-1 flex-row justify-between border-b pl-[18px] pr-[26px] pt-[16px]">
               <div className="flex w-full flex-col gap-1">
                 <div className="text-3xs md:text-2xs">{token0.symbol}</div>
-                <div className="flex  flex-row items-center justify-between">
+                <div className="flex flex-row items-center justify-between">
                   <div className="flex flex-row items-center gap-1 text-sm md:gap-2 md:text-2xl">
                     <TokenIcon
                       src={token0.icon}
@@ -534,7 +534,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
             <div className="flex flex-1 flex-row justify-between pl-[18px] pr-[26px] pt-[16px]">
               <div className="flex w-full flex-col gap-1">
                 <div className="text-3xs md:text-2xs">ƒUSDC</div>
-                <div className="flex  flex-row items-center justify-between">
+                <div className="flex flex-row items-center justify-between">
                   <div className="flex flex-row items-center gap-1 text-sm md:gap-2 md:text-2xl">
                     <TokenIridescent />
                     <div>350.00</div>
@@ -674,7 +674,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
           </>
         )}
 
-        <div className=" flex flex-col items-center p-[15px]">
+        <div className="flex flex-col items-center p-[15px]">
           <Button
             variant={"secondary"}
             className="w-full max-w-[350px]"

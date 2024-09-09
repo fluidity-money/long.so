@@ -35,7 +35,7 @@ export default function BottomBanner() {
   return (
     <div
       className={cn(
-        "fixed bottom-16 z-20  ",
+        "fixed bottom-16 z-20",
         isLeftBanner ? "left-4" : "right-4",
       )}
     >

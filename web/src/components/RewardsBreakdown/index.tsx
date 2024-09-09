@@ -16,7 +16,7 @@ export const RewardsBreakdown = ({ hidden = false }: RewardsBreakdownProps) => (
     )}
   >
     <div className={"text-[12px]"}>Rewards Breakdown</div>
-    <div className={"mt-[10px] flex flex-col gap-[4px] "}>
+    <div className={"mt-[10px] flex flex-col gap-[4px]"}>
       <div className={"flex flex-row justify-between text-[10px]"}>
         <div>Fluid Rewards</div>
         <div className={"iridescent-text flex flex-row items-center gap-1"}>

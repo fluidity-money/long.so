@@ -22,7 +22,7 @@ export const DisconnectButton = () => {
         "h-[25px] w-[25px] cursor-pointer items-center gap-1 px-1 transition-all",
         {
           "bg-transparent": !confirmDisconnect,
-          "w-[95px] ": confirmDisconnect,
+          "w-[95px]": confirmDisconnect,
         },
       )}
       onClick={() => {

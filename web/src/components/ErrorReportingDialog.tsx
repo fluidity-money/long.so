@@ -21,8 +21,8 @@ export default function ErrorReportingDialog() {
         !isOpen && setError(null);
       }}
     >
-      <DialogContent className="fixed bottom-4 right-4 z-50  rounded-md bg-black  ">
-        <div className="flex  flex-col items-center justify-center gap-4 p-6 text-sm text-white">
+      <DialogContent className="fixed bottom-4 right-4 z-50 rounded-md bg-black">
+        <div className="flex flex-col items-center justify-center gap-4 p-6 text-sm text-white">
           <span className="font-bold">Report this error?</span>
           <span>
             {error instanceof Error ? error.name : "Unknown error name"}

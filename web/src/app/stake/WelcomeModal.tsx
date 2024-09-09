@@ -115,7 +115,7 @@ export const WelcomeModal = () => {
                     <div className="mt-4 flex w-full flex-col items-center">
                       <Button
                         variant="iridescent"
-                        className="h-[37px] w-full "
+                        className="h-[37px] w-full"
                         onClick={() => {
                           setWelcome(false);
                           setYieldBreakdown(true);

@@ -541,7 +541,7 @@ export default function PoolPage() {
                           className="iridescent h-[19.24px] w-[102.15px] px-4 py-0.5 md:px-8 md:text-base"
                           size="sm"
                         >
-                          <div className="text-2xs ">Boost Incentives</div>
+                          <div className="text-2xs">Boost Incentives</div>
                         </Button>
                       </div>
                     )}

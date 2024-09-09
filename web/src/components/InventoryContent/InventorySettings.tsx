@@ -56,9 +56,7 @@ export const InventorySettings = () => {
 
       {maxSlippage === "custom" && (
         <div
-          className={
-            "mt-[6px] flex  w-full flex-row items-center justify-start"
-          }
+          className={"mt-[6px] flex w-full flex-row items-center justify-start"}
         >
           <Input
             placeholder={"0.5"}
@@ -98,7 +96,7 @@ export const InventorySettings = () => {
       {transactionDeadline === "custom" && (
         <div
           className={
-            "mt-[6px] flex  w-full flex-row items-center justify-start gap-1"
+            "mt-[6px] flex w-full flex-row items-center justify-start gap-1"
           }
         >
           <Input

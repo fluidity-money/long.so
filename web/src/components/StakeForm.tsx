@@ -689,7 +689,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.01%</div>
-                    <div className="text-center text-3xs text-gray-2 ">
+                    <div className="text-center text-3xs text-gray-2">
                       Best for Very <br /> Stable Pairs
                     </div>
                     <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
@@ -702,7 +702,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.05%</div>
-                    <div className="text-center text-3xs text-gray-2 ">
+                    <div className="text-center text-3xs text-gray-2">
                       Best for <br /> Stable Pairs
                     </div>
                     <div className="iridescent rounded bg-[#D8D8D8] px-1 text-4xs text-black md:text-3xs">
@@ -715,7 +715,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.10%</div>
-                    <div className="text-center text-3xs text-gray-2 ">
+                    <div className="text-center text-3xs text-gray-2">
                       Best for <br /> Stable Pairs
                     </div>
                     <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
@@ -728,7 +728,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.15%</div>
-                    <div className="text-center text-3xs text-gray-2 ">
+                    <div className="text-center text-3xs text-gray-2">
                       Best for <br /> Stable Pairs
                     </div>
                     <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
@@ -792,8 +792,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 onChange={(e) => setPriceLower(e.target.value, token0.decimals)}
               />
               <div className="mt-1 flex flex-row items-start gap-1 whitespace-nowrap text-3xs font-semibold">
-                <Token className="size-[12px]  invert" /> fUSDC per{" "}
-                {token0.name}
+                <Token className="size-[12px] invert" /> fUSDC per {token0.name}
               </div>
             </div>
 
@@ -806,7 +805,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   liquidityRangeType === "full-range"
                     ? "md:text-2xl"
                     : "md:text-sm",
-                  "rounded-none border-x-0 border-b border-t-0 border-b-white bg-black px-0 text-2xs font-semibold ",
+                  "rounded-none border-x-0 border-b border-t-0 border-b-white bg-black px-0 text-2xs font-semibold",
                 )}
                 disabled={
                   liquidityRangeType !== "custom" || mode === "existing"
@@ -816,8 +815,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               />
 
               <div className="mt-1 flex flex-row items-start gap-1 whitespace-nowrap text-3xs font-semibold">
-                <Token className="size-[12px]  invert" /> fUSDC per{" "}
-                {token0.name}
+                <Token className="size-[12px] invert" /> fUSDC per {token0.name}
               </div>
             </div>
           </div>

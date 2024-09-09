@@ -185,8 +185,8 @@ export const TradeTabContent = () => {
   }, [showMockData, transactionHistoryData, duration]);
 
   return (
-    <div className="mt-[34px] flex flex-col items-center ">
-      <div className={"text-[14px] font-medium "}>My Total Trade Rewards</div>
+    <div className="mt-[34px] flex flex-col items-center">
+      <div className={"text-[14px] font-medium"}>My Total Trade Rewards</div>
 
       <Badge
         variant={"iridescent"}
@@ -233,7 +233,7 @@ export const TradeTabContent = () => {
       </div>
 
       <ReactECharts
-        className="mt-[10px] h-[70px] w-full  md:mt-[20px]"
+        className="mt-[10px] h-[70px] w-full md:mt-[20px]"
         opts={{
           height: 70,
         }}
