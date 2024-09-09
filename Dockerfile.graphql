@@ -21,6 +21,7 @@ RUN go mod download
 
 COPY lib lib/
 COPY cmd cmd/
+COPY config config/
 
 ENV INSTALL_DIR /bin
 
