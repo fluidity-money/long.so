@@ -154,7 +154,7 @@ export default function PoolPage() {
     : 0n;
 
   const {
-    writeContract: writeContractCollect,
+    writeContractAsync: writeContractCollect,
     data: collectData,
     error: collectError,
     isPending: isCollectPending,
