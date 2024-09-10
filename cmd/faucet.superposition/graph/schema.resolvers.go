@@ -16,8 +16,8 @@ import (
 )
 
 // RequestTokens is the resolver for the requestTokens field.
-func (r *mutationResolver) RequestTokens(ctx context.Context, wallet_ string, turnstileToken string) (string, error) {
-	wallet := strings.ToLower(wallet_)
+func (r *mutationResolver) RequestTokens(ctx context.Context, wallet string, turnstileToken string) (string, error) {
+	wallet = strings.ToLower(wallet)
 	// Get the user's IP address to prevent them from spamming this
 	// incase our rate limiting is skipped somehow (it's good to be cautious.)
 	ipAddrs, _ := ctx.Value("X-Forwarded-For").(string)

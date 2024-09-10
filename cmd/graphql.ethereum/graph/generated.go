@@ -167,6 +167,7 @@ type ComplexityRoot struct {
 	SeawaterPosition struct {
 		Created    func(childComplexity int) int
 		ID         func(childComplexity int) int
+		IsVested   func(childComplexity int) int
 		Liquidity  func(childComplexity int) int
 		Lower      func(childComplexity int) int
 		Owner      func(childComplexity int) int
@@ -316,6 +317,7 @@ type SeawaterPositionResolver interface {
 	Pool(ctx context.Context, obj *seawater.Position) (seawater.Pool, error)
 	Lower(ctx context.Context, obj *seawater.Position) (int, error)
 	Upper(ctx context.Context, obj *seawater.Position) (int, error)
+	IsVested(ctx context.Context, obj *seawater.Position) (bool, error)
 	Liquidity(ctx context.Context, obj *seawater.Position) (model.PairAmount, error)
 }
 type SeawaterPositionsGlobalResolver interface {
@@ -940,6 +942,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SeawaterPosition.ID(childComplexity), true
+
+	case "SeawaterPosition.isVested":
+		if e.complexity.SeawaterPosition.IsVested == nil {
+			break
+		}
+
+		return e.complexity.SeawaterPosition.IsVested(childComplexity), true
 
 	case "SeawaterPosition.liquidity":
 		if e.complexity.SeawaterPosition.Liquidity == nil {
@@ -1874,6 +1883,11 @@ type SeawaterPosition {
   Upper tick of this position.
   """
   upper: Int!
+
+  """
+  True if this position is currently vested in Leo, false otherwise.
+  """
+  isVested: Boolean!
 
   """
   Liquidity available in this specific position.
@@ -4477,6 +4491,8 @@ func (ec *executionContext) fieldContext_Query_getPosition(ctx context.Context, 
 				return ec.fieldContext_SeawaterPosition_lower(ctx, field)
 			case "upper":
 				return ec.fieldContext_SeawaterPosition_upper(ctx, field)
+			case "isVested":
+				return ec.fieldContext_SeawaterPosition_isVested(ctx, field)
 			case "liquidity":
 				return ec.fieldContext_SeawaterPosition_liquidity(ctx, field)
 			}
@@ -6871,6 +6887,50 @@ func (ec *executionContext) fieldContext_SeawaterPosition_upper(_ context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _SeawaterPosition_isVested(ctx context.Context, field graphql.CollectedField, obj *seawater.Position) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterPosition_isVested(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.SeawaterPosition().IsVested(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SeawaterPosition_isVested(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SeawaterPosition",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _SeawaterPosition_liquidity(ctx context.Context, field graphql.CollectedField, obj *seawater.Position) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_SeawaterPosition_liquidity(ctx, field)
 	if err != nil {
@@ -7022,6 +7082,8 @@ func (ec *executionContext) fieldContext_SeawaterPositionsGlobal_positions(_ con
 				return ec.fieldContext_SeawaterPosition_lower(ctx, field)
 			case "upper":
 				return ec.fieldContext_SeawaterPosition_upper(ctx, field)
+			case "isVested":
+				return ec.fieldContext_SeawaterPosition_isVested(ctx, field)
 			case "liquidity":
 				return ec.fieldContext_SeawaterPosition_liquidity(ctx, field)
 			}
@@ -7244,6 +7306,8 @@ func (ec *executionContext) fieldContext_SeawaterPositionsUser_positions(_ conte
 				return ec.fieldContext_SeawaterPosition_lower(ctx, field)
 			case "upper":
 				return ec.fieldContext_SeawaterPosition_upper(ctx, field)
+			case "isVested":
+				return ec.fieldContext_SeawaterPosition_isVested(ctx, field)
 			case "liquidity":
 				return ec.fieldContext_SeawaterPosition_liquidity(ctx, field)
 			}
@@ -12965,6 +13029,42 @@ func (ec *executionContext) _SeawaterPosition(ctx context.Context, sel ast.Selec
 					}
 				}()
 				res = ec._SeawaterPosition_upper(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "isVested":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SeawaterPosition_isVested(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

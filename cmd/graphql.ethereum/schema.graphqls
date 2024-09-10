@@ -523,6 +523,11 @@ type SeawaterPosition {
   upper: Int!
 
   """
+  True if this position is currently vested in Leo, false otherwise.
+  """
+  isVested: Boolean!
+
+  """
   Liquidity available in this specific position.
   """
   liquidity: PairAmount!

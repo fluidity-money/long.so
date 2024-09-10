@@ -29,6 +29,7 @@ type Position struct {
 	Pool            types.Address `json:"pool"`
 	Lower           types.Number  `json:"lower"`
 	Upper           types.Number  `json:"upper"`
+	IsVested        bool          `json:"is_vested"`
 }
 
 // PositionSnapshot taken from snapshot_positions_log_1. Used to service
