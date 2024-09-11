@@ -364,6 +364,8 @@ export type SeawaterPosition = {
   created: Scalars['Int']['output'];
   /** Id of the GraphQL object, for caching reasons. Made up of `positionId (pos:positionId)`. */
   id: Scalars['ID']['output'];
+  /** True if this position is currently vested in Leo, false otherwise. */
+  isVested: Scalars['Boolean']['output'];
   /** Liquidity available in this specific position. */
   liquidity: PairAmount;
   /** Lower tick of this position. */
