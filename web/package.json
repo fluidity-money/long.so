@@ -72,6 +72,7 @@
     "vaul": "^0.9.2",
     "viem": "^2.17.8",
     "wagmi": "^2.10.9",
+    "zod": "^3.23.8",
     "zustand": "^4.5.4"
   },
   "devDependencies": {

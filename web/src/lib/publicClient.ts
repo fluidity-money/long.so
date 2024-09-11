@@ -1,5 +1,5 @@
 import { createPublicClient, http } from "viem";
-import { arbitrumStylusTestnet } from "../config/arbitrumStylusTestnet";
+import { arbitrumStylusTestnet } from "../config/networks";
 
 export const publicClient = createPublicClient({
   chain: arbitrumStylusTestnet,

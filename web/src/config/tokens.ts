@@ -1,10 +1,14 @@
-export type Token = {
-  name: string;
-  address: `0x${string}`;
-  symbol: string;
-  decimals: number;
-  icon?: string;
-};
+import z from "zod";
+
+const tokenSchema = z.object({
+  name: z.string(),
+  address: z.string(),
+  symbol: z.string(),
+  decimals: z.number(),
+  icon: z.string().optional(),
+});
+
+export type Token = z.infer<typeof tokenSchema>;
 
 export const fUSDC: Token = {
   name: "fUSDC",
@@ -46,7 +50,14 @@ export const CATBUX: Token = {
   icon: "/icons/cbux.svg",
 };
 
-const allTokens: Token[] = [fUSDC, USDC, WSPN, WETH, CATBUX];
+export const allTokens: Token[] = [fUSDC, USDC, WSPN, WETH, CATBUX];
+
+const tokenValidation = z.array(tokenSchema).safeParse(allTokens);
+
+if (!tokenValidation.success) {
+  console.error("Invalid tokens: ", tokenValidation.error.name);
+  throw new Error(tokenValidation.error.message);
+}
 
 export const DefaultToken = USDC;
 

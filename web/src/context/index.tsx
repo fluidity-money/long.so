@@ -1,7 +1,7 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import { config, projectId } from "@/config";
+import appConfig from "@/config";
 
 import { createWeb3Modal } from "@web3modal/wagmi/react";
 
@@ -12,12 +12,10 @@ import { State, WagmiProvider } from "wagmi";
 // Setup queryClient
 export const queryClient = new QueryClient();
 
-if (!projectId) throw new Error("Project ID is not defined");
-
 // Create modal
 createWeb3Modal({
-  wagmiConfig: config,
-  projectId,
+  wagmiConfig: appConfig.wagmiConfig,
+  projectId: appConfig.NEXT_PUBLIC_LONGTAIL_WALLETCONNECT_PROJECT_ID,
   enableAnalytics: true, // Optional - defaults to your Cloud configuration
   enableOnramp: true, // Optional - false as default
 });
@@ -30,7 +28,7 @@ export default function Web3ModalProvider({
   initialState?: State;
 }) {
   return (
-    <WagmiProvider config={config} initialState={initialState}>
+    <WagmiProvider config={appConfig.wagmiConfig} initialState={initialState}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </WagmiProvider>
   );

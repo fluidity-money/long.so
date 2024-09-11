@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import request from "graphql-request";
-import { graphqlEndpoint } from "@/config/graphqlEndpoint";
+import appConfig from "@/config";
 import { graphql } from "@/gql";
 import { useAccount } from "wagmi";
 
@@ -63,20 +63,15 @@ export const graphqlQueryUser = graphql(`
  * Fetch all data from the global GraphQL endpoint.
  */
 export const useGraphqlGlobal = () => {
-  if (!graphqlEndpoint)
-    throw new Error("NEXT_PUBLIC_LONGTAIL_GRAPHQL_URL not set!");
-
   return useQuery({
     queryKey: ["graphql"],
-    queryFn: () => request(graphqlEndpoint!, graphqlQueryGlobal),
+    queryFn: () =>
+      request(appConfig.NEXT_PUBLIC_LONGTAIL_GRAPHQL_URL, graphqlQueryGlobal),
     refetchInterval: 60 * 1000, // 1 minute
   });
 };
 
 export const useGraphqlUser = () => {
-  if (!graphqlEndpoint)
-    throw new Error("NEXT_PUBLIC_LONGTAIL_GRAPHQL_URL not set!");
-
   const { address } = useAccount();
 
   // TODO needs to be replaced with an empty instance of this
@@ -84,7 +79,9 @@ export const useGraphqlUser = () => {
   return useQuery({
     queryKey: ["graphql", address ?? ""],
     queryFn: () =>
-      request(graphqlEndpoint!, graphqlQueryUser, { wallet: address ?? "" }),
+      request(appConfig.NEXT_PUBLIC_LONGTAIL_GRAPHQL_URL, graphqlQueryUser, {
+        wallet: address ?? "",
+      }),
     refetchInterval: 20 * 1000, // 20 seconds
     enabled: !!address,
   });
