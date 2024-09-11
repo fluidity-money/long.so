@@ -20,7 +20,7 @@ import {
 } from "@/demoData/swapExploreAssets";
 import { getBalance } from "wagmi/actions";
 import { useAccount } from "wagmi";
-import { config } from "@/config";
+import appConfig from "@/config";
 import { getFormattedStringFromTokenAmount } from "@/lib/amounts";
 import { SwapExploreFragmentFragment } from "@/gql/graphql";
 import { useDetectClickOutside } from "react-detect-click-outside";
@@ -107,7 +107,7 @@ const ExplorePage = () => {
 
       const balances = await Promise.all(
         tokensData.map(async (token) => {
-          const { value } = await getBalance(config, {
+          const { value } = await getBalance(appConfig.wagmiConfig, {
             address,
             token: token.token.address as `0x${string}`,
           });
