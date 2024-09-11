@@ -1,4 +1,4 @@
-import { arbitrumSepolia } from "wagmi/chains";
+import { arbitrumSepolia as baseArbitrumSepolia } from "wagmi/chains";
 import z from "zod";
 import { defineChain } from "viem";
 
@@ -38,7 +38,13 @@ export const superpositionTestnet = defineChain({
       url: "https://testnet-explorer.superposition.so",
     },
   },
+  icon: "/icons/spn-test.svg",
 });
+
+const arbitrumSepolia = {
+  ...baseArbitrumSepolia,
+  icon: "/icons/ARB.svg",
+};
 
 export { arbitrumSepolia };
 
@@ -46,7 +52,7 @@ export const allTestnets = [superpositionTestnet, arbitrumSepolia] as const;
 
 export const allMainnets = [] as const;
 
-const allChains = [...allTestnets, ...allMainnets] as const;
+export const allChains = [...allTestnets, ...allMainnets] as const;
 
 // validate all chains
 const chainValidation = z.array(networkSchema).safeParse(allChains);

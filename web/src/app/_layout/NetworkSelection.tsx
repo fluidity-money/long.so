@@ -4,15 +4,17 @@ import { Badge } from "@/components/ui/badge";
 import ArrowDown from "@/assets/icons/arrow-down.svg";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import SPNTest from "@/assets/icons/spn-test.svg";
-import Ethereum from "@/assets/icons/ethereum.svg";
 import { useAccount, useChainId, useSwitchChain } from "wagmi";
 import { cn } from "@/lib/utils";
+import appConfig from "@/config";
+import Image from "next/image";
 
 export const NetworkSelection = () => {
   const { address } = useAccount();
 
-  const { chains, switchChain } = useSwitchChain();
+  const { switchChain } = useSwitchChain();
   const chainId = useChainId();
+  const chains = appConfig.chains.allChains;
 
   const selectedChain = chains.find((chain) => chain.id === chainId);
 
@@ -28,11 +30,21 @@ export const NetworkSelection = () => {
           <div className="flex-col">
             <div className="flex flex-row items-center">
               <div className="mr-2">
-                <SPNTest
-                  className={cn("size-[20px] transition-none", {
-                    invert: address,
-                  })}
-                />
+                {selectedChain?.icon ? (
+                  <Image
+                    width={20}
+                    height={20}
+                    className="size-5 rounded-full bg-white"
+                    alt={selectedChain.name}
+                    src={selectedChain.icon}
+                  />
+                ) : (
+                  <SPNTest
+                    className={cn("size-[20px] transition-none", {
+                      invert: address,
+                    })}
+                  />
+                )}
               </div>
               <div className="text-nowrap">{selectedChain?.name}</div>
               <div className="ml-2 hidden w-0 transition-[width] group-hover:inline-flex group-hover:w-2 group-data-[state=open]:inline-flex group-data-[state=open]:w-2">
@@ -66,11 +78,21 @@ export const NetworkSelection = () => {
                   className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs"
                   onSelect={() => switchChain({ chainId: chain.id })}
                 >
-                  <Ethereum
-                    className={cn("size-[12px]", {
-                      invert: address,
-                    })}
-                  />{" "}
+                  {chain.icon ? (
+                    <Image
+                      width={20}
+                      height={20}
+                      alt={chain.name}
+                      src={chain.icon}
+                      className="size-5 rounded-full bg-white"
+                    />
+                  ) : (
+                    <SPNTest
+                      className={cn("size-[20px] transition-none", {
+                        invert: address,
+                      })}
+                    />
+                  )}{" "}
                   {chain.name}
                 </DropdownMenu.Item>
               ),
