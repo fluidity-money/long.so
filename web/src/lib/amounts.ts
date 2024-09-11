@@ -10,7 +10,7 @@ import {
 } from "./math";
 import { usdFormat } from "./usdFormat";
 import { simulateContract } from "wagmi/actions";
-import { config } from "@/config";
+import appConfig from "@/config";
 import { ammAddress } from "./addresses";
 import { fUSDC, Token } from "@/config/tokens";
 
@@ -128,13 +128,13 @@ const getUsdTokenAmountsForPosition = async (
   token0: Token,
   tokenPrice: number,
 ): Promise<[number, number]> => {
-  const positionLiquidity = await simulateContract(config, {
+  const positionLiquidity = await simulateContract(appConfig.wagmiConfig, {
     address: ammAddress,
     abi: seawaterContract.abi,
     functionName: "positionLiquidity8D11C045",
     args: [token0.address, BigInt(position.positionId)],
   });
-  const curTick = await simulateContract(config, {
+  const curTick = await simulateContract(appConfig.wagmiConfig, {
     address: ammAddress,
     abi: seawaterContract.abi,
     functionName: "curTick181C6FD9",

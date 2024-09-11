@@ -2,13 +2,18 @@ import z from "zod";
 
 const tokenSchema = z.object({
   name: z.string(),
-  address: z.string(),
+  address: z.string().regex(/^0x[a-fA-F0-9]+$/, {
+    message:
+      "Invalid hex string. It must start with '0x' and contain only hexadecimal characters.",
+  }),
   symbol: z.string(),
   decimals: z.number(),
   icon: z.string().optional(),
 });
 
-export type Token = z.infer<typeof tokenSchema>;
+export type Token = z.infer<typeof tokenSchema> & {
+  address: `0x${string}`;
+};
 
 export const fUSDC: Token = {
   name: "fUSDC",
