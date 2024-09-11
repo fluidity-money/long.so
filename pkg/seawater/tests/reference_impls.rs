@@ -9,9 +9,6 @@ use libseawater::maths::{full_math, tick_math};
 use ruint::aliases::U256;
 use ruint::uint;
 
-#[allow(unused_imports)]
-use libseawater::current_test;
-
 fn rand_u256<R: Rng + ?Sized>(rng: &mut R) -> U256 {
     U256::from_limbs([rng.gen(), rng.gen(), rng.gen(), rng.gen()])
 }
@@ -24,9 +21,6 @@ fn test_mul_div() {
         let a = rand_u256(&mut rng);
         let b = rand_u256(&mut rng);
         let denom = rand_u256(&mut rng);
-
-        #[cfg(feature = "testing-dbg")]
-        dbg!(("mul div", current_test!(), a, b, denom));
 
         let res = full_math::mul_div(a, b, denom);
         let reference = reference::full_math::mul_div(a, b, denom);
@@ -55,9 +49,6 @@ fn test_get_tick_at_sqrt_ratio() {
             0,
         ]);
 
-        #[cfg(feature = "testing-dbg")]
-        dbg!(("ratio", current_test!(), ratio));
-
         let tick = tick_math::get_tick_at_sqrt_ratio(ratio);
         let reference = reference::tick_math::get_tick_at_sqrt_ratio(ratio);
         if tick.is_err() {
@@ -80,12 +71,6 @@ fn test_get_sqrt_ratio_at_tick() {
 
         let ratio = tick_math::get_sqrt_ratio_at_tick(tick);
 
-        #[cfg(feature = "testing-dbg")]
-        dbg!(
-            ("tick", current_test!(), tick),
-            ("ratio", current_test!(), &ratio)
-        );
-
         let reference = reference::tick_math::get_sqrt_ratio_at_tick(tick);
         if ratio.is_err() {
             errs += 1;
@@ -102,6 +87,8 @@ fn test_get_sqrt_ratio_at_tick() {
     assert!(errs < 10);
 }
 
+// We can't use some of its dependencies for this
+#[cfg(all(test, not(target_arch = "wasm32")))]
 mod test_mul_div_more {
     use crate::reference;
 

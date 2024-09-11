@@ -10,7 +10,6 @@ use stylus_sdk::{prelude::*, storage::*};
 
 use num_traits::ToPrimitive;
 
-#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 use crate::test_utils;
 
 #[cfg(feature = "testing-dbg")]
@@ -629,7 +628,6 @@ impl StoragePool {
     }
 }
 
-#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 impl test_utils::StorageNew for StoragePool {
     fn new(i: U256, v: u8) -> Self {
         unsafe { <Self as stylus_sdk::storage::StorageType>::new(i, v) }

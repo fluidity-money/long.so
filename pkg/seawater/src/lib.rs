@@ -24,14 +24,18 @@ pub mod host_test_shims;
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 pub mod host_test_utils;
 
+#[cfg(all(target_arch = "wasm32", feature = "testing"))]
+pub mod wasm_test_utils;
+
 #[cfg(feature = "testing")]
 pub mod test_shims;
 
-#[cfg(feature = "testing")]
 pub mod test_utils;
 
 // Permit2 types exposed by the erc20 file.
 pub mod permit2_types;
+
+mod calldata_erc20;
 
 // We only want to have testing on the host environment and mocking stuff
 // out in a testing context
@@ -56,6 +60,7 @@ use types::{U256Extension, WrappedNative};
 
 use stylus_sdk::{msg, prelude::*, storage::*};
 
+#[cfg(feature = "log-events")]
 use stylus_sdk::evm;
 
 #[allow(dead_code)]
@@ -171,6 +176,7 @@ impl Pools {
             Error::SwapResultTooLow
         );
 
+        #[cfg(feature = "log-events")]
         evm::log(events::Swap1 {
             user: msg::sender(),
             pool,
@@ -279,6 +285,7 @@ impl Pools {
         erc20::take(from, original_amount, permit2)?;
         erc20::transfer_to_sender(to, amount_out)?;
 
+        #[cfg(feature = "log-events")]
         evm::log(events::Swap2 {
             user: msg::sender(),
             from,
@@ -495,6 +502,7 @@ impl Pools {
 
         self.grant_position(owner, id);
 
+        #[cfg(feature = "log-events")]
         evm::log(events::MintPosition {
             id,
             owner,
@@ -523,6 +531,7 @@ impl Pools {
 
         self.remove_position(owner, id);
 
+        #[cfg(feature = "log-events")]
         evm::log(events::BurnPosition { owner, id });
 
         Ok(())
@@ -548,6 +557,7 @@ impl Pools {
         self.remove_position(from, id);
         self.grant_position(to, id);
 
+        #[cfg(feature = "log-events")]
         evm::log(events::TransferPosition { from, to, id });
 
         Ok(())
@@ -608,6 +618,7 @@ impl Pools {
         let res = self.pools.setter(pool).collect(id)?;
         let (token_0, token_1) = res;
 
+        #[cfg(feature = "log-events")]
         evm::log(events::CollectFees {
             id,
             pool,
@@ -700,6 +711,7 @@ impl Pools {
             erc20::take(FUSDC_ADDR, token_1.abs_pos()?, permit_1)?;
         }
 
+        #[cfg(feature = "log-events")]
         evm::log(events::UpdatePositionLiquidity {
             id,
             token0: token_0,
@@ -734,6 +746,7 @@ impl Pools {
             giving,
         )?;
 
+        #[cfg(feature = "log-events")]
         evm::log(events::UpdatePositionLiquidity {
             id,
             token0: amount_0,
@@ -1000,6 +1013,7 @@ impl Pools {
 
         let _decimals = erc20::decimals(pool)?;
 
+        #[cfg(feature = "log-events")]
         evm::log(events::NewPool {
             token: pool,
             fee,
@@ -1130,6 +1144,7 @@ impl Pools {
         erc20::transfer_to_addr(recipient, pool, U256::from(token_0))?;
         erc20::transfer_to_addr(recipient, FUSDC_ADDR, U256::from(token_1))?;
 
+        #[cfg(feature = "log-events")]
         evm::log(events::CollectProtocolFees {
             pool,
             to: recipient,
@@ -1233,7 +1248,6 @@ impl Pools {
     }
 }
 
-#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 impl test_utils::StorageNew for Pools {
     fn new(i: U256, v: u8) -> Self {
         unsafe { <Self as stylus_sdk::storage::StorageType>::new(i, v) }

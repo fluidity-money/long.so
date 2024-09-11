@@ -26,6 +26,9 @@ num-traits.workspace = true
 [dev-dependencies]
 rand = "0.8.5"
 maplit = "1.0.2"
+getrandom = { version = "0.2.15", features = ["js"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 proptest = "1.5.0"
 
 [features]
@@ -40,3 +43,4 @@ migrations = []
 debug = []
 testing = []
 testing-dbg = []
+log-events = []

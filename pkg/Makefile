@@ -56,7 +56,7 @@ DOCKER_BUILD := docker build
 
 ${OUT_SEAWATER_ADMIN}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_ADMIN}
-	@${CARGO_BUILD_STYLUS} seawater --features admin
+	@${CARGO_BUILD_STYLUS} seawater --features log-events,admin
 	@mv seawater.wasm ${OUT_SEAWATER_ADMIN}
 	@rm -f liblibseawater.rlib
 
@@ -158,4 +158,5 @@ clean:
 		target \
 		out \
 		docker \
-		docs-out
+		docs-out \
+		node_modules

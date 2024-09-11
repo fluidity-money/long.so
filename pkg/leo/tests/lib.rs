@@ -247,7 +247,7 @@ mod testing {
     }
 }
 
-#[cfg(feature = "testing")]
+#[cfg(test, all(feature = "testing"), not(target_arch = "wasm32"))]
 mod proptesting {
     use libleo;
     use proptest::prelude::*;

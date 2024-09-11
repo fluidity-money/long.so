@@ -8,9 +8,6 @@ use std::collections::HashMap;
 
 use crate::{Address, U256};
 
-#[allow(unused_imports)]
-use crate::current_test;
-
 #[no_mangle]
 pub unsafe extern "C" fn native_keccak256(bytes: *const u8, len: usize, output: *mut u8) {
     // SAFETY
