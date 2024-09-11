@@ -1,5 +1,6 @@
-import { arbitrumSepolia as sepoliaTestnet } from "wagmi/chains";
+import { arbitrumSepolia } from "wagmi/chains";
 import z from "zod";
+import { defineChain } from "viem";
 
 const networkSchema = z.object({
   id: z.number(),
@@ -23,7 +24,7 @@ const networkSchema = z.object({
   icons: z.array(z.string()).optional(),
 });
 
-export const arbitrumStylusTestnet = networkSchema.parse({
+export const superpositionTestnet = defineChain({
   name: "Superposition Testnet",
   id: 98985,
   nativeCurrency: { name: "Superposition", symbol: "SPN", decimals: 18 },
@@ -39,13 +40,18 @@ export const arbitrumStylusTestnet = networkSchema.parse({
   },
 });
 
-export { sepoliaTestnet };
+export { arbitrumSepolia };
 
-const networkValidation = z
-  .array(networkSchema)
-  .safeParse([arbitrumStylusTestnet, sepoliaTestnet]);
+export const allTestnets = [superpositionTestnet, arbitrumSepolia] as const;
 
-if (!networkValidation.success) {
-  console.error("Invalid networks: ", networkValidation.error.name);
-  throw new Error(networkValidation.error.message);
+export const allMainnets = [] as const;
+
+const allChains = [...allTestnets, ...allMainnets] as const;
+
+// validate all chains
+const chainValidation = z.array(networkSchema).safeParse(allChains);
+
+if (!chainValidation.success) {
+  console.error("Invalid chain: ", chainValidation.error.name);
+  throw new Error(chainValidation.error.message);
 }

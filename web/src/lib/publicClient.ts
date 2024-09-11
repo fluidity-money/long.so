@@ -1,7 +1,7 @@
 import { createPublicClient, http } from "viem";
-import { arbitrumStylusTestnet } from "../config/networks";
+import { superpositionTestnet } from "../config/chains";
 
 export const publicClient = createPublicClient({
-  chain: arbitrumStylusTestnet,
+  chain: superpositionTestnet,
   transport: http(),
 });
