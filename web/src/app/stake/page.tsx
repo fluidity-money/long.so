@@ -15,11 +15,18 @@ import { YieldBreakdownClaimedModal } from "@/app/stake/YieldBreakdownClaimedMod
 import { YieldBreakdownDrawer } from "@/app/stake/YieldBreakdownDrawer";
 import { YieldBreakdownClaimedDrawer } from "@/app/stake/YieldBreakdownClaimedDrawer";
 import { useAccount } from "wagmi";
+import { useState } from "react";
+import { Rnd } from "react-rnd";
 
 const Stake = () => {
   const { welcome, setWelcome, yieldBreakdown, yieldBreakdownClaimed } =
     useStakeWelcomeBackStore();
 
+  const [position, setPosition] = useState<{ x: number; y: number }>();
+  const [size, setSize] = useState<{ width: number; height: number }>({
+    width: 650,
+    height: 400,
+  });
   useHotkeys(
     "esc",
     () => {
@@ -48,7 +55,10 @@ const Stake = () => {
       <YieldBreakdownDrawer />
       <YieldBreakdownClaimedDrawer />
 
-      <div className="z-10 flex flex-col items-center gap-2 px-4">
+      <div
+        id="rnd-wrapper"
+        className="z-10 flex flex-col items-center gap-2 px-4"
+      >
         {showCampaignBanner && (
           <motion.div
             className="w-full max-w-[500px]"
@@ -59,11 +69,34 @@ const Stake = () => {
             <CampaignBanner />
           </motion.div>
         )}
-
-        <div className="flex w-full flex-row justify-center gap-8">
-          <div className="flex w-full max-w-[500px] flex-1 flex-col gap-2">
+        <div
+          className="relative flex items-center justify-center"
+          style={{
+            width: size.width,
+            height: size.height,
+          }}
+        >
+          <Rnd
+            size={{ width: size?.width, height: size?.height }}
+            position={position && { x: position.x, y: position.y }}
+            onDragStop={(e, d) => {
+              setPosition({ y: position?.y ?? 0, x: d.x });
+            }}
+            maxWidth={1024}
+            minWidth={650}
+            bounds={"div#rnd-wrapper"}
+            dragAxis="x"
+            onResizeStop={(e, direction, ref, delta, position) => {
+              console.log("Resize stop");
+              setSize({
+                width: +ref.style.width.split("px")[0],
+                height: +ref.style.height.split("px")[0],
+              });
+              setPosition({ x: position.x, y: 0 });
+            }}
+          >
             <MyPositions />
-          </div>
+          </Rnd>
 
           {/* this doesn't show on mobile */}
           {address && showYieldOverTime && (
@@ -77,7 +110,6 @@ const Stake = () => {
             </motion.div>
           )}
         </div>
-
         <motion.div
           initial={{ opacity: 0, y: 100 }}
           animate={{ opacity: 1, y: 0 }}

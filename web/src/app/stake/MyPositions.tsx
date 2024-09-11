@@ -133,10 +133,7 @@ export const MyPositions = () => {
     <motion.div
       layoutId="modal"
       className={cn(
-        "flex h-[240px] w-full flex-col gap-2 rounded-lg bg-black p-4 pb-2 text-white transition-[height] md:h-[248px]",
-        {
-          "h-[412px]": expanded,
-        },
+        "flex h-full w-full flex-col gap-2 rounded-lg bg-black p-4 pb-2 text-white transition-[height]",
       )}
     >
       <div className="flex flex-row items-center justify-between">
@@ -170,11 +167,7 @@ export const MyPositions = () => {
         />
       </div>
 
-      <div
-        className={cn("h-[180px] overflow-y-auto transition-[height]", {
-          "h-[300px]": expanded,
-        })}
-      >
+      <div className={cn("h-full overflow-y-auto transition-[height]")}>
         {!pools || pools?.length === 0 ? (
           isLoading ? (
             <div className={"flex h-full flex-col items-center justify-center"}>
@@ -192,7 +185,7 @@ export const MyPositions = () => {
         ) : (
           <motion.div
             layout
-            className={cn("flex flex-row items-center justify-around gap-4", {
+            className={cn("grid grid-cols-5 gap-4", {
               "mb-4 flex-wrap": expanded,
             })}
           >
