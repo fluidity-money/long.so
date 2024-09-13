@@ -168,6 +168,9 @@ export const DefaultToken = (chainId: ChainIdTypes) => tokens[chainId]["usdc"];
 export const getTokenFromAddress = (chainId: ChainIdTypes, address_: string) =>
   Object.values(tokens[chainId]).find(({ address }) => address === address_);
 
+export const getTokenFromSymbol = (chainId: ChainIdTypes, symbol: TokenTypes) =>
+  tokens[chainId][symbol];
+
 export const mockTokens = (chainId: ChainIdTypes) => [DefaultToken(chainId)];
 
 const tokenTypeSchema = z.enum(tokenTypes);

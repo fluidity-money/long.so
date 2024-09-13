@@ -75,6 +75,10 @@ export function useContracts(chainId: ChainIdTypes, contract?: ContractTypes) {
   if (contract) return contracts[chainId][contract];
   return contracts[chainId];
 }
+export const getContractFromKey = (
+  chainId: ChainIdTypes,
+  contract: ContractTypes,
+) => contracts[chainId][contract];
 
 const contractValueSchema = z.object({
   abi: z.array(z.any()),

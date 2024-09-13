@@ -11,8 +11,8 @@ import { usdFormat } from "./usdFormat";
 import { simulateContract } from "wagmi/actions";
 import appConfig from "@/config";
 import type { Token, ChainIdTypes } from "@/config/tokens";
-import { useContracts } from "@/config/contracts";
-import { useTokens } from "@/config/tokens";
+import { getContractFromKey, useContracts } from "@/config/contracts";
+import { getTokenFromSymbol, useTokens } from "@/config/tokens";
 
 /**
  * @description convert a bigint formatted amount to a token amount
@@ -129,8 +129,8 @@ const getUsdTokenAmountsForPosition = async (
   token0: Token,
   tokenPrice: number,
 ): Promise<[number, number]> => {
-  const ammContract = useContracts(chainId, "amm");
-  const fUSDC = useTokens(chainId, "fusdc");
+  const ammContract = getContractFromKey(chainId, "amm");
+  const fUSDC = getTokenFromSymbol(chainId, "fusdc");
   const positionLiquidity = await simulateContract(appConfig.wagmiConfig, {
     address: ammContract.address,
     abi: ammContract.abi,
