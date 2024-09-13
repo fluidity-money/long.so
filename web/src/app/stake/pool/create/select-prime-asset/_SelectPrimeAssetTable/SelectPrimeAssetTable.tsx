@@ -21,9 +21,10 @@ import Search from "@/assets/icons/Search.svg";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { useStakeStore } from "@/stores/useStakeStore";
-import { fUSDC } from "@/config/tokens";
+import { useTokens } from "@/config/tokens";
 import { rankItem } from "@tanstack/match-sorter-utils";
 import { useState } from "react";
+import { useChainId } from "wagmi";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -65,7 +66,8 @@ export function SelectPrimeAssetTable<TData, TValue>({
   children,
 }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState("");
-
+  const chainId = useChainId();
+  const fUSDC = useTokens(chainId, "fusdc");
   const table = useReactTable({
     data,
     columns,

@@ -3,7 +3,22 @@ import { Pool } from "@/app/stake/_AllPoolsTable/columns";
 export const mockAllPools: Pool[] = [
   {
     id: "1",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDC",
+        symbol: "USDC",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+      {
+        name: "fUSDC",
+        symbol: "fUSDC",
+        decimals: 6,
+        icon: "/icons/fUSDC.svg",
+        address: "0x0",
+      },
+    ],
     annualPercentageYield: 12,
     claimable: true,
     fees: 14,
@@ -14,7 +29,23 @@ export const mockAllPools: Pool[] = [
   },
   {
     id: "2",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDC",
+        symbol: "USDC",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+
+      {
+        name: "fUSDC",
+        symbol: "fUSDC",
+        decimals: 6,
+        icon: "/icons/fUSDC.svg",
+        address: "0x0",
+      },
+    ],
     annualPercentageYield: 5,
     claimable: false,
     fees: 13,
@@ -26,7 +57,23 @@ export const mockAllPools: Pool[] = [
   },
   {
     id: "3",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDC",
+        symbol: "USDC",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+
+      {
+        name: "fUSDC",
+        symbol: "fUSDC",
+        decimals: 6,
+        icon: "/icons/fUSDC.svg",
+        address: "0x0",
+      },
+    ],
     annualPercentageYield: 4,
     claimable: true,
     fees: 16,
@@ -37,7 +84,23 @@ export const mockAllPools: Pool[] = [
   },
   {
     id: "4",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDC",
+        symbol: "USDC",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+
+      {
+        name: "fUSDC",
+        symbol: "fUSDC",
+        decimals: 6,
+        icon: "/icons/fUSDC.svg",
+        address: "0x0",
+      },
+    ],
     annualPercentageYield: 12,
     claimable: true,
     fees: 14,
@@ -49,7 +112,23 @@ export const mockAllPools: Pool[] = [
   },
   {
     id: "5",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDC",
+        symbol: "USDC",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+
+      {
+        name: "fUSDC",
+        symbol: "fUSDC",
+        decimals: 6,
+        icon: "/icons/fUSDC.svg",
+        address: "0x0",
+      },
+    ],
     annualPercentageYield: 5,
     claimable: false,
     fees: 13,
@@ -61,7 +140,23 @@ export const mockAllPools: Pool[] = [
   },
   {
     id: "6",
-    tokens: [{ name: "USDC" }, { name: "fUSDC" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDC",
+        symbol: "USDC",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+
+      {
+        name: "fUSDC",
+        symbol: "fUSDC",
+        decimals: 6,
+        icon: "/icons/fUSDC.svg",
+        address: "0x0",
+      },
+    ],
     annualPercentageYield: 4,
     claimable: true,
     fees: 16,

@@ -23,8 +23,13 @@ import { sum } from "lodash";
 import { graphql, useFragment } from "@/gql";
 import { useRouter } from "next/navigation";
 import { getFormattedPriceFromTick } from "@/lib/amounts";
-import { fUSDC, getTokenFromAddress } from "@/config/tokens";
+import {
+  getTokenFromAddress,
+  Token as TokenType,
+  useTokens,
+} from "@/config/tokens";
 import { TokenIcon } from "@/components/TokenIcon";
+import { useChainId } from "wagmi";
 
 const DisplayModeMenu = ({
   setDisplayMode,
@@ -100,6 +105,8 @@ export const AllPools = () => {
   const { data, isLoading } = useGraphqlGlobal();
 
   const router = useRouter();
+  const chainId = useChainId();
+  const fUSDC = useTokens(chainId, "fusdc");
 
   const poolsData = useFragment(AllPoolsFragment, data?.pools);
 
@@ -141,12 +148,12 @@ export const AllPools = () => {
         id: pool.address,
         tokens: [
           {
-            name: pool.token.name,
+            ...getTokenFromAddress(chainId, pool.address)!,
           },
           {
-            name: "fUSDC",
+            ...fUSDC,
           },
-        ],
+        ] satisfies [TokenType, TokenType],
         // assume that the first daily value is the current value
         volume: volume,
         totalValueLocked: totalValueLocked,
@@ -241,7 +248,7 @@ export const AllPools = () => {
               >
                 <div className={"absolute -left-1 -top-2 flex flex-row"}>
                   <TokenIcon
-                    src={getTokenFromAddress(pool.id)?.icon}
+                    src={getTokenFromAddress(chainId, pool.id)?.icon}
                     className={"size-[24px] rounded-full"}
                   />
                   <Badge

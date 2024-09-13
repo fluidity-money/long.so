@@ -14,13 +14,14 @@ import {
   Pool,
 } from "@/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/columns";
 import { nanoid } from "nanoid";
-import { DefaultToken, Token, fUSDC } from "@/config/tokens";
+import { getTokenFromAddress, Token, useTokens } from "@/config/tokens";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { Hash } from "viem";
 import { usdFormat } from "@/lib/usdFormat";
 import { graphql, useFragment } from "@/gql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useDetectClickOutside } from "react-detect-click-outside";
+import { useChainId } from "wagmi";
 
 const SelectPrimeAssetFragment = graphql(`
   fragment SelectPrimeAssetFragment on SeawaterPool {
@@ -43,7 +44,9 @@ const SelectPrimeAssetFragment = graphql(`
 
 const SelectPrimeAsset = () => {
   const router = useRouter();
-
+  const chainId = useChainId();
+  const fUSDC = useTokens(chainId, "fusdc");
+  const DefaultToken = useTokens(chainId, "default");
   const ref = useDetectClickOutside({
     onTriggered: () => router.back(),
   });
@@ -103,6 +106,7 @@ const SelectPrimeAsset = () => {
           symbol: pool.token.symbol,
           address: pool.token.address as Hash,
           decimals: pool.token.decimals,
+          icon: getTokenFromAddress(chainId, pool.token.address)?.icon,
         },
         // assume the second token is always fUSDC
         fUSDC,

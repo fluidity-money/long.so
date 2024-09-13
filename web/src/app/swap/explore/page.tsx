@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import IridescentToken from "@/assets/icons/token-iridescent.svg";
 import { AllAssetsTable } from "@/app/swap/explore/_AllAssetsTable/AllAssetsTable";
 import { columns } from "@/app/swap/explore/_AllAssetsTable/columns";
-import { Token, fUSDC, getTokenFromAddress } from "@/config/tokens";
+import { useTokens, getTokenFromAddress } from "@/config/tokens";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
@@ -19,7 +19,7 @@ import {
   mockSwapExploreAssets,
 } from "@/demoData/swapExploreAssets";
 import { getBalance } from "wagmi/actions";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId, useToken } from "wagmi";
 import appConfig from "@/config";
 import { getFormattedStringFromTokenAmount } from "@/lib/amounts";
 import { SwapExploreFragmentFragment } from "@/gql/graphql";
@@ -40,7 +40,8 @@ const SwapExploreFragment = graphql(`
 
 const ExplorePage = () => {
   const router = useRouter();
-
+  const chainId = useChainId();
+  const fUSDC = useTokens(chainId, "fusdc");
   const { setToken1, setToken0 } = useSwapStore();
 
   const { address } = useAccount();
@@ -126,12 +127,15 @@ const ExplorePage = () => {
   }, [address, tokensData]);
 
   const allAssetsData = useMemo(() => {
-    if (showMockData) return mockSwapExploreAssets;
+    if (showMockData) return mockSwapExploreAssets(chainId);
 
     // reformat the data to match the columns
     return (
       tokensData.map((token, i) => {
-        const tokenFromAddress = getTokenFromAddress(token.token.address);
+        const tokenFromAddress = getTokenFromAddress(
+          chainId,
+          token.token.address,
+        );
         return {
           symbol: token.token.symbol,
           address: token.token.address,
@@ -143,7 +147,7 @@ const ExplorePage = () => {
         };
       }) ?? []
     );
-  }, [showMockData, tokensData, tokenBalances]);
+  }, [showMockData, tokensData, tokenBalances, chainId]);
 
   return (
     <div className={"flex flex-col items-center overflow-y-auto"}>
@@ -178,32 +182,34 @@ const ExplorePage = () => {
                 }
               >
                 {/* TODO: add in highest rewarders */}
-                {(showMockData ? mockHighestRewarders : []).map((rewarder) => (
-                  <Badge
-                    variant={"outline"}
-                    className={
-                      "relative h-[25.36px] cursor-pointer gap-1 pl-0.5"
-                    }
-                    key={rewarder.address}
-                    onClick={() => {
-                      if (token === "1") {
-                        setToken1(rewarder.token);
-                      } else {
-                        setToken0(rewarder.token);
+                {(showMockData ? mockHighestRewarders(chainId) : []).map(
+                  (rewarder) => (
+                    <Badge
+                      variant={"outline"}
+                      className={
+                        "relative h-[25.36px] cursor-pointer gap-1 pl-0.5"
                       }
+                      key={rewarder.address}
+                      onClick={() => {
+                        if (token === "1") {
+                          setToken1(rewarder.token);
+                        } else {
+                          setToken0(rewarder.token);
+                        }
 
-                      router.back();
-                    }}
-                  >
-                    <IridescentToken className={"size-[20px]"} />
-                    <div className={"iridescent-text text-sm"}>
-                      {rewarder.symbol}
-                    </div>
-                    <div className="iridescent absolute -bottom-2 right-0 inline-flex h-[13px] flex-col items-end justify-center rounded-sm border border-stone-900 px-[3px] py-[1.50px]">
-                      <div className="text-[8px]">2 days</div>
-                    </div>
-                  </Badge>
-                ))}
+                        router.back();
+                      }}
+                    >
+                      <IridescentToken className={"size-[20px]"} />
+                      <div className={"iridescent-text text-sm"}>
+                        {rewarder.symbol}
+                      </div>
+                      <div className="iridescent absolute -bottom-2 right-0 inline-flex h-[13px] flex-col items-end justify-center rounded-sm border border-stone-900 px-[3px] py-[1.50px]">
+                        <div className="text-[8px]">2 days</div>
+                      </div>
+                    </Badge>
+                  ),
+                )}
               </div>
             </div>
           </AllAssetsTable>

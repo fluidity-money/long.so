@@ -13,7 +13,43 @@ const tokenAbis = {
 const tokenTypes = ["fusdc", "usdc", "weth", "wspn", "bux"] as const;
 type TokenTypes = (typeof tokenTypes)[number];
 export type ChainIdTypes = (typeof allChains)[number]["id"];
-
+export const defaults = {
+  fusdc: {
+    abi: tokenAbis.fusdc,
+    name: "fUSDC",
+    symbol: "fUSDC",
+    decimals: 6,
+    icon: "/icons/fUSDC.svg",
+  },
+  usdc: {
+    abi: tokenAbis.usdc,
+    name: "USD Coin",
+    symbol: "USDC",
+    decimals: 6,
+    icon: "/icons/usd-coin-usdc-logo.svg",
+  },
+  weth: {
+    abi: tokenAbis.weth,
+    name: "Wrapped Ethereum",
+    symbol: "WETH",
+    decimals: 18,
+    icon: "/icons/ethereum-eth-logo.svg",
+  },
+  wspn: {
+    abi: tokenAbis.wspn,
+    name: "Wrapped Superposition",
+    symbol: "WSPN",
+    decimals: 18,
+    icon: "/icons/ICON_BLACK.png",
+  },
+  bux: {
+    abi: tokenAbis.bux,
+    name: "CATBUX",
+    symbol: "BUX",
+    decimals: 18,
+    icon: "/icons/cbux.svg",
+  },
+} as const;
 const chainTokens: {
   [chanId in ChainIdTypes | "defaults"]: {
     [token in TokenTypes]?: {
@@ -26,43 +62,7 @@ const chainTokens: {
     };
   };
 } = {
-  defaults: {
-    fusdc: {
-      abi: tokenAbis.fusdc,
-      name: "fUSDC",
-      symbol: "fUSDC",
-      decimals: 6,
-      icon: "/icons/fUSDC.svg",
-    },
-    usdc: {
-      abi: tokenAbis.usdc,
-      name: "USD Coin",
-      symbol: "USDC",
-      decimals: 6,
-      icon: "/icons/usd-coin-usdc-logo.svg",
-    },
-    weth: {
-      abi: tokenAbis.weth,
-      name: "Wrapped Ethereum",
-      symbol: "WETH",
-      decimals: 18,
-      icon: "/icons/ethereum-eth-logo.svg",
-    },
-    wspn: {
-      abi: tokenAbis.wspn,
-      name: "Wrapped Superposition",
-      symbol: "WSPN",
-      decimals: 18,
-      icon: "/icons/ICON_BLACK.png",
-    },
-    bux: {
-      abi: tokenAbis.bux,
-      name: "CATBUX",
-      symbol: "BUX",
-      decimals: 18,
-      icon: "/icons/cbux.svg",
-    },
-  },
+  defaults,
   98985: {
     fusdc: {
       address: "0xa8ea92c819463efbeddfb670fefc881a480f0115",

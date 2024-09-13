@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import TokenIridescent from "@/assets/icons/token-iridescent.svg";
-import { Token, getTokenFromAddress } from "../../../../../../config/tokens";
+import { Token } from "@/config/tokens";
 import { TokenIcon } from "@/components/TokenIcon";
 
 export type Pool = {
@@ -26,7 +26,7 @@ export const columns: ColumnDef<Pool>[] = [
       return (
         <div className="flex flex-row items-center gap-2">
           <TokenIcon
-            src={getTokenFromAddress(row.original.token0Address)?.icon}
+            src={row.original.tokens[0].icon}
             className="size-[20px]"
           />
           <TokenIridescent

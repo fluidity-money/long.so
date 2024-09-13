@@ -7,8 +7,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as echarts from "echarts/core";
 import { padLiquidityPool } from "@/lib/padLiquidityPool";
 import { useStakeStore } from "@/stores/useStakeStore";
-import { fUSDC } from "@/config/tokens";
+import { useTokens } from "@/config/tokens";
 import { StakeFormFragmentFragment } from "@/gql/graphql";
+import { useChainId } from "wagmi";
 const colorGradient = new echarts.graphic.LinearGradient(
   0,
   0,
@@ -33,6 +34,8 @@ export default function LiquidityRangeVisualizer({
   currentPrice: bigint;
   tokenDecimals: number;
 }) {
+  const chainId = useChainId();
+  const fUSDC = useTokens(chainId, "fusdc");
   const showLiquidityVisualiser = useFeatureFlag(
     "ui show liquidity visualiser",
   );

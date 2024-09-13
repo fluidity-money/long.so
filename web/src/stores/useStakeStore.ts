@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Token, DefaultToken, fUSDC } from "@/config/tokens";
+import { Token, tokens, defaults } from "@/config/tokens";
 import {
   MIN_TICK,
   MAX_TICK,
@@ -65,10 +65,10 @@ export const useStakeStore = create<StakeStore>((set) => ({
   multiSingleToken: "multi",
   setMultiSingleToken: (multiSingleToken) => set({ multiSingleToken }),
 
-  token0: DefaultToken,
+  token0: tokens[98985].usdc,
   setToken0: (token0) => set({ token0 }),
 
-  token1: fUSDC,
+  token1: tokens[98985].fusdc,
   setToken1: (token1) => set({ token1 }),
 
   token0Amount: "",
@@ -173,7 +173,10 @@ export const useStakeStore = create<StakeStore>((set) => ({
     // update display amount if `amount` is valid as a display number
     if (!validNumber) return;
     // Make a best effort to convert the number to a sqrt price, then to a tick.
-    const rawPrice = getTokenAmountFromFormattedString(price, fUSDC.decimals);
+    const rawPrice = getTokenAmountFromFormattedString(
+      price,
+      defaults.fusdc.decimals,
+    );
     const priceN = Number(rawPrice);
     let tick = 0;
     try {
@@ -193,7 +196,10 @@ export const useStakeStore = create<StakeStore>((set) => ({
     // update display amount if `amount` is valid as a display number
     if (!validNumber) return;
 
-    const rawPrice = getTokenAmountFromFormattedString(price, fUSDC.decimals);
+    const rawPrice = getTokenAmountFromFormattedString(
+      price,
+      defaults.fusdc.decimals,
+    );
     const priceN = Number(rawPrice);
     let tick = 0;
     try {

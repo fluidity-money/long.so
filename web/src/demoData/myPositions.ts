@@ -4,7 +4,22 @@ export const mockMyPositions: Pool[] = [
   {
     id: "1",
     positionId: 0,
-    tokens: [{ name: "USDC" }, { name: "ETH" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDC",
+        symbol: "USDC",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+      {
+        address: "0x0",
+        name: "ETH",
+        symbol: "ETH",
+        decimals: 18,
+        icon: "/ethereum-eth-logo.svg",
+      },
+    ],
     duration: 100,
     staked: 100,
     totalYield: 100,
@@ -12,7 +27,22 @@ export const mockMyPositions: Pool[] = [
   {
     id: "2",
     positionId: 0,
-    tokens: [{ name: "USDT" }, { name: "ETH" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDT",
+        symbol: "USDT",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+      {
+        address: "0x0",
+        name: "ETH",
+        symbol: "ETH",
+        decimals: 18,
+        icon: "/ethereum-eth-logo.svg",
+      },
+    ],
     duration: 100,
     staked: 100,
     totalYield: 100,
@@ -20,7 +50,22 @@ export const mockMyPositions: Pool[] = [
   {
     id: "3",
     positionId: 0,
-    tokens: [{ name: "USDC" }, { name: "USDT" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDC",
+        symbol: "USDC",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+      {
+        address: "0x0",
+        name: "USDT",
+        symbol: "USDT",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+    ],
     duration: 100,
     staked: 100,
     totalYield: 100,
@@ -28,7 +73,22 @@ export const mockMyPositions: Pool[] = [
   {
     id: "4",
     positionId: 0,
-    tokens: [{ name: "USDC" }, { name: "ETH" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDC",
+        symbol: "USDC",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+      {
+        address: "0x0",
+        name: "ETH",
+        symbol: "ETH",
+        decimals: 18,
+        icon: "/ethereum-eth-logo.svg",
+      },
+    ],
     duration: 100,
     staked: 100,
     totalYield: 100,
@@ -36,7 +96,22 @@ export const mockMyPositions: Pool[] = [
   {
     id: "5",
     positionId: 0,
-    tokens: [{ name: "USDT" }, { name: "ETH" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDT",
+        symbol: "USDT",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+      {
+        address: "0x0",
+        name: "ETH",
+        symbol: "ETH",
+        decimals: 18,
+        icon: "/ethereum-eth-logo.svg",
+      },
+    ],
     duration: 100,
     staked: 100,
     totalYield: 100,
@@ -44,7 +119,22 @@ export const mockMyPositions: Pool[] = [
   {
     id: "6",
     positionId: 0,
-    tokens: [{ name: "USDC" }, { name: "USDT" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDC",
+        symbol: "USDC",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+      {
+        address: "0x0",
+        name: "USDT",
+        symbol: "USDT",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+    ],
     duration: 100,
     staked: 100,
     totalYield: 100,
@@ -52,7 +142,22 @@ export const mockMyPositions: Pool[] = [
   {
     id: "7",
     positionId: 0,
-    tokens: [{ name: "USDC" }, { name: "ETH" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDC",
+        symbol: "USDC",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+      {
+        address: "0x0",
+        name: "ETH",
+        symbol: "ETH",
+        decimals: 18,
+        icon: "/ethereum-eth-logo.svg",
+      },
+    ],
     duration: 100,
     staked: 100,
     totalYield: 100,
@@ -60,7 +165,22 @@ export const mockMyPositions: Pool[] = [
   {
     id: "8",
     positionId: 0,
-    tokens: [{ name: "USDT" }, { name: "ETH" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDT",
+        symbol: "USDT",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+      {
+        address: "0x0",
+        name: "ETH",
+        symbol: "ETH",
+        decimals: 18,
+        icon: "/ethereum-eth-logo.svg",
+      },
+    ],
     duration: 100,
     staked: 100,
     totalYield: 100,
@@ -68,7 +188,22 @@ export const mockMyPositions: Pool[] = [
   {
     id: "9",
     positionId: 0,
-    tokens: [{ name: "USDC" }, { name: "USDT" }],
+    tokens: [
+      {
+        address: "0x0",
+        name: "USDC",
+        symbol: "USDC",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+      {
+        address: "0x0",
+        name: "USDT",
+        symbol: "USDT",
+        decimals: 6,
+        icon: "/icons/usd-coin-usdc-logo.svg",
+      },
+    ],
     duration: 100,
     staked: 100,
     totalYield: 100,
