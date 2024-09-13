@@ -9,13 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Line } from "rc-progress";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usdFormat } from "@/lib/usdFormat";
-import { fUSDC, getTokenFromAddress } from "@/config/tokens";
 import {
   Select,
   SelectContent,
@@ -26,8 +24,7 @@ import {
 import { getFormattedPriceFromTick } from "@/lib/amounts";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useSwapStore } from "@/stores/useSwapStore";
-import { ammAddress } from "@/lib/addresses";
-import { useSimulateContract } from "wagmi";
+import { useChainId, useSimulateContract } from "wagmi";
 import useWriteContract from "@/fixtures/wagmi/useWriteContract";
 import {
   getSqrtRatioAtTick,
@@ -36,6 +33,8 @@ import {
 } from "@/lib/math";
 import { TokenIcon } from "@/components/TokenIcon";
 import { usePositions } from "@/hooks/usePostions";
+import { useTokens, getTokenFromAddress } from "@/config/tokens";
+import { useContracts } from "@/config/contracts";
 
 const ManagePoolFragment = graphql(`
   fragment ManagePoolFragment on SeawaterPool {
@@ -55,7 +54,9 @@ const ManagePoolFragment = graphql(`
 
 export default function PoolPage() {
   const router = useRouter();
-
+  const chainId = useChainId();
+  const fUSDC = useTokens(chainId, "fusdc");
+  const ammContract = useContracts(chainId, "amm");
   useHotkeys("esc", () => router.back());
 
   // get the id from the query params
@@ -84,7 +85,7 @@ export default function PoolPage() {
 
   useEffect(() => {
     if (!id) return;
-    const token = getTokenFromAddress(id);
+    const token = getTokenFromAddress(chainId, id);
     if (!token) return;
     // Graph is rendered by SwapPro, which uses the swap store
     // So we have to set both of these.
@@ -127,24 +128,24 @@ export default function PoolPage() {
 
   // Current liquidity of the position
   const { data: positionLiquidity } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "positionLiquidity8D11C045",
     args: [token0.address, BigInt(positionId ?? 0)],
   });
 
   // Current tick of the pool
   const { data: { result: curTickNum } = { result: 0 } } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "curTick181C6FD9",
     args: [token0.address],
   });
   const curTick = BigInt(curTickNum);
 
   const { data: poolSqrtPriceX96 } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
   });
@@ -161,8 +162,8 @@ export default function PoolPage() {
   } = useWriteContract();
 
   const { data: unclaimedRewardsData } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "collect7F21947C",
     args: [[token0.address], [BigInt(positionId ?? 0)]],
   });
@@ -183,13 +184,13 @@ export default function PoolPage() {
   const collect = useCallback(
     (id: bigint) => {
       writeContractCollect({
-        address: ammAddress,
-        abi: seawaterContract.abi,
+        address: ammContract.address,
+        abi: ammContract.abi,
         functionName: "collect7F21947C",
         args: [[token0.address], [id]],
       });
     },
-    [writeContractCollect, token0],
+    [writeContractCollect, token0, ammContract],
   );
 
   const positionBalance = useMemo(() => {

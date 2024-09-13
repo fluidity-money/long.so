@@ -1,11 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ammAddress } from "@/lib/addresses";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect } from "react";
-import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import {
   useAccount,
   useChainId,
@@ -13,7 +11,7 @@ import {
   useWaitForTransactionReceipt,
 } from "wagmi";
 import useWriteContract from "@/fixtures/wagmi/useWriteContract";
-import { fUSDC } from "@/config/tokens";
+import { useTokens } from "@/config/tokens";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import {
   getFormattedPriceFromAmount,
@@ -24,6 +22,7 @@ import { Success } from "@/components/sequence/Success";
 import { Fail } from "@/components/sequence/Fail";
 import { TokenIcon } from "@/components/TokenIcon";
 import { usePositions } from "@/hooks/usePostions";
+import { useContracts } from "@/config/contracts";
 
 export default function ConfirmWithdrawLiquidity() {
   const router = useRouter();
@@ -33,6 +32,8 @@ export default function ConfirmWithdrawLiquidity() {
 
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
+  const fUSDC = useTokens(expectedChainId, "fusdc");
+  const ammContract = useContracts(expectedChainId, "amm");
 
   useEffect(() => {
     if (!address || chainId !== expectedChainId) router.back();
@@ -53,8 +54,8 @@ export default function ConfirmWithdrawLiquidity() {
 
   // Current liquidity of the position
   const { data: positionLiquidity } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "positionLiquidity8D11C045",
     args: [token0.address, BigInt(positionId ?? 0)],
   });
@@ -88,31 +89,31 @@ export default function ConfirmWithdrawLiquidity() {
   const updatePosition = useCallback(
     (id: bigint) => {
       writeContractUpdatePosition({
-        address: ammAddress,
-        abi: seawaterContract.abi,
+        address: ammContract.address,
+        abi: ammContract.abi,
         functionName: "updatePositionC7F1F740",
         args: [token0.address, id, -delta],
       });
     },
-    [delta, writeContractUpdatePosition, token0AmountRaw, token0],
+    [delta, writeContractUpdatePosition, token0AmountRaw, token0, ammContract],
   );
 
   const collect = useCallback(
     (id: bigint) => {
       writeContractCollect({
-        address: ammAddress,
-        abi: seawaterContract.abi,
+        address: ammContract.address,
+        abi: ammContract.abi,
         functionName: "collect7F21947C",
         args: [[token0.address], [BigInt(id ?? 0)]],
       });
     },
-    [writeContractCollect, token0],
+    [writeContractCollect, token0, ammContract],
   );
 
   // price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address === fUSDC.address ? token1.address : token0.address],
   });
@@ -122,8 +123,8 @@ export default function ConfirmWithdrawLiquidity() {
     : 0n;
 
   const { data: unclaimedRewardsData } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "collect7F21947C",
     args: [[token0.address], [BigInt(positionId ?? 0)]],
   });
@@ -157,6 +158,7 @@ export default function ConfirmWithdrawLiquidity() {
           upper: tickUpper,
         };
         getUsdTokenAmountsForPosition(
+          expectedChainId,
           position,
           token0,
           Number(tokenPrice),

@@ -1,6 +1,5 @@
 "use client";
 
-import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { useSwapPro } from "@/stores/useSwapPro";
 import { TypographyH3 } from "@/components/ui/typography";
 import { Badge } from "@/components/ui/badge";
@@ -20,10 +19,10 @@ import { SwapProPoolFragment } from "@/components/SwapPro/SwapProPoolFragment";
 import { useMemo } from "react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usdFormat } from "@/lib/usdFormat";
-import { useConnectorClient, useSimulateContract } from "wagmi";
-import { ammAddress } from "@/lib/addresses";
+import { useChainId, useConnectorClient, useSimulateContract } from "wagmi";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
-import { fUSDC } from "@/config/tokens";
+import { useTokens } from "@/config/tokens";
+import { useContracts } from "@/config/contracts";
 
 const variants = {
   hidden: { opacity: 0, width: 0 },
@@ -39,6 +38,9 @@ export const SwapPro = ({
 }) => {
   const swapPro = useSwapPro((s) => s.swapPro);
   const welcome = useWelcomeStore((s) => s.welcome);
+  const chainId = useChainId();
+  const fUSDC = useTokens(chainId, "fusdc");
+  const ammContract = useContracts(chainId, "amm");
 
   const { isLtSm } = useMediaQuery();
 
@@ -47,8 +49,6 @@ export const SwapPro = ({
   const isOpen = override || (!welcome && (swapPro || isLtSm));
 
   const { data: dataGlobal, isLoading: isLoadingGlobal } = useGraphqlGlobal();
-
-  const isLoading = isLoadingGlobal;
 
   // the selected pool
   const pool = useMemo(
@@ -93,16 +93,16 @@ export const SwapPro = ({
     connector?.account ?? "0x1111111111111111111111111111111111111111";
 
   const { data: token0SqrtPriceX96 } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     account: simulateAccount,
     functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
   });
 
   const { data: token1SqrtPriceX96 } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     account: simulateAccount,
     functionName: "sqrtPriceX967B8F5FC5",
     args: [token1.address],

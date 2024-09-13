@@ -18,8 +18,6 @@ import {
   getSqrtRatioAtTick,
   sqrtPriceX96ToPrice,
 } from "@/lib/math";
-import { ammAddress } from "@/lib/addresses";
-import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { useRouter } from "next/navigation";
 import { useHotkeys } from "react-hotkeys-hook";
 import { AnimatePresence, motion } from "framer-motion";
@@ -50,13 +48,14 @@ import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 import {
-  Token as TokenType,
-  fUSDC,
   getTokenFromAddress,
+  useTokens,
+  type Token as TokenType,
 } from "@/config/tokens";
 import { getFormattedPriceFromAmount } from "@/lib/amounts";
 import { TokenIcon } from "./TokenIcon";
 import LiquidityRangeVisualizer from "./LiquidityRangeVisualizer";
+import { useContracts } from "@/config/contracts";
 
 type StakeFormProps = { poolId: string } & (
   | {
@@ -103,7 +102,14 @@ const PositionsFragment = graphql(`
 
 export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const [feeTier, setFeeTier] = useState<"auto" | "manual">("auto");
-
+  const { address, chainId } = useAccount();
+  const expectedChainId = useChainId();
+  const ammContract = useContracts(expectedChainId, "amm");
+  const fUSDC = useTokens(expectedChainId, "fusdc");
+  const isCorrectChain = useMemo(
+    () => chainId === expectedChainId,
+    [chainId, expectedChainId],
+  );
   const [breakdownHidden, setBreakdownHidden] = useState(true);
   const router = useRouter();
   const {
@@ -137,7 +143,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   useEffect(() => {
     if (!poolId) return;
     if (token0.address !== poolId && token1.address !== poolId) {
-      const poolToken = getTokenFromAddress(poolId);
+      const poolToken = getTokenFromAddress(expectedChainId, poolId);
       if (!poolToken) {
         router.push("/stake");
         return;
@@ -201,13 +207,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     }
   };
 
-  const { address, chainId } = useAccount();
-  const expectedChainId = useChainId();
-  const isCorrectChain = useMemo(
-    () => chainId === expectedChainId,
-    [chainId, expectedChainId],
-  );
-
   // useSimulateContract throws if connector.account is not defined
   // so we must check if it exists or use a dummy address for sqrtPriceX96
   const { data: connector } = useConnectorClient();
@@ -216,8 +215,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   // Price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     account: simulateAccount,
     functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
@@ -253,8 +252,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   // The tick spacing will determine how granular the graph is.
   const { data: curTickNum } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     account: simulateAccount,
     functionName: "curTick181C6FD9",
     args: [token0.address],

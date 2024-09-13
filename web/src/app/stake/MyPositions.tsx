@@ -10,27 +10,28 @@ import { columns, Pool } from "@/app/stake/_MyPositionsTable/columns";
 import { Badge } from "@/components/ui/badge";
 import { usdFormat } from "@/lib/usdFormat";
 import Position from "@/assets/icons/position.svg";
-import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import TokenIridescent from "@/assets/icons/token-iridescent.svg";
 import SegmentedControl from "@/components/ui/segmented-control";
-import { useAccount, useSimulateContract } from "wagmi";
+import { useAccount, useChainId, useSimulateContract } from "wagmi";
 import useWriteContract from "@/fixtures/wagmi/useWriteContract";
 import { mockMyPositions } from "@/demoData/myPositions";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-import { Token, fUSDC, getTokenFromAddress } from "@/config/tokens";
 import { TokenIcon } from "@/components/TokenIcon";
-import { ammAddress } from "@/lib/addresses";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { usePositions } from "@/hooks/usePostions";
 import { LoaderIcon } from "lucide-react";
+import { useTokens, type Token, getTokenFromAddress } from "@/config/tokens";
+import { useContracts } from "@/config/contracts";
 
 export const MyPositions = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-
+  const chainId = useChainId();
+  const fUSDC = useTokens(chainId, "fusdc");
+  const ammContract = useContracts(chainId, "amm");
   const [expanded, setExpanded] = useState(false);
 
   const router = useRouter();
@@ -74,8 +75,8 @@ export const MyPositions = () => {
   }, [showDemoData, address, walletData]);
 
   const { data: poolSqrtPriceX96 } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
   });
@@ -101,8 +102,8 @@ export const MyPositions = () => {
   );
 
   const { data: unclaimedRewardsData } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "collect7F21947C",
     args: collectArgs,
   });
@@ -122,8 +123,8 @@ export const MyPositions = () => {
 
   const collectAll = useCallback(() => {
     writeContractCollect({
-      address: ammAddress,
-      abi: seawaterContract.abi,
+      address: ammContract.address,
+      abi: ammContract.abi,
       functionName: "collect7F21947C",
       args: collectArgs,
     });
@@ -207,7 +208,7 @@ export const MyPositions = () => {
                 <div className="-mt-1 flex flex-col md:-mt-2">
                   <div className="flex flex-row">
                     <TokenIcon
-                      src={getTokenFromAddress(pool.id)?.icon}
+                      src={getTokenFromAddress(chainId, pool.id)?.icon}
                       className="ml-[-2px] size-[25px] rounded-full border border-black md:size-[35px]"
                     />
                     <TokenIridescent className="ml-[-6px] size-[25px] rounded-full border-2 border-black md:size-[35px]" />

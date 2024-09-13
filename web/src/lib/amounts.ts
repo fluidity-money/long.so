@@ -2,7 +2,6 @@
 // a token amount is a raw amount scaled by a token's decimals, such as 1445000 or 20000000
 
 import { Position } from "@/hooks/usePostions";
-import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import {
   getSqrtRatioAtTick,
   getTokenAmountsNumeric,
@@ -11,8 +10,9 @@ import {
 import { usdFormat } from "./usdFormat";
 import { simulateContract } from "wagmi/actions";
 import appConfig from "@/config";
-import { ammAddress } from "./addresses";
-import { fUSDC, Token } from "@/config/tokens";
+import type { Token, ChainIdTypes } from "@/config/tokens";
+import { useContracts } from "@/config/contracts";
+import { useTokens } from "@/config/tokens";
 
 /**
  * @description convert a bigint formatted amount to a token amount
@@ -124,19 +124,22 @@ const getFormattedPriceFromTick = (
 };
 
 const getUsdTokenAmountsForPosition = async (
+  chainId: ChainIdTypes,
   position: Pick<Position, "positionId" | "lower" | "upper">,
   token0: Token,
   tokenPrice: number,
 ): Promise<[number, number]> => {
+  const ammContract = useContracts(chainId, "amm");
+  const fUSDC = useTokens(chainId, "fusdc");
   const positionLiquidity = await simulateContract(appConfig.wagmiConfig, {
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "positionLiquidity8D11C045",
     args: [token0.address, BigInt(position.positionId)],
   });
   const curTick = await simulateContract(appConfig.wagmiConfig, {
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "curTick181C6FD9",
     args: [token0.address],
   });

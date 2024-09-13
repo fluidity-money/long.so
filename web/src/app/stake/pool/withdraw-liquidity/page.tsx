@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import Ethereum from "@/assets/icons/ethereum.svg";
 import { Badge } from "@/components/ui/badge";
 import Token from "@/assets/icons/token.svg";
 import { Button } from "@/components/ui/button";
@@ -12,17 +11,16 @@ import * as RadioGroup from "@radix-ui/react-radio-group";
 import Slider from "@/components/Slider";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import { useStakeStore } from "@/stores/useStakeStore";
-import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { useAccount, useChainId, useSimulateContract } from "wagmi";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlUser } from "@/hooks/useGraphql";
 import { useEffect, useMemo, useState } from "react";
 import { usdFormat } from "@/lib/usdFormat";
-import { ammAddress } from "@/lib/addresses";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
-import { fUSDC } from "@/config/tokens";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { TokenIcon } from "@/components/TokenIcon";
+import { useTokens } from "@/config/tokens";
+import { useContracts } from "@/config/contracts";
 
 const PositionsFragment = graphql(`
   fragment WithdrawPositionsFragment on Wallet {
@@ -61,6 +59,8 @@ export default function WithdrawLiquidity() {
 
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
+  const fUSDC = useTokens(expectedChainId, "fusdc");
+  const ammContract = useContracts(expectedChainId, "amm");
   const isCorrectChain = useMemo(
     () => chainId === expectedChainId,
     [chainId, expectedChainId],
@@ -81,8 +81,8 @@ export default function WithdrawLiquidity() {
 
   // Current tick of the pool
   const { data: { result: curTickNum } = { result: 0 } } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "curTick181C6FD9",
     args: [token0.address],
   });
@@ -90,15 +90,15 @@ export default function WithdrawLiquidity() {
 
   // Current liquidity of the position
   const { data: positionLiquidity } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "positionLiquidity8D11C045",
     args: [token0.address, BigInt(positionId ?? 0)],
   });
 
   const { data: poolSqrtPriceX96 } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
   });

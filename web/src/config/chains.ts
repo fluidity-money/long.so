@@ -1,6 +1,7 @@
 import { arbitrumSepolia as baseArbitrumSepolia } from "wagmi/chains";
 import z from "zod";
 import { defineChain } from "viem";
+import "wagmi";
 
 const networkSchema = z.object({
   id: z.number(),
@@ -53,6 +54,10 @@ export const allTestnets = [superpositionTestnet, arbitrumSepolia] as const;
 export const allMainnets = [] as const;
 
 export const allChains = [...allTestnets, ...allMainnets] as const;
+
+declare module "wagmi" {
+  function useChainId(): (typeof allChains)[number]["id"];
+}
 
 // validate all chains
 const chainValidation = z.array(networkSchema).safeParse(allChains);

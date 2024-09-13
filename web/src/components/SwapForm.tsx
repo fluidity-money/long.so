@@ -28,9 +28,7 @@ import {
 } from "wagmi";
 import { formatEther, maxUint256 } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
-import { ammAddress } from "@/lib/addresses";
-import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
-import { fUSDC } from "@/config/tokens";
+import { useTokens } from "@/config/tokens";
 import { LoaderIcon } from "lucide-react";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
@@ -44,6 +42,7 @@ import {
 import { RewardsBreakdown } from "@/components/RewardsBreakdown";
 import { useRouter } from "next/navigation";
 import { TokenIcon } from "./TokenIcon";
+import { useContracts } from "@/config/contracts";
 
 const SwapFormFragment = graphql(`
   fragment SwapFormFragment on SeawaterPool {
@@ -132,6 +131,8 @@ export const SwapForm = () => {
 
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
+  const fUSDC = useTokens(expectedChainId, "fusdc");
+  const ammContract = useContracts(expectedChainId, "amm");
   const isCorrectChain = useMemo(
     () => chainId === expectedChainId,
     [chainId, expectedChainId],
@@ -155,16 +156,16 @@ export const SwapForm = () => {
 
   // price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     account: simulateAccount,
     functionName: "sqrtPriceX967B8F5FC5",
     args: [poolAddress],
   });
 
   const { data: token1SqrtPriceX96 } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     account: simulateAccount,
     functionName: "sqrtPriceX967B8F5FC5",
     args: [token1.address],
@@ -190,9 +191,9 @@ export const SwapForm = () => {
 
   const { error: quote1Error, isLoading: quote1IsLoading } =
     useSimulateContract({
-      address: ammAddress,
+      address: ammContract.address,
       account: simulateAccount,
-      abi: seawaterContract.abi,
+      abi: ammContract.abi,
       functionName: "quote72E2ADE7",
       args: [
         poolAddress,
@@ -213,23 +214,23 @@ export const SwapForm = () => {
     if (isSwappingBaseAsset) {
       // if one of the assets is fusdc, use swap1
       return {
-        address: ammAddress,
-        abi: seawaterContract.abi,
+        address: ammContract.address,
+        abi: ammContract.abi,
         functionName: "swap904369BE",
         args: [token1.address, false, BigInt(token0AmountRaw ?? 0), maxUint256],
       } as const;
     } else if (token1.address === fUSDC.address) {
       return {
-        address: ammAddress,
-        abi: seawaterContract.abi,
+        address: ammContract.address,
+        abi: ammContract.abi,
         functionName: "swap904369BE",
         args: [token0.address, true, BigInt(token0AmountRaw ?? 0), maxUint256],
       } as const;
     } else {
       // if both of the assets aren't fusdc, use swap2
       return {
-        address: ammAddress,
-        abi: seawaterContract.abi,
+        address: ammContract.address,
+        abi: ammContract.abi,
         functionName: "swap2ExactIn41203F1D",
         args: [
           token0.address,
@@ -239,7 +240,13 @@ export const SwapForm = () => {
         ],
       } as const;
     }
-  }, [isSwappingBaseAsset, token0AmountRaw, token0.address, token1.address]);
+  }, [
+    isSwappingBaseAsset,
+    token0AmountRaw,
+    token0.address,
+    token1.address,
+    ammContract,
+  ]);
 
   // TODO this is in ETH(/SPN), not USD
   useEffect(() => {
@@ -263,8 +270,8 @@ export const SwapForm = () => {
 
   const { error: quote2Error, isLoading: quote2IsLoading } =
     useSimulateContract({
-      address: ammAddress,
-      abi: seawaterContract.abi,
+      address: ammContract.address,
+      abi: ammContract.abi,
       account: simulateAccount,
       functionName: "quote2CD06B86E",
       args: [

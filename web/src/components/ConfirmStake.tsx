@@ -13,16 +13,13 @@ import {
   useWaitForTransactionReceipt,
 } from "wagmi";
 import useWriteContract from "@/fixtures/wagmi/useWriteContract";
-import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import {
   sqrtPriceX96ToPrice,
   getLiquidityForAmounts,
   snapTickToSpacing,
 } from "@/lib/math";
 import { useEffect, useCallback, useMemo } from "react";
-import { erc20Abi, Hash, hexToBigInt, maxUint256 } from "viem";
-import { ammAddress } from "@/lib/addresses";
-import LightweightERC20 from "@/lib/abi/LightweightERC20";
+import { Hash, hexToBigInt, maxUint256 } from "viem";
 import Confirm from "@/components/sequence/Confirm";
 import { EnableSpending } from "@/components/sequence/EnableSpending";
 import { Fail } from "@/components/sequence/Fail";
@@ -31,7 +28,8 @@ import {
   getFormattedPriceFromAmount,
   getUsdTokenAmountsForPosition,
 } from "@/lib/amounts";
-import { fUSDC } from "@/config/tokens";
+import { getTokenFromAddress, useTokens } from "@/config/tokens";
+import { useContracts } from "@/config/contracts";
 import { TokenIcon } from "./TokenIcon";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usePositions } from "@/hooks/usePostions";
@@ -51,6 +49,8 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
 
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
+  const fUSDC = useTokens(expectedChainId, "fusdc");
+  const ammContract = useContracts(expectedChainId, "amm");
   const showBoostIncentives = useFeatureFlag("ui show boost incentives");
   const showStakeApy = useFeatureFlag("ui show stake apy");
 
@@ -75,8 +75,8 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
 
   // Price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
   });
@@ -95,34 +95,34 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   // read the allowance of the token
   const { data: allowanceDataToken0 } = useSimulateContract({
     address: token0.address,
-    abi: LightweightERC20,
+    abi: getTokenFromAddress(expectedChainId, token0.address)?.abi,
     // @ts-ignore this needs to use useSimulateContract which breaks the types
     functionName: "allowance",
     // @ts-ignore
-    args: [address as Hash, ammAddress],
+    args: [address as Hash, ammContract.address],
   });
 
   const { data: allowanceDataToken1 } = useSimulateContract({
     address: token1.address,
-    abi: LightweightERC20,
+    abi: getTokenFromAddress(expectedChainId, token1.address)?.abi,
     // @ts-ignore this needs to use useSimulateContract which breaks the types
     functionName: "allowance",
     // @ts-ignore
-    args: [address as Hash, ammAddress],
+    args: [address as Hash, ammContract.address],
   });
 
   // Current tick of the pool
   const { data: curTickNum } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "curTick181C6FD9",
     args: [token0.address],
   });
   const curTick = { result: BigInt(curTickNum?.result ?? 0) };
 
   const { data: tickSpacing } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "tickSpacing653FE28F",
     args: [token0.address],
   });
@@ -191,8 +191,8 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     const upper = snapTickToSpacing(tickUpper, spacing);
 
     writeContractMint({
-      address: ammAddress,
-      abi: seawaterContract.abi,
+      address: ammContract.address,
+      abi: ammContract.abi,
       functionName: "mintPositionBC5B086D",
       args: [token0.address, lower, upper],
     });
@@ -219,13 +219,13 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const updatePosition = useCallback(
     (id: bigint) => {
       writeContractUpdatePosition({
-        address: ammAddress,
-        abi: seawaterContract.abi,
+        address: ammContract.address,
+        abi: ammContract.abi,
         functionName: "updatePositionC7F1F740",
         args: [token0.address, id, delta],
       });
     },
-    [writeContractUpdatePosition, delta, token0],
+    [writeContractUpdatePosition, delta, token0, ammContract],
   );
 
   /**
@@ -240,9 +240,9 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     ) {
       writeContractApprovalToken1({
         address: token1.address,
-        abi: erc20Abi,
+        abi: getTokenFromAddress(expectedChainId, token1.address)!.abi,
         functionName: "approve",
-        args: [ammAddress, maxUint256],
+        args: [ammContract.address, maxUint256],
       });
     } else {
       updatePosition(hexToBigInt(mintPositionId as Hash));
@@ -265,14 +265,20 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     ) {
       writeContractApprovalToken0({
         address: token0.address,
-        abi: erc20Abi,
+        abi: getTokenFromAddress(expectedChainId, token0.address)!.abi,
         functionName: "approve",
-        args: [ammAddress, maxUint256],
+        args: [ammContract.address, maxUint256],
       });
     } else {
       approveToken1();
     }
-  }, [allowanceDataToken0, writeContractApprovalToken0, token0, approveToken1]);
+  }, [
+    allowanceDataToken0,
+    writeContractApprovalToken0,
+    token0,
+    ammContract,
+    approveToken1,
+  ]);
 
   // once we have the position ID, approve the AMM to spend the token
   useEffect(() => {
@@ -323,6 +329,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
           upper: tickUpper,
         };
         getUsdTokenAmountsForPosition(
+          expectedChainId,
           position,
           token0,
           Number(tokenPrice),

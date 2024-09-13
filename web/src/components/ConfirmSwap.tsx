@@ -12,12 +12,9 @@ import {
   useWaitForTransactionReceipt,
 } from "wagmi";
 import useWriteContract from "@/fixtures/wagmi/useWriteContract";
-import { output as seawaterContract } from "@/lib/abi/ISeawaterAMM";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { useEffect, useCallback, useMemo } from "react";
-import { erc20Abi, formatEther, Hash, maxUint256 } from "viem";
-import { ammAddress } from "@/lib/addresses";
-import LightweightERC20 from "@/lib/abi/LightweightERC20";
+import { formatEther, Hash, maxUint256 } from "viem";
 import Confirm from "@/components/sequence/Confirm";
 import { EnableSpending } from "@/components/sequence/EnableSpending";
 import { Fail } from "@/components/sequence/Fail";
@@ -26,7 +23,8 @@ import {
   getFormattedPriceFromAmount,
   snapAmountToDecimals,
 } from "@/lib/amounts";
-import { fUSDC } from "@/config/tokens";
+import { getTokenFromAddress, useTokens } from "@/config/tokens";
+import { useContracts } from "@/config/contracts";
 import { RewardsBreakdown } from "./RewardsBreakdown";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { TokenIcon } from "./TokenIcon";
@@ -39,6 +37,8 @@ export const ConfirmSwap = () => {
 
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
+  const ammContract = useContracts(expectedChainId, "amm");
+  const fUSDC = useTokens(expectedChainId, "fusdc");
 
   const {
     token0,
@@ -57,15 +57,15 @@ export const ConfirmSwap = () => {
 
   // price of the current pool
   const { data: token0SqrtPriceX96 } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "sqrtPriceX967B8F5FC5",
     args: [token0.address],
   });
 
   const { data: token1SqrtPriceX96 } = useSimulateContract({
-    address: ammAddress,
-    abi: seawaterContract.abi,
+    address: ammContract.address,
+    abi: ammContract.abi,
     functionName: "sqrtPriceX967B8F5FC5",
     args: [token1.address],
   });
@@ -79,23 +79,23 @@ export const ConfirmSwap = () => {
     if (isSwappingBaseAsset) {
       // if one of the assets is fusdc, use swap1
       return {
-        address: ammAddress,
-        abi: seawaterContract.abi,
+        address: ammContract.address,
+        abi: ammContract.abi,
         functionName: "swap904369BE",
         args: [token1.address, false, BigInt(token0AmountRaw ?? 0), maxUint256],
       } as const;
     } else if (token1.address === fUSDC.address) {
       return {
-        address: ammAddress,
-        abi: seawaterContract.abi,
+        address: ammContract.address,
+        abi: ammContract.abi,
         functionName: "swap904369BE",
         args: [token0.address, true, BigInt(token0AmountRaw ?? 0), maxUint256],
       } as const;
     } else {
       // if both of the assets aren't fusdc, use swap2
       return {
-        address: ammAddress,
-        abi: seawaterContract.abi,
+        address: ammContract.address,
+        abi: ammContract.abi,
         functionName: "swap2ExactIn41203F1D",
         args: [
           token0.address,
@@ -105,7 +105,13 @@ export const ConfirmSwap = () => {
         ],
       } as const;
     }
-  }, [isSwappingBaseAsset, token0AmountRaw, token0.address, token1.address]);
+  }, [
+    isSwappingBaseAsset,
+    ammContract,
+    token0AmountRaw,
+    token0.address,
+    token1.address,
+  ]);
 
   // set up write hooks
   const {
@@ -159,7 +165,7 @@ export const ConfirmSwap = () => {
   // read the allowance of the token
   const { data: allowanceData } = useSimulateContract({
     address: token0.address,
-    abi: LightweightERC20,
+    abi: getTokenFromAddress(chainId, token0.address)?.abi,
     // @ts-ignore this needs to use useSimulateContract which breaks the types
     functionName: "allowance",
     // @ts-ignore
@@ -195,9 +201,9 @@ export const ConfirmSwap = () => {
     if (!allowanceData?.result || allowanceData.result === BigInt(0)) {
       writeContractApproval({
         address: token0.address,
-        abi: erc20Abi,
+        abi: getTokenFromAddress(chainId, token0.address)!.abi,
         functionName: "approve",
-        args: [ammAddress, maxUint256],
+        args: [ammContract.address, maxUint256],
       });
     } else {
       performSwap();
