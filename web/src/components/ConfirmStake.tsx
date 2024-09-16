@@ -36,21 +36,33 @@ import { usePositions } from "@/hooks/usePostions";
 
 type ConfirmStakeProps =
   | {
-      mode: "new";
-      positionId?: never;
-    }
+    mode: "new";
+    // vesting represents a change in vesting state 
+    // for a new position it is true if it should be vested
+    // for an existing position it is true if it is already vested
+    vesting: boolean;
+    positionId?: never;
+  }
   | {
-      mode: "existing";
-      positionId: number;
-    };
+    mode: "existing";
+    // vesting represents a change in vesting state 
+    // for a new position it is true if it should be vested
+    // for an existing position it is true if it is already vested
+    vesting: boolean;
+    positionId: number;
+  };
 
-export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
+export const ConfirmStake = ({ mode, positionId, vesting, }: ConfirmStakeProps) => {
   const router = useRouter();
+
+  const isVesting = mode === "new" && vesting;
+  const isVested = mode === "existing" && vesting;
 
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
   const fUSDC = useTokens(expectedChainId, "fusdc");
   const ammContract = useContracts(expectedChainId, "amm");
+  const leoContract = useContracts(expectedChainId, "leo");
   const showBoostIncentives = useFeatureFlag("ui show boost incentives");
   const showStakeApy = useFeatureFlag("ui show stake apy");
 
@@ -155,18 +167,39 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     isPending: isUpdatePositionPending,
     reset: resetUpdatePosition,
   } = useWriteContract();
+  const {
+    writeContractAsync: writeContractVestPosition,
+    data: vestPositionData,
+    error: vestPositionError,
+    isPending: isVestPositionPending,
+    reset: resetVestPosition,
+  } = useWriteContract();
+  const {
+    writeContractAsync: writeContractDivestPosition,
+    data: divestPositionData,
+    error: divestPositionError,
+    reset: resetDivestPosition,
+  } = useWriteContract();
+
+  const divestPositionResult = useWaitForTransactionReceipt({
+    hash: divestPositionData,
+  });
+
+  const vestPositionResult = useWaitForTransactionReceipt({
+    hash: vestPositionData,
+  });
 
   const delta = useMemo(
     () =>
       !curTick || tickLower === undefined || tickUpper === undefined
         ? 0n
         : getLiquidityForAmounts(
-            curTick.result,
-            BigInt(tickLower),
-            BigInt(tickUpper),
-            BigInt(token0AmountRaw),
-            BigInt(token1AmountRaw),
-          ),
+          curTick.result,
+          BigInt(tickLower),
+          BigInt(tickUpper),
+          BigInt(token0AmountRaw),
+          BigInt(token1AmountRaw),
+        ),
     [curTick, tickLower, tickUpper, token0AmountRaw, token1AmountRaw],
   );
 
@@ -215,6 +248,26 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
 
   // extract the position ID from the mintPosition transaction
   const mintPositionId = result?.data?.logs[0].topics[1];
+
+  // divest if already vested before updating
+  const divestPosition = useCallback(
+    (id: bigint) => {
+      writeContractDivestPosition({
+        address: leoContract.address,
+        abi: leoContract.abi,
+        functionName: "divestPosition",
+        args: [token0.address, BigInt(id ?? 0)],
+      });
+    },
+    [writeContractDivestPosition, token0],
+  )
+
+  // once token is divested, continue to updating
+  useEffect(() => {
+    if (!divestPositionResult.data || !positionId) return;
+    // the position already exists so use positionId rather than mintPositionId
+    updatePosition(BigInt(positionId));
+  }, [divestPositionResult.data, positionId]);
 
   const updatePosition = useCallback(
     (id: bigint) => {
@@ -316,8 +369,30 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
   const updatePositionResult = useWaitForTransactionReceipt({
     hash: updatePositionData,
   });
+
   useEffect(() => {
     if (updatePositionResult.isSuccess) {
+      // if we're vesting in Leo, do so now
+      if (isVesting) {
+        switch (true) {
+          // haven't yet called vest position, so call it and wait
+          case vestPositionResult.fetchStatus === "idle" && !vestPositionResult.data:
+            writeContractVestPosition({
+              address: leoContract.address,
+              abi: leoContract.abi,
+              functionName: "vestPosition",
+              args: [token0.address, BigInt(positionId ?? 0)],
+            });
+            return;
+          // vest position call is pending, so wait
+          case isVestPositionPending:
+            return;
+          // call has completed, so proceed
+          default:
+            break;
+        }
+      }
+
       const id = positionId ?? Number(mintPositionId);
       if (id && tickLower && tickUpper) {
         const position = {
@@ -327,6 +402,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
           },
           lower: tickLower,
           upper: tickUpper,
+          isVested,
         };
         getUsdTokenAmountsForPosition(
           expectedChainId,
@@ -352,7 +428,7 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
         );
       }
     }
-  }, [updatePositionResult.isSuccess]);
+  }, [updatePositionResult.isSuccess, vestPositionResult]);
 
   // step 1 pending
   if (isMintPending || (mintData && result?.isPending)) {
@@ -416,6 +492,8 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
           resetUpdatePosition();
           resetApproveToken0();
           resetApproveToken1();
+          resetVestPosition();
+          resetDivestPosition();
           updatePositionResult.refetch();
           router.push("/stake");
         }}
@@ -428,13 +506,17 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
     mintError ||
     approvalErrorToken0 ||
     approvalErrorToken1 ||
-    updatePositionError
+    updatePositionError ||
+    divestPositionError ||
+    vestPositionError
   ) {
     const error =
       mintError ||
       approvalErrorToken0 ||
       approvalErrorToken1 ||
-      updatePositionError;
+      updatePositionError ||
+      divestPositionError ||
+      vestPositionError;
     return <Fail text={(error as any)?.shortMessage} />;
   }
 
@@ -688,10 +770,13 @@ export const ConfirmStake = ({ mode, positionId }: ConfirmStakeProps) => {
             onClick={() => {
               mode === "new"
                 ? createPosition()
-                : updatePosition(BigInt(positionId));
+                : isVested
+                  ? divestPosition(BigInt(positionId))
+                  : updatePosition(BigInt(positionId));
             }}
           >
-            Confirm Stake
+
+            {isVesting ? "Confirm Stake and Vest" : isVested ? "Confirm Harvest and Update Stake" : "Confirm Stake"}
           </Button>
         </div>
       </motion.div>

@@ -56,16 +56,17 @@ import { getFormattedPriceFromAmount } from "@/lib/amounts";
 import { TokenIcon } from "./TokenIcon";
 import LiquidityRangeVisualizer from "./LiquidityRangeVisualizer";
 import { useContracts } from "@/config/contracts";
+import { CheckboxContainer } from "./ui/checkbox";
 
 type StakeFormProps = { poolId: string } & (
   | {
-      mode: "new";
-      positionId?: never;
-    }
+    mode: "new";
+    positionId?: never;
+  }
   | {
-      mode: "existing";
-      positionId: number;
-    }
+    mode: "existing";
+    positionId: number;
+  }
 );
 
 const StakeFormFragment = graphql(`
@@ -95,6 +96,7 @@ const PositionsFragment = graphql(`
         positionId
         lower
         upper
+        isVested
       }
     }
   }
@@ -181,6 +183,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       ),
     [positionData_, positionId],
   );
+  const { isVested } = positionData || { isVested: false };
+  const [isVesting, setIsVesting] = useState(isVested);
 
   useEffect(() => {
     setTickLower(positionData?.lower ?? 0);
@@ -198,12 +202,13 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const showCampaignBanner = useFeatureFlag("ui show campaign banner");
 
   const showBoostIncentives = useFeatureFlag("ui show boost incentives");
+  const showLeo = useFeatureFlag("ui show leo");
 
   const onSubmit = () => {
     if (mode === "new") {
-      router.push("/stake/pool/create/confirm");
+      router.push(`/stake/pool/create/confirm?isVested=${isVesting}`);
     } else {
-      router.push(`/stake/pool/confirm-liquidity?positionId=${positionId}`);
+      router.push(`/stake/pool/confirm-liquidity?positionId=${positionId}&isVested=${isVested}`);
     }
   };
 
@@ -313,11 +318,11 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const setMaxBalance = (token: TokenType) => {
     token.address === token0.address
       ? setToken0AmountRaw(
-          token0Balance?.value.toString() ?? token0Amount ?? "0",
-        )
+        token0Balance?.value.toString() ?? token0Amount ?? "0",
+      )
       : setToken1AmountRaw(
-          token1Balance?.value.toString() ?? token1Amount ?? "0",
-        );
+        token1Balance?.value.toString() ?? token1Amount ?? "0",
+      );
   };
 
   const usdPriceToken0 =
@@ -975,9 +980,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         <div
           className={cn(
             "mt-[15px] h-[210px] w-[318px] rounded-lg bg-black px-[11px] pt-[16px] text-xs text-white md:w-[392px]",
-            {
-              "h-[120px]": !showBoostIncentives,
-            },
+            showLeo && showBoostIncentives ? "h-[250px]" :
+              showLeo ? "h-[150px]" :
+                showBoostIncentives ? "h-[210px]" :
+                  "h-[120px]"
           )}
         >
           <div>Yield Breakdown</div>
@@ -1059,12 +1065,54 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               </div>
             </>
           )}
+          {showLeo &&
+            <CheckboxContainer
+              enabled={mode === "new"}
+              checked={isVesting || isVested}
+              setChecked={setIsVesting}
+            >
+              {mode === "new" ?
+                "Stake position NFT to earn liquidity rewards" :
+                "Unstake position NFT to add liquidity"
+              }
+            </CheckboxContainer>
+          }
         </div>
 
         <div className="mt-[20px] w-[318px] md:hidden">
-          <Index onSlideComplete={onSubmit}>
-            <div className="text-xs">Stake</div>
-          </Index>
+          {address ? (
+            isCorrectChain ? (
+              <Index
+                onSlideComplete={onSubmit}
+                disabled={!token0Amount}
+              >
+                <div className="text-xs">
+                  {
+                    mode === "new" && isVesting ? "Stake with liquidity rewards" :
+                      mode === "new" ? "Stake" :
+                        isVested ? "Unstake NFT and add liquidity" : "Stake"
+                  }
+                </div>
+              </Index>
+            ) : (
+              <Index
+                onSlideComplete={() => open({ view: "Networks" })}
+                disabled={!token0Amount}
+              >
+                <div className="text-xs">
+                  Wrong Network
+                </div>
+              </Index>
+            )
+          ) : (
+            <Index
+              onSlideComplete={() => open()}
+            >
+              <div className="text-xs">
+                Connect Wallet
+              </div>
+            </Index>
+          )}
         </div>
 
         <div className="mt-[20px] hidden md:inline-flex md:w-[392px]">
@@ -1075,7 +1123,11 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 onClick={onSubmit}
                 disabled={!token0Amount}
               >
-                Stake
+                {
+                  mode === "new" && isVesting ? "Stake with liquidity rewards" :
+                    mode === "new" ? "Stake" :
+                      isVested ? "Unstake NFT and add liquidity" : "Stake"
+                }
               </Button>
             ) : (
               <Button
@@ -1088,7 +1140,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               </Button>
             )
           ) : (
-            <Button className={"w-full"} onClick={() => open()}>
+            <Button
+              className={"w-full"}
+              onClick={() => open()}
+            >
               Connect Wallet
             </Button>
           )}

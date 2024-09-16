@@ -23,17 +23,22 @@ import { Fail } from "@/components/sequence/Fail";
 import { TokenIcon } from "@/components/TokenIcon";
 import { usePositions } from "@/hooks/usePostions";
 import { useContracts } from "@/config/contracts";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 export default function ConfirmWithdrawLiquidity() {
   const router = useRouter();
   const params = useSearchParams();
 
+  const showLeo = useFeatureFlag("ui show leo");
+
   const positionId = params.get("positionId") ?? "0";
+  const isDivesting = showLeo && params.get("divestPosition") === "true";
 
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
   const fUSDC = useTokens(expectedChainId, "fusdc");
   const ammContract = useContracts(expectedChainId, "amm");
+  const leoContract = useContracts(expectedChainId, "leo");
 
   useEffect(() => {
     if (!address || chainId !== expectedChainId) router.back();
@@ -86,6 +91,18 @@ export default function ConfirmWithdrawLiquidity() {
     hash: collectData,
   });
 
+  const {
+    writeContractAsync: writeContractDivestPosition,
+    data: divestPositionData,
+    error: divestPositionError,
+    isPending: isDivestPositionPending,
+    reset: resetDivestPosition,
+  } = useWriteContract();
+
+  const divestPositionResult = useWaitForTransactionReceipt({
+    hash: divestPositionData,
+  });
+
   const updatePosition = useCallback(
     (id: bigint) => {
       writeContractUpdatePosition({
@@ -110,6 +127,18 @@ export default function ConfirmWithdrawLiquidity() {
     [writeContractCollect, token0, ammContract],
   );
 
+  const divestPosition = useCallback(
+    (id: bigint) => {
+      writeContractDivestPosition({
+        address: leoContract.address,
+        abi: leoContract.abi,
+        functionName: "divestPosition",
+        args: [token0.address, BigInt(id ?? 0)],
+      });
+    },
+    [writeContractDivestPosition, token0],
+  )
+
   // price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammContract.address,
@@ -133,7 +162,9 @@ export default function ConfirmWithdrawLiquidity() {
     const [{ amount0, amount1 }] = unclaimedRewardsData?.result || [
       { amount0: 0, amount1: 0 },
     ];
-    if (isWithdrawingEntirePosition && (amount0 > 0 || amount1 > 0)) {
+    if (isDivesting) {
+      divestPosition(BigInt(positionId))
+    } else if (isWithdrawingEntirePosition && (amount0 > 0 || amount1 > 0)) {
       collect(id);
     } else {
       updatePosition(BigInt(positionId));
@@ -156,6 +187,7 @@ export default function ConfirmWithdrawLiquidity() {
           },
           lower: tickLower,
           upper: tickUpper,
+          isVested: !isDivesting,
         };
         getUsdTokenAmountsForPosition(
           expectedChainId,
@@ -183,7 +215,25 @@ export default function ConfirmWithdrawLiquidity() {
     }
   }, [updatePositionResult.isSuccess]);
 
-  // step 1 - collect yield from position if emptying entire balance
+  // TODO - may need to call Leo and Seawater's respective collect functions
+
+  // step 1 - divest from Leo if position is vested
+  if (
+    isDivesting &&
+    (isDivestPositionPending || (divestPositionData && divestPositionResult?.isPending))
+  ) {
+    return (
+      <Confirm
+        text={"Divest Position"}
+        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+        transactionHash={divestPositionData}
+      />
+    );
+
+  }
+
+  // step 2 - collect yield from position if emptying entire balance
   if (
     isWithdrawingEntirePosition &&
     (isCollectPending || (collectData && collectResult?.isPending))
@@ -198,7 +248,7 @@ export default function ConfirmWithdrawLiquidity() {
     );
   }
 
-  // step 2 - update position
+  // step 3 - update position
   if (
     isUpdatePositionPending ||
     (updatePositionData && updatePositionResult?.isPending)
@@ -220,6 +270,7 @@ export default function ConfirmWithdrawLiquidity() {
         onDone={() => {
           resetUpdatePosition();
           resetCollect();
+          resetDivestPosition();
           router.push("/stake");
         }}
         transactionHash={updatePositionResult.data?.transactionHash}
@@ -228,7 +279,7 @@ export default function ConfirmWithdrawLiquidity() {
   }
 
   // error
-  if (updatePositionError || collectError) {
+  if (updatePositionError || collectError || divestPositionError) {
     const error = updatePositionError || collectError;
     return <Fail text={(error as any)?.shortMessage} />;
   }
@@ -263,10 +314,10 @@ export default function ConfirmWithdrawLiquidity() {
             {token0.address === fUSDC.address
               ? token0Amount
               : getFormattedPriceFromAmount(
-                  token0Amount,
-                  tokenPrice,
-                  fUSDC.decimals,
-                )}
+                token0Amount,
+                tokenPrice,
+                fUSDC.decimals,
+              )}
           </div>
         </div>
 
@@ -281,10 +332,10 @@ export default function ConfirmWithdrawLiquidity() {
             {token1.address === fUSDC.address
               ? token1Amount
               : getFormattedPriceFromAmount(
-                  token1Amount,
-                  tokenPrice,
-                  fUSDC.decimals,
-                )}
+                token1Amount,
+                tokenPrice,
+                fUSDC.decimals,
+              )}
           </div>
         </div>
 

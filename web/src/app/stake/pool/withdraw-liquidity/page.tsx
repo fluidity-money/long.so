@@ -21,6 +21,8 @@ import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { TokenIcon } from "@/components/TokenIcon";
 import { useTokens } from "@/config/tokens";
 import { useContracts } from "@/config/contracts";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { CheckboxContainer } from "@/components/ui/checkbox";
 
 const PositionsFragment = graphql(`
   fragment WithdrawPositionsFragment on Wallet {
@@ -42,6 +44,7 @@ const PositionsFragment = graphql(`
             valueScaled
           }
         }
+        isVested
       }
     }
   }
@@ -52,6 +55,8 @@ export default function WithdrawLiquidity() {
   const params = useSearchParams();
 
   const positionId = params.get("positionId");
+
+  const showLeo = useFeatureFlag("ui show leo");
 
   useEffect(() => {
     if (!positionId && typeof window !== undefined) router.back();
@@ -115,7 +120,7 @@ export default function WithdrawLiquidity() {
       p.positionId.toString() === positionId &&
       p.owner.address === address?.toLowerCase(),
   );
-  const { upper: upperTick, lower: lowerTick } = position || {};
+  const { upper: upperTick, lower: lowerTick, isVested } = position || { isVested: false };
 
   // update ticks in stakeStore based on the current position
   useEffect(() => {
@@ -162,15 +167,21 @@ export default function WithdrawLiquidity() {
     }
   };
 
+  const [isDivesting, setIsDivesting] = useState(false)
+
   const onSubmit = () => {
-    router.push(`/stake/pool/confirm-withdraw?positionId=${positionId}`);
+    router.push(`/stake/pool/confirm-withdraw?positionId=${positionId}&divestPosition=${isDivesting}`);
   };
 
   return (
     <div className="flex flex-col items-center">
       <motion.div
         layoutId="modal"
-        className="relative z-10 h-[180px] w-[317px] rounded-lg bg-black px-[18px] pt-[10px] text-white md:h-[198px] md:w-[394px]"
+        className={cn(
+
+          "relative z-10 h-[180px] w-[317px] rounded-lg bg-black px-[18px] pt-[10px] text-white md:h-[215px] md:h-[198px]",
+          showLeo && "h-[210px] md:h-[218px]"
+        )}
       >
         <motion.div className="flex flex-col" layout>
           <div className={cn("absolute -top-[15px] left-0 flex flex-row")}>
@@ -280,6 +291,15 @@ export default function WithdrawLiquidity() {
               </div>
             </RadioGroup.Root>
           </div>
+          {showLeo &&
+            <CheckboxContainer
+              enabled={isVested}
+              checked={isDivesting}
+              setChecked={setIsDivesting}
+            >
+              Harvest and burn the NFT of this position
+            </CheckboxContainer>
+          }
         </motion.div>
       </motion.div>
 
@@ -292,8 +312,19 @@ export default function WithdrawLiquidity() {
 
       {isCorrectChain ? (
         <div className="z-10 mt-[20px] w-[318px] md:hidden">
-          <Slider onSlideComplete={onSubmit}>
-            <div className="text-xs font-medium">Withdraw</div>
+          <Slider
+            disabled={isVested && !isDivesting}
+            onSlideComplete={onSubmit}
+          >
+            <div className="text-xs font-medium">
+              {
+                isVested && !isDivesting ?
+                  "NFT must be harvested" :
+                  isVested && isDivesting ?
+                    "Harvest and Withdraw" :
+                    "Withdraw"
+              }
+            </div>
           </Slider>
         </div>
       ) : (
@@ -311,8 +342,18 @@ export default function WithdrawLiquidity() {
 
       {isCorrectChain ? (
         <div className="z-10 mt-[20px] hidden md:inline">
-          <Button className="h-[53.92px] w-[395px]" onClick={onSubmit}>
-            Withdraw
+          <Button
+            disabled={isVested && !isDivesting}
+            className="h-[53.92px] w-[395px]"
+            onClick={onSubmit}
+          >
+            {
+              isVested && !isDivesting ?
+                "NFT must be harvested" :
+                isVested && isDivesting ?
+                  "Harvest and Withdraw" :
+                  "Withdraw"
+            }
           </Button>
         </div>
       ) : (
