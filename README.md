@@ -15,9 +15,7 @@ https://arbitrum.io/stylus
 
 ## Addresses
 
-Deployment addresses are available at [DEPLOYMENT.md](DEPLOYMENT.md).
-
-Architecture information is available at [ARCHITECTURE.md](ARCHITECTURE.md).
+Deployment addresses are available in pkg/README.md.
 
 ## Contributing
 

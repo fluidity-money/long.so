@@ -214,7 +214,10 @@ impl Leo {
 
         // Make sure the sender owns the campaign balance.
         let campaign_bal_owner = self.campaign_balances.getter(identifier).owner.get();
-        assert_or!(campaign_bal_owner == msg::sender(), Error::NotCampaignOwner);
+        assert_or!(
+            campaign_bal_owner.is_zero() || campaign_bal_owner == msg::sender(),
+            Error::NotCampaignOwner
+        );
 
         // Set everything related to the pool.
         campaign
