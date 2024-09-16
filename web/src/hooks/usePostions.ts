@@ -28,6 +28,7 @@ export type Position = {
       valueUsd: string;
     };
   };
+  isVested: boolean;
 };
 
 interface PositionStore {
@@ -121,6 +122,7 @@ const PositionsFragment = graphql(`
             valueUsd
           }
         }
+        isVested
       }
     }
   }

@@ -157,6 +157,11 @@ export interface FeatureFlags {
    * Show user notes in UI
    */
   "ui show banners": boolean;
+
+  /**
+   * Show Leo-related vesting and divesting in the UI
+   */
+  "ui show leo": boolean;
 }
 
 /**
