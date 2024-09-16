@@ -1,7 +1,11 @@
 "use client";
 
 import { ConfirmStake } from "@/components/ConfirmStake";
+import { useSearchParams } from "next/navigation";
 
 export default function ConfirmCreatePool() {
-  return <ConfirmStake mode="new" />;
+  const params = useSearchParams();
+  const isVested = params.get("isVested") === "true";
+
+  return <ConfirmStake mode="new" vesting={isVested}/>;
 }
