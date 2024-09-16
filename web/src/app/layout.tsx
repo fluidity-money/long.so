@@ -11,9 +11,6 @@ import { NavigationMenu } from "@/app/_layout/NavigationMenu";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { FeatureFlagConfig } from "@/app/_layout/FeatureFlagConfig";
-import request from "graphql-request";
-import appConfig from "@/config";
-import { graphqlQueryGlobal } from "@/hooks/useGraphql";
 import PopulateQueryCache from "@/app/PopulateQueryCache";
 import BottomBanner from "@/components/Banners/BottomBanner";
 import ErrorReportingDialog from "@/components/ErrorReportingDialog";
@@ -67,12 +64,6 @@ export default async function RootLayout({
 }) {
   const gitHash = process.env.GIT_HASH;
 
-  // make server-side requests for pre-fetching data
-  const data = await request(
-    appConfig.NEXT_PUBLIC_LONGTAIL_GRAPHQL_URL,
-    graphqlQueryGlobal,
-  );
-
   const featuresDataRequest = await fetch(
     "https://features.long.so/features.json",
   );
@@ -84,7 +75,7 @@ export default async function RootLayout({
         className={cn("flex min-h-screen flex-col bg-white", inter.className)}
       >
         <Provider>
-          <PopulateQueryCache data={data} featuresData={featuresData} />
+          <PopulateQueryCache featuresData={featuresData} />
           <div className="iridescent-blur absolute left-1/2 top-[180px] size-full max-h-[305px] max-w-[557px] -translate-x-1/2" />
 
           <header className="z-20 p-8">

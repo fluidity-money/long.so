@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import request from "graphql-request";
 import appConfig from "@/config";
 import { graphql } from "@/gql";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
+import { useChain } from "@/config/chains";
 
 /**
  * The main GraphQL query to fetch all data. The global query that should be run and
@@ -63,23 +64,25 @@ export const graphqlQueryUser = graphql(`
  * Fetch all data from the global GraphQL endpoint.
  */
 export const useGraphqlGlobal = () => {
+  const chainId = useChainId();
+  const { gqlUrl } = useChain(chainId);
+
   return useQuery({
-    queryKey: ["graphql"],
-    queryFn: () =>
-      request(appConfig.NEXT_PUBLIC_LONGTAIL_GRAPHQL_URL, graphqlQueryGlobal),
+    queryKey: ["graphql", chainId],
+    queryFn: () => request(gqlUrl, graphqlQueryGlobal),
     refetchInterval: 60 * 1000, // 1 minute
   });
 };
 
 export const useGraphqlUser = () => {
   const { address } = useAccount();
-
-  // TODO needs to be replaced with an empty instance of this
+  const chainId = useChainId();
+  const { gqlUrl } = useChain(chainId);
 
   return useQuery({
-    queryKey: ["graphql", address ?? ""],
+    queryKey: ["graphql", chainId, address],
     queryFn: () =>
-      request(appConfig.NEXT_PUBLIC_LONGTAIL_GRAPHQL_URL, graphqlQueryUser, {
+      request(gqlUrl, graphqlQueryUser, {
         wallet: address ?? "",
       }),
     refetchInterval: 20 * 1000, // 20 seconds

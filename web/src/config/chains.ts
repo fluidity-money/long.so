@@ -20,6 +20,7 @@ const networkSchema = z.object({
   }),
   testnet: z.boolean().optional(),
   contracts: z.any().optional(),
+  gqlUrl: z.string().url(),
   // Optional fields
   icon: z.string().optional(),
   icons: z.array(z.string()).optional(),
@@ -39,12 +40,14 @@ export const superpositionTestnet = defineChain({
       url: "https://testnet-explorer.superposition.so",
     },
   },
+  gqlUrl: "https://testnet-graph.long.so",
   icon: "/icons/spn-test.svg",
 });
 
 const arbitrumSepolia = {
   ...baseArbitrumSepolia,
   icon: "/icons/ARB.svg",
+  gqlUrl: "https://arb-sepolia-graph.long.so",
 };
 
 export { arbitrumSepolia };
@@ -57,6 +60,10 @@ export const allChains = [...allTestnets, ...allMainnets] as const;
 
 declare module "wagmi" {
   function useChainId(): (typeof allChains)[number]["id"];
+}
+
+export function useChain(chainId: (typeof allChains)[number]["id"]) {
+  return allChains.find((chain) => chain.id === chainId)!;
 }
 
 // validate all chains

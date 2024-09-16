@@ -1,25 +1,35 @@
 "use client";
 //
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { queryClient } from "@/context";
-import { AllDataQuery } from "@/gql/graphql";
+import request from "graphql-request";
+import { graphqlQueryGlobal } from "@/hooks/useGraphql";
+import { useChainId } from "wagmi";
+import { useChain } from "@/config/chains";
 
 /**
  * This component is used to populate the query cache with the data fetched from the server.
  * To use this fetch the data from the server in a server component and pass it to this component.
  */
 export default function PopulateQueryCache({
-  data,
   featuresData,
 }: {
-  data: AllDataQuery;
   featuresData: any;
 }) {
+  const chainId = useChainId();
+  const chain = useChain(chainId);
+  const fetchQueryData = useCallback(
+    async function () {
+      const data = await request(chain.gqlUrl, graphqlQueryGlobal);
+      queryClient.setQueryData(["graphql", chainId], data);
+    },
+    [chain.gqlUrl, chainId],
+  );
+
   useEffect(() => {
-    // using the same query key as in useGraphql.tsx
-    queryClient.setQueryData(["graphql", ""], data);
-  }, [data]);
+    fetchQueryData();
+  }, [fetchQueryData]);
 
   useEffect(() => {
     // using the same query key as in useFeatureFlag.tsx
