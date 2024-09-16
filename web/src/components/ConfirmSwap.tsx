@@ -169,7 +169,7 @@ export const ConfirmSwap = () => {
     // @ts-ignore this needs to use useSimulateContract which breaks the types
     functionName: "allowance",
     // @ts-ignore
-    args: [address as Hash, ammAddress],
+    args: [address as Hash, ammContract.address],
   });
 
   const usdPriceToken0 = snapAmountToDecimals(
