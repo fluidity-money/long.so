@@ -58,12 +58,16 @@ export default function WithdrawLiquidity() {
 
   const showLeo = useFeatureFlag("ui show leo");
 
-  useEffect(() => {
-    if (!positionId && typeof window !== undefined) router.back();
-  }, [positionId, router]);
-
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
+
+  useEffect(() => {
+    if (
+      (!positionId && typeof window !== undefined) ||
+      (!address)
+    ) router.back();
+  }, [positionId, router, address]);
+
   const fUSDC = useTokens(expectedChainId, "fusdc");
   const ammContract = useContracts(expectedChainId, "amm");
   const isCorrectChain = useMemo(
