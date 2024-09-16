@@ -25,8 +25,8 @@ const chainContracts: {
       abi: contractAbis.amm,
     },
     leo: {
-      abi: contractAbis.leo
-    }
+      abi: contractAbis.leo,
+    },
   },
   98985: {
     amm: { address: "0xE13Fec14aBFbAa5b185cFb46670A56BF072E13b1" },
@@ -38,12 +38,14 @@ const chainContracts: {
   },
 };
 
-const contractKey = <T extends ContractTypes>(sv: T, id: ChainIdTypes) => ({
-  ...chainContracts.defaults[sv],
-  ...chainContracts[id][sv],
-} as {
-  abi: (typeof contractAbis)[T]; address: `0x${string}`
-});
+const contractKey = <T extends ContractTypes>(sv: T, id: ChainIdTypes) =>
+  ({
+    ...chainContracts.defaults[sv],
+    ...chainContracts[id][sv],
+  }) as {
+    abi: (typeof contractAbis)[T];
+    address: `0x${string}`;
+  };
 
 export const contracts = allChains.reduce(
   (acc, v) => {
@@ -52,11 +54,11 @@ export const contracts = allChains.reduce(
         // Typescript can't narrow sv without a condition, so use an exhaustive switch
         switch (sv) {
           case "amm":
-            sacc[sv] = contractKey(sv, v.id)
-            break
+            sacc[sv] = contractKey(sv, v.id);
+            break;
           case "leo":
-            sacc[sv] = contractKey(sv, v.id)
-            break
+            sacc[sv] = contractKey(sv, v.id);
+            break;
           default:
             sv satisfies never;
         }

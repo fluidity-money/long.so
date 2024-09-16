@@ -23,37 +23,45 @@ const checkboxVariants = cva(
 
 interface CheckboxProps
   extends React.InputHTMLAttributes<HTMLInputElement>,
-  VariantProps<typeof checkboxVariants> {
+    VariantProps<typeof checkboxVariants> {
   enabled: boolean;
 }
 
 interface CheckboxContainerProps extends CheckboxProps {
-  setChecked: Dispatch<SetStateAction<boolean>>
+  setChecked: Dispatch<SetStateAction<boolean>>;
 }
 
-const CheckboxContainer = ({ enabled, checked, setChecked, children, ...props }: CheckboxContainerProps) => (
+const CheckboxContainer = ({
+  enabled,
+  checked,
+  setChecked,
+  children,
+  ...props
+}: CheckboxContainerProps) => (
   <div
     onClick={() => enabled && setChecked(!checked)}
     className={cn(
       "mt-[10px]",
-      "flex flex-row items-end gap-1 justify-left cursor-pointer select-none text-xs font-bold underline",
+      "justify-left flex cursor-pointer select-none flex-row items-end gap-1 text-xs font-bold underline",
       !enabled && "cursor-not-allowed text-gray-2",
     )}
   >
-    <Checkbox
-      enabled={enabled}
-      checked={checked}
-      {...props}
-    />
+    <Checkbox enabled={enabled} checked={checked} {...props} />
     {children}
   </div>
 );
 
-const Checkbox = ({ enabled, checked, variant, className, ...props }: CheckboxProps) => (
+const Checkbox = ({
+  enabled,
+  checked,
+  variant,
+  className,
+  ...props
+}: CheckboxProps) => (
   <Input
     className={cn(
       checked && "iridescent",
-      checkboxVariants({ variant, className })
+      checkboxVariants({ variant, className }),
     )}
     autoFocus
     disabled={!enabled}
@@ -61,10 +69,6 @@ const Checkbox = ({ enabled, checked, variant, className, ...props }: CheckboxPr
     type="checkbox"
     {...props}
   />
-
 );
 
-export {
-  Checkbox,
-  CheckboxContainer
-};
+export { Checkbox, CheckboxContainer };

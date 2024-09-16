@@ -1,449 +1,449 @@
 export const ILeo = [
   {
-    "type": "function",
-    "name": "campaignDetails",
-    "inputs": [
+    type: "function",
+    name: "campaignDetails",
+    inputs: [
       {
-        "name": "pool",
-        "type": "address",
-        "internalType": "address"
+        name: "pool",
+        type: "address",
+        internalType: "address",
       },
       {
-        "name": "campaignId",
-        "type": "bytes8",
-        "internalType": "bytes8"
-      }
+        name: "campaignId",
+        type: "bytes8",
+        internalType: "bytes8",
+      },
     ],
-    "outputs": [
+    outputs: [
       {
-        "name": "tickLower",
-        "type": "int32",
-        "internalType": "int32"
+        name: "tickLower",
+        type: "int32",
+        internalType: "int32",
       },
       {
-        "name": "tickUpper",
-        "type": "int32",
-        "internalType": "int32"
+        name: "tickUpper",
+        type: "int32",
+        internalType: "int32",
       },
       {
-        "name": "perSecond",
-        "type": "uint256",
-        "internalType": "uint256"
+        name: "perSecond",
+        type: "uint256",
+        internalType: "uint256",
       },
       {
-        "name": "token",
-        "type": "address",
-        "internalType": "address"
+        name: "token",
+        type: "address",
+        internalType: "address",
       },
       {
-        "name": "distributed",
-        "type": "uint256",
-        "internalType": "uint256"
+        name: "distributed",
+        type: "uint256",
+        internalType: "uint256",
       },
       {
-        "name": "maximum",
-        "type": "uint256",
-        "internalType": "uint256"
+        name: "maximum",
+        type: "uint256",
+        internalType: "uint256",
       },
       {
-        "name": "startingTimestamp",
-        "type": "uint64",
-        "internalType": "uint64"
+        name: "startingTimestamp",
+        type: "uint64",
+        internalType: "uint64",
       },
       {
-        "name": "endingTimestamp",
-        "type": "uint64",
-        "internalType": "uint64"
-      }
+        name: "endingTimestamp",
+        type: "uint64",
+        internalType: "uint64",
+      },
     ],
-    "stateMutability": "view"
+    stateMutability: "view",
   },
   {
-    "type": "function",
-    "name": "campaignRevisions",
-    "inputs": [
+    type: "function",
+    name: "campaignRevisions",
+    inputs: [
       {
-        "name": "pool",
-        "type": "address",
-        "internalType": "address"
+        name: "pool",
+        type: "address",
+        internalType: "address",
       },
       {
-        "name": "campaignId",
-        "type": "bytes8",
-        "internalType": "bytes8"
-      }
+        name: "campaignId",
+        type: "bytes8",
+        internalType: "bytes8",
+      },
     ],
-    "outputs": [
+    outputs: [
       {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
-    "stateMutability": "view"
+    stateMutability: "view",
   },
   {
-    "type": "function",
-    "name": "cancelCampaign",
-    "inputs": [
+    type: "function",
+    name: "cancelCampaign",
+    inputs: [
       {
-        "name": "pool",
-        "type": "address",
-        "internalType": "address"
+        name: "pool",
+        type: "address",
+        internalType: "address",
       },
       {
-        "name": "campaignId",
-        "type": "bytes8",
-        "internalType": "bytes8"
-      }
+        name: "campaignId",
+        type: "bytes8",
+        internalType: "bytes8",
+      },
     ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
+    outputs: [],
+    stateMutability: "nonpayable",
   },
   {
-    "type": "function",
-    "name": "collect",
-    "inputs": [
+    type: "function",
+    name: "collect",
+    inputs: [
       {
-        "name": "positionDetails",
-        "type": "tuple[]",
-        "internalType": "struct ILeo.PositionDetails[]",
-        "components": [
+        name: "positionDetails",
+        type: "tuple[]",
+        internalType: "struct ILeo.PositionDetails[]",
+        components: [
           {
-            "name": "token",
-            "type": "address",
-            "internalType": "address"
+            name: "token",
+            type: "address",
+            internalType: "address",
           },
           {
-            "name": "id",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
-        ]
+            name: "id",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
       },
       {
-        "name": "campaignIds",
-        "type": "bytes8[]",
-        "internalType": "bytes8[]"
-      }
+        name: "campaignIds",
+        type: "bytes8[]",
+        internalType: "bytes8[]",
+      },
     ],
-    "outputs": [
+    outputs: [
       {
-        "name": "poolRewards",
-        "type": "tuple[]",
-        "internalType": "struct ILeo.PoolRewards[]",
-        "components": [
+        name: "poolRewards",
+        type: "tuple[]",
+        internalType: "struct ILeo.PoolRewards[]",
+        components: [
           {
-            "name": "pool",
-            "type": "address",
-            "internalType": "address"
+            name: "pool",
+            type: "address",
+            internalType: "address",
           },
           {
-            "name": "amount0Lp",
-            "type": "uint128",
-            "internalType": "uint128"
+            name: "amount0Lp",
+            type: "uint128",
+            internalType: "uint128",
           },
           {
-            "name": "amount1Lp",
-            "type": "uint128",
-            "internalType": "uint128"
-          }
-        ]
+            name: "amount1Lp",
+            type: "uint128",
+            internalType: "uint128",
+          },
+        ],
       },
       {
-        "name": "campaignRewards",
-        "type": "tuple[]",
-        "internalType": "struct ILeo.CampaignRewards[]",
-        "components": [
+        name: "campaignRewards",
+        type: "tuple[]",
+        internalType: "struct ILeo.CampaignRewards[]",
+        components: [
           {
-            "name": "campaignToken",
-            "type": "address",
-            "internalType": "address"
+            name: "campaignToken",
+            type: "address",
+            internalType: "address",
           },
           {
-            "name": "rewards",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
-        ]
-      }
+            name: "rewards",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+      },
     ],
-    "stateMutability": "nonpayable"
+    stateMutability: "nonpayable",
   },
   {
-    "type": "function",
-    "name": "createCampaign",
-    "inputs": [
+    type: "function",
+    name: "createCampaign",
+    inputs: [
       {
-        "name": "campaignId",
-        "type": "bytes8",
-        "internalType": "bytes8"
+        name: "campaignId",
+        type: "bytes8",
+        internalType: "bytes8",
       },
       {
-        "name": "pool",
-        "type": "address",
-        "internalType": "address"
+        name: "pool",
+        type: "address",
+        internalType: "address",
       },
       {
-        "name": "tickLower",
-        "type": "int32",
-        "internalType": "int32"
+        name: "tickLower",
+        type: "int32",
+        internalType: "int32",
       },
       {
-        "name": "tickUpper",
-        "type": "int32",
-        "internalType": "int32"
+        name: "tickUpper",
+        type: "int32",
+        internalType: "int32",
       },
       {
-        "name": "perSecond",
-        "type": "uint256",
-        "internalType": "uint256"
+        name: "perSecond",
+        type: "uint256",
+        internalType: "uint256",
       },
       {
-        "name": "token",
-        "type": "address",
-        "internalType": "address"
+        name: "token",
+        type: "address",
+        internalType: "address",
       },
       {
-        "name": "extraMax",
-        "type": "uint256",
-        "internalType": "uint256"
+        name: "extraMax",
+        type: "uint256",
+        internalType: "uint256",
       },
       {
-        "name": "starting",
-        "type": "uint64",
-        "internalType": "uint64"
+        name: "starting",
+        type: "uint64",
+        internalType: "uint64",
       },
       {
-        "name": "ending",
-        "type": "uint64",
-        "internalType": "uint64"
-      }
+        name: "ending",
+        type: "uint64",
+        internalType: "uint64",
+      },
     ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
+    outputs: [],
+    stateMutability: "nonpayable",
   },
   {
-    "type": "function",
-    "name": "divestPosition",
-    "inputs": [
+    type: "function",
+    name: "divestPosition",
+    inputs: [
       {
-        "name": "pool",
-        "type": "address",
-        "internalType": "address"
+        name: "pool",
+        type: "address",
+        internalType: "address",
       },
       {
-        "name": "positionId",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+        name: "positionId",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
+    outputs: [],
+    stateMutability: "nonpayable",
   },
   {
-    "type": "function",
-    "name": "poolLp",
-    "inputs": [
+    type: "function",
+    name: "poolLp",
+    inputs: [
       {
-        "name": "pool",
-        "type": "address",
-        "internalType": "address"
-      }
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
     ],
-    "outputs": [
+    outputs: [
       {
-        "name": "lp",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+        name: "lp",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
-    "stateMutability": "nonpayable"
+    stateMutability: "nonpayable",
   },
   {
-    "type": "function",
-    "name": "updateCampaign",
-    "inputs": [
+    type: "function",
+    name: "updateCampaign",
+    inputs: [
       {
-        "name": "campaignId",
-        "type": "bytes8",
-        "internalType": "bytes8"
+        name: "campaignId",
+        type: "bytes8",
+        internalType: "bytes8",
       },
       {
-        "name": "pool",
-        "type": "address",
-        "internalType": "address"
+        name: "pool",
+        type: "address",
+        internalType: "address",
       },
       {
-        "name": "tickLower",
-        "type": "int32",
-        "internalType": "int32"
+        name: "tickLower",
+        type: "int32",
+        internalType: "int32",
       },
       {
-        "name": "tickUpper",
-        "type": "int32",
-        "internalType": "int32"
+        name: "tickUpper",
+        type: "int32",
+        internalType: "int32",
       },
       {
-        "name": "perSecond",
-        "type": "uint256",
-        "internalType": "uint256"
+        name: "perSecond",
+        type: "uint256",
+        internalType: "uint256",
       },
       {
-        "name": "token",
-        "type": "address",
-        "internalType": "address"
+        name: "token",
+        type: "address",
+        internalType: "address",
       },
       {
-        "name": "extraMax",
-        "type": "uint256",
-        "internalType": "uint256"
+        name: "extraMax",
+        type: "uint256",
+        internalType: "uint256",
       },
       {
-        "name": "starting",
-        "type": "uint64",
-        "internalType": "uint64"
+        name: "starting",
+        type: "uint64",
+        internalType: "uint64",
       },
       {
-        "name": "ending",
-        "type": "uint64",
-        "internalType": "uint64"
-      }
+        name: "ending",
+        type: "uint64",
+        internalType: "uint64",
+      },
     ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
+    outputs: [],
+    stateMutability: "nonpayable",
   },
   {
-    "type": "function",
-    "name": "vestPosition",
-    "inputs": [
+    type: "function",
+    name: "vestPosition",
+    inputs: [
       {
-        "name": "pool",
-        "type": "address",
-        "internalType": "address"
+        name: "pool",
+        type: "address",
+        internalType: "address",
       },
       {
-        "name": "id",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+        name: "id",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
+    outputs: [],
+    stateMutability: "nonpayable",
   },
   {
-    "type": "event",
-    "name": "CampaignBalanceUpdated",
-    "inputs": [
+    type: "event",
+    name: "CampaignBalanceUpdated",
+    inputs: [
       {
-        "name": "identifier",
-        "type": "bytes8",
-        "indexed": true,
-        "internalType": "bytes8"
+        name: "identifier",
+        type: "bytes8",
+        indexed: true,
+        internalType: "bytes8",
       },
       {
-        "name": "newMaximum",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      }
+        name: "newMaximum",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
     ],
-    "anonymous": false
+    anonymous: false,
   },
   {
-    "type": "event",
-    "name": "CampaignCreated",
-    "inputs": [
+    type: "event",
+    name: "CampaignCreated",
+    inputs: [
       {
-        "name": "identifier",
-        "type": "bytes8",
-        "indexed": true,
-        "internalType": "bytes8"
+        name: "identifier",
+        type: "bytes8",
+        indexed: true,
+        internalType: "bytes8",
       },
       {
-        "name": "pool",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
+        name: "pool",
+        type: "address",
+        indexed: true,
+        internalType: "address",
       },
       {
-        "name": "token",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
+        name: "token",
+        type: "address",
+        indexed: true,
+        internalType: "address",
       },
       {
-        "name": "details",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
+        name: "details",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
       },
       {
-        "name": "times",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
+        name: "times",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
     ],
-    "anonymous": false
+    anonymous: false,
   },
   {
-    "type": "event",
-    "name": "CampaignUpdated",
-    "inputs": [
+    type: "event",
+    name: "CampaignUpdated",
+    inputs: [
       {
-        "name": "identifier",
-        "type": "bytes8",
-        "indexed": true,
-        "internalType": "bytes8"
+        name: "identifier",
+        type: "bytes8",
+        indexed: true,
+        internalType: "bytes8",
       },
       {
-        "name": "pool",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
+        name: "pool",
+        type: "address",
+        indexed: true,
+        internalType: "address",
       },
       {
-        "name": "perSecond",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
+        name: "perSecond",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
       },
       {
-        "name": "extras",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
+        name: "extras",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
     ],
-    "anonymous": false
+    anonymous: false,
   },
   {
-    "type": "event",
-    "name": "PositionDivested",
-    "inputs": [
+    type: "event",
+    name: "PositionDivested",
+    inputs: [
       {
-        "name": "positionId",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      }
+        name: "positionId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
     ],
-    "anonymous": false
+    anonymous: false,
   },
   {
-    "type": "event",
-    "name": "PositionVested",
-    "inputs": [
+    type: "event",
+    name: "PositionVested",
+    inputs: [
       {
-        "name": "positionId",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      }
+        name: "positionId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
     ],
-    "anonymous": false
-  }
+    anonymous: false,
+  },
 ] as const;
 
 export default ILeo;

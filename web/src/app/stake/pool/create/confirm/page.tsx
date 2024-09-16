@@ -7,5 +7,5 @@ export default function ConfirmCreatePool() {
   const params = useSearchParams();
   const isVested = params.get("isVested") === "true";
 
-  return <ConfirmStake mode="new" vesting={isVested}/>;
+  return <ConfirmStake mode="new" vesting={isVested} />;
 }

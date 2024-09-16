@@ -137,7 +137,7 @@ export default function ConfirmWithdrawLiquidity() {
       });
     },
     [writeContractDivestPosition, token0],
-  )
+  );
 
   // price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
@@ -163,7 +163,7 @@ export default function ConfirmWithdrawLiquidity() {
       { amount0: 0, amount1: 0 },
     ];
     if (isDivesting) {
-      divestPosition(BigInt(positionId))
+      divestPosition(BigInt(positionId));
     } else if (isWithdrawingEntirePosition && (amount0 > 0 || amount1 > 0)) {
       collect(id);
     } else {
@@ -220,7 +220,8 @@ export default function ConfirmWithdrawLiquidity() {
   // step 1 - divest from Leo if position is vested
   if (
     isDivesting &&
-    (isDivestPositionPending || (divestPositionData && divestPositionResult?.isPending))
+    (isDivestPositionPending ||
+      (divestPositionData && divestPositionResult?.isPending))
   ) {
     return (
       <Confirm
@@ -230,7 +231,6 @@ export default function ConfirmWithdrawLiquidity() {
         transactionHash={divestPositionData}
       />
     );
-
   }
 
   // step 2 - collect yield from position if emptying entire balance
@@ -314,10 +314,10 @@ export default function ConfirmWithdrawLiquidity() {
             {token0.address === fUSDC.address
               ? token0Amount
               : getFormattedPriceFromAmount(
-                token0Amount,
-                tokenPrice,
-                fUSDC.decimals,
-              )}
+                  token0Amount,
+                  tokenPrice,
+                  fUSDC.decimals,
+                )}
           </div>
         </div>
 
@@ -332,10 +332,10 @@ export default function ConfirmWithdrawLiquidity() {
             {token1.address === fUSDC.address
               ? token1Amount
               : getFormattedPriceFromAmount(
-                token1Amount,
-                tokenPrice,
-                fUSDC.decimals,
-              )}
+                  token1Amount,
+                  tokenPrice,
+                  fUSDC.decimals,
+                )}
           </div>
         </div>
 

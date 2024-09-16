@@ -36,23 +36,27 @@ import { usePositions } from "@/hooks/usePostions";
 
 type ConfirmStakeProps =
   | {
-    mode: "new";
-    // vesting represents a change in vesting state 
-    // for a new position it is true if it should be vested
-    // for an existing position it is true if it is already vested
-    vesting: boolean;
-    positionId?: never;
-  }
+      mode: "new";
+      // vesting represents a change in vesting state
+      // for a new position it is true if it should be vested
+      // for an existing position it is true if it is already vested
+      vesting: boolean;
+      positionId?: never;
+    }
   | {
-    mode: "existing";
-    // vesting represents a change in vesting state 
-    // for a new position it is true if it should be vested
-    // for an existing position it is true if it is already vested
-    vesting: boolean;
-    positionId: number;
-  };
+      mode: "existing";
+      // vesting represents a change in vesting state
+      // for a new position it is true if it should be vested
+      // for an existing position it is true if it is already vested
+      vesting: boolean;
+      positionId: number;
+    };
 
-export const ConfirmStake = ({ mode, positionId, vesting, }: ConfirmStakeProps) => {
+export const ConfirmStake = ({
+  mode,
+  positionId,
+  vesting,
+}: ConfirmStakeProps) => {
   const router = useRouter();
 
   const isVesting = mode === "new" && vesting;
@@ -194,12 +198,12 @@ export const ConfirmStake = ({ mode, positionId, vesting, }: ConfirmStakeProps) 
       !curTick || tickLower === undefined || tickUpper === undefined
         ? 0n
         : getLiquidityForAmounts(
-          curTick.result,
-          BigInt(tickLower),
-          BigInt(tickUpper),
-          BigInt(token0AmountRaw),
-          BigInt(token1AmountRaw),
-        ),
+            curTick.result,
+            BigInt(tickLower),
+            BigInt(tickUpper),
+            BigInt(token0AmountRaw),
+            BigInt(token1AmountRaw),
+          ),
     [curTick, tickLower, tickUpper, token0AmountRaw, token1AmountRaw],
   );
 
@@ -260,7 +264,7 @@ export const ConfirmStake = ({ mode, positionId, vesting, }: ConfirmStakeProps) 
       });
     },
     [writeContractDivestPosition, token0],
-  )
+  );
 
   // once token is divested, continue to updating
   useEffect(() => {
@@ -376,7 +380,8 @@ export const ConfirmStake = ({ mode, positionId, vesting, }: ConfirmStakeProps) 
       if (isVesting) {
         switch (true) {
           // haven't yet called vest position, so call it and wait
-          case vestPositionResult.fetchStatus === "idle" && !vestPositionResult.data:
+          case vestPositionResult.fetchStatus === "idle" &&
+            !vestPositionResult.data:
             writeContractVestPosition({
               address: leoContract.address,
               abi: leoContract.abi,
@@ -775,8 +780,11 @@ export const ConfirmStake = ({ mode, positionId, vesting, }: ConfirmStakeProps) 
                   : updatePosition(BigInt(positionId));
             }}
           >
-
-            {isVesting ? "Confirm Stake and Vest" : isVested ? "Confirm Harvest and Update Stake" : "Confirm Stake"}
+            {isVesting
+              ? "Confirm Stake and Vest"
+              : isVested
+                ? "Confirm Harvest and Update Stake"
+                : "Confirm Stake"}
           </Button>
         </div>
       </motion.div>
