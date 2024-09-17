@@ -150,7 +150,7 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 
 // CampaignID is the resolver for the campaignId field.
 func (r *liquidityCampaignResolver) CampaignID(ctx context.Context, obj *model.LiquidityCampaign) (string, error) {
-	panic(fmt.Errorf("not implemented: CampaignID - campaignId"))
+	return obj.Identifier.String(), nil
 }
 
 // Owner is the resolver for the owner field.
@@ -170,12 +170,12 @@ func (r *liquidityCampaignResolver) MaximumAmount(ctx context.Context, obj *mode
 
 // FromTimestamp is the resolver for the fromTimestamp field.
 func (r *liquidityCampaignResolver) FromTimestamp(ctx context.Context, obj *model.LiquidityCampaign) (int, error) {
-	panic(fmt.Errorf("not implemented: FromTimestamp - fromTimestamp"))
+	return int(obj.Starting.Unix()), nil
 }
 
 // EndTimestamp is the resolver for the endTimestamp field.
 func (r *liquidityCampaignResolver) EndTimestamp(ctx context.Context, obj *model.LiquidityCampaign) (int, error) {
-	panic(fmt.Errorf("not implemented: EndTimestamp - endTimestamp"))
+	return int(obj.Ending.Unix()), nil
 }
 
 // Pool is the resolver for the pool field.

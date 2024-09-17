@@ -317,7 +317,7 @@ type SeawaterPositionResolver interface {
 	Pool(ctx context.Context, obj *seawater.Position) (seawater.Pool, error)
 	Lower(ctx context.Context, obj *seawater.Position) (int, error)
 	Upper(ctx context.Context, obj *seawater.Position) (int, error)
-	IsVested(ctx context.Context, obj *seawater.Position) (bool, error)
+
 	Liquidity(ctx context.Context, obj *seawater.Position) (model.PairAmount, error)
 }
 type SeawaterPositionsGlobalResolver interface {
@@ -6901,7 +6901,7 @@ func (ec *executionContext) _SeawaterPosition_isVested(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.SeawaterPosition().IsVested(rctx, obj)
+		return obj.IsVested, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6922,8 +6922,8 @@ func (ec *executionContext) fieldContext_SeawaterPosition_isVested(_ context.Con
 	fc = &graphql.FieldContext{
 		Object:     "SeawaterPosition",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
 		},
@@ -13056,41 +13056,10 @@ func (ec *executionContext) _SeawaterPosition(ctx context.Context, sel ast.Selec
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "isVested":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._SeawaterPosition_isVested(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._SeawaterPosition_isVested(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
 			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "liquidity":
 			field := field
 
