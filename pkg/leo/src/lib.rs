@@ -7,7 +7,6 @@ use stylus_sdk::{
     storage::*,
 };
 
-#[cfg(feature = "log-events")]
 use stylus_sdk::evm;
 
 pub mod calldata;
@@ -99,7 +98,7 @@ pub struct StorageCampaign {
     tick_upper: StorageI32,
 
     // Amount of token emitted per second.
-    per_second: StorageU256,
+    per_second: StorageU64,
 
     // The timestamp of when this campaign is starting.
     starting: StorageU64,
@@ -171,9 +170,8 @@ impl Leo {
             .setter(pool)
             .set(existing_liq + U256::from(position_liq));
 
-        #[cfg(feature = "log-events")]
         evm::log(events::PositionVested {
-            positionId: position_id,
+            positionId: id,
         });
 
         Ok(())
@@ -189,7 +187,7 @@ impl Leo {
         pool: Address,
         tick_lower: i32,
         tick_upper: i32,
-        per_second: U256,
+        per_second: u64,
         token: Address,
         extra_max: U256,
         starting: u64,
@@ -198,7 +196,7 @@ impl Leo {
         assert_or!(self.enabled.get(), Error::NotEnabled);
 
         // Sanity checks to prevent junk campaigns from being made.
-        assert_or!(!per_second.is_zero(), Error::BadCampaignConfig);
+        assert_or!(per_second > 0, Error::BadCampaignConfig);
 
         // Take the ERC20 from the user for the maximum run of the campaign.
         let mut pool_campaigns = self.campaigns.setter(pool);
@@ -226,7 +224,7 @@ impl Leo {
         campaign
             .tick_upper
             .set(I32::from_le_bytes(tick_upper.to_le_bytes()));
-        campaign.per_second.set(per_second);
+        campaign.per_second.set(U64::from(per_second));
         campaign
             .starting
             .set(U64::from_le_bytes(starting.to_le_bytes()));
@@ -246,7 +244,6 @@ impl Leo {
             // Take the token's amounts for the campaign.
             erc20::take(token, pool, extra_max)?;
 
-            #[cfg(feature = "log-events")]
             evm::log(events::CampaignBalanceUpdated {
                 identifier: identifier.as_slice().try_into().unwrap(),
                 newMaximum: new_maximum,
@@ -254,7 +251,6 @@ impl Leo {
         }
 
         // Pack the words for CampaignCreated, and then emit that event.
-        #[cfg(feature = "log-events")]
         events::emit_campaign_created(
             identifier,
             pool,
@@ -264,6 +260,7 @@ impl Leo {
             tick_upper,
             starting,
             ending,
+            per_second,
         );
 
         Ok(())
@@ -280,7 +277,7 @@ impl Leo {
         pool: Address,
         tick_lower: i32,
         tick_upper: i32,
-        per_second: U256,
+        per_second: u64,
         extra_max: U256,
         starting: u64,
         ending: u64,
@@ -292,7 +289,7 @@ impl Leo {
             self.campaign_balances.getter(identifier).owner.get(),
             msg::sender()
         );
-        assert_or!(!per_second.is_zero(), Error::BadCampaignConfig);
+        assert_or!(per_second > 0, Error::BadCampaignConfig);
         assert_or!(starting >= block::timestamp(), Error::BadCampaignConfig);
         assert_or!(ending > block::timestamp(), Error::BadCampaignConfig);
 
@@ -314,7 +311,7 @@ impl Leo {
         campaign
             .tick_upper
             .set(I32::from_le_bytes(tick_upper.to_le_bytes()));
-        campaign.per_second.set(per_second);
+        campaign.per_second.set(U64::from(per_second));
         campaign
             .starting
             .set(U64::from_le_bytes(starting.to_le_bytes()));
@@ -332,14 +329,12 @@ impl Leo {
             // Take the token's amounts for the campaign.
             erc20::take(token, pool, extra_max)?;
 
-            #[cfg(feature = "log-events")]
             evm::log(events::CampaignBalanceUpdated {
                 identifier: identifier.as_slice().try_into().unwrap(),
                 newMaximum: new_maximum,
             });
         }
 
-        #[cfg(feature = "log-events")]
         events::emit_campaign_updated(
             identifier, pool, per_second, tick_lower, tick_upper, starting, ending,
         );
@@ -377,7 +372,7 @@ impl Leo {
             .ending
             .set(U64::from(block::timestamp()));
         campaign_versions.grow(); // Grow with an empty value so it's 0 for all!
-        events::emit_campaign_updated(identifier, pool, U256::ZERO, 0, 0, 0, 0);
+        events::emit_campaign_updated(identifier, pool, 0, 0, 0, 0, 0);
         Ok(())
     }
 
@@ -391,7 +386,7 @@ impl Leo {
         &self,
         pool: Address,
         id: CampaignId,
-    ) -> Result<(i32, i32, U256, Address, U256, U256, u64, u64), Vec<u8>> {
+    ) -> Result<(i32, i32, u64, Address, U256, U256, u64, u64), Vec<u8>> {
         let len = self.campaigns.getter(pool).ongoing.getter(id).len();
         assert_or!(len > 0, Error::NoCampaign);
         let campaigns = self.campaigns.getter(pool);
@@ -401,7 +396,7 @@ impl Leo {
         Ok((
             i32::from_le_bytes(campaign.tick_lower.get().to_le_bytes()),
             i32::from_le_bytes(campaign.tick_upper.get().to_le_bytes()),
-            campaign.per_second.get(),
+            u64::from_le_bytes(campaign.per_second.get().to_le_bytes()),
             campaign_bal.token.get(),
             campaign_bal.distributed.get(),
             campaign_bal.maximum.get(),
@@ -527,7 +522,7 @@ impl Leo {
                     let base_rewards = maths::calc_base_rewards(
                         self.liquidity.getter(pool).get(), // Pool LP
                         position_liquidity,                // User LP
-                        campaign.per_second.get(),         // Campaign rewards per sec
+                        U256::from(campaign.per_second.get()),         // Campaign rewards per sec
                     );
 
                     let rewards = base_rewards * U256::from(clamped_secs_since);
@@ -581,7 +576,6 @@ impl Leo {
 
         nft_manager::give_position(position_id)?;
 
-        #[cfg(feature = "log-events")]
         evm::log(events::PositionDivested {
             positionId: position_id,
         });

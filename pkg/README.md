@@ -37,9 +37,9 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 
 |     Deployment name     |              Deployment address            |
 |-------------------------|--------------------------------------------|
-| Transparent proxy admin | 0x9e4b67ece9444a300229cef1224b161aaf73bc18 |
-| Transparent proxy       | 0xBcAC72cf96A2Ac6Dc1D2602BBe534541BF3a1681 |
-| Implementation          | 0x6dc3e39ac602a0e422d0ecc3f6394b36b2165eb9 |
+| Transparent proxy admin | 0x3c09d0c7f5448d08c5c386289c628305a54cc6df |
+| Transparent proxy       | 0xECc45391ad9961612F52677d9053B46aeae1064B |
+| Implementation          | 0x89803927efa544c1f5b5e77df22932a0654a816f |
 
 ##### Useful testing token deployments
 

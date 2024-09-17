@@ -56,7 +56,7 @@ DOCKER_BUILD := docker build
 
 ${OUT_SEAWATER_ADMIN}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_ADMIN}
-	@${CARGO_BUILD_STYLUS} seawater --features admin
+	@${CARGO_BUILD_STYLUS} seawater --features admin,log-events
 	@mv seawater.wasm ${OUT_SEAWATER_ADMIN}
 	@rm -f liblibseawater.rlib
 
@@ -98,7 +98,7 @@ ${OUT_SEAWATER_MIGRATIONS}: ${FILES_RUST}
 
 ${OUT_LEO}: ${FILES_RUST}
 	@rm -f ${OUT_LEO}
-	@${CARGO_BUILD_STYLUS} leo
+	@${CARGO_BUILD_STYLUS} leo --features log-events
 	@rm -f liblibleo.rlib
 
 ### STYLUS CHECK
