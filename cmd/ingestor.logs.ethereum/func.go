@@ -225,8 +225,8 @@ func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address, l 
 
 	case leo.TopicCampaignBalanceUpdated:
 		a, err = leo.UnpackCampaignBalanceUpdated(topic1, topic2, topic3, data)
-		logEvent("CampaignBalanceCreated")
-		table = "events_leo_campaignbalancecreated"
+		logEvent("CampaignBalanceUpdated")
+		table = "events_leo_campaignbalanceupdated"
 		isSeawater = false
 		isLeo = true
 

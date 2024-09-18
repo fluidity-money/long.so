@@ -307,7 +307,7 @@ func TestHandleLogCallbackCampaignBalanceUpdated(t *testing.T) {
 	wasRun := false
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
 	handleLogCallback(EmptyAddr, EmptyAddr, leoAddr, l, func(table string, a any) error {
-		assert.Equalf(t, "events_leo_campaignbalancecreated", table, "table not equal")
+		assert.Equalf(t, "events_leo_campaignbalanceupdated", table, "table not equal")
 		_, ok := a.(*leo.CampaignBalanceUpdated)
 		// We're light on the checking here since we've already tested in the leo tests this transaction.
 		assert.Truef(t, ok, "CampaignUpdated type coercion not true")
