@@ -104,7 +104,7 @@ func UnpackPositionDivested(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*P
 }
 
 func hashToBytes8Data(t ethCommon.Hash) types.Data {
-	b := t.Bytes()[:5]
+	b := t.Bytes()[:8]
 	return types.DataFromBytes(b)
 }
 

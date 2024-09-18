@@ -7,6 +7,7 @@ import (
 
 	"github.com/fluidity-money/long.so/lib/events/seawater"
 	"github.com/fluidity-money/long.so/lib/events/thirdweb"
+	"github.com/fluidity-money/long.so/lib/events/leo"
 	"github.com/fluidity-money/long.so/lib/types"
 
 	ethCommon "github.com/ethereum/go-ethereum/common"
@@ -245,6 +246,71 @@ func TestHandleLogCallbackAccountCreated(t *testing.T) {
 			accountCreated.AccountAdmin,
 			"account admin not equal",
 		)
+		wasRun = true
+		return nil
+	})
+	assert.True(t, wasRun)
+}
+
+func TestHandleLogCallbackCampaignCreated(t *testing.T) {
+	leoAddr := ethCommon.HexToAddress("0xECc45391ad9961612F52677d9053B46aeae1064B")
+	s := strings.NewReader(`
+{
+	"address": "0xecc45391ad9961612f52677d9053b46aeae1064b",
+	"blockHash": "0x230419faba356065120bc8fdd1a455230f89a80e6252dd528529a54f1122383c",
+	"blockNumber": "0xc00a5a",
+	"data": "0x00000000fff27618000d89e8feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d500000000000000000000000066ebec9b000000006ce046fb0000000000000064",
+	"logIndex": "0x2",
+	"removed": false,
+	"topics": [
+		"0x39b9c32a7bde96957f468fed294bbbabd23606909dd0f9c72eb8956b3c2b3a75",
+		"0x27670260e0e7fe46000000000000000000000000000000000000000000000000",
+		"0x00000000000000000000000022b9fa698b68bba071b513959794e9a47d19214c",
+		"0x000000000000000000000000376bf949c05ebae6fdb0fcf2ca6ecced208ec670"
+	],
+	"transactionHash": "0xd8b4f57e1261b12280a5246b0f03b7bfd5b551e0996d6618274f6a6477ef3c58",
+	"transactionIndex": "0x1"
+}`)
+	var l ethTypes.Log
+	wasRun := false
+	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
+	handleLogCallback(EmptyAddr, EmptyAddr, leoAddr, l, func(table string, a any) error {
+		assert.Equalf(t, "events_leo_campaigncreated", table, "table not equal")
+		_, ok := a.(*leo.CampaignCreated)
+		// We're light on the checking here since we've already tested in the leo tests this transaction.
+		assert.Truef(t, ok, "CampaignCreated type coercion not true")
+		wasRun = true
+		return nil
+	})
+	assert.True(t, wasRun)
+}
+
+func TestHandleLogCallbackCampaignBalanceUpdated(t *testing.T) {
+	leoAddr := ethCommon.HexToAddress("0xECc45391ad9961612F52677d9053B46aeae1064B")
+	s := strings.NewReader(`
+{
+	"address": "0xecc45391ad9961612f52677d9053b46aeae1064b",
+	"blockHash": "0x230419faba356065120bc8fdd1a455230f89a80e6252dd528529a54f1122383c",
+	"blockNumber": "0xc00a5a",
+	"data": "0x",
+	"logIndex": "0x1",
+	"removed": false,
+	"topics": [
+		"0x8c2a8674701414e5397bbd322c3d11a54cec483eed2b0ceb8205d7251c0a6b88",
+		"0x27670260e0e7fe46000000000000000000000000000000000000000000000000",
+		"0x000000000000000000000000000000000001ed09bead87c0378d8e6400000000"
+	],
+	"transactionHash": "0xd8b4f57e1261b12280a5246b0f03b7bfd5b551e0996d6618274f6a6477ef3c58",
+	"transactionIndex": "0x1"
+}`)
+	var l ethTypes.Log
+	wasRun := false
+	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
+	handleLogCallback(EmptyAddr, EmptyAddr, leoAddr, l, func(table string, a any) error {
+		assert.Equalf(t, "events_leo_campaignbalancecreated", table, "table not equal")
+		_, ok := a.(*leo.CampaignBalanceUpdated)
+		// We're light on the checking here since we've already tested in the leo tests this transaction.
+		assert.Truef(t, ok, "CampaignUpdated type coercion not true")
 		wasRun = true
 		return nil
 	})
