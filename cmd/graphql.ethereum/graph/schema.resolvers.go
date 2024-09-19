@@ -180,7 +180,15 @@ func (r *liquidityCampaignResolver) EndTimestamp(ctx context.Context, obj *model
 
 // Pool is the resolver for the pool field.
 func (r *liquidityCampaignResolver) Pool(ctx context.Context, obj *model.LiquidityCampaign) (seawater.Pool, error) {
-	panic(fmt.Errorf("not implemented: Pool - pool"))
+	var p seawater.Pool
+	err := r.DB.Table("events_seawater_newpool").
+		Where("token = ?", obj.Token).
+		Scan(&p).
+		Error
+	if err != nil {
+		return p, err
+	}
+	return p, nil
 }
 
 // Served is the resolver for the served field.
@@ -222,8 +230,7 @@ func (r *queryResolver) ActiveLiquidityCampaigns(ctx context.Context) (campaigns
 		campaigns = MockCampaigns()
 		return
 	}
-	// TODO
-	//err = r.DB.Table("leo_active_campaigns_1").Scan(&campaigns).Error
+	err = r.DB.Table("leo_active_campaigns_1").Scan(&campaigns).Error
 	return
 }
 
@@ -237,8 +244,7 @@ func (r *queryResolver) UpcomingLiquidityCampaigns(ctx context.Context) (campaig
 		campaigns = MockCampaigns()
 		return
 	}
-	// TODO
-	//err = r.DB.Table("leo_upcoming_campaigns_1").Scan(&campaigns).Error
+	err = r.DB.Table("leo_upcoming_campaigns_1").Scan(&campaigns).Error
 	return
 }
 
@@ -919,7 +925,15 @@ func (r *seawaterPoolResolver) EarnedFeesAPRToken1(ctx context.Context, obj *sea
 
 // LiquidityCampaigns is the resolver for the liquidityCampaigns field.
 func (r *seawaterPoolResolver) LiquidityCampaigns(ctx context.Context, obj *seawater.Pool) ([]model.LiquidityCampaign, error) {
-	panic(fmt.Errorf("not implemented: LiquidityCampaigns - liquidityCampaigns"))
+	var c []model.LiquidityCampaign
+	err := r.DB.Table("leo_active_campaigns_1").
+		Where("pool = ?", obj.Token).
+		Scan(&c).
+		Error
+	if err != nil {
+		return c, fmt.Errorf("liquidity campaign: %v", err)
+	}
+	return c, nil
 }
 
 // Positions is the resolver for the positions field.
