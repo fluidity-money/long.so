@@ -42,6 +42,8 @@ pub struct StoragePool {
 
     ticks: tick::StorageTicks,
     tick_bitmap: tick::StorageTickBitmap,
+
+    initialised: StorageBool,
 }
 
 impl StoragePool {
@@ -53,11 +55,9 @@ impl StoragePool {
         tick_spacing: u8,
         max_liquidity_per_tick: u128,
     ) -> Result<(), Revert> {
-        assert_eq_or!(
-            self.sqrt_price.get(),
-            U256::ZERO,
-            Error::PoolAlreadyInitialised
-        );
+        assert_or!(!self.initialised.get(), Error::PoolAlreadyInitialised);
+
+        self.initialised.set(true);
 
         self.sqrt_price.set(price);
         self.cur_tick
