@@ -1245,7 +1245,7 @@ impl Pools {
         Ok(())
     }
 
-    pub fn send_token_to_sender(&mut self, token: Address, amount: U256) -> Result<(), Vec<u8>> {
+    pub fn send_token_to_sender_9603_F_18_B(&mut self, token: Address, amount: U256) -> Result<(), Vec<u8>> {
         assert_eq_or!(
             msg::sender(),
             self.seawater_admin.get(),
@@ -1257,11 +1257,10 @@ impl Pools {
         Ok(())
     }
 
-    pub fn send_amounts_from_sender(
+    pub fn send_amounts_from_sender_3_D_F_81_C_E_5(
         &mut self,
         token: Address,
-        recipient_addrs: Vec<Address>,
-        recipient_amounts: Vec<U256>,
+        recipients: Vec<(Address, U256)>,
     ) -> Result<(), Revert> {
         assert_eq_or!(
             msg::sender(),
@@ -1269,8 +1268,8 @@ impl Pools {
             Error::SeawaterAdminOnly
         );
 
-        for (addr, amount) in recipient_addrs.iter().zip(recipient_amounts.iter()) {
-            erc20::take_from_to(token, *addr, *amount)?;
+        for (addr, amount) in recipients {
+            erc20::take_from_to(token, addr, amount)?;
         }
 
         Ok(())
