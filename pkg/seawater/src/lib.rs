@@ -238,8 +238,8 @@ impl Pools {
             min_out.to_string()
         ));
 
-        assert_eq_or!(interim_usdc_out, interim_usdc_in, Error::InterimSwapNotEq);
         assert_or!(amount_out >= min_out, Error::MinOutNotReached);
+
         Ok((
             original_amount,
             amount_in,

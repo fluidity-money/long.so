@@ -170,7 +170,7 @@ pub enum Error {
     #[error("Swap result too high")]
     SwapResultTooHigh,
 
-    // 26 (0x1a)
+    // 26 (0x1a) UNUSED
     #[error("Internal swap amounts not matched")]
     InterimSwapNotEq,
 
