@@ -237,6 +237,10 @@ pub enum Error {
     // 42 (0x2a)
     #[error("Amount remaining add")]
     AmountRemainingAdd,
+
+    // 43 (0x2b)
+    #[error("Trying to swap2 between the same pool")]
+    SamePool,
 }
 
 impl From<Error> for Vec<u8> {

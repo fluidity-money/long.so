@@ -331,6 +331,7 @@ impl Pools {
         amount: U256,
         min_out: U256,
     ) -> Result<(U256, U256), Revert> {
+        assert_or!(from != to, Error::SamePool);
         Pools::swap_2_internal_erc20(self, from, to, amount, min_out, None)
     }
 }
@@ -452,6 +453,8 @@ impl Pools {
             deadline,
             sig: &sig,
         };
+
+        assert_or!(from != to, Error::SamePool);
 
         Pools::swap_2_internal_erc20(self, from, to, amount, min_out, Some(permit2_args))
     }
