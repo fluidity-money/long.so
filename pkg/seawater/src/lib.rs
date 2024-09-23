@@ -1095,7 +1095,7 @@ impl Pools {
             Error::SeawaterAdminOnly
         );
 
-        self.nft_manager.set(manager);
+        self.emergency_council.set(manager);
 
         Ok(())
     }
