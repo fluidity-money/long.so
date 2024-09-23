@@ -249,7 +249,7 @@ pub fn get_amounts_for_delta(
     if sqrt_ratio_a_x_96 > sqrt_ratio_b_x_96 {
         (sqrt_ratio_a_x_96, sqrt_ratio_b_x_96) = (sqrt_ratio_b_x_96, sqrt_ratio_a_x_96)
     };
-    Ok(if sqrt_ratio_x_96 <= sqrt_ratio_a_x_96 {
+    Ok(if sqrt_ratio_x_96 < sqrt_ratio_a_x_96 {
         (
             get_amount_0_delta(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, liquidity)?,
             I256::ZERO,
