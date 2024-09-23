@@ -1123,8 +1123,8 @@ impl Pools {
             .setter(pool)
             .collect_protocol(amount_0, amount_1)?;
 
-        erc20::transfer_to_addr(recipient, pool, U256::from(token_0))?;
-        erc20::transfer_to_addr(recipient, FUSDC_ADDR, U256::from(token_1))?;
+        erc20::transfer_to_addr(pool, recipient, U256::from(token_0))?;
+        erc20::transfer_to_addr(FUSDC_ADDR, recipient, U256::from(token_1))?;
 
         #[cfg(feature = "log-events")]
         evm::log(events::CollectProtocolFees {
