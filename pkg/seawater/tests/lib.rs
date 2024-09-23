@@ -786,3 +786,29 @@ fn ethers_suite_swapping_with_permit2_blobs_no_permit2() {
         },
     );
 }
+
+#[test]
+fn test_rugging_liquidity() {
+    test_utils::with_storage::<_, Pools, _>(
+        Some(address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5").into_array()),
+        Some(hashmap! {
+                "0x0000000000000000000000000000000000000000000000000000000000000000" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
+        "0x344c13190645d452a52856ca1efc42b3609893d92b93219c8820b76f3aa11288" => "0x0000000000000000000000009c9e3ead905fe5407feffb22d74fe68f0af98a45",
+        "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f5612" => "0x00000000000000000000000000000000000000040d4be1343b606502ea233d3e",
+        "0xabd6e7cb50984ff9c2f3e18a2660c3353dadf4e3291deeb275dae2cd1e44fe05" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
+        "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560d" => "0x00000000000000000000000000000000d3c21bcecceda10000000a000001f400",
+"0x34f8f0d3bae3526bdcdef95cebeb2c4aea0814ea5408b08b616414cdad19b6c6" => "0x000000000000000000000000000a5e45000000000000000000000000d6af768f",
+
+        }),
+        None,
+        None,
+        |contract| {
+            let pool = address!("6437fdc89ced41941b97a9f1f8992d88718c81c5");
+            contract.enable_pool_579_D_A658(pool, true).unwrap();
+            contract
+                .update_position_C_7_F_1_F_740(pool, U256::from(1), -50015001499)
+                .unwrap()
+        },
+    );
+}
