@@ -111,7 +111,7 @@ export const MyPositions = () => {
       [
         // unique campaign IDs
         [...new Set(
-          pools?.flatMap(p => p.liquidityCampaigns.map(l =>
+          pools?.flatMap(p => p.liquidityCampaigns?.map(l =>
             l.campaignId as `0x${string}`)
           ))
         ] ?? [],
@@ -259,7 +259,7 @@ export const MyPositions = () => {
                   <div className="flex flex-row justify-center">
                     <Badge
                       variant="outline"
-                      className="z-20 -mt-1 text-nowrap bg-black p-0 px-px text-[4px] text-white md:-mt-2 md:px-[2px] md:text-3xs"
+                      className="md:text-3xs z-20 -mt-1 text-nowrap bg-black p-0 px-px text-[4px] text-white md:-mt-2 md:px-[2px]"
                     >
                       {pool.tokens[0].name}
                       {" x "}
@@ -272,7 +272,7 @@ export const MyPositions = () => {
                   <div className="text-xs md:text-sm">
                     {usdFormat(pool.staked)}
                   </div>
-                  <div className="mt-[-2px] text-[4px] text-gray-2 md:text-3xs">
+                  <div className="text-gray-2 md:text-3xs mt-[-2px] text-[4px]">
                     No Yield Yet
                   </div>
                 </div>
@@ -283,7 +283,7 @@ export const MyPositions = () => {
                     )
                   }
                   variant="secondary"
-                  className="mt-[5px] h-6 w-full justify-center gap-1 text-nowrap p-0 px-1 text-2xs"
+                  className="text-2xs mt-[5px] h-6 w-full justify-center gap-1 text-nowrap p-0 px-1"
                 >
                   <Position className={"size-[6px] md:size-[10px]"} />
                   <div className="text-4xs md:text-3xs">
@@ -300,7 +300,7 @@ export const MyPositions = () => {
         <div className="flex flex-col items-center md:hidden">
           <Button
             variant="link"
-            className="group flex h-6 flex-row gap-2 text-2xs text-white hover:no-underline"
+            className="text-2xs group flex h-6 flex-row gap-2 text-white hover:no-underline"
             size={"sm"}
             onClick={() => setExpanded((v) => !v)}
           >
@@ -323,7 +323,7 @@ export const MyPositions = () => {
         {pools && showClaimAllYield && pools.length > 0 && (
           <div className="flex flex-1 flex-col items-center">
             <Button
-              className="w-full text-3xs text-black md:text-xs"
+              className="text-3xs w-full text-black md:text-xs"
               variant={collectError ? "destructive" : "iridescent"}
               disabled={!!collectData || isCollectPending}
               size="sm"
@@ -339,7 +339,7 @@ export const MyPositions = () => {
             </Button>
             <Badge
               variant={collectError ? "destructive" : "iridescent"}
-              className="-mt-2 gap-2 border-2 border-black text-3xs"
+              className="text-3xs -mt-2 gap-2 border-2 border-black"
             >
               {unclaimedRewards}
             </Badge>
@@ -347,7 +347,7 @@ export const MyPositions = () => {
         )}
         <Link href={"/stake/pool/create"} className="flex-1">
           <Button
-            className="w-full text-3xs md:text-xs"
+            className="text-3xs w-full md:text-xs"
             variant="secondary"
             size="sm"
           >
