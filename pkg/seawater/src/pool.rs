@@ -82,6 +82,7 @@ impl StoragePool {
         let max_tick = tick_math::get_max_tick(spacing);
         assert_or!(low >= min_tick && low <= max_tick, Error::InvalidTick);
         assert_or!(up >= min_tick && up <= max_tick, Error::InvalidTick);
+        assert_or!(low < up, Error::InvalidTick);
         self.positions.new(id, low, up);
         Ok(())
     }
