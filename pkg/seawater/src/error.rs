@@ -241,6 +241,10 @@ pub enum Error {
     // 43 (0x2b)
     #[error("Trying to swap2 between the same pool")]
     SamePool,
+
+    // 44 (0x2c)
+    #[error("Swap sending fee taking overflow")]
+    TransferToSenderSub,
 }
 
 impl From<Error> for Vec<u8> {
