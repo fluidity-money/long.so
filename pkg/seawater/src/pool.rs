@@ -56,7 +56,7 @@ impl StoragePool {
         max_liquidity_per_tick: u128,
     ) -> Result<(), Revert> {
         assert_or!(!self.initialised.get(), Error::PoolAlreadyInitialised);
-        assert_or!(fee < 10000, Error::BadFee);
+        assert_or!(fee <= 10000, Error::BadFee);
 
         self.initialised.set(true);
 
