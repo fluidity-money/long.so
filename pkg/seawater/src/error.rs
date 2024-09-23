@@ -227,10 +227,6 @@ pub enum Error {
     LiqResultTooLow,
 
     // 40 (0x28)
-    #[error("Fee growth sub overflow tick")]
-    FeeGrowthSubTick,
-
-    // 41 (0x29)
     #[error("The emergency council can only disable pools")]
     SeawaterEmergencyOnlyDisable,
 }
