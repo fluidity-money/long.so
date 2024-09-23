@@ -90,7 +90,7 @@ contract OwnershipNFTs is IERC721Metadata {
         );
 
         require(
-            data != IERC721TokenReceiver.onERC721Received.selector,
+            data == IERC721TokenReceiver.onERC721Received.selector,
             "bad nft transfer received data"
         );
     }
