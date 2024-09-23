@@ -7,6 +7,7 @@ import TokenIridescent from "@/assets/icons/token-iridescent.svg";
 import { TokenIcon } from "@/components/TokenIcon";
 import { Token } from "@/config/tokens";
 import { formatDuration, intervalToDuration } from "date-fns";
+import { LiquidityCampaign } from "@/hooks/usePostions";
 
 // this is a misnomer - it represents a position and its corresponding pool
 export type Pool = {
@@ -16,6 +17,8 @@ export type Pool = {
   duration: number;
   staked: number;
   totalYield: number;
+  isVested: boolean;
+  liquidityCampaigns: LiquidityCampaign[];
 };
 
 export const columns: ColumnDef<Pool>[] = [

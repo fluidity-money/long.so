@@ -70,6 +70,8 @@ export const MyPositions = () => {
           parseFloat(position.liquidity.token1.valueUsd),
         // TODO set this based on unclaimedRewardsData
         totalYield: 0,
+        isVested: position.isVested,
+        liquidityCampaigns: position.pool.liquidityCampaigns,
       }))
       .filter((position) => position.staked > 0);
   }, [showDemoData, address, walletData]);

@@ -6,6 +6,14 @@ import { useAccount } from "wagmi";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+export type LiquidityCampaign = {
+  campaignId: string;
+  endTimestamp: number;
+  fromTimestamp: number;
+  tickLower: number;
+  tickUpper: number;
+}
+
 // Position partially defines the remote Position type with necessary fields
 export type Position = {
   // the age at which the position was created
@@ -17,6 +25,7 @@ export type Position = {
   positionId: number;
   pool: {
     token: Token;
+    liquidityCampaigns: LiquidityCampaign[]
   };
   lower: number;
   upper: number;
@@ -110,6 +119,13 @@ const PositionsFragment = graphql(`
             address
             symbol
             decimals
+          }
+          liquidityCampaigns {
+            campaignId
+            tickLower
+            tickUpper
+            fromTimestamp
+            endTimestamp
           }
         }
         lower
