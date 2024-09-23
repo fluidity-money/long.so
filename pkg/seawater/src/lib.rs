@@ -56,7 +56,6 @@ use types::{U256Extension, WrappedNative};
 
 use stylus_sdk::{msg, prelude::*, storage::*};
 
-#[cfg(feature = "log-events")]
 use stylus_sdk::evm;
 
 #[allow(dead_code)]
@@ -181,7 +180,6 @@ impl Pools {
             Error::SwapResultTooLow
         );
 
-        #[cfg(feature = "log-events")]
         evm::log(events::Swap1 {
             user: msg::sender(),
             pool,
@@ -299,7 +297,6 @@ impl Pools {
             )?;
         }
 
-        #[cfg(feature = "log-events")]
         evm::log(events::Swap2 {
             user: msg::sender(),
             from,
@@ -519,7 +516,6 @@ impl Pools {
 
         self.grant_position(owner, id);
 
-        #[cfg(feature = "log-events")]
         evm::log(events::MintPosition {
             id,
             owner,
@@ -556,7 +552,6 @@ impl Pools {
         self.remove_position(from, id);
         self.grant_position(to, id);
 
-        #[cfg(feature = "log-events")]
         evm::log(events::TransferPosition { from, to, id });
 
         Ok(())
@@ -617,7 +612,6 @@ impl Pools {
         let res = self.pools.setter(pool).collect(id)?;
         let (token_0, token_1) = res;
 
-        #[cfg(feature = "log-events")]
         evm::log(events::CollectFees {
             id,
             pool,
@@ -710,7 +704,6 @@ impl Pools {
             erc20::take(FUSDC_ADDR, token_1.abs_pos()?, permit_1)?;
         }
 
-        #[cfg(feature = "log-events")]
         evm::log(events::UpdatePositionLiquidity {
             id,
             token0: token_0,
@@ -745,7 +738,6 @@ impl Pools {
             giving,
         )?;
 
-        #[cfg(feature = "log-events")]
         evm::log(events::UpdatePositionLiquidity {
             id,
             token0: amount_0,
@@ -1012,7 +1004,6 @@ impl Pools {
 
         let _decimals = erc20::decimals(pool)?;
 
-        #[cfg(feature = "log-events")]
         evm::log(events::NewPool {
             token: pool,
             fee,
@@ -1085,7 +1076,7 @@ impl Pools {
         Ok(())
     }
 
-    pub fn set_fee_protocol(
+    pub fn set_fee_protocol_C_B_D_3_E_C_35(
         &mut self,
         pool: Address,
         fee_protocol_0: u8,
@@ -1106,7 +1097,6 @@ impl Pools {
 
         self.pools.setter(pool).set_fee_protocol(fee_protocol);
 
-        #[cfg(feature = "log-events")]
         evm::log(events::NewFees {
             pool,
             feeProtocol: fee_protocol,
@@ -1173,7 +1163,6 @@ impl Pools {
         erc20::transfer_to_addr(pool, recipient, U256::from(token_0))?;
         erc20::transfer_to_addr(FUSDC_ADDR, recipient, U256::from(token_1))?;
 
-        #[cfg(feature = "log-events")]
         evm::log(events::CollectProtocolFees {
             pool,
             to: recipient,
