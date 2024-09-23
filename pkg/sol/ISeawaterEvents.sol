@@ -125,7 +125,6 @@ interface ISeawaterEvents {
 
     /// @notice new fees were set!
     /// @param pool that the fees are set for.
-    /// @param fee for the pool given
     /// @param feeProtocol that's taken by the protocol
     event NewFees(
         address indexed pool,

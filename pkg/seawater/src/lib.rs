@@ -547,6 +547,11 @@ impl Pools {
         to: Address,
     ) -> Result<(), Revert> {
         assert_eq_or!(msg::sender(), self.nft_manager.get(), Error::NftManagerOnly);
+        assert_eq_or!(
+            self.position_owners.getter(id).get(),
+            from,
+            Error::PositionOwnerOnly
+        );
 
         self.remove_position(from, id);
         self.grant_position(to, id);
@@ -999,12 +1004,9 @@ impl Pools {
             Error::SeawaterAdminOnly
         );
 
-        self.pools.setter(pool).init(
-            price,
-            fee,
-            tick_spacing,
-            max_liquidity_per_tick,
-        )?;
+        self.pools
+            .setter(pool)
+            .init(price, fee, tick_spacing, max_liquidity_per_tick)?;
 
         // get the decimals for the asset so we can log it's decimals for the indexer
 

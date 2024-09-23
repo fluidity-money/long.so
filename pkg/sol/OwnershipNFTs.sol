@@ -30,9 +30,9 @@ contract OwnershipNFTs is IERC721Metadata {
      * @dev required in the NFT spec and we simplify the use here by
      *      naming the storage slot as such
      */
-    mapping(uint256 => address) public getApproved;
+    mapping(uint256 => address) private getApproved_;
 
-    /// @notice isApprovedForAll[owner][spender] == true if `spender` can spend any of `owner`'s NFTs
+    /// @inheritdoc IERC721Metadata
     mapping(address => mapping(address => bool)) public isApprovedForAll;
 
     constructor(
@@ -47,10 +47,7 @@ contract OwnershipNFTs is IERC721Metadata {
         SEAWATER = _seawater;
     }
 
-    /**
-     * @notice ownerOf a NFT given by looking it up with the tracked Seawater contract
-     * @param _tokenId to look up
-     */
+    /// @inheritdoc IERC721Metadata
     function ownerOf(uint256 _tokenId) public view returns (address) {
         (bool ok, bytes memory rc) = address(SEAWATER).staticcall(abi.encodeWithSelector(
             SEAWATER.positionOwnerD7878480.selector,
@@ -59,6 +56,13 @@ contract OwnershipNFTs is IERC721Metadata {
         require(ok, "position owner revert");
         (address owner) = abi.decode(rc, (address));
         return owner;
+    }
+
+    /// @inheritdoc IERC721Metadata
+    function getApproved(uint256 _tokenId) external view returns (address) {
+        address approved = getApproved_[_tokenId];
+        require(approved != address(0), "not existing");
+        return approved;
     }
 
     /**
@@ -100,7 +104,7 @@ contract OwnershipNFTs is IERC721Metadata {
         bool isAllowed =
             msg.sender == _from ||
             isApprovedForAll[_from][msg.sender] ||
-            msg.sender == getApproved[_tokenId];
+            msg.sender == getApproved_[_tokenId];
 
         require(isAllowed, "not allowed");
         require(ownerOf(_tokenId) == _from, "_from is not the owner!");
@@ -112,7 +116,9 @@ contract OwnershipNFTs is IERC721Metadata {
         uint256 _tokenId
     ) internal {
         _requireAuthorised(_from, _tokenId);
+        require(_to != address(0), "invalid recipient");
         SEAWATER.transferPositionEEC7A3CD(_tokenId, _from, _to);
+        emit Transfer(_from, _to, _tokenId);
     }
 
     function transferFrom(
@@ -159,16 +165,19 @@ contract OwnershipNFTs is IERC721Metadata {
     /// @inheritdoc IERC721Metadata
     function approve(address _approved, uint256 _tokenId) external payable {
         _requireAuthorised(msg.sender, _tokenId);
-        getApproved[_tokenId] = _approved;
+        getApproved_[_tokenId] = _approved;
+        emit Approval(msg.sender, _approved, _tokenId);
     }
 
     /// @inheritdoc IERC721Metadata
     function setApprovalForAll(address _operator, bool _approved) external {
         isApprovedForAll[msg.sender][_operator] = _approved;
+        emit ApprovalForAll(msg.sender, _operator, _approved);
     }
 
     /// @inheritdoc IERC721Metadata
     function balanceOf(address _spender) external view returns (uint256) {
+        require(_spender != address(0), "invalid recipient");
         (bool ok, bytes memory rc) = address(SEAWATER).staticcall(abi.encodeWithSelector(
             SEAWATER.positionBalance4F32C7DB.selector,
             _spender
