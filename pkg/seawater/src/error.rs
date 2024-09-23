@@ -229,6 +229,14 @@ pub enum Error {
     // 40 (0x28)
     #[error("The emergency council can only disable pools")]
     SeawaterEmergencyOnlyDisable,
+
+    // 41 (0x29)
+    #[error("Amount remaining sub")]
+    AmountRemainingSub,
+
+    // 42 (0x2a)
+    #[error("Amount remaining add")]
+    AmountRemainingAdd,
 }
 
 impl From<Error> for Vec<u8> {

@@ -436,12 +436,17 @@ impl StoragePool {
                 true => {
                     state.amount_remaining -=
                         I256::unchecked_from(step_amount_in + step_fee_amount);
-                    state.amount_calculated -= I256::unchecked_from(step_amount_out);
+                    state.amount_calculated = state
+                        .amount_calculated
+                        .checked_sub(I256::unchecked_from(step_amount_out))
+                        .ok_or(Error::AmountRemainingSub)?;
                 }
                 false => {
                     state.amount_remaining += I256::unchecked_from(step_amount_out);
-                    state.amount_calculated +=
-                        I256::unchecked_from(step_amount_in + step_fee_amount);
+                    state.amount_calculated = state
+                        .amount_calculated
+                        .checked_add(I256::unchecked_from(step_amount_in + step_fee_amount))
+                        .ok_or(Error::AmountRemainingAdd)?;
                 }
             }
 
