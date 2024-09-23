@@ -309,7 +309,7 @@ pub fn get_liquidity_for_amounts(
         (sqrt_ratio_a_x_96, sqrt_ratio_b_x_96) = (sqrt_ratio_b_x_96, sqrt_ratio_a_x_96)
     };
 
-    let delta = if sqrt_ratio_x_96 <= sqrt_ratio_a_x_96 {
+    let delta = if sqrt_ratio_x_96 < sqrt_ratio_a_x_96 {
         get_liquidity_for_amount_0(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, amount_0)?
     } else if sqrt_ratio_x_96 < sqrt_ratio_b_x_96 {
         let liq0 = get_liquidity_for_amount_0(sqrt_ratio_x_96, sqrt_ratio_b_x_96, amount_0)?;
