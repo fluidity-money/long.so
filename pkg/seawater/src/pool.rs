@@ -375,6 +375,8 @@ impl StoragePool {
         // continue swapping while there's tokens left to swap
         // and we haven't reached the price limit
         let mut iters = 0;
+        let mut last_valid_price = state.price;
+
         while !state.amount_remaining.is_zero() && state.price != price_limit {
             iters += 1;
             debug_assert!(iters < 500);
@@ -486,6 +488,8 @@ impl StoragePool {
                     state.liquidity = liquidity_math::add_delta(state.liquidity, liquidity_net)?;
                 }
 
+                last_valid_price = state.price;
+
                 state.tick = match zero_for_one {
                     true => step_next_tick - 1,
                     false => step_next_tick,
@@ -496,9 +500,14 @@ impl StoragePool {
             }
         }
 
-        // write state
-        // update price and tick
-        self.sqrt_price.set(state.price);
+        // write, and update tick. if we hit the price limit, use the
+        // last price that was swapped
+        self.sqrt_price.set(if state.price == price_limit {
+            last_valid_price
+        } else {
+            state.price
+        });
+
         if state.tick != self.cur_tick.get().sys() {
             self.cur_tick.set(I32::unchecked_from(state.tick));
         }
