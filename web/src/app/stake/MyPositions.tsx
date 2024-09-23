@@ -32,6 +32,7 @@ export const MyPositions = () => {
   const chainId = useChainId();
   const fUSDC = useTokens(chainId, "fusdc");
   const ammContract = useContracts(chainId, "amm");
+  const leoContract = useContracts(chainId, "leo");
   const [expanded, setExpanded] = useState(false);
 
   const router = useRouter();
@@ -88,26 +89,58 @@ export const MyPositions = () => {
     : 0n;
 
   const {
-    writeContractAsync: writeContractCollect,
-    data: collectData,
-    error: collectError,
-    isPending: isCollectPending,
+    writeContractAsync: writeContractCollectSeawater,
+    data: collectSeawaterData,
+    error: collectSeawaterError,
+    isPending: isCollectSeawaterPending,
   } = useWriteContract();
 
-  const collectArgs = useMemo(
+  const {
+    writeContractAsync: writeContractCollectLeo,
+    data: collectLeoData,
+    error: collectLeoError,
+    isPending: isCollectLeoPending,
+  } = useWriteContract();
+
+  const collectData = collectSeawaterData && collectLeoData;
+  const collectError = collectSeawaterError || collectLeoError;
+  const isCollectPending = isCollectSeawaterPending || isCollectLeoPending;
+
+  const [campaignIds, vestedPositions, nonVestedPositions] = useMemo(
     () =>
       [
-        pools?.map((p) => p.id as `0x${string}`) ?? [],
-        pools?.map((p) => BigInt(p.positionId)) ?? [],
+        // unique campaign IDs
+        [...new Set(
+          pools?.flatMap(p => p.liquidityCampaigns.map(l =>
+            l.campaignId as `0x${string}`)
+          ))
+        ] ?? [],
+        // positions that are leo
+        pools?.filter(p => p.isVested).map(p => ({
+          // tokens are always [fUSDC, token]
+          token: p.tokens[1].address,
+          id: BigInt(p.positionId)
+        })) ?? [],
+        // positions that aren't leo
+        pools?.filter(p => !p.isVested) ?? [],
       ] as const,
     [pools],
+  )
+
+  const collectSeawaterArgs = useMemo(
+    () =>
+      [
+        nonVestedPositions.map((p) => p.id as `0x${string}`),
+        nonVestedPositions.map((p) => BigInt(p.positionId))
+      ] as const,
+    [nonVestedPositions],
   );
 
   const { data: unclaimedRewardsData } = useSimulateContract({
     address: ammContract.address,
     abi: ammContract.abi,
     functionName: "collect7F21947C",
-    args: collectArgs,
+    args: collectSeawaterArgs,
   });
 
   const unclaimedRewards = useMemo(() => {
@@ -124,13 +157,21 @@ export const MyPositions = () => {
   }, [unclaimedRewardsData, token0, tokenPrice]);
 
   const collectAll = useCallback(() => {
-    writeContractCollect({
+    // for all positions that are in leo, call leo collect
+    vestedPositions.length > 0 && writeContractCollectLeo({
+      address: leoContract.address,
+      abi: leoContract.abi,
+      functionName: "collect",
+      args: [vestedPositions, campaignIds],
+    })
+    // for all other positions, call normal collect
+    writeContractCollectSeawater({
       address: ammContract.address,
       abi: ammContract.abi,
       functionName: "collect7F21947C",
-      args: collectArgs,
+      args: collectSeawaterArgs,
     });
-  }, [writeContractCollect, collectArgs]);
+  }, [writeContractCollectLeo, writeContractCollectSeawater, vestedPositions, campaignIds, collectSeawaterArgs]);
 
   return (
     <motion.div
