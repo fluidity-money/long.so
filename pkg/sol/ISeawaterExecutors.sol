@@ -115,10 +115,6 @@ interface ISeawaterExecutorPosition {
         int32 upper
     ) external returns (uint256 id);
 
-    /// @notice burns a position, leaving the liquidity in it inaccessible
-    /// @notice id the id of the position to burn
-    function burnPositionAE401070(uint256 id) external;
-
     /// @notice transferPosition transfers a position. usable only by the NFT manager
     /// @param id the id of the position to transfer
     /// @param from the user to transfer the position from

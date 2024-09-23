@@ -519,29 +519,6 @@ impl Pools {
         Ok(id)
     }
 
-    /// Burns a position. Only usable by the position owner.
-    ///
-    /// Calling this function leaves any liquidity or fees left in the position inaccessible.
-    ///
-    /// # Errors
-    /// Requires the position be owned by the caller. Requires the pool to be enabled.
-    #[allow(non_snake_case)]
-    pub fn burn_position_AE401070(&mut self, id: U256) -> Result<(), Revert> {
-        let owner = msg::sender();
-        assert_eq_or!(
-            self.position_owners.get(id),
-            owner,
-            Error::PositionOwnerOnly
-        );
-
-        self.remove_position(owner, id);
-
-        #[cfg(feature = "log-events")]
-        evm::log(events::BurnPosition { owner, id });
-
-        Ok(())
-    }
-
     /// Transfers a position's ownership from one address to another. Only usable by the NFT
     /// manager account.
     ///
