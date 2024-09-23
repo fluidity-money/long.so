@@ -210,6 +210,7 @@ interface ISeawaterExecutorUpdatePosition {
     /// @param amount1Max to use as the maximum of amount1, used to create the delta
     /// @return the deltas for token0, and token1
     function decrPosition09293696(
+        address pool,
         uint256 id,
         uint256 amount0Min,
         uint256 amount1Min,
