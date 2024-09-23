@@ -786,3 +786,34 @@ fn ethers_suite_swapping_with_permit2_blobs_no_permit2() {
         },
     );
 }
+
+mod proptesting {
+    use proptest::prelude::*;
+
+    use super::*;
+
+    fn match_fees(x: u8, y: u8) -> bool {
+        match (x, y) {
+            (0, 0) | (0, 1) | (1, 5) | (1, 6) | (1, 7) | (1, 8) | (1, 9) | (1, 10) => true,
+            _ => false,
+        }
+    }
+
+    proptest! {
+        #[test]
+        fn test_fee_protocol(fee_protocol_0 in any::<u8>(), fee_protocol_1 in any::<u8>()) {
+            test_utils::with_storage::<_, Pools, _>(
+                None,
+                None,
+                None,
+                None,
+                |contract| {
+
+                let should_work = match_fees(fee_protocol_0, fee_protocol_1);
+
+                let r = contract.set_fee_protocol(Address::ZERO, fee_protocol_0, fee_protocol_1);
+                assert!((r.is_ok() && should_work) || (r.is_err() && !should_work));
+            });
+        }
+    }
+}

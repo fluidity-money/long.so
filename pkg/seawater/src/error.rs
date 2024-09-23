@@ -245,6 +245,10 @@ pub enum Error {
     // 44 (0x2c)
     #[error("Swap sending fee taking overflow")]
     TransferToSenderSub,
+
+    // 45 (0x2d)
+    #[error("Bad protocol fee was attempted to be set")]
+    BadFeeProtocol
 }
 
 impl From<Error> for Vec<u8> {

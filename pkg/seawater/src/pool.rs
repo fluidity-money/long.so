@@ -639,6 +639,10 @@ impl StoragePool {
         self.sqrt_price.set(new_price);
     }
 
+    pub fn set_fee_protocol(&mut self, fee_protocol: u8) {
+        self.fee_protocol.set(U8::lib(&fee_protocol));
+    }
+
     pub fn get_enabled(&self) -> bool {
         self.enabled.get()
     }

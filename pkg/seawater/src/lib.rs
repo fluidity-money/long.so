@@ -999,9 +999,12 @@ impl Pools {
             Error::SeawaterAdminOnly
         );
 
-        self.pools
-            .setter(pool)
-            .init(price, fee, tick_spacing, max_liquidity_per_tick)?;
+        self.pools.setter(pool).init(
+            price,
+            fee,
+            tick_spacing,
+            max_liquidity_per_tick,
+        )?;
 
         // get the decimals for the asset so we can log it's decimals for the indexer
 
@@ -1076,6 +1079,36 @@ impl Pools {
         );
 
         self.pools.setter(pool).set_sqrt_price(new_price);
+
+        Ok(())
+    }
+
+    pub fn set_fee_protocol(
+        &mut self,
+        pool: Address,
+        fee_protocol_0: u8,
+        fee_protocol_1: u8,
+    ) -> Result<(), Revert> {
+        assert_eq_or!(
+            msg::sender(),
+            self.seawater_admin.get(),
+            Error::SeawaterAdminOnly
+        );
+
+        let is_fee_valid = (fee_protocol_0 == 0 || (fee_protocol_0 >= 4 && fee_protocol_0 <= 10))
+            && (fee_protocol_1 == 0 || (fee_protocol_1 >= 4 && fee_protocol_1 <= 10));
+
+        assert_or!(is_fee_valid, Error::BadFeeProtocol);
+
+        let fee_protocol = fee_protocol_0 + (fee_protocol_1 << 4);
+
+        self.pools.setter(pool).set_fee_protocol(fee_protocol);
+
+        #[cfg(feature = "log-events")]
+        evm::log(events::NewFees {
+            pool,
+            feeProtocol: fee_protocol,
+        });
 
         Ok(())
     }
