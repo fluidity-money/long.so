@@ -49,6 +49,13 @@ const ManagePoolFragment = graphql(`
       decimals
     }
     earnedFeesAPRFUSDC
+    liquidityCampaigns {
+      campaignId
+      tickLower
+      tickUpper
+      fromTimestamp
+      endTimestamp
+    }
   }
 `);
 
@@ -57,6 +64,7 @@ export default function PoolPage() {
   const chainId = useChainId();
   const fUSDC = useTokens(chainId, "fusdc");
   const ammContract = useContracts(chainId, "amm");
+  const leoContract = useContracts(chainId, "leo");
   useHotkeys("esc", () => router.back());
 
   // get the id from the query params
@@ -73,8 +81,8 @@ export default function PoolPage() {
         (p) =>
           p.pool.token.address === id &&
           parseFloat(p.liquidity.fusdc.valueUsd) +
-            parseFloat(p.liquidity.token1.valueUsd) >
-            0,
+          parseFloat(p.liquidity.token1.valueUsd) >
+          0,
       ),
     [id, positionsData_],
   );
@@ -97,6 +105,8 @@ export default function PoolPage() {
 
   const poolData = allPoolsData?.find((pool) => pool.id === id);
 
+  const { liquidityCampaigns } = poolData || { liquidityCampaigns: [] }
+
   const setPositionId = (posId: number) =>
     router.replace(`?id=${id}&positionId=${posId}`);
 
@@ -115,12 +125,12 @@ export default function PoolPage() {
       usdFormat(
         positionsData
           ? positionsData.reduce(
-              (total, { liquidity: { fusdc, token1 } }) =>
-                total +
-                parseFloat(fusdc.valueUsd) +
-                parseFloat(token1.valueUsd),
-              0,
-            )
+            (total, { liquidity: { fusdc, token1 } }) =>
+              total +
+              parseFloat(fusdc.valueUsd) +
+              parseFloat(token1.valueUsd),
+            0,
+          )
           : 0,
       ),
     [poolData],
@@ -168,6 +178,13 @@ export default function PoolPage() {
     args: [[token0.address], [BigInt(positionId ?? 0)]],
   });
 
+  const { data: unclaimedLeoRewardsData } = useSimulateContract({
+    address: leoContract.address,
+    abi: leoContract.abi,
+    functionName: "collect",
+    args: [[{ token: token0.address, id: BigInt(positionId ?? 0) }], liquidityCampaigns?.map(c => c.campaignId as `0x${string}`)],
+  });
+
   const unclaimedRewards = useMemo(() => {
     if (!unclaimedRewardsData || !positionId) return "$0.00";
 
@@ -183,14 +200,22 @@ export default function PoolPage() {
 
   const collect = useCallback(
     (id: bigint) => {
-      writeContractCollect({
-        address: ammContract.address,
-        abi: ammContract.abi,
-        functionName: "collect7F21947C",
-        args: [[token0.address], [id]],
-      });
+      if (unclaimedLeoRewardsData?.result)
+        writeContractCollect({
+          address: leoContract.address,
+          abi: leoContract.abi,
+          functionName: "collect",
+          args: [[{ token: token0.address, id }], liquidityCampaigns?.map(c => c.campaignId as `0x${string}`)],
+        })
+      else
+        writeContractCollect({
+          address: ammContract.address,
+          abi: ammContract.abi,
+          functionName: "collect7F21947C",
+          args: [[token0.address], [id]],
+        });
     },
-    [writeContractCollect, token0, ammContract],
+    [writeContractCollect, token0, ammContract, leoContract, liquidityCampaigns],
   );
 
   const positionBalance = useMemo(() => {
@@ -203,8 +228,8 @@ export default function PoolPage() {
     );
     return usdFormat(
       (amount0 * Number(tokenPrice)) /
-        10 ** (token0.decimals + fUSDC.decimals) +
-        amount1 / 10 ** token1.decimals,
+      10 ** (token0.decimals + fUSDC.decimals) +
+      amount1 / 10 ** token1.decimals,
     );
   }, [position, positionLiquidity, tokenPrice, token0, token1, curTick]);
 
@@ -366,18 +391,18 @@ export default function PoolPage() {
                     <div className="text-xl md:text-2xl">
                       {lowerTick
                         ? getFormattedPriceFromTick(
-                            lowerTick,
-                            token0.decimals,
-                            token1.decimals,
-                          )
+                          lowerTick,
+                          token0.decimals,
+                          token1.decimals,
+                        )
                         : usdFormat(0)}
                       -
                       {upperTick
                         ? getFormattedPriceFromTick(
-                            upperTick,
-                            token0.decimals,
-                            token1.decimals,
-                          )
+                          upperTick,
+                          token0.decimals,
+                          token1.decimals,
+                        )
                         : usdFormat(0)}
                     </div>
                   </div>
