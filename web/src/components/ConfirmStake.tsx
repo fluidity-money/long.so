@@ -404,6 +404,7 @@ export const ConfirmStake = ({
           positionId: id,
           pool: {
             token: token0,
+            liquidityCampaigns: [],
           },
           lower: tickLower,
           upper: tickUpper,

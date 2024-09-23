@@ -184,6 +184,7 @@ export default function ConfirmWithdrawLiquidity() {
           positionId: Number(positionId),
           pool: {
             token: token0,
+            liquidityCampaigns: [],
           },
           lower: tickLower,
           upper: tickUpper,

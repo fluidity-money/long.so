@@ -23,6 +23,8 @@ export const mockMyPositions: Pool[] = [
     duration: 100,
     staked: 100,
     totalYield: 100,
+    liquidityCampaigns: [],
+    isVested: false,
   },
   {
     id: "2",
@@ -46,6 +48,8 @@ export const mockMyPositions: Pool[] = [
     duration: 100,
     staked: 100,
     totalYield: 100,
+    liquidityCampaigns: [],
+    isVested: false,
   },
   {
     id: "3",
@@ -69,6 +73,8 @@ export const mockMyPositions: Pool[] = [
     duration: 100,
     staked: 100,
     totalYield: 100,
+    liquidityCampaigns: [],
+    isVested: false,
   },
   {
     id: "4",
@@ -92,6 +98,8 @@ export const mockMyPositions: Pool[] = [
     duration: 100,
     staked: 100,
     totalYield: 100,
+    liquidityCampaigns: [],
+    isVested: false,
   },
   {
     id: "5",
@@ -115,6 +123,8 @@ export const mockMyPositions: Pool[] = [
     duration: 100,
     staked: 100,
     totalYield: 100,
+    liquidityCampaigns: [],
+    isVested: false,
   },
   {
     id: "6",
@@ -138,6 +148,8 @@ export const mockMyPositions: Pool[] = [
     duration: 100,
     staked: 100,
     totalYield: 100,
+    liquidityCampaigns: [],
+    isVested: false,
   },
   {
     id: "7",
@@ -161,6 +173,8 @@ export const mockMyPositions: Pool[] = [
     duration: 100,
     staked: 100,
     totalYield: 100,
+    liquidityCampaigns: [],
+    isVested: false,
   },
   {
     id: "8",
@@ -184,6 +198,8 @@ export const mockMyPositions: Pool[] = [
     duration: 100,
     staked: 100,
     totalYield: 100,
+    liquidityCampaigns: [],
+    isVested: false,
   },
   {
     id: "9",
@@ -207,5 +223,7 @@ export const mockMyPositions: Pool[] = [
     duration: 100,
     staked: 100,
     totalYield: 100,
+    liquidityCampaigns: [],
+    isVested: false,
   },
 ];
