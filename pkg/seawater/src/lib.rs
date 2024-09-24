@@ -65,15 +65,6 @@ type RawArbResult = Option<Result<Vec<u8>, Vec<u8>>>;
 type Revert = Vec<u8>;
 
 extern crate alloc;
-// only set a custom allocator if we're deploying on wasm
-#[cfg(target_arch = "wasm32")]
-mod allocator {
-    use lol_alloc::{AssumeSingleThreaded, FreeListAllocator};
-    // SAFETY: This application is single threaded, so using AssumeSingleThreaded is allowed.
-    #[global_allocator]
-    static ALLOCATOR: AssumeSingleThreaded<FreeListAllocator> =
-        unsafe { AssumeSingleThreaded::new(FreeListAllocator::new()) };
-}
 
 // we split our entrypoint functions into three sets, and call them via diamond proxies, to
 // save on binary size
@@ -97,7 +88,7 @@ mod shim {
 
 /// The root of seawater's storage. Stores variables needed globally, as well as the map of AMM
 /// pools.
-#[solidity_storage]
+#[storage]
 #[entrypoint]
 pub struct Pools {
     // admin that can control the settings of everything. either the DAO, or the
@@ -218,7 +209,7 @@ impl Pools {
             .ok_or(Error::InterimSwapPositive)?;
 
         // swap usdc -> out
-        let (amount_out, interim_usdc_in, final_tick_out) = pools.pools.setter(to).swap(
+        let (amount_out, _interim_usdc_in, final_tick_out) = pools.pools.setter(to).swap(
             false,
             interim_usdc_out,
             tick_math::MAX_SQRT_RATIO - U256::one(),
@@ -315,7 +306,7 @@ impl Pools {
 }
 
 /// Swap functions. Only enabled when the `swaps` feature is set.
-#[cfg_attr(feature = "swaps", external)]
+#[cfg_attr(feature = "swaps", public)]
 impl Pools {
     #[allow(non_snake_case)]
     pub fn swap_904369_B_E(
@@ -343,7 +334,7 @@ impl Pools {
 }
 
 /// Quote functions. Only enabled when the `quotes` feature is set.
-#[cfg_attr(feature = "quotes", external)]
+#[cfg_attr(feature = "quotes", public)]
 impl Pools {
     /// Quote a [Self::swap]. Will revert with the result of the swap
     /// as a decimal number as the message of an `Error(string)`.
@@ -408,7 +399,7 @@ impl Pools {
 }
 
 /// Swap functions using Permit2. Only enabled when the `swap_permit2` feature is set.
-#[cfg_attr(feature = "swap_permit2", external)]
+#[cfg_attr(feature = "swap_permit2", public)]
 impl Pools {
     #[cfg(feature = "swap_permit2")]
     #[allow(non_snake_case)]
@@ -494,7 +485,7 @@ impl Pools {
 }
 
 /// Position management functions. Only enabled when the `positions` feature is set.
-#[cfg_attr(feature = "positions", external)]
+#[cfg_attr(feature = "positions", public)]
 impl Pools {
     /// Creates a new, empty position, owned by a user.
     ///
@@ -880,7 +871,7 @@ impl Pools {
     }
 }
 
-#[cfg_attr(feature = "update_positions", external)]
+#[cfg_attr(feature = "update_positions", public)]
 impl Pools {
     /// Refreshes and updates liquidity in a position, using approvals to transfer tokens.
     /// See [Self::update_position_internal].
@@ -944,7 +935,7 @@ impl Pools {
 }
 
 /// Admin functions. Only enabled when the `admin` feature is set.
-#[cfg_attr(feature = "admin", external)]
+#[cfg_attr(feature = "admin", public)]
 impl Pools {
     /// The initialiser function for the seawater contract. Should be called in the proxy's
     /// constructor.
@@ -1076,6 +1067,7 @@ impl Pools {
         Ok(())
     }
 
+    #[allow(non_snake_case)]
     pub fn set_fee_protocol_C_B_D_3_E_C_35(
         &mut self,
         pool: Address,
@@ -1234,6 +1226,7 @@ impl Pools {
         Ok(())
     }
 
+    #[allow(non_snake_case)]
     pub fn send_token_to_sender_9603_F_18_B(&mut self, token: Address, amount: U256) -> Result<(), Vec<u8>> {
         assert_eq_or!(
             msg::sender(),
@@ -1246,6 +1239,7 @@ impl Pools {
         Ok(())
     }
 
+    #[allow(non_snake_case)]
     pub fn send_amounts_from_sender_3_D_F_81_C_E_5(
         &mut self,
         token: Address,

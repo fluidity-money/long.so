@@ -19,7 +19,7 @@ use crate::current_test;
 type Revert = Vec<u8>;
 
 /// The storage type for an AMM pool.
-#[solidity_storage]
+#[storage]
 pub struct StoragePool {
     pub enabled: StorageBool,
     // immutables

@@ -9,7 +9,7 @@ use crate::{
 use stylus_sdk::{prelude::*, storage::*};
 
 /// Storage type for the details on a position.
-#[solidity_storage]
+#[storage]
 pub struct StoragePositionInfo {
     pub lower: StorageI32,
     pub upper: StorageI32,
@@ -21,7 +21,7 @@ pub struct StoragePositionInfo {
 }
 
 /// Container type for the map of position ID to position details.
-#[solidity_storage]
+#[storage]
 pub struct StoragePositions {
     pub positions: StorageMap<U256, StoragePositionInfo>,
 }
