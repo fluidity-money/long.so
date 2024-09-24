@@ -12,7 +12,7 @@ export type LiquidityCampaign = {
   fromTimestamp: number;
   tickLower: number;
   tickUpper: number;
-}
+};
 
 // Position partially defines the remote Position type with necessary fields
 export type Position = {
@@ -25,7 +25,7 @@ export type Position = {
   positionId: number;
   pool: {
     token: Token;
-    liquidityCampaigns: LiquidityCampaign[]
+    liquidityCampaigns: LiquidityCampaign[];
   };
   lower: number;
   upper: number;

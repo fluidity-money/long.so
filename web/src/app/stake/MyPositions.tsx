@@ -110,28 +110,32 @@ export const MyPositions = () => {
     () =>
       [
         // unique campaign IDs
-        [...new Set(
-          pools?.flatMap(p => p.liquidityCampaigns?.map(l =>
-            l.campaignId as `0x${string}`)
-          ))
+        [
+          ...new Set(
+            pools?.flatMap((p) =>
+              p.liquidityCampaigns?.map((l) => l.campaignId as `0x${string}`),
+            ),
+          ),
         ] ?? [],
         // positions that are leo
-        pools?.filter(p => p.isVested).map(p => ({
-          // tokens are always [fUSDC, token]
-          token: p.tokens[1].address,
-          id: BigInt(p.positionId)
-        })) ?? [],
+        pools
+          ?.filter((p) => p.isVested)
+          .map((p) => ({
+            // tokens are always [fUSDC, token]
+            token: p.tokens[1].address,
+            id: BigInt(p.positionId),
+          })) ?? [],
         // positions that aren't leo
-        pools?.filter(p => !p.isVested) ?? [],
+        pools?.filter((p) => !p.isVested) ?? [],
       ] as const,
     [pools],
-  )
+  );
 
   const collectSeawaterArgs = useMemo(
     () =>
       [
         nonVestedPositions.map((p) => p.id as `0x${string}`),
-        nonVestedPositions.map((p) => BigInt(p.positionId))
+        nonVestedPositions.map((p) => BigInt(p.positionId)),
       ] as const,
     [nonVestedPositions],
   );
@@ -158,12 +162,13 @@ export const MyPositions = () => {
 
   const collectAll = useCallback(() => {
     // for all positions that are in leo, call leo collect
-    vestedPositions.length > 0 && writeContractCollectLeo({
-      address: leoContract.address,
-      abi: leoContract.abi,
-      functionName: "collect",
-      args: [vestedPositions, campaignIds],
-    })
+    vestedPositions.length > 0 &&
+      writeContractCollectLeo({
+        address: leoContract.address,
+        abi: leoContract.abi,
+        functionName: "collect",
+        args: [vestedPositions, campaignIds],
+      });
     // for all other positions, call normal collect
     writeContractCollectSeawater({
       address: ammContract.address,
@@ -171,7 +176,13 @@ export const MyPositions = () => {
       functionName: "collect7F21947C",
       args: collectSeawaterArgs,
     });
-  }, [writeContractCollectLeo, writeContractCollectSeawater, vestedPositions, campaignIds, collectSeawaterArgs]);
+  }, [
+    writeContractCollectLeo,
+    writeContractCollectSeawater,
+    vestedPositions,
+    campaignIds,
+    collectSeawaterArgs,
+  ]);
 
   return (
     <motion.div
@@ -259,7 +270,7 @@ export const MyPositions = () => {
                   <div className="flex flex-row justify-center">
                     <Badge
                       variant="outline"
-                      className="md:text-3xs z-20 -mt-1 text-nowrap bg-black p-0 px-px text-[4px] text-white md:-mt-2 md:px-[2px]"
+                      className="z-20 -mt-1 text-nowrap bg-black p-0 px-px text-[4px] text-white md:-mt-2 md:px-[2px] md:text-3xs"
                     >
                       {pool.tokens[0].name}
                       {" x "}
@@ -272,7 +283,7 @@ export const MyPositions = () => {
                   <div className="text-xs md:text-sm">
                     {usdFormat(pool.staked)}
                   </div>
-                  <div className="text-gray-2 md:text-3xs mt-[-2px] text-[4px]">
+                  <div className="mt-[-2px] text-[4px] text-gray-2 md:text-3xs">
                     No Yield Yet
                   </div>
                 </div>
@@ -283,7 +294,7 @@ export const MyPositions = () => {
                     )
                   }
                   variant="secondary"
-                  className="text-2xs mt-[5px] h-6 w-full justify-center gap-1 text-nowrap p-0 px-1"
+                  className="mt-[5px] h-6 w-full justify-center gap-1 text-nowrap p-0 px-1 text-2xs"
                 >
                   <Position className={"size-[6px] md:size-[10px]"} />
                   <div className="text-4xs md:text-3xs">
@@ -300,7 +311,7 @@ export const MyPositions = () => {
         <div className="flex flex-col items-center md:hidden">
           <Button
             variant="link"
-            className="text-2xs group flex h-6 flex-row gap-2 text-white hover:no-underline"
+            className="group flex h-6 flex-row gap-2 text-2xs text-white hover:no-underline"
             size={"sm"}
             onClick={() => setExpanded((v) => !v)}
           >
@@ -323,7 +334,7 @@ export const MyPositions = () => {
         {pools && showClaimAllYield && pools.length > 0 && (
           <div className="flex flex-1 flex-col items-center">
             <Button
-              className="text-3xs w-full text-black md:text-xs"
+              className="w-full text-3xs text-black md:text-xs"
               variant={collectError ? "destructive" : "iridescent"}
               disabled={!!collectData || isCollectPending}
               size="sm"
@@ -339,7 +350,7 @@ export const MyPositions = () => {
             </Button>
             <Badge
               variant={collectError ? "destructive" : "iridescent"}
-              className="text-3xs -mt-2 gap-2 border-2 border-black"
+              className="-mt-2 gap-2 border-2 border-black text-3xs"
             >
               {unclaimedRewards}
             </Badge>
@@ -347,7 +358,7 @@ export const MyPositions = () => {
         )}
         <Link href={"/stake/pool/create"} className="flex-1">
           <Button
-            className="text-3xs w-full md:text-xs"
+            className="w-full text-3xs md:text-xs"
             variant="secondary"
             size="sm"
           >
