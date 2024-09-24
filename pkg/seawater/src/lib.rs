@@ -583,8 +583,8 @@ impl Pools {
         pool: Address,
         id: U256,
     ) -> Result<i32, Revert> {
-        let lower = self.pools.getter(pool).get_position_tick_upper(id);
-        Ok(lower.sys())
+        let upper = self.pools.getter(pool).get_position_tick_upper(id);
+        Ok(upper.sys())
     }
 
     #[allow(non_snake_case)]
