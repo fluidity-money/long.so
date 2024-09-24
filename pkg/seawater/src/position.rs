@@ -51,16 +51,16 @@ impl StoragePositions {
 
         let owed_fees_0 = full_math::mul_div(
             fee_growth_inside_0
-                .checked_sub(info.fee_growth_inside_0.get())
-                .ok_or(Error::FeeGrowthSubPos)?,
+                .overflowing_sub(info.fee_growth_inside_0.get())
+                .0,
             U256::from(info.liquidity.get()),
             full_math::Q128,
         )?;
 
         let owed_fees_1 = full_math::mul_div(
             fee_growth_inside_1
-                .checked_sub(info.fee_growth_inside_1.get())
-                .ok_or(Error::FeeGrowthSubPos)?,
+                .overflowing_sub(info.fee_growth_inside_1.get())
+                .0,
             U256::from(info.liquidity.get()),
             full_math::Q128,
         )?;
