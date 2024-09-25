@@ -222,7 +222,7 @@ contract SeawaterAMM is ISeawaterAMM {
 
 
     /// @inheritdoc ISeawaterExecutorQuote
-    function quote2CD06B86E(address /* to */, address /* from */, uint256 /* amount */, uint256 /* minOut*/) external {
+    function quote2CD06B86E(address /* from */, address /* to */, uint256 /* amount */, uint256 /* minOut*/) external {
         directDelegate(_getExecutorQuote());
     }
 
