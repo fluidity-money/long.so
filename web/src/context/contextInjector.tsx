@@ -2,8 +2,7 @@
 
 import { useAccount, useChainId } from "wagmi";
 import { useEffect } from "react";
-import { setContext, setUser } from "@sentry/nextjs";
-import appConfig from "@/config";
+import { setTag, setUser } from "@sentry/nextjs";
 export default function ContextInjector() {
   const account = useAccount();
 
@@ -18,8 +17,7 @@ export default function ContextInjector() {
   }, [account?.address]);
 
   useEffect(() => {
-    setContext("version", { commitHash: appConfig.NEXT_PUBLIC_GIT_HASH });
-    setContext("chain", { id: account?.chainId });
+    setTag("chainId", account?.chainId);
   }, [account?.chainId]);
 
   return null;
