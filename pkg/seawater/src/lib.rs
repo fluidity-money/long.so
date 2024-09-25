@@ -193,6 +193,9 @@ impl Pools {
         amount: U256,
         min_out: U256,
     ) -> Result<(U256, U256, U256, I256, i32, i32), Revert> {
+        assert_or!(from != to, Error::SamePool);
+        assert_or!(!amount.is_zero(), Error::SwapIsZero);
+
         let original_amount = amount;
 
         let amount = I256::try_from(amount).map_err(|_| Error::SwapResultTooHigh)?;
@@ -330,7 +333,6 @@ impl Pools {
         amount: U256,
         min_out: U256,
     ) -> Result<(U256, U256), Revert> {
-        assert_or!(from != to, Error::SamePool);
         Pools::swap_2_internal_erc20(self, from, to, amount, min_out, None)
     }
 }
