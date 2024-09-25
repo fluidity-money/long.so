@@ -29,7 +29,7 @@ const chainContracts: {
     },
   },
   98985: {
-    amm: { address: "0x63a0B66b741CC9B1e28DA46bDBBCE09Ac964B799" },
+    amm: { address: "0x4622e516abFd1BBF34E0e884570eA0FC7EeF10cc" },
     leo: { address: "0x0000000000000000000000000000000000000000" },
   },
   421614: {

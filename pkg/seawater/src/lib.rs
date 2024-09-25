@@ -1219,7 +1219,7 @@ impl Pools {
 ///! situation. These functions will break the internal state of the pool most likely.
 ///! These likely won't exist beyond testnet, and are as such not included as a facet,
 ///! intending to be used in the catch all feature.
-#[cfg_attr(feature = "migrations", external)]
+#[cfg_attr(feature = "migrations", public)]
 impl Pools {
     pub fn disable_pools(&mut self, pools: Vec<Address>) -> Result<(), Vec<u8>> {
         assert_eq_or!(
