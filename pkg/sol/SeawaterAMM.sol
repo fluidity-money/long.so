@@ -410,7 +410,7 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
-    function tickSpacing653FE28F(address /* pool */) external returns (uint16) {
+    function tickSpacing653FE28F(address /* pool */) external returns (uint8) {
         directDelegate(_getExecutorAdmin());
     }
 

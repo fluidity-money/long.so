@@ -250,9 +250,13 @@ pub enum Error {
     #[error("Bad protocol fee was attempted to be set")]
     BadFeeProtocol,
 
-    // 46 (0xde)
+    // 46 (0x2e)
     #[error("Bad pool fee")]
     BadFee,
+
+    // 47 (0x2f)
+    #[error("0 was provided as an argument for swap")]
+    SwapIsZero
 }
 
 impl From<Error> for Vec<u8> {

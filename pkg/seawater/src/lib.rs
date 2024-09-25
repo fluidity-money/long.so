@@ -139,6 +139,8 @@ impl Pools {
         price_limit_x96: U256,
         permit2: Option<Permit2Args>,
     ) -> Result<(I256, I256), Revert> {
+        assert_or!(!amount.is_zero(), Error::SwapIsZero);
+
         let (amount_0, amount_1, _ending_tick) =
             pools
                 .pools
