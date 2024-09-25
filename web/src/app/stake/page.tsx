@@ -87,7 +87,6 @@ const Stake = () => {
             bounds={"div#rnd-wrapper"}
             dragAxis="x"
             onResizeStop={(e, direction, ref, delta, position) => {
-              console.log("Resize stop");
               setSize({
                 width: +ref.style.width.split("px")[0],
                 height: +ref.style.height.split("px")[0],

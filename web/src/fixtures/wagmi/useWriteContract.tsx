@@ -29,7 +29,6 @@ export default function useWriteContract() {
   const writeContractAsync = useCallback(
     async function (props: VariablesType<WriteContractMutateAsync<Config>>) {
       try {
-        console.log("write call again");
         return await baseWriteContractAsync(props);
       } catch (error) {
         handleError(error);
