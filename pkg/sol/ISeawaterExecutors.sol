@@ -263,7 +263,7 @@ interface ISeawaterExecutorAdminExposed {
     /// @notice gets the tick spacing of the pool
     /// @param pool to get from
     /// @return the tick spacing of the pool
-    function tickSpacing653FE28F(address pool) external returns (uint16);
+    function tickSpacing653FE28F(address pool) external returns (uint8);
 
     /// @notice gets the fee for a specific pool
     /// @param pool to get the fee for
