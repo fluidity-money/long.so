@@ -1,8 +1,8 @@
-import { Token } from "@/config/tokens";
+import { ChainIdTypes, Token } from "@/config/tokens";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlUser } from "@/hooks/useGraphql";
 import { useEffect } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -42,16 +42,24 @@ export type Position = {
 
 interface PositionStore {
   // positionsLocal is a list of positions modified by local actions
-  positionsLocal: { [positionId: number]: Position };
+  positionsLocal: {
+    [chainId: number]: {
+      [positionId: number]: Position
+    }
+  };
   // positions is a key value store of the most up to date positions
   // from the remote server and local
-  positions: { [positionId: number]: Position };
+  positions: {
+    [chainId: number]: {
+      [positionId: number]: Position
+    }
+  };
   // receive new positions, preferring the newest version of each position
-  updatePositionsFromGraph: (newPositions: Array<Position>) => void;
+  updatePositionsFromGraph: (chainId: ChainIdTypes, newPositions: Array<Position>) => void;
   // store a local position update after depositing or withdrawing a stake
   // it is assumed this is always newer/more accurate than the remote data
   // the first time it is stored
-  updatePositionLocal: (newPosition: Position) => void;
+  updatePositionLocal: (chainId: ChainIdTypes, newPosition: Position) => void;
 }
 
 const usePositionStore = create<PositionStore>()(
@@ -60,11 +68,11 @@ const usePositionStore = create<PositionStore>()(
       return {
         positions: {},
         positionsLocal: {},
-        updatePositionsFromGraph: (newPositions) =>
+        updatePositionsFromGraph: (chainId, newPositions) =>
           set(({ positions, positionsLocal }) => {
             const positionsUpdated = newPositions.reduce(
               (existing, newPosition) => {
-                const local = positionsLocal[newPosition.positionId];
+                const local = positionsLocal[chainId]?.[newPosition.positionId];
                 if (local?.served.timestamp < newPosition.served.timestamp)
                   return {
                     ...existing,
@@ -80,19 +88,28 @@ const usePositionStore = create<PositionStore>()(
             return {
               positions: {
                 ...positions,
-                ...positionsUpdated,
+                [chainId]: {
+                  ...positions[chainId],
+                  ...positionsUpdated,
+                }
               },
             };
           }),
-        updatePositionLocal: (newPosition) =>
+        updatePositionLocal: (chainId, newPosition) =>
           set(({ positionsLocal, positions }) => ({
             positionsLocal: {
               ...positionsLocal,
-              [newPosition.positionId]: newPosition,
+              [chainId]: {
+                ...positionsLocal[chainId],
+                [newPosition.positionId]: newPosition,
+              }
             },
             positions: {
               ...positions,
-              [newPosition.positionId]: newPosition,
+              [chainId]: {
+                ...positions[chainId],
+                [newPosition.positionId]: newPosition,
+              }
             },
           })),
       };
@@ -146,6 +163,7 @@ const PositionsFragment = graphql(`
 
 export const usePositions = () => {
   const { data: userData } = useGraphqlUser();
+  const chainId = useChainId();
   const { address } = useAccount();
   const positionsData = useFragment(PositionsFragment, userData?.getWallet);
   const { positions, updatePositionLocal, updatePositionsFromGraph } =
@@ -154,6 +172,7 @@ export const usePositions = () => {
   useEffect(() => {
     if (!positionsData) return;
     updatePositionsFromGraph(
+      chainId,
       // postprocess this to assert that the nested address type is correct
       positionsData.positions.positions.map((p) => ({
         ...p,
@@ -171,7 +190,7 @@ export const usePositions = () => {
   return {
     // loading if the user is connected but the query hasn't resolved yet
     isLoading: address && !userData?.getWallet,
-    positions: Object.values(positions).reverse(),
-    updatePositionLocal,
+    positions: Object.values(positions[chainId] ?? {}).reverse(),
+    updatePositionLocal: (newPosition: Position) => updatePositionLocal(chainId, newPosition),
   };
 };
