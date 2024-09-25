@@ -256,7 +256,11 @@ pub enum Error {
 
     // 47 (0x2f)
     #[error("0 was provided as an argument for swap")]
-    SwapIsZero
+    SwapIsZero,
+
+    // 48 (0x30)
+    #[error("Pool is already initialised!")]
+    PoolIsInitialised,
 }
 
 impl From<Error> for Vec<u8> {

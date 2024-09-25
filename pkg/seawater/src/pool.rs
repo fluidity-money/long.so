@@ -43,7 +43,7 @@ pub struct StoragePool {
     ticks: tick::StorageTicks,
     tick_bitmap: tick::StorageTickBitmap,
 
-    initialised: StorageBool,
+    pub initialised: StorageBool,
 }
 
 impl StoragePool {

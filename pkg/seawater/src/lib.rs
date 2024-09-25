@@ -1182,6 +1182,10 @@ impl Pools {
                 || self.authorised_enablers.get(msg::sender()),
             Error::SeawaterAdminOnly
         );
+        assert_or!(
+            self.pools.getter(pool).initialised.get(),
+            Error::PoolIsInitialised
+        );
 
         if self.emergency_council.get() == msg::sender()
             && self.seawater_admin.get() != msg::sender()
@@ -1231,7 +1235,11 @@ impl Pools {
     }
 
     #[allow(non_snake_case)]
-    pub fn send_token_to_sender_9603_F_18_B(&mut self, token: Address, amount: U256) -> Result<(), Vec<u8>> {
+    pub fn send_token_to_sender_9603_F_18_B(
+        &mut self,
+        token: Address,
+        amount: U256,
+    ) -> Result<(), Vec<u8>> {
         assert_eq_or!(
             msg::sender(),
             self.seawater_admin.get(),
