@@ -87,7 +87,7 @@ export const ConfirmStake = ({
     feePercentage,
   } = useStakeStore();
 
-  const { positions, updatePositionLocal } = usePositions();
+  const { updatePositionLocal } = usePositions();
 
   // Price of the current pool
   const { data: poolSqrtPriceX96 } = useSimulateContract({
@@ -384,6 +384,77 @@ export const ConfirmStake = ({
     hash: updatePositionData,
   });
 
+  const getAmountsAndSetPosition = useCallback(
+    function (id: number, tickLower: number, tickUpper: number) {
+      const position = {
+        positionId: id,
+        pool: {
+          token: token0,
+          liquidityCampaigns: [],
+        },
+        lower: tickLower,
+        upper: tickUpper,
+        isVested,
+      };
+      getUsdTokenAmountsForPosition(
+        expectedChainId,
+        position,
+        token0,
+        Number(tokenPrice),
+      ).then(([amount0, amount1]) =>
+        updatePositionLocal({
+          ...position,
+          created: Math.round(new Date().getTime() / 1000),
+          served: {
+            timestamp: Math.round(new Date().getTime() / 1000),
+          },
+          liquidity: {
+            fusdc: {
+              valueUsd: String(amount1),
+            },
+            token1: {
+              valueUsd: String(amount0),
+            },
+          },
+        }),
+      );
+    },
+    [expectedChainId, isVested, token0, tokenPrice, updatePositionLocal],
+  );
+
+  const vestPositionResultIdle = useCallback(
+    () =>
+      writeContractVestPosition({
+        address: leoContract.address,
+        abi: leoContract.abi,
+        functionName: "vestPosition",
+        args: [token0.address, BigInt(positionId ?? 0)],
+      }),
+    [
+      leoContract.abi,
+      leoContract.address,
+      positionId,
+      token0.address,
+      writeContractVestPosition,
+    ],
+  );
+
+  useEffect(() => {
+    if (updatePositionResult.isSuccess) {
+      const id = positionId ?? Number(mintPositionId);
+      if (id && tickLower && tickUpper) {
+        getAmountsAndSetPosition(id, tickLower, tickUpper);
+      }
+    }
+  }, [
+    getAmountsAndSetPosition,
+    mintPositionId,
+    positionId,
+    tickLower,
+    tickUpper,
+    updatePositionResult.isSuccess,
+  ]);
+
   useEffect(() => {
     if (updatePositionResult.isSuccess) {
       // if we're vesting in Leo, do so now
@@ -392,12 +463,7 @@ export const ConfirmStake = ({
           // haven't yet called vest position, so call it and wait
           case vestPositionResult.fetchStatus === "idle" &&
             !vestPositionResult.data:
-            writeContractVestPosition({
-              address: leoContract.address,
-              abi: leoContract.abi,
-              functionName: "vestPosition",
-              args: [token0.address, BigInt(positionId ?? 0)],
-            });
+            vestPositionResultIdle();
             return;
           // vest position call is pending, so wait
           case isVestPositionPending:
@@ -407,60 +473,14 @@ export const ConfirmStake = ({
             break;
         }
       }
-
-      const id = positionId ?? Number(mintPositionId);
-      if (id && tickLower && tickUpper) {
-        const position = {
-          positionId: id,
-          pool: {
-            token: token0,
-            liquidityCampaigns: [],
-          },
-          lower: tickLower,
-          upper: tickUpper,
-          isVested,
-        };
-        getUsdTokenAmountsForPosition(
-          expectedChainId,
-          position,
-          token0,
-          Number(tokenPrice),
-        ).then(([amount0, amount1]) =>
-          updatePositionLocal({
-            ...position,
-            created: Math.round(new Date().getTime() / 1000),
-            served: {
-              timestamp: Math.round(new Date().getTime() / 1000),
-            },
-            liquidity: {
-              fusdc: {
-                valueUsd: String(amount1),
-              },
-              token1: {
-                valueUsd: String(amount0),
-              },
-            },
-          }),
-        );
-      }
     }
   }, [
-    updatePositionResult.isSuccess,
-    vestPositionResult,
-    expectedChainId,
+    vestPositionResultIdle,
     isVestPositionPending,
-    isVested,
     isVesting,
-    leoContract.abi,
-    leoContract.address,
-    mintPositionId,
-    positionId,
-    tickLower,
-    tickUpper,
-    token0,
-    tokenPrice,
-    updatePositionLocal,
-    writeContractVestPosition,
+    updatePositionResult.isSuccess,
+    vestPositionResult.data,
+    vestPositionResult.fetchStatus,
   ]);
 
   // step 1 pending
