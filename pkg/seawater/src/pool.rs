@@ -309,7 +309,6 @@ impl StoragePool {
         mut price_limit: U256,
     ) -> Result<(I256, I256, i32), Revert> {
         assert_or!(self.enabled.get(), Error::PoolDisabled);
-        assert_or!(!amount.is_zero(), Error::SwapIsZero);
 
         // ensure the price limit is within bounds
         match zero_for_one {
