@@ -164,7 +164,8 @@ contract OwnershipNFTs is IERC721Metadata {
 
     /// @inheritdoc IERC721Metadata
     function approve(address _approved, uint256 _tokenId) external payable {
-        _requireAuthorised(msg.sender, _tokenId);
+        address owner = ownerOf(_tokenId);
+        require(owner == msg.sender || isApprovedForAll[owner][msg.sender], "not authorised");
         getApproved_[_tokenId] = _approved;
         emit Approval(msg.sender, _approved, _tokenId);
     }
