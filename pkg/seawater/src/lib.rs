@@ -525,9 +525,6 @@ impl Pools {
     /// Transfers a position's ownership from one address to another. Only usable by the NFT
     /// manager account.
     ///
-    /// # Calling requirements
-    /// Requires that the `from` address is the current owner of the position.
-    ///
     /// # Errors
     /// Requires the caller be the NFT manager.
     #[allow(non_snake_case)]
