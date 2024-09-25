@@ -52,8 +52,6 @@ pub struct StorageTickInfo {
     fee_growth_outside_0: StorageU256,
     fee_growth_outside_1: StorageU256,
     tick_cumulative_outside: StorageI64,
-    seconds_per_liquidity_outside: StorageU160,
-    seconds_outside: StorageU32,
     initialised: StorageBool,
 }
 
