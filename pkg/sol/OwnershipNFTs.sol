@@ -2,15 +2,16 @@
 pragma solidity 0.8.16;
 
 import "./IERC721Metadata.sol";
-import "./ISeawaterAMM.sol";
-
 import "./IERC721TokenReceiver.sol";
+import "./IERC165.sol";
+
+import "./ISeawaterAMM.sol";
 
 /*
  * OwnershipNFTs is a simple interface for tracking ownership of
  * positions in the Seawater Stylus contract.
  */
-contract OwnershipNFTs is IERC721Metadata {
+contract OwnershipNFTs is IERC721Metadata, IERC165 {
     ISeawaterAMM immutable public SEAWATER;
 
     /**
@@ -121,16 +122,6 @@ contract OwnershipNFTs is IERC721Metadata {
         emit Transfer(_from, _to, _tokenId);
     }
 
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId,
-        bytes calldata /* _data */
-    ) external payable {
-        // checks that the user is authorised
-        _transfer(_from, _to, _tokenId);
-    }
-
     /// @inheritdoc IERC721Metadata
     function transferFrom(
         address _from,
@@ -191,5 +182,23 @@ contract OwnershipNFTs is IERC721Metadata {
     /// @inheritdoc IERC721Metadata
     function tokenURI(uint256 /* _tokenId */) external view returns (string memory) {
         return TOKEN_URI;
+    }
+
+    /// @inheritdoc IERC165
+    function supportsInterface(bytes4 _interfaceId) external view returns (bool) {
+        return
+            _interfaceId == this.supportsInterface.selector ||
+            _interfaceId == this.balanceOf.selector
+                            ^ this.ownerOf.selector
+                            ^ bytes8(keccak256("safeTransferFrom(address,address,uint256)"))
+                            ^ bytes8(keccak256("safeTransferFrom(address,address,uint256,bytes)"))
+                            ^ this.transferFrom.selector
+                            ^ this.approve.selector
+                            ^ this.setApprovalForAll.selector
+                            ^ this.getApproved.selector
+                            ^ this.isApprovedForAll.selector
+                            ^ this.name.selector
+                            ^ this.symbol.selector
+                            ^ this.tokenURI.selector;
     }
 }
