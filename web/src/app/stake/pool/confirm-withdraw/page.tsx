@@ -42,7 +42,7 @@ export default function ConfirmWithdrawLiquidity() {
 
   useEffect(() => {
     if (!address || chainId !== expectedChainId) router.back();
-  }, [address, expectedChainId, chainId]);
+  }, [address, expectedChainId, chainId, router]);
 
   const {
     token0,
@@ -55,7 +55,7 @@ export default function ConfirmWithdrawLiquidity() {
     tickUpper,
   } = useStakeStore();
 
-  const { positions, updatePositionLocal } = usePositions();
+  const { updatePositionLocal } = usePositions();
 
   // Current liquidity of the position
   const { data: positionLiquidity } = useSimulateContract({
@@ -112,7 +112,7 @@ export default function ConfirmWithdrawLiquidity() {
         args: [token0.address, id, -delta],
       });
     },
-    [delta, writeContractUpdatePosition, token0AmountRaw, token0, ammContract],
+    [delta, writeContractUpdatePosition, token0, ammContract],
   );
 
   const collect = useCallback(
@@ -136,7 +136,7 @@ export default function ConfirmWithdrawLiquidity() {
         args: [token0.address, BigInt(id ?? 0)],
       });
     },
-    [writeContractDivestPosition, token0],
+    [writeContractDivestPosition, token0, leoContract.abi, leoContract.address],
   );
 
   // price of the current pool
@@ -175,46 +175,70 @@ export default function ConfirmWithdrawLiquidity() {
   useEffect(() => {
     if (!collectResult.data || !isWithdrawingEntirePosition) return;
     updatePosition(BigInt(positionId));
-  }, [updatePosition, positionId, collectResult.data]);
+  }, [
+    updatePosition,
+    positionId,
+    collectResult.data,
+    isWithdrawingEntirePosition,
+  ]);
+
+  const getAmountsAndSetPosition = useCallback(
+    function (tickLower: number, tickUpper: number) {
+      const position = {
+        positionId: Number(positionId),
+        pool: {
+          token: token0,
+          liquidityCampaigns: [],
+        },
+        lower: tickLower,
+        upper: tickUpper,
+        isVested: !isDivesting,
+      };
+      getUsdTokenAmountsForPosition(
+        expectedChainId,
+        position,
+        token0,
+        Number(tokenPrice),
+      ).then(([amount0, amount1]) =>
+        updatePositionLocal({
+          ...position,
+          created: Math.round(new Date().getTime() / 1000),
+          served: {
+            timestamp: Math.round(new Date().getTime() / 1000),
+          },
+          liquidity: {
+            fusdc: {
+              valueUsd: String(amount1),
+            },
+            token1: {
+              valueUsd: String(amount0),
+            },
+          },
+        }),
+      );
+    },
+    [
+      expectedChainId,
+      isDivesting,
+      token0,
+      positionId,
+      tokenPrice,
+      updatePositionLocal,
+    ],
+  );
 
   useEffect(() => {
     if (updatePositionResult.isSuccess) {
       if (tickLower && tickUpper) {
-        const position = {
-          positionId: Number(positionId),
-          pool: {
-            token: token0,
-            liquidityCampaigns: [],
-          },
-          lower: tickLower,
-          upper: tickUpper,
-          isVested: !isDivesting,
-        };
-        getUsdTokenAmountsForPosition(
-          expectedChainId,
-          position,
-          token0,
-          Number(tokenPrice),
-        ).then(([amount0, amount1]) =>
-          updatePositionLocal({
-            ...position,
-            created: Math.round(new Date().getTime() / 1000),
-            served: {
-              timestamp: Math.round(new Date().getTime() / 1000),
-            },
-            liquidity: {
-              fusdc: {
-                valueUsd: String(amount1),
-              },
-              token1: {
-                valueUsd: String(amount0),
-              },
-            },
-          }),
-        );
+        getAmountsAndSetPosition(tickLower, tickUpper);
       }
     }
-  }, [updatePositionResult.isSuccess]);
+  }, [
+    getAmountsAndSetPosition,
+    tickLower,
+    tickUpper,
+    updatePositionResult.isSuccess,
+  ]);
 
   // TODO - may need to call Leo and Seawater's respective collect functions
 
