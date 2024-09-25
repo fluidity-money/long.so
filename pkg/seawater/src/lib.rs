@@ -1217,6 +1217,8 @@ impl Pools {
 
 ///! Migrations code that should only be used in a testing environment, or in a rescue
 ///! situation. These functions will break the internal state of the pool most likely.
+///! These likely won't exist beyond testnet, and are as such not included as a facet,
+///! intending to be used in the catch all feature.
 #[cfg_attr(feature = "migrations", external)]
 impl Pools {
     pub fn disable_pools(&mut self, pools: Vec<Address>) -> Result<(), Vec<u8>> {
