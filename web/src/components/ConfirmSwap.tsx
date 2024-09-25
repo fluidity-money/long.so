@@ -111,6 +111,7 @@ export const ConfirmSwap = () => {
     token0AmountRaw,
     token0.address,
     token1.address,
+    fUSDC.address,
   ]);
 
   // set up write hooks
@@ -160,7 +161,7 @@ export const ConfirmSwap = () => {
         (1 / Number(token0Price.toString())) * 10 ** fUSDC.decimals,
       );
     return snapAmountToDecimals(Number(token1Price) / Number(token0Price));
-  }, [isSwappingBaseAsset, isSwap1, token0Price, token1Price]);
+  }, [isSwappingBaseAsset, isSwap1, token0Price, token1Price, fUSDC.decimals]);
 
   // read the allowance of the token
   const { data: allowanceData } = useSimulateContract({

@@ -72,7 +72,7 @@ export const ConfirmStake = ({
 
   useEffect(() => {
     if (!address || chainId !== expectedChainId) router.back();
-  }, [address, expectedChainId, chainId]);
+  }, [address, expectedChainId, chainId, router]);
 
   const {
     token0,
@@ -134,7 +134,12 @@ export const ConfirmStake = ({
     functionName: "curTick181C6FD9",
     args: [token0.address],
   });
-  const curTick = { result: BigInt(curTickNum?.result ?? 0) };
+  const curTick = useMemo(
+    () => ({
+      result: BigInt(curTickNum?.result ?? 0),
+    }),
+    [curTickNum],
+  );
 
   const { data: tickSpacing } = useSimulateContract({
     address: ammContract.address,
@@ -263,15 +268,8 @@ export const ConfirmStake = ({
         args: [token0.address, BigInt(id ?? 0)],
       });
     },
-    [writeContractDivestPosition, token0],
+    [writeContractDivestPosition, token0, leoContract.address, leoContract.abi],
   );
-
-  // once token is divested, continue to updating
-  useEffect(() => {
-    if (!divestPositionResult.data || !positionId) return;
-    // the position already exists so use positionId rather than mintPositionId
-    updatePosition(BigInt(positionId));
-  }, [divestPositionResult.data, positionId]);
 
   const updatePosition = useCallback(
     (id: bigint) => {
@@ -284,6 +282,13 @@ export const ConfirmStake = ({
     },
     [writeContractUpdatePosition, delta, token0, ammContract],
   );
+
+  // once token is divested, continue to updating
+  useEffect(() => {
+    if (!divestPositionResult.data || !positionId) return;
+    // the position already exists so use positionId rather than mintPositionId
+    updatePosition(BigInt(positionId));
+  }, [divestPositionResult.data, positionId, updatePosition]);
 
   /**
    * Approve the AMM to spend the token
@@ -310,6 +315,9 @@ export const ConfirmStake = ({
     token1,
     updatePosition,
     mintPositionId,
+    ammContract.address,
+    expectedChainId,
+    token1AmountRaw,
   ]);
 
   /**
@@ -335,6 +343,8 @@ export const ConfirmStake = ({
     token0,
     ammContract,
     approveToken1,
+    expectedChainId,
+    token1AmountRaw,
   ]);
 
   // once we have the position ID, approve the AMM to spend the token
@@ -344,7 +354,7 @@ export const ConfirmStake = ({
     approveToken0();
     // including approveToken0 in this dependency array causes changes in allowance data
     // to retrigger the staking flow, as allowance data is a dependency of approveToken0
-  }, [mintPositionId]);
+  }, [mintPositionId, approveToken0]);
 
   // wait for the approval transaction to complete
   const approvalToken0Result = useWaitForTransactionReceipt({
@@ -357,7 +367,7 @@ export const ConfirmStake = ({
     approveToken1();
     // including approveToken1 in this dependency array causes changes in allowance data
     // to retrigger the staking flow, as allowance data is a dependency of approveToken1
-  }, [approvalToken0Result.data, mintPositionId]);
+  }, [approvalToken0Result.data, mintPositionId, approveToken1]);
 
   const approvalToken1Result = useWaitForTransactionReceipt({
     hash: approvalDataToken1,
@@ -434,7 +444,24 @@ export const ConfirmStake = ({
         );
       }
     }
-  }, [updatePositionResult.isSuccess, vestPositionResult]);
+  }, [
+    updatePositionResult.isSuccess,
+    vestPositionResult,
+    expectedChainId,
+    isVestPositionPending,
+    isVested,
+    isVesting,
+    leoContract.abi,
+    leoContract.address,
+    mintPositionId,
+    positionId,
+    tickLower,
+    tickUpper,
+    token0,
+    tokenPrice,
+    updatePositionLocal,
+    writeContractVestPosition,
+  ]);
 
   // step 1 pending
   if (isMintPending || (mintData && result?.isPending)) {
