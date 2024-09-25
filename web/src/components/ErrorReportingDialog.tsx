@@ -8,7 +8,11 @@ import * as Sentry from "@sentry/nextjs";
 export default function ErrorReportingDialog() {
   const { isOpen, setIsOpen, error, setError } = useErrorReportingStore();
   async function handleError() {
-    Sentry.captureException(error);
+    Sentry.captureException(error, {
+      tags: {
+        userReport: "contracts",
+      },
+    });
     // close dialog
     setError(null);
     setIsOpen(false);
