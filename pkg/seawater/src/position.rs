@@ -50,17 +50,13 @@ impl StoragePositions {
         let mut info = self.positions.setter(id);
 
         let owed_fees_0 = full_math::mul_div(
-            fee_growth_inside_0
-                .overflowing_sub(info.fee_growth_inside_0.get())
-                .0,
+            fee_growth_inside_0.wrapping_sub(info.fee_growth_inside_0.get()),
             U256::from(info.liquidity.get()),
             full_math::Q128,
         )?;
 
         let owed_fees_1 = full_math::mul_div(
-            fee_growth_inside_1
-                .overflowing_sub(info.fee_growth_inside_1.get())
-                .0,
+            fee_growth_inside_1.wrapping_sub(info.fee_growth_inside_1.get()),
             U256::from(info.liquidity.get()),
             full_math::Q128,
         )?;

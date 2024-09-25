@@ -136,7 +136,7 @@ pub fn get_next_sqrt_price_from_amount_1_rounding_down(
             return Err(Error::SqrtPriceIsLteQuotient);
         }
 
-        Ok(sqrt_price_x_96.overflowing_sub(quotient).0)
+        Ok(sqrt_price_x_96.wrapping_sub(quotient))
     }
 }
 

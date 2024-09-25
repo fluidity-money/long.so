@@ -140,12 +140,8 @@ impl StorageTicks {
             )
         } else {
             (
-                fee_growth_global_0
-                    .overflowing_sub(lower.fee_growth_outside_0.get())
-                    .0,
-                fee_growth_global_1
-                    .overflowing_sub(lower.fee_growth_outside_1.get())
-                    .0,
+                fee_growth_global_0.wrapping_sub(lower.fee_growth_outside_0.get()),
+                fee_growth_global_1.wrapping_sub(lower.fee_growth_outside_1.get()),
             )
         };
 
@@ -156,26 +152,18 @@ impl StorageTicks {
             )
         } else {
             (
-                fee_growth_global_0
-                    .overflowing_sub(upper.fee_growth_outside_0.get())
-                    .0,
-                fee_growth_global_1
-                    .overflowing_sub(upper.fee_growth_outside_1.get())
-                    .0,
+                fee_growth_global_0.wrapping_sub(upper.fee_growth_outside_0.get()),
+                fee_growth_global_1.wrapping_sub(upper.fee_growth_outside_1.get()),
             )
         };
 
         Ok((
             fee_growth_global_0
-                .overflowing_sub(fee_growth_below_0)
-                .0
-                .overflowing_sub(fee_growth_above_0)
-                .0,
+                .wrapping_sub(fee_growth_below_0)
+                .wrapping_sub(fee_growth_above_0),
             fee_growth_global_1
-                .overflowing_sub(fee_growth_below_1)
-                .0
-                .overflowing_sub(fee_growth_above_1)
-                .0,
+                .wrapping_sub(fee_growth_below_1)
+                .wrapping_sub(fee_growth_above_1),
         ))
     }
 
