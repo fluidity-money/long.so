@@ -118,7 +118,7 @@ contract OwnershipNFTs is IERC721Metadata, IERC165 {
     ) internal {
         _requireAuthorised(_from, _tokenId);
         require(_to != address(0), "invalid recipient");
-        getApproved_[_from] = address(0);
+        getApproved_[_tokenId] = address(0);
         SEAWATER.transferPositionEEC7A3CD(_tokenId, _from, _to);
         emit Transfer(_from, _to, _tokenId);
     }
