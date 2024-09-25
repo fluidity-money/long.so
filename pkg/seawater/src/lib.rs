@@ -82,7 +82,7 @@ mod shim {
     compile_error!(
         "Either `swaps` or `swap_permit2` or `quotes` or `positions` or `update_positions`, `admin`, or `migrations` must be enabled when building for wasm."
     );
-    #[stylus_sdk::prelude::external]
+    #[stylus_sdk::prelude::public]
     impl crate::Pools {}
 }
 
