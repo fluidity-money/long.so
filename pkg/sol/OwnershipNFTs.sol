@@ -190,8 +190,8 @@ contract OwnershipNFTs is IERC721Metadata, IERC165 {
             _interfaceId == this.supportsInterface.selector ||
             _interfaceId == this.balanceOf.selector
                             ^ this.ownerOf.selector
-                            ^ bytes8(keccak256("safeTransferFrom(address,address,uint256)"))
-                            ^ bytes8(keccak256("safeTransferFrom(address,address,uint256,bytes)"))
+                            ^ bytes4(keccak256("safeTransferFrom(address,address,uint256)"))
+                            ^ bytes4(keccak256("safeTransferFrom(address,address,uint256,bytes)"))
                             ^ this.transferFrom.selector
                             ^ this.approve.selector
                             ^ this.setApprovalForAll.selector
