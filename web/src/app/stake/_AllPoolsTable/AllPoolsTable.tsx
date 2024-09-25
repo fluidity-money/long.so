@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { useEffect, useState } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 interface AllPoolsTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -35,14 +36,18 @@ export function AllPoolsTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = useState({
     fees: true,
     rewards: true,
+    annualPercentageYield: true,
   });
+
+  const showApy = useFeatureFlag("ui show pool apy")
 
   useEffect(() => {
     setColumnVisibility({
       fees: isMd,
       rewards: isMd,
+      annualPercentageYield: showApy,
     });
-  }, [isMd]);
+  }, [isMd, showApy]);
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -74,9 +79,9 @@ export function AllPoolsTable<TData, TValue>({
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
                   </TableHead>
                 );
               })}

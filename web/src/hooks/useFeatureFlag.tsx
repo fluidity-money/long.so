@@ -162,6 +162,11 @@ export interface FeatureFlags {
    * Show Leo-related vesting and divesting in the UI
    */
   "ui show leo": boolean;
+
+  /**
+   * Show APY as a column in the list of pools
+   */
+  "ui show pool apy": boolean;
 }
 
 /**

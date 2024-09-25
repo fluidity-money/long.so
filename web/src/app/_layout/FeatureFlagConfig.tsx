@@ -45,6 +45,7 @@ const featureFlagsLabels: { [K in FeatureFlagKey]: string } = {
   "ui show liquidity visualiser": "UI Show Liquidity Visualiser",
   "ui show banners": "UI Show Banner",
   "ui show leo": "UI Show Leo",
+  "ui show pool apy": "UI Show Pool APY",
 };
 
 export const FeatureFlagConfig = () => {
