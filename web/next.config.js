@@ -13,7 +13,7 @@ module.exports = withSentryConfig(
     output: "export",
     images: { unoptimized: true },
     env: {
-      GIT_HASH: gitHash,
+      NEXT_PUBLIC_GIT_HASH: gitHash,
     },
     webpack(config) {
       if (process.env.NODE_V8_COVERAGE) {

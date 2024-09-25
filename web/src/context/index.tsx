@@ -8,6 +8,7 @@ import { createWeb3Modal } from "@web3modal/wagmi/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { State, WagmiProvider } from "wagmi";
+import ContextInjector from "./contextInjector";
 
 // Setup queryClient
 export const queryClient = new QueryClient();
@@ -29,7 +30,10 @@ export default function Web3ModalProvider({
 }) {
   return (
     <WagmiProvider config={appConfig.wagmiConfig} initialState={initialState}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <ContextInjector />
+        {children}
+      </QueryClientProvider>
     </WagmiProvider>
   );
 }

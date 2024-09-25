@@ -62,7 +62,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const gitHash = process.env.GIT_HASH;
+  const gitHash = process.env.NEXT_PUBLIC_GIT_HASH;
 
   const featuresDataRequest = await fetch(
     "https://features.long.so/features.json",
