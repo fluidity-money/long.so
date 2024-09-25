@@ -44,7 +44,7 @@ jobs:
         steps:
         - name: Send failure notification to Twist
           run: |
-            curl -X POST 'https://twist.com/api/v3/integration_incoming/post_data?install_id=443271&install_token=443271_b1e06d8a655b1447f14ea57a06876ae6' \
+            curl -X POST ${{ secrets.SPN_TWIST_CI_ERRORS }} \
             -H "Content-Type: application/json" \
             -d '{
                     "content": "Deployment failed for commit: **${{ github.event.head_commit.message }}** on branch **${{ github.ref_name }}**"
