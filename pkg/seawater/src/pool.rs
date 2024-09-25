@@ -90,9 +90,6 @@ impl StoragePool {
 
     /// Updates a position in this pool, refreshing fees earned and updating liquidity.
     pub fn update_position(&mut self, id: U256, delta: i128) -> Result<(I256, I256), Revert> {
-        // the pool must be enabled
-        assert_or!(self.enabled.get(), Error::PoolDisabled);
-
         let position = self.positions.positions.get(id);
         let lower = position.lower.get().sys();
         let upper = position.upper.get().sys();

@@ -246,39 +246,6 @@ fn test_pool_position_create() -> Result<(), Vec<u8>> {
 }
 
 #[test]
-fn test_pool_update_position_reverts() {
-    test_utils::with_storage::<_, StoragePool, _>(None, None, None, None, |pool| {
-        pool.init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
-            .unwrap();
-
-        pool.enabled.set(true);
-
-        let id = uint!(2_U256);
-
-        pool.create_position(id, tick_math::get_min_tick(1), tick_math::get_max_tick(1))
-            .unwrap();
-
-        pool.set_enabled(false);
-
-        match pool.update_position(id, 3161) {
-            Err(r) => assert_eq!(
-                Error::PoolDisabled.to_string(),
-                String::from_utf8(r).unwrap()
-            ),
-            _ => panic!("expected PoolDisabled"),
-        }
-
-        match pool.update_position(id, 0) {
-            Err(r) => assert_eq!(
-                Error::PoolDisabled.to_string(),
-                String::from_utf8(r).unwrap()
-            ),
-            _ => panic!("expected PoolDisabled"),
-        }
-    })
-}
-
-#[test]
 fn test_pool_update_position_parametric() {
     let init_prices: [[i64; 2]; 9] = [
         [10, 10],

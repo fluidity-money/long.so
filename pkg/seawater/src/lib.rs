@@ -670,7 +670,7 @@ impl Pools {
     /// position owner. Requires the pool to be enabled unless removing liquidity.
     pub fn update_position_internal(
         &mut self,
-        pool: Address,
+        pool_addr: Address,
         id: U256,
         delta: i128,
         permit2: Option<(Permit2Args, Permit2Args)>,
@@ -681,21 +681,23 @@ impl Pools {
             Error::PositionOwnerOnly
         );
 
-        let (token_0, token_1) = self.pools.setter(pool).update_position(id, delta)?;
-
-        #[cfg(feature = "testing-dbg")]
-        dbg!(("update position taking", current_test!(), token_0, token_1));
+        let mut pool = self.pools.setter(pool_addr);
+        let (token_0, token_1) = pool.update_position(id, delta)?;
 
         if delta < 0 {
-            erc20::transfer_to_sender(pool, token_0.abs_neg()?)?;
+            // if we're sending to sender, make sure that the pool is initialised.
+            assert_or!(pool.initialised.get(), Error::PoolDisabled);
+            erc20::transfer_to_sender(pool_addr, token_0.abs_neg()?)?;
             erc20::transfer_to_sender(FUSDC_ADDR, token_1.abs_neg()?)?;
         } else {
+            // if we're TAKING, make sure that the pool is enabled.
+            assert_or!(pool.enabled.get(), Error::PoolDisabled);
             let (permit_0, permit_1) = match permit2 {
                 Some((permit_0, permit_1)) => (Some(permit_0), Some(permit_1)),
                 None => (None, None),
             };
 
-            erc20::take(pool, token_0.abs_pos()?, permit_0)?;
+            erc20::take(pool_addr, token_0.abs_pos()?, permit_0)?;
             erc20::take(FUSDC_ADDR, token_1.abs_pos()?, permit_1)?;
         }
 
