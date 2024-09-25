@@ -150,10 +150,14 @@ export const MyPositions = () => {
   const unclaimedRewards = useMemo(() => {
     if (!unclaimedRewardsData) return "$0.00";
 
-    const rewards = unclaimedRewardsData.result.reduce((p, c) => {
+    const rewards = unclaimedRewardsData.result.reduce((p, c, i) => {
+      const token = getTokenFromAddress(chainId, nonVestedPositions[i].id)
+      // this should never happen as nonVestedPositions is passed to collect
+      if (!token)
+        return 0
       const token0AmountScaled =
         (Number(c.amount0) * Number(tokenPrice)) /
-        10 ** (token0.decimals + fUSDC.decimals);
+        10 ** (token.decimals + fUSDC.decimals);
       const token1AmountScaled = Number(c.amount1) / 10 ** fUSDC.decimals;
       return p + token0AmountScaled + token1AmountScaled;
     }, 0);
