@@ -9,8 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: mainnet
     env:
-      NEXT_PUBLIC_LONGTAIL_GRAPHQL_URL: https://testnet-graph.long.so
       NEXT_PUBLIC_LONGTAIL_WALLETCONNECT_PROJECT_ID: bf05d5b47c6d5a47c0de300dc3b80f70
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
     steps:
       - uses: actions/checkout@v3
         with:
