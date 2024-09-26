@@ -483,6 +483,24 @@ export const ConfirmStake = ({
     vestPositionResult.fetchStatus,
   ]);
 
+  const handleDone = useCallback(() => {
+    resetUpdatePosition();
+    resetApproveToken0();
+    resetApproveToken1();
+    resetVestPosition();
+    resetDivestPosition();
+    updatePositionResult.refetch();
+    router.push("/stake");
+  }, [
+    resetUpdatePosition,
+    resetApproveToken0,
+    resetApproveToken1,
+    resetVestPosition,
+    resetDivestPosition,
+    updatePositionResult,
+    router,
+  ]);
+
   // step 1 pending
   if (isMintPending || (mintData && result?.isPending)) {
     return (
@@ -541,15 +559,7 @@ export const ConfirmStake = ({
     return (
       <Success
         transactionHash={updatePositionResult.data.transactionHash}
-        onDone={() => {
-          resetUpdatePosition();
-          resetApproveToken0();
-          resetApproveToken1();
-          resetVestPosition();
-          resetDivestPosition();
-          updatePositionResult.refetch();
-          router.push("/stake");
-        }}
+        onDone={handleDone}
       />
     );
   }
@@ -585,7 +595,7 @@ export const ConfirmStake = ({
         })}
       >
         <div className="flex flex-row items-center justify-between p-[9px]">
-          <div className="p-[6px] text-3xs md:text-xs">
+          <div className="text-3xs p-[6px] md:text-xs">
             {mode === "new"
               ? "Stake Confirmation"
               : "Add Liquidity Confirmation"}
@@ -616,7 +626,7 @@ export const ConfirmStake = ({
           <div className="mt-[4px] text-2xl font-medium md:text-3xl">
             ${usdTokenOPriceWReward}
           </div>
-          <div className="mt-[4px] text-3xs font-medium text-gray-2 md:text-2xs">
+          <div className="text-3xs text-gray-2 md:text-2xs mt-[4px] font-medium">
             The amount is split into{" "}
             <span className="text-white underline">2 Tokens</span> below:
           </div>
@@ -640,10 +650,10 @@ export const ConfirmStake = ({
             <TokenIridescent />
             <div>700</div>
           </div>
-          <div className="mt-[4px] text-3xs font-medium text-gray-2 md:text-2xs">
+          <div className="text-3xs text-gray-2 md:text-2xs mt-[4px] font-medium">
             (= $700)
           </div>
-          <div className="mt-[19px] w-[212px] text-center text-3xs font-medium text-gray-2 md:mt-[17px] md:w-[250px] md:text-2xs">
+          <div className="text-3xs text-gray-2 md:text-2xs mt-[19px] w-[212px] text-center font-medium md:mt-[17px] md:w-[250px]">
             Your <span className="iridescent-text">700 ƒUSDC</span> will be
             converted into the following two tokens to set your position in this
             pool <div className="inline-block rotate-90">{"->"}</div>
@@ -694,14 +704,14 @@ export const ConfirmStake = ({
             hidden: multiSingleToken === "single",
           })}
         >
-          <div className="text-3xs font-medium md:text-2xs">
+          <div className="text-3xs md:text-2xs font-medium">
             {token0.symbol}
           </div>
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
             <TokenIcon src={token0.icon} className={"size-[24px] invert"} />{" "}
             {token0Amount}
           </div>
-          <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">
+          <div className="text-2xs text-gray-2 mt-0.5 md:text-xs">
             = ${usdTokenOPrice}
           </div>
         </div>
@@ -711,12 +721,12 @@ export const ConfirmStake = ({
             hidden: multiSingleToken === "single",
           })}
         >
-          <div className="text-3xs font-medium md:text-2xs">ƒUSDC</div>
+          <div className="text-3xs md:text-2xs font-medium">ƒUSDC</div>
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
             <TokenIcon src={token1.icon} className={"size-[24px] invert"} />{" "}
             {token1Amount}
           </div>
-          <div className="mt-0.5 text-2xs text-gray-2 md:text-xs">
+          <div className="text-2xs text-gray-2 mt-0.5 md:text-xs">
             = ${token1Amount}
           </div>
         </div>
@@ -738,10 +748,10 @@ export const ConfirmStake = ({
             "mt-[19px] md:mt-[16px]": mode === "existing",
           })}
         >
-          <div className="text-3xs font-medium md:text-2xs md:font-normal">
+          <div className="text-3xs md:text-2xs font-medium md:font-normal">
             Projected Yield
           </div>
-          <div className="mt-[13px] flex flex-col gap-[5px] px-[4px] text-2xs">
+          <div className="text-2xs mt-[13px] flex flex-col gap-[5px] px-[4px]">
             <div className="flex flex-row justify-between">
               <div>Fees</div>
               <div>
@@ -787,7 +797,7 @@ export const ConfirmStake = ({
             <div className="mt-[20px] px-[21px]">
               <div className="text-3xs">Yield Composition</div>
 
-              <div className="mt-[20px] flex flex-row gap-1 text-2xs">
+              <div className="text-2xs mt-[20px] flex flex-row gap-1">
                 <div className="flex w-[3%] flex-col gap-1">
                   <div>3%</div>
                   <div className="h-1 w-full rounded bg-white"></div>
