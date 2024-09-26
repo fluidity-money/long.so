@@ -1,5 +1,5 @@
 {
-    "src/**/*.{ts,tsx,js,jsx,json,css,md}": ["prettier --write", "eslint --fix", "git add"],
-    "__tests__/**/*.{ts,tsx}": ["prettier --write", "eslint --fix", "git add"],
-   "e2e/**/*.{ts,tsx}" : ["prettier --write", "eslint --fix", "git add"]
+    "src/**/*.{ts,tsx,js,jsx,json,css,md}": ["prettier --write", "eslint"],
+    "__tests__/**/*.{ts,tsx}": ["prettier --write", "eslint"],
+   "e2e/**/*.{ts,tsx}" : ["prettier --write", "eslint"]
 }
