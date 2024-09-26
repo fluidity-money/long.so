@@ -39,7 +39,7 @@ export function AllPoolsTable<TData, TValue>({
     annualPercentageYield: true,
   });
 
-  const showApy = useFeatureFlag("ui show pool apy")
+  const showApy = useFeatureFlag("ui show pool apy");
 
   useEffect(() => {
     setColumnVisibility({
@@ -79,9 +79,9 @@ export function AllPoolsTable<TData, TValue>({
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 );
               })}

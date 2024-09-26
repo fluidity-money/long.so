@@ -326,20 +326,20 @@ export const SwapForm = () => {
     token0.address === fUSDC.address
       ? token0AmountFloat
       : getFormattedPriceFromAmount(
-        token0AmountFloat.toString(),
-        token0Price,
-        fUSDC.decimals,
-      ),
+          token0AmountFloat.toString(),
+          token0Price,
+          fUSDC.decimals,
+        ),
   );
 
   const usdPriceToken1 = snapAmountToDecimals(
     token1.address === fUSDC.address
       ? token1AmountFloat
       : getFormattedPriceFromAmount(
-        token1AmountFloat.toString(),
-        token1Price,
-        fUSDC.decimals,
-      ),
+          token1AmountFloat.toString(),
+          token1Price,
+          fUSDC.decimals,
+        ),
   );
   // make user confirm before receiving 0 tokens from a swap
   const [allowZeroSwap, setAllowZeroSwap] = useState(false);
@@ -668,11 +668,11 @@ export const SwapForm = () => {
               <TokenIcon className="-ml-1 size-5" />
               <TokenIcon className="-ml-1.5 size-5" />
 
-              {chainId === superpositionTestnet.id &&
+              {chainId === superpositionTestnet.id && (
                 <div className={"iridescent-text text-[12px] md:text-[14px]"}>
                   Earn up to $100 for making this trade!
                 </div>
-              }
+              )}
             </Badge>
             <RewardsBreakdown hidden={breakdownHidden} />
             {address ? (
@@ -685,9 +685,9 @@ export const SwapForm = () => {
                   onClick={onSubmit}
                 >
                   {!quoteIsLoading &&
-                    token0AmountFloat > 0 &&
-                    token1AmountFloat === 0 &&
-                    !allowZeroSwap
+                  token0AmountFloat > 0 &&
+                  token1AmountFloat === 0 &&
+                  !allowZeroSwap
                     ? "Not Enough Liquidity"
                     : "Swap"}
                 </Button>

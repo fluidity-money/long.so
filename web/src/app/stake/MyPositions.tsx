@@ -151,10 +151,9 @@ export const MyPositions = () => {
     if (!unclaimedRewardsData) return "$0.00";
 
     const rewards = unclaimedRewardsData.result.reduce((p, c, i) => {
-      const token = getTokenFromAddress(chainId, nonVestedPositions[i].id)
+      const token = getTokenFromAddress(chainId, nonVestedPositions[i].id);
       // this should never happen as nonVestedPositions is passed to collect
-      if (!token)
-        return 0
+      if (!token) return 0;
       const token0AmountScaled =
         (Number(c.amount0) * Number(tokenPrice)) /
         10 ** (token.decimals + fUSDC.decimals);
