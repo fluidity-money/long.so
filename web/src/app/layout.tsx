@@ -14,6 +14,10 @@ import { FeatureFlagConfig } from "@/app/_layout/FeatureFlagConfig";
 import PopulateQueryCache from "@/app/PopulateQueryCache";
 import BottomBanner from "@/components/Banners/BottomBanner";
 import ErrorReportingDialog from "@/components/ErrorReportingDialog";
+import { useChainId } from "wagmi";
+import wagmiConfig from "@/config/wagmi";
+import { superpositionTestnet } from "@/config/chains";
+
 const title = "Longtail";
 
 const description = "Longtail is Arbitrum's cheapest and most rewarding AMM.";
@@ -69,6 +73,8 @@ export default async function RootLayout({
   );
   const featuresData = await featuresDataRequest.json();
 
+  const faucetChains = [superpositionTestnet];
+
   return (
     <html lang="en">
       <body
@@ -90,7 +96,7 @@ export default async function RootLayout({
                   <DemoData />
                 </div>
                 <div className="flex flex-row items-center gap-4">
-                  <FaucetDropdown />
+                  <FaucetDropdown allowedChains={faucetChains} />
                   <NetworkSelection />
                   <ConnectWalletButton />
                 </div>

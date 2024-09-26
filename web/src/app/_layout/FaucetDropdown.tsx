@@ -5,12 +5,19 @@ import { Badge } from "@/components/ui/badge";
 import { FaFaucet } from "react-icons/fa";
 import ArrowDown from "@/assets/icons/arrow-down.svg";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
+import { useChainId } from "wagmi";
+import { Chain } from "viem";
 
 /**
  * Shows a dropdown menu with links to the faucets.
  */
-export const FaucetDropdown = () => {
+export const FaucetDropdown = ({allowedChains}: {allowedChains: Chain[]}) => {
+  // this can't be conditionally rendered in the top level as the provider 
+  // isn't initialised, so we have to do it in the component
+  const chainId = useChainId();
+  if (!allowedChains.some(c => c.id === chainId))
+    return <></>
+
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger className="group">
