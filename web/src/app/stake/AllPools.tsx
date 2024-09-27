@@ -166,7 +166,7 @@ export const AllPools = () => {
         annualPercentageYield: 0,
       };
     });
-  }, [showDemoData, poolsData]);
+  }, [showDemoData, poolsData, chainId, fUSDC]);
 
   const poolTvlSummed = sum(
     poolsData?.map((pool) => parseFloat(pool.tvlOverTime.daily[0])),

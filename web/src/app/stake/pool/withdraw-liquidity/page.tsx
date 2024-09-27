@@ -132,7 +132,7 @@ export default function WithdrawLiquidity() {
     if (lowerTick === undefined || upperTick === undefined) return;
     setTickLower(lowerTick);
     setTickUpper(upperTick);
-  }, [position]);
+  }, [lowerTick, upperTick, setTickLower, setTickUpper]);
 
   const positionBalance = positionLiquidity?.result ?? 0n;
 
@@ -141,7 +141,7 @@ export default function WithdrawLiquidity() {
     const token0AmountScaled =
       (Number(token0Amount) * Number(tokenPrice)) / 10 ** fUSDC.decimals;
     return usdFormat(token0AmountScaled + parseFloat(token1Amount));
-  }, [token0Amount, token1Amount]);
+  }, [token0Amount, token1Amount, fUSDC.decimals, tokenPrice]);
 
   // set the delta to delta/denom
   const setDeltaOverDenom = (denom: bigint) =>
@@ -193,7 +193,7 @@ export default function WithdrawLiquidity() {
           <div className={cn("absolute -top-[15px] left-0 flex flex-row")}>
             <TokenIcon
               src={token0.icon}
-              className="size-[30px] rounded-full border-[1px] border-white"
+              className="size-[30px] rounded-full border border-white"
             />
             <Badge
               variant="outline"

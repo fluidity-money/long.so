@@ -214,7 +214,13 @@ export default function LiquidityRangeVisualizer({
         token0.decimals,
       );
     },
-    [setPriceLower, setPriceUpper, token0.decimals, graphLPData],
+    [
+      setPriceLower,
+      setPriceUpper,
+      token0.decimals,
+      graphLPData,
+      fUSDC.decimals,
+    ],
   );
 
   useEffect(() => {

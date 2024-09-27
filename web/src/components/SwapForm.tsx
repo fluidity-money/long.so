@@ -243,6 +243,7 @@ export const SwapForm = () => {
     }
   }, [
     isSwappingBaseAsset,
+    fUSDC.address,
     token0AmountRaw,
     token0.address,
     token1.address,
@@ -301,15 +302,7 @@ export const SwapForm = () => {
       ) || [];
 
     return [BigInt(quoteAmountString ?? 0), quoteIsLoading];
-  }, [
-    token0,
-    token1,
-    isSwap1,
-    quote1Error,
-    quote1IsLoading,
-    quote2Error,
-    quote2IsLoading,
-  ]);
+  }, [isSwap1, quote1Error, quote1IsLoading, quote2Error, quote2IsLoading]);
 
   // update the token1 amount when the quote amount changes
   useEffect(() => {

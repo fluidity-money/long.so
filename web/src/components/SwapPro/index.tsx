@@ -130,7 +130,14 @@ export const SwapPro = ({
       default:
         return `${usdFormat(token0Price)}/${usdFormat(token1Price)}`;
     }
-  }, [token0, token1, token0SqrtPriceX96, token1SqrtPriceX96]);
+  }, [
+    token0,
+    token1,
+    token0SqrtPriceX96,
+    token1SqrtPriceX96,
+    fUSDC.address,
+    fUSDC.decimals,
+  ]);
 
   const transactions = poolSwapPro?.swaps.swaps;
 
@@ -173,7 +180,7 @@ export const SwapPro = ({
         };
       })
       .sort((a, b) => (a.time > b.time ? -1 : a.time === b.time ? 0 : 1));
-  }, [transactions, token0.symbol, token1.symbol, showMockData]);
+  }, [transactions, showMockData]);
 
   return (
     <motion.div

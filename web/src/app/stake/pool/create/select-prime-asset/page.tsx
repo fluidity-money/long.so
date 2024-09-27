@@ -118,7 +118,7 @@ const SelectPrimeAsset = () => {
       token1Symbol: fUSDC.symbol,
       token1Address: fUSDC.address,
     }));
-  }, [isLoading, poolsData, showMockData]);
+  }, [isLoading, poolsData, showMockData, DefaultToken, chainId, fUSDC]);
 
   return (
     <div className={"flex flex-col items-center"}>

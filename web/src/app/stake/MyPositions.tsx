@@ -75,7 +75,7 @@ export const MyPositions = () => {
         liquidityCampaigns: position.pool.liquidityCampaigns,
       }))
       .filter((position) => position.staked > 0);
-  }, [showDemoData, address, walletData]);
+  }, [showDemoData, address, walletData, fUSDC]);
 
   const { data: poolSqrtPriceX96 } = useSimulateContract({
     address: ammContract.address,
@@ -161,7 +161,13 @@ export const MyPositions = () => {
       return p + token0AmountScaled + token1AmountScaled;
     }, 0);
     return usdFormat(rewards);
-  }, [unclaimedRewardsData, token0, tokenPrice]);
+  }, [
+    unclaimedRewardsData,
+    tokenPrice,
+    chainId,
+    fUSDC.decimals,
+    nonVestedPositions,
+  ]);
 
   const collectAll = useCallback(() => {
     // for all positions that are in leo, call leo collect
@@ -185,6 +191,10 @@ export const MyPositions = () => {
     vestedPositions,
     campaignIds,
     collectSeawaterArgs,
+    ammContract.abi,
+    ammContract.address,
+    leoContract.abi,
+    leoContract.address,
   ]);
 
   return (

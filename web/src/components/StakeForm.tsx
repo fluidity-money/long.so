@@ -153,7 +153,16 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       setToken0(poolToken);
       setToken1(fUSDC);
     }
-  }, [poolId, setToken0, setToken1, token0.address, token1.address, router]);
+  }, [
+    poolId,
+    setToken0,
+    setToken1,
+    token0.address,
+    token1.address,
+    router,
+    expectedChainId,
+    fUSDC,
+  ]);
 
   // Parse the price lower and upper, and set the ticks properly.
 
@@ -361,6 +370,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     mode,
     positionData?.lower,
     positionData?.upper,
+    fUSDC.decimals,
     setPriceLower,
     setPriceUpper,
     token0.decimals,
@@ -417,6 +427,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     setTickLower,
     setTickUpper,
     token0.decimals,
+    fUSDC.decimals,
     poolData?.config.classification,
     dailyPrices,
   ]);

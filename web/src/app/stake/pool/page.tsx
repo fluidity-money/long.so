@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Line } from "rc-progress";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
@@ -33,7 +33,11 @@ import {
 } from "@/lib/math";
 import { TokenIcon } from "@/components/TokenIcon";
 import { usePositions } from "@/hooks/usePostions";
-import { useTokens, getTokenFromAddress } from "@/config/tokens";
+import {
+  useTokens,
+  getTokenFromAddress,
+  Token as TokenType,
+} from "@/config/tokens";
 import { useContracts } from "@/config/contracts";
 
 const ManagePoolFragment = graphql(`
@@ -91,17 +95,24 @@ export default function PoolPage() {
 
   const { setToken0: setToken0Swap, setToken1: setToken1Swap } = useSwapStore();
 
+  const handleTokens = useCallback(
+    function (token0: TokenType, token1: TokenType) {
+      // Graph is rendered by SwapPro, which uses the swap store
+      // So we have to set both of these.
+      setToken0(token0);
+      setToken1(token1);
+      setToken0Swap(token0);
+      setToken1Swap(token1);
+    },
+    [setToken0, setToken1, setToken0Swap, setToken1Swap],
+  );
+
   useEffect(() => {
     if (!id) return;
     const token = getTokenFromAddress(chainId, id);
     if (!token) return;
-    // Graph is rendered by SwapPro, which uses the swap store
-    // So we have to set both of these.
-    setToken0(token);
-    setToken1(fUSDC);
-    setToken0Swap(token);
-    setToken1Swap(fUSDC);
-  }, [id]);
+    handleTokens(token, fUSDC);
+  }, [id, chainId, fUSDC, handleTokens]);
 
   const poolData = allPoolsData?.find((pool) => pool.id === id);
 
@@ -116,7 +127,7 @@ export default function PoolPage() {
     if (positionIdParam)
       return positionsData?.find((p) => p.positionId === positionIdParam);
     return positionsData?.[0];
-  }, [positionIdParam]);
+  }, [positionIdParam, positionsData]);
 
   const { positionId, upper: upperTick, lower: lowerTick } = position || {};
 
@@ -133,7 +144,7 @@ export default function PoolPage() {
             )
           : 0,
       ),
-    [poolData],
+    [positionsData],
   );
 
   // Current liquidity of the position
@@ -199,7 +210,13 @@ export default function PoolPage() {
       10 ** (token0.decimals + fUSDC.decimals);
     const token1AmountScaled = Number(amount1) / 10 ** fUSDC.decimals;
     return usdFormat(token0AmountScaled + token1AmountScaled);
-  }, [unclaimedRewardsData]);
+  }, [
+    unclaimedRewardsData,
+    fUSDC.decimals,
+    positionId,
+    token0.decimals,
+    tokenPrice,
+  ]);
 
   const collect = useCallback(
     (id: bigint) => {
@@ -225,6 +242,7 @@ export default function PoolPage() {
       writeContractCollect,
       token0,
       ammContract,
+      unclaimedLeoRewardsData?.result,
       leoContract,
       liquidityCampaigns,
     ],
@@ -243,7 +261,15 @@ export default function PoolPage() {
         10 ** (token0.decimals + fUSDC.decimals) +
         amount1 / 10 ** token1.decimals,
     );
-  }, [position, positionLiquidity, tokenPrice, token0, token1, curTick]);
+  }, [
+    position,
+    positionLiquidity,
+    tokenPrice,
+    token0,
+    token1,
+    curTick,
+    fUSDC.decimals,
+  ]);
 
   const showMockData = useFeatureFlag("ui show demo data");
   const showBoostIncentives = useFeatureFlag("ui show boost incentives");
