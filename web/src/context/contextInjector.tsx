@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccount, useChainId } from "wagmi";
+import { useAccount } from "wagmi";
 import { useEffect } from "react";
 import { setTag, setUser } from "@sentry/nextjs";
 export default function ContextInjector() {
@@ -8,10 +8,10 @@ export default function ContextInjector() {
 
   useEffect(() => {
     if (account?.address) {
-      //   window.localStorage.setItem("walletAddress", account.address); // this one is going to be needed for GTM
+      window.localStorage.setItem("walletAddress", account.address);
       setUser({ id: account.address });
     } else {
-      //   window.localStorage.removeItem("walletAddress");
+      window.localStorage.removeItem("walletAddress");
       setUser(null);
     }
   }, [account?.address]);

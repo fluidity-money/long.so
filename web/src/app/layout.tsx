@@ -14,9 +14,9 @@ import { FeatureFlagConfig } from "@/app/_layout/FeatureFlagConfig";
 import PopulateQueryCache from "@/app/PopulateQueryCache";
 import BottomBanner from "@/components/Banners/BottomBanner";
 import ErrorReportingDialog from "@/components/ErrorReportingDialog";
-import { useChainId } from "wagmi";
-import wagmiConfig from "@/config/wagmi";
 import { superpositionTestnet } from "@/config/chains";
+import CookieBanner from "@/components/CookieBanner";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const title = "Longtail";
 
@@ -52,7 +52,6 @@ export const metadata: Metadata = {
   },
 };
 
-/* istanbul ignore next */
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500"],
@@ -140,7 +139,9 @@ export default async function RootLayout({
           <BottomBanner />
           <ErrorReportingDialog />
         </Provider>
+        <CookieBanner />
       </body>
+      <GoogleAnalytics />
     </html>
   );
 }
