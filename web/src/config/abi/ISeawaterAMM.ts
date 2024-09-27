@@ -403,7 +403,7 @@ const ISeawaterAMM = [
     type: "function",
     name: "tickSpacing653FE28F",
     inputs: [{ name: "pool", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint16", internalType: "uint16" }],
+    outputs: [{ name: "", type: "uint8", internalType: "uint8" }],
     stateMutability: "nonpayable",
   },
   {
