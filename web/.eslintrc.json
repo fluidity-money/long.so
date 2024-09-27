@@ -7,6 +7,9 @@
   ],
   "plugins": ["@stylistic/ts"],
   "parser": "@typescript-eslint/parser",
+  "rules": {
+    "react-hooks/exhaustive-deps": "error"
+  },
   "overrides": [
     {
       "files": ["*.ts", "*.tsx"],
