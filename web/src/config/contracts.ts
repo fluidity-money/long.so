@@ -2,6 +2,7 @@ import z from "zod";
 import { allChains } from "./chains";
 import AMMContract from "./abi/ISeawaterAMM";
 import LeoContract from "./abi/ILeo";
+import appConfig from "@/config";
 
 const contractTypes = ["amm", "leo"] as const;
 type ContractTypes = (typeof contractTypes)[number];
@@ -30,11 +31,11 @@ const chainContracts: {
   },
   98985: {
     amm: { address: "0x3d37c3f4a7c773243f9FC31a891911D39d5A75fE" },
-    leo: { address: "0x0000000000000000000000000000000000000000" },
+    leo: { address: appConfig.nullAddress },
   },
   421614: {
     amm: { address: "0xe89E8Cb7E84Dd1b4460cF2a51B3f0B05Ff952bB6" },
-    leo: { address: "0x0000000000000000000000000000000000000000" },
+    leo: { address: appConfig.nullAddress },
   },
 };
 

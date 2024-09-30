@@ -10,8 +10,19 @@ const appSchema = z.object({
     url: z.string().url(),
     icons: z.array(z.string()),
   }),
-  // Add more config variables here
+  nullAddress: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]+$/, {
+      message:
+        "Invalid hex string. It must start with '0x' and contain only hexadecimal characters.",
+    })
+    .length(42, {
+      message:
+        "Address must be exactly 42 characters long, including the '0x' prefix.",
+    }),
 });
+
+type AppSchemaType = z.infer<typeof appSchema>;
 
 const appVars = appSchema.safeParse({
   metadata: {
@@ -20,6 +31,7 @@ const appVars = appSchema.safeParse({
     url: "https://long.so",
     icons: [""],
   },
+  nullAddress: "0x0000000000000000000000000000000000000000",
 });
 
 if (!appVars.success) {
@@ -27,4 +39,4 @@ if (!appVars.success) {
   throw new Error(appVars.error.message);
 }
 
-export default appVars.data;
+export default appVars.data as AppSchemaType & { nullAddress: `0x${string}` };

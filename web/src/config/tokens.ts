@@ -1,7 +1,7 @@
 import z from "zod";
 import { allChains } from "./chains";
 import LightweightERC20 from "./abi/LightweightERC20";
-
+import appConfig from "@/config";
 const tokenAbis = {
   fusdc: LightweightERC20,
   usdc: LightweightERC20,
@@ -82,19 +82,19 @@ const chainTokens: {
   },
   421614: {
     fusdc: {
-      address: "0x0",
+      address: appConfig.nullAddress,
     },
     usdc: {
-      address: "0x0",
+      address: appConfig.nullAddress,
     },
     weth: {
-      address: "0x0",
+      address: appConfig.nullAddress,
     },
     wspn: {
-      address: "0x0",
+      address: appConfig.nullAddress,
     },
     bux: {
-      address: "0x0",
+      address: appConfig.nullAddress,
     },
   },
 } as const;
@@ -150,10 +150,16 @@ export function useTokens(
 const tokensValueSchema = z.object({
   abi: z.array(z.any()).optional(),
   name: z.string(),
-  address: z.string().regex(/^0x[a-fA-F0-9]+$/, {
-    message:
-      "Invalid hex string. It must start with '0x' and contain only hexadecimal characters.",
-  }),
+  address: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]+$/, {
+      message:
+        "Invalid hex string. It must start with '0x' and contain only hexadecimal characters.",
+    })
+    .length(42, {
+      message:
+        "Address must be exactly 42 characters long, including the '0x' prefix.",
+    }),
   symbol: z.string(),
   decimals: z.number(),
   icon: z.string().optional(),

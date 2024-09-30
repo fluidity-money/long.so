@@ -108,9 +108,13 @@ const ExplorePage = () => {
 
       const balances = await Promise.all(
         tokensData.map(async (token) => {
+          const tokenAddress = token?.token?.address as `0x${string}`;
+          if (!tokenAddress || tokenAddress === appConfig.nullAddress)
+            return { amount: 0, amountUSD: 0 };
+
           const { value } = await getBalance(appConfig.wagmiConfig, {
             address,
-            token: token.token.address as `0x${string}`,
+            token: tokenAddress,
           });
           const amount = Number(
             getFormattedStringFromTokenAmount(

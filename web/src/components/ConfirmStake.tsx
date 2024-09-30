@@ -232,6 +232,8 @@ export const ConfirmStake = ({
     const lower = snapTickToSpacing(tickLower, spacing);
     const upper = snapTickToSpacing(tickUpper, spacing);
 
+    if (isNaN(lower) || isNaN(upper)) return;
+
     writeContractMint({
       address: ammContract.address,
       abi: ammContract.abi,
