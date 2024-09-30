@@ -592,12 +592,16 @@ export const SwapForm = () => {
                   {showSwapBreakdown ? (
                     breakdownHidden ? (
                       <>
-                        <div className="underline">See breakdown</div>
+                        <div className="select-none underline">
+                          See breakdown
+                        </div>
                         <div className="ml-1">{"->"}</div>
                       </>
                     ) : (
                       <>
-                        <div className="underline">Hide breakdown</div>
+                        <div className="select-none underline">
+                          Hide breakdown
+                        </div>
                         <div className="ml-1 rotate-90">{"<-"}</div>
                       </>
                     )
@@ -653,19 +657,17 @@ export const SwapForm = () => {
               className={cn(
                 "shine mt-[15px] h-[27px] w-full pl-1.5 md:h-[31px]",
                 {
-                  hidden: !breakdownHidden,
+                  hidden:
+                    !breakdownHidden || chainId !== superpositionTestnet.id,
                 },
               )}
             >
               <TokenIcon className="size-5" />
               <TokenIcon className="-ml-1 size-5" />
               <TokenIcon className="-ml-1.5 size-5" />
-
-              {chainId === superpositionTestnet.id && (
-                <div className={"iridescent-text text-[12px] md:text-[14px]"}>
-                  Earn up to $100 for making this trade!
-                </div>
-              )}
+              <div className={"iridescent-text text-[12px] md:text-[14px]"}>
+                Earn up to $100 for making this trade!
+              </div>
             </Badge>
             <RewardsBreakdown hidden={breakdownHidden} />
             {address ? (
