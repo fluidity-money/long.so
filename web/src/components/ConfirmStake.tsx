@@ -312,7 +312,7 @@ export const ConfirmStake = ({
   }, [
     allowanceDataToken1,
     writeContractApprovalToken1,
-    token1,
+    token1.address,
     updatePosition,
     mintPositionId,
     ammContract.address,
@@ -340,8 +340,8 @@ export const ConfirmStake = ({
   }, [
     allowanceDataToken0,
     writeContractApprovalToken0,
-    token0,
-    ammContract,
+    token0.address,
+    ammContract.address,
     approveToken1,
     expectedChainId,
     token1AmountRaw,
@@ -354,7 +354,8 @@ export const ConfirmStake = ({
     approveToken0();
     // including approveToken0 in this dependency array causes changes in allowance data
     // to retrigger the staking flow, as allowance data is a dependency of approveToken0
-  }, [mintPositionId, approveToken0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mintPositionId]);
 
   // wait for the approval transaction to complete
   const approvalToken0Result = useWaitForTransactionReceipt({
@@ -367,7 +368,8 @@ export const ConfirmStake = ({
     approveToken1();
     // including approveToken1 in this dependency array causes changes in allowance data
     // to retrigger the staking flow, as allowance data is a dependency of approveToken1
-  }, [approvalToken0Result.data, mintPositionId, approveToken1]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [approvalToken0Result.data, mintPositionId]);
 
   const approvalToken1Result = useWaitForTransactionReceipt({
     hash: approvalDataToken1,
