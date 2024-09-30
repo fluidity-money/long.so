@@ -1,7 +1,7 @@
 import z from "zod";
 import { allChains } from "./chains";
 import LightweightERC20 from "./abi/LightweightERC20";
-import appConfig from "@/config";
+import appConfig from "./app";
 const tokenAbis = {
   fusdc: LightweightERC20,
   usdc: LightweightERC20,

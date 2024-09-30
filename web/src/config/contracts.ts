@@ -2,7 +2,7 @@ import z from "zod";
 import { allChains } from "./chains";
 import AMMContract from "./abi/ISeawaterAMM";
 import LeoContract from "./abi/ILeo";
-import appConfig from "@/config";
+import appConfig from "./app";
 
 const contractTypes = ["amm", "leo"] as const;
 type ContractTypes = (typeof contractTypes)[number];
