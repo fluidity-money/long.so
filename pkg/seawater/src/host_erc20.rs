@@ -2,6 +2,8 @@
 //! supports optionally controlling the amount of tokens that are sent
 //! with configuration in the `with_storage` function with host shims.
 
+#![coverage(off)]
+
 pub use crate::permit2_types;
 
 use crate::error::Error;
@@ -13,13 +15,13 @@ use permit2_types::*;
 #[allow(unused_imports)]
 use crate::{current_test, host_test_shims};
 
-///! Decimals function used in event mocking for pool creation.
+/// Decimals function used in event mocking for pool creation.
 pub fn decimals(_token: Address) -> Result<u8, Error> {
     Ok(6)
 }
 
-///! Pretends to take tokens from the user. Only useful for testing.
-///! Assumes a single token is in use for the life of this test.
+/// Pretends to take tokens from the user. Only useful for testing.
+/// Assumes a single token is in use for the life of this test.
 pub fn take_transfer_from(_token: Address, _amount: U256) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg")]
     dbg!(("take_transfer_from", current_test!(), _token, _amount));

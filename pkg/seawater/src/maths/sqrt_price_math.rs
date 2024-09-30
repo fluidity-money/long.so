@@ -617,6 +617,26 @@ mod test {
     }
 
     #[test]
+    fn test_get_amount_0_delta_weird() {
+        use std::str::FromStr;
+        assert_eq!(get_amount_0_delta(
+            U256::from_str("4542003653232976906676481").unwrap(),
+            U256::from_str("131868213966106679867939773610132322838817501").unwrap(),
+            53524466837499715685
+        ).unwrap(), I256::from_str("933650758750999306306261").unwrap());
+    }
+
+    #[test]
+    fn test_get_amount_1_delta_weird() {
+        use std::str::FromStr;
+        assert_eq!(get_amount_1_delta(
+            U256::from_str("1252249874353107").unwrap(),
+            U256::from_str("4542003653232976906676481").unwrap(),
+            53524466837499715685
+        ).unwrap(), I256::from_str("3068458438657788").unwrap());
+    }
+
+    #[test]
     fn test_get_amount_0_delta() {
         // returns 0 if liquidity is 0
         let amount_0 = _get_amount_0_delta(

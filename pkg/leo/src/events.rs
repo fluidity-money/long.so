@@ -6,6 +6,7 @@ sol!("../sol/ILeoEvents.sol");
 
 pub use ILeoEvents::*;
 
+#[allow(clippy::too_many_arguments)]
 pub fn emit_campaign_created(
     identifier: FixedBytes<8>,
     pool: Address,
@@ -37,7 +38,7 @@ fn pack_details(tick_lower: i32, tick_upper: i32, owner: Address) -> U256 {
 
 #[allow(dead_code)]
 fn pack_times(starting: u64, ending: u64, per_second: u64) -> U256 {
-    let mut packed = U256::from(starting) << 64 * 2;
+    let mut packed = U256::from(starting) << (64 * 2);
     packed |= U256::from(ending) << 64;
     packed | U256::from(per_second)
 }

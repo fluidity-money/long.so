@@ -7,6 +7,13 @@ members = [
     "leo",
 ]
 
+[profile.dev]
+opt-level = 0
+debug = true
+debug-assertions = true
+panic = "abort"
+codegen-units = 1
+
 [profile.release]
 codegen-units = 1
 panic = "abort"
@@ -20,6 +27,7 @@ incremental = false
 
 [workspace.dependencies]
 stylus-sdk = "0.6.0"
+stylus-proc = "0.6.0"
 thiserror = "1.0.48"
 tiny-keccak = "2.0.2"
 ruint = { version = "1.11.0", features = ["num-traits"] }

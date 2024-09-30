@@ -197,11 +197,11 @@ mod testing {
 
             // Someone claims from it...
 
-            let earned_rewards = leo
+            /*let earned_rewards = leo
                 .collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID])
                 .unwrap()
                 .1[0]
-                .1;
+                .1; */
 
             // Then the campaign author updates it in the future...
 
@@ -276,7 +276,7 @@ mod proptesting {
             starting_pool in any::<[u64; 4]>(),
             expected_starting in 0..libleo::host::current_timestamp(),
             expected_ending in any::<u64>(),
-            secs_in in 1..u64::MAX,
+            //secs_in in 1..u64::MAX,
             position_lp in 1..u128::MAX,
             other_position_lp in 1..u128::MAX,
         ) {

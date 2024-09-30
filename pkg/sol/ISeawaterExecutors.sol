@@ -189,7 +189,7 @@ interface ISeawaterExecutorUpdatePosition {
     /// @param amount0Desired to take from the user. May exceed.
     /// @param amount1Desired to take from the user. May exceed.
     /// @return the deltas for token0, and token1
-    function incrPositionC3AC7CAA(
+    function incrPositionB11093D7(
         address pool,
         uint256 id,
         uint256 amount0Min,

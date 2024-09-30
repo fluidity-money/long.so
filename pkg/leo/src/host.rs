@@ -36,6 +36,10 @@ pub fn reset_storage() {
     STORAGE.with(|s| s.borrow_mut().clear())
 }
 
+/// # Safety
+///
+/// This will read the word from the bytes array, and should be fine as it uses
+/// thread-local storage for storage access.
 #[no_mangle]
 pub unsafe extern "C" fn storage_store_bytes32(key: *const u8, value: *const u8) {
     let (key, value) = unsafe {
@@ -45,6 +49,10 @@ pub unsafe extern "C" fn storage_store_bytes32(key: *const u8, value: *const u8)
     STORAGE.with(|storage| storage.borrow_mut().insert(key, value));
 }
 
+/// # Safety
+///
+/// This will call the code that will store the bytes, eliminating the caching step.
+/// This should be fine since the cache flush code doesn't do anything.
 #[no_mangle]
 pub unsafe extern "C" fn storage_cache_bytes32(key: *const u8, value: *const u8) {
     // do the same as storage... for now. if the tests are more comprehensive
@@ -52,6 +60,9 @@ pub unsafe extern "C" fn storage_cache_bytes32(key: *const u8, value: *const u8)
     storage_store_bytes32(key, value);
 }
 
+/// # Safety
+///
+/// This will use tiny_keccak to do any keccak in lieu of the EVM being available!
 #[no_mangle]
 pub unsafe extern "C" fn native_keccak256(bytes: *const u8, len: usize, output: *mut u8) {
     // SAFETY
@@ -73,12 +84,21 @@ pub fn block_timestamp() -> u64 {
     CURRENT_TIME.with(|t| *t.borrow())
 }
 
+/// # Safety
+///
+/// This won't do anything, and should be safe to use.
 #[no_mangle]
 pub unsafe fn storage_flush_cache(_clear: bool) {}
 
+/// # Safety
+///
+/// This won't do anything, and should be safe to use all the time.
 #[no_mangle]
 pub unsafe extern "C" fn emit_log(_pointer: *const u8, _len: usize, _: usize) {}
 
+/// # Safety
+///
+/// This will copy a word from the hashmap into the pointer given, or blow up trying.
 #[no_mangle]
 pub unsafe extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
     // SAFETY - stylus promises etc
@@ -95,9 +115,15 @@ pub unsafe extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
     unsafe { write_word(out, value) };
 }
 
+/// # Safety
+///
+/// This won't do anything. Which should default to zero address.
 #[no_mangle]
 pub unsafe extern "C" fn msg_sender(_sender: *mut u8) {}
 
+/// # Safety
+///
+/// This won't do anything. Which should default to zero address.
 #[no_mangle]
 pub unsafe extern "C" fn contract_address(_addr: *mut u8) {}
 
@@ -121,7 +147,7 @@ pub fn current_timestamp() -> u64 {
         .as_secs()
 }
 
-///! Set up the storage access.
+/// Set up the storage access.
 pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     pos_info: &[(Address, U256, i32, i32, u128)],
     f: F,

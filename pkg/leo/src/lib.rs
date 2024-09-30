@@ -172,7 +172,7 @@ impl Leo {
     // Create a campaign, setting its current iteration to these parameters,
     // taking the maximum balance of tokens to distribute into this
     // contract for later distribution.
-    #[allow(clippy::type_complexity)]
+    #[allow(clippy::type_complexity, clippy::too_many_arguments)]
     pub fn create_campaign(
         &mut self,
         identifier: CampaignId,
@@ -263,6 +263,7 @@ impl Leo {
     /// a new record to the campaign versions array with the settings we
     /// requested. Allows 0 to be provided as the ending timestamp, which is the equivalent of
     /// cancelling the campaign if it's provided.
+    #[allow(clippy::too_many_arguments)]
     pub fn update_campaign(
         &mut self,
         identifier: CampaignId,
@@ -409,6 +410,7 @@ impl Leo {
     // rewards code attempts to roll over. In doing so, update the
     // timestamp to reset the rewards they've earned so far, and set them
     // to the latest version of each campaign update.
+    #[allow(clippy::type_complexity)]
     pub fn collect(
         &mut self,
         position_details: Vec<(Address, U256)>,

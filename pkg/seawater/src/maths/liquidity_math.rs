@@ -25,7 +25,6 @@ pub fn add_delta(x: u128, y: i128) -> Result<u128, Error> {
 
 #[cfg(test)]
 mod test {
-
     use super::add_delta;
 
     #[test]

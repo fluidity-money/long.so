@@ -4,7 +4,7 @@ use ruint_macro::uint;
 
 #[test]
 fn test_update_position() {
-    test_utils::with_storage::<_, StoragePool, _>(None, None, None, None, |storage| {
+    test_utils::with_storage::<_, StoragePool, _>(None, None, None, |storage| {
         storage
             .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
             .unwrap();
@@ -26,7 +26,7 @@ fn test_update_position() {
 
 #[test]
 fn test_update_position_2() {
-    test_utils::with_storage::<_, StoragePool, _>(None, None, None, None, |storage| {
+    test_utils::with_storage::<_, StoragePool, _>(None, None, None, |storage| {
         storage
             .init(test_utils::encode_sqrt_price(1, 10), 0, 1, u128::MAX)
             .unwrap();
@@ -46,7 +46,7 @@ fn test_update_position_2() {
 
 #[test]
 fn test_swap() -> Result<(), Vec<u8>> {
-    test_utils::with_storage::<_, StoragePool, _>(None, None, None, None, |storage| {
+    test_utils::with_storage::<_, StoragePool, _>(None, None, None, |storage| {
         storage.init(
             test_utils::encode_sqrt_price(100, 1), // price
             0,
@@ -106,7 +106,7 @@ fn test_swap() -> Result<(), Vec<u8>> {
 
 #[test]
 fn test_pool_init_state() -> Result<(), Vec<u8>> {
-    test_utils::with_storage::<_, StoragePool, _>(None, None, None, None, |pool| {
+    test_utils::with_storage::<_, StoragePool, _>(None, None, None, |pool| {
         let price = test_utils::encode_sqrt_price(100, 1);
 
         pool.init(price, 2, 1, u128::MAX)?;
@@ -134,7 +134,7 @@ fn test_pool_init_state() -> Result<(), Vec<u8>> {
 
 #[test]
 fn test_pool_init_reverts() -> Result<(), Vec<u8>> {
-    test_utils::with_storage::<_, StoragePool, _>(None, None, None, None, |storage| {
+    test_utils::with_storage::<_, StoragePool, _>(None, None, None, |storage| {
         match storage.init(uint!(1_U256), 0, 0, 0_u128) {
             Err(r) => assert_eq!(Error::R.to_string(), String::from_utf8(r).unwrap()),
             _ => panic!("expected R"),
@@ -153,7 +153,7 @@ fn test_pool_init_reverts() -> Result<(), Vec<u8>> {
 
 #[test]
 fn test_pool_swaps_reverts() {
-    test_utils::with_storage::<_, StoragePool, _>(None, None, None, None, |pool| {
+    test_utils::with_storage::<_, StoragePool, _>(None, None, None, |pool| {
         let sqrt_price = test_utils::encode_sqrt_price(1, 1);
 
         match pool.swap(true, I256::unchecked_from(1), sqrt_price) {
@@ -204,7 +204,7 @@ fn test_pool_swaps_reverts() {
 
 #[test]
 fn test_pool_position_create() -> Result<(), Vec<u8>> {
-    test_utils::with_storage::<_, StoragePool, _>(None, None, None, None, |pool| {
+    test_utils::with_storage::<_, StoragePool, _>(None, None, None, |pool| {
         let id = uint!(2_U256);
         let low = tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(50, 1))?;
         let up = tick_math::get_tick_at_sqrt_ratio(test_utils::encode_sqrt_price(150, 1))?;
@@ -266,7 +266,7 @@ fn test_pool_update_position_parametric() {
     for price in init_prices.iter() {
         for delta in position_delta.iter() {
             for position_range in position_ranges.iter() {
-                test_utils::with_storage::<_, StoragePool, _>(None, None, None, None, |pool| {
+                test_utils::with_storage::<_, StoragePool, _>(None, None, None, |pool| {
                     let init_price = test_utils::encode_sqrt_price(
                         price[0].unsigned_abs(),
                         price[1].unsigned_abs(),
@@ -334,7 +334,7 @@ fn test_swap_inside_liq_range() -> Result<(), Vec<u8>> {
 
     for swap_amount in &swap_amounts {
         // Price inside liquidity range
-        test_utils::with_storage::<_, StoragePool, _>(None, None, None, None, |pool| {
+        test_utils::with_storage::<_, StoragePool, _>(None, None, None, |pool| {
             pool.init(init_price, 3000, 60, u128::MAX).unwrap();
 
             pool.enabled.set(true);

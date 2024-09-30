@@ -1143,6 +1143,7 @@ name = "seawater"
 version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
+ "arrayvec",
  "const-hex",
  "keccak-const",
  "maplit",

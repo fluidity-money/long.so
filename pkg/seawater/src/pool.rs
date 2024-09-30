@@ -13,9 +13,6 @@ use num_traits::ToPrimitive;
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 use crate::test_utils;
 
-#[cfg(feature = "testing-dbg")]
-use crate::current_test;
-
 type Revert = Vec<u8>;
 
 /// The storage type for an AMM pool.
@@ -75,14 +72,13 @@ impl StoragePool {
     /// Creates a new position in this pool.
     pub fn create_position(&mut self, id: U256, low: i32, up: i32) -> Result<(), Revert> {
         assert_or!(self.enabled.get(), Error::PoolDisabled);
-        let spacing = self.tick_spacing.get().sys() as i32;
-        assert_or!(low % spacing == 0, Error::InvalidTickSpacing);
-        assert_or!(up % spacing == 0, Error::InvalidTickSpacing);
-        let spacing: u8 = spacing.try_into().map_err(|_| Error::InvalidTickSpacing)?;
+        let spacing = self.tick_spacing.get().sys();
+        assert_or!(low % spacing as i32 == 0, Error::InvalidTickSpacing);
+        assert_or!(up % spacing as i32 == 0, Error::InvalidTickSpacing);
         let min_tick = tick_math::get_min_tick(spacing);
         let max_tick = tick_math::get_max_tick(spacing);
-        assert_or!(low >= min_tick && low <= max_tick, Error::InvalidTick);
-        assert_or!(up >= min_tick && up <= max_tick, Error::InvalidTick);
+        assert_or!((min_tick..=max_tick).contains(&low), Error::InvalidTick);
+        assert_or!((min_tick..=max_tick).contains(&up), Error::InvalidTick);
         assert_or!(low < up, Error::InvalidTick);
         self.positions.new(id, low, up);
         Ok(())
@@ -99,15 +95,6 @@ impl StoragePool {
         let fee_growth_global_0 = self.fee_growth_global_0.get();
         let fee_growth_global_1 = self.fee_growth_global_1.get();
         let max_liquidity_per_tick = self.max_liquidity_per_tick.get().sys();
-
-        #[cfg(feature = "testing-dbg")]
-        dbg!((
-            "inside update_position before delta check",
-            delta,
-            cur_tick,
-            fee_growth_global_0,
-            fee_growth_global_1,
-        ));
 
         let mut flipped_lower = false;
         let mut flipped_upper = false;
@@ -132,9 +119,6 @@ impl StoragePool {
                 true,
                 max_liquidity_per_tick,
             )?;
-
-            #[cfg(feature = "testing-dbg")]
-            dbg!(("before if flip lower", flipped_lower, flipped_upper));
 
             // clear unneeded storage
             if flipped_lower {
@@ -169,17 +153,6 @@ impl StoragePool {
         // calculate liquidity change and the amount of each token we need
         if delta != 0 {
             let (amount_0, amount_1) = if self.cur_tick.get().sys() < lower {
-                #[cfg(feature = "testing-dbg")]
-                dbg!((
-                    "update_position, cur_tick < lower path",
-                    lower,
-                    upper,
-                    tick_math::get_sqrt_ratio_at_tick(lower)?,
-                    tick_math::get_sqrt_ratio_at_tick(upper)?,
-                    self.sqrt_price.get(),
-                    delta
-                ));
-
                 // we're below the range, we need to move right, we'll need more token0
                 (
                     sqrt_price_math::get_amount_0_delta(
@@ -192,22 +165,7 @@ impl StoragePool {
             } else if self.cur_tick.get().sys() < upper {
                 // we're inside the range, the liquidity is active and we need both tokens
                 let new_liquidity = liquidity_math::add_delta(self.liquidity.get().sys(), delta)?;
-
-                #[cfg(feature = "testing-dbg")]
-                dbg!((
-                    "update_position, cur_tick < upper path",
-                    lower,
-                    upper,
-                    tick_math::get_sqrt_ratio_at_tick(lower)?.to_string(),
-                    tick_math::get_sqrt_ratio_at_tick(upper)?.to_string(),
-                    self.sqrt_price.get().to_string(),
-                    delta,
-                    self.liquidity.get().sys(),
-                    new_liquidity
-                ));
-
                 self.liquidity.set(U128::lib(&new_liquidity));
-
                 (
                     sqrt_price_math::get_amount_0_delta(
                         self.sqrt_price.get(),
@@ -221,17 +179,6 @@ impl StoragePool {
                     )?,
                 )
             } else {
-                #[cfg(feature = "testing-dbg")]
-                dbg!((
-                    "update_position, else",
-                    lower,
-                    upper,
-                    tick_math::get_sqrt_ratio_at_tick(lower)?,
-                    tick_math::get_sqrt_ratio_at_tick(upper)?,
-                    self.sqrt_price.get(),
-                    delta,
-                ));
-
                 // we're above the range, we need to move left, we'll need token1
                 (
                     I256::zero(),
@@ -261,7 +208,7 @@ impl StoragePool {
 
         let position = self.positions.positions.get(id);
 
-        let sqrt_ratio_x_96 = tick_math::get_sqrt_ratio_at_tick(self.get_cur_tick().as_i32())?;
+        let sqrt_ratio_x_96 = self.sqrt_price.get();
         let sqrt_ratio_a_x_96 = tick_math::get_sqrt_ratio_at_tick(position.lower.get().as_i32())?;
         let sqrt_ratio_b_x_96 = tick_math::get_sqrt_ratio_at_tick(position.upper.get().as_i32())?;
 
@@ -273,24 +220,12 @@ impl StoragePool {
             amount_1,          // amount_1
         )?
         .to_i128()
-        .map_or_else(|| Err(Error::LiquidityAmountTooWide), Ok)?;
+        .ok_or(Error::LiquidityAmountTooWide)?;
 
         if giving {
             // If we're giving, then we need to take from the delta.
             delta = -delta;
         }
-
-        #[cfg(feature = "testing-dbg")]
-        dbg!((
-            "inside adjust_position",
-            current_test!(),
-            sqrt_ratio_x_96.to_string(),
-            sqrt_ratio_a_x_96.to_string(),
-            sqrt_ratio_b_x_96.to_string(),
-            amount_0.to_string(),
-            amount_1.to_string(),
-            delta
-        ));
 
         // [update_position] should also ensure that we don't do this on a pool that's not currently
         // running
@@ -328,13 +263,6 @@ impl StoragePool {
                 }
             }
         };
-
-        #[cfg(feature = "testing-dbg")]
-        dbg!((
-            "inside swap pool function",
-            current_test!(),
-            price_limit.to_string()
-        ));
 
         // is the swap exact in or exact out
         let exact_in = amount > I256::zero();
@@ -395,18 +323,6 @@ impl StoragePool {
             let step_next_tick = step_next_tick.clamp(tick_math::MIN_TICK, tick_math::MAX_TICK);
 
             let step_next_price = tick_math::get_sqrt_ratio_at_tick(step_next_tick)?;
-
-            #[cfg(feature = "testing-dbg")]
-            dbg!((
-                "swapping",
-                state.amount_remaining.to_string(),
-                state.price.to_string(),
-                price_limit.to_string(),
-                iters,
-                step_next_tick,
-                step_next_tick_initialised,
-                step_next_price.to_string()
-            ));
 
             // swap til the tick is reached or the price limit is reached or the in/out amount is
             // used

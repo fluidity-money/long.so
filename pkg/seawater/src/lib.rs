@@ -3,6 +3,7 @@
 //! Seawater is an AMM designed for arbitrum's stylus environment based on uniswap v3.
 
 #![feature(split_array)]
+#![feature(coverage_attribute)]
 #![cfg_attr(not(target_arch = "wasm32"), feature(const_trait_impl))]
 #![deny(clippy::unwrap_used)]
 
@@ -119,14 +120,16 @@ impl Pools {
     ///
     /// # Arguments
     /// * `pool` - The pool to swap for. Pools are accessed as the address of their first token,
-    /// where every pool has the fluid token as token 1.
+    ///            where every pool has the fluid token as token 1.
     /// * `zero_for_one` - The swap direction. This is `true` if swapping to the fluid token, or
-    /// `false` if swapping from the fluid token.
+    ///                    `false` if swapping from the fluid token.
     /// * `amount` - The amount of token to swap. Follows the uniswap convention, where a positive
-    /// amount will perform an exact in swap and a negative amount will perform an exact out swap.
+    ///              amount will perform an exact in swap and a negative amount will perform an
+    ///              exact out swap.
     /// * `price_limit_x96` - The price limit, specified as an X96 encoded square root price.
     /// * `permit2` - Optional permit2 blob for the token being transfered - transfers will be done
-    /// using permit2 if this is `Some`, or `transferFrom` if this is `None`.
+    ///               using permit2 if this is `Some`, or `transferFrom` if this is `None`.
+    ///
     /// # Side effects
     /// This function transfers ERC20 tokens from and to the caller as per the swap. It takes
     /// tokens using ERC20's `transferFrom` method, and therefore must have approvals set before
@@ -656,7 +659,7 @@ impl Pools {
     /// * `id` - The ID of the position.
     /// * `delta` - The change to apply to the liquidity in the position.
     /// * `permit2` - Optional permit2 blob for the token being transfered - transfers will be done
-    /// using permit2 if this is `Some`, or `transferFrom` if this is `None`.
+    ///               using permit2 if this is `Some`, or `transferFrom` if this is `None`.
     ///
     /// # Side effects
     /// Adding or removing liquidity will transfer tokens from or to the caller. Tokens are
@@ -738,108 +741,11 @@ impl Pools {
             token1: amount_1,
         });
 
-        #[cfg(feature = "testing-dbg")]
-        dbg!((
-            "adjust position before conversion",
-            current_test!(),
-            giving,
-            amount_0.to_string(),
-            amount_1.to_string(),
-            amount_0_min.to_string(),
-            amount_1_min.to_string(),
-            amount_0_desired.to_string(),
-            amount_1_desired.to_string(),
-        ));
-
         let (amount_0, amount_1) = if giving {
-            #[cfg(feature = "testing-dbg")]
-            {
-                if amount_0 > I256::zero() {
-                    dbg!((
-                        "amount_0 > 0 (abs neg failed!)",
-                        current_test!(),
-                        amount_0.to_string(),
-                    ));
-                }
-                if amount_1 > I256::zero() {
-                    dbg!((
-                        "amount_1 > 0 (abs neg failed!)",
-                        current_test!(),
-                        amount_1.to_string(),
-                    ));
-                }
-            }
             (amount_0.abs_neg()?, amount_1.abs_neg()?)
         } else {
-            #[cfg(feature = "testing-dbg")]
-            {
-                if amount_0 < I256::zero() {
-                    dbg!((
-                        "amount_0 < 0 (abs pos failed!)",
-                        current_test!(),
-                        amount_0.to_string(),
-                    ));
-                }
-                if amount_1 < I256::zero() {
-                    dbg!((
-                        "amount_1 < 0 (abs pos failed!)",
-                        current_test!(),
-                        amount_1.to_string(),
-                    ));
-                }
-            }
             (amount_0.abs_pos()?, amount_1.abs_pos()?)
         };
-
-        #[cfg(feature = "testing-dbg")]
-        {
-            if amount_0 < amount_0_min {
-                dbg!((
-                    "amount 0 < amount 0 min",
-                    current_test!(),
-                    amount_0.to_string(),
-                    amount_0_min.to_string()
-                ));
-            }
-            if amount_1 < amount_1_min {
-                dbg!((
-                    "amount 1 < amount 1 min",
-                    current_test!(),
-                    amount_1.to_string(),
-                    amount_1_min.to_string()
-                ));
-            }
-        }
-
-        #[cfg(feature = "testing-dbg")]
-        dbg!((
-            "amounts",
-            current_test!(),
-            amount_0.to_string(),
-            amount_1.to_string(),
-            amount_0_desired.to_string(),
-            amount_1_desired.to_string()
-        ));
-
-        #[cfg(feature = "testing-dbg")]
-        {
-            if amount_0 > amount_0_desired {
-                dbg!((
-                    "amount 0 > amount 0 desired",
-                    current_test!(),
-                    amount_0.to_string(),
-                    amount_0_desired.to_string()
-                ));
-            }
-            if amount_1 > amount_1_desired {
-                dbg!((
-                    "amount 1 > amount 1 desired",
-                    current_test!(),
-                    amount_1.to_string(),
-                    amount_1_desired.to_string()
-                ));
-            }
-        }
 
         assert_or!(amount_0 >= amount_0_min, Error::LiqResultTooLow);
         assert_or!(amount_1 >= amount_1_min, Error::LiqResultTooLow);
@@ -891,7 +797,7 @@ impl Pools {
     /// Refreshes and updates liquidity in a position, transferring tokens from the user with a restriction on the amount taken.
     /// See [Self::adjust_position_internal].
     #[allow(non_snake_case)]
-    pub fn incr_position_C_3_A_C_7_C_A_A(
+    pub fn incr_position_B_11093_D_7(
         &mut self,
         pool: Address,
         id: U256,
@@ -1083,8 +989,8 @@ impl Pools {
             Error::SeawaterAdminOnly
         );
 
-        let is_fee_valid = (fee_protocol_0 == 0 || (fee_protocol_0 >= 4 && fee_protocol_0 <= 10))
-            && (fee_protocol_1 == 0 || (fee_protocol_1 >= 4 && fee_protocol_1 <= 10));
+        let is_fee_valid = (fee_protocol_0 == 0 || (4..=10).contains(&fee_protocol_0))
+            && (fee_protocol_1 == 0 || (4..=10).contains(&fee_protocol_1));
 
         assert_or!(is_fee_valid, Error::BadFeeProtocol);
 
@@ -1215,10 +1121,10 @@ impl Pools {
     }
 }
 
-///! Migrations code that should only be used in a testing environment, or in a rescue
-///! situation. These functions will break the internal state of the pool most likely.
-///! These likely won't exist beyond testnet, and are as such not included as a facet,
-///! intending to be used in the catch all feature.
+/// Migrations code that should only be used in a testing environment, or in a rescue
+/// situation. These functions will break the internal state of the pool most likely.
+/// These likely won't exist beyond testnet, and are as such not included as a facet,
+/// intending to be used in the catch all feature.
 #[cfg_attr(feature = "migrations", public)]
 impl Pools {
     pub fn disable_pools(&mut self, pools: Vec<Address>) -> Result<(), Vec<u8>> {

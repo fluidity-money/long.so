@@ -1,7 +1,8 @@
-///! Functions for testing including the setup function for storage.
+#![coverage(off)]
+
 use std::collections::HashMap;
 
-use stylus_sdk::storage::StorageCache;
+use stylus_sdk::{alloy_primitives::address, storage::StorageCache};
 
 use crate::{
     maths::sqrt_price_math::Q96,
@@ -18,6 +19,8 @@ macro_rules! current_test {
         std::thread::current().name().unwrap()
     };
 }
+
+const DEFAULT_SENDER: Address = address!("feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5");
 
 pub fn decode_sqrt_price_num(sqrt_price_x96: U256, denom: u64) -> U256 {
     let numerator = sqrt_price_x96.pow(U256::from(2)) * U256::from(denom);
@@ -59,9 +62,8 @@ pub trait StorageNew {
     fn new(i: U256, v: u8) -> Self;
 }
 
-///! Set up the storage access, controlling for parallel use.
+/// Set up the storage access, controlling for parallel use.
 pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
-    sender: Option<[u8; 20]>,
     slots: Option<HashMap<&str, &str>>,
     caller_bals: Option<HashMap<Address, U256>>,
     amm_bals: Option<HashMap<Address, U256>>,
@@ -69,9 +71,7 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
 ) -> T {
     StorageCache::clear();
     test_shims::reset_storage();
-    if let Some(v) = sender {
-        test_shims::set_sender(v);
-    }
+    test_shims::set_sender(DEFAULT_SENDER.into_array());
     if let Some(items) = caller_bals {
         test_shims::set_caller_bals(items);
     }
@@ -84,7 +84,7 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     f(&mut P::new(U256::ZERO, 0))
 }
 
-///! Set the slot storage with a hashmap for the current thread.
+/// Set the slot storage with a hashmap for the current thread.
 pub fn set_storage(items: HashMap<&str, &str>) {
     for (key, value) in items {
         test_shims::insert_word(

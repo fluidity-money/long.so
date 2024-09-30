@@ -41,7 +41,7 @@ pub fn pack_transfer_from(sender: Address, recipient: Address, amount: U256) -> 
 pub fn unpack_bool_safe(data: &[u8]) -> Result<(), Vec<u8>> {
     match data.get(31) {
         None | Some(1) => Ok(()),
-        Some(0) | _ => Err(Error::ReturnedFalse.into()),
+        _ => Err(Error::ReturnedFalse.into()),
     }
 }
 

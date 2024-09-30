@@ -4,6 +4,8 @@
 //! Functions here are gated on tests, since normal contract execution should have the hosted
 //! stylus environment.
 
+#![coverage(off)]
+
 use std::collections::HashMap;
 
 use crate::{Address, U256};
@@ -11,6 +13,9 @@ use crate::{Address, U256};
 #[allow(unused_imports)]
 use crate::current_test;
 
+/// # Safety
+///
+/// Perform a local keccak and write it to the pointer given.
 #[no_mangle]
 pub unsafe extern "C" fn native_keccak256(bytes: *const u8, len: usize, output: *mut u8) {
     // SAFETY
@@ -51,17 +56,29 @@ pub mod storage {
             RefCell::new(HashMap::new());
     }
 
+    /// # Safety
+    ///
+    /// Read from the pointer given!
+    #[no_mangle]
     pub unsafe fn read_word(key: *const u8) -> Word {
         let mut res = Word::default();
         ptr::copy(key, res.as_mut_ptr(), WORD_BYTES);
         res
     }
 
+    /// # Safety
+    ///
+    /// Write to the pointer given!
+    #[no_mangle]
     pub unsafe fn write_word(key: *mut u8, val: Word) {
         ptr::copy(val.as_ptr(), key, WORD_BYTES);
     }
 }
 
+/// # Safety
+///
+/// Stores a EVM word into the hashmap after dereferencing the pointer given.
+/// Not safe in a multithreaded environment if you cross threads.
 #[no_mangle]
 pub unsafe extern "C" fn storage_store_bytes32(key: *const u8, value: *const u8) {
     let (key, value) = unsafe {
@@ -72,6 +89,9 @@ pub unsafe extern "C" fn storage_store_bytes32(key: *const u8, value: *const u8)
     storage::STORAGE.with(|storage| storage.borrow_mut().insert(key, value));
 }
 
+/// # Safety
+///
+/// Performs the same operation as writing a word!
 #[no_mangle]
 pub unsafe extern "C" fn storage_cache_bytes32(key: *const u8, value: *const u8) {
     // do the same as storage... for now. if the tests are more comprehensive
@@ -84,12 +104,15 @@ pub extern "C" fn storage_flush_cache(_clear: bool) {
     // do nothing
 }
 
+/// # Safety
+///
+/// Reads a EVM word from the hashmap, and writes it to the pointer given.
+/// It should be fine to use without crossing any threads.
 #[no_mangle]
 pub unsafe extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
     #[allow(unused_imports)]
     use crate::current_test;
 
-    // SAFETY - stylus promises etc
     let key = unsafe { storage::read_word(key) };
 
     let value = storage::STORAGE.with(|storage| {
@@ -111,6 +134,11 @@ pub unsafe extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
     unsafe { storage::write_word(out, value) };
 }
 
+/// # Safety
+///
+/// This will set to the pointer given a value that's unpacked from a hashmap here.
+/// It should be safe to use a thread local context after doing setup with
+/// with_storage.
 #[no_mangle]
 pub unsafe extern "C" fn msg_sender(sender: *mut u8) {
     // copy the currently defined sender and return the pointer, or default
@@ -128,6 +156,9 @@ pub unsafe extern "C" fn msg_sender(sender: *mut u8) {
     std::ptr::copy(b, sender, 20);
 }
 
+/// # Safety
+///
+/// This won't do anything! It should be safe to use all the time.
 #[no_mangle]
 pub unsafe extern "C" fn emit_log(_pointer: *const u8, _len: usize, _: usize) {
     #[cfg(feature = "testing-dbg")]
@@ -179,8 +210,8 @@ pub fn take_caller_bal(token: Address, amt: U256) -> Result<(), U256> {
     })
 }
 
-///! Take AMM balance at the address. If the index does not exist, assume the test is
-///! permissive, and continue without issue.
+/// Take AMM balance at the address. If the index does not exist, assume the test is
+/// permissive, and continue without issue.
 pub fn take_amm_bal(token: Address, amt: U256) -> Result<(), U256> {
     storage::AMM_BALS.with(|bals| match bals.borrow_mut().get_mut(&token) {
         Some(amm_bal) => {

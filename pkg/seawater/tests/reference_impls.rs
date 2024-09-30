@@ -1,13 +1,9 @@
 // rng based tests of rewritten functions against their reference implementations
 
-use std::cmp::max;
-use std::cmp::min;
-
 use rand::prelude::*;
 mod reference;
 use libseawater::maths::{full_math, tick_math};
 use ruint::aliases::U256;
-use ruint::uint;
 
 #[allow(unused_imports)]
 use libseawater::current_test;
