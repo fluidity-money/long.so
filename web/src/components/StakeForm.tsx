@@ -57,6 +57,7 @@ import { TokenIcon } from "./TokenIcon";
 import LiquidityRangeVisualizer from "./LiquidityRangeVisualizer";
 import { useContracts } from "@/config/contracts";
 import { CheckboxContainer } from "./ui/checkbox";
+import { superpositionTestnet } from "@/config/chains";
 
 type StakeFormProps = { poolId: string } & (
   | {
@@ -211,7 +212,11 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const showCampaignBanner = useFeatureFlag("ui show campaign banner");
 
   const showBoostIncentives = useFeatureFlag("ui show boost incentives");
-  const showLeo = useFeatureFlag("ui show leo");
+
+  const showLeo =
+    useFeatureFlag("ui show leo") &&
+    isCorrectChain &&
+    expectedChainId === superpositionTestnet.id;
 
   const onSubmit = () => {
     if (mode === "new") {

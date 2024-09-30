@@ -23,6 +23,7 @@ import { useTokens } from "@/config/tokens";
 import { useContracts } from "@/config/contracts";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { CheckboxContainer } from "@/components/ui/checkbox";
+import { superpositionTestnet } from "@/config/chains";
 
 const PositionsFragment = graphql(`
   fragment WithdrawPositionsFragment on Wallet {
@@ -56,8 +57,6 @@ export default function WithdrawLiquidity() {
 
   const positionId = params.get("positionId");
 
-  const showLeo = useFeatureFlag("ui show leo");
-
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
 
@@ -71,6 +70,11 @@ export default function WithdrawLiquidity() {
     () => chainId === expectedChainId,
     [chainId, expectedChainId],
   );
+
+  const showLeo =
+    useFeatureFlag("ui show leo") &&
+    isCorrectChain &&
+    expectedChainId === superpositionTestnet.id;
 
   const { open } = useWeb3Modal();
 

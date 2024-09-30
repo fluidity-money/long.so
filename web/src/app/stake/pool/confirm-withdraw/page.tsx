@@ -24,15 +24,13 @@ import { TokenIcon } from "@/components/TokenIcon";
 import { usePositions } from "@/hooks/usePostions";
 import { useContracts } from "@/config/contracts";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { superpositionTestnet } from "@/config/chains";
 
 export default function ConfirmWithdrawLiquidity() {
   const router = useRouter();
   const params = useSearchParams();
 
-  const showLeo = useFeatureFlag("ui show leo");
-
   const positionId = params.get("positionId") ?? "0";
-  const isDivesting = showLeo && params.get("divestPosition") === "true";
 
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
@@ -43,6 +41,10 @@ export default function ConfirmWithdrawLiquidity() {
   useEffect(() => {
     if (!address || chainId !== expectedChainId) router.back();
   }, [address, expectedChainId, chainId, router]);
+
+  const showLeo =
+    useFeatureFlag("ui show leo") && chainId === superpositionTestnet.id;
+  const isDivesting = showLeo && params.get("divestPosition") === "true";
 
   const {
     token0,
