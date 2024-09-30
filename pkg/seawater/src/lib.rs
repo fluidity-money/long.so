@@ -788,7 +788,7 @@ impl Pools {
     /// Refreshes and updates liquidity in a position, transferring tokens from the user with a restriction on the amount taken.
     /// See [Self::adjust_position_internal].
     #[allow(non_snake_case)]
-    pub fn incr_pos_D_3521721(
+    pub fn swag_3_a_4394_a_6(
         &mut self,
         pool: Address,
         id: U256,
@@ -861,7 +861,7 @@ impl Pools {
         Ok(())
     }
 
-    /// Creates a new pool. Only usable by the seawater admin.
+    /// Creates a new pool.
     ///
     /// # Arguments
     /// * `pool` - The address of the non-fluid token to construct the pool around.
@@ -871,7 +871,7 @@ impl Pools {
     /// * `max_liquidity_per_tick` - The maximum amount of liquidity allowed in a single tick.
     ///
     /// # Errors
-    /// Requires the caller to be the seawater admin. Requires the pool to not exist.
+    /// Requires the pool to not exist.
     #[allow(non_snake_case)]
     pub fn create_pool_D650_E2_D0(
         &mut self,
@@ -881,12 +881,6 @@ impl Pools {
         tick_spacing: u8,
         max_liquidity_per_tick: u128,
     ) -> Result<(), Revert> {
-        assert_eq_or!(
-            msg::sender(),
-            self.seawater_admin.get(),
-            Error::SeawaterAdminOnly
-        );
-
         self.pools
             .setter(pool)
             .init(price, fee, tick_spacing, max_liquidity_per_tick)?;

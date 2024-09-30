@@ -261,6 +261,10 @@ pub enum Error {
     // 48 (0x30)
     #[error("Pool is already initialised!")]
     PoolIsInitialised,
+
+    // 49 (0x31)
+    #[error("Position conversion fail")]
+    PositionConvFail,
 }
 
 impl From<Error> for Vec<u8> {

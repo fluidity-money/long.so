@@ -209,8 +209,22 @@ impl StoragePool {
         let position = self.positions.positions.get(id);
 
         let sqrt_ratio_x_96 = self.sqrt_price.get();
-        let sqrt_ratio_a_x_96 = tick_math::get_sqrt_ratio_at_tick(position.lower.get().as_i32())?;
-        let sqrt_ratio_b_x_96 = tick_math::get_sqrt_ratio_at_tick(position.upper.get().as_i32())?;
+
+        let sqrt_ratio_a_x_96 = tick_math::get_sqrt_ratio_at_tick(
+            position
+                .lower
+                .get()
+                .try_into()
+                .map_err(|_| Error::PositionConvFail)?,
+        )?;
+
+        let sqrt_ratio_b_x_96 = tick_math::get_sqrt_ratio_at_tick(
+            position
+                .upper
+                .get()
+                .try_into()
+                .map_err(|_| Error::PositionConvFail)?,
+        )?;
 
         let mut delta = sqrt_price_math::get_liquidity_for_amounts(
             sqrt_ratio_x_96,   // cur_tick
