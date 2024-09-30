@@ -134,7 +134,7 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 		First(&finalTick).
 		Error
 	switch {
-	case errors.Is(err, ErrRecordNotFound):
+	case errors.Is(err, gorm.ErrRecordNotFound):
 		return "0", nil
 	case err != nil:
 		return "", err
