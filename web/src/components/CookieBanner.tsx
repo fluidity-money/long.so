@@ -43,7 +43,7 @@ export default function CookieBanner() {
   if (!showConsentDialog) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 mx-auto mb-[72px] flex max-w-max flex-col items-center justify-between gap-4 rounded-lg bg-[#1E1E1E] p-3 shadow sm:flex-row md:mb-4 md:max-w-screen-sm md:px-4">
+    <div className="fixed inset-x-0 bottom-0 z-50 mx-auto mb-[72px] flex max-w-max flex-col items-center justify-between gap-4 rounded-lg bg-black p-3 shadow sm:flex-row md:mb-4 md:max-w-screen-sm md:px-4">
       <div className="text-center text-white">
         <Link target="_blank" href="https://static.long.so/privacy-policy.pdf">
           <p>
