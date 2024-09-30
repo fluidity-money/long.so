@@ -39,8 +39,11 @@ jobs:
             - e2e-test
     notify-twist:
         runs-on: ubuntu-latest
-        needs: deploy
-        if: ${{ needs.deploy.result == 'failure' }}
+        needs: 
+            - unit-test
+            - e2e-test
+            - deploy
+        if: ${{ needs.unit-test.result == 'failure' || needs.e2e-test.result == 'failure' || needs.deploy.result == 'failure' }}
         steps:
         - name: Send failure notification to Twist
           run: |
