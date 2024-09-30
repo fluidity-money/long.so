@@ -199,7 +199,7 @@ export const usePositions = () => {
   return {
     // loading if the user is connected but the query hasn't resolved yet
     isLoading: address && !userData?.getWallet,
-    positions: chainPositions,
+    positions: address ? chainPositions : [],
     updatePositionLocal: useCallback(
       (newPosition: Position) => updatePositionLocal(chainId, newPosition),
       [chainId, updatePositionLocal],
