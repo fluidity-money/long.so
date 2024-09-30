@@ -253,7 +253,7 @@ export const SwapForm = () => {
   // TODO this is in ETH(/SPN), not USD
   useEffect(() => {
     (async () => {
-      if (!client || !address) return;
+      if (!client || !address || BigInt(token0AmountRaw ?? 0) === 0n) return;
       try {
         const estimatedGas = await estimateContractGas(client, {
           ...swapOptions,
