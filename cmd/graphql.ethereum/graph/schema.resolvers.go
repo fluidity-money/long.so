@@ -133,8 +133,13 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 		Where("pool = ?", obj.Token).
 		First(&finalTick).
 		Error
-	if err != nil {
+	switch {
+	case errors.Is(err, ErrRecordNotFound):
+		return "0", nil
+	case err != nil:
 		return "", err
+	default:
+		// Do nothing
 	}
 	sqrtPrice := math.GetSqrtRatioAtTick(finalTick.FinalTick.Big())
 	price := math.GetPriceAtSqrtRatio(sqrtPrice)
