@@ -11,6 +11,7 @@
 /.v8-coverage
 /jest-coverage
 /playwright-coverage
+/monocart-report
 
 # next.js
 /.next/
