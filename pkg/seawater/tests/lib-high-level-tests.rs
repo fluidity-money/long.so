@@ -197,7 +197,7 @@ fn decr_existing_position_some() {
 
         contract.mint_position_B_C5_B086_D(token, -887272, 887272)?;
 
-        let (amount_0_taken, amount_1_taken) = contract.incr_position_C_3_A_C_7_C_A_A(
+        let (amount_0_taken, amount_1_taken) = contract.incr_pos_D_3521721(
             token,
             id,
             U256::zero(),

@@ -4,9 +4,6 @@ use crate::error::*;
 use crate::maths::liquidity_math;
 use crate::types::*;
 
-#[cfg(feature = "testing-dbg")]
-use crate::current_test;
-
 use stylus_sdk::prelude::*;
 use stylus_sdk::storage::*;
 

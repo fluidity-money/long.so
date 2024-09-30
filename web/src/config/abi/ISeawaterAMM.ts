@@ -149,7 +149,7 @@ const ISeawaterAMM = [
   },
   {
     type: "function",
-    name: "incrPositionB11093D7",
+    name: "incrPosD3521721",
     inputs: [
       { name: "pool", type: "address", internalType: "address" },
       { name: "id", type: "uint256", internalType: "uint256" },
@@ -403,7 +403,7 @@ const ISeawaterAMM = [
     type: "function",
     name: "tickSpacing653FE28F",
     inputs: [{ name: "pool", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint8", internalType: "uint8" }],
+    outputs: [{ name: "", type: "uint16", internalType: "uint16" }],
     stateMutability: "nonpayable",
   },
   {

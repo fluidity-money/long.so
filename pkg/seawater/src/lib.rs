@@ -226,15 +226,6 @@ impl Pools {
         let amount_in = amount_in.abs_pos()?;
         let amount_out = amount_out.abs_neg()?;
 
-        #[cfg(feature = "testing-dbg")]
-        dbg!((
-            "inside swap_2_internal",
-            interim_usdc_out,
-            interim_usdc_in,
-            amount_out.to_string(),
-            min_out.to_string()
-        ));
-
         assert_or!(amount_out >= min_out, Error::MinOutNotReached);
 
         Ok((
@@ -797,7 +788,7 @@ impl Pools {
     /// Refreshes and updates liquidity in a position, transferring tokens from the user with a restriction on the amount taken.
     /// See [Self::adjust_position_internal].
     #[allow(non_snake_case)]
-    pub fn incr_position_B_11093_D_7(
+    pub fn incr_pos_D_3521721(
         &mut self,
         pool: Address,
         id: U256,

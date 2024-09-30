@@ -30,7 +30,7 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 | Swaps permit2 implementation   | 0x73f0a38ff769a28999196978613945b51d1dd05b |
 | Quotes implementation          | 0x67af82f586d64888ce0149a511c47b9a9ab8c141 |
 | Positions implementation       | 0x377a50c9539b0a6005d52a90a9dba331be21b374 |
-| Update position implementation | 0x551d11122bc646a924a2be7e096516f847549d9c |
+| Update position implementation | 0x68d82f448a7e40f624b8c75547faac1ef470321b |
 | Admin implementation           | 0x4f2464fe772c4dfa472784723956247021855122 |
 
 ##### Leo contract deployments

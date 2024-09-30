@@ -35,7 +35,7 @@ struct ActionAdjustPositionIncrease {
 struct ActionSwap1 {
     zero_to_one: bool,
     amount0: i128,
-    amount1: i128
+    amount1: i128,
 }
 
 fn next_lowest_tick(spacing: u8, x: i32) -> i32 {
@@ -95,14 +95,66 @@ fn fee_of_spacing(x: u8) -> u32 {
     }
 }
 
+#[test]
+fn test_revert_incr_pos() {
+    //curl -d '{"jsonrpc":"2.0","id":40,"method":"eth_call","params":[{"data":"0x000001020000000000000000000000006437fdc89ced41941b97a9f1f8992d88718c81c5000000000000000000000000000000000000000000000000000000000000313b0000000000000000000000000000000000000000000000000000000000cdfe600000000000000000000000000000000000000000000000000000000003e9324e0000000000000000000000000000000000000000000000000000000000d97010000000000000000000000000000000000000000000000000000000000420d18b","from":"0xFEb6034FC7dF27dF18a3a6baD5Fb94C0D3dCb6d5","to":"0x4622e516abFd1BBF34E0e884570eA0FC7EeF10cc"},"13980427"]}' https://testnet-rpc.superposition.so
+    use const_hex::decode;
+    use libseawater::host_test_shims;
+    use maplit::hashmap;
+    use stylus_sdk::alloy_primitives::address;
+    test_utils::with_storage::<_, Pools, _>(None, None, None, |contract| {
+        let words = hashmap! {
+            "0x0000000000000000000000000000000000000000000000000000000000000000" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
+            "0x23feb6d8d2b252125e987a23345e54328fb4bf1192972da3b653a37092a57d15" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0x3c79da47f96b0f39664f73c0a1f350580be90742947dddfa21ba64d578dfe600" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0x3d1d41a8d46b1f9d86db08fd55d0f82339b394ac04ec979dbbce935f7a6de06a" => "0x00000000000000000000000f02ef1c8d00000000000000000000000f02ef1c8d",
+            "0x3d1d41a8d46b1f9d86db08fd55d0f82339b394ac04ec979dbbce935f7a6de06b" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0x3d1d41a8d46b1f9d86db08fd55d0f82339b394ac04ec979dbbce935f7a6de06c" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0x3d1d41a8d46b1f9d86db08fd55d0f82339b394ac04ec979dbbce935f7a6de06d" => "0x0000000000000000000000000000000000000000000000010000000000000000",
+            "0x5af493b7b07abc9e18b90146696abde96f97f15ce82e13957ba43d6f5007c506" => "0x0000000000000000000000000080000000000000000000000000000000000000",
+            "0x6d158211a169125e8fa12f28e1e4439d9364e0d218085b3b60a43c02a3bbc725" => "0x000000000000000000000000000000000000000ba9d1746c000d89e6fff2761a",
+            "0x6d158211a169125e8fa12f28e1e4439d9364e0d218085b3b60a43c02a3bbc726" => "0x000000000000000000000000000000000206b75b68b1c471cba3f596e0646615",
+            "0x6d158211a169125e8fa12f28e1e4439d9364e0d218085b3b60a43c02a3bbc727" => "0x00000000000000000000000000000008c6726454e301697698de0ba1bea5c9f4",
+            "0x6d158211a169125e8fa12f28e1e4439d9364e0d218085b3b60a43c02a3bbc728" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0x81e9c7c70971b5eb969cec21a82e6deed42e7c6736e0e83ced66d72297d9f1d7" => "0x00000000000000000000000065ec89436fd7f23dd054e9a8c872a5ac01224a58",
+            "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560d" => "0x00000000000000000000ffffffffffffffffffffffffffffffff0a000001f401",
+            "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560e" => "0x00000000000000000000000000000000020790b80b535a27692ff8f5078bfebd",
+            "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f560f" => "0x00000000000000000000000000000008c6782e4083b0dd7369a895c370ad8552",
+            "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f5611" => "0x00000000000000000000000000004f560000000000000000000000d503f41c0a",
+            "0x8fbdd8104933a0a177010a6634261ffafc4ccc198a7e6ad034d7dcf09d0f5612" => "0x0000000000000000000000000000000000000002c2b78b4a6492e652216704eb",
+            "0xa6c747c93abeb9d383a2bfbbf5483f113a113333cf85a431c77844817e468513" => "0xfffffffffffffffffffffff0fd10e37300000000000000000000000f02ef1c8d",
+            "0xa6c747c93abeb9d383a2bfbbf5483f113a113333cf85a431c77844817e468514" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0xa6c747c93abeb9d383a2bfbbf5483f113a113333cf85a431c77844817e468515" => "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "0xa6c747c93abeb9d383a2bfbbf5483f113a113333cf85a431c77844817e468516" => "0x0000000000000000000000000000000000000000000000010000000000000000",
+            "0xda5136ce5ed2e1c80e1be7eb5326a41deb52862b26dbcc8467cd590cbd14b481" => "0x000000000000000000000000feb6034fc7df27df18a3a6bad5fb94c0d3dcb6d5",
+};
+        for (word, key) in words {
+            host_test_shims::insert_word(
+                decode(word).unwrap().try_into().unwrap(),
+                decode(key).unwrap().try_into().unwrap(),
+            )
+        }
+        contract
+            .incr_pos_D_3521721(
+                address!("6437fdc89ced41941b97a9f1f8992d88718c81c5"),
+                U256::from(12603),
+                U256::from(13500000),
+                U256::from(65614414),
+                U256::from(14250000),
+                U256::from(69259659),
+            )
+            .unwrap();
+    })
+}
+
 proptest! {
     #[test]
     fn test_mint_position_ranges(
         // Positions split 1 is used to figure out which trades should be in epoch 1.
-        positions_split_count_1 in 0..10_000_usize in
+        positions_split_count_1 in 0..10_000_usize,
         // Positions split 2 is used to figure out which trades should be in epoch 2.
         // Will be whatever's left from the position creation.
-        positions_split_count_2 in 0..10_000_usize in
+        positions_split_count_2 in 0..10_000_usize,
         (spacing, positions) in strat_pool_and_position_creation()
     ) {
         test_utils::with_storage::<_, Pools, _>(None, None, None, |contract| -> Result<(), TestCaseError> {
@@ -131,7 +183,7 @@ proptest! {
                 };
                 let amount0 = U256::from(amount0);
                 let amount1 = U256::from(amount1);
-                let incr_res = contract.incr_position_C_3_A_C_7_C_A_A(
+                let incr_res = contract.incr_pos_D_3521721(
                     pool,
                     id,
                     U256::ZERO,
