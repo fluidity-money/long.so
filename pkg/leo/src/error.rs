@@ -83,6 +83,11 @@ pub enum Error {
     // 13 (0x0d)
     #[error("Seawater returned nothing")]
     SeawaterDecode,
+
+    /// Only the NFT manager that's registered can send Leo tokens
+    // 14 (0x0e)
+    #[error("Only the NFT manager")]
+    OnlyNftManager,
 }
 
 impl From<Error> for Vec<u8> {

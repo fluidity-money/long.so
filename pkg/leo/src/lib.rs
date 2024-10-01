@@ -162,9 +162,7 @@ impl Leo {
             .setter(pool)
             .set(existing_liq + U256::from(position_liq));
 
-        evm::log(events::PositionVested {
-            positionId: id,
-        });
+        evm::log(events::PositionVested { positionId: id });
 
         Ok(())
     }
@@ -402,6 +400,21 @@ impl Leo {
         Ok(self.liquidity.getter(pool).get())
     }
 
+    #[allow(non_snake_case)]
+    pub fn on_E_R_C_721_received(
+        _operator: Address,
+        _from: Address,
+        _token_id: U256,
+        _data: Vec<u8>,
+    ) -> Result<[u8; 4], Vec<u8>> {
+        assert_or!(
+            msg::sender() == immutables::NFT_MANAGER_ADDR,
+            Error::OnlyNftManager
+        );
+        //bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))
+        Ok([0x15, 0x0b, 0x7a, 0x02])
+    }
+
     // Return the LP and pool rewards paid by Leo for vesting this NFT position.
     // Update the current position of the user per campaign that's
     // ongoing, and send them rewards using the time that was spent in
@@ -514,9 +527,9 @@ impl Leo {
                     }
 
                     let base_rewards = maths::calc_base_rewards(
-                        self.liquidity.getter(pool).get(), // Pool LP
-                        position_liquidity,                // User LP
-                        U256::from(campaign.per_second.get()),         // Campaign rewards per sec
+                        self.liquidity.getter(pool).get(),     // Pool LP
+                        position_liquidity,                    // User LP
+                        U256::from(campaign.per_second.get()), // Campaign rewards per sec
                     );
 
                     let rewards = base_rewards * U256::from(clamped_secs_since);
