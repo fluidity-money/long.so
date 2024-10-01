@@ -24,7 +24,7 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 |         Deployment name        |              Deployment address            |
 |--------------------------------|--------------------------------------------|
 | Longtail AMM                   | 0x3d37c3f4a7c773243f9FC31a891911D39d5A75fE |
-| Longtail NFT manager           | 0x0000000000000000000000000000000000000000 |
+| Longtail NFT manager           | 0x7AD12Ef3578D5eb845883d156D8dFB2eA39448B5 |
 | Permit2 router                 | 0x2246431582087b930F2CE561c34deb8E7e5c44bE |
 | Swaps implementation           | 0xf45d0f868e93d68c6698c88b2c0a06feb0f5effc |
 | Swaps permit2 implementation   | 0x486ee4cb319b19652c97bf4bf81046a5fbd62bf4 |
@@ -35,11 +35,9 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 
 ##### Leo contract deployments
 
-|     Deployment name     |              Deployment address            |
-|-------------------------|--------------------------------------------|
-| Transparent proxy admin | 0x765a83bf808fa494196ba511a6d486a6dc0d35cb |
-| Transparent proxy       | 0x93eE067c3a3dF5155FC2d0ef20a4f618907F5436 |
-| Implementation          | 0x6fe1e96ad07fd0690f590aedc574f278dad32f0f |
+|  Deployment name |              Deployment address            |
+|------------------|--------------------------------------------|
+| Implementation   | 0xe2c9281ec0a52d2fafeb26b2c3555e09e48614a1 |
 
 ##### Useful testing token deployments
 

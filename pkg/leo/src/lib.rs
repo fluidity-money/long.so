@@ -1,6 +1,7 @@
 #![allow(unused_variables)]
 
 use stylus_sdk::{
+    abi::Bytes,
     alloy_primitives::{aliases::*, *},
     block, msg,
     prelude::*,
@@ -405,14 +406,14 @@ impl Leo {
         _operator: Address,
         _from: Address,
         _token_id: U256,
-        _data: Vec<u8>,
-    ) -> Result<[u8; 4], Vec<u8>> {
+        _data: Bytes,
+    ) -> Result<FixedBytes<4>, Vec<u8>> {
         assert_or!(
             msg::sender() == immutables::NFT_MANAGER_ADDR,
             Error::OnlyNftManager
         );
         //bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))
-        Ok([0x15, 0x0b, 0x7a, 0x02])
+        Ok(FixedBytes::new([0x15, 0x0b, 0x7a, 0x02]))
     }
 
     // Return the LP and pool rewards paid by Leo for vesting this NFT position.
