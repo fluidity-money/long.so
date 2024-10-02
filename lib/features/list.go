@@ -9,6 +9,9 @@ const (
 	// FeatureGraphqlMockGraphDelay by delaying the display of the mocked data.
 	FeatureGraphqlMockGraphDataDelay = "graphql mock demo data delay"
 
+	// FeatureWhitelistedOnlyPools to only show pools that we track in pools.toml.
+	FeatureWhitelistedOnlyPools = "graphql whitelisted only pools"
+
 	// FeatureIngestorPollRpc using the ingestor. Useful in environments
 	// where websocket access is inconsistent or unavailable. Does so with
 	// a (by default) 15 second delay, with checkpointing done in the database.

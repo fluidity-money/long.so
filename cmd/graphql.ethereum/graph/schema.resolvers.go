@@ -216,8 +216,21 @@ func (r *queryResolver) Pools(ctx context.Context) (pools []seawater.Pool, err e
 		pools = MockSeawaterPools()
 		return
 	}
-	err = r.DB.Table("events_seawater_newpool").Scan(&pools).Error
-	return
+	var pools_ []seawater.Pool
+	err = r.DB.Table("events_seawater_newpool").Scan(&pools_).Error
+	// Only show pools that're in the pools file if someone requests it from
+	// this endpoint if the feature's enabled.
+	if r.F.Is(features.FeatureWhitelistedOnlyPools) {
+		for _, p := range pools_ {
+			_, ok := r.PoolsConfig[p.Token]
+			if !ok {
+				continue
+			}
+			pools = append(pools, p)
+		}
+		return pools, nil
+	}
+	return pools_, nil
 }
 
 // ActiveLiquidityCampaigns is the resolver for the activeLiquidityCampaigns field.

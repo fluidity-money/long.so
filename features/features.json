@@ -3,6 +3,7 @@
 	"faucet enabled": true,
 	"graphql mock demo data": false,
 	"graphql mock demo data should delay": false,
+	"graphql whitelisted only pools": true,
 	"ui show boost incentives": false,
 	"ui show campaign banner": false,
 	"ui show claim all yield": true,
