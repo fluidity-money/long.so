@@ -26,7 +26,7 @@ type (
 	TransferPosition struct {
 		events.Event
 
-		From  types.Address `json:"from_"`
+		From  types.Address `json:"from_" gorm:"column:from_"`
 		To    types.Address `json:"to_"`
 		PosId int           `json:"pos_id"`
 	}
