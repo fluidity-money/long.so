@@ -24,7 +24,11 @@ import {
 import { getFormattedPriceFromTick } from "@/lib/amounts";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useSwapStore } from "@/stores/useSwapStore";
-import { useChainId, useSimulateContract } from "wagmi";
+import {
+  useChainId,
+  useSimulateContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
 import useWriteContract from "@/fixtures/wagmi/useWriteContract";
 import {
   getSqrtRatioAtTick,
@@ -39,6 +43,7 @@ import {
   Token as TokenType,
 } from "@/config/tokens";
 import { useContracts } from "@/config/contracts";
+import { superpositionTestnet } from "@/config/chains";
 
 const ManagePoolFragment = graphql(`
   fragment ManagePoolFragment on SeawaterPool {
@@ -69,6 +74,7 @@ export default function PoolPage() {
   const fUSDC = useTokens(chainId, "fusdc");
   const ammContract = useContracts(chainId, "amm");
   const leoContract = useContracts(chainId, "leo");
+  const ownershipNFTContract = useContracts(chainId, "ownershipNFTs");
   useHotkeys("esc", () => router.back());
 
   // get the id from the query params
@@ -78,7 +84,7 @@ export default function PoolPage() {
 
   const { data: globalData } = useGraphqlGlobal();
   const allPoolsData = useFragment(ManagePoolFragment, globalData?.pools);
-  const { positions: positionsData_ } = usePositions();
+  const { positions: positionsData_, updatePositionLocal } = usePositions();
   const positionsData = useMemo(
     () =>
       positionsData_.filter(
@@ -94,6 +100,12 @@ export default function PoolPage() {
   const { token0, token1, setToken0, setToken1 } = useStakeStore();
 
   const { setToken0: setToken0Swap, setToken1: setToken1Swap } = useSwapStore();
+
+  const expectedChainId = useChainId();
+  const isCorrectChain = useMemo(
+    () => chainId === expectedChainId,
+    [chainId, expectedChainId],
+  );
 
   const handleTokens = useCallback(
     function (token0: TokenType, token1: TokenType) {
@@ -129,7 +141,12 @@ export default function PoolPage() {
     return positionsData?.[0];
   }, [positionIdParam, positionsData]);
 
-  const { positionId, upper: upperTick, lower: lowerTick } = position || {};
+  const {
+    positionId,
+    upper: upperTick,
+    lower: lowerTick,
+    isVested,
+  } = position || {};
 
   const poolBalance = useMemo(
     () =>
@@ -180,7 +197,28 @@ export default function PoolPage() {
     data: collectData,
     error: collectError,
     isPending: isCollectPending,
+    reset: resetCollect,
   } = useWriteContract();
+  const {
+    writeContractAsync: writeContractVestPosition,
+    data: vestPositionData,
+    error: vestPositionError,
+    isPending: isVestPositionPending,
+    reset: resetVestPosition,
+  } = useWriteContract();
+  const {
+    writeContractAsync: writeContractApproveOwnershipNFT,
+    data: approveOwnershipNFTData,
+    error: approveOwnershipNFTError,
+    isPending: isApproveOwnershipNFTPending,
+    reset: resetApproveOwnershipNFT,
+  } = useWriteContract();
+  const vestError = vestPositionError || approveOwnershipNFTError;
+  const vestPending =
+    isVestPositionPending ||
+    isApproveOwnershipNFTPending ||
+    !!vestPositionData ||
+    !!approveOwnershipNFTData;
 
   const { data: unclaimedRewardsData } = useSimulateContract({
     address: ammContract.address,
@@ -248,6 +286,82 @@ export default function PoolPage() {
     ],
   );
 
+  const vestPosition = useCallback(
+    (id: bigint) => {
+      writeContractVestPosition({
+        address: leoContract.address,
+        abi: leoContract.abi,
+        functionName: "vestPosition",
+        args: [token0.address, id],
+      });
+    },
+    [
+      writeContractVestPosition,
+      leoContract.address,
+      leoContract.abi,
+      token0.address,
+    ],
+  );
+
+  const vestPositionResult = useWaitForTransactionReceipt({
+    hash: vestPositionData,
+  });
+
+  const approveOwnershipNFT = useCallback(
+    (id: bigint) =>
+      writeContractApproveOwnershipNFT({
+        address: ownershipNFTContract.address,
+        abi: ownershipNFTContract.abi,
+        functionName: "approve",
+        args: [leoContract.address, id],
+      }),
+    [
+      writeContractApproveOwnershipNFT,
+      ownershipNFTContract.address,
+      ownershipNFTContract.abi,
+      leoContract.address,
+    ],
+  );
+  // wait for the approveOwnershipNFT transaction to complete
+  const approveOwnershipNFTResult = useWaitForTransactionReceipt({
+    hash: approveOwnershipNFTData,
+  });
+  useEffect(() => {
+    // if we're vesting in Leo, have approved the ownership transfer, but haven't vested the position, do so now
+    if (
+      approveOwnershipNFTResult.isSuccess &&
+      !isVested &&
+      vestPositionResult.fetchStatus === "idle" &&
+      !vestPositionResult.data &&
+      positionId
+    )
+      vestPosition(BigInt(positionId));
+  }, [
+    vestPosition,
+    isVested,
+    positionId,
+    approveOwnershipNFTResult.isSuccess,
+    vestPositionResult.data,
+    vestPositionResult.fetchStatus,
+  ]);
+
+  // update local position when vesting is completed
+  useEffect(() => {
+    if (position && vestPositionResult.isSuccess) {
+      updatePositionLocal({
+        ...position,
+        isVested: true,
+      });
+    }
+  }, [updatePositionLocal, vestPositionResult.isSuccess, position]);
+
+  // reset callbacks when switching positions
+  useEffect(() => {
+    resetApproveOwnershipNFT();
+    resetVestPosition();
+    resetCollect();
+  }, [position, resetVestPosition, resetApproveOwnershipNFT, resetCollect]);
+
   const positionBalance = useMemo(() => {
     if (!positionLiquidity || !position) return 0;
     const [amount0, amount1] = getTokenAmountsNumeric(
@@ -283,6 +397,11 @@ export default function PoolPage() {
   const showClaimYield = useFeatureFlag("ui show claim yield");
   const showPoolRewardRange = useFeatureFlag("ui show pool reward range");
   const showEarnedFeesApr = useFeatureFlag("ui show earned fees apr");
+
+  const showLeo =
+    useFeatureFlag("ui show leo") &&
+    isCorrectChain &&
+    expectedChainId === superpositionTestnet.id;
 
   /**
    * Redirect to the stake page if the id is not present
@@ -574,11 +693,37 @@ export default function PoolPage() {
                     )}
 
                     <div className="flex flex-1" />
+                    {showLeo && (
+                      <div>
+                        <Button
+                          variant={vestError ? "destructive" : "secondary"}
+                          className="h-[19px] w-[75px] select-none px-[27px] py-[5px] md:h-[22px] md:w-[92px]"
+                          size="sm"
+                          disabled={isVested || vestPending}
+                          onClick={() =>
+                            positionId &&
+                            approveOwnershipNFT(BigInt(positionId))
+                          }
+                        >
+                          <div className="text-3xs">
+                            {isVested
+                              ? "Vested"
+                              : vestError
+                                ? "Failed"
+                                : vestPositionData
+                                  ? "Vested!"
+                                  : vestPending
+                                    ? "Vesting..."
+                                    : "Vest Position"}
+                          </div>
+                        </Button>
+                      </div>
+                    )}
                     {showClaimYield && (
                       <div>
                         <Button
                           variant={collectError ? "destructive" : "secondary"}
-                          className="h-[19px] w-[75px] px-[27px] py-[5px] md:h-[22px] md:w-[92px]"
+                          className="h-[19px] w-[75px] select-none px-[27px] py-[5px] md:h-[22px] md:w-[92px]"
                           size="sm"
                           disabled={!!collectData || isCollectPending}
                           onClick={() =>
