@@ -222,8 +222,8 @@ func (r *queryResolver) Pools(ctx context.Context) (pools []seawater.Pool, err e
 	// this endpoint if the feature's enabled.
 	if r.F.Is(features.FeatureWhitelistedOnlyPools) {
 		for _, p := range pools_ {
-			_, ok := r.PoolsConfig[p.Token]
-			if !ok {
+			c, _ := r.PoolsConfig[p.Token]
+			if !c.Displayed {
 				continue
 			}
 			pools = append(pools, p)
