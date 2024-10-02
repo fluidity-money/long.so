@@ -27,7 +27,7 @@ type (
 		events.Event
 
 		From  types.Address `json:"from_" gorm:"column:from_"`
-		To    types.Address `json:"to_"`
+		To    types.Address `json:"to_" gorm:"column:to_"`
 		PosId int           `json:"pos_id"`
 	}
 
