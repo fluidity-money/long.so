@@ -173,15 +173,20 @@ export default function ConfirmWithdrawLiquidity() {
     }
   };
 
-  // once yield is collected, update position
+  // once yield is collected or position is divested, update position
   useEffect(() => {
-    if (!collectResult.data || !isWithdrawingEntirePosition) return;
-    updatePosition(BigInt(positionId));
+    if (
+      (isWithdrawingEntirePosition && collectResult.data) ||
+      (isDivesting && divestPositionResult.data)
+    )
+      updatePosition(BigInt(positionId));
   }, [
     updatePosition,
     positionId,
     collectResult.data,
     isWithdrawingEntirePosition,
+    isDivesting,
+    divestPositionResult.data,
   ]);
 
   const getAmountsAndSetPosition = useCallback(

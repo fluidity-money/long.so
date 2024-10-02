@@ -33,6 +33,7 @@ import { useContracts } from "@/config/contracts";
 import { TokenIcon } from "./TokenIcon";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usePositions } from "@/hooks/usePostions";
+import { superpositionTestnet } from "@/config/chains";
 
 type ConfirmStakeProps =
   | {
@@ -67,8 +68,13 @@ export const ConfirmStake = ({
   const fUSDC = useTokens(expectedChainId, "fusdc");
   const ammContract = useContracts(expectedChainId, "amm");
   const leoContract = useContracts(expectedChainId, "leo");
+  const ownershipNFTContract = useContracts(expectedChainId, "ownershipNFTs");
   const showBoostIncentives = useFeatureFlag("ui show boost incentives");
   const showStakeApy = useFeatureFlag("ui show stake apy");
+
+  const showLeo =
+    useFeatureFlag("ui show leo") && chainId === superpositionTestnet.id;
+  const isDivesting = showLeo && isVested;
 
   useEffect(() => {
     if (!address || chainId !== expectedChainId) router.back();
@@ -187,7 +193,15 @@ export const ConfirmStake = ({
     writeContractAsync: writeContractDivestPosition,
     data: divestPositionData,
     error: divestPositionError,
+    isPending: isDivestPositionPending,
     reset: resetDivestPosition,
+  } = useWriteContract();
+  const {
+    writeContractAsync: writeContractApproveOwnershipNFT,
+    data: approveOwnershipNFTData,
+    error: approveOwnershipNFTError,
+    isPending: isApproveOwnershipNFTPending,
+    reset: resetApproveOwnershipNFT,
   } = useWriteContract();
 
   const divestPositionResult = useWaitForTransactionReceipt({
@@ -388,6 +402,11 @@ export const ConfirmStake = ({
     hash: updatePositionData,
   });
 
+  // wait for the approveOwnershipNFT transaction to complete
+  const approveOwnershipNFTResult = useWaitForTransactionReceipt({
+    hash: approveOwnershipNFTData,
+  });
+
   const getAmountsAndSetPosition = useCallback(
     function (id: number, tickLower: number, tickUpper: number) {
       const position = {
@@ -398,7 +417,8 @@ export const ConfirmStake = ({
         },
         lower: tickLower,
         upper: tickUpper,
-        isVested,
+        // if isVested already, we have to unvest to update the position
+        isVested: isVesting,
       };
       getUsdTokenAmountsForPosition(
         expectedChainId,
@@ -423,7 +443,25 @@ export const ConfirmStake = ({
         }),
       );
     },
-    [expectedChainId, isVested, token0, tokenPrice, updatePositionLocal],
+    [expectedChainId, isVesting, token0, tokenPrice, updatePositionLocal],
+  );
+
+  const approveOwnershipNFT = useCallback(
+    () =>
+      writeContractApproveOwnershipNFT({
+        address: ownershipNFTContract.address,
+        abi: ownershipNFTContract.abi,
+        functionName: "approve",
+        args: [leoContract.address, BigInt(positionId ?? mintPositionId ?? 0)],
+      }),
+    [
+      writeContractApproveOwnershipNFT,
+      ownershipNFTContract.address,
+      ownershipNFTContract.abi,
+      positionId,
+      mintPositionId,
+      leoContract.address,
+    ],
   );
 
   const vestPositionResultIdle = useCallback(
@@ -461,29 +499,24 @@ export const ConfirmStake = ({
   ]);
 
   useEffect(() => {
-    if (updatePositionResult.isSuccess) {
-      // if we're vesting in Leo, do so now
-      if (isVesting) {
-        switch (true) {
-          // haven't yet called vest position, so call it and wait
-          case vestPositionResult.fetchStatus === "idle" &&
-            !vestPositionResult.data:
-            vestPositionResultIdle();
-            return;
-          // vest position call is pending, so wait
-          case isVestPositionPending:
-            return;
-          // call has completed, so proceed
-          default:
-            break;
-        }
-      }
+    if (updatePositionResult.isSuccess && isVesting) {
+      approveOwnershipNFT();
     }
+  }, [updatePositionResult.isSuccess, isVesting, approveOwnershipNFT]);
+
+  useEffect(() => {
+    // if we're vesting in Leo, have approved the ownership transfer, but haven't vested the position, do so now
+    if (
+      approveOwnershipNFTResult.isSuccess &&
+      isVesting &&
+      vestPositionResult.fetchStatus === "idle" &&
+      !vestPositionResult.data
+    )
+      vestPositionResultIdle();
   }, [
     vestPositionResultIdle,
-    isVestPositionPending,
     isVesting,
-    updatePositionResult.isSuccess,
+    approveOwnershipNFTResult.isSuccess,
     vestPositionResult.data,
     vestPositionResult.fetchStatus,
   ]);
@@ -494,6 +527,7 @@ export const ConfirmStake = ({
     resetApproveToken1();
     resetVestPosition();
     resetDivestPosition();
+    resetApproveOwnershipNFT();
     updatePositionResult.refetch();
     router.push("/stake");
   }, [
@@ -502,6 +536,7 @@ export const ConfirmStake = ({
     resetApproveToken1,
     resetVestPosition,
     resetDivestPosition,
+    resetApproveOwnershipNFT,
     updatePositionResult,
     router,
   ]);
@@ -544,7 +579,23 @@ export const ConfirmStake = ({
     );
   }
 
-  // step 3 pending
+  // step 4 - divest from Leo if position is vested
+  if (
+    isDivesting &&
+    (isDivestPositionPending ||
+      (divestPositionData && divestPositionResult?.isPending))
+  ) {
+    return (
+      <Confirm
+        text={"Divest Position"}
+        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+        transactionHash={divestPositionData}
+      />
+    );
+  }
+
+  // step 5 pending
   if (
     isUpdatePositionPending ||
     (updatePositionData && updatePositionResult?.isPending)
@@ -555,6 +606,38 @@ export const ConfirmStake = ({
         fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
         toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
         transactionHash={updatePositionData}
+      />
+    );
+  }
+
+  // step 6 approving NFT ownership transfer for vesting
+  if (
+    isVesting &&
+    (isApproveOwnershipNFTPending ||
+      (approveOwnershipNFTData && approveOwnershipNFTResult?.isPending))
+  ) {
+    return (
+      <Confirm
+        text={"Vest Position"}
+        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+        transactionHash={vestPositionData}
+      />
+    );
+  }
+
+  // step 7 vesting position
+  if (
+    isVesting &&
+    (isVestPositionPending ||
+      (vestPositionData && vestPositionResult?.isPending))
+  ) {
+    return (
+      <Confirm
+        text={"Vest Position"}
+        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+        transactionHash={vestPositionData}
       />
     );
   }
@@ -576,7 +659,8 @@ export const ConfirmStake = ({
     approvalErrorToken1 ||
     updatePositionError ||
     divestPositionError ||
-    vestPositionError
+    vestPositionError ||
+    approveOwnershipNFTError
   ) {
     const error =
       mintError ||
@@ -584,7 +668,8 @@ export const ConfirmStake = ({
       approvalErrorToken1 ||
       updatePositionError ||
       divestPositionError ||
-      vestPositionError;
+      vestPositionError ||
+      approveOwnershipNFTError;
     return <Fail text={(error as any)?.shortMessage} />;
   }
 
@@ -838,7 +923,7 @@ export const ConfirmStake = ({
             onClick={() => {
               mode === "new"
                 ? createPosition()
-                : isVested
+                : isDivesting
                   ? divestPosition(BigInt(positionId))
                   : updatePosition(BigInt(positionId));
             }}
