@@ -45,7 +45,7 @@ import Index from "@/components/Slider";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
-import { useGraphqlGlobal, useGraphqlUser } from "@/hooks/useGraphql";
+import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 import {
   getTokenFromAddress,
@@ -58,6 +58,7 @@ import LiquidityRangeVisualizer from "./LiquidityRangeVisualizer";
 import { useContracts } from "@/config/contracts";
 import { CheckboxContainer } from "./ui/checkbox";
 import { superpositionTestnet } from "@/config/chains";
+import { usePositions } from "@/hooks/usePostions";
 
 type StakeFormProps = { poolId: string } & (
   | {
@@ -86,19 +87,6 @@ const StakeFormFragment = graphql(`
       tickUpper
       price
       liquidity
-    }
-  }
-`);
-
-const PositionsFragment = graphql(`
-  fragment DepositPositionsFragment on Wallet {
-    positions {
-      positions {
-        positionId
-        lower
-        upper
-        isVested
-      }
     }
   }
 `);
@@ -168,7 +156,6 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   // Parse the price lower and upper, and set the ticks properly.
 
   const { data } = useGraphqlGlobal();
-  const { data: userData } = useGraphqlUser();
 
   const poolsData = useFragment(StakeFormFragment, data?.pools);
   const poolData = poolsData?.find(
@@ -185,13 +172,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     () => poolData?.priceOverTime.daily.map((price) => parseFloat(price)),
     [poolData],
   );
-  const positionData_ = useFragment(PositionsFragment, userData?.getWallet);
+  const { positions } = usePositions();
   const positionData = useMemo(
-    () =>
-      positionData_?.positions.positions.find(
-        (p) => p.positionId === positionId,
-      ),
-    [positionData_, positionId],
+    () => positions.find((p) => p.positionId === positionId),
+    [positions, positionId],
   );
   const { isVested } = positionData || { isVested: false };
   const [isVesting, setIsVesting] = useState(isVested);

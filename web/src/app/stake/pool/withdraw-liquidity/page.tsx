@@ -12,8 +12,7 @@ import Slider from "@/components/Slider";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useAccount, useChainId, useSimulateContract } from "wagmi";
-import { graphql, useFragment } from "@/gql";
-import { useGraphqlUser } from "@/hooks/useGraphql";
+import { graphql } from "@/gql";
 import { useEffect, useMemo, useState } from "react";
 import { usdFormat } from "@/lib/usdFormat";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
@@ -24,32 +23,7 @@ import { useContracts } from "@/config/contracts";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { CheckboxContainer } from "@/components/ui/checkbox";
 import { superpositionTestnet } from "@/config/chains";
-
-const PositionsFragment = graphql(`
-  fragment WithdrawPositionsFragment on Wallet {
-    positions {
-      positions {
-        positionId
-        lower
-        upper
-        owner {
-          address
-        }
-        liquidity {
-          fusdc {
-            valueUsd
-            valueScaled
-          }
-          token1 {
-            valueUsd
-            valueScaled
-          }
-        }
-        isVested
-      }
-    }
-  }
-`);
+import { usePositions } from "@/hooks/usePostions";
 
 export default function WithdrawLiquidity() {
   const router = useRouter();
@@ -117,13 +91,9 @@ export default function WithdrawLiquidity() {
     ? sqrtPriceX96ToPrice(poolSqrtPriceX96.result, token0.decimals)
     : 0n;
 
-  const { data } = useGraphqlUser();
-
-  const positionsData = useFragment(PositionsFragment, data?.getWallet);
-  const position = positionsData?.positions.positions.find(
-    (p) =>
-      p.positionId.toString() === positionId &&
-      p.owner.address === address?.toLowerCase(),
+  const { positions } = usePositions();
+  const position = positions.find(
+    (p) => p.positionId.toString() === positionId,
   );
   const {
     upper: upperTick,
