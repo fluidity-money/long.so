@@ -3,14 +3,16 @@ import { allChains } from "./chains";
 import AMMContract from "./abi/ISeawaterAMM";
 import LeoContract from "./abi/ILeo";
 import appConfig from "./app";
+import OwnershipNFTsContract from "./abi/IOwnershipNFTs";
 
-const contractTypes = ["amm", "leo"] as const;
+const contractTypes = ["amm", "leo", "ownershipNFTs"] as const;
 type ContractTypes = (typeof contractTypes)[number];
 type ChainIdTypes = (typeof allChains)[number]["id"];
 
 const contractAbis = {
   amm: AMMContract,
   leo: LeoContract,
+  ownershipNFTs: OwnershipNFTsContract,
 } as const;
 
 const chainContracts: {
@@ -28,14 +30,19 @@ const chainContracts: {
     leo: {
       abi: contractAbis.leo,
     },
+    ownershipNFTs: {
+      abi: contractAbis.ownershipNFTs,
+    },
   },
   98985: {
     amm: { address: "0x3d37c3f4a7c773243f9FC31a891911D39d5A75fE" },
-    leo: { address: appConfig.nullAddress },
+    leo: { address: "0xe2c9281ec0a52d2fafeb26b2c3555e09e48614a1" },
+    ownershipNFTs: { address: "0x7ad12ef3578d5eb845883d156d8dfb2ea39448b5" },
   },
   421614: {
     amm: { address: "0xe89E8Cb7E84Dd1b4460cF2a51B3f0B05Ff952bB6" },
     leo: { address: appConfig.nullAddress },
+    ownershipNFTs: { address: appConfig.nullAddress },
   },
 };
 
@@ -58,6 +65,9 @@ export const contracts = allChains.reduce(
             sacc[sv] = contractKey(sv, v.id);
             break;
           case "leo":
+            sacc[sv] = contractKey(sv, v.id);
+            break;
+          case "ownershipNFTs":
             sacc[sv] = contractKey(sv, v.id);
             break;
           default:
