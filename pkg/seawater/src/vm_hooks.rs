@@ -4,13 +4,11 @@
 //! Functions here are gated on tests, since normal contract execution should have the hosted
 //! stylus environment.
 
-#![coverage(off)]
-
 use std::collections::HashMap;
 
 use crate::{Address, U256};
 
-#[allow(unused_imports)]
+#[allow(unused)]
 use crate::current_test;
 
 /// # Safety
@@ -110,9 +108,6 @@ pub extern "C" fn storage_flush_cache(_clear: bool) {
 /// It should be fine to use without crossing any threads.
 #[no_mangle]
 pub unsafe extern "C" fn storage_load_bytes32(key: *const u8, out: *mut u8) {
-    #[allow(unused_imports)]
-    use crate::current_test;
-
     let key = unsafe { storage::read_word(key) };
 
     let value = storage::STORAGE.with(|storage| {

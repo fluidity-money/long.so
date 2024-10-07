@@ -8,10 +8,10 @@ members = [
 ]
 
 [profile.dev]
-opt-level = 0
+opt-level = "s"
 debug = true
 debug-assertions = true
-panic = "abort"
+panic = "unwind"
 codegen-units = 1
 
 [profile.release]

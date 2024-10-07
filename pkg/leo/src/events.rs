@@ -16,7 +16,7 @@ pub fn emit_campaign_created(
     tick_upper: i32,
     starting: u64,
     ending: u64,
-    per_second: u64
+    per_second: u64,
 ) {
     evm::log(CampaignCreated {
         identifier: identifier.as_slice().try_into().unwrap(),

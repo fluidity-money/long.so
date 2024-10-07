@@ -1,4 +1,4 @@
-use libseawater::{error::Error, eth_serde, test_utils, types::I256Extension, types::*, Pools};
+use libseawater::{error::Error, test_utils, types::*, Pools};
 
 use ruint_macro::uint;
 
@@ -6,47 +6,6 @@ use stylus_sdk::{
     alloy_primitives::{address, bytes},
     msg,
 };
-
-#[test]
-fn test_decode_swap() {
-    // taken from an ethers generated blob
-    let data = bytes!(
-        "baef4bf9"
-        "00000000000000000000000028f99e094fc846d4f5c8ad91e2ffd6ff92b0e7ca"
-        "0000000000000000000000000000000000000000000000000000000000000001"
-        "000000000000000000000000000000000000000000000000000000000000000a"
-        "00000000000000000000000000000000000000057a2b748da963c00000000000"
-        "0000000000000000000000000000000000000000000000000000000000000001"
-        "00000000000000000000000000000000000000000000000000000000655d6b6d"
-        "000000000000000000000000000000000000000000000000000000000000000a"
-        "0000000000000000000000000000000000000000000000000000000000000100"
-        "0000000000000000000000000000000000000000000000000000000000000041"
-        "749af269b6860d64e97485e6be28448028f0e5e306b723fec3967bd489d667c8"
-        "3c679180bc36f3d6ea751198b01e4b082e83ed853265a504d1f56f6712ee7380"
-        "1b00000000000000000000000000000000000000000000000000000000000000"
-    )
-    .0;
-
-    let data = &data;
-
-    let (_, data) = eth_serde::parse_selector(data);
-    let (pool, data) = eth_serde::parse_addr(data);
-    let (zero_for_one, data) = eth_serde::parse_bool(data);
-    let (amount, data) = eth_serde::parse_i256(data);
-    let (_price_limit_x96, data) = eth_serde::parse_u256(data);
-    let (nonce, data) = eth_serde::parse_u256(data);
-    let (_deadline, data) = eth_serde::parse_u256(data);
-    let (max_amount, data) = eth_serde::parse_u256(data);
-    let (_, data) = eth_serde::take_word(data); // placeholder
-    let (_sig, data) = eth_serde::parse_bytes(data);
-
-    assert_eq!(pool, address!("28f99e094fc846d4f5c8ad91e2ffd6ff92b0e7ca"));
-    assert_eq!(zero_for_one, true);
-    assert_eq!(amount.abs_pos().unwrap(), uint!(10_U256));
-    assert_eq!(nonce, uint!(1_U256));
-    assert_eq!(max_amount, uint!(10_U256));
-    assert_eq!(data.len(), 0);
-}
 
 #[test]
 fn test_similar_to_ethers() -> Result<(), Vec<u8>> {
@@ -197,7 +156,7 @@ fn decr_existing_position_some() {
 
         contract.mint_position_B_C5_B086_D(token, -887272, 887272)?;
 
-        let (amount_0_taken, amount_1_taken) = contract.incr_pos_D_3521721(
+        let (amount_0_taken, amount_1_taken) = contract.swag_3_a_4394_a_6(
             token,
             id,
             U256::zero(),

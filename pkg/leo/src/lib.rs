@@ -19,17 +19,17 @@ pub mod nft_manager;
 
 mod calldata_seawater;
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(not(feature = "testing"))]
 mod wasm_seawater;
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(feature = "testing")]
 mod host_seawater;
 
 pub mod seawater;
 
 mod immutables;
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(feature = "testing")]
 pub mod host;
 
 use error::Error;

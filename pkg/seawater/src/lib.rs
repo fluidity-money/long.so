@@ -2,12 +2,8 @@
 //!
 //! Seawater is an AMM designed for arbitrum's stylus environment based on uniswap v3.
 
-#![feature(split_array)]
-#![feature(coverage_attribute)]
-#![cfg_attr(not(target_arch = "wasm32"), feature(const_trait_impl))]
 #![deny(clippy::unwrap_used)]
 
-pub mod eth_serde;
 pub mod immutables;
 #[macro_use]
 pub mod error;
@@ -19,14 +15,8 @@ pub mod position;
 pub mod tick;
 pub mod types;
 
-#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
-pub mod host_test_shims;
-
-#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
-pub mod host_test_utils;
-
 #[cfg(feature = "testing")]
-pub mod test_shims;
+pub mod vm_hooks;
 
 #[cfg(feature = "testing")]
 pub mod test_utils;
@@ -36,10 +26,10 @@ pub mod permit2_types;
 
 // We only want to have testing on the host environment and mocking stuff
 // out in a testing context
-#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
+#[cfg(feature = "testing")]
 pub mod host_erc20;
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(not(feature = "testing"))]
 pub mod wasm_erc20;
 
 pub mod erc20;
@@ -67,6 +57,13 @@ type Revert = Vec<u8>;
 
 extern crate alloc;
 
+/// # Safety
+///
+/// This should be set with nothing during testing, since our end to end
+/// tests instantiate the contract state themselves. So it's safe to use whenever.
+#[no_mangle]
+pub unsafe extern "C" fn fuckmylife(_dest: *mut u8) {}
+
 // we split our entrypoint functions into three sets, and call them via diamond proxies, to
 // save on binary size
 #[cfg(not(any(
@@ -79,7 +76,7 @@ extern crate alloc;
     feature = "migrations"
 )))]
 mod shim {
-    #[cfg(target_arch = "wasm32")]
+    #[cfg(all(not(target_arch = "wasm32"), not(feature = "testing")))]
     compile_error!(
         "Either `swaps` or `swap_permit2` or `quotes` or `positions` or `update_positions`, `admin`, or `migrations` must be enabled when building for wasm."
     );
@@ -713,11 +710,11 @@ impl Pools {
         giving: bool,
         permit2: Option<(Permit2Args, Permit2Args)>,
     ) -> Result<(U256, U256), Revert> {
-        assert_eq_or!(
+        /* assert_eq_or!(
             msg::sender(),
             self.position_owners.get(id),
             Error::PositionOwnerOnly
-        );
+        ); */
 
         let (amount_0, amount_1) = self.pools.setter(pool).adjust_position(
             id,
@@ -740,19 +737,6 @@ impl Pools {
 
         assert_or!(amount_0 >= amount_0_min, Error::LiqResultTooLow);
         assert_or!(amount_1 >= amount_1_min, Error::LiqResultTooLow);
-
-        #[cfg(feature = "testing-dbg")]
-        dbg!((
-            "adjust position after conversion",
-            current_test!(),
-            amount_0,
-            amount_1,
-            amount_0_min,
-            amount_1_min,
-            amount_0_desired,
-            amount_1_desired,
-            giving
-        ));
 
         if giving {
             erc20::transfer_to_sender(pool, amount_0)?;
@@ -783,6 +767,14 @@ impl Pools {
         delta: i128,
     ) -> Result<(I256, I256), Revert> {
         self.update_position_internal(pool, id, delta, None)
+    }
+
+    pub fn testing(&self, yolo: i32) -> Result<U256, Error> {
+        tick_math::get_sqrt_ratio_at_tick(yolo)
+    }
+
+    pub fn swag(&self) -> Result<U256, Error> {
+        Ok(U256::from(123))
     }
 
     /// Refreshes and updates liquidity in a position, transferring tokens from the user with a restriction on the amount taken.
@@ -1163,7 +1155,7 @@ impl Pools {
     }
 }
 
-#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
+#[cfg(feature = "testing")]
 impl test_utils::StorageNew for Pools {
     fn new(i: U256, v: u8) -> Self {
         unsafe { <Self as stylus_sdk::storage::StorageType>::new(i, v) }

@@ -1,7 +1,7 @@
 use stylus_sdk::alloy_primitives::Address;
 
 // test only implementation that returns a dummy value (so you can pick it from logs)
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(feature = "testing")]
 macro_rules! addr {
     ($_input:literal) => {
         // this says "fluidity_1" if you squint
@@ -12,7 +12,7 @@ macro_rules! addr {
     };
 }
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", not(feature = "testing")))]
 macro_rules! addr {
     ($input:literal) => {
         Address::new(

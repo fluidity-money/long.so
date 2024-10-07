@@ -198,10 +198,10 @@ mod testing {
             // Someone claims from it...
 
             /*let earned_rewards = leo
-                .collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID])
-                .unwrap()
-                .1[0]
-                .1; */
+            .collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID])
+            .unwrap()
+            .1[0]
+            .1; */
 
             // Then the campaign author updates it in the future...
 
@@ -248,7 +248,7 @@ mod testing {
     }
 }
 
-#[cfg(feature = "testing")]
+#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 mod proptesting {
     use libleo;
     use proptest::prelude::*;

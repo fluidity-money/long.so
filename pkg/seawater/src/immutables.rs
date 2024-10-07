@@ -3,7 +3,7 @@
 
 use crate::types::Address;
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(not(feature = "testing"))]
 macro_rules! addr {
     ($input:literal) => {
         Address::new(
@@ -16,7 +16,7 @@ macro_rules! addr {
 }
 
 // test only implementation that returns a dummy value (so you can pick it from logs)
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(feature = "testing")]
 macro_rules! addr {
     ($_input:literal) => {
         // this says "fluidity_1" if you squint

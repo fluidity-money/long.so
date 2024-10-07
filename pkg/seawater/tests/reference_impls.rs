@@ -1,4 +1,5 @@
 // rng based tests of rewritten functions against their reference implementations
+#![cfg(not(target_arch = "wasm32"))]
 
 use rand::prelude::*;
 mod reference;
@@ -65,6 +66,7 @@ fn test_get_tick_at_sqrt_ratio() {
     assert!(errs < 10);
 }
 
+#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 mod test_mul_div_more {
     use crate::reference;
 

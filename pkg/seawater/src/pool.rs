@@ -10,9 +10,6 @@ use stylus_sdk::{prelude::*, storage::*};
 
 use num_traits::ToPrimitive;
 
-#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
-use crate::test_utils;
-
 type Revert = Vec<u8>;
 
 /// The storage type for an AMM pool.
@@ -210,21 +207,9 @@ impl StoragePool {
 
         let sqrt_ratio_x_96 = self.sqrt_price.get();
 
-        let sqrt_ratio_a_x_96 = tick_math::get_sqrt_ratio_at_tick(
-            position
-                .lower
-                .get()
-                .try_into()
-                .map_err(|_| Error::PositionConvFail)?,
-        )?;
+        let sqrt_ratio_a_x_96 = tick_math::get_sqrt_ratio_at_tick(position.lower.get().sys())?;
 
-        let sqrt_ratio_b_x_96 = tick_math::get_sqrt_ratio_at_tick(
-            position
-                .upper
-                .get()
-                .try_into()
-                .map_err(|_| Error::PositionConvFail)?,
-        )?;
+        let sqrt_ratio_b_x_96 = tick_math::get_sqrt_ratio_at_tick(position.upper.get().sys())?;
 
         let mut delta = sqrt_price_math::get_liquidity_for_amounts(
             sqrt_ratio_x_96,   // cur_tick
@@ -245,6 +230,10 @@ impl StoragePool {
         // running
 
         self.update_position(id, delta)
+
+        //return Err(sqrt_ratio_b_x_96.to_be_bytes::<32>().to_vec().into_iter().chain(sqrt_ratio_a_x_96.to_be_bytes::<32>().to_vec().into_iter()).chain(delta.to_be_bytes().into_iter()).collect::<Vec<u8>>());
+
+        //Ok((I256::ZERO, I256::ZERO))
     }
 
     /// Performs a swap on this pool.
@@ -576,8 +565,8 @@ impl StoragePool {
     }
 }
 
-#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
-impl test_utils::StorageNew for StoragePool {
+#[cfg(feature = "testing")]
+impl crate::test_utils::StorageNew for StoragePool {
     fn new(i: U256, v: u8) -> Self {
         unsafe { <Self as stylus_sdk::storage::StorageType>::new(i, v) }
     }

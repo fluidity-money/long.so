@@ -1,5 +1,3 @@
-use proptest::prelude::*;
-
 use libseawater::maths::liquidity_math;
 
 #[test]

@@ -1,5 +1,5 @@
-#[cfg(target_arch = "wasm32")]
+#[cfg(not(feature = "testing"))]
 pub use crate::wasm_seawater::*;
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(feature = "testing")]
 pub use crate::host_seawater::*;

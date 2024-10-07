@@ -21,6 +21,7 @@ dependencies = [
  "cfg-if",
  "const-hex",
  "derive_more",
+ "getrandom",
  "hex-literal",
  "itoa",
  "k256",
@@ -1142,9 +1143,11 @@ dependencies = [
 name = "seawater"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
  "alloy-sol-types",
  "arrayvec",
  "const-hex",
+ "getrandom",
  "keccak-const",
  "maplit",
  "num-traits",

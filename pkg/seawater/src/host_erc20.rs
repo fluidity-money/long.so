@@ -2,8 +2,6 @@
 //! supports optionally controlling the amount of tokens that are sent
 //! with configuration in the `with_storage` function with host shims.
 
-#![coverage(off)]
-
 pub use crate::permit2_types;
 
 use crate::error::Error;
@@ -13,7 +11,7 @@ use stylus_sdk::alloy_primitives::{Address, U256};
 use permit2_types::*;
 
 #[allow(unused_imports)]
-use crate::{current_test, host_test_shims};
+use crate::{current_test, vm_hooks};
 
 /// Decimals function used in event mocking for pool creation.
 pub fn decimals(_token: Address) -> Result<u8, Error> {
@@ -25,7 +23,7 @@ pub fn decimals(_token: Address) -> Result<u8, Error> {
 pub fn take_transfer_from(_token: Address, _amount: U256) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg")]
     dbg!(("take_transfer_from", current_test!(), _token, _amount));
-    host_test_shims::take_caller_bal(_token, _amount).map_err(
+    vm_hooks::take_caller_bal(_token, _amount).map_err(
         |_| Error::Erc20RevertNoData, // follow the trace!
     )
 }
@@ -34,7 +32,7 @@ pub fn take_transfer_from(_token: Address, _amount: U256) -> Result<(), Error> {
 pub fn transfer_to_sender(_token: Address, _amount: U256) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg")]
     dbg!(("give", current_test!(), _token, _amount));
-    host_test_shims::take_amm_bal(_token, _amount).map_err(
+    vm_hooks::take_amm_bal(_token, _amount).map_err(
         |_| Error::Erc20RevertNoData, // follow the trace!
     )
 }
@@ -55,7 +53,7 @@ pub fn take_from_to(_token: Address, _recipient: Address, _amount: U256) -> Resu
 pub fn take_permit2(_token: Address, _amount: U256, _details: Permit2Args) -> Result<(), Error> {
     #[cfg(feature = "testing-dbg")]
     dbg!(("take_permit2", current_test!(), _token, _amount, _details));
-    host_test_shims::take_caller_bal(_token, _amount).map_err(
+    vm_hooks::take_caller_bal(_token, _amount).map_err(
         |_| Error::Erc20RevertNoData, // follow the trace!
     )
 }
@@ -75,7 +73,7 @@ pub fn take(
         _amount.to_string(),
         _permit2_details
     ));
-    host_test_shims::take_caller_bal(_token, _amount).map_err(
+    vm_hooks::take_caller_bal(_token, _amount).map_err(
         |_| Error::Erc20RevertNoData, // follow the trace!
     )
 }

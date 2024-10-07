@@ -52,8 +52,7 @@ pub fn next_initialized_tick_within_one_word(
         let next = if initialized {
             (compressed
                 + 1
-                + (bit_math::least_significant_bit(masked)?
-                    .wrapping_sub(bit_pos)) as i32)
+                + (bit_math::least_significant_bit(masked)?.wrapping_sub(bit_pos)) as i32)
                 * tick_spacing
         } else {
             (compressed + 1 + ((0xFF - bit_pos) as i32)) * tick_spacing

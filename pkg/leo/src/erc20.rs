@@ -4,9 +4,7 @@ use stylus_sdk::{call::RawCall, contract, msg};
 
 use crate::calldata::*;
 
-use crate::{
-    calldata::{write_address, write_selector, write_u256},
-};
+use crate::calldata::{write_address, write_selector, write_u256};
 
 //transfer(address,uint256)
 const TRANSFER_SELECTOR: [u8; 4] = [0xa9, 0x05, 0x9c, 0xbb];
@@ -49,7 +47,6 @@ fn pack_transfer(recipient: Address, amount: U256) -> [u8; 4 + 32 * 2] {
     write_u256(&mut cd, 1, amount);
     cd
 }
-
 
 #[test]
 fn test_pack_transfer() {

@@ -269,7 +269,7 @@ pub enum Error {
 
 impl From<Error> for Vec<u8> {
     // tests return the message
-    #[cfg(not(target_arch = "wasm32"))]
+    #[cfg(feature = "testing")]
     fn from(val: Error) -> Self {
         val.to_string().into()
     }
@@ -277,7 +277,7 @@ impl From<Error> for Vec<u8> {
     // runtime returns the message code to save binary size
     // TODO - once errors are mostly finalised we should find a way to return actual solidity
     // errors
-    #[cfg(target_arch = "wasm32")]
+    #[cfg(not(feature = "testing"))]
     fn from(val: Error) -> Self {
         // cast the enum to its descriminant
         // https://doc.rust-lang.org/std/mem/fn.discriminant.html
