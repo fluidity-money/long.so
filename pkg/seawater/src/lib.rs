@@ -772,7 +772,7 @@ impl Pools {
     /// Refreshes and updates liquidity in a position, transferring tokens from the user with a restriction on the amount taken.
     /// See [Self::adjust_position_internal].
     #[allow(non_snake_case)]
-    pub fn swag_3_a_4394_a_6(
+    pub fn incr_pos_D_3521721(
         &mut self,
         pool: Address,
         id: U256,

@@ -156,7 +156,7 @@ proptest! {
                 };
                 let amount0 = U256::from(amount0);
                 let amount1 = U256::from(amount1);
-                let incr_res = contract.swag_3_a_4394_a_6(
+                let incr_res = contract.incr_pos_D_3521721(
                     pool,
                     id,
                     U256::ZERO,

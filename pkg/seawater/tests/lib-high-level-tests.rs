@@ -1,11 +1,6 @@
 use libseawater::{error::Error, test_utils, types::*, Pools};
 
-use ruint_macro::uint;
-
-use stylus_sdk::{
-    alloy_primitives::{address, bytes},
-    msg,
-};
+use stylus_sdk::{alloy_primitives::address, msg};
 
 #[test]
 fn test_similar_to_ethers() -> Result<(), Vec<u8>> {
@@ -156,7 +151,7 @@ fn decr_existing_position_some() {
 
         contract.mint_position_B_C5_B086_D(token, -887272, 887272)?;
 
-        let (amount_0_taken, amount_1_taken) = contract.swag_3_a_4394_a_6(
+        let (amount_0_taken, amount_1_taken) = contract.incr_pos_D_3521721(
             token,
             id,
             U256::zero(),
