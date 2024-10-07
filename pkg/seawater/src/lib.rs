@@ -710,11 +710,11 @@ impl Pools {
         giving: bool,
         permit2: Option<(Permit2Args, Permit2Args)>,
     ) -> Result<(U256, U256), Revert> {
-        /* assert_eq_or!(
+        assert_eq_or!(
             msg::sender(),
             self.position_owners.get(id),
             Error::PositionOwnerOnly
-        ); */
+        );
 
         let (amount_0, amount_1) = self.pools.setter(pool).adjust_position(
             id,
