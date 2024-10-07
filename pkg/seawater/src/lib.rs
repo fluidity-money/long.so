@@ -769,14 +769,6 @@ impl Pools {
         self.update_position_internal(pool, id, delta, None)
     }
 
-    pub fn testing(&self, yolo: i32) -> Result<U256, Error> {
-        tick_math::get_sqrt_ratio_at_tick(yolo)
-    }
-
-    pub fn swag(&self) -> Result<U256, Error> {
-        Ok(U256::from(123))
-    }
-
     /// Refreshes and updates liquidity in a position, transferring tokens from the user with a restriction on the amount taken.
     /// See [Self::adjust_position_internal].
     #[allow(non_snake_case)]
