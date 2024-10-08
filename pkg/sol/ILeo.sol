@@ -105,6 +105,11 @@ interface ILeo is ILeoEvents {
         uint256 rewards;
     }
 
+    struct CollectRewards {
+        PoolRewards[] poolRewards;
+        CampaignRewards[] campaignRewards;
+    }
+
     /// @notice collect rewards for a position vested in a pool with the campaigns given
     /// @param positionDetails to check
     /// @param campaignIds to check
@@ -112,8 +117,7 @@ interface ILeo is ILeoEvents {
         PositionDetails[] memory positionDetails,
         bytes8[] memory campaignIds
     ) external returns (
-        PoolRewards[] memory poolRewards,
-        CampaignRewards[] memory campaignRewards
+        CollectRewards memory collectRewards
     );
 
     /// @notice divest a position, returning the position ID to the user
