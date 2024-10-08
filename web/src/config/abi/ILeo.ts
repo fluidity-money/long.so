@@ -129,12 +129,12 @@ export const ILeo = [
     ],
     outputs: [
       {
-        name: "bababa",
+        name: "collectRewards",
         type: "tuple",
-        internalType: "struct ILeo.blah",
+        internalType: "struct ILeo.CollectRewards",
         components: [
           {
-            name: "p",
+            name: "poolRewards",
             type: "tuple[]",
             internalType: "struct ILeo.PoolRewards[]",
             components: [
@@ -156,7 +156,7 @@ export const ILeo = [
             ],
           },
           {
-            name: "c",
+            name: "campaignRewards",
             type: "tuple[]",
             internalType: "struct ILeo.CampaignRewards[]",
             components: [
