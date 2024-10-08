@@ -8,11 +8,13 @@ import "./ISeawaterExecutors.sol";
 interface ISeawaterAMM is
     ISeawaterEvents,
     ISeawaterExecutorSwap,
-    ISeawaterExecutorSwapPermit2,
+    ISeawaterExecutorSwapPermit2A,
     ISeawaterExecutorQuote,
     ISeawaterExecutorPosition,
     ISeawaterExecutorUpdatePosition,
-    ISeawaterExecutorAdminExposed
+    ISeawaterExecutorAdminExposed,
+    ISeawaterExecutorAdjustPosition,
+    ISeawaterExecutorSwapPermit2B
     {
     /// @notice swaps _token for USDC
     /// @param _token the token to swap

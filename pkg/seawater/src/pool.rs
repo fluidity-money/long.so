@@ -209,6 +209,8 @@ impl StoragePool {
         let sqrt_ratio_a_x_96 = tick_math::get_sqrt_ratio_at_tick(position.lower.get().sys())?;
         let sqrt_ratio_b_x_96 = tick_math::get_sqrt_ratio_at_tick(position.upper.get().sys())?;
 
+        //return Err(sqrt_ratio_b_x_96.to_le_bytes::<32>().to_vec());
+
         let mut delta = sqrt_price_math::get_liquidity_for_amounts(
             sqrt_ratio_x_96,   // cur_tick
             sqrt_ratio_a_x_96, // lower_tick

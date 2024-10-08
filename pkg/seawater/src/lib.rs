@@ -68,17 +68,19 @@ pub unsafe extern "C" fn fuckmylife(_dest: *mut u8) {}
 // save on binary size
 #[cfg(not(any(
     feature = "swaps",
-    feature = "swap_permit2",
+    feature = "swap_permit2_a",
     feature = "quotes",
     feature = "positions",
     feature = "update_positions",
     feature = "admin",
-    feature = "migrations"
+    feature = "migrations",
+    feature = "adjust_positions",
+    feature = "swap_permit2_b"
 )))]
 mod shim {
     #[cfg(all(not(target_arch = "wasm32"), not(feature = "testing")))]
     compile_error!(
-        "Either `swaps` or `swap_permit2` or `quotes` or `positions` or `update_positions`, `admin`, or `migrations` must be enabled when building for wasm."
+        "Either `swaps` or `swap_permit2_a` or `quotes` or `positions` or `update_positions`, `admin`, `migrations`, `adjust_positions` or `swap_permit2_b` must be enabled when building for wasm."
     );
     #[stylus_sdk::prelude::public]
     impl crate::Pools {}
@@ -302,6 +304,9 @@ impl Pools {
 }
 
 /// Swap functions. Only enabled when the `swaps` feature is set.
+/// Functions here are dispatched into by when the proxy
+/// sees the EXECUTOR_SWAP_DISPATCH magic byte in
+/// its fallback function.
 #[cfg_attr(feature = "swaps", public)]
 impl Pools {
     #[allow(non_snake_case)]
@@ -329,6 +334,9 @@ impl Pools {
 }
 
 /// Quote functions. Only enabled when the `quotes` feature is set.
+/// Functions here are dispatched into by when the proxy
+/// sees the EXECUTOR_QUOTES_DISPATCH magic byte in
+/// its fallback function.
 #[cfg_attr(feature = "quotes", public)]
 impl Pools {
     /// Quote a [Self::swap]. Will revert with the result of the swap
@@ -393,10 +401,12 @@ impl Pools {
     }
 }
 
-/// Swap functions using Permit2. Only enabled when the `swap_permit2` feature is set.
-#[cfg_attr(feature = "swap_permit2", public)]
+/// Some swap functions using Permit2. Only enabled when the `swap_permit2_a` feature is
+/// set. Functions here are dispatched into by when the proxy
+/// sees the EXECUTOR_SWAP_PERMIT2_A_DISPATCH magic byte in
+/// its fallback function.
+#[cfg_attr(feature = "swap_permit2_a", public)]
 impl Pools {
-    #[cfg(feature = "swap_permit2")]
     #[allow(non_snake_case)]
     pub fn swap_permit_2_E_E84_A_D91(
         &mut self,
@@ -424,31 +434,6 @@ impl Pools {
             price_limit_x96,
             Some(permit2_args),
         )
-    }
-
-    /// Performs a two stage swap, using permit2 to transfer tokens. See [Self::swap_2_internal].
-    #[cfg(feature = "swap_permit2")]
-    #[allow(non_snake_case)]
-    pub fn swap_2_exact_in_permit_2_36_B2_F_D_D8(
-        &mut self,
-        from: Address,
-        to: Address,
-        amount: U256,
-        min_out: U256,
-        nonce: U256,
-        deadline: U256,
-        sig: Vec<u8>,
-    ) -> Result<(U256, U256), Revert> {
-        let permit2_args = Permit2Args {
-            max_amount: amount,
-            nonce,
-            deadline,
-            sig: &sig,
-        };
-
-        assert_or!(from != to, Error::SamePool);
-
-        Pools::swap_2_internal_erc20(self, from, to, amount, min_out, Some(permit2_args))
     }
 }
 
@@ -480,6 +465,9 @@ impl Pools {
 }
 
 /// Position management functions. Only enabled when the `positions` feature is set.
+/// Functions here are dispatched into by when the proxy
+/// sees the EXECUTOR_POSITION_DISPATCH magic byte in
+/// its fallback function.
 #[cfg_attr(feature = "positions", public)]
 impl Pools {
     /// Creates a new, empty position, owned by a user.
@@ -768,57 +756,13 @@ impl Pools {
     ) -> Result<(I256, I256), Revert> {
         self.update_position_internal(pool, id, delta, None)
     }
-
-    /// Refreshes and updates liquidity in a position, transferring tokens from the user with a restriction on the amount taken.
-    /// See [Self::adjust_position_internal].
-    #[allow(non_snake_case)]
-    pub fn incr_pos_D_3521721(
-        &mut self,
-        pool: Address,
-        id: U256,
-        amount_0_min: U256,
-        amount_1_min: U256,
-        amount_0_desired: U256,
-        amount_1_desired: U256,
-    ) -> Result<(U256, U256), Revert> {
-        self.adjust_position_internal(
-            pool,
-            id,
-            amount_0_min,
-            amount_1_min,
-            amount_0_desired,
-            amount_1_desired,
-            false,
-            None,
-        )
-    }
-
-    /// Refreshes and updates liquidity in a position, transferring tokens to the user with restrictions.
-    /// See [Self::adjust_position_internal].
-    #[allow(non_snake_case)]
-    pub fn decr_position_09293696(
-        &mut self,
-        pool: Address,
-        id: U256,
-        amount_0_min: U256,
-        amount_1_min: U256,
-        amount_0_max: U256,
-        amount_1_max: U256,
-    ) -> Result<(U256, U256), Revert> {
-        self.adjust_position_internal(
-            pool,
-            id,
-            amount_0_min,
-            amount_1_min,
-            amount_0_max,
-            amount_1_max,
-            true,
-            None,
-        )
-    }
 }
 
 /// Admin functions. Only enabled when the `admin` feature is set.
+/// Functions for adjusting positions using in-contract calculation of
+/// certain values. Functions here are dispatched into by when the proxy
+/// sees the EXECUTOR_ADMIN_DISPATCH magic byte in
+/// its fallback function.
 #[cfg_attr(feature = "admin", public)]
 impl Pools {
     /// The initialiser function for the seawater contract. Should be called in the proxy's
@@ -1144,6 +1088,68 @@ impl Pools {
         }
 
         Ok(())
+    }
+}
+
+/// Functions for adjusting positions using in-contract calculation of certain values.
+/// Functions here are dispatched into by when the proxy
+/// sees the EXECUTOR_ADJUST_POSITION_DISPATCH magic byte in
+/// its fallback function.
+#[cfg_attr(feature = "adjust_positions", public)]
+impl Pools {
+    /// Refreshes and updates liquidity in a position, transferring tokens from the user with a restriction on the amount taken.
+    /// See [Self::adjust_position_internal].
+    #[allow(non_snake_case)]
+    pub fn incr_position_E_2437399(
+        &mut self,
+        pool: Address,
+        id: U256,
+        amount_0_min: U256,
+        amount_1_min: U256,
+        amount_0_desired: U256,
+        amount_1_desired: U256,
+    ) -> Result<(U256, U256), Revert> {
+        self.adjust_position_internal(
+            pool,
+            id,
+            amount_0_min,
+            amount_1_min,
+            amount_0_desired,
+            amount_1_desired,
+            false,
+            None,
+        )
+    }
+}
+
+/// Some swap functions using Permit2. Only enabled when the `swap_permit2_b` feature is
+/// set. Functions here are dispatched into by when the proxy
+/// sees the EXECUTOR_SWAP_PERMIT2_B_DISPATCH magic byte in
+/// its fallback function.
+#[cfg_attr(feature = "swap_permit2_b", public)]
+impl Pools {
+    /// Performs a two stage swap, using permit2 to transfer tokens. See [Self::swap_2_internal].
+    #[allow(non_snake_case)]
+    pub fn swap2_exact_in_permit_254_A_7_D_B_B_1(
+        &mut self,
+        from: Address,
+        to: Address,
+        amount: U256,
+        min_out: U256,
+        nonce: U256,
+        deadline: U256,
+        sig: Vec<u8>,
+    ) -> Result<(U256, U256), Revert> {
+        let permit2_args = Permit2Args {
+            max_amount: amount,
+            nonce,
+            deadline,
+            sig: &sig,
+        };
+
+        assert_or!(from != to, Error::SamePool);
+
+        Pools::swap_2_internal_erc20(self, from, to, amount, min_out, Some(permit2_args))
     }
 }
 

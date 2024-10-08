@@ -29,7 +29,7 @@ interface ISeawaterExecutorSwap {
     ) external returns (uint256, uint256);
 }
 
-interface ISeawaterExecutorSwapPermit2 {
+interface ISeawaterExecutorSwapPermit2A {
     /// @notice swaps within a pool using permit2 for token transfers
     /// @param pool the pool to swap on
     /// @param zeroForOne true if swapping token->fluid token
@@ -50,7 +50,9 @@ interface ISeawaterExecutorSwapPermit2 {
         uint256 maxAmount,
         bytes memory sig
     ) external returns (int256, int256);
+}
 
+interface ISeawaterExecutorSwapPermit2B {
     /// @notice performs a two stage swap across two pools using permit2 for token transfers
     /// @param from the input token
     /// @param to the output token
@@ -61,7 +63,7 @@ interface ISeawaterExecutorSwapPermit2 {
     /// @param sig the permit2 signature
     /// @notice permit2's max amount must be set to `amount`
     /// @return (amount in, amount out)
-    function swap2ExactInPermit236B2FDD8(
+    function swap2ExactInPermit254A7DBB1(
         address from,
         address to,
         uint256 amount,
@@ -180,40 +182,8 @@ interface ISeawaterExecutorUpdatePosition {
         uint256 id,
         int128 delta
     ) external returns (int256, int256);
-
-    /// @notice refreshes a position's fees, and adds liquidity, preventing less than the minimum from being taken.
-    /// @param pool of the token to use
-    /// @param id the id of the position
-    /// @param amount0Min minimum of amount0 to take from the user
-    /// @param amount1Min minimum of amount1 to take from the user
-    /// @param amount0Desired to take from the user. May exceed.
-    /// @param amount1Desired to take from the user. May exceed.
-    /// @return the deltas for token0, and token1
-    function incrPosD3521721(
-        address pool,
-        uint256 id,
-        uint256 amount0Min,
-        uint256 amount1Min,
-        uint256 amount0Desired,
-        uint256 amount1Desired
-    ) external returns (uint256, uint256);
-
-    /// @notice refreshes a position's fees, and takes liquidity, preventing less than the minimum from being taken.
-    /// @param id the id of the position
-    /// @param amount0Min minimum of amount0 to take from the user
-    /// @param amount1Min minimum of amount1 to take from the user
-    /// @param amount0Max to use as the maximum of amount0, used to create the delta
-    /// @param amount1Max to use as the maximum of amount1, used to create the delta
-    /// @return the deltas for token0, and token1
-    function decrPosition09293696(
-        address pool,
-        uint256 id,
-        uint256 amount0Min,
-        uint256 amount1Min,
-        uint256 amount0Max,
-        uint256 amount1Max
-    ) external returns (uint256, uint256);
 }
+
 
 /// @dev contains just the admin functions that are exposed directly
 interface ISeawaterExecutorAdminExposed {
@@ -303,12 +273,31 @@ interface ISeawaterExecutorAdminExposed {
     function updateEmergencyCouncil7D0C1C58(address newCouncil) external;
 }
 
-interface ISeawaterExecutorAdmin  is ISeawaterExecutorAdminExposed {
+interface ISeawaterExecutorAdmin is ISeawaterExecutorAdminExposed {
     /// @notice constructor function
     /// @param seawaterAdmin the account with administrative power on the amm
     /// @param nftManager the account with control over NFT ownership
     /// @param emergencyCouncil to use to control for pool disabling interactions
     function ctor(address seawaterAdmin, address nftManager, address emergencyCouncil) external;
+}
+
+interface ISeawaterExecutorAdjustPosition {
+    /// @notice refreshes a position's fees, and adds liquidity, preventing less than the minimum from being taken.
+    /// @param pool of the token to use
+    /// @param id the id of the position
+    /// @param amount0Min minimum of amount0 to take from the user
+    /// @param amount1Min minimum of amount1 to take from the user
+    /// @param amount0Desired to take from the user. May exceed.
+    /// @param amount1Desired to take from the user. May exceed.
+    /// @return the deltas for token0, and token1
+    function incrPositionE2437399(
+        address pool,
+        uint256 id,
+        uint256 amount0Min,
+        uint256 amount1Min,
+        uint256 amount0Desired,
+        uint256 amount1Desired
+    ) external returns (uint256, uint256);
 }
 
 interface ISeawaterExecutorFallback {}

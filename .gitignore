@@ -5,6 +5,7 @@
 # pkg
 pkg/target
 pkg/*.wasm
+pkg/*.wasm-small
 pkg/out
 pkg/*.rlib
 /web/.env

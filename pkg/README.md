@@ -37,7 +37,7 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 
 |  Deployment name |              Deployment address            |
 |------------------|--------------------------------------------|
-| Implementation   | 0xe2c9281ec0a52d2fafeb26b2c3555e09e48614a1 |
+| Implementation   | 0x5b3d9c7effafc0da1ec98f5abdd96f72124b81d6 |
 
 ##### Useful testing token deployments
 
