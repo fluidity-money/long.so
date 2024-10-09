@@ -1,6 +1,7 @@
 module github.com/fluidity-money/long.so
 
-go 1.21.1
+go 1.23
+
 require (
 	github.com/99designs/gqlgen v0.17.55
 	github.com/aws/aws-lambda-go v1.47.0
