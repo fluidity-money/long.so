@@ -108,6 +108,22 @@ const getFormattedPriceFromAmount = (
   decimalsFusdc: number,
 ): number => (Number(amount) * Number(price)) / 10 ** decimalsFusdc;
 
+/**
+ * @description scale an unscaled amount by the price of the pool
+ * @param amount - unscaled token amount
+ * @param decimals - the decimals of the token
+ * @param price - the pool price as a regular number, scaled up by fUSDC decimals
+ * @param decimalsFusdc - the decimals of fUSDC
+ * @returns the scaled price amount in USD
+ */
+const getFormattedPriceFromUnscaledAmount = (
+  amount: bigint | number,
+  decimals: number,
+  price: bigint | number,
+  decimalsFusdc: number,
+): number =>
+  (Number(amount) * Number(price)) / 10 ** (decimals + decimalsFusdc);
+
 // convert a tick to a formatted price, scaled by decimals
 const getFormattedPriceFromTick = (
   tick: number,
@@ -162,6 +178,7 @@ export {
   snapAmountToDecimals,
   getTokenAmountFromFormattedString,
   getFormattedPriceFromAmount,
+  getFormattedPriceFromUnscaledAmount,
   getFormattedPriceFromTick,
   getUsdTokenAmountsForPosition,
 };

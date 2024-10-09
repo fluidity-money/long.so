@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Line } from "rc-progress";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
@@ -21,7 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getFormattedPriceFromTick } from "@/lib/amounts";
+import {
+  getFormattedPriceFromTick,
+  getFormattedPriceFromUnscaledAmount,
+} from "@/lib/amounts";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useSwapStore } from "@/stores/useSwapStore";
 import {
@@ -44,6 +47,12 @@ import {
 } from "@/config/tokens";
 import { useContracts } from "@/config/contracts";
 import { superpositionTestnet } from "@/config/chains";
+import { simulateContract } from "wagmi/actions";
+import config from "@/config";
+
+export type CampaignPrices = {
+  [k: `0x${string}`]: { decimals: number; tokenPrice: bigint };
+};
 
 const ManagePoolFragment = graphql(`
   fragment ManagePoolFragment on SeawaterPool {
@@ -237,23 +246,98 @@ export default function PoolPage() {
     ],
   });
 
-  const unclaimedRewards = useMemo(() => {
-    if (!unclaimedRewardsData || !positionId) return "$0.00";
+  // campaignTokenPrices is the price of each token used in a campaign for this position
+  const [campaignTokenPrices, setCampaignTokenPrices] =
+    useState<CampaignPrices>({});
+  useEffect(() => {
+    (async () => {
+      const prices: CampaignPrices = {};
+      // no campaign rewards
+      if (!unclaimedLeoRewardsData) return prices;
+      for (const reward of unclaimedLeoRewardsData.result.campaignRewards) {
+        // looking at a seawater reward, not a leo reward
+        if (!("campaignToken" in reward)) continue;
+        const campaignToken =
+          reward.campaignToken.toLowerCase() as `0x${string}`;
+        // already seen this token
+        if (campaignToken in prices) continue;
+        // find token details
+        const token = getTokenFromAddress(chainId, campaignToken);
+        if (!token) {
+          console.warn("Token not found, skipping!", campaignToken);
+          continue;
+        }
+        // look up price
+        const { result: poolSqrtPriceX96 } = await simulateContract(
+          config.wagmiConfig,
+          {
+            address: ammContract.address,
+            abi: ammContract.abi,
+            functionName: "sqrtPriceX967B8F5FC5",
+            args: [token.address],
+          },
+        );
+        // store converted price
+        const tokenPrice = sqrtPriceX96ToPrice(
+          poolSqrtPriceX96,
+          token.decimals,
+        );
+        prices[campaignToken] = { decimals: token.decimals, tokenPrice };
+      }
+      setCampaignTokenPrices(prices);
+    })();
+  }, [
+    unclaimedLeoRewardsData,
+    setCampaignTokenPrices,
+    ammContract.abi,
+    ammContract.address,
+    chainId,
+  ]);
 
-    const [{ amount0, amount1 }] = unclaimedRewardsData.result || [
+  const unclaimedRewards = useMemo(() => {
+    if (!(unclaimedRewardsData || unclaimedLeoRewardsData) || !positionId)
+      return "$0.00";
+
+    // Sum all Leo rewards, scaled by the price of their token
+    const campaignRewards =
+      unclaimedLeoRewardsData?.result.campaignRewards.reduce(
+        (acc, campaignReward) => {
+          if (!("campaignToken" in campaignReward)) return acc;
+          const campaignToken =
+            campaignReward.campaignToken.toLowerCase() as `0x${string}`;
+          if (!(campaignToken in campaignTokenPrices)) return acc;
+          const tokenDetails = campaignTokenPrices[campaignToken];
+          const reward = getFormattedPriceFromUnscaledAmount(
+            campaignReward.rewards,
+            tokenDetails.decimals,
+            tokenDetails.tokenPrice,
+            fUSDC.decimals,
+          );
+          return acc + reward;
+        },
+        0,
+      ) ?? 0;
+
+    // Sum regular rewards
+    const [{ amount0, amount1 }] = unclaimedRewardsData?.result || [
       { amount0: 0n, amount1: 0n },
     ];
-    const token0AmountScaled =
-      (Number(amount0) * Number(tokenPrice)) /
-      10 ** (token0.decimals + fUSDC.decimals);
+    const token0AmountScaled = getFormattedPriceFromUnscaledAmount(
+      amount0,
+      token0.decimals,
+      tokenPrice,
+      fUSDC.decimals,
+    );
     const token1AmountScaled = Number(amount1) / 10 ** fUSDC.decimals;
-    return usdFormat(token0AmountScaled + token1AmountScaled);
+    return usdFormat(token0AmountScaled + token1AmountScaled + campaignRewards);
   }, [
     unclaimedRewardsData,
+    unclaimedLeoRewardsData,
     fUSDC.decimals,
     positionId,
     token0.decimals,
     tokenPrice,
+    campaignTokenPrices,
   ]);
 
   const collect = useCallback(
