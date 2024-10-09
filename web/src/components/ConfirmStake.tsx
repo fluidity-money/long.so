@@ -176,11 +176,11 @@ export const ConfirmStake = ({
     reset: resetApproveToken1,
   } = useWriteContract();
   const {
-    writeContractAsync: writeContractUpdatePosition,
-    data: updatePositionData,
-    error: updatePositionError,
-    isPending: isUpdatePositionPending,
-    reset: resetUpdatePosition,
+    writeContractAsync: writeContractIncrPosition,
+    data: incrPositionData,
+    error: incrPositionError,
+    isPending: isIncrPositionPending,
+    reset: resetIncrPosition,
   } = useWriteContract();
   const {
     writeContractAsync: writeContractVestPosition,
@@ -211,20 +211,6 @@ export const ConfirmStake = ({
   const vestPositionResult = useWaitForTransactionReceipt({
     hash: vestPositionData,
   });
-
-  const delta = useMemo(
-    () =>
-      !curTick || tickLower === undefined || tickUpper === undefined
-        ? 0n
-        : getLiquidityForAmounts(
-            curTick.result,
-            BigInt(tickLower),
-            BigInt(tickUpper),
-            BigInt(token0AmountRaw),
-            BigInt(token1AmountRaw),
-          ),
-    [curTick, tickLower, tickUpper, token0AmountRaw, token1AmountRaw],
-  );
 
   /**
    * Create a new position in the AMM.
@@ -287,24 +273,47 @@ export const ConfirmStake = ({
     [writeContractDivestPosition, token0, leoContract.address, leoContract.abi],
   );
 
-  const updatePosition = useCallback(
+  const incrPosition = useCallback(
     (id: bigint) => {
-      writeContractUpdatePosition({
+      const amount0 = BigInt(token0AmountRaw);
+      const amount1 = BigInt(token1AmountRaw);
+      // amount0 - 10%
+      const amount0Min = amount0 - amount0 / 10n;
+      // amount1 - 10%
+      const amount1Min = amount1 - amount1 / 10n;
+      // amount0 - 5%
+      const amount0Desired = amount0 - amount0 / 20n;
+      // amount1 - 5%
+      const amount1Desired = amount1 - amount1 / 20n;
+      writeContractIncrPosition({
         address: ammContract.address,
         abi: ammContract.abi,
-        functionName: "updatePositionC7F1F740",
-        args: [token0.address, id, delta],
+        functionName: "incrPositionE2437399",
+        args: [
+          token0.address,
+          id,
+          amount0Min,
+          amount1Min,
+          amount0Desired,
+          amount1Desired,
+        ],
       });
     },
-    [writeContractUpdatePosition, delta, token0, ammContract],
+    [
+      writeContractIncrPosition,
+      token0,
+      ammContract,
+      token0AmountRaw,
+      token1AmountRaw,
+    ],
   );
 
   // once token is divested, continue to updating
   useEffect(() => {
     if (!divestPositionResult.data || !positionId) return;
     // the position already exists so use positionId rather than mintPositionId
-    updatePosition(BigInt(positionId));
-  }, [divestPositionResult.data, positionId, updatePosition]);
+    incrPosition(BigInt(positionId));
+  }, [divestPositionResult.data, positionId, incrPosition]);
 
   /**
    * Approve the AMM to spend the token
@@ -323,13 +332,13 @@ export const ConfirmStake = ({
         args: [ammContract.address, maxUint256],
       });
     } else {
-      updatePosition(hexToBigInt(mintPositionId as Hash));
+      incrPosition(hexToBigInt(mintPositionId as Hash));
     }
   }, [
     allowanceDataToken1,
     writeContractApprovalToken1,
     token1.address,
-    updatePosition,
+    incrPosition,
     mintPositionId,
     ammContract.address,
     expectedChainId,
@@ -391,15 +400,15 @@ export const ConfirmStake = ({
     hash: approvalDataToken1,
   });
 
-  // update the position once the approval is complete
+  // incr the position once the approval is complete
   useEffect(() => {
     if (!approvalToken1Result.data || !mintPositionId) return;
-    updatePosition(hexToBigInt(mintPositionId as Hash));
-  }, [approvalToken1Result.data, mintPositionId, updatePosition]);
+    incrPosition(hexToBigInt(mintPositionId as Hash));
+  }, [approvalToken1Result.data, mintPositionId, incrPosition]);
 
-  // wait for the updatePosition transaction to complete
-  const updatePositionResult = useWaitForTransactionReceipt({
-    hash: updatePositionData,
+  // wait for the incrPosition transaction to complete
+  const incrPositionResult = useWaitForTransactionReceipt({
+    hash: incrPositionData,
   });
 
   // wait for the approveOwnershipNFT transaction to complete
@@ -483,7 +492,7 @@ export const ConfirmStake = ({
   );
 
   useEffect(() => {
-    if (updatePositionResult.isSuccess) {
+    if (incrPositionResult.isSuccess) {
       const id = positionId ?? Number(mintPositionId);
       if (id && tickLower && tickUpper) {
         getAmountsAndSetPosition(id, tickLower, tickUpper);
@@ -495,14 +504,14 @@ export const ConfirmStake = ({
     positionId,
     tickLower,
     tickUpper,
-    updatePositionResult.isSuccess,
+    incrPositionResult.isSuccess,
   ]);
 
   useEffect(() => {
-    if (updatePositionResult.isSuccess && isVesting) {
+    if (incrPositionResult.isSuccess && isVesting) {
       approveOwnershipNFT();
     }
-  }, [updatePositionResult.isSuccess, isVesting, approveOwnershipNFT]);
+  }, [incrPositionResult.isSuccess, isVesting, approveOwnershipNFT]);
 
   useEffect(() => {
     // if we're vesting in Leo, have approved the ownership transfer, but haven't vested the position, do so now
@@ -522,22 +531,22 @@ export const ConfirmStake = ({
   ]);
 
   const handleDone = useCallback(() => {
-    resetUpdatePosition();
+    resetIncrPosition();
     resetApproveToken0();
     resetApproveToken1();
     resetVestPosition();
     resetDivestPosition();
     resetApproveOwnershipNFT();
-    updatePositionResult.refetch();
+    incrPositionResult.refetch();
     router.push("/stake");
   }, [
-    resetUpdatePosition,
+    resetIncrPosition,
     resetApproveToken0,
     resetApproveToken1,
     resetVestPosition,
     resetDivestPosition,
     resetApproveOwnershipNFT,
-    updatePositionResult,
+    incrPositionResult,
     router,
   ]);
 
@@ -597,15 +606,15 @@ export const ConfirmStake = ({
 
   // step 5 pending
   if (
-    isUpdatePositionPending ||
-    (updatePositionData && updatePositionResult?.isPending)
+    isIncrPositionPending ||
+    (incrPositionData && incrPositionResult?.isPending)
   ) {
     return (
       <Confirm
         text={"Stake"}
         fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
         toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
-        transactionHash={updatePositionData}
+        transactionHash={incrPositionData}
       />
     );
   }
@@ -643,10 +652,10 @@ export const ConfirmStake = ({
   }
 
   // success
-  if (updatePositionResult.data) {
+  if (incrPositionResult.data) {
     return (
       <Success
-        transactionHash={updatePositionResult.data.transactionHash}
+        transactionHash={incrPositionResult.data.transactionHash}
         onDone={handleDone}
       />
     );
@@ -657,7 +666,7 @@ export const ConfirmStake = ({
     mintError ||
     approvalErrorToken0 ||
     approvalErrorToken1 ||
-    updatePositionError ||
+    incrPositionError ||
     divestPositionError ||
     vestPositionError ||
     approveOwnershipNFTError
@@ -666,7 +675,7 @@ export const ConfirmStake = ({
       mintError ||
       approvalErrorToken0 ||
       approvalErrorToken1 ||
-      updatePositionError ||
+      incrPositionError ||
       divestPositionError ||
       vestPositionError ||
       approveOwnershipNFTError;
@@ -925,7 +934,7 @@ export const ConfirmStake = ({
                 ? createPosition()
                 : isDivesting
                   ? divestPosition(BigInt(positionId))
-                  : updatePosition(BigInt(positionId));
+                  : incrPosition(BigInt(positionId));
             }}
           >
             {isVesting

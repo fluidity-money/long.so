@@ -3,8 +3,16 @@ const ISeawaterAMM = [
     type: "function",
     name: "authoriseEnabler5B17C274",
     inputs: [
-      { name: "enabler", type: "address", internalType: "address" },
-      { name: "enabled", type: "bool", internalType: "bool" },
+      {
+        name: "enabler",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "enabled",
+        type: "bool",
+        internalType: "bool",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -13,8 +21,16 @@ const ISeawaterAMM = [
     type: "function",
     name: "collect7F21947C",
     inputs: [
-      { name: "pools", type: "address[]", internalType: "address[]" },
-      { name: "ids", type: "uint256[]", internalType: "uint256[]" },
+      {
+        name: "pools",
+        type: "address[]",
+        internalType: "address[]",
+      },
+      {
+        name: "ids",
+        type: "uint256[]",
+        internalType: "uint256[]",
+      },
     ],
     outputs: [
       {
@@ -22,8 +38,16 @@ const ISeawaterAMM = [
         type: "tuple[]",
         internalType: "struct ISeawaterExecutorPosition.CollectResult[]",
         components: [
-          { name: "amount0", type: "uint128", internalType: "uint128" },
-          { name: "amount1", type: "uint128", internalType: "uint128" },
+          {
+            name: "amount0",
+            type: "uint128",
+            internalType: "uint128",
+          },
+          {
+            name: "amount1",
+            type: "uint128",
+            internalType: "uint128",
+          },
         ],
       },
     ],
@@ -33,14 +57,38 @@ const ISeawaterAMM = [
     type: "function",
     name: "collectProtocol7540FA9F",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "amount0", type: "uint128", internalType: "uint128" },
-      { name: "amount1", type: "uint128", internalType: "uint128" },
-      { name: "recipient", type: "address", internalType: "address" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "amount0",
+        type: "uint128",
+        internalType: "uint128",
+      },
+      {
+        name: "amount1",
+        type: "uint128",
+        internalType: "uint128",
+      },
+      {
+        name: "recipient",
+        type: "address",
+        internalType: "address",
+      },
     ],
     outputs: [
-      { name: "", type: "uint128", internalType: "uint128" },
-      { name: "", type: "uint128", internalType: "uint128" },
+      {
+        name: "",
+        type: "uint128",
+        internalType: "uint128",
+      },
+      {
+        name: "",
+        type: "uint128",
+        internalType: "uint128",
+      },
     ],
     stateMutability: "nonpayable",
   },
@@ -48,13 +96,33 @@ const ISeawaterAMM = [
     type: "function",
     name: "collectSingleTo6D76575F",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "id", type: "uint256", internalType: "uint256" },
-      { name: "recipient", type: "address", internalType: "address" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "id",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "recipient",
+        type: "address",
+        internalType: "address",
+      },
     ],
     outputs: [
-      { name: "amount0", type: "uint128", internalType: "uint128" },
-      { name: "amount1", type: "uint128", internalType: "uint128" },
+      {
+        name: "amount0",
+        type: "uint128",
+        internalType: "uint128",
+      },
+      {
+        name: "amount1",
+        type: "uint128",
+        internalType: "uint128",
+      },
     ],
     stateMutability: "nonpayable",
   },
@@ -62,14 +130,26 @@ const ISeawaterAMM = [
     type: "function",
     name: "createPoolD650E2D0",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
       {
         name: "sqrtPriceX96",
         type: "uint256",
         internalType: "uint256",
       },
-      { name: "fee", type: "uint32", internalType: "uint32" },
-      { name: "tickSpacing", type: "uint8", internalType: "uint8" },
+      {
+        name: "fee",
+        type: "uint32",
+        internalType: "uint32",
+      },
+      {
+        name: "tickSpacing",
+        type: "uint8",
+        internalType: "uint8",
+      },
       {
         name: "maxLiquidityPerTick",
         type: "uint128",
@@ -82,24 +162,19 @@ const ISeawaterAMM = [
   {
     type: "function",
     name: "curTick181C6FD9",
-    inputs: [{ name: "pool", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "int32", internalType: "int32" }],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "decrPosition09293696",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "id", type: "uint256", internalType: "uint256" },
-      { name: "amount0Min", type: "uint256", internalType: "uint256" },
-      { name: "amount1Min", type: "uint256", internalType: "uint256" },
-      { name: "amount0Max", type: "uint256", internalType: "uint256" },
-      { name: "amount1Max", type: "uint256", internalType: "uint256" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
     ],
     outputs: [
-      { name: "", type: "uint256", internalType: "uint256" },
-      { name: "", type: "uint256", internalType: "uint256" },
+      {
+        name: "",
+        type: "int32",
+        internalType: "int32",
+      },
     ],
     stateMutability: "nonpayable",
   },
@@ -107,8 +182,16 @@ const ISeawaterAMM = [
     type: "function",
     name: "enablePool579DA658",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "enabled", type: "bool", internalType: "bool" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "enabled",
+        type: "bool",
+        internalType: "bool",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -116,45 +199,113 @@ const ISeawaterAMM = [
   {
     type: "function",
     name: "feeBB3CF608",
-    inputs: [{ name: "pool", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint32", internalType: "uint32" }],
+    inputs: [
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint32",
+        internalType: "uint32",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "feeGrowthGlobal038B5665B",
-    inputs: [{ name: "pool", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "feeGrowthGlobal1A33A5A1B",
-    inputs: [{ name: "pool", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "feesOwed22F28DBD",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "id", type: "uint256", internalType: "uint256" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "id",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [
-      { name: "", type: "uint128", internalType: "uint128" },
-      { name: "", type: "uint128", internalType: "uint128" },
+      {
+        name: "",
+        type: "uint128",
+        internalType: "uint128",
+      },
+      {
+        name: "",
+        type: "uint128",
+        internalType: "uint128",
+      },
     ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
-    name: "incrPosD3521721",
+    name: "incrPositionE2437399",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "id", type: "uint256", internalType: "uint256" },
-      { name: "amount0Min", type: "uint256", internalType: "uint256" },
-      { name: "amount1Min", type: "uint256", internalType: "uint256" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "id",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "amount0Min",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "amount1Min",
+        type: "uint256",
+        internalType: "uint256",
+      },
       {
         name: "amount0Desired",
         type: "uint256",
@@ -167,8 +318,16 @@ const ISeawaterAMM = [
       },
     ],
     outputs: [
-      { name: "", type: "uint256", internalType: "uint256" },
-      { name: "", type: "uint256", internalType: "uint256" },
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     stateMutability: "nonpayable",
   },
@@ -176,65 +335,165 @@ const ISeawaterAMM = [
     type: "function",
     name: "mintPositionBC5B086D",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "lower", type: "int32", internalType: "int32" },
-      { name: "upper", type: "int32", internalType: "int32" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "lower",
+        type: "int32",
+        internalType: "int32",
+      },
+      {
+        name: "upper",
+        type: "int32",
+        internalType: "int32",
+      },
     ],
-    outputs: [{ name: "id", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      {
+        name: "id",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "positionBalance4F32C7DB",
-    inputs: [{ name: "user", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "positionLiquidity8D11C045",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "id", type: "uint256", internalType: "uint256" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "id",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
-    outputs: [{ name: "", type: "uint128", internalType: "uint128" }],
+    outputs: [
+      {
+        name: "",
+        type: "uint128",
+        internalType: "uint128",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "positionOwnerD7878480",
-    inputs: [{ name: "id", type: "uint256", internalType: "uint256" }],
-    outputs: [{ name: "", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "id",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "positionTickLower2F77CCE1",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "id", type: "uint256", internalType: "uint256" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "id",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
-    outputs: [{ name: "", type: "int32", internalType: "int32" }],
+    outputs: [
+      {
+        name: "",
+        type: "int32",
+        internalType: "int32",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "positionTickUpper67FD55BA",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "id", type: "uint256", internalType: "uint256" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "id",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
-    outputs: [{ name: "", type: "int32", internalType: "int32" }],
+    outputs: [
+      {
+        name: "",
+        type: "int32",
+        internalType: "int32",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "quote2CD06B86E",
     inputs: [
-      { name: "from", type: "address", internalType: "address" },
-      { name: "to", type: "address", internalType: "address" },
-      { name: "amount", type: "uint256", internalType: "uint256" },
-      { name: "minOut", type: "uint256", internalType: "uint256" },
+      {
+        name: "from",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "to",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "amount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "minOut",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -243,10 +502,26 @@ const ISeawaterAMM = [
     type: "function",
     name: "quote72E2ADE7",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "zeroForOne", type: "bool", internalType: "bool" },
-      { name: "amount", type: "int256", internalType: "int256" },
-      { name: "priceLimit", type: "uint256", internalType: "uint256" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "zeroForOne",
+        type: "bool",
+        internalType: "bool",
+      },
+      {
+        name: "amount",
+        type: "int256",
+        internalType: "int256",
+      },
+      {
+        name: "priceLimit",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -255,8 +530,16 @@ const ISeawaterAMM = [
     type: "function",
     name: "setSqrtPriceFF4DB98C",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "price", type: "uint256", internalType: "uint256" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "price",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -264,40 +547,112 @@ const ISeawaterAMM = [
   {
     type: "function",
     name: "sqrtPriceX967B8F5FC5",
-    inputs: [{ name: "pool", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "swap2ExactIn41203F1D",
     inputs: [
-      { name: "_tokenA", type: "address", internalType: "address" },
-      { name: "_tokenB", type: "address", internalType: "address" },
-      { name: "_amount", type: "uint256", internalType: "uint256" },
-      { name: "_minOut", type: "uint256", internalType: "uint256" },
+      {
+        name: "_tokenA",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "_tokenB",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "_amount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "_minOut",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [
-      { name: "", type: "uint256", internalType: "uint256" },
-      { name: "", type: "uint256", internalType: "uint256" },
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
-    name: "swap2ExactInPermit236B2FDD8",
+    name: "swap2ExactInPermit254A7DBB1",
     inputs: [
-      { name: "from", type: "address", internalType: "address" },
-      { name: "to", type: "address", internalType: "address" },
-      { name: "amount", type: "uint256", internalType: "uint256" },
-      { name: "minOut", type: "uint256", internalType: "uint256" },
-      { name: "nonce", type: "uint256", internalType: "uint256" },
-      { name: "deadline", type: "uint256", internalType: "uint256" },
-      { name: "sig", type: "bytes", internalType: "bytes" },
+      {
+        name: "from",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "to",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "amount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "minOut",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "nonce",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "deadline",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "sig",
+        type: "bytes",
+        internalType: "bytes",
+      },
     ],
     outputs: [
-      { name: "", type: "uint256", internalType: "uint256" },
-      { name: "", type: "uint256", internalType: "uint256" },
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     stateMutability: "nonpayable",
   },
@@ -305,14 +660,38 @@ const ISeawaterAMM = [
     type: "function",
     name: "swap904369BE",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "zeroForOne", type: "bool", internalType: "bool" },
-      { name: "amount", type: "int256", internalType: "int256" },
-      { name: "priceLimit", type: "uint256", internalType: "uint256" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "zeroForOne",
+        type: "bool",
+        internalType: "bool",
+      },
+      {
+        name: "amount",
+        type: "int256",
+        internalType: "int256",
+      },
+      {
+        name: "priceLimit",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [
-      { name: "", type: "int256", internalType: "int256" },
-      { name: "", type: "int256", internalType: "int256" },
+      {
+        name: "",
+        type: "int256",
+        internalType: "int256",
+      },
+      {
+        name: "",
+        type: "int256",
+        internalType: "int256",
+      },
     ],
     stateMutability: "nonpayable",
   },
@@ -320,13 +699,33 @@ const ISeawaterAMM = [
     type: "function",
     name: "swapIn32502CA71",
     inputs: [
-      { name: "_token", type: "address", internalType: "address" },
-      { name: "_amount", type: "uint256", internalType: "uint256" },
-      { name: "_minOut", type: "uint256", internalType: "uint256" },
+      {
+        name: "_token",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "_amount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "_minOut",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [
-      { name: "", type: "int256", internalType: "int256" },
-      { name: "", type: "int256", internalType: "int256" },
+      {
+        name: "",
+        type: "int256",
+        internalType: "int256",
+      },
+      {
+        name: "",
+        type: "int256",
+        internalType: "int256",
+      },
     ],
     stateMutability: "nonpayable",
   },
@@ -334,17 +733,53 @@ const ISeawaterAMM = [
     type: "function",
     name: "swapInPermit2CEAAB576",
     inputs: [
-      { name: "_token", type: "address", internalType: "address" },
-      { name: "_amount", type: "uint256", internalType: "uint256" },
-      { name: "_minOut", type: "uint256", internalType: "uint256" },
-      { name: "_nonce", type: "uint256", internalType: "uint256" },
-      { name: "_deadline", type: "uint256", internalType: "uint256" },
-      { name: "_maxAmount", type: "uint256", internalType: "uint256" },
-      { name: "_sig", type: "bytes", internalType: "bytes" },
+      {
+        name: "_token",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "_amount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "_minOut",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "_nonce",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "_deadline",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "_maxAmount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "_sig",
+        type: "bytes",
+        internalType: "bytes",
+      },
     ],
     outputs: [
-      { name: "", type: "int256", internalType: "int256" },
-      { name: "", type: "int256", internalType: "int256" },
+      {
+        name: "",
+        type: "int256",
+        internalType: "int256",
+      },
+      {
+        name: "",
+        type: "int256",
+        internalType: "int256",
+      },
     ],
     stateMutability: "nonpayable",
   },
@@ -352,13 +787,33 @@ const ISeawaterAMM = [
     type: "function",
     name: "swapOut5E08A399",
     inputs: [
-      { name: "_token", type: "address", internalType: "address" },
-      { name: "_amount", type: "uint256", internalType: "uint256" },
-      { name: "_minOut", type: "uint256", internalType: "uint256" },
+      {
+        name: "_token",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "_amount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "_minOut",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [
-      { name: "", type: "int256", internalType: "int256" },
-      { name: "", type: "int256", internalType: "int256" },
+      {
+        name: "",
+        type: "int256",
+        internalType: "int256",
+      },
+      {
+        name: "",
+        type: "int256",
+        internalType: "int256",
+      },
     ],
     stateMutability: "nonpayable",
   },
@@ -366,17 +821,53 @@ const ISeawaterAMM = [
     type: "function",
     name: "swapOutPermit23273373B",
     inputs: [
-      { name: "_token", type: "address", internalType: "address" },
-      { name: "_amount", type: "uint256", internalType: "uint256" },
-      { name: "_minOut", type: "uint256", internalType: "uint256" },
-      { name: "_nonce", type: "uint256", internalType: "uint256" },
-      { name: "_deadline", type: "uint256", internalType: "uint256" },
-      { name: "_maxAmount", type: "uint256", internalType: "uint256" },
-      { name: "_sig", type: "bytes", internalType: "bytes" },
+      {
+        name: "_token",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "_amount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "_minOut",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "_nonce",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "_deadline",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "_maxAmount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "_sig",
+        type: "bytes",
+        internalType: "bytes",
+      },
     ],
     outputs: [
-      { name: "", type: "int256", internalType: "int256" },
-      { name: "", type: "int256", internalType: "int256" },
+      {
+        name: "",
+        type: "int256",
+        internalType: "int256",
+      },
+      {
+        name: "",
+        type: "int256",
+        internalType: "int256",
+      },
     ],
     stateMutability: "nonpayable",
   },
@@ -384,35 +875,99 @@ const ISeawaterAMM = [
     type: "function",
     name: "swapPermit2EE84AD91",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "zeroForOne", type: "bool", internalType: "bool" },
-      { name: "amount", type: "int256", internalType: "int256" },
-      { name: "priceLimit", type: "uint256", internalType: "uint256" },
-      { name: "nonce", type: "uint256", internalType: "uint256" },
-      { name: "deadline", type: "uint256", internalType: "uint256" },
-      { name: "maxAmount", type: "uint256", internalType: "uint256" },
-      { name: "sig", type: "bytes", internalType: "bytes" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "zeroForOne",
+        type: "bool",
+        internalType: "bool",
+      },
+      {
+        name: "amount",
+        type: "int256",
+        internalType: "int256",
+      },
+      {
+        name: "priceLimit",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "nonce",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "deadline",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "maxAmount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "sig",
+        type: "bytes",
+        internalType: "bytes",
+      },
     ],
     outputs: [
-      { name: "", type: "int256", internalType: "int256" },
-      { name: "", type: "int256", internalType: "int256" },
+      {
+        name: "",
+        type: "int256",
+        internalType: "int256",
+      },
+      {
+        name: "",
+        type: "int256",
+        internalType: "int256",
+      },
     ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "tickSpacing653FE28F",
-    inputs: [{ name: "pool", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint16", internalType: "uint16" }],
+    inputs: [
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint8",
+        internalType: "uint8",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "transferPositionEEC7A3CD",
     inputs: [
-      { name: "id", type: "uint256", internalType: "uint256" },
-      { name: "from", type: "address", internalType: "address" },
-      { name: "to", type: "address", internalType: "address" },
+      {
+        name: "id",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "from",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "to",
+        type: "address",
+        internalType: "address",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -420,14 +975,26 @@ const ISeawaterAMM = [
   {
     type: "function",
     name: "updateEmergencyCouncil7D0C1C58",
-    inputs: [{ name: "newCouncil", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "newCouncil",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "updateNftManager9BDF41F6",
-    inputs: [{ name: "manager", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "manager",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
   },
@@ -435,13 +1002,33 @@ const ISeawaterAMM = [
     type: "function",
     name: "updatePositionC7F1F740",
     inputs: [
-      { name: "pool", type: "address", internalType: "address" },
-      { name: "id", type: "uint256", internalType: "uint256" },
-      { name: "delta", type: "int128", internalType: "int128" },
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "id",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "delta",
+        type: "int128",
+        internalType: "int128",
+      },
     ],
     outputs: [
-      { name: "", type: "int256", internalType: "int256" },
-      { name: "", type: "int256", internalType: "int256" },
+      {
+        name: "",
+        type: "int256",
+        internalType: "int256",
+      },
+      {
+        name: "",
+        type: "int256",
+        internalType: "int256",
+      },
     ],
     stateMutability: "nonpayable",
   },
