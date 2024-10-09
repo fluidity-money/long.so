@@ -77,7 +77,7 @@ cat <<EOF
 	"seawater_positions_impl": "$SEAWATER_POSITIONS",
 	"seawater_update_positions_impl": "$SEAWATER_UPDATE_POSITIONS",
 	"seawater_admin_impl": "$SEAWATER_ADMIN",
-	"seawater_adjust_position_impl": "$SEAWATER_ADJUST_POSITION",
+	"seawater_adjust_position_impl": "$SEAWATER_ADJUST_POSITIONS",
 	"seawater_swap_permit2_b_impl": "$SEAWATER_SWAP_PERMIT2_B",
 	"seawater_proxy_admin": "$SEAWATER_PROXY_ADMIN",
 	"seawater_fusdc_addr": "$FLU_SEAWATER_FUSDC_ADDR"
