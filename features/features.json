@@ -31,7 +31,7 @@
 	"ui show yield over time": false,
 	"ui show liquidity visualiser": true,
 	"ui show banners": true,
-	"ui show leo": false,
+	"ui show leo": true,
 	"ui show pool apy": false
 }
 
