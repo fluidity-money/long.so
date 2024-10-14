@@ -22,3 +22,11 @@ classification = "VOLATILE"
 [0x22b9fa698b68bBA071B513959794E9a47d19214c]
 displayed = true
 classification = "VOLATILE"
+
+[0x7165ab64d673baa4159b2016c845c8b416ede8dc]
+displayed = true
+classification = "VOLATILE"
+
+[0x546db1432dafd619c1ba63a3ba72b09c6b852066]
+displayed = true
+classification = "VOLATILE"
