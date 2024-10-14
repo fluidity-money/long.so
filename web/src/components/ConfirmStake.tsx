@@ -277,10 +277,10 @@ export const ConfirmStake = ({
     (id: bigint) => {
       const amount0 = BigInt(token0AmountRaw);
       const amount1 = BigInt(token1AmountRaw);
-      // amount0 - 10%
-      const amount0Min = amount0 - amount0 / 10n;
-      // amount1 - 10%
-      const amount1Min = amount1 - amount1 / 10n;
+      // amount0 - 33%
+      const amount0Min = amount0 - amount0 / 3n;
+      // amount1 - 33%
+      const amount1Min = amount1 - amount1 / 3n;
       // amount0 - 5%
       const amount0Desired = amount0 - amount0 / 20n;
       // amount1 - 5%
