@@ -279,6 +279,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     const sqb = getSqrtRatioAtTick(upper);
 
     if (quotedToken === "token0") {
+      if (!token0AmountRaw) return;
       const delta = cur === upper ? 1n : 0n;
       // delta is a guard for same lower and upper ticks
       const liq = getLiquidityForAmount0(
@@ -290,6 +291,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       if (token1Balance?.value && newToken1Amount > token1Balance.value) return;
       setToken1AmountRaw(newToken1Amount.toString());
     } else {
+      if (!token1AmountRaw) return;
       // delta is a guard for same lower and upper ticks
       const delta = cur === lower ? 1n : 0n;
       const liq = getLiquidityForAmount1(
@@ -327,12 +329,12 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   const usdPriceToken0 =
     token0.address === fUSDC.address
-      ? parseFloat(token0Amount)
+      ? parseFloat(token0Amount === "" ? "0" : token0Amount)
       : getFormattedPriceFromAmount(token0Amount, tokenPrice, fUSDC.decimals);
 
   const usdPriceToken1 =
     token1.address === fUSDC.address
-      ? parseFloat(token1Amount)
+      ? parseFloat(token1Amount === "" ? "0" : token1Amount)
       : getFormattedPriceFromAmount(token1Amount, tokenPrice, fUSDC.decimals);
 
   const [liquidityRangeType, setLiquidityRangeType] = useState<
@@ -508,6 +510,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               <Input
                 className="-ml-2 border-0 bg-black pl-2 text-2xl"
                 autoFocus
+                placeholder="0"
                 variant={"no-ring"}
                 value={token0Amount}
                 onChange={(e) => quoteTokenAmount(e.target.value, "token0")}
@@ -569,6 +572,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 <Input
                   className="-ml-2 border-0 bg-black pl-2 text-2xl"
                   autoFocus
+                  placeholder="0"
                   variant={"no-ring"}
                   value={token1Amount}
                   onChange={(e) => quoteTokenAmount(e.target.value, "token1")}
