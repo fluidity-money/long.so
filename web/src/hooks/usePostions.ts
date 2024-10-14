@@ -195,7 +195,7 @@ export const usePositions = () => {
     () =>
       address
         ? Object.values(positions[chainId]?.[address] ?? {}).reverse()
-        : {},
+        : [],
     [chainId, address, positions],
   );
   useEffect(() => {
@@ -220,7 +220,7 @@ export const usePositions = () => {
   return {
     // loading if the user is connected but the query hasn't resolved yet
     isLoading: address && !userData?.getWallet,
-    positions: address ? chainPositions : [],
+    positions: chainPositions,
     updatePositionLocal: useCallback<(newPosition: Position) => void>(
       (newPosition) =>
         address ? updatePositionLocal(chainId, address, newPosition) : () => {},
