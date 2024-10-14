@@ -449,7 +449,10 @@ export const MyPositions = () => {
             </Button>
             <Badge
               variant={collectError ? "destructive" : "iridescent"}
-              className="-mt-2 gap-2 border-2 border-black text-3xs"
+              className={cn(
+                "-mt-2 gap-2 border-2 border-black text-3xs",
+                collectData && "pointer-events-none opacity-70",
+              )}
             >
               {unclaimedRewards}
             </Badge>
