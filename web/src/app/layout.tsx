@@ -129,6 +129,15 @@ export default async function RootLayout({
                 <a
                   rel="noopener noreferrer"
                   target="_blank"
+                  href="https://issues.superposition.so"
+                >
+                  Known issues
+                </a>
+              </small>
+              <small>
+                <a
+                  rel="noopener noreferrer"
+                  target="_blank"
                   href={`https://github.com/fluidity-money/long.so/commit/${gitHash}`}
                 >
                   Commit {gitHash}
