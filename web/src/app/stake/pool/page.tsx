@@ -28,6 +28,7 @@ import {
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useSwapStore } from "@/stores/useSwapStore";
 import {
+  useAccount,
   useChainId,
   useSimulateContract,
   useWaitForTransactionReceipt,
@@ -79,11 +80,12 @@ const ManagePoolFragment = graphql(`
 
 export default function PoolPage() {
   const router = useRouter();
-  const chainId = useChainId();
-  const fUSDC = useTokens(chainId, "fusdc");
-  const ammContract = useContracts(chainId, "amm");
-  const leoContract = useContracts(chainId, "leo");
-  const ownershipNFTContract = useContracts(chainId, "ownershipNFTs");
+  const { chainId } = useAccount();
+  const expectedChainId = useChainId();
+  const fUSDC = useTokens(expectedChainId, "fusdc");
+  const ammContract = useContracts(expectedChainId, "amm");
+  const leoContract = useContracts(expectedChainId, "leo");
+  const ownershipNFTContract = useContracts(expectedChainId, "ownershipNFTs");
   useHotkeys("esc", () => router.back());
 
   // get the id from the query params
@@ -110,7 +112,6 @@ export default function PoolPage() {
 
   const { setToken0: setToken0Swap, setToken1: setToken1Swap } = useSwapStore();
 
-  const expectedChainId = useChainId();
   const isCorrectChain = useMemo(
     () => chainId === expectedChainId,
     [chainId, expectedChainId],
@@ -130,10 +131,10 @@ export default function PoolPage() {
 
   useEffect(() => {
     if (!id) return;
-    const token = getTokenFromAddress(chainId, id);
+    const token = getTokenFromAddress(expectedChainId, id);
     if (!token) return;
     handleTokens(token, fUSDC);
-  }, [id, chainId, fUSDC, handleTokens]);
+  }, [id, expectedChainId, fUSDC, handleTokens]);
 
   const poolData = allPoolsData?.find((pool) => pool.id === id);
 
@@ -262,7 +263,7 @@ export default function PoolPage() {
         // already seen this token
         if (campaignToken in prices) continue;
         // find token details
-        const token = getTokenFromAddress(chainId, campaignToken);
+        const token = getTokenFromAddress(expectedChainId, campaignToken);
         if (!token) {
           console.warn("Token not found, skipping!", campaignToken);
           continue;
@@ -291,7 +292,7 @@ export default function PoolPage() {
     setCampaignTokenPrices,
     ammContract.abi,
     ammContract.address,
-    chainId,
+    expectedChainId,
   ]);
 
   const unclaimedRewards = useMemo(() => {
