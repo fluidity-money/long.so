@@ -204,7 +204,7 @@ export const ConfirmSwap = () => {
         address: token0.address,
         abi: getTokenFromAddress(chainId, token0.address)!.abi,
         functionName: "approve",
-        args: [ammContract.address, maxUint256],
+        args: [ammContract.address, token0AmountRaw],
       });
     } else {
       performSwap();

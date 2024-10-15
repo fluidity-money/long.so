@@ -19,7 +19,7 @@ import {
   snapTickToSpacing,
 } from "@/lib/math";
 import { useEffect, useCallback, useMemo } from "react";
-import { Hash, hexToBigInt, maxUint256 } from "viem";
+import { Hash, hexToBigInt } from "viem";
 import Confirm from "@/components/sequence/Confirm";
 import { EnableSpending } from "@/components/sequence/EnableSpending";
 import { Fail } from "@/components/sequence/Fail";
@@ -329,7 +329,7 @@ export const ConfirmStake = ({
         address: token1.address,
         abi: getTokenFromAddress(expectedChainId, token1.address)!.abi,
         functionName: "approve",
-        args: [ammContract.address, maxUint256],
+        args: [ammContract.address, token1AmountRaw],
       });
     } else {
       incrPosition(hexToBigInt(mintPositionId as Hash));
@@ -351,13 +351,13 @@ export const ConfirmStake = ({
   const approveToken0 = useCallback(() => {
     if (
       !allowanceDataToken0?.result ||
-      allowanceDataToken0.result < BigInt(token1AmountRaw)
+      allowanceDataToken0.result < BigInt(token0AmountRaw)
     ) {
       writeContractApprovalToken0({
         address: token0.address,
         abi: getTokenFromAddress(expectedChainId, token0.address)!.abi,
         functionName: "approve",
-        args: [ammContract.address, maxUint256],
+        args: [ammContract.address, token0AmountRaw],
       });
     } else {
       approveToken1();
@@ -369,7 +369,7 @@ export const ConfirmStake = ({
     ammContract.address,
     approveToken1,
     expectedChainId,
-    token1AmountRaw,
+    token0AmountRaw,
   ]);
 
   // once we have the position ID, approve the AMM to spend the token
