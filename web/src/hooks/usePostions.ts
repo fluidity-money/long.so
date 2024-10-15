@@ -183,8 +183,8 @@ const PositionsFragment = graphql(`
 export const usePositions = () => {
   const { data: userData } = useGraphqlUser();
   const chainId = useChainId();
-  const address = (useAccount().address?.toLowerCase() ||
-    "0x") as `0x${string}`;
+  const address =
+    (useAccount().address?.toLowerCase() as `0x${string}`) || undefined;
   const positionsData = useFragment(PositionsFragment, userData?.getWallet);
   const positions = usePositionStore((s) => s.positions);
   const updatePositionLocal = usePositionStore((s) => s.updatePositionLocal);
