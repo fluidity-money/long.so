@@ -1,19 +1,15 @@
 #![cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 
-use std::str::FromStr;
+use std::{cell::RefCell, str::FromStr};
 
-use libseawater::{error::Error, maths::tick_math, test_utils, vm_hooks, Pools};
+use libseawater::{error::Error, maths::tick_math, test_utils, Pools};
 
 use proptest::{collection, prelude::*, test_runner::TestCaseError};
-
-use maplit::hashmap;
 
 use stylus_sdk::{
     alloy_primitives::{Address, I256, U256},
     msg,
 };
-
-use arrayvec::ArrayVec;
 
 const LP_MAX_INT128: i128 = 100000000000000000000000000;
 
@@ -69,7 +65,7 @@ fn strat_update_position_increase(
 
 fn strat_pool_and_position_creation(
 ) -> impl Strategy<Value = (u8, Vec<ActionAdjustPositionIncrease>)> {
-    (0..30_usize).prop_flat_map(move |i| {
+    (0..100_usize).prop_flat_map(move |i| {
         prop_oneof![Just(10), Just(60), Just(200)].prop_flat_map(move |spacing| {
             (
                 Just(spacing),
@@ -90,7 +86,7 @@ fn strat_swap_1() -> impl Strategy<Value = ActionSwap1> {
 }
 
 fn strat_swaps_1() -> impl Strategy<Value = Vec<ActionSwap1>> {
-    (1..=1_usize).prop_flat_map(move |i| collection::vec(strat_swap_1(), i))
+    (1..=1000_usize).prop_flat_map(move |i| collection::vec(strat_swap_1(), i))
 }
 
 fn fee_of_spacing(x: u8) -> u32 {
@@ -104,7 +100,6 @@ fn fee_of_spacing(x: u8) -> u32 {
 
 #[test]
 fn test_weird_behaviour() {
-    use alloy_primitives::address;
     //15272948
     test_utils::with_storage::<_, Pools, _>(None, None, None, |c| {
         let pool = Address::from([1_u8; 20]);
@@ -112,8 +107,9 @@ fn test_weird_behaviour() {
         c.create_pool_D650_E2_D0(
             pool,
             U256::from_limbs([9433916063688681729, 246222, 0, 0]), //4542003653232976906676481
-            3000
-        ).unwrap();
+            3000,
+        )
+        .unwrap();
     })
 }
 
@@ -124,11 +120,11 @@ proptest! {
         positions_split_count_1 in 0..10_usize,
         // Positions split 2 is used to figure out which trades should be in stage 2 of testing.
         // After stage 1.
-        positions_split_count_2 in 0..10_usize,
+        positions_split_count_2 in 0..50_usize,
         // Number of swaps to use for the first part.
-        //swaps_split_count_1 in 0..10_usize,
+        //swaps_split_count_1 in 0..7_000_usize,
         // Number of swaps to use for the second part.
-        //swaps_split_count_2 in 0..10_usize,
+        //swaps_split_count_2 in 0..7_000_usize,
         // Positions to use. Cut up by the split count field that was used before.
         (spacing, positions_vec) in strat_pool_and_position_creation(),
         swaps in strat_swaps_1()
@@ -143,7 +139,9 @@ proptest! {
                 fee,
             ).unwrap();
             contract.enable_pool_579_D_A658(pool, true).unwrap();
-            let sqrt_price = contract.sqrt_price_x967_B8_F5_F_C5(pool).unwrap();
+
+            let accrued_amount0 = RefCell::new(U256::ZERO);
+            let accrued_amount1 = RefCell::new(U256::ZERO);
 
             let f_insert_position = |contract: &mut Pools, (_, &ref pos)| -> Option<(U256, U256, U256, ActionAdjustPositionIncrease)> {
                 let ActionAdjustPositionIncrease{low, up, amount0, amount1} = *pos;
@@ -180,7 +178,9 @@ proptest! {
                         }
                     },
                     Ok((taken0, taken1)) => {
-                        println!("{fee},{sqrt_price},{low},{up},{amount0},{amount1},{taken0},{taken1},PUTOK");
+                        *accrued_amount0.borrow_mut() += taken0;
+                        *accrued_amount1.borrow_mut() += taken1;
+                        //println!("{fee},{sqrt_price},{low},{up},{amount0},{amount1},{taken0},{taken1},PUTOK");
                      }
                 };
                 let (taken0, taken1) = incr_res.unwrap();
@@ -200,7 +200,26 @@ proptest! {
                 let mut x = [0_u8; 32];
                 x[..16].copy_from_slice(&amount.to_le_bytes());
                 match contract.swap_904369_B_E(pool, zero_for_one, I256::from_le_bytes(x), U256::MAX) {
-                    Ok((taken0, taken1)) => println!("{fee},{sqrt_price},{zero_for_one},{amount},{taken0},{taken1},SWAPOK"),                    Err(b) => eprintln!("{fee},{sqrt_price},{zero_for_one},{amount},SWAPERR,{:?}", std::str::from_utf8(&b).unwrap()),
+                    Ok((taken0_, taken1)) => {
+                        let taken0_neg = taken0_ < I256::ZERO;
+                        let taken1_neg = taken1 < I256::ZERO;
+                        let taken0 = u128::from_le_bytes(taken0_.abs().to_le_bytes::<32>()[..16].try_into().unwrap());
+                        dbg!(taken0, taken0_, const_hex::encode(taken0_.abs().to_le_bytes::<32>()));
+                        let taken1 = u128::from_le_bytes(taken1.abs().to_le_bytes::<32>()[..16].try_into().unwrap());
+                        if taken0_neg {
+                            *accrued_amount0.borrow_mut() -= U256::from(taken0);
+                        } else {
+                            *accrued_amount0.borrow_mut() += U256::from(taken0);
+                        };
+                        if taken1_neg {
+                            *accrued_amount1.borrow_mut() -= U256::from(taken1);
+                        } else {
+                            *accrued_amount1.borrow_mut() += U256::from(taken1);
+                        };
+                        ()
+                        //println!("{fee},{sqrt_price},{zero_for_one},{amount},{taken0},{taken1},SWAPOK")
+                    },
+                    Err(b) => () // eprintln!("{fee},{sqrt_price},{zero_for_one},{amount},SWAPERR,{:?}", std::str::from_utf8(&b).unwrap()),
                 }
             };
 
@@ -217,17 +236,10 @@ proptest! {
                 f_make_swap(&mut contract, *amount, *zero_for_one)
             }
 
-            return Ok(());
-
             // Time to LP some more. Do this a variable number of times. Make sure to
             // add them to the other vector.
 
             positions.extend(positions_vec.iter().skip(positions_split_count_1).take(positions_split_count_2).enumerate().filter_map(|x| f_insert_position(&mut contract, x)));
-
-            // Set the restriction on the amounts that can be taken using the ERC20. methods.
-
-            let taken0 = positions.iter().map(|(taken0, _, _, _)| taken0).sum::<U256>();
-            let taken1 = positions.iter().map(|(_, taken1, _, _)| taken1).sum::<U256>();
 
             // Time to make some more trades.
 
@@ -237,7 +249,7 @@ proptest! {
 
             // Time to collect all the LP from the positions we created.
 
-            for (position_id, taken0, taken1, ActionAdjustPositionIncrease{low, up, amount0, amount1}) in positions {
+            for (position_id, taken0, taken1, ActionAdjustPositionIncrease{amount0, amount1, ..}) in positions {
                 let liq: i128 =
                     contract.position_liquidity_8_D11_C045(pool, position_id)
                         .unwrap()
@@ -248,10 +260,11 @@ proptest! {
 
                 let returned0 = U256::from_str(&returned0.abs().to_string()).unwrap();
                 let returned1 = U256::from_str(&returned1.abs().to_string()).unwrap();
-                let ret_amt = returned0 + returned1;
-                let put_amt = taken0 + taken1;
-                println!("{fee},{sqrt_price},{position_id},{low},{up},{amount0},{amount1},{returned0},{returned1},{liq},{put_amt}{ret_amt},TAKEOK");
-                assert!(ret_amt > put_amt, "returned1 {returned1} != taken1 {taken1}");
+                assert!(returned0 <= *accrued_amount0.borrow(), "returned0 {returned0} <= accrued_amount0 {}", *accrued_amount0.borrow());
+                assert!(returned1 <= *accrued_amount1.borrow(), "returned1 {returned1} <= accrued_amount1 {}", *accrued_amount1.borrow());
+
+                *accrued_amount0.borrow_mut() -= returned0;
+                *accrued_amount1.borrow_mut() -= returned1;
             }
             Ok(())
         }).unwrap()

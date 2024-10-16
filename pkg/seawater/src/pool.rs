@@ -234,8 +234,6 @@ impl StoragePool {
     ) -> Result<(I256, I256, i32), Revert> {
         assert_or!(self.enabled.get(), Error::PoolDisabled);
 
-        dbg!(self.sqrt_price.get());
-
         // ensure the price limit is within bounds
         match zero_for_one {
             true => {
