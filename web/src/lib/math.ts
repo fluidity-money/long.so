@@ -305,7 +305,7 @@ export const getAmountsForLiquidity = (
     sqrtRatio0X96 = sqrtRatioBX96;
     sqrtRatio1X96 = sqrtRatioAX96;
   }
-  if (sqrtRatioX96 <= sqrtRatio0X96) {
+  if (sqrtRatioX96 < sqrtRatio0X96) {
     const amount0 = getAmount0ForLiquidity(
       sqrtRatio0X96,
       sqrtRatio1X96,
