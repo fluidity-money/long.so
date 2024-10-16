@@ -278,6 +278,18 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     const sqa = getSqrtRatioAtTick(lower);
     const sqb = getSqrtRatioAtTick(upper);
 
+    // out of range below, lock amount1 to 0
+    if (cur < lower) {
+      setToken1Amount("0");
+      return;
+    }
+
+    // out of range above, lock amount0 to 0
+    if (cur > upper) {
+      setToken0Amount("0");
+      return;
+    }
+
     if (quotedToken === "token0") {
       if (!token0AmountRaw) return;
       const delta = cur === upper ? 1n : 0n;
@@ -304,6 +316,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       setToken0AmountRaw(newToken0Amount.toString());
     }
   }, [
+    setToken0Amount,
+    setToken1Amount,
     setToken0AmountRaw,
     setToken1AmountRaw,
     token0Balance?.value,
@@ -513,6 +527,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 placeholder="0"
                 variant={"no-ring"}
                 value={token0Amount}
+                // out of range above, lock amount0 to 0
+                disabled={curTick?.result > BigInt(tickUpper ?? -MIN_TICK)}
                 onChange={(e) => quoteTokenAmount(e.target.value, "token0")}
               />
 
@@ -575,6 +591,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   placeholder="0"
                   variant={"no-ring"}
                   value={token1Amount}
+                  // out of range below, lock amount1 to 0
+                  disabled={curTick?.result < BigInt(tickLower ?? -MAX_TICK)}
                   onChange={(e) => quoteTokenAmount(e.target.value, "token1")}
                 />
 
