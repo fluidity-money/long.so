@@ -259,12 +259,16 @@ pub enum Error {
     SwapIsZero,
 
     // 48 (0x30)
-    #[error("Pool is already initialised!")]
-    PoolIsInitialised,
+    #[error("Pool is not initialised!")]
+    PoolIsNotInitialised,
 
     // 49 (0x31)
     #[error("Position conversion fail")]
     PositionConvFail,
+
+    // 50 (0x32)
+    #[error("Debug assert")]
+    DebugAssert,
 }
 
 impl From<Error> for Vec<u8> {

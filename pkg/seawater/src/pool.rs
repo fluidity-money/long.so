@@ -5,6 +5,7 @@ use crate::maths::{full_math, liquidity_math, sqrt_price_math, swap_math, tick_b
 use crate::position;
 use crate::tick;
 use crate::types::{I256Extension, U256Extension, WrappedNative, I256, I32, U128, U256, U32, U8};
+
 use alloc::vec::Vec;
 use stylus_sdk::{prelude::*, storage::*};
 
@@ -198,7 +199,6 @@ impl StoragePool {
         id: U256,
         amount_0: U256,
         amount_1: U256,
-        giving: bool,
     ) -> Result<(I256, I256), Revert> {
         // calculate the delta using the amounts that we have here, guaranteeing
         // that we don't dip below the amount that's supplied as the minimum.
@@ -209,9 +209,7 @@ impl StoragePool {
         let sqrt_ratio_a_x_96 = tick_math::get_sqrt_ratio_at_tick(position.lower.get().sys())?;
         let sqrt_ratio_b_x_96 = tick_math::get_sqrt_ratio_at_tick(position.upper.get().sys())?;
 
-        //return Err(sqrt_ratio_b_x_96.to_le_bytes::<32>().to_vec());
-
-        let mut delta = sqrt_price_math::get_liquidity_for_amounts(
+        let delta = sqrt_price_math::get_liquidity_for_amounts(
             sqrt_ratio_x_96,   // cur_tick
             sqrt_ratio_a_x_96, // lower_tick
             sqrt_ratio_b_x_96, // upper_tick
@@ -220,11 +218,6 @@ impl StoragePool {
         )?
         .to_i128()
         .ok_or(Error::LiquidityAmountTooWide)?;
-
-        if giving {
-            // If we're giving, then we need to take from the delta.
-            delta = -delta;
-        }
 
         // [update_position] should also ensure that we don't do this on a pool that's not currently
         // running
@@ -240,6 +233,8 @@ impl StoragePool {
         mut price_limit: U256,
     ) -> Result<(I256, I256, i32), Revert> {
         assert_or!(self.enabled.get(), Error::PoolDisabled);
+
+        dbg!(self.sqrt_price.get());
 
         // ensure the price limit is within bounds
         match zero_for_one {
@@ -300,12 +295,17 @@ impl StoragePool {
 
         // continue swapping while there's tokens left to swap
         // and we haven't reached the price limit
+        #[allow(unused)]
         let mut iters = 0;
         let mut last_valid_price = state.price;
 
         while !state.amount_remaining.is_zero() && state.price != price_limit {
             iters += 1;
-            debug_assert!(iters < 500);
+
+            #[cfg(test)]
+            if iters > 500 {
+                return Err(Error::DebugAssert)?;
+            }
 
             let step_initial_price = state.price;
 

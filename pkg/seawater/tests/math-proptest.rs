@@ -1,9 +1,12 @@
-use libseawater::maths::liquidity_math;
+#![cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 
-#[test]
-fn test_add_delta_weird() {
-    assert_eq!(
-        liquidity_math::add_delta(0, 53524466837499715685).unwrap(),
-        53524466837499715685
-    );
+use proptest::prelude::*;
+
+use libseawater::maths::tick_math::{get_tick_at_sqrt_ratio, get_sqrt_ratio_at_tick};
+
+proptest! {
+  #[test]
+  fn test_get_sqrt_ratio_at_tick_to_back(tick in -887272..=887272) {
+    assert_eq!(get_tick_at_sqrt_ratio(get_sqrt_ratio_at_tick(tick).unwrap()).unwrap(), tick);
+  }
 }

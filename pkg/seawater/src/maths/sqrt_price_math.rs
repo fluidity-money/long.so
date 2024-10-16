@@ -240,33 +240,6 @@ pub fn get_amount_1_delta(
     }
 }
 
-pub fn get_amounts_for_delta(
-    sqrt_ratio_x_96: U256,
-    mut sqrt_ratio_a_x_96: U256,
-    mut sqrt_ratio_b_x_96: U256,
-    liquidity: i128,
-) -> Result<(I256, I256), Error> {
-    if sqrt_ratio_a_x_96 > sqrt_ratio_b_x_96 {
-        (sqrt_ratio_a_x_96, sqrt_ratio_b_x_96) = (sqrt_ratio_b_x_96, sqrt_ratio_a_x_96)
-    };
-    Ok(if sqrt_ratio_x_96 < sqrt_ratio_a_x_96 {
-        (
-            get_amount_0_delta(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, liquidity)?,
-            I256::ZERO,
-        )
-    } else if sqrt_ratio_x_96 < sqrt_ratio_b_x_96 {
-        (
-            get_amount_0_delta(sqrt_ratio_x_96, sqrt_ratio_b_x_96, liquidity)?,
-            get_amount_1_delta(sqrt_ratio_a_x_96, sqrt_ratio_x_96, liquidity)?,
-        )
-    } else {
-        (
-            I256::ZERO,
-            get_amount_1_delta(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, liquidity)?,
-        )
-    })
-}
-
 /// Calculates the liquidity in the form of the delta amount for
 /// amount0.
 pub fn get_liquidity_for_amount_0(
@@ -309,7 +282,7 @@ pub fn get_liquidity_for_amounts(
         (sqrt_ratio_a_x_96, sqrt_ratio_b_x_96) = (sqrt_ratio_b_x_96, sqrt_ratio_a_x_96)
     };
 
-    let delta = if sqrt_ratio_x_96 < sqrt_ratio_a_x_96 {
+    let delta = if sqrt_ratio_x_96 <= sqrt_ratio_a_x_96 {
         get_liquidity_for_amount_0(sqrt_ratio_a_x_96, sqrt_ratio_b_x_96, amount_0)?
     } else if sqrt_ratio_x_96 < sqrt_ratio_b_x_96 {
         let liq0 = get_liquidity_for_amount_0(sqrt_ratio_x_96, sqrt_ratio_b_x_96, amount_0)?;

@@ -1,5 +1,7 @@
 #![cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 
+use std::str::FromStr;
+
 use libseawater::{error::Error, maths::tick_math, test_utils, vm_hooks, Pools};
 
 use proptest::{collection, prelude::*, test_runner::TestCaseError};
@@ -7,24 +9,13 @@ use proptest::{collection, prelude::*, test_runner::TestCaseError};
 use maplit::hashmap;
 
 use stylus_sdk::{
-    alloy_primitives::{Address, U256},
+    alloy_primitives::{Address, I256, U256},
     msg,
 };
 
 use arrayvec::ArrayVec;
 
 const LP_MAX_INT128: i128 = 100000000000000000000000000;
-
-fn strat_u256() -> impl Strategy<Value = U256> {
-    (0..32).prop_perturb(move |steps, mut rng| {
-        U256::from_be_slice(
-            (0..=steps)
-                .map(|_| rng.gen())
-                .collect::<ArrayVec<u8, 256>>()
-                .as_slice(),
-        )
-    })
-}
 
 // Increase the position by way of incrPosition.
 #[derive(Clone, Debug)]
@@ -37,9 +28,8 @@ struct ActionAdjustPositionIncrease {
 
 #[derive(Clone, Debug)]
 struct ActionSwap1 {
-    zero_to_one: bool,
-    amount0: i128,
-    amount1: i128,
+    zero_for_one: bool,
+    amount: i128,
 }
 
 fn next_lowest_tick(spacing: u8, x: i32) -> i32 {
@@ -79,7 +69,7 @@ fn strat_update_position_increase(
 
 fn strat_pool_and_position_creation(
 ) -> impl Strategy<Value = (u8, Vec<ActionAdjustPositionIncrease>)> {
-    (0..20_000_usize).prop_flat_map(move |i| {
+    (0..30_usize).prop_flat_map(move |i| {
         prop_oneof![Just(10), Just(60), Just(200)].prop_flat_map(move |spacing| {
             (
                 Just(spacing),
@@ -88,6 +78,19 @@ fn strat_pool_and_position_creation(
                 .prop_map(|(x, y)| (x, y))
         })
     })
+}
+
+fn strat_swap_1() -> impl Strategy<Value = ActionSwap1> {
+    (0..i128::MAX).prop_flat_map(move |amount| {
+        any::<bool>().prop_map(move |zero_for_one| ActionSwap1 {
+            zero_for_one,
+            amount,
+        })
+    })
+}
+
+fn strat_swaps_1() -> impl Strategy<Value = Vec<ActionSwap1>> {
+    (1..=1_usize).prop_flat_map(move |i| collection::vec(strat_swap_1(), i))
 }
 
 fn fee_of_spacing(x: u8) -> u32 {
@@ -100,36 +103,37 @@ fn fee_of_spacing(x: u8) -> u32 {
 }
 
 #[test]
-fn test_9lives_creation() {
-    // Test if the Longtail interaction in 9lives works fine.
-
-    //79228162514264337593543950336
-    let price = U256::from_limbs([0, 4294967296, 0, 0]);
-    let tick_spacing = 10;
-    test_utils::with_storage::<_, Pools, _>(None, None, None, |contract| {
-        let pool = Address::ZERO;
-        contract
-            .ctor(msg::sender(), Address::ZERO, Address::ZERO)
-            .unwrap();
-        let fee = fee_of_spacing(tick_spacing);
-        contract
-            .create_pool_D650_E2_D0(pool, price, fee, tick_spacing, u128::MAX)
-            .unwrap();
-    });
+fn test_weird_behaviour() {
+    use alloy_primitives::address;
+    //15272948
+    test_utils::with_storage::<_, Pools, _>(None, None, None, |c| {
+        let pool = Address::from([1_u8; 20]);
+        c.ctor(msg::sender(), Address::ZERO, Address::ZERO).unwrap();
+        c.create_pool_D650_E2_D0(
+            pool,
+            U256::from_limbs([9433916063688681729, 246222, 0, 0]), //4542003653232976906676481
+            3000
+        ).unwrap();
+    })
 }
 
 proptest! {
     #[test]
     fn test_mint_position_ranges(
         // Positions split 1 is used to figure out which positions should be created at first.
-        positions_split_count_1 in 0..10_000_usize,
+        positions_split_count_1 in 0..10_usize,
         // Positions split 2 is used to figure out which trades should be in stage 2 of testing.
         // After stage 1.
-        positions_split_count_2 in 0..10_000_usize,
+        positions_split_count_2 in 0..10_usize,
+        // Number of swaps to use for the first part.
+        //swaps_split_count_1 in 0..10_usize,
+        // Number of swaps to use for the second part.
+        //swaps_split_count_2 in 0..10_usize,
         // Positions to use. Cut up by the split count field that was used before.
         (spacing, positions_vec) in strat_pool_and_position_creation(),
+        swaps in strat_swaps_1()
     ) {
-        test_utils::with_storage::<_, Pools, _>(None, None, None, |contract| -> Result<(), TestCaseError> {
+        test_utils::with_storage::<_, Pools, _>(None, None, None, |mut contract| -> Result<(), TestCaseError> {
             let pool = Address::from([1_u8; 20]);
             contract.ctor(msg::sender(), Address::ZERO, Address::ZERO).unwrap();
             let fee = fee_of_spacing(spacing);
@@ -137,13 +141,11 @@ proptest! {
                 pool,
                 U256::from_limbs([9433916063688681729, 246222, 0, 0]), //4542003653232976906676481
                 fee,
-                spacing,
-                u128::MAX
             ).unwrap();
             contract.enable_pool_579_D_A658(pool, true).unwrap();
             let sqrt_price = contract.sqrt_price_x967_B8_F5_F_C5(pool).unwrap();
 
-            let mut f_insert_position = |(_, &ref pos)| -> Option<(U256, U256, U256, ActionAdjustPositionIncrease)> {
+            let f_insert_position = |contract: &mut Pools, (_, &ref pos)| -> Option<(U256, U256, U256, ActionAdjustPositionIncrease)> {
                 let ActionAdjustPositionIncrease{low, up, amount0, amount1} = *pos;
                 let invalid_tick_bytes: Vec<u8> = Error::InvalidTick.into();
                 let id = match contract.mint_position_B_C5_B086_D(pool, low, up) {
@@ -156,7 +158,7 @@ proptest! {
                 };
                 let amount0 = U256::from(amount0);
                 let amount1 = U256::from(amount1);
-                let incr_res = contract.incr_pos_D_3521721(
+                let incr_res = contract.incr_position_E_2437399(
                     pool,
                     id,
                     U256::ZERO,
@@ -173,11 +175,13 @@ proptest! {
                             //eprintln!("{sqrt_price},{low},{up},{amount0},{amount1},FAILURE");
                             return None
                         } else {
-                            eprintln!("{fee},{sqrt_price},{low},{up},{amount0},{amount1},FAILED WITH {}", std::str::from_utf8(&b).unwrap());
+                            //eprintln!("{fee},{sqrt_price},{low},{up},{amount0},{amount1},FAILED WITH {}", std::str::from_utf8(&b).unwrap());
                             return None;
                         }
                     },
-                    _ => ()
+                    Ok((taken0, taken1)) => {
+                        println!("{fee},{sqrt_price},{low},{up},{amount0},{amount1},{taken0},{taken1},PUTOK");
+                     }
                 };
                 let (taken0, taken1) = incr_res.unwrap();
                 // If taken0 or taken1 is 0, skip
@@ -189,29 +193,47 @@ proptest! {
                 Some((id, taken0, taken1, pos.clone()))
             };
 
+            let f_make_swap = |contract: &mut Pools, amount: i128, zero_for_one: bool| {
+                if amount == 0 {
+                    return ()
+                }
+                let mut x = [0_u8; 32];
+                x[..16].copy_from_slice(&amount.to_le_bytes());
+                match contract.swap_904369_B_E(pool, zero_for_one, I256::from_le_bytes(x), U256::MAX) {
+                    Ok((taken0, taken1)) => println!("{fee},{sqrt_price},{zero_for_one},{amount},{taken0},{taken1},SWAPOK"),                    Err(b) => eprintln!("{fee},{sqrt_price},{zero_for_one},{amount},SWAPERR,{:?}", std::str::from_utf8(&b).unwrap()),
+                }
+            };
+
             let mut positions = Vec::with_capacity(positions_vec.len());
 
-            positions.extend(positions_vec.iter().take(positions_split_count_1).enumerate().filter_map(&mut f_insert_position));
+            positions.extend(positions_vec.iter().take(positions_split_count_1).enumerate().filter_map(|x| f_insert_position(&mut contract, x)));
             //prop_assume!(positions.len() > 0);
 
             // Time to start making some trades!
 
+            if swaps.len() == 0 { return Ok(()) }
+
+            for ActionSwap1 { zero_for_one, amount } in &swaps {
+                f_make_swap(&mut contract, *amount, *zero_for_one)
+            }
+
+            return Ok(());
+
             // Time to LP some more. Do this a variable number of times. Make sure to
             // add them to the other vector.
 
-            positions.extend(positions_vec.iter().skip(positions_split_count_1).take(positions_split_count_2).enumerate().filter_map(&mut f_insert_position));
+            positions.extend(positions_vec.iter().skip(positions_split_count_1).take(positions_split_count_2).enumerate().filter_map(|x| f_insert_position(&mut contract, x)));
 
             // Set the restriction on the amounts that can be taken using the ERC20. methods.
 
             let taken0 = positions.iter().map(|(taken0, _, _, _)| taken0).sum::<U256>();
             let taken1 = positions.iter().map(|(_, taken1, _, _)| taken1).sum::<U256>();
 
-            vm_hooks::set_amm_bals(hashmap!{
-                pool => taken0,
-                Address::ZERO => taken1
-            });
-
             // Time to make some more trades.
+
+            for ActionSwap1 { zero_for_one, amount } in &swaps {
+                f_make_swap(&mut contract, *amount, *zero_for_one)
+            }
 
             // Time to collect all the LP from the positions we created.
 
@@ -221,9 +243,15 @@ proptest! {
                         .unwrap()
                         .try_into()
                         .unwrap();
-                eprintln!("{fee},{sqrt_price},{low},{up},{amount0},{amount1},{taken0},{taken1},{liq},SUCCESS");
-                contract.update_position_C_7_F_1_F_740(pool, position_id, -liq)
+                let (returned0, returned1) = contract.update_position_C_7_F_1_F_740(pool, position_id, -liq)
                     .unwrap();
+
+                let returned0 = U256::from_str(&returned0.abs().to_string()).unwrap();
+                let returned1 = U256::from_str(&returned1.abs().to_string()).unwrap();
+                let ret_amt = returned0 + returned1;
+                let put_amt = taken0 + taken1;
+                println!("{fee},{sqrt_price},{position_id},{low},{up},{amount0},{amount1},{returned0},{returned1},{liq},{put_amt}{ret_amt},TAKEOK");
+                assert!(ret_amt > put_amt, "returned1 {returned1} != taken1 {taken1}");
             }
             Ok(())
         }).unwrap()

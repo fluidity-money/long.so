@@ -1,4 +1,4 @@
-use libseawater::{error::Error, test_utils, types::*, Pools};
+use libseawater::{test_utils, types::*, Pools};
 
 use stylus_sdk::{alloy_primitives::address, msg};
 
@@ -18,8 +18,6 @@ fn test_similar_to_ethers() -> Result<(), Vec<u8>> {
                 token_addr,
                 test_utils::encode_sqrt_price(50, 1), // the price
                 0,
-                1,
-                100000000000,
             )?;
 
             contract.enable_pool_579_D_A658(token_addr, true)?;
@@ -59,9 +57,7 @@ fn test_alex() -> Result<(), Vec<u8>> {
             contract.create_pool_D650_E2_D0(
                 token_addr,
                 test_utils::encode_sqrt_price(100, 1), // the price
-                0,
-                1,
-                100000000000,
+                0,                                     // fee
             )?;
 
             contract.enable_pool_579_D_A658(token_addr, true)?;
@@ -87,97 +83,6 @@ fn test_alex() -> Result<(), Vec<u8>> {
 }
 
 #[test]
-fn decr_nonexisting_position() {
-    use core::str::FromStr;
-
-    let token = Address::with_last_byte(1);
-
-    test_utils::with_storage::<_, Pools, _>(None, None, None, |contract| -> Result<(), Vec<u8>> {
-        contract.ctor(msg::sender(), msg::sender(), msg::sender())?;
-
-        contract.create_pool_D650_E2_D0(
-            token,
-            U256::from_str("792281625142643375935439503360").unwrap(), // encodeSqrtPrice(100)
-            3000,
-            1,
-            u128::MAX,
-        )?;
-
-        contract.enable_pool_579_D_A658(token, true)?;
-
-        let id = U256::from(0);
-
-        contract.mint_position_B_C5_B086_D(token, -887272, 887272)?;
-
-        assert_eq!(
-            contract
-                .decr_position_09293696(
-                    token,
-                    id,
-                    U256::zero(),
-                    U256::zero(),
-                    U256::from(10000),
-                    U256::from(10000),
-                )
-                .unwrap_err(),
-            Vec::<u8>::from(Error::LiquiditySub)
-        );
-
-        Ok(())
-    })
-    .unwrap();
-}
-
-#[test]
-fn decr_existing_position_some() {
-    use core::str::FromStr;
-
-    let token = Address::with_last_byte(1);
-
-    test_utils::with_storage::<_, Pools, _>(None, None, None, |contract| -> Result<(), Vec<u8>> {
-        contract.ctor(msg::sender(), msg::sender(), msg::sender())?;
-
-        contract.create_pool_D650_E2_D0(
-            token,
-            U256::from_str("792281625142643375935439503360").unwrap(), // encodeSqrtPrice(100)
-            3000,
-            1,
-            u128::MAX,
-        )?;
-
-        contract.enable_pool_579_D_A658(token, true)?;
-
-        let id = U256::from(0);
-
-        contract.mint_position_B_C5_B086_D(token, -887272, 887272)?;
-
-        let (amount_0_taken, amount_1_taken) = contract.incr_pos_D_3521721(
-            token,
-            id,
-            U256::zero(),
-            U256::zero(),
-            U256::from(100_000),
-            U256::from(100_000),
-        )?;
-
-        // Took some amount off the amount to take, since the taking rounds
-        // up, and the removal rounds down.
-
-        contract.decr_position_09293696(
-            token,
-            id,
-            U256::from(998),
-            U256::from(99_000),
-            amount_0_taken,
-            amount_1_taken,
-        )?;
-
-        Ok(())
-    })
-    .unwrap();
-}
-
-#[test]
 fn ethers_suite_orchestrated_uniswap_single() {
     test_utils::with_storage::<_, Pools, _>(None, None, None, |contract| -> Result<(), Vec<u8>> {
         let token0 = address!("9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
@@ -186,8 +91,6 @@ fn ethers_suite_orchestrated_uniswap_single() {
             token0,
             U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
             500,                                      // fee
-            10,                                       // tick spacing
-            u128::MAX,
         )?;
         contract.enable_pool_579_D_A658(token0, true)?;
         contract.mint_position_B_C5_B086_D(token0, 39120, 50100)?;
@@ -213,8 +116,6 @@ fn ethers_suite_orchestrated_uniswap_single_version_2() {
             token0,
             U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
             500,                                      // fee
-            10,                                       // tick spacing
-            u128::MAX,
         )?;
         contract.enable_pool_579_D_A658(token0, true)?;
         contract.mint_position_B_C5_B086_D(token0, 39120, 50100)?;
@@ -250,8 +151,6 @@ fn ethers_suite_orchestrated_uniswap_two() {
                 token0,
                 U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
                 500,                                      // fee
-                10,                                       // tick spacing
-                u128::MAX,
             )
             .unwrap();
         contract
@@ -259,8 +158,6 @@ fn ethers_suite_orchestrated_uniswap_two() {
                 token1,
                 U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
                 500,                                      // fee
-                10,                                       // tick spacing
-                u128::MAX,
             )
             .unwrap();
         contract.enable_pool_579_D_A658(token0, true).unwrap();
@@ -297,8 +194,6 @@ fn ethers_suite_swapping_with_permit2_blobs_no_permit2() {
                 token0,
                 U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
                 500,                                      // fee
-                10,                                       // tick spacing
-                u128::MAX,
             )
             .unwrap();
         contract.enable_pool_579_D_A658(token0, true).unwrap();

@@ -57,12 +57,22 @@ type Revert = Vec<u8>;
 
 extern crate alloc;
 
-/// # Safety
-///
-/// This should be set with nothing during testing, since our end to end
-/// tests instantiate the contract state themselves. So it's safe to use whenever.
-#[no_mangle]
-pub unsafe extern "C" fn fuckmylife(_dest: *mut u8) {}
+#[link(wasm_import_module = "stylus_test_runner")]
+extern "C" {
+    #[allow(dead_code)]
+    fn wasm_log_ext(ptr: *const u8, len: usize);
+}
+
+#[macro_export]
+macro_rules! wasm_log {
+    ($($arg:tt)*) => {
+        #[cfg(all(feature = "testing-dbg", target_arch = "wasm32"))]
+        unsafe {
+            let msg = format!($($arg)*);
+            wasm_log_ext(msg.as_ptr(), msg.len())
+        }
+    }
+}
 
 // we split our entrypoint functions into three sets, and call them via diamond proxies, to
 // save on binary size
@@ -695,7 +705,6 @@ impl Pools {
         amount_1_min: U256,
         amount_0_desired: U256,
         amount_1_desired: U256,
-        giving: bool,
         permit2: Option<(Permit2Args, Permit2Args)>,
     ) -> Result<(U256, U256), Revert> {
         assert_eq_or!(
@@ -704,12 +713,10 @@ impl Pools {
             Error::PositionOwnerOnly
         );
 
-        let (amount_0, amount_1) = self.pools.setter(pool).adjust_position(
-            id,
-            amount_0_desired,
-            amount_1_desired,
-            giving,
-        )?;
+        let (amount_0, amount_1) =
+            self.pools
+                .setter(pool)
+                .adjust_position(id, amount_0_desired, amount_1_desired)?;
 
         evm::log(events::UpdatePositionLiquidity {
             id,
@@ -717,27 +724,18 @@ impl Pools {
             token1: amount_1,
         });
 
-        let (amount_0, amount_1) = if giving {
-            (amount_0.abs_neg()?, amount_1.abs_neg()?)
-        } else {
-            (amount_0.abs_pos()?, amount_1.abs_pos()?)
-        };
+        let (amount_0, amount_1) = (amount_0.abs_pos()?, amount_1.abs_pos()?);
 
         assert_or!(amount_0 >= amount_0_min, Error::LiqResultTooLow);
         assert_or!(amount_1 >= amount_1_min, Error::LiqResultTooLow);
 
-        if giving {
-            erc20::transfer_to_sender(pool, amount_0)?;
-            erc20::transfer_to_sender(FUSDC_ADDR, amount_1)?;
-        } else {
-            let (permit_0, permit_1) = match permit2 {
-                Some((permit_0, permit_1)) => (Some(permit_0), Some(permit_1)),
-                None => (None, None),
-            };
+        let (permit_0, permit_1) = match permit2 {
+            Some((permit_0, permit_1)) => (Some(permit_0), Some(permit_1)),
+            None => (None, None),
+        };
 
-            erc20::take(pool, amount_0, permit_0)?;
-            erc20::take(FUSDC_ADDR, amount_1, permit_1)?;
-        }
+        erc20::take(pool, amount_0, permit_0)?;
+        erc20::take(FUSDC_ADDR, amount_1, permit_1)?;
 
         Ok((amount_0, amount_1))
     }
@@ -806,12 +804,20 @@ impl Pools {
         pool: Address,
         price: U256,
         fee: u32,
-        tick_spacing: u8,
-        max_liquidity_per_tick: u128,
     ) -> Result<(), Revert> {
+        let tick_spacing = match fee {
+            0 => Ok(1),
+            500 => Ok(10),
+            3000 => Ok(60),
+            10_000 => Ok(200),
+            _ => Err(Error::BadFee)
+        }?;
+
+        let max_liq_per_tick = tick_math::tick_spacing_to_max_liq(tick_spacing)?;
+
         self.pools
             .setter(pool)
-            .init(price, fee, tick_spacing, max_liquidity_per_tick)?;
+            .init(price, fee, tick_spacing, max_liq_per_tick)?;
 
         // get the decimals for the asset so we can log it's decimals for the indexer
 
@@ -1002,7 +1008,7 @@ impl Pools {
         );
         assert_or!(
             self.pools.getter(pool).initialised.get(),
-            Error::PoolIsInitialised
+            Error::PoolIsNotInitialised
         );
 
         if self.emergency_council.get() == msg::sender()
@@ -1116,7 +1122,6 @@ impl Pools {
             amount_1_min,
             amount_0_desired,
             amount_1_desired,
-            false,
             None,
         )
     }

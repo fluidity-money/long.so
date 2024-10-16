@@ -175,6 +175,10 @@ pub fn set_caller_bals(items: HashMap<Address, U256>) {
     storage::CALLER_BALS.with(|sender| *sender.borrow_mut() = items);
 }
 
+pub fn get_caller_bal(pool: Address) -> U256 {
+    storage::CALLER_BALS.with(|sender| *sender.borrow_mut().get(&pool).unwrap_or(&U256::ZERO))
+}
+
 pub fn set_amm_bals(items: HashMap<Address, U256>) {
     storage::AMM_BALS.with(|sender| *sender.borrow_mut() = items);
 }
