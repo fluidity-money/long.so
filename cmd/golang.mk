@@ -12,7 +12,7 @@ CMDLET := $(shell basename ${PWD})
 CONFIG_DIR := ../../config
 
 ${CMDLET}: ${EXTRA_FILES} ${GO_FILES}
-	@${GO_BUILD} ${GO_BUILD_EXTRA_ARGS}
+	${GO_BUILD} ${GO_BUILD_EXTRA_ARGS}
 
 lint: ${GO_FILES}
 	@${GO_FMT}

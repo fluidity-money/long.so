@@ -1,5 +1,5 @@
 
-EXTRA_FILES := pools.toml bootstrap bootstrap.zip
+EXTRA_FILES := pools.toml
 
 include ../golang.mk
 
@@ -10,7 +10,7 @@ pools.toml: ${CONFIG_DIR}/pools.toml
 
 lambda: bootstrap.zip
 
-bootstrap: graphql.ethereum
+bootstrap: ${CMDLET}
 	@cp graphql.ethereum bootstrap
 
 bootstrap.zip: bootstrap
