@@ -119,6 +119,9 @@ pub struct Pools {
 
     // authorised enablers to create new pools, and enable them
     authorised_enablers: StorageMap<Address, StorageBool>,
+
+    // global emergency that should pause everything
+    global_emergency: StorageBool
 }
 
 impl Pools {

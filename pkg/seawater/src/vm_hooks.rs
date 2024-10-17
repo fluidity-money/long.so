@@ -102,6 +102,26 @@ pub extern "C" fn storage_flush_cache(_clear: bool) {
     // do nothing
 }
 
+#[no_mangle]
+pub extern "C" fn msg_reentrant() -> bool {
+    false
+}
+
+#[no_mangle]
+pub extern "C" fn pay_for_memory_grow(_pages: u16) {
+    // Do nothing
+}
+
+#[no_mangle]
+pub extern "C" fn read_args(_dest: *mut u8) {
+    // Do nothing
+}
+
+#[no_mangle]
+pub extern "C" fn write_result(_data: *const u8, _len: usize) {
+    // Do nothing
+}
+
 /// # Safety
 ///
 /// Reads a EVM word from the hashmap, and writes it to the pointer given.
