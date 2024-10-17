@@ -131,7 +131,7 @@ export default async function RootLayout({
                   target="_blank"
                   href="https://issues.superposition.so"
                 >
-                  Known issues
+                  TODO board
                 </a>
               </small>
               <small>
