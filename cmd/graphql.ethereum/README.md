@@ -6,6 +6,4 @@ using SPN_LISTEN_BACKEND, http and lambda is accepted.
 
 ## Features
 
-|            Name          |                      Description                       |
-|--------------------------|--------------------------------------------------------|
-| `graphql mock demo data` | Mocks out each GraphQL endpoint, returning dummy data. |
+Refer to ../../lib/features/list.go
