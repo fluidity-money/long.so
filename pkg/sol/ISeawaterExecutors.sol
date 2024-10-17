@@ -268,6 +268,10 @@ interface ISeawaterExecutorAdminExposed {
     /// @param manager address to set to in its new form
     function updateNftManager9BDF41F6(address manager) external;
 
+    /// @notice set the new admin.
+    /// @param operator to replace the existing operator with
+    function updateSeawaterAdminD25D364D(address operator) external;
+
     /// @notice updateEmergencyCouncil to a new address.
     /// @param newCouncil to set the emergency council to
     function updateEmergencyCouncil7D0C1C58(address newCouncil) external;

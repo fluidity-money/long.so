@@ -940,6 +940,19 @@ impl Pools {
         Ok(())
     }
 
+    /// Update the operator that's trusted to call certain trusted functions.
+    #[allow(non_snake_case)]
+    pub fn update_seawater_admin_D25_D_364_D(&mut self, admin: Address) -> Result<(), Revert> {
+        assert_eq_or!(
+            msg::sender(),
+            self.seawater_admin.get(),
+            Error::SeawaterAdminOnly
+        );
+
+        self.seawater_admin.set(admin);
+
+        Ok(())
+    }
     /// Update the emergency council that can disable the pools.
     #[allow(non_snake_case)]
     pub fn update_emergency_council_7_D_0_C_1_C_58(

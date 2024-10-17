@@ -208,6 +208,11 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
+    function updateSeawaterAdminD25D364D(address /* operator */) external {
+        directDelegate(_getExecutorAdmin());
+    }
+
+    /// @inheritdoc ISeawaterExecutorAdminExposed
     function updateEmergencyCouncil7D0C1C58(address /* council */) external {
         directDelegate(_getExecutorAdmin());
     }

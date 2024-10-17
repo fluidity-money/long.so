@@ -15,6 +15,26 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 
 ### Deployments
 
+#### Superposition Mainnet
+
+[Superposition RPC](https://docs.superposition.so/superposition-mainnet/network-details)
+
+##### AMM contract deployments
+
+|         Deployment name        |              Deployment address            |
+|--------------------------------|--------------------------------------------|
+| Longtail AMM                   |  |
+| Longtail NFT manager           |  |
+| Permit2 router                 |  |
+| Swaps implementation           |  |
+| Swaps permit2 A implementation |  |
+| Quotes implementation          |  |
+| Positions implementation       |  |
+| Update position implementation |  |
+| Admin implementation           |  |
+| Adjust position implementation |  |
+| Swaps permit2 B implementation |  |
+
 #### Superposition Testnet
 
 [Superposition RPC](https://docs.superposition.so/superposition-testnet/network-details)
