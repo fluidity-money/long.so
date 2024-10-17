@@ -99,8 +99,7 @@ func init() {
 		Level: logLevel,
 	})
 	logger := slog.New(multihandler)
-	// Find the commit hash (taken straight from
-	// https:icinga.com/blog/2022/05/25/embedding-git-commit-information-in-go-binaries/)
+	// Find the commit hash.
 	var revision string
 	if info, ok := debug.ReadBuildInfo(); ok {
 		for _, setting := range info.Settings {
