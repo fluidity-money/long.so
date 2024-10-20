@@ -199,7 +199,10 @@ export const ConfirmSwap = () => {
   });
 
   const onSubmit = () => {
-    if (!allowanceData?.result || allowanceData.result === BigInt(0)) {
+    if (
+      !allowanceData?.result ||
+      allowanceData.result < BigInt(token0AmountRaw ?? 0)
+    ) {
       writeContractApproval({
         address: token0.address,
         abi: getTokenFromAddress(chainId, token0.address)!.abi,
