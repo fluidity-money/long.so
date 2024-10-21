@@ -13,7 +13,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.3
 	github.com/samber/slog-sentry/v2 v2.8.0
 	github.com/stretchr/testify v1.9.0
-	github.com/vektah/gqlparser/v2 v2.5.17
+	github.com/vektah/gqlparser/v2 v2.5.18
 	gorm.io/driver/postgres v1.5.9
 	gorm.io/gorm v1.25.12
 )
