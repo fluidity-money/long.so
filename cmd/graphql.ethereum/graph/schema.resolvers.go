@@ -12,15 +12,19 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
-	graphErc20 "github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
 	"github.com/fluidity-money/long.so/lib/config"
 	"github.com/fluidity-money/long.so/lib/events/thirdweb"
 	"github.com/fluidity-money/long.so/lib/features"
 	"github.com/fluidity-money/long.so/lib/math"
+	"github.com/fluidity-money/long.so/lib/notes"
 	"github.com/fluidity-money/long.so/lib/types"
 	"github.com/fluidity-money/long.so/lib/types/erc20"
 	"github.com/fluidity-money/long.so/lib/types/seawater"
+
+	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
+
+	graphErc20 "github.com/fluidity-money/long.so/cmd/graphql.ethereum/lib/erc20"
+
 	"gorm.io/gorm"
 )
 
@@ -262,20 +266,33 @@ func (r *queryResolver) UpcomingLiquidityCampaigns(ctx context.Context) (campaig
 }
 
 // Notes is the resolver for the notes field.
-func (r *queryResolver) Notes(ctx context.Context, wallet string) (notes []model.Note, err error) {
+func (r *queryResolver) Notes(ctx context.Context, wallet string) ([]model.Note, error) {
 	q := r.DB.Table("notes_current_1")
+	var (
+		notes_ []model.Note
+		err    error
+	)
 	if wallet == "" {
 		err = q.
 			Where("target = NULL").
-			Scan(&notes).
+			Scan(&notes_).
 			Error
 	} else {
 		err = q.
 			Where("target IS NULL OR target = ?", types.AddressFromString(wallet)).
-			Scan(&notes).
+			Scan(&notes_).
 			Error
 	}
-	return
+	nxs := make([]model.Note, len(notes_))
+	for i, n := range notes_ {
+		nxs[i].Content, err = notes.Render(n.Content, notes.Args{
+			Address: types.AddressFromString(wallet),
+		})
+		if err != nil {
+			return nil, fmt.Errorf("rendering note for %#v: %v", wallet, err)
+		}
+	}
+	return nxs, nil
 }
 
 // GetPool is the resolver for the getPool field.
