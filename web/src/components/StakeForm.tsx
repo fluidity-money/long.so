@@ -382,45 +382,53 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   ]);
 
   useEffect(() => {
-    if (mode === "new") {
-      // set the ticks to min and max, ignoring display prices
-      // which will be shown as infinity
-      if (liquidityRangeType === "full-range") {
-        setTickLower(MIN_TICK);
-        setTickUpper(MAX_TICK);
-      } else if (liquidityRangeType === "auto") {
-        if (!curTick) return;
-        // auto sets the price range to +-10% of the current tick
-        const priceAtTick = sqrtPriceX96ToPrice(
-          getSqrtRatioAtTick(curTick.result),
-          token0.decimals,
-        );
-        let priceLower: string;
-        let priceUpper: string;
-        if (
-          poolData?.config.classification === "VOLATILE" &&
-          dailyPrices &&
-          dailyPrices.length >= 2
-        ) {
-          const lastSevenDays = dailyPrices.slice(0, 7);
+    if (mode !== "new") return;
+    // set the ticks to min and max, ignoring display prices
+    // which will be shown as infinity
+    if (liquidityRangeType === "full-range") {
+      setTickLower(MIN_TICK);
+      setTickUpper(MAX_TICK);
+    } else if (liquidityRangeType === "auto") {
+      if (!curTick) return;
+      // auto sets the price range to +-10% of the current tick
+      const priceAtTick = sqrtPriceX96ToPrice(
+        getSqrtRatioAtTick(curTick.result),
+        token0.decimals,
+      );
+      let priceLower: string | undefined;
+      let priceUpper: string | undefined;
+      const priceCurrent = Number(priceAtTick) / 10 ** fUSDC.decimals;
 
-          priceLower = Math.min(...lastSevenDays).toFixed(fUSDC.decimals);
-          priceUpper = Math.max(...lastSevenDays).toFixed(fUSDC.decimals);
-        } else {
-          const diff = priceAtTick / 10n;
-          const pu = priceAtTick + diff;
-          const pl = priceAtTick - diff;
-          priceLower = (Number(pl) / 10 ** fUSDC.decimals).toFixed(
-            fUSDC.decimals,
-          );
-          priceUpper = (Number(pu) / 10 ** fUSDC.decimals).toFixed(
-            fUSDC.decimals,
-          );
-        }
+      const isVolatile =
+        poolData?.config.classification === "VOLATILE" &&
+        dailyPrices &&
+        dailyPrices.length >= 2;
 
-        setPriceLower(priceLower, token0.decimals);
-        setPriceUpper(priceUpper, token0.decimals);
+      if (isVolatile) {
+        const lastSevenDays = dailyPrices.slice(0, 7);
+        priceLower = Math.min(...lastSevenDays).toFixed(fUSDC.decimals);
+        priceUpper = Math.max(...lastSevenDays).toFixed(fUSDC.decimals);
       }
+
+      if (
+        !isVolatile ||
+        Number(priceLower) > priceCurrent ||
+        Number(priceUpper) < priceCurrent
+      ) {
+        const diff = priceAtTick / 10n;
+        const pu = priceAtTick + diff;
+        const pl = priceAtTick - diff;
+        priceLower = (Number(pl) / 10 ** fUSDC.decimals).toFixed(
+          fUSDC.decimals,
+        );
+        priceUpper = (Number(pu) / 10 ** fUSDC.decimals).toFixed(
+          fUSDC.decimals,
+        );
+      }
+
+      // these are always set as (isVolatile || !isVolatile) == true
+      setPriceLower(priceLower!, token0.decimals);
+      setPriceUpper(priceUpper!, token0.decimals);
     }
   }, [
     mode,
