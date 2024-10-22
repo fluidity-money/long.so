@@ -672,11 +672,28 @@ export default function PoolPage() {
                             key={`${position.positionId}`}
                             value={`${position.positionId}`}
                           >
-                            {position.positionId}
+                            {position.positionId} {position.isVested && "✨"}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    {isVested ? (
+                      <Badge
+                        size="sm"
+                        variant="iridescent-border"
+                        className="mt-1 w-fit p-2"
+                      >
+                        Position has been vested and is earning BOOSTED yield
+                      </Badge>
+                    ) : (
+                      <Badge
+                        size="sm"
+                        variant="outline"
+                        className="mt-1 w-fit border-warn p-2 text-warn"
+                      >
+                        Position is unvested and NOT earning yield
+                      </Badge>
+                    )}
                   </div>
                 </div>
 

@@ -38,6 +38,14 @@ export const columns: ColumnDef<Pool>[] = [
           {row.original.tokens[0].name}
           {" x "}
           {row.original.tokens[1].name}
+          {row.original.isVested && (
+            <>
+              {" ✨"}
+              <Badge size="sm" variant="iridescent-border">
+                Vested
+              </Badge>
+            </>
+          )}
         </div>
       );
     },
