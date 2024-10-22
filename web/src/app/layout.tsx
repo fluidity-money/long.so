@@ -44,6 +44,7 @@ export const metadata: Metadata = {
     images: [
       {
         url: image,
+        secureUrl: image,
         width: 1200,
         height: 800,
         alt: "Longtail AMM",
