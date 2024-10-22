@@ -247,6 +247,10 @@ export default function PoolPage() {
     ],
   });
 
+  const isLeoRewardsOnly =
+    unclaimedRewardsData?.result.length === 0 &&
+    unclaimedLeoRewardsData?.result.campaignRewards.length !== 0;
+
   // campaignTokenPrices is the price of each token used in a campaign for this position
   const [campaignTokenPrices, setCampaignTokenPrices] =
     useState<CampaignPrices>({});
@@ -827,19 +831,25 @@ export default function PoolPage() {
                           variant={collectError ? "destructive" : "secondary"}
                           className="h-[19px] w-[75px] select-none px-[27px] py-[5px] md:h-[22px] md:w-[92px]"
                           size="sm"
-                          disabled={!!collectData || isCollectPending}
+                          disabled={
+                            !!collectData ||
+                            isCollectPending ||
+                            isLeoRewardsOnly
+                          }
                           onClick={() =>
                             positionId && collect(BigInt(positionId))
                           }
                         >
                           <div className="text-3xs">
-                            {collectError
-                              ? "Failed"
-                              : collectData
-                                ? "Claimed!"
-                                : isCollectPending
-                                  ? "Claiming..."
-                                  : "Claim Yield"}
+                            {isLeoRewardsOnly
+                              ? "Pending Claim"
+                              : collectError
+                                ? "Failed"
+                                : collectData
+                                  ? "Claimed!"
+                                  : isCollectPending
+                                    ? "Claiming..."
+                                    : "Claim Yield"}
                           </div>
                         </Button>
                       </div>

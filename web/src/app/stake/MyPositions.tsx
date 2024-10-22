@@ -158,6 +158,10 @@ export const MyPositions = () => {
     args: [vestedPositions, campaignIds],
   });
 
+  const isLeoRewardsOnly =
+    unclaimedRewardsData?.result.length === 0 &&
+    unclaimedLeoRewardsData?.result.campaignRewards.length !== 0;
+
   // campaignTokenPrices is the price of each token used in a campaign for this position
   const [campaignTokenPrices, setCampaignTokenPrices] =
     useState<CampaignPrices>({});
@@ -435,23 +439,26 @@ export const MyPositions = () => {
             <Button
               className="w-full text-3xs text-black md:text-xs"
               variant={collectError ? "destructive" : "iridescent"}
-              disabled={!!collectData || isCollectPending}
+              disabled={!!collectData || isCollectPending || isLeoRewardsOnly}
               size="sm"
               onClick={() => collectAll()}
             >
-              {collectError
-                ? "Failed"
-                : collectData
-                  ? "Claimed!"
-                  : isCollectPending
-                    ? "Claiming..."
-                    : "Claim All Yield"}
+              {isLeoRewardsOnly
+                ? "Campaign Yield Not Yet Claimable"
+                : collectError
+                  ? "Failed"
+                  : collectData
+                    ? "Claimed!"
+                    : isCollectPending
+                      ? "Claiming..."
+                      : "Claim All Yield"}
             </Button>
             <Badge
               variant={collectError ? "destructive" : "iridescent"}
               className={cn(
                 "-mt-2 gap-2 border-2 border-black text-3xs",
-                collectData && "pointer-events-none opacity-70",
+                (collectData || isCollectPending || isLeoRewardsOnly) &&
+                  "pointer-events-none opacity-70",
               )}
             >
               {unclaimedRewards}
