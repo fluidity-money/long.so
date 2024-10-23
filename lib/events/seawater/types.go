@@ -27,7 +27,7 @@ type (
 		events.Event
 
 		From  types.Address `json:"from_" gorm:"column:from_"`
-		To    types.Address `json:"to_" gorm:"column:to_"`
+		To    types.Address `json:"to_" gorm:"column:to_" json:"to"`
 		PosId int           `json:"pos_id"`
 	}
 
@@ -44,7 +44,7 @@ type (
 
 		PosId   int                  `json:"pos_id"`
 		Pool    types.Address        `json:"pool"`
-		To      types.Address        `json:"to" gorm:"column:to_"`
+		To      types.Address        `json:"to" gorm:"column:to_" json:"to"`
 		Amount0 types.UnscaledNumber `json:"amount0"`
 		Amount1 types.UnscaledNumber `json:"amount1"`
 	}
@@ -63,7 +63,7 @@ type (
 		events.Event
 
 		Pool    types.Address        `json:"pool"`
-		To      types.Address        `json:"to_"`
+		To          types.Address        `gorm:"column:to_" json:"to"`
 		Amount0 types.UnscaledNumber `json:"amount0"`
 		Amount1 types.UnscaledNumber `json:"amount1"`
 	}
@@ -82,9 +82,9 @@ type (
 	Swap2 struct {
 		events.Event
 
-		User        types.Address        `gorm:"column:user_"`
-		From        types.Address        `gorm:"column:from_"`
-		To          types.Address        `gorm:"column:to_"`
+		User        types.Address        `gorm:"column:user_" json:"user"`
+		From        types.Address        `gorm:"column:from_" json:"from"`
+		To          types.Address        `gorm:"column:to_" json:"to"`
 		AmountIn    types.UnscaledNumber `json:"amountIn"`
 		AmountOut   types.UnscaledNumber `json:"amountOut"`
 		FluidVolume types.UnscaledNumber `json:"fluidVolume"`
