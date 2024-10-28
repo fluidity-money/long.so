@@ -169,7 +169,7 @@ export const AllPools = () => {
   }, [showDemoData, poolsData, chainId, fUSDC]);
 
   const poolTvlSummed = sum(
-    poolsData?.map((pool) => parseFloat(pool.tvlOverTime.daily[0])),
+    poolsData?.map((pool) => parseFloat(pool.tvlOverTime.daily[0] ?? 0)),
   );
 
   return (
@@ -192,7 +192,7 @@ export const AllPools = () => {
                 {showDemoData
                   ? "12.1M"
                   : // sum the tvl of all pools, assume the first daily value is the current value
-                    usdFormat(poolTvlSummed ? poolTvlSummed : 0)}
+                    usdFormat(poolTvlSummed)}
               </div>
             </div>
 
