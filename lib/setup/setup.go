@@ -6,7 +6,6 @@ package setup
 import (
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
 	"os"
 	"runtime/debug"
@@ -58,11 +57,10 @@ func (h Multihandler) Handle(ctx context.Context, record slog.Record) error {
 	if s := h.sentry; s != nil {
 		// Hack here to make sure we don't log any inappropriate Sentry
 		// errors.
-		if record.Level < h.furthestSentry {
-			return nil
-		}
-		if err := s.Handle(ctx, record); err != nil {
-			return err
+		if record.Level >= h.furthestSentry {
+			if err := s.Handle(ctx, record); err != nil {
+				return err
+			}
 		}
 	}
 	return h.json.Handle(ctx, record)
@@ -126,6 +124,6 @@ func Exit() {
 	os.Exit(1)
 }
 func Exitf(s string, f ...any) {
-	log.Printf(s, f...)
+	slog.Error("setup.Exitf", "reason", fmt.Sprintf(s, f...))
 	Exit()
 }
