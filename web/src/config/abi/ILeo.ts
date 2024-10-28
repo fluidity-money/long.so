@@ -166,6 +166,11 @@ export const ILeo = [
                 internalType: "address",
               },
               {
+                name: "positionId",
+                type: "uint256",
+                internalType: "uint256",
+              },
+              {
                 name: "rewards",
                 type: "uint256",
                 internalType: "uint256",

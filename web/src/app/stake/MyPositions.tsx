@@ -73,7 +73,8 @@ export const MyPositions = () => {
         staked:
           parseFloat(position.liquidity.fusdc.valueUsd) +
           parseFloat(position.liquidity.token1.valueUsd),
-        // TODO set this based on unclaimedRewardsData
+        // later passed to table based on unclaimedRewardsData
+        // to avoid recursive state updates
         totalYield: 0,
         isVested: position.isVested,
         liquidityCampaigns: position.pool.liquidityCampaigns,
@@ -210,14 +211,20 @@ export const MyPositions = () => {
     chainId,
   ]);
 
-  const unclaimedRewards = useMemo(() => {
-    if (!(unclaimedRewardsData || unclaimedLeoRewardsData)) return "$0.00";
+  // [map of unclaimed rewards by position, USD formatted total reward amount]
+  const [unclaimedRewardsByPosition, unclaimedRewards] = useMemo(() => {
+    if (!(unclaimedRewardsData || unclaimedLeoRewardsData))
+      return [{}, "$0.00"];
 
     // Sum all Leo rewards, scaled by the price of their token
     const campaignRewards =
       unclaimedLeoRewardsData?.result.campaignRewards.reduce(
         (acc, campaignReward) => {
-          if (!("campaignToken" in campaignReward)) return acc;
+          const vestedPosition = vestedPositions.find(
+            (p) => p.id === campaignReward.positionId,
+          );
+          if (!("campaignToken" in campaignReward) || !vestedPosition)
+            return acc;
           const campaignToken =
             campaignReward.campaignToken.toLowerCase() as `0x${string}`;
           if (!(campaignToken in campaignTokenPrices)) return acc;
@@ -228,33 +235,60 @@ export const MyPositions = () => {
             tokenDetails.tokenPrice,
             fUSDC.decimals,
           );
-          return acc + reward;
+          return {
+            ...acc,
+            [vestedPosition.id.toString()]:
+              (acc[vestedPosition.id.toString()] ?? 0) + reward,
+          };
         },
-        0,
-      ) ?? 0;
+        {} as { [positionId: string]: number },
+      ) ?? {};
 
     // Sum regular rewards
     const rewards =
-      unclaimedRewardsData?.result.reduce((p, c, i) => {
-        const token = getTokenFromAddress(chainId, nonVestedPositions[i].id);
-        // this should never happen as nonVestedPositions is passed to collect
-        if (!token) return 0;
-        const token0AmountScaled = getFormattedPriceFromUnscaledAmount(
-          c.amount0,
-          token.decimals,
-          tokenPrice,
-          fUSDC.decimals,
-        );
-        const token1AmountScaled = Number(c.amount1) / 10 ** fUSDC.decimals;
-        return p + token0AmountScaled + token1AmountScaled;
-      }, 0) ?? 0;
-    return usdFormat(rewards + campaignRewards);
+      unclaimedRewardsData?.result.reduce(
+        (acc, c, i) => {
+          const token = getTokenFromAddress(chainId, nonVestedPositions[i].id);
+          // this should never happen as nonVestedPositions is passed to collect
+          if (!token) return acc;
+          const token0AmountScaled = getFormattedPriceFromUnscaledAmount(
+            c.amount0,
+            token.decimals,
+            tokenPrice,
+            fUSDC.decimals,
+          );
+          const token1AmountScaled = Number(c.amount1) / 10 ** fUSDC.decimals;
+          return {
+            ...acc,
+            [nonVestedPositions[i].positionId.toString()]:
+              (acc[nonVestedPositions[i].positionId.toString()] ?? 0) +
+              token0AmountScaled +
+              token1AmountScaled,
+          };
+        },
+        {} as { [positionId: string]: number },
+      ) ?? {};
+
+    // Sum all rewards by position now that they have been scaled
+    const allRewards = [rewards, campaignRewards].reduce((acc, r) => {
+      Object.entries(r).forEach(([k, v]) => {
+        acc[k] = (acc[k] ?? 0) + v;
+      });
+      return acc;
+    }, {});
+    // Sum all rewards to find total pending yield
+    const unclaimedRewards = Object.values(allRewards).reduce(
+      (acc, v) => acc + v,
+      0,
+    );
+    return [allRewards, usdFormat(unclaimedRewards)];
   }, [
     unclaimedRewardsData,
     unclaimedLeoRewardsData,
     tokenPrice,
     chainId,
     fUSDC.decimals,
+    vestedPositions,
     nonVestedPositions,
     campaignTokenPrices,
   ]);
@@ -339,7 +373,15 @@ export const MyPositions = () => {
             </div>
           )
         ) : displayMode === "list" ? (
-          pools && <MyPositionsTable columns={columns} data={pools} />
+          pools && (
+            <MyPositionsTable
+              columns={columns}
+              data={pools.map((p) => ({
+                ...p,
+                totalYield: unclaimedRewardsByPosition[p.positionId] ?? 0,
+              }))}
+            />
+          )
         ) : (
           <motion.div
             layout
