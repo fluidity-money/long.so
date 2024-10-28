@@ -248,12 +248,14 @@ func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address, l 
 		a, err = leo.UnpackPositionVested(topic1, topic2, topic3, data)
 		logEvent("PositionVested")
 		table = "events_leo_positionvested"
+		isSeawater = false
 		isLeo = true
 
 	case leo.TopicPositionDivested:
 		a, err = leo.UnpackPositionDivested(topic1, topic2, topic3, data)
 		logEvent("PositionDivested")
 		table = "events_leo_positiondivested"
+		isSeawater = false
 		isLeo = true
 
 	case seawater.TopicMintPosition:
