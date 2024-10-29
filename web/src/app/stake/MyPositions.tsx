@@ -429,7 +429,15 @@ export const MyPositions = () => {
                     {usdFormat(pool.staked)}
                   </div>
                   <div className="mt-[-2px] text-[4px] text-gray-2 md:text-3xs">
-                    No Yield Yet
+                    {pool.isVested ? (
+                      <Badge size="sm" variant="iridescent-border">
+                        Vested
+                      </Badge>
+                    ) : unclaimedRewardsByPosition[pool.positionId] > 0 ? (
+                      usdFormat(unclaimedRewardsByPosition[pool.positionId])
+                    ) : (
+                      "No Yield Yet"
+                    )}
                   </div>
                 </div>
                 <Badge
@@ -439,7 +447,10 @@ export const MyPositions = () => {
                     )
                   }
                   variant="secondary"
-                  className="mt-[5px] h-6 w-full justify-center gap-1 text-nowrap p-0 px-1 text-2xs"
+                  className={cn(
+                    "mt-[5px] h-6 w-full justify-center gap-1 text-nowrap p-0 px-1 text-2xs",
+                    pool.isVested && "iridescent",
+                  )}
                 >
                   <Position className={"size-[6px] md:size-[10px]"} />
                   <div className="text-4xs md:text-3xs">
