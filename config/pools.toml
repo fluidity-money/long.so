@@ -2,14 +2,17 @@
 [0xA8EA92c819463EFbEdDFB670FEfC881A480f0115]
 displayed = true
 classification = "STABLECOIN"
+image = "/icons/fUSDC.svg"
 
 [0xde104342B32BCa03ec995f999181f7Cf1fFc04d7]
 displayed = true
 classification = "VOLATILE"
+image = "/icons/ethereum-eth-logo.svg"
 
 [0x6437fdc89cED41941b97A9f1f8992D88718C81c5]
 displayed = true
 classification = "STABLECOIN"
+image = "/icons/usd-coin-usdc-logo.svg"
 
 [0x09f7156aae9c903f90b1cb1e312582c4f208a759]
 displayed = true
@@ -18,10 +21,12 @@ classification = "VOLATILE"
 [0x36c116a8851869cf8a99b3bda0fad42453d32b99]
 displayed = true
 classification = "VOLATILE"
+image = "/icons/cbux.svg"
 
 [0x22b9fa698b68bBA071B513959794E9a47d19214c]
 displayed = true
 classification = "VOLATILE"
+image = "/icons/ICON_BLACK.png"
 
 [0x7165ab64d673baa4159b2016c845c8b416ede8dc]
 displayed = true

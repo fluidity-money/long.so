@@ -6,4 +6,5 @@ import "github.com/fluidity-money/long.so/lib/types/seawater"
 type Pool struct {
 	Displayed      bool                    `toml:"displayed" json:"displayed"`
 	Classification seawater.Classification `toml:"classification" json:"classification"`
+	Image          string                  `toml:"image" json:"image"`
 }

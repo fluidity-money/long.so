@@ -1677,7 +1677,10 @@ func (r *tokenResolver) Address(ctx context.Context, obj *model.Token) (string, 
 
 // Image is the resolver for the image field.
 func (r *tokenResolver) Image(ctx context.Context, obj *model.Token) (string, error) {
-	panic(fmt.Errorf("not implemented: Image - image"))
+	if obj == nil {
+		return "", fmt.Errorf("empty token")
+	}
+	return r.PoolsConfig[obj.Address].Image, nil
 }
 
 // TotalSupply is the resolver for the totalSupply field.
