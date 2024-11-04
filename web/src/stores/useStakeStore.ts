@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Token, tokens, defaults } from "@/config/tokens";
+import { Token } from "@/config/tokens";
 import {
   MIN_TICK,
   MAX_TICK,
@@ -12,6 +12,7 @@ import {
   getFormattedStringFromTokenAmount,
   getTokenAmountFromFormattedString,
 } from "@/lib/amounts";
+import { EmptyToken } from "@/lib/utils";
 
 interface StakeStore {
   multiSingleToken: "multi" | "single";
@@ -53,8 +54,16 @@ interface StakeStore {
   priceUpper: string;
 
   // parse and set from a display amount
-  setPriceLower: (tick: string, decimals: number) => void;
-  setPriceUpper: (tick: string, decimals: number) => void;
+  setPriceLower: (
+    tick: string,
+    decimals: number,
+    fusdcDecimals?: number,
+  ) => void;
+  setPriceUpper: (
+    tick: string,
+    decimals: number,
+    fusdcDecimals?: number,
+  ) => void;
 
   // fee Percentage taken from graph
   feePercentage: number;
@@ -65,10 +74,10 @@ export const useStakeStore = create<StakeStore>((set) => ({
   multiSingleToken: "multi",
   setMultiSingleToken: (multiSingleToken) => set({ multiSingleToken }),
 
-  token0: tokens[98985].usdc,
+  token0: EmptyToken,
   setToken0: (token0) => set({ token0 }),
 
-  token1: tokens[98985].fusdc,
+  token1: EmptyToken,
   setToken1: (token1) => set({ token1 }),
 
   token0Amount: "",
@@ -167,16 +176,13 @@ export const useStakeStore = create<StakeStore>((set) => ({
   priceLower: "0",
   priceUpper: "0",
 
-  setPriceLower: (price, decimals) => {
+  setPriceLower: (price, decimals, fusdcDecimals = 6) => {
     const validNumber =
       (!price.includes(" ") && !isNaN(Number(price))) || price === ".";
     // update display amount if `amount` is valid as a display number
     if (!validNumber) return;
     // Make a best effort to convert the number to a sqrt price, then to a tick.
-    const rawPrice = getTokenAmountFromFormattedString(
-      price,
-      defaults.fusdc.decimals,
-    );
+    const rawPrice = getTokenAmountFromFormattedString(price, fusdcDecimals);
     const priceN = Number(rawPrice);
     let tick = 0;
     try {
@@ -190,16 +196,13 @@ export const useStakeStore = create<StakeStore>((set) => ({
       priceLower: price,
     });
   },
-  setPriceUpper: (price, decimals) => {
+  setPriceUpper: (price, decimals, fusdcDecimals = 6) => {
     const validNumber =
       (!price.includes(" ") && !isNaN(Number(price))) || price === ".";
     // update display amount if `amount` is valid as a display number
     if (!validNumber) return;
 
-    const rawPrice = getTokenAmountFromFormattedString(
-      price,
-      defaults.fusdc.decimals,
-    );
+    const rawPrice = getTokenAmountFromFormattedString(price, fusdcDecimals);
     const priceN = Number(rawPrice);
     let tick = 0;
     try {

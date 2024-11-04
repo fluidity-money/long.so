@@ -132,7 +132,7 @@ export const SwapForm = () => {
 
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
-  const fUSDC = useTokens(expectedChainId, "fusdc");
+  const fUSDC = useTokens("fusdc");
   const ammContract = useContracts(expectedChainId, "amm");
   const isCorrectChain = useMemo(
     () => chainId === expectedChainId,

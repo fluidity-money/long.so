@@ -35,7 +35,7 @@ export default function LiquidityRangeVisualizer({
   tokenDecimals: number;
 }) {
   const chainId = useChainId();
-  const fUSDC = useTokens(chainId, "fusdc");
+  const fUSDC = useTokens("fusdc");
   const showLiquidityVisualiser = useFeatureFlag(
     "ui show liquidity visualiser",
   );

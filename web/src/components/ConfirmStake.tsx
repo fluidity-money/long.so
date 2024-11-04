@@ -13,11 +13,7 @@ import {
   useWaitForTransactionReceipt,
 } from "wagmi";
 import useWriteContract from "@/fixtures/wagmi/useWriteContract";
-import {
-  sqrtPriceX96ToPrice,
-  getLiquidityForAmounts,
-  snapTickToSpacing,
-} from "@/lib/math";
+import { sqrtPriceX96ToPrice, snapTickToSpacing } from "@/lib/math";
 import { useEffect, useCallback, useMemo } from "react";
 import { Hash, hexToBigInt } from "viem";
 import Confirm from "@/components/sequence/Confirm";
@@ -28,7 +24,7 @@ import {
   getFormattedPriceFromAmount,
   getUsdTokenAmountsForPosition,
 } from "@/lib/amounts";
-import { getTokenFromAddress, useTokens } from "@/config/tokens";
+import { useTokens } from "@/config/tokens";
 import { useContracts } from "@/config/contracts";
 import { TokenIcon } from "./TokenIcon";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
@@ -65,7 +61,7 @@ export const ConfirmStake = ({
 
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
-  const fUSDC = useTokens(expectedChainId, "fusdc");
+  const fUSDC = useTokens("fusdc");
   const ammContract = useContracts(expectedChainId, "amm");
   const leoContract = useContracts(expectedChainId, "leo");
   const ownershipNFTContract = useContracts(expectedChainId, "ownershipNFTs");
@@ -117,7 +113,7 @@ export const ConfirmStake = ({
   // read the allowance of the token
   const { data: allowanceDataToken0 } = useSimulateContract({
     address: token0.address,
-    abi: getTokenFromAddress(expectedChainId, token0.address)?.abi,
+    abi: token0.abi,
     // @ts-ignore this needs to use useSimulateContract which breaks the types
     functionName: "allowance",
     // @ts-ignore
@@ -126,7 +122,7 @@ export const ConfirmStake = ({
 
   const { data: allowanceDataToken1 } = useSimulateContract({
     address: token1.address,
-    abi: getTokenFromAddress(expectedChainId, token1.address)?.abi,
+    abi: token1.abi,
     // @ts-ignore this needs to use useSimulateContract which breaks the types
     functionName: "allowance",
     // @ts-ignore
@@ -322,12 +318,13 @@ export const ConfirmStake = ({
    */
   const approveToken1 = useCallback(() => {
     if (
-      !allowanceDataToken1?.result ||
-      allowanceDataToken1.result < BigInt(token1AmountRaw)
+      token1.abi &&
+      (!allowanceDataToken1?.result ||
+        allowanceDataToken1.result < BigInt(token1AmountRaw))
     ) {
       writeContractApprovalToken1({
         address: token1.address,
-        abi: getTokenFromAddress(expectedChainId, token1.address)!.abi,
+        abi: token1.abi,
         functionName: "approve",
         args: [ammContract.address, token1AmountRaw],
       });
@@ -338,10 +335,10 @@ export const ConfirmStake = ({
     allowanceDataToken1,
     writeContractApprovalToken1,
     token1.address,
+    token1.abi,
     incrPosition,
     mintPositionId,
     ammContract.address,
-    expectedChainId,
     token1AmountRaw,
   ]);
 
@@ -350,12 +347,13 @@ export const ConfirmStake = ({
    */
   const approveToken0 = useCallback(() => {
     if (
-      !allowanceDataToken0?.result ||
-      allowanceDataToken0.result < BigInt(token0AmountRaw)
+      token0.abi &&
+      (!allowanceDataToken0?.result ||
+        allowanceDataToken0.result < BigInt(token0AmountRaw))
     ) {
       writeContractApprovalToken0({
         address: token0.address,
-        abi: getTokenFromAddress(expectedChainId, token0.address)!.abi,
+        abi: token0.abi,
         functionName: "approve",
         args: [ammContract.address, token0AmountRaw],
       });
@@ -366,9 +364,9 @@ export const ConfirmStake = ({
     allowanceDataToken0,
     writeContractApprovalToken0,
     token0.address,
+    token0.abi,
     ammContract.address,
     approveToken1,
-    expectedChainId,
     token0AmountRaw,
   ]);
 
@@ -433,6 +431,7 @@ export const ConfirmStake = ({
         expectedChainId,
         position,
         token0,
+        fUSDC,
         Number(tokenPrice),
       ).then(([amount0, amount1]) =>
         updatePositionLocal({
@@ -452,7 +451,14 @@ export const ConfirmStake = ({
         }),
       );
     },
-    [expectedChainId, isVesting, token0, tokenPrice, updatePositionLocal],
+    [
+      expectedChainId,
+      isVesting,
+      token0,
+      fUSDC,
+      tokenPrice,
+      updatePositionLocal,
+    ],
   );
 
   const approveOwnershipNFT = useCallback(

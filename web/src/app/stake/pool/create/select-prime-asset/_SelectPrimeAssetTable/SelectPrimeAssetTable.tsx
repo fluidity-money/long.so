@@ -24,7 +24,6 @@ import { useStakeStore } from "@/stores/useStakeStore";
 import { useTokens } from "@/config/tokens";
 import { rankItem } from "@tanstack/match-sorter-utils";
 import { useState } from "react";
-import { useChainId } from "wagmi";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -66,8 +65,7 @@ export function SelectPrimeAssetTable<TData, TValue>({
   children,
 }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState("");
-  const chainId = useChainId();
-  const fUSDC = useTokens(chainId, "fusdc");
+  const fUSDC = useTokens("fusdc");
   const table = useReactTable({
     data,
     columns,

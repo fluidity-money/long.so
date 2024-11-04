@@ -23,7 +23,7 @@ import {
   getFormattedPriceFromAmount,
   snapAmountToDecimals,
 } from "@/lib/amounts";
-import { getTokenFromAddress, useTokens } from "@/config/tokens";
+import { useTokens } from "@/config/tokens";
 import { useContracts } from "@/config/contracts";
 import { RewardsBreakdown } from "./RewardsBreakdown";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
@@ -38,7 +38,7 @@ export const ConfirmSwap = () => {
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
   const ammContract = useContracts(expectedChainId, "amm");
-  const fUSDC = useTokens(expectedChainId, "fusdc");
+  const fUSDC = useTokens("fusdc");
 
   const {
     token0,
@@ -166,7 +166,7 @@ export const ConfirmSwap = () => {
   // read the allowance of the token
   const { data: allowanceData } = useSimulateContract({
     address: token0.address,
-    abi: getTokenFromAddress(chainId, token0.address)?.abi,
+    abi: token0.abi,
     // @ts-ignore this needs to use useSimulateContract which breaks the types
     functionName: "allowance",
     // @ts-ignore
@@ -200,12 +200,13 @@ export const ConfirmSwap = () => {
 
   const onSubmit = () => {
     if (
-      !allowanceData?.result ||
-      allowanceData.result < BigInt(token0AmountRaw ?? 0)
+      token0.abi &&
+      (!allowanceData?.result ||
+        allowanceData.result < BigInt(token0AmountRaw ?? 0))
     ) {
       writeContractApproval({
         address: token0.address,
-        abi: getTokenFromAddress(chainId, token0.address)!.abi,
+        abi: token0.abi,
         functionName: "approve",
         args: [ammContract.address, token0AmountRaw],
       });

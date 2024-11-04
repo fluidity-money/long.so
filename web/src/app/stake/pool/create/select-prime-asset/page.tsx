@@ -14,7 +14,7 @@ import {
   Pool,
 } from "@/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/columns";
 import { nanoid } from "nanoid";
-import { getTokenFromAddress, Token, useTokens } from "@/config/tokens";
+import { Token, useTokens } from "@/config/tokens";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { Hash } from "viem";
 import { usdFormat } from "@/lib/usdFormat";
@@ -45,8 +45,9 @@ const SelectPrimeAssetFragment = graphql(`
 const SelectPrimeAsset = () => {
   const router = useRouter();
   const chainId = useChainId();
-  const fUSDC = useTokens(chainId, "fusdc");
-  const DefaultToken = useTokens(chainId, "default");
+  const fUSDC = useTokens("fusdc");
+  const { getTokenFromAddress } = useTokens();
+  const DefaultToken = useTokens("default");
   const ref = useDetectClickOutside({
     onTriggered: () => router.back(),
   });
@@ -106,7 +107,7 @@ const SelectPrimeAsset = () => {
           symbol: pool.token.symbol,
           address: pool.token.address as Hash,
           decimals: pool.token.decimals,
-          icon: getTokenFromAddress(chainId, pool.token.address)?.icon,
+          icon: getTokenFromAddress(pool.token.address)?.icon,
         },
         // assume the second token is always fUSDC
         fUSDC,
@@ -118,7 +119,14 @@ const SelectPrimeAsset = () => {
       token1Symbol: fUSDC.symbol,
       token1Address: fUSDC.address,
     }));
-  }, [isLoading, poolsData, showMockData, DefaultToken, chainId, fUSDC]);
+  }, [
+    isLoading,
+    poolsData,
+    showMockData,
+    DefaultToken,
+    fUSDC,
+    getTokenFromAddress,
+  ]);
 
   return (
     <div className={"flex flex-col items-center"}>

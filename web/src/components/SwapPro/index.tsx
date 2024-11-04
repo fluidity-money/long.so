@@ -39,7 +39,7 @@ export const SwapPro = ({
   const swapPro = useSwapPro((s) => s.swapPro);
   const welcome = useWelcomeStore((s) => s.welcome);
   const chainId = useChainId();
-  const fUSDC = useTokens(chainId, "fusdc");
+  const fUSDC = useTokens("fusdc");
   const ammContract = useContracts(chainId, "amm");
 
   const { isLtSm } = useMediaQuery();

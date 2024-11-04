@@ -24,7 +24,7 @@ import { useStakeStore } from "@/stores/useStakeStore";
 import { sqrtPriceX96ToPrice } from "@/lib/math";
 import { usePositions } from "@/hooks/usePostions";
 import { LoaderIcon } from "lucide-react";
-import { useTokens, type Token, getTokenFromAddress } from "@/config/tokens";
+import { useTokens, type Token } from "@/config/tokens";
 import { useContracts } from "@/config/contracts";
 import { simulateContract } from "wagmi/actions";
 import config from "@/config";
@@ -34,7 +34,8 @@ import { CampaignPrices } from "./pool/page";
 export const MyPositions = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const chainId = useChainId();
-  const fUSDC = useTokens(chainId, "fusdc");
+  const fUSDC = useTokens("fusdc");
+  const { getTokenFromAddress } = useTokens();
   const ammContract = useContracts(chainId, "amm");
   const leoContract = useContracts(chainId, "leo");
   const [expanded, setExpanded] = useState(false);
@@ -179,7 +180,7 @@ export const MyPositions = () => {
         // already seen this token
         if (campaignToken in prices) continue;
         // find token details
-        const token = getTokenFromAddress(chainId, campaignToken);
+        const token = getTokenFromAddress(campaignToken);
         if (!token) {
           console.warn("Token not found, skipping!", campaignToken);
           continue;
@@ -209,6 +210,7 @@ export const MyPositions = () => {
     ammContract.abi,
     ammContract.address,
     chainId,
+    getTokenFromAddress,
   ]);
 
   // [map of unclaimed rewards by position, USD formatted total reward amount]
@@ -248,7 +250,7 @@ export const MyPositions = () => {
     const rewards =
       unclaimedRewardsData?.result.reduce(
         (acc, c, i) => {
-          const token = getTokenFromAddress(chainId, nonVestedPositions[i].id);
+          const token = getTokenFromAddress(nonVestedPositions[i].id);
           // this should never happen as nonVestedPositions is passed to collect
           if (!token) return acc;
           const token0AmountScaled = getFormattedPriceFromUnscaledAmount(
@@ -286,11 +288,11 @@ export const MyPositions = () => {
     unclaimedRewardsData,
     unclaimedLeoRewardsData,
     tokenPrice,
-    chainId,
     fUSDC.decimals,
     vestedPositions,
     nonVestedPositions,
     campaignTokenPrices,
+    getTokenFromAddress,
   ]);
 
   const collectAll = useCallback(() => {
@@ -407,7 +409,7 @@ export const MyPositions = () => {
                 <div className="-mt-1 flex flex-col md:-mt-2">
                   <div className="flex flex-row">
                     <TokenIcon
-                      src={getTokenFromAddress(chainId, pool.id)?.icon}
+                      src={getTokenFromAddress(pool.id)?.icon}
                       className="ml-[-2px] size-[25px] rounded-full border border-black md:size-[35px]"
                     />
                     <TokenIridescent className="ml-[-6px] size-[25px] rounded-full border-2 border-black md:size-[35px]" />

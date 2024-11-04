@@ -47,11 +47,7 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
-import {
-  getTokenFromAddress,
-  useTokens,
-  type Token as TokenType,
-} from "@/config/tokens";
+import { useTokens, type Token as TokenType } from "@/config/tokens";
 import { getFormattedPriceFromAmount } from "@/lib/amounts";
 import { TokenIcon } from "./TokenIcon";
 import LiquidityRangeVisualizer from "./LiquidityRangeVisualizer";
@@ -96,7 +92,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
   const ammContract = useContracts(expectedChainId, "amm");
-  const fUSDC = useTokens(expectedChainId, "fusdc");
+  const fUSDC = useTokens("fusdc");
+  const { getTokenFromAddress } = useTokens();
   const isCorrectChain = useMemo(
     () => chainId === expectedChainId,
     [chainId, expectedChainId],
@@ -134,7 +131,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   useEffect(() => {
     if (!poolId) return;
     if (token0.address !== poolId && token1.address !== poolId) {
-      const poolToken = getTokenFromAddress(expectedChainId, poolId);
+      const poolToken = getTokenFromAddress(poolId);
       if (!poolToken) {
         router.push("/stake");
         return;
@@ -151,6 +148,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     router,
     expectedChainId,
     fUSDC,
+    getTokenFromAddress,
   ]);
 
   // Parse the price lower and upper, and set the ticks properly.

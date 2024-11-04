@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import IridescentToken from "@/assets/icons/token-iridescent.svg";
 import { AllAssetsTable } from "@/app/swap/explore/_AllAssetsTable/AllAssetsTable";
 import { columns } from "@/app/swap/explore/_AllAssetsTable/columns";
-import { useTokens, getTokenFromAddress } from "@/config/tokens";
+import { useTokens } from "@/config/tokens";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
@@ -41,7 +41,8 @@ const SwapExploreFragment = graphql(`
 const ExplorePage = () => {
   const router = useRouter();
   const chainId = useChainId();
-  const fUSDC = useTokens(chainId, "fusdc");
+  const fUSDC = useTokens("fusdc");
+  const { getTokenFromAddress } = useTokens();
   const { setToken1, setToken0 } = useSwapStore();
 
   const { address } = useAccount();
@@ -131,15 +132,12 @@ const ExplorePage = () => {
   }, [address, tokensData]);
 
   const allAssetsData = useMemo(() => {
-    if (showMockData) return mockSwapExploreAssets(chainId);
+    if (showMockData) return mockSwapExploreAssets();
 
     // reformat the data to match the columns
     return (
       tokensData.map((token, i) => {
-        const tokenFromAddress = getTokenFromAddress(
-          chainId,
-          token.token.address,
-        );
+        const tokenFromAddress = getTokenFromAddress(token.token.address);
         return {
           symbol: token.token.symbol,
           address: token.token.address,
@@ -151,7 +149,7 @@ const ExplorePage = () => {
         };
       }) ?? []
     );
-  }, [showMockData, tokensData, tokenBalances, chainId]);
+  }, [showMockData, tokensData, tokenBalances, getTokenFromAddress]);
 
   return (
     <div className={"flex flex-col items-center overflow-y-auto"}>
@@ -186,7 +184,7 @@ const ExplorePage = () => {
                 }
               >
                 {/* TODO: add in highest rewarders */}
-                {(showMockData ? mockHighestRewarders(chainId) : []).map(
+                {(showMockData ? mockHighestRewarders() : []).map(
                   (rewarder) => (
                     <Badge
                       variant={"outline"}

@@ -38,7 +38,7 @@ export default function WithdrawLiquidity() {
     if ((!positionId && typeof window !== undefined) || !address) router.back();
   }, [positionId, router, address]);
 
-  const fUSDC = useTokens(expectedChainId, "fusdc");
+  const fUSDC = useTokens("fusdc");
   const ammContract = useContracts(expectedChainId, "amm");
   const isCorrectChain = useMemo(
     () => chainId === expectedChainId,

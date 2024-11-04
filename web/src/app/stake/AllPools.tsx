@@ -23,11 +23,7 @@ import { sum } from "lodash";
 import { graphql, useFragment } from "@/gql";
 import { useRouter } from "next/navigation";
 import { getFormattedPriceFromTick } from "@/lib/amounts";
-import {
-  getTokenFromAddress,
-  Token as TokenType,
-  useTokens,
-} from "@/config/tokens";
+import { Token as TokenType, useTokens } from "@/config/tokens";
 import { TokenIcon } from "@/components/TokenIcon";
 import { useChainId } from "wagmi";
 
@@ -72,6 +68,7 @@ export const AllPoolsFragment = graphql(`
     token {
       name
       decimals
+      symbol
     }
     volumeOverTime {
       daily {
@@ -106,7 +103,7 @@ export const AllPools = () => {
 
   const router = useRouter();
   const chainId = useChainId();
-  const fUSDC = useTokens(chainId, "fusdc");
+  const fUSDC = useTokens("fusdc");
 
   const poolsData = useFragment(AllPoolsFragment, data?.pools);
 
@@ -148,7 +145,8 @@ export const AllPools = () => {
         id: pool.address,
         tokens: [
           {
-            ...getTokenFromAddress(chainId, pool.address)!,
+            address: pool.address as `0x${string}`,
+            ...pool.token,
           },
           {
             ...fUSDC,
@@ -166,7 +164,7 @@ export const AllPools = () => {
         annualPercentageYield: 0,
       };
     });
-  }, [showDemoData, poolsData, chainId, fUSDC]);
+  }, [showDemoData, poolsData, fUSDC]);
 
   const poolTvlSummed = sum(
     poolsData?.map((pool) => parseFloat(pool.tvlOverTime.daily[0] ?? 0)),
@@ -248,7 +246,7 @@ export const AllPools = () => {
               >
                 <div className={"absolute -left-1 -top-2 flex flex-row"}>
                   <TokenIcon
-                    src={getTokenFromAddress(chainId, pool.id)?.icon}
+                    src={pool.tokens[0].icon}
                     className={"size-[24px] rounded-full"}
                   />
                   <Badge

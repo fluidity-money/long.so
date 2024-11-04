@@ -41,11 +41,7 @@ import {
 } from "@/lib/math";
 import { TokenIcon } from "@/components/TokenIcon";
 import { usePositions } from "@/hooks/usePostions";
-import {
-  useTokens,
-  getTokenFromAddress,
-  Token as TokenType,
-} from "@/config/tokens";
+import { useTokens, Token as TokenType } from "@/config/tokens";
 import { useContracts } from "@/config/contracts";
 import { superpositionTestnet } from "@/config/chains";
 import { simulateContract } from "wagmi/actions";
@@ -82,7 +78,8 @@ export default function PoolPage() {
   const router = useRouter();
   const { chainId } = useAccount();
   const expectedChainId = useChainId();
-  const fUSDC = useTokens(expectedChainId, "fusdc");
+  const fUSDC = useTokens("fusdc");
+  const { getTokenFromAddress } = useTokens();
   const ammContract = useContracts(expectedChainId, "amm");
   const leoContract = useContracts(expectedChainId, "leo");
   const ownershipNFTContract = useContracts(expectedChainId, "ownershipNFTs");
@@ -131,10 +128,10 @@ export default function PoolPage() {
 
   useEffect(() => {
     if (!id) return;
-    const token = getTokenFromAddress(expectedChainId, id);
+    const token = getTokenFromAddress(id);
     if (!token) return;
     handleTokens(token, fUSDC);
-  }, [id, expectedChainId, fUSDC, handleTokens]);
+  }, [id, expectedChainId, fUSDC, handleTokens, getTokenFromAddress]);
 
   const poolData = allPoolsData?.find((pool) => pool.id === id);
 
@@ -267,7 +264,7 @@ export default function PoolPage() {
         // already seen this token
         if (campaignToken in prices) continue;
         // find token details
-        const token = getTokenFromAddress(expectedChainId, campaignToken);
+        const token = getTokenFromAddress(campaignToken);
         if (!token) {
           console.warn("Token not found, skipping!", campaignToken);
           continue;
@@ -297,6 +294,7 @@ export default function PoolPage() {
     ammContract.abi,
     ammContract.address,
     expectedChainId,
+    getTokenFromAddress,
   ]);
 
   const unclaimedRewards = useMemo(() => {

@@ -34,7 +34,7 @@ export default function ConfirmWithdrawLiquidity() {
 
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
-  const fUSDC = useTokens(expectedChainId, "fusdc");
+  const fUSDC = useTokens("fusdc");
   const ammContract = useContracts(expectedChainId, "amm");
   const leoContract = useContracts(expectedChainId, "leo");
 
@@ -205,6 +205,7 @@ export default function ConfirmWithdrawLiquidity() {
         expectedChainId,
         position,
         token0,
+        fUSDC,
         Number(tokenPrice),
       ).then(([amount0, amount1]) =>
         updatePositionLocal({
@@ -228,6 +229,7 @@ export default function ConfirmWithdrawLiquidity() {
       expectedChainId,
       isDivesting,
       token0,
+      fUSDC,
       positionId,
       tokenPrice,
       updatePositionLocal,

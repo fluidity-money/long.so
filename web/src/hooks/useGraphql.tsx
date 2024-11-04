@@ -15,6 +15,10 @@ import { useChain } from "@/config/chains";
  */
 export const graphqlQueryGlobal = graphql(`
   query AllData {
+    fusdc {
+      address
+      ...FusdcFragment
+    }
     pools {
       # used for the pool selector
       address
@@ -27,6 +31,7 @@ export const graphqlQueryGlobal = graphql(`
       ...ManagePoolFragment
       ...SwapFormFragment
       ...StakeFormFragment
+      ...TokensFragment
     }
   }
 `);
