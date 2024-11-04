@@ -69,6 +69,7 @@ export const AllPoolsFragment = graphql(`
       name
       decimals
       symbol
+      image
     }
     volumeOverTime {
       daily {
@@ -146,6 +147,7 @@ export const AllPools = () => {
         tokens: [
           {
             address: pool.address as `0x${string}`,
+            icon: pool.token.image,
             ...pool.token,
           },
           {
