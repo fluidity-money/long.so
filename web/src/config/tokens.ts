@@ -2,7 +2,7 @@ import { allChains } from "./chains";
 import LightweightERC20 from "./abi/LightweightERC20";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { graphql, useFragment } from "@/gql";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { EmptyToken } from "@/lib/utils";
 import { useStakeStore } from "@/stores/useStakeStore";
@@ -89,19 +89,25 @@ export function useTokens(token?: "default" | string) {
     ? Object.values(tokens).find((t) => t.symbol === "fUSDC")
     : undefined;
 
-  const getTokenFromAddress = isTokens
-    ? (address: string) =>
-        Object.values(tokens).find(
-          ({ address: _a }) => address.toLowerCase() === _a.toLowerCase(),
-        )
-    : () => EmptyToken;
+  const getTokenFromAddress = useCallback(
+    (address: string) =>
+      isTokens
+        ? Object.values(tokens).find(
+            ({ address: _a }) => address.toLowerCase() === _a.toLowerCase(),
+          )
+        : EmptyToken,
+    [isTokens, tokens],
+  );
 
-  const getTokenFromSymbol = isTokens
-    ? (symbol: string) =>
-        Object.values(tokens).find(
-          ({ symbol: _s }) => symbol.toLowerCase() === _s.toLowerCase(),
-        )
-    : () => EmptyToken;
+  const getTokenFromSymbol = useCallback(
+    (symbol: string) =>
+      isTokens
+        ? Object.values(tokens).find(
+            ({ symbol: _s }) => symbol.toLowerCase() === _s.toLowerCase(),
+          )
+        : EmptyToken,
+    [isTokens, tokens],
+  );
 
   // set default tokens once we load
   useEffect(() => {
