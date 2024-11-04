@@ -111,8 +111,8 @@ export function useTokens(token?: "default" | string) {
         setSwapToken1(DefaultToken);
       }
       if (stakeToken0 === EmptyToken && stakeToken1 === EmptyToken) {
-        setStakeToken0(fUSDC);
-        setStakeToken1(DefaultToken);
+        setStakeToken0(DefaultToken);
+        setStakeToken1(fUSDC);
       }
     }
   }, [
