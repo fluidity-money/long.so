@@ -25,7 +25,7 @@ const TokensFragment = graphql(`
       decimals
       name
       symbol
-      # image
+      image
     }
   }
 `);
@@ -36,7 +36,7 @@ const FusdcFragment = graphql(`
     decimals
     name
     symbol
-    # image
+    image
   }
 `);
 
@@ -74,7 +74,7 @@ export function useTokens(token?: "default" | string) {
           ...t.token,
           address: t.token.address as `0x${string}`,
           abi: LightweightERC20,
-          icon: "",
+          icon: t.token.image,
         },
       }),
       {} as { [symbol: string]: Token },
