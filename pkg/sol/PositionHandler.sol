@@ -10,11 +10,11 @@ contract PositionHandler {
     ILeo immutable LEO;
     IERC20 immutable FUSDC;
 
-    constructor(address longtail, address leo, address fusdcAddr) {
-        LONGTAIL = ISeawaterAMM(longtail);
-        LEO = ILeo(leo);
-        FUSDC = IERC20(fusdcAddr);
-        FUSDC.approve(longtail, type(uint256).max);
+    constructor(ISeawaterAMM longtail, ILeo leo, IERC20 fusdcAddr) {
+        LONGTAIL = longtail;
+        LEO = leo;
+        FUSDC = fusdcAddr;
+        FUSDC.approve(address(longtail), type(uint256).max);
     }
 
     function proxyVestIncr(
@@ -31,6 +31,7 @@ contract PositionHandler {
         uint256 id = LONGTAIL.mintPositionBC5B086D(pool, lower, upper);
         IERC20(pool).transferFrom(msg.sender, address(this), amount0Max);
         FUSDC.transferFrom(msg.sender, address(this), fusdcMax);
+        IERC20(pool).approve(address(LONGTAIL), amount0Max);
         (uint256 amount0Taken, uint256 fusdcTaken) =
             LONGTAIL.incrPositionE2437399(
                 pool,

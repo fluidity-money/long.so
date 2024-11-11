@@ -1,8 +1,16 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.16;
 
+import "../sol/IERC20.sol";
+
 contract MockLongtail {
+    IERC20 immutable FUSDC;
+
     uint counter;
+
+    constructor(IERC20 fusdc) {
+        FUSDC = fusdc;
+    }
 
     function mintPositionBC5B086D(
         address /* pool */,
@@ -21,14 +29,15 @@ contract MockLongtail {
     }
 
     function incrPositionE2437399(
-        address /* pool *,
+        address pool,
         uint256 /* id */,
         uint256 amount0Min,
         uint256 amount1Min,
         uint256 /* amount0Desired */,
         uint256 /* amount1Desired */
     ) external returns (uint256, uint256) {
-        ++counter;
+        IERC20(pool).transferFrom(msg.sender, address(this), amount0Min);
+        FUSDC.transferFrom(msg.sender, address(this), amount1Min);
         return (amount0Min, amount1Min);
     }
 }
