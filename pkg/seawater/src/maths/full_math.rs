@@ -7,27 +7,6 @@ use crate::error::Error;
 /// 2^128, for normalising 128-bit fixed point numbers.
 pub const Q128: U256 = U256::from_limbs([0, 0, 1, 0]);
 
-/// Returns `a * b % c` without losing precision.
-///
-/// This function is modified from 0xKitsune's implementation, since we can simply allocate a
-/// 512 bit int and do the maths directly on it.
-pub fn mul_mod(a: U256, b: U256, mut modulus: U256) -> U256 {
-    if modulus == U256::ZERO {
-        return U256::ZERO;
-    }
-
-    // alloc a 512 bit result
-    let mut product = [0; 8];
-    let overflow = ruint::algorithms::addmul(&mut product, a.as_limbs(), b.as_limbs());
-    debug_assert!(!overflow);
-
-    // compute modulus
-    // SAFETY - ruint code
-    unsafe { ruint::algorithms::div(&mut product, modulus.as_limbs_mut()) };
-
-    modulus
-}
-
 /// Returns `a * b / c` and if the result had carry.
 pub fn _mul_div(a: U256, b: U256, mut denom_and_rem: U256) -> Result<(U256, bool), Error> {
     if denom_and_rem == U256::ZERO {

@@ -44,7 +44,7 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 |         Deployment name        |              Deployment address            |
 |--------------------------------|--------------------------------------------|
 | Longtail AMM                   | 0xd706b85c571330af8495174664d04D6d8551F9D5 |
-| Longtail NFT manager           | 0x7AD12Ef3578D5eb845883d156D8dFB2eA39448B5 |
+| Longtail NFT manager           | 0xd36A5BA112dCBD0fCae76f7A159a0CA9C71e00Ee |
 | Permit2 router                 | 0x2246431582087b930F2CE561c34deb8E7e5c44bE |
 | Swaps implementation           | 0x7717e32db762818b86b47a213c1461c56ab2d4b6 |
 | Swaps permit2 A implementation | 0x5992090411265add042b29dc361dee05e5606db6 |
@@ -59,7 +59,7 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 
 |  Deployment name |              Deployment address            |
 |------------------|--------------------------------------------|
-| Implementation   | 0xe8c1d28a4c16225c7188d0d812690a451e9c818a |
+| Implementation   | 0x487fad81909176b559a45fcad7ffeae1ea13cf0d |
 
 ##### Useful testing token deployments
 

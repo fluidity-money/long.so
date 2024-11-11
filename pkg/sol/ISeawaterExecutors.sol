@@ -191,14 +191,10 @@ interface ISeawaterExecutorAdminExposed {
     /// @param pool the token to create the pool with
     /// @param sqrtPriceX96 the starting price for the pool
     /// @param fee the fee to use
-    /// @param tickSpacing the spacing for valid liquidity ticks
-    /// @param maxLiquidityPerTick the maximum amount of liquidity allowed in a single tick
-    function createPoolD650E2D0(
+    function createPool653F395E(
         address pool,
         uint256 sqrtPriceX96,
-        uint32 fee,
-        uint8 tickSpacing,
-        uint128 maxLiquidityPerTick
+        uint32 fee
     ) external;
 
     /// @notice collects protocol fees. only usable by the seawater admin

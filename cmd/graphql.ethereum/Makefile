@@ -1,6 +1,8 @@
 
 EXTRA_FILES := pools.toml
 
+CLEAN_FILES := bootstrap bootstrap.zip
+
 include ../golang.mk
 
 pools.toml: ${CONFIG_DIR}/pools.toml

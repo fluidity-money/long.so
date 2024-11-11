@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"math/big"
@@ -350,10 +348,6 @@ func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address, l 
 }
 
 func databaseInsertLog(db *gorm.DB, table string, a any) error {
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(a); err != nil {
-		return fmt.Errorf("encoding block header: %v", err)
-	}
 	if err := db.Table(table).Omit("CreatedBy").Create(a).Error; err != nil {
 		return fmt.Errorf("inserting log: %v", err)
 	}

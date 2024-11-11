@@ -429,7 +429,7 @@ impl Leo {
         &mut self,
         position_details: Vec<(Address, U256)>,
         campaign_ids: Vec<CampaignId>,
-    ) -> Result<(Vec<(Address, u128, u128)>, Vec<(Address, U256)>), Vec<u8>> {
+    ) -> Result<(Vec<(Address, u128, u128)>, Vec<(U256, Address, U256)>), Vec<u8>> {
         assert_or!(self.enabled.get(), Error::NotEnabled);
 
         // Track amounts owed to this array to return.
@@ -534,7 +534,7 @@ impl Leo {
                     );
 
                     let rewards = base_rewards * U256::from(clamped_secs_since);
-                    campaign_owed.push((campaign_token, rewards));
+                    campaign_owed.push((position_id, campaign_token, rewards));
 
                     erc20::give(campaign_token, rewards)?;
 

@@ -128,7 +128,7 @@ const ISeawaterAMM = [
   },
   {
     type: "function",
-    name: "createPoolD650E2D0",
+    name: "createPool653F395E",
     inputs: [
       {
         name: "pool",
@@ -144,17 +144,7 @@ const ISeawaterAMM = [
         name: "fee",
         type: "uint32",
         internalType: "uint32",
-      },
-      {
-        name: "tickSpacing",
-        type: "uint8",
-        internalType: "uint8",
-      },
-      {
-        name: "maxLiquidityPerTick",
-        type: "uint128",
-        internalType: "uint128",
-      },
+      }
     ],
     outputs: [],
     stateMutability: "nonpayable",

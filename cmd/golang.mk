@@ -12,7 +12,7 @@ CMDLET := $(shell basename ${PWD})
 CONFIG_DIR := ../../config
 
 ${CMDLET}: ${EXTRA_FILES} ${GO_FILES}
-	${GO_BUILD} ${GO_BUILD_EXTRA_ARGS}
+	@${GO_BUILD} ${GO_BUILD_EXTRA_ARGS}
 
 lint: ${GO_FILES}
 	@${GO_FMT}
@@ -29,4 +29,4 @@ watch:
 	@ls -1 ${GO_FILES} | entr -ns 'clear && make build'
 
 clean:
-	@rm -f "${CMDLET}" lint test docker ${EXTRA_FILES}
+	@rm -f "${CMDLET}" lint test docker ${EXTRA_FILES} ${CLEAN_FILES}

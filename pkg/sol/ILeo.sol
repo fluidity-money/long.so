@@ -101,8 +101,8 @@ interface ILeo is ILeoEvents {
     }
 
     struct CampaignRewards {
-        address campaignToken;
         uint256 positionId;
+        address campaignToken;
         uint256 rewards;
     }
 

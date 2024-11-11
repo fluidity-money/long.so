@@ -161,12 +161,10 @@ contract SeawaterAMM is ISeawaterAMM {
     // admin functions
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
-    function createPoolD650E2D0(
+    function createPool653F395E(
         address /* token */,
         uint256 /* sqrtPriceX96 */,
-        uint32 /* fee */,
-        uint8 /* tickSpacing */,
-        uint128 /* maxLiquidityPerTick */
+        uint32 /* fee */
     ) external {
         directDelegate(_getExecutorAdmin());
     }

@@ -45,9 +45,10 @@ use maths::tick_math;
 
 use types::{U256Extension, WrappedNative};
 
-use stylus_sdk::{msg, prelude::*, storage::*};
+use stylus_sdk::{evm, msg, prelude::*, storage::*};
 
-use stylus_sdk::evm;
+#[cfg(all(target_arch = "wasm32", feature = "testing"))]
+use getrandom::register_custom_getrandom;
 
 #[allow(dead_code)]
 type RawArbResult = Option<Result<Vec<u8>, Vec<u8>>>;
@@ -61,6 +62,8 @@ extern crate alloc;
 extern "C" {
     #[allow(dead_code)]
     fn wasm_log_ext(ptr: *const u8, len: usize);
+    #[allow(dead_code)]
+    fn wasm_request_rand(ptr: *mut u8, len: usize);
 }
 
 #[macro_export]
@@ -73,6 +76,17 @@ macro_rules! wasm_log {
         }
     }
 }
+
+#[cfg(all(target_arch = "wasm32", feature = "testing"))]
+fn wasm_get_random(buf: &mut [u8]) -> Result<(), getrandom::Error> {
+    unsafe {
+        wasm_request_rand(buf.as_mut_ptr(), 100);
+    }
+    Ok(())
+}
+
+#[cfg(all(target_arch = "wasm32", feature = "testing"))]
+register_custom_getrandom!(wasm_get_random);
 
 // we split our entrypoint functions into three sets, and call them via diamond proxies, to
 // save on binary size
