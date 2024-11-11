@@ -22,8 +22,6 @@ contract TestPositionHandler is Test {
     PositionHandler positionHandler;
 
     function setUp() external {
-        seawater = ISeawater(address(new MockLongtail(fusdc)));
-        leo = ILeo(address(new MockLeo()));
         fusdc = IERC20(address(new LightweightERC20(
             "Hello",
             "World",
@@ -38,18 +36,20 @@ contract TestPositionHandler is Test {
             type(uint256).max,
             address(this)
         )));
+        seawater = ISeawater(address(new MockLongtail(fusdc)));
+        leo = ILeo(address(new MockLeo()));
         positionHandler = new PositionHandler(seawater, leo, fusdc);
     }
 
     function testShouldTakePositions() external {
         uint256 fusdcMaxAmt = 200;
         uint256 otherTokenMaxAmt = 100;
-        otherToken.approve(address(positionHandler), 100);
-        fusdc.approve(address(positionHandler), 200);
+        otherToken.approve(address(positionHandler), otherTokenMaxAmt);
+        fusdc.approve(address(positionHandler), fusdcMaxAmt);
         positionHandler.proxyVestIncr(
             address(otherToken),
-            100,
-            200,
+            11,  // Lower
+            222, // Upper
             0,
             1,
             otherTokenMaxAmt,
