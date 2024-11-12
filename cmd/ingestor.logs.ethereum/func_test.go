@@ -285,6 +285,39 @@ func TestHandleLogCallbackCampaignCreated(t *testing.T) {
 	assert.True(t, wasRun)
 }
 
+func TestHandleLogCallbackCampaignUpdated(t *testing.T) {
+	leoAddr := ethCommon.HexToAddress("0x487fad81909176b559a45fcad7ffeae1ea13cf0d")
+	s := strings.NewReader(`
+{
+	"address": "0x487fad81909176b559a45fcad7ffeae1ea13cf0d",
+	"blockHash": "0xdf0158760c6e71bbc08040b07f950d9a6671c71feaa1621fedba4305f106ee84",
+	"blockNumber": "0x1094992",
+	"data": "0x0000000000000000000000000000000000000000000000000000000000000000",
+	"logIndex": "0x0",
+	"removed": false,
+	"topics": [
+		"0x864ae7d7d1b893bdc1fcaa3bcca9f18e3b6c0e5eb8e71f6cd269e1ffb14eff98",
+		"0x5555666677778888000000000000000000000000000000000000000000000000",
+		"0x0000000000000000000000006437fdc89ced41941b97a9f1f8992d88718c81c5",
+		"0x0000000000000000000000000000000000000000000000000000000000000000"
+	],
+	"transactionHash": "0x44e789f6ef62636e295d264a3068dcf78234c2b18e33b022e96d6bc2909b89df",
+	"transactionIndex": "0x1"
+}`)
+	var l ethTypes.Log
+	wasRun := false
+	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
+	err := handleLogCallback(EmptyAddr, EmptyAddr, leoAddr, l, func(table string, a any) error {
+		assert.Equalf(t, "events_leo_campaignupdated", table, "table not equal")
+		_, ok := a.(*leo.CampaignUpdated)
+		assert.Truef(t, ok, "CampaignUpdated type coercion not true")
+		wasRun = true
+		return nil
+	})
+	assert.Nil(t, err)
+	assert.True(t, wasRun)
+}
+
 func TestHandleLogCallbackCampaignBalanceUpdated(t *testing.T) {
 	leoAddr := ethCommon.HexToAddress("0xECc45391ad9961612F52677d9053B46aeae1064B")
 	s := strings.NewReader(`
@@ -329,6 +362,7 @@ func TestCurrentEventIds(t *testing.T) {
 		"0xd3593b1fa4a2b80431faf29b3fb80cd1ef82a2b65128a650c625c4ed8d1b4d92": false,
 		"0xd500e81443925d03f2ac45364aa32d71b4bbd8f697bc7b8fc5a4accc4601b54b": false,
 		"0xac631f3001b55ea1509cf3d7e74898f85392a61a76e8149181ae1259622dabc8": false,
+		"0x864ae7d7d1b893bdc1fcaa3bcca9f18e3b6c0e5eb8e71f6cd269e1ffb14eff98": false,
 	}
 	for _, id := range FilterTopics {
 		currentIds[id.Hex()] = true

@@ -71,7 +71,7 @@ func UnpackCampaignCreated(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*Ca
 // UnpackCampaignUpdated happening with a new iteration of an existing
 // campaign for a specific pool
 func UnpackCampaignUpdated(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*CampaignUpdated, error) {
-	i, err := abi.Unpack("CampaignCreated", d)
+	i, err := abi.Unpack("CampaignUpdated", d)
 	if err != nil {
 		return nil, err
 	}
