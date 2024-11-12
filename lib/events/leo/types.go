@@ -37,7 +37,6 @@ type (
 		Identifier types.Data    `json:"identifier"`
 		Pool       types.Address `json:"pool"`
 		PerSecond  types.Number  `json:"perSecond"`
-		Token      types.Address `json:"token"`
 		TickLower  int32         `json:"tickLower"`
 		TickUpper  int32         `json:"tickUpper"`
 		Starting   time.Time     `json:"starting"`
