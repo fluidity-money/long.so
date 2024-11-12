@@ -161,14 +161,14 @@ export const ILeo = [
             internalType: "struct ILeo.CampaignRewards[]",
             components: [
               {
-                name: "campaignToken",
-                type: "address",
-                internalType: "address",
-              },
-              {
                 name: "positionId",
                 type: "uint256",
                 internalType: "uint256",
+              },
+              {
+                name: "campaignToken",
+                type: "address",
+                internalType: "address",
               },
               {
                 name: "rewards",
