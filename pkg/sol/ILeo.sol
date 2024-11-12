@@ -7,7 +7,8 @@ interface ILeo is ILeoEvents {
     /// @notice vest a position that the caller owns.
     /// @param pool to take the position from
     /// @param id of the position to take
-    function vestPosition(address pool, uint256 id) external;
+    /// @param recipient to receive the vested position
+    function vestPosition(address pool, uint256 id, address recipient) external;
 
     /// @notice create a campaign with the parameters given.
     /// @param campaignId to modify for the pool given

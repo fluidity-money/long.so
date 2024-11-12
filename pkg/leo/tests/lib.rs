@@ -4,7 +4,7 @@ mod testing {
 
     use stylus_sdk::{
         alloy_primitives::{address, Address, FixedBytes, U256},
-        block,
+        block, msg,
     };
 
     const POOL: Address = address!("6221a9c005f6e47eb398fd867784cacfdcfff4e7");
@@ -63,7 +63,7 @@ mod testing {
             )
             .unwrap();
 
-            leo.vest_position(POOL, POS_ID).unwrap();
+            leo.vest_position(POOL, POS_ID, msg::sender()).unwrap();
 
             assert!(
                 leo.collect(vec![(POOL, POS_ID)], vec![CAMPAIGN_ID])
@@ -80,9 +80,9 @@ mod testing {
         libleo::host::with_storage::<_, libleo::Leo, _>(&[(POOL, POS_ID, 0, 100, 1000)], |leo| {
             leo.ctor(Address::ZERO).unwrap();
 
-            leo.vest_position(POOL, POS_ID).unwrap();
+            leo.vest_position(POOL, POS_ID, msg::sender()).unwrap();
 
-            assert!(leo.vest_position(POOL, POS_ID).is_err());
+            assert!(leo.vest_position(POOL, POS_ID, msg::sender()).is_err());
 
             leo.create_campaign(
                 CAMPAIGN_ID,                // Identifier
@@ -115,7 +115,7 @@ mod testing {
 
             leo.ctor(Address::ZERO).unwrap();
 
-            leo.vest_position(POOL, POS_ID).unwrap();
+            leo.vest_position(POOL, POS_ID, msg::sender()).unwrap();
 
             // Someone goes to create a campaign.
 
@@ -178,7 +178,7 @@ mod testing {
 
             leo.ctor(Address::ZERO).unwrap();
 
-            leo.vest_position(POOL, POS_ID).unwrap();
+            leo.vest_position(POOL, POS_ID, msg::sender()).unwrap();
 
             // Someone goes to create a campaign.
 
@@ -255,7 +255,7 @@ mod proptesting {
 
     use stylus_sdk::{
         alloy_primitives::{Address, FixedBytes, U256},
-        block,
+        block, msg,
     };
 
     const POOL: Address = Address::ZERO;
@@ -317,11 +317,11 @@ mod proptesting {
 
                     assert_eq!(leo.pool_lp(POOL).unwrap(), U256::ZERO);
 
-                    leo.vest_position(POOL, POS_ID_OTHER).unwrap();
+                    leo.vest_position(POOL, POS_ID_OTHER, msg::sender()).unwrap();
 
                     assert_eq!(leo.pool_lp(POOL).unwrap(), other_position_lp);
 
-                    leo.vest_position(POOL, POS_ID).unwrap();
+                    leo.vest_position(POOL, POS_ID, msg::sender()).unwrap();
 
                     assert_eq!(leo.pool_lp(POOL).unwrap(), U256::from(other_position_lp + position_lp));
 

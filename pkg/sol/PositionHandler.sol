@@ -44,7 +44,7 @@ contract PositionHandler {
         IERC20(pool).transfer(msg.sender, amount0Max - amount0Taken);
         IERC20(pool).transfer(msg.sender, fusdcMax - fusdcTaken);
         if (shouldVest) {
-            LEO.vestPosition(pool, id);
+            LEO.vestPosition(pool, id, recipient);
         } else {
             LONGTAIL.transferPositionEEC7A3CD(id, address(this), recipient);
         }

@@ -132,7 +132,12 @@ impl Leo {
     // Take a user's LP NFT using the NFT Manager, also recording the
     // pool they LP'd, including the timestamp when they deposited it
     // here. This also serves as the time it was last updated.
-    pub fn vest_position(&mut self, pool: Address, id: U256) -> Result<(), Vec<u8>> {
+    pub fn vest_position(
+        &mut self,
+        pool: Address,
+        id: U256,
+        recipient: Address,
+    ) -> Result<(), Vec<u8>> {
         // Just to be safe, check if we already have this position tracked.
         assert_or!(
             self.positions.get(id).timestamp.get().is_zero(),
@@ -146,7 +151,7 @@ impl Leo {
 
         // Start to set everything related to the position.
         let mut position = self.positions.setter(id);
-        position.owner.set(msg::sender());
+        position.owner.set(recipient);
         position.timestamp.set(U64::from(block::timestamp()));
         position.token.set(pool);
         position.tick_lower.set(I32::from_le_bytes(
@@ -163,7 +168,10 @@ impl Leo {
             .setter(pool)
             .set(existing_liq + U256::from(position_liq));
 
-        evm::log(events::PositionVested { positionId: id });
+        evm::log(events::PositionVested2 {
+            positionId: id,
+            owner: recipient,
+        });
 
         Ok(())
     }

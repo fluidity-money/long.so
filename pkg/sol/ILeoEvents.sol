@@ -39,7 +39,10 @@ interface ILeoEvents {
 
     /// @notice a specific position was vested
     /// @param positionId that was just vested
-    event PositionVested(uint256 indexed positionId);
+    event PositionVested2(
+        uint256 indexed positionId,
+        address indexed owner
+    );
 
     /// @notice a specific position was just divested from Leo
     /// @param positionId that was divested
