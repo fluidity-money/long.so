@@ -68,6 +68,15 @@ type Served struct {
 	Timestamp int `json:"timestamp"`
 }
 
+type TotalFee struct {
+	// USD scaled value of token0 that has been collected as fees.
+	Amount0 string `json:"amount0"`
+	// USD scaled value of token1 (fUSDC) that has been collected as fees.
+	Amount1 string `json:"amount1"`
+	// USD scaled value of both tokens that have been collected as fees.
+	Total string `json:"total"`
+}
+
 // TVL over time available in the pool, in the form of just the USD amount, if the client is
 // so inclined to request this data.
 //

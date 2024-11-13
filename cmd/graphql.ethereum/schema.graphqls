@@ -169,6 +169,12 @@ type SeawaterPool {
   fee: Int!
 
   """
+  Total all time fees collected by this pool,
+  scaled by price as a USD amount.
+  """
+  total_fee: TotalFee!
+
+  """
   Address of the pool, and of the token that's traded.
   """
   address: String!
@@ -267,6 +273,21 @@ type Served {
   Timestamp of the creation of the served request.
   """
   timestamp: Int!
+}
+
+type TotalFee {
+  """
+  USD scaled value of token0 that has been collected as fees.
+  """
+  amount0: String! # should this include token?
+  """
+  USD scaled value of token1 (fUSDC) that has been collected as fees.
+  """
+  amount1: String!
+  """
+  USD scaled value of both tokens that have been collected as fees.
+  """
+  total: String!
 }
 
 """
