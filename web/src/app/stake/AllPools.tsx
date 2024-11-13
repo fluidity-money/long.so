@@ -94,6 +94,9 @@ export const AllPoolsFragment = graphql(`
         upper
       }
     }
+    total_fee {
+      total
+    }
   }
 `);
 
@@ -161,7 +164,7 @@ export const AllPools = () => {
         liquidityRange,
         // TODO: I don't know where to get the following info from
         boosted: false,
-        fees: 0,
+        fees: Number(pool.total_fee.total),
         claimable: false,
         annualPercentageYield: 0,
       };
