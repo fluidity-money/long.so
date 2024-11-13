@@ -787,14 +787,14 @@ func (r *seawaterPoolResolver) VolumeOverTime(ctx context.Context, obj *seawater
 		FusdcValueUnscaled  types.UnscaledNumber
 		Token1ValueUnscaled types.UnscaledNumber
 	}
-	err = r.DB.Table("seawater_pool_swap_volume_daily_1").
+	err = r.DB.Table("seawater_pool_swap_volume_daily_2").
 		Where("token1_token = ?", obj.Token).
 		Limit(maxDays).Scan(&dailyResults).
 		Error
 	if err != nil {
 		return
 	}
-	err = r.DB.Table("seawater_pool_swap_volume_monthly_1").
+	err = r.DB.Table("seawater_pool_swap_volume_monthly_2").
 		Where("token1_token = ?", obj.Token).Limit(maxMonths).
 		Scan(&monthlyResults).
 		Error
