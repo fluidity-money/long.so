@@ -144,7 +144,7 @@ const ISeawaterAMM = [
         name: "fee",
         type: "uint32",
         internalType: "uint32",
-      }
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
