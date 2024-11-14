@@ -1005,9 +1005,15 @@ func (r *seawaterPoolResolver) Apr(ctx context.Context, obj *seawater.Pool) (mod
 	if err != nil {
 		return model.Apr{}, fmt.Errorf("tvl: %v", err)
 	}
+	var yieldString string
+	if yield.Total == "" {
+		yieldString = "0"
+	} else {
+		yieldString = yield.Total
+	}
 	// Fee APR = (total yield from fees) / TVL * 100
 	ratOneHundred := big.NewRat(100, 1)
-	feeApr, _ := new(big.Rat).SetString(yield.Total)
+	feeApr, _ := new(big.Rat).SetString(yieldString)
 	feeApr.Mul(feeApr, ratOneHundred)
 	feeApr.Quo(feeApr, tvl)
 
