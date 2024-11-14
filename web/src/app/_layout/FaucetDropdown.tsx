@@ -72,7 +72,7 @@ export const FaucetDropdown = ({
             href="https://bridge.superposition.so"
           >
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
-              Meow Domains
+              Bridge
             </DropdownMenu.Item>
           </a>
           <a
