@@ -58,6 +58,18 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	APR struct {
+		Campaign func(childComplexity int) int
+		Fee      func(childComplexity int) int
+		Total    func(childComplexity int) int
+	}
+
+	APRFee struct {
+		Fusdc func(childComplexity int) int
+		Token func(childComplexity int) int
+		Total func(childComplexity int) int
+	}
+
 	Amount struct {
 		Decimals      func(childComplexity int) int
 		Timestamp     func(childComplexity int) int
@@ -143,6 +155,7 @@ type ComplexityRoot struct {
 	SeawaterPool struct {
 		Address             func(childComplexity int) int
 		Amounts             func(childComplexity int) int
+		Apr                 func(childComplexity int) int
 		Config              func(childComplexity int) int
 		EarnedFeesAPRToken1 func(childComplexity int) int
 		EarnedFeesAprfusdc  func(childComplexity int) int
@@ -308,6 +321,7 @@ type SeawaterPoolResolver interface {
 	YieldOverTime(ctx context.Context, obj *seawater.Pool) (model.YieldOverTime, error)
 	EarnedFeesAprfusdc(ctx context.Context, obj *seawater.Pool) ([]string, error)
 	EarnedFeesAPRToken1(ctx context.Context, obj *seawater.Pool) ([]string, error)
+	Apr(ctx context.Context, obj *seawater.Pool) (model.Apr, error)
 	LiquidityCampaigns(ctx context.Context, obj *seawater.Pool) ([]model.LiquidityCampaign, error)
 	Positions(ctx context.Context, obj *seawater.Pool, first *int, after *int) (model.SeawaterPositionsGlobal, error)
 	PositionsForUser(ctx context.Context, obj *seawater.Pool, wallet string, first *int, after *int) (model.SeawaterPositionsUser, error)
@@ -386,6 +400,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "APR.campaign":
+		if e.complexity.APR.Campaign == nil {
+			break
+		}
+
+		return e.complexity.APR.Campaign(childComplexity), true
+
+	case "APR.fee":
+		if e.complexity.APR.Fee == nil {
+			break
+		}
+
+		return e.complexity.APR.Fee(childComplexity), true
+
+	case "APR.total":
+		if e.complexity.APR.Total == nil {
+			break
+		}
+
+		return e.complexity.APR.Total(childComplexity), true
+
+	case "APRFee.fusdc":
+		if e.complexity.APRFee.Fusdc == nil {
+			break
+		}
+
+		return e.complexity.APRFee.Fusdc(childComplexity), true
+
+	case "APRFee.token":
+		if e.complexity.APRFee.Token == nil {
+			break
+		}
+
+		return e.complexity.APRFee.Token(childComplexity), true
+
+	case "APRFee.total":
+		if e.complexity.APRFee.Total == nil {
+			break
+		}
+
+		return e.complexity.APRFee.Total(childComplexity), true
 
 	case "Amount.decimals":
 		if e.complexity.Amount.Decimals == nil {
@@ -788,6 +844,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SeawaterPool.Amounts(childComplexity), true
+
+	case "SeawaterPool.APR":
+		if e.complexity.SeawaterPool.Apr == nil {
+			break
+		}
+
+		return e.complexity.SeawaterPool.Apr(childComplexity), true
 
 	case "SeawaterPool.config":
 		if e.complexity.SeawaterPool.Config == nil {
@@ -1628,6 +1691,12 @@ type SeawaterPool {
   """
   earnedFeesAPRToken1: [String!]!
 
+
+  """
+  APR for this pool, containing USD values for campaign rewards and pool fees.
+  """
+  APR: APR!
+
   """
   Liquidity campaigns currently available for this pool.
   """
@@ -2178,6 +2247,27 @@ type Note {
   to be displayed on. Could be "top", "bottom-right" for Longtail.
   """
   placement: String!
+}
+
+type APR {
+  """ 
+  Scaled USD value of the APR available from rewards from campaign tokens, for campaigns that are currently active on this pool.
+  """
+  campaign: String!
+  """
+  Scaled USD value of the APR available from the fee this pool takes, containing the amount of fUSDC, pool token, and sum of both that is available.
+  """
+  fee: APRFee!
+  """ 
+  Scaled USD value representing the total APR of this pool, summing the pool fees of fUSDC and the pool token, and the campaign rewards for all active campaigns on the pool.
+  """
+  total: String!
+}
+
+type APRFee {
+  token: String!
+  fusdc: String!
+  total: String!
 }
 
 """
@@ -3205,6 +3295,278 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _APR_campaign(ctx context.Context, field graphql.CollectedField, obj *model.Apr) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_APR_campaign(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Campaign, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_APR_campaign(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "APR",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _APR_fee(ctx context.Context, field graphql.CollectedField, obj *model.Apr) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_APR_fee(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Fee, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.APRFee)
+	fc.Result = res
+	return ec.marshalNAPRFee2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐAPRFee(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_APR_fee(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "APR",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "token":
+				return ec.fieldContext_APRFee_token(ctx, field)
+			case "fusdc":
+				return ec.fieldContext_APRFee_fusdc(ctx, field)
+			case "total":
+				return ec.fieldContext_APRFee_total(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type APRFee", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _APR_total(ctx context.Context, field graphql.CollectedField, obj *model.Apr) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_APR_total(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Total, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_APR_total(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "APR",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _APRFee_token(ctx context.Context, field graphql.CollectedField, obj *model.APRFee) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_APRFee_token(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Token, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_APRFee_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "APRFee",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _APRFee_fusdc(ctx context.Context, field graphql.CollectedField, obj *model.APRFee) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_APRFee_fusdc(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Fusdc, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_APRFee_fusdc(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "APRFee",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _APRFee_total(ctx context.Context, field graphql.CollectedField, obj *model.APRFee) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_APRFee_total(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Total, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_APRFee_total(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "APRFee",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Amount_token(ctx context.Context, field graphql.CollectedField, obj *model.Amount) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Amount_token(ctx, field)
 	if err != nil {
@@ -4048,6 +4410,8 @@ func (ec *executionContext) fieldContext_LiquidityCampaign_pool(_ context.Contex
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRFUSDC(ctx, field)
 			case "earnedFeesAPRToken1":
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
+			case "APR":
+				return ec.fieldContext_SeawaterPool_APR(ctx, field)
 			case "liquidityCampaigns":
 				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
@@ -4686,6 +5050,8 @@ func (ec *executionContext) fieldContext_Query_pools(_ context.Context, field gr
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRFUSDC(ctx, field)
 			case "earnedFeesAPRToken1":
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
+			case "APR":
+				return ec.fieldContext_SeawaterPool_APR(ctx, field)
 			case "liquidityCampaigns":
 				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
@@ -4962,6 +5328,8 @@ func (ec *executionContext) fieldContext_Query_getPool(ctx context.Context, fiel
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRFUSDC(ctx, field)
 			case "earnedFeesAPRToken1":
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
+			case "APR":
+				return ec.fieldContext_SeawaterPool_APR(ctx, field)
 			case "liquidityCampaigns":
 				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
@@ -5685,6 +6053,8 @@ func (ec *executionContext) fieldContext_SeawaterConfig_pool(_ context.Context, 
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRFUSDC(ctx, field)
 			case "earnedFeesAPRToken1":
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
+			case "APR":
+				return ec.fieldContext_SeawaterPool_APR(ctx, field)
 			case "liquidityCampaigns":
 				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
@@ -6732,6 +7102,58 @@ func (ec *executionContext) fieldContext_SeawaterPool_earnedFeesAPRToken1(_ cont
 	return fc, nil
 }
 
+func (ec *executionContext) _SeawaterPool_APR(ctx context.Context, field graphql.CollectedField, obj *seawater.Pool) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterPool_APR(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.SeawaterPool().Apr(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.Apr)
+	fc.Result = res
+	return ec.marshalNAPR2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐApr(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SeawaterPool_APR(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SeawaterPool",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "campaign":
+				return ec.fieldContext_APR_campaign(ctx, field)
+			case "fee":
+				return ec.fieldContext_APR_fee(ctx, field)
+			case "total":
+				return ec.fieldContext_APR_total(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type APR", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _SeawaterPool_liquidityCampaigns(ctx context.Context, field graphql.CollectedField, obj *seawater.Pool) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 	if err != nil {
@@ -7454,6 +7876,8 @@ func (ec *executionContext) fieldContext_SeawaterPosition_pool(_ context.Context
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRFUSDC(ctx, field)
 			case "earnedFeesAPRToken1":
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
+			case "APR":
+				return ec.fieldContext_SeawaterPool_APR(ctx, field)
 			case "liquidityCampaigns":
 				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
@@ -8268,6 +8692,8 @@ func (ec *executionContext) fieldContext_SeawaterSwap_pool(_ context.Context, fi
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRFUSDC(ctx, field)
 			case "earnedFeesAPRToken1":
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
+			case "APR":
+				return ec.fieldContext_SeawaterPool_APR(ctx, field)
 			case "liquidityCampaigns":
 				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
@@ -11447,6 +11873,104 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(_ context.Context
 
 // region    **************************** object.gotpl ****************************
 
+var aPRImplementors = []string{"APR"}
+
+func (ec *executionContext) _APR(ctx context.Context, sel ast.SelectionSet, obj *model.Apr) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, aPRImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("APR")
+		case "campaign":
+			out.Values[i] = ec._APR_campaign(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "fee":
+			out.Values[i] = ec._APR_fee(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "total":
+			out.Values[i] = ec._APR_total(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var aPRFeeImplementors = []string{"APRFee"}
+
+func (ec *executionContext) _APRFee(ctx context.Context, sel ast.SelectionSet, obj *model.APRFee) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, aPRFeeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("APRFee")
+		case "token":
+			out.Values[i] = ec._APRFee_token(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "fusdc":
+			out.Values[i] = ec._APRFee_fusdc(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "total":
+			out.Values[i] = ec._APRFee_total(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var amountImplementors = []string{"Amount"}
 
 func (ec *executionContext) _Amount(ctx context.Context, sel ast.SelectionSet, obj *model.Amount) graphql.Marshaler {
@@ -13301,6 +13825,42 @@ func (ec *executionContext) _SeawaterPool(ctx context.Context, sel ast.Selection
 					}
 				}()
 				res = ec._SeawaterPool_earnedFeesAPRToken1(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "APR":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SeawaterPool_APR(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -15563,6 +16123,14 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
+
+func (ec *executionContext) marshalNAPR2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐApr(ctx context.Context, sel ast.SelectionSet, v model.Apr) graphql.Marshaler {
+	return ec._APR(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAPRFee2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐAPRFee(ctx context.Context, sel ast.SelectionSet, v model.APRFee) graphql.Marshaler {
+	return ec._APRFee(ctx, sel, &v)
+}
 
 func (ec *executionContext) marshalNAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐAmount(ctx context.Context, sel ast.SelectionSet, v model.Amount) graphql.Marshaler {
 	return ec._Amount(ctx, sel, &v)

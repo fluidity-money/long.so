@@ -2,6 +2,21 @@
 
 package model
 
+type Apr struct {
+	// Scaled USD value of the APR available from rewards from campaign tokens, for campaigns that are currently active on this pool.
+	Campaign string `json:"campaign"`
+	// Scaled USD value of the APR available from the fee this pool takes, containing the amount of fUSDC, pool token, and sum of both that is available.
+	Fee APRFee `json:"fee"`
+	// Scaled USD value representing the total APR of this pool, summing the pool fees of fUSDC and the pool token, and the campaign rewards for all active campaigns on the pool.
+	Total string `json:"total"`
+}
+
+type APRFee struct {
+	Token string `json:"token"`
+	Fusdc string `json:"fusdc"`
+	Total string `json:"total"`
+}
+
 // Get swaps for a specific pool, set up to be more granular for caching.
 type GetSwaps struct {
 	Data SeawaterSwaps `json:"data"`

@@ -151,6 +151,9 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 
 // CampaignID is the resolver for the campaignId field.
 func (r *liquidityCampaignResolver) CampaignID(ctx context.Context, obj *model.LiquidityCampaign) (string, error) {
+	if obj == nil {
+		return "", fmt.Errorf("no campaign")
+	}
 	return obj.Identifier.String(), nil
 }
 
@@ -166,7 +169,21 @@ func (r *liquidityCampaignResolver) PerSecond(ctx context.Context, obj *model.Li
 
 // MaximumAmount is the resolver for the maximumAmount field.
 func (r *liquidityCampaignResolver) MaximumAmount(ctx context.Context, obj *model.LiquidityCampaign) (model.Amount, error) {
-	panic(fmt.Errorf("not implemented: MaximumAmount - maximumAmount"))
+	if obj == nil {
+		return model.Amount{}, fmt.Errorf("no campaign")
+	}
+	pool, err := r.Pool(ctx, obj)
+	if err != nil {
+		return model.Amount{}, fmt.Errorf("no pool")
+	}
+	ts := int(time.Now().Unix())
+	m := model.Amount{
+		Token:         obj.Token,
+		Decimals:      pool.Decimals,
+		Timestamp:     ts,
+		ValueUnscaled: types.UnscaledNumber(obj.MaximumAmount),
+	}
+	return m, nil
 }
 
 // FromTimestamp is the resolver for the fromTimestamp field.
@@ -964,6 +981,64 @@ func (r *seawaterPoolResolver) EarnedFeesAPRToken1(ctx context.Context, obj *sea
 		return []string{"0", "0.15"}, nil
 	}
 	return nil, nil // TODO
+}
+
+// Apr is the resolver for the APR field.
+func (r *seawaterPoolResolver) Apr(ctx context.Context, obj *seawater.Pool) (model.Apr, error) {
+	if obj == nil {
+		return model.Apr{}, fmt.Errorf("pool empty")
+	}
+	// Get most recent TVL
+	tvlOverTime, err := r.TvlOverTime(ctx, obj)
+	if err != nil || len(tvlOverTime.Daily) == 0 {
+		return model.Apr{}, fmt.Errorf("no tvl: %v", err)
+	}
+	tvl, _ := new(big.Rat).SetString(tvlOverTime.Daily[0])
+	// Get total fees from this pool
+	yield, err := r.TotalFee(ctx, obj)
+	if err != nil {
+		return model.Apr{}, fmt.Errorf("tvl: %v", err)
+	}
+	// Fee APR = (total yield from fees) / TVL * 100
+	ratOneHundred := big.NewRat(100, 1)
+	feeApr, _ := new(big.Rat).SetString(yield.Total)
+	feeApr.Mul(feeApr, ratOneHundred)
+	feeApr.Quo(feeApr, tvl)
+
+	// Get campaign rewards
+	activeLiquidityCampaigns, err := r.LiquidityCampaigns(ctx, obj)
+	if err != nil {
+		return model.Apr{}, fmt.Errorf("liquidity campaigns: %v", err)
+	}
+	// Sum all rewards for all campaigns on this pool
+	var allCampaignRewards *big.Rat
+	for _, campaign := range activeLiquidityCampaigns {
+		// Get current price of the token distributed by this campaign
+		pool, err := r.Resolver.Query().GetPool(ctx, campaign.Token.String())
+		if err != nil {
+			return model.Apr{}, fmt.Errorf("pool: %v", err)
+		}
+		price, err := r.Price(ctx, pool)
+		if err != nil {
+			return model.Apr{}, fmt.Errorf("price: %v", err)
+		}
+		// Scale total campaign distribution amount to USD
+		priceFloat, _ := new(big.Rat).SetString(price)
+		maxAmt := new(big.Rat).SetInt(campaign.MaximumAmount.Int)
+		decimals := math.ExponentiateDecimals(int64(pool.Decimals))
+		maxAmt = maxAmt.Mul(maxAmt, priceFloat)
+		maxAmt = maxAmt.Quo(maxAmt, decimals)
+		allCampaignRewards.Add(allCampaignRewards, maxAmt)
+	}
+	// Campaign APR = (total campaign rewards) / TVL * 100
+	campaignApr := allCampaignRewards.Mul(allCampaignRewards, ratOneHundred)
+	campaignApr.Quo(campaignApr, tvl)
+	totalApr := feeApr.Add(feeApr, campaignApr)
+	return model.Apr{
+		// TODO Campaign: ,
+		// TODO Fee: ,
+		Total: totalApr.FloatString(8),
+	}, nil
 }
 
 // LiquidityCampaigns is the resolver for the liquidityCampaigns field.
