@@ -32,6 +32,6 @@
 	"ui show liquidity visualiser": true,
 	"ui show banners": true,
 	"ui show leo": true,
-	"ui show pool apy": false
+	"ui show pool apy": false,
+	"ui is mainnet enabled": false
 }
-

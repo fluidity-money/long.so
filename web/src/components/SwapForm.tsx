@@ -666,7 +666,7 @@ export const SwapForm = () => {
               <TokenIcon className="-ml-1 size-5" />
               <TokenIcon className="-ml-1.5 size-5" />
               <div className={"iridescent-text text-[12px] md:text-[14px]"}>
-                Earn up to $100 for making this trade!
+                Earn rewards for making this trade!
               </div>
             </Badge>
             <RewardsBreakdown hidden={breakdownHidden} />

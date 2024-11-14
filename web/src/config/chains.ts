@@ -1,4 +1,3 @@
-import { arbitrumSepolia as baseArbitrumSepolia } from "wagmi/chains";
 import z from "zod";
 import { defineChain } from "viem";
 import "wagmi";
@@ -44,17 +43,27 @@ export const superpositionTestnet = defineChain({
   icon: "/icons/spn-test.svg",
 });
 
-const arbitrumSepolia = {
-  ...baseArbitrumSepolia,
-  icon: "/icons/ARB.svg",
-  gqlUrl: "https://arb-sepolia-graph.long.so",
-};
+export const superpositionMainnet = defineChain({
+  name: "Superposition",
+  id: 55244,
+  nativeCurrency: { name: "Superposition", symbol: "SPN", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://rpc.superposition.so"] },
+    public: { http: ["https://rpc.superposition.so"] },
+  },
+  blockExplorers: {
+    default: {
+      name: "CatScan",
+      url: "https://explorer.superposition.so",
+    },
+  },
+  gqlUrl: "https://graph.long.so",
+  icon: "/icons/spn.svg",
+});
 
-export { arbitrumSepolia };
+export const allTestnets = [superpositionTestnet] as const;
 
-export const allTestnets = [superpositionTestnet, arbitrumSepolia] as const;
-
-export const allMainnets = [] as const;
+export const allMainnets = [superpositionMainnet] as const;
 
 export const allChains = [...allTestnets, ...allMainnets] as const;
 

@@ -34,7 +34,7 @@ export const FaucetDropdown = ({
               <div className="mx-2">
                 <FaFaucet />
               </div>
-              <div className="text-nowrap">Faucets</div>
+              <div className="text-nowrap">Explore</div>
               <div className="ml-2 hidden w-0 transition-[width] group-hover:inline-flex group-hover:w-2 group-data-[state=open]:inline-flex group-data-[state=open]:w-2">
                 <ArrowDown width={10} height={6} className={"invert"} />
               </div>
@@ -51,10 +51,46 @@ export const FaucetDropdown = ({
           <a
             rel="noopener noreferrer"
             target="_blank"
+            href="https://superposition.so/"
+          >
+            <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
+              Dapp Explorer
+            </DropdownMenu.Item>
+          </a>
+          <a
+            rel="noopener noreferrer"
+            target="_blank"
+            href="https://meow.domains"
+          >
+            <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
+              Meow Domains
+            </DropdownMenu.Item>
+          </a>
+          <a
+            rel="noopener noreferrer"
+            target="_blank"
+            href="https://bridge.superposition.so"
+          >
+            <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
+              Meow Domains
+            </DropdownMenu.Item>
+          </a>
+          <a
+            rel="noopener noreferrer"
+            target="_blank"
+            href="https://weth.long.so/"
+          >
+            <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
+              Wrap ETH
+            </DropdownMenu.Item>
+          </a>
+          <a
+            rel="noopener noreferrer"
+            target="_blank"
             href="https://wspn.long.so/"
           >
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
-              Wrap SPN
+              Wrap SPN (testnet)
             </DropdownMenu.Item>
           </a>
           <a
@@ -66,15 +102,6 @@ export const FaucetDropdown = ({
               SPN faucet
             </DropdownMenu.Item>
           </a>
-          <a
-            rel="noopener noreferrer"
-            target="_blank"
-            href="https://faucet.quicknode.com/arbitrum/sepolia"
-          >
-            <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
-              Arbitrum Sepolia ETH faucet
-            </DropdownMenu.Item>
-          </a>
           {/*
           <a rel="noopener noreferrer" target="_blank" href="https://wspn.long.so">
             <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
@@ -82,15 +109,6 @@ export const FaucetDropdown = ({
             </DropdownMenu.Item>
           </a>
           */}
-          <a
-            rel="noopener noreferrer"
-            target="_blank"
-            href="https://sepolia.arbiscan.io/address/0x980b62da83eff3d4576c647993b0c1d7faf17c73#writeProxyContract#F5"
-          >
-            <DropdownMenu.Item className="flex cursor-pointer flex-row items-center gap-1 p-1 text-xs">
-              Arbitrum Sepolia Create WETH
-            </DropdownMenu.Item>
-          </a>
           <a
             rel="noopener noreferrer"
             target="_blank"

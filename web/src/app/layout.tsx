@@ -126,24 +126,26 @@ export default async function RootLayout({
                   </a>
                 </small>
               </div>
-              <small>
-                <a
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  href="https://issues.superposition.so"
-                >
-                  TODO board
-                </a>
-              </small>
-              <small>
-                <a
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  href={`https://github.com/fluidity-money/long.so/commit/${gitHash}`}
-                >
-                  Commit {gitHash}
-                </a>
-              </small>
+              <div className="flex items-center gap-x-[10px]">
+                <small>
+                  <a
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    href="https://issues.superposition.so"
+                  >
+                    TODO board
+                  </a>
+                </small>
+                <small>
+                  <a
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    href={`https://github.com/fluidity-money/long.so/commit/${gitHash}`}
+                  >
+                    Commit {gitHash}
+                  </a>
+                </small>
+              </div>
             </div>
           </footer>
           <BottomBanner />

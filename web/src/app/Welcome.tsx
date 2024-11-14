@@ -80,7 +80,7 @@ export const Welcome = () => {
                       rel="noopener noreferrer"
                       target="_blank"
                     >
-                      $29,123 Trader Rewards available on every swap
+                      Trader Rewards available on every swap
                     </a>
                   </div>
                   <div className="hidden text-xs text-gray-1 group-hover:inline-flex">

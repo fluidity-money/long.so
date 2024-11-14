@@ -167,6 +167,11 @@ export interface FeatureFlags {
    * Show APY as a column in the list of pools
    */
   "ui show pool apy": boolean;
+
+  /**
+   * Show the mainnet functionality
+   */
+  "ui is mainnet enabled": boolean;
 }
 
 /**
