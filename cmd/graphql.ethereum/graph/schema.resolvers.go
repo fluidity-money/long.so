@@ -990,10 +990,16 @@ func (r *seawaterPoolResolver) Apr(ctx context.Context, obj *seawater.Pool) (mod
 	}
 	// Get most recent TVL
 	tvlOverTime, err := r.TvlOverTime(ctx, obj)
-	if err != nil || len(tvlOverTime.Daily) == 0 {
+	if err != nil {
 		return model.Apr{}, fmt.Errorf("no tvl: %v", err)
 	}
-	tvl, _ := new(big.Rat).SetString(tvlOverTime.Daily[0])
+	var tvlString string
+	if len(tvlOverTime.Daily) == 0 {
+		tvlString = "0"
+	} else {
+		tvlString = tvlOverTime.Daily[0]
+	}
+	tvl, _ := new(big.Rat).SetString(tvlString)
 	// Get total fees from this pool
 	yield, err := r.TotalFee(ctx, obj)
 	if err != nil {
