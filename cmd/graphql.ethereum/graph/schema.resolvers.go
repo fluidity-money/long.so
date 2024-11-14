@@ -995,7 +995,7 @@ func (r *seawaterPoolResolver) Apr(ctx context.Context, obj *seawater.Pool) (mod
 	}
 	var tvlString string
 	if len(tvlOverTime.Daily) == 0 {
-		tvlString = "0"
+		tvlString = "1"
 	} else {
 		tvlString = tvlOverTime.Daily[0]
 	}
@@ -1023,7 +1023,7 @@ func (r *seawaterPoolResolver) Apr(ctx context.Context, obj *seawater.Pool) (mod
 		return model.Apr{}, fmt.Errorf("liquidity campaigns: %v", err)
 	}
 	// Sum all rewards for all campaigns on this pool
-	var allCampaignRewards *big.Rat
+	allCampaignRewards := new(big.Rat)
 	for _, campaign := range activeLiquidityCampaigns {
 		// Get current price of the token distributed by this campaign
 		pool, err := r.Resolver.Query().GetPool(ctx, campaign.Token.String())
