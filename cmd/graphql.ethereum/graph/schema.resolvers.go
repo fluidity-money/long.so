@@ -1002,7 +1002,7 @@ func (r *seawaterPoolResolver) Apr(ctx context.Context, obj *seawater.Pool) (mod
 	tvl, _ := new(big.Rat).SetString(tvlString)
 	// If TVL is 0, set to 1 to avoid division by 0
 	if tvl.Cmp(big.NewRat(0, 1)) == 0 {
-
+		tvl.SetInt64(1)
 	}
 	// Get total fees from this pool
 	yield, err := r.TotalFee(ctx, obj)
