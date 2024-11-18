@@ -1088,7 +1088,7 @@ impl Pools {
     }
 
     #[allow(non_snake_case)]
-    pub fn send_token_to_sender_9603_F_18_B(
+    pub fn send_token_to_sender(
         &mut self,
         token: Address,
         amount: U256,
@@ -1105,7 +1105,7 @@ impl Pools {
     }
 
     #[allow(non_snake_case)]
-    pub fn send_amounts_from_sender_3_D_F_81_C_E_5(
+    pub fn send_amounts_from_sender(
         &mut self,
         token: Address,
         recipients: Vec<(Address, U256)>,

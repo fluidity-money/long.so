@@ -43,17 +43,17 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 
 |         Deployment name        |              Deployment address            |
 |--------------------------------|--------------------------------------------|
-| Longtail AMM                   | 0xd706b85c571330af8495174664d04D6d8551F9D5 |
-| Longtail NFT manager           | 0xd36A5BA112dCBD0fCae76f7A159a0CA9C71e00Ee |
+| Longtail AMM                   | 0x2A4a912970b780C29cf5b97aaD45ea5f98A07341 |
+| Longtail NFT manager           | 0x0000000000000000000000000000000000000000 |
 | Permit2 router                 | 0x2246431582087b930F2CE561c34deb8E7e5c44bE |
-| Swaps implementation           | 0x7717e32db762818b86b47a213c1461c56ab2d4b6 |
-| Swaps permit2 A implementation | 0x5992090411265add042b29dc361dee05e5606db6 |
-| Quotes implementation          | 0xf6120b79c5541806b1b4c619fbb8dcfdf32cfa20 |
-| Positions implementation       | 0x0721157b712f90085a006eb56f44e5b22b374501 |
-| Update position implementation | 0x149c6ead35c4e60a090dad3dcb458f2b2e5f18a8 |
-| Admin implementation           | 0x24afbecec87a98a214edecdc11250668f15cef0b |
-| Adjust position implementation | 0x6de9c5025c107057b63ffe15dcfe28604f27e4f1 |
-| Swaps permit2 B implementation | 0x03af6a949f68e1ede06b63c8b43e6082689171cf |
+| Swaps implementation           | 0xc28bbb1f15fa27d32c6c892928cef984fdafae90 |
+| Swaps permit2 A implementation | 0xbc005f1d3b52b939a91954159320df6bed66ce17 |
+| Quotes implementation          | 0xc8730b8ca0bc8631c75d2df6dec6244fafa2ccfd |
+| Positions implementation       | 0x69300b5761a79ced0322c3f0b7d6092ef0da5309 |
+| Update position implementation | 0xac59e975cd18bc44b6abc9fc37b14ff28f59fd42 |
+| Admin implementation           | 0xa1c554281564dfbd574a2cafc3456b90ae4dd981 |
+| Adjust position implementation | 0x57470a0f95d4843adea37ec47b8e6a0616e45a58 |
+| Swaps permit2 B implementation | 0x0000000000000000000000000000000000000000 |
 
 ##### Leo contract deployments
 
