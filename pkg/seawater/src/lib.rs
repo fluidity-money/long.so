@@ -813,7 +813,7 @@ impl Pools {
     /// # Errors
     /// Requires the pool to not exist.
     #[allow(non_snake_case)]
-    pub fn create_pool_D650_E2_D0(
+    pub fn create_pool_653_F_395_E(
         &mut self,
         pool: Address,
         price: U256,
