@@ -66,7 +66,7 @@ export const ConfirmStake = ({
   const leoContract = useContracts(expectedChainId, "leo");
   const ownershipNFTContract = useContracts(expectedChainId, "ownershipNFTs");
   const showBoostIncentives = useFeatureFlag("ui show boost incentives");
-  const showStakeApy = useFeatureFlag("ui show stake apy");
+  const showStakeApr = useFeatureFlag("ui show stake apr");
 
   const showLeo =
     useFeatureFlag("ui show leo") && chainId === superpositionTestnet.id;
@@ -879,10 +879,10 @@ export const ConfirmStake = ({
               </>
             )}
 
-            {showStakeApy && (
+            {showStakeApr && (
               <>
                 <div className="mt-[15px] flex flex-row justify-between">
-                  <div>APY</div>
+                  <div>APR</div>
                   <div className="iridescent rounded px-1 text-black">
                     12.09%
                   </div>

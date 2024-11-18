@@ -17,7 +17,7 @@ export type Pool = {
   fees: number;
   volume: number;
   rewards: number;
-  annualPercentageYield: number;
+  annualPercentageRate: number;
   claimable: boolean;
   boosted?: boolean;
   liquidityRange: [string, string];
@@ -124,20 +124,20 @@ export const columns: ColumnDef<Pool>[] = [
     },
   },
   {
-    accessorKey: "annualPercentageYield",
+    accessorKey: "annualPercentageRate",
     header: ({ column }) => {
       return (
         <div
           className="flex cursor-pointer flex-row items-center"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          APY
+          APR
           <Sort className="ml-2 size-3" />
         </div>
       );
     },
     cell: ({ row }) => {
-      return `${row.original.annualPercentageYield.toFixed(2)}%`;
+      return `${row.original.annualPercentageRate.toFixed(2)}%`;
     },
   },
   {

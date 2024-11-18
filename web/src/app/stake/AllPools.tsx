@@ -88,6 +88,9 @@ export const AllPoolsFragment = graphql(`
         }
       }
     }
+    APR {
+      total
+    }
     positions {
       positions {
         lower
@@ -166,7 +169,7 @@ export const AllPools = () => {
         boosted: false,
         fees: Number(pool.total_fee.total),
         claimable: false,
-        annualPercentageYield: 0,
+        annualPercentageRate: Number(pool.APR.total),
       };
     });
   }, [showDemoData, poolsData, fUSDC]);

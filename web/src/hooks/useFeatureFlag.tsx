@@ -69,9 +69,9 @@ export interface FeatureFlags {
   "ui show liquidity incentives": boolean;
 
   /**
-   * Show the Stake APY in the stake tabs.
+   * Show the Stake APR in the stake tabs.
    */
-  "ui show stake apy": boolean;
+  "ui show stake apr": boolean;
 
   /**
    * Show the my transactions option.
@@ -164,9 +164,9 @@ export interface FeatureFlags {
   "ui show leo": boolean;
 
   /**
-   * Show APY as a column in the list of pools
+   * Show APR as a column in the list of pools
    */
-  "ui show pool apy": boolean;
+  "ui show pool apr": boolean;
 
   /**
    * Show the mainnet functionality

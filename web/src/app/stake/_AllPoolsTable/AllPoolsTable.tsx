@@ -39,15 +39,15 @@ export function AllPoolsTable<TData, TValue>({
     annualPercentageYield: true,
   });
 
-  const showApy = useFeatureFlag("ui show pool apy");
+  const showApr = useFeatureFlag("ui show pool apr");
 
   useEffect(() => {
     setColumnVisibility({
       fees: isMd,
       rewards: isMd,
-      annualPercentageYield: showApy,
+      annualPercentageYield: showApr,
     });
-  }, [isMd, showApy]);
+  }, [isMd, showApr]);
 
   const [sorting, setSorting] = useState<SortingState>([]);
 

@@ -232,7 +232,7 @@ type SeawaterPool {
 
 
   """
-  APR for this pool, containing USD values for campaign rewards and pool fees.
+  APR for this pool, containing scaled percentage values for campaign rewards and pool fees.
   """
   APR: APR!
 
@@ -790,15 +790,15 @@ type Note {
 
 type APR {
   """ 
-  Scaled USD value of the APR available from rewards from campaign tokens, for campaigns that are currently active on this pool.
+  Scaled percentage APR available from rewards from campaign tokens, for campaigns that are currently active on this pool.
   """
   campaign: String!
   """
-  Scaled USD value of the APR available from the fee this pool takes, containing the amount of fUSDC, pool token, and sum of both that is available.
+  Scaled percentage APR available from the fee this pool takes, containing the amount of fUSDC, pool token, and sum of both that is available.
   """
   fee: APRFee!
   """ 
-  Scaled USD value representing the total APR of this pool, summing the pool fees of fUSDC and the pool token, and the campaign rewards for all active campaigns on the pool.
+  Scaled percentage representing the total APR of this pool, summing the pool fees of fUSDC and the pool token, and the campaign rewards for all active campaigns on the pool.
   """
   total: String!
 }

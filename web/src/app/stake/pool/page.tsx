@@ -508,7 +508,7 @@ export default function PoolPage() {
 
   const superIncentives = 0;
 
-  const liquidityCampaignsApy = 0;
+  const liquidityCampaignsApr = 0;
 
   return (
     <div className="flex w-full flex-col">

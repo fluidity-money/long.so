@@ -142,7 +142,7 @@ export const SwapPro = ({
   const transactions = poolSwapPro?.swaps.swaps;
 
   const showMockData = useFeatureFlag("ui show demo data");
-  const showStakeApy = useFeatureFlag("ui show stake apy");
+  const showStakeApr = useFeatureFlag("ui show stake apr");
   const showMyTransactions = useFeatureFlag("ui show my transactions");
   const showTradeRewards = useFeatureFlag("ui show trade rewards");
 
@@ -236,8 +236,8 @@ export const SwapPro = ({
           </div>
 
           <div>
-            <p className="text-2xs">Stake APY</p>
-            <p className="text-xl">{showStakeApy ? "1.62%" : "-"}</p>
+            <p className="text-2xs">Stake APR</p>
+            <p className="text-xl">{showStakeApr ? "1.62%" : "-"}</p>
           </div>
 
           <div>

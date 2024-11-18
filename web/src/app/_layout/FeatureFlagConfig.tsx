@@ -25,7 +25,7 @@ const featureFlagsLabels: { [K in FeatureFlagKey]: string } = {
   "ui show campaign banner": "UI Show Campaign Banner",
   "ui show rewards claimed": "UI Show Rewards Claimed",
   "ui show incentives": "UI Show Incentives",
-  "ui show stake apy": "UI Show Stake APY",
+  "ui show stake apr": "UI Show Stake APR",
   "ui show my transactions": "UI Show My Transactions",
   "ui show trade rewards": "UI Show Trade Rewards",
   "ui show boost incentives": "UI Show Boost Incentives",
@@ -45,7 +45,7 @@ const featureFlagsLabels: { [K in FeatureFlagKey]: string } = {
   "ui show liquidity visualiser": "UI Show Liquidity Visualiser",
   "ui show banners": "UI Show Banner",
   "ui show leo": "UI Show Leo",
-  "ui show pool apy": "UI Show Pool APY",
+  "ui show pool apr": "UI Show Pool APR",
   "ui is mainnet enabled": "UI Is Mainnet Enabled",
 };
 
