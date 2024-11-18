@@ -1257,13 +1257,13 @@ func (r *seawaterPoolResolver) Amounts(ctx context.Context, obj *seawater.Pool) 
 			Token:         r.C.FusdcAddr,
 			Decimals:      r.C.FusdcDecimals,
 			Timestamp:     ts,
-			ValueUnscaled: sum.CumulativeAmount0,
+			ValueUnscaled: sum.CumulativeAmount1,
 		},
 		Token1: model.Amount{
 			Token:         obj.Token,
 			Decimals:      int(sum.Decimals),
 			Timestamp:     ts,
-			ValueUnscaled: sum.CumulativeAmount1,
+			ValueUnscaled: sum.CumulativeAmount0,
 		},
 	}
 	return
