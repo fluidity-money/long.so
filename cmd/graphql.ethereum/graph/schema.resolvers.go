@@ -988,18 +988,26 @@ func (r *seawaterPoolResolver) Apr(ctx context.Context, obj *seawater.Pool) (mod
 	if obj == nil {
 		return model.Apr{}, fmt.Errorf("pool empty")
 	}
-	// Get most recent TVL
-	tvlOverTime, err := r.TvlOverTime(ctx, obj)
+	// Get the TVL by scaling the current Amounts by their prices
+	pairAmount, err := r.Amounts(ctx, obj)
 	if err != nil {
-		return model.Apr{}, fmt.Errorf("no tvl: %v", err)
+		return model.Apr{}, fmt.Errorf("amounts: %v", err)
 	}
-	var tvlString string
-	if len(tvlOverTime.Daily) == 0 {
-		tvlString = "1"
-	} else {
-		tvlString = tvlOverTime.Daily[0]
+	price, err := r.Price(ctx, obj)
+	if err != nil {
+		return model.Apr{}, fmt.Errorf("price: %v", err)
 	}
-	tvl, _ := new(big.Rat).SetString(tvlString)
+	fusdcUsd, err := pairAmount.Fusdc.UsdValue(price, r.C.FusdcAddr)
+	if err != nil {
+		return model.Apr{}, fmt.Errorf("fusdc usd value: %v", err)
+	}
+	tvl, _ := new(big.Rat).SetString(fusdcUsd)
+	token1Usd, err := pairAmount.Token1.UsdValue(price, r.C.FusdcAddr)
+	if err != nil {
+		return model.Apr{}, fmt.Errorf("token1 usd value: %v", err)
+	}
+	token1, _ := new(big.Rat).SetString(token1Usd)
+	tvl = tvl.Add(tvl, token1)
 	// If TVL is 0, set to 1 to avoid division by 0
 	if tvl.Cmp(big.NewRat(0, 1)) == 0 {
 		tvl.SetInt64(1)
