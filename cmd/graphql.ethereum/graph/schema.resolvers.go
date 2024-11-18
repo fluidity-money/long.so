@@ -1230,6 +1230,15 @@ func (r *seawaterPoolResolver) Amounts(ctx context.Context, obj *seawater.Pool) 
 		Where("pool = ?", obj.Token).
 		First(&sum).
 		Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		err = nil
+		sum = seawater.SnapshotPositionsLatestDecimalsGroup{
+			Pool:              obj.Token,
+			Decimals:          uint8(obj.Decimals),
+			CumulativeAmount0: types.EmptyUnscaledNumber(),
+			CumulativeAmount1: types.EmptyUnscaledNumber(),
+		}
+	}
 	if err != nil {
 		return
 	}
