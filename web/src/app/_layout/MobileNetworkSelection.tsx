@@ -5,13 +5,21 @@ import SPNTest from "@/assets/icons/spn-test.svg";
 import ArrowDown from "@/assets/icons/arrow-down.svg";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Ethereum from "@/assets/icons/ethereum.svg";
+import appConfig from "@/config";
 import { useChainId, useSwitchChain } from "wagmi";
+import { superpositionMainnet } from "@/config/chains";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 /**
  * Shows a dropdown menu with links to switch the network.
  */
 export const MobileNetworkSelection = () => {
-  const { chains, switchChain } = useSwitchChain();
+  const showSuperpositionMainnet = useFeatureFlag("ui is mainnet enabled");
+  const { switchChain } = useSwitchChain();
+
+  const chains = appConfig.chains.allChains.filter(
+    (c) => !(c.id === superpositionMainnet.id && !showSuperpositionMainnet),
+  );
 
   const chainId = useChainId();
 
