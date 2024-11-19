@@ -8,13 +8,18 @@ import { useAccount, useChainId, useSwitchChain } from "wagmi";
 import { cn } from "@/lib/utils";
 import appConfig from "@/config";
 import Image from "next/image";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { superpositionMainnet } from "@/config/chains";
 
 export const NetworkSelection = () => {
   const { address } = useAccount();
+  const showSuperpositionMainnet = useFeatureFlag("ui is mainnet enabled");
 
   const { switchChain } = useSwitchChain();
   const chainId = useChainId();
-  const chains = appConfig.chains.allChains;
+  const chains = appConfig.chains.allChains.filter(
+    (c) => !(c.id === superpositionMainnet.id && !showSuperpositionMainnet),
+  );
 
   const selectedChain = chains.find((chain) => chain.id === chainId);
 
