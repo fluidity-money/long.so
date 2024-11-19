@@ -603,6 +603,35 @@ mod test {
         );
     }
 
+    // These differ from the Go tests by +1 as we use mul_div_rounding_up here
+    #[test]
+    fn test_get_amount_1_delta_go() {
+        use std::str::FromStr;
+        assert_eq!(
+            get_amount_1_delta(
+                U256::from_str("87999098777895760865233273050").unwrap(),
+                U256::from_str("91911338314972375132734921679").unwrap(),
+                18117952900
+            )
+            .unwrap(),
+            I256::from_str("894653737").unwrap()
+        );
+    }
+
+    #[test]
+    fn test_get_amount_0_delta_go() {
+        use std::str::FromStr;
+        assert_eq!(
+            get_amount_0_delta(
+                U256::from_str("97156358459122590463153608088").unwrap(),
+                U256::from_str("91911338314972375132734921679").unwrap(),
+                18117952900
+            )
+            .unwrap(),
+            I256::from_str("843131961").unwrap()
+        );
+    }
+
     #[test]
     fn test_get_amount_1_delta_weird() {
         use std::str::FromStr;

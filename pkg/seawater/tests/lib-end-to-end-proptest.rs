@@ -133,7 +133,7 @@ proptest! {
             let pool = Address::from([1_u8; 20]);
             contract.ctor(msg::sender(), Address::ZERO, Address::ZERO).unwrap();
             let fee = fee_of_spacing(spacing);
-            contract.create_pool_D650_E2_D0(
+            contract.create_pool_653_F_395_E(
                 pool,
                 U256::from_limbs([9433916063688681729, 246222, 0, 0]), //4542003653232976906676481
                 fee,
