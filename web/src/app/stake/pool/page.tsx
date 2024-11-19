@@ -622,7 +622,6 @@ export default function PoolPage() {
                       Unclaimed Rewards
                     </div>
                     <div className="text-xl md:text-2xl">
-                      {/* TODO:get unclaimed rewards */}
                       {showMockData ? "$52,420" : unclaimedRewards}
                     </div>
                   </div>
