@@ -201,7 +201,7 @@ impl Leo {
         assert_or!(campaign.token.get().is_zero(), Error::CampaignAlreadyExists);
 
         // Make sure that this campaign's end is after the starting.
-        assert_or!(starting < ending, Error::BadCampaignConfig);
+        assert_or!(ending > starting, Error::BadCampaignConfig);
 
         // Make sure this campaign starts after the current timestamp.
         assert_or!(starting > block::timestamp(), Error::BadCampaignConfig);
