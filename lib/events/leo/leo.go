@@ -17,7 +17,7 @@ var (
 	TopicCampaignBalanceUpdated = abi.Events["CampaignBalanceUpdated"].ID
 	TopicCampaignCreated        = abi.Events["CampaignCreated"].ID
 	TopicCampaignUpdated        = abi.Events["CampaignUpdated"].ID
-	TopicPositionVested         = abi.Events["PositionVested"].ID
+	TopicPositionVested2        = abi.Events["PositionVested2"].ID
 	TopicPositionDivested       = abi.Events["PositionDivested"].ID
 )
 
@@ -64,7 +64,7 @@ func UnpackCampaignCreated(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*Ca
 		Owner:      owner,
 		Starting:   time.Unix(int64(starting), 0),
 		Ending:     time.Unix(int64(ending), 0),
-		PerSecond: perSecond,
+		PerSecond:  perSecond,
 	}, nil
 }
 
@@ -91,9 +91,10 @@ func UnpackCampaignUpdated(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*Ca
 	}, nil
 }
 
-func UnpackPositionVested(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*PositionVested, error) {
-	return &PositionVested{
+func UnpackPositionVested2(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*PositionVested2, error) {
+	return &PositionVested2{
 		PositionId: hashToNumber(topic1),
+		Owner:      hashToAddr(topic2),
 	}, nil
 }
 
@@ -125,7 +126,7 @@ func unpackDetails(i *big.Int) (tickLower int32, tickUpper int32, owner types.Ad
 }
 
 func unpackTimes(i *big.Int) (starting uint64, ending uint64, perSecond uint64) {
-	starting = new(big.Int).Rsh(i, 64 * 2).Uint64()
+	starting = new(big.Int).Rsh(i, 64*2).Uint64()
 	ending = new(big.Int).Rsh(i, 64).Uint64()
 	perSecond = i.Uint64()
 	return

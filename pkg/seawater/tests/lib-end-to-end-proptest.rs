@@ -104,7 +104,7 @@ fn test_weird_behaviour() {
     test_utils::with_storage::<_, Pools, _>(None, None, None, |c| {
         let pool = Address::from([1_u8; 20]);
         c.ctor(msg::sender(), Address::ZERO, Address::ZERO).unwrap();
-        c.create_pool_D650_E2_D0(
+        c.create_pool_653_F_395_E(
             pool,
             U256::from_limbs([9433916063688681729, 246222, 0, 0]), //4542003653232976906676481
             3000,

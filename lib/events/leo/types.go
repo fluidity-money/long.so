@@ -43,10 +43,11 @@ type (
 		Ending     time.Time     `json:"ending"`
 	}
 
-	PositionVested struct {
+	PositionVested2 struct {
 		events.Event
 
 		PositionId types.Number `json:"positionId"`
+		Owner types.Address `json:"owner"`
 	}
 
 	PositionDivested struct {

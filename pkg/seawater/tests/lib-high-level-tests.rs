@@ -14,7 +14,7 @@ fn test_similar_to_ethers() -> Result<(), Vec<u8>> {
             let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
 
             // First, we set up the pool.
-            contract.create_pool_D650_E2_D0(
+            contract.create_pool_653_F_395_E(
                 token_addr,
                 test_utils::encode_sqrt_price(50, 1), // the price
                 0,
@@ -54,7 +54,7 @@ fn test_alex() -> Result<(), Vec<u8>> {
             let token_addr = address!("97392C28f02AF38ac2aC41AF61297FA2b269C3DE");
 
             // First, we set up the pool.
-            contract.create_pool_D650_E2_D0(
+            contract.create_pool_653_F_395_E(
                 token_addr,
                 test_utils::encode_sqrt_price(100, 1), // the price
                 0,                                     // fee
@@ -87,7 +87,7 @@ fn ethers_suite_orchestrated_uniswap_single() {
     test_utils::with_storage::<_, Pools, _>(None, None, None, |contract| -> Result<(), Vec<u8>> {
         let token0 = address!("9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
         contract.ctor(msg::sender(), Address::ZERO, Address::ZERO)?;
-        contract.create_pool_D650_E2_D0(
+        contract.create_pool_653_F_395_E(
             token0,
             U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
             500,                                      // fee
@@ -112,7 +112,7 @@ fn ethers_suite_orchestrated_uniswap_single_version_2() {
     test_utils::with_storage::<_, Pools, _>(None, None, None, |contract| -> Result<(), Vec<u8>> {
         let token0 = address!("9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
         contract.ctor(msg::sender(), Address::ZERO, Address::ZERO)?;
-        contract.create_pool_D650_E2_D0(
+        contract.create_pool_653_F_395_E(
             token0,
             U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
             500,                                      // fee
@@ -147,14 +147,14 @@ fn ethers_suite_orchestrated_uniswap_two() {
             .ctor(msg::sender(), Address::ZERO, Address::ZERO)
             .unwrap();
         contract
-            .create_pool_D650_E2_D0(
+            .create_pool_653_F_395_E(
                 token0,
                 U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
                 500,                                      // fee
             )
             .unwrap();
         contract
-            .create_pool_D650_E2_D0(
+            .create_pool_653_F_395_E(
                 token1,
                 U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
                 500,                                      // fee
@@ -190,7 +190,7 @@ fn ethers_suite_swapping_with_permit2_blobs_no_permit2() {
             .ctor(msg::sender(), Address::ZERO, Address::ZERO)
             .unwrap();
         contract
-            .create_pool_D650_E2_D0(
+            .create_pool_653_F_395_E(
                 token0,
                 U256::from_limbs([0, 42949672960, 0, 0]), //792281625142643375935439503360
                 500,                                      // fee

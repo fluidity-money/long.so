@@ -2,4 +2,4 @@
 
 export RUST_BACKTRACE=1
 
-cargo test --features testing
+cargo test --features testing -- leo

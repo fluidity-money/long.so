@@ -47,39 +47,14 @@ pub struct Leo {
 
     emergency_council: StorageAddress,
 
-    // pool => campaign id => campaign[]
-    campaigns: StorageMap<Address, StorageCampaigns>,
-
-    // campaign id => campaign balance
-    campaign_balances: StorageMap<CampaignId, StorageCampaignBal>,
+    // pool => campaign id => campaign
+    campaigns: StorageMap<Address, StorageCampaign>,
 
     // position id => position
     positions: StorageMap<U256, StoragePosition>,
 
     // pool address => LP token count
     liquidity: StorageMap<Address, StorageU256>,
-}
-
-#[storage]
-pub struct StorageCampaigns {
-    // Ongoing campaigns. We don't use a map since the seconds will
-    // default to 0 so it'll return 0 for amounts calculated.
-    ongoing: StorageMap<CampaignId, StorageVec<StorageCampaign>>,
-}
-
-#[storage]
-pub struct StorageCampaignBal {
-    // Owner of the campaign balance so we don't have any abuse.
-    owner: StorageAddress,
-
-    // Token being distributed.
-    token: StorageAddress,
-
-    // Amount that can be distributed.
-    maximum: StorageU256,
-
-    // Amount that was already distributed.
-    distributed: StorageU256,
 }
 
 #[storage]
@@ -99,6 +74,18 @@ pub struct StorageCampaign {
     // The timestamp of when this campaign ended. May be modified
     // if updates are made to the existing campaign.
     ending: StorageU64,
+
+    // Owner of the campaign balance so we don't have any abuse.
+    owner: StorageAddress,
+
+    // Token being distributed.
+    token: StorageAddress,
+
+    // Amount that can be distributed.
+    maximum: StorageU256,
+
+    // Amount that was already distributed.
+    distributed: StorageU256,
 }
 
 #[storage]
@@ -114,9 +101,6 @@ pub struct StoragePosition {
     tick_upper: StorageI32,
 
     liquidity: StorageU256,
-
-    // Indexes of the position of the current status per campaign that's updated
-    offsets: StorageMap<CampaignId, StorageU256>,
 }
 
 #[public]

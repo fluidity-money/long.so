@@ -111,5 +111,24 @@
 			}
 		],
 		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "PositionVested2",
+		"inputs": [
+			{
+				"name": "positionId",
+				"type": "uint256",
+				"indexed": true,
+				"internalType": "uint256"
+			},
+			{
+				"name": "owner",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			}
+		],
+		"anonymous": false
 	}
 ]
