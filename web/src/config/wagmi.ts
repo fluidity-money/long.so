@@ -5,7 +5,7 @@ import { http, HttpTransport } from "viem";
 import * as chains from "./chains";
 import appConfig from "./app";
 
-const testnetTransports = chains.allTestnets.reduce(
+const transports = chains.allChains.reduce(
   (acc, chain) => {
     acc[chain.id] = http(chain.rpcUrls.default.http[0]);
     return acc;
@@ -14,9 +14,9 @@ const testnetTransports = chains.allTestnets.reduce(
 );
 
 const wagmiConfig = defaultWagmiConfig({
-  chains: chains.allTestnets,
+  chains: chains.allChains,
   projectId: process.env.NEXT_PUBLIC_LONGTAIL_WALLETCONNECT_PROJECT_ID,
-  transports: testnetTransports,
+  transports: transports,
   metadata: appConfig.metadata,
   ssr: true,
 });
