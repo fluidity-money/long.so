@@ -1,15 +1,5 @@
 #![allow(unused_variables)]
 
-use stylus_sdk::{
-    abi::Bytes,
-    alloy_primitives::{aliases::*, *},
-    block, msg,
-    prelude::*,
-    storage::*,
-};
-
-use stylus_sdk::evm;
-
 pub mod calldata;
 pub mod erc20;
 pub mod error;
@@ -32,6 +22,23 @@ mod immutables;
 #[cfg(feature = "testing")]
 pub mod host;
 
+use stylus_sdk::{
+    abi::Bytes,
+    alloy_primitives::{aliases::*, *},
+    block, evm, msg,
+    prelude::*,
+    storage::*,
+};
+
+use num_traits::cast::ToPrimitive;
+
+use std::{
+    cmp::{max, min},
+    collections::HashMap,
+};
+
+use immutables::SCALING_FACTOR;
+
 use error::Error;
 
 extern crate alloc;
@@ -47,8 +54,8 @@ pub struct Leo {
 
     emergency_council: StorageAddress,
 
-    // pool => campaign id => campaign
-    campaigns: StorageMap<Address, StorageCampaign>,
+    // campaign id => campaign
+    campaigns: StorageMap<CampaignId, StorageCampaign>,
 
     // position id => position
     positions: StorageMap<U256, StoragePosition>,
@@ -66,7 +73,7 @@ pub struct StorageCampaign {
     tick_upper: StorageI32,
 
     // Amount of token emitted per second.
-    per_second: StorageU64,
+    per_sec: StorageU256,
 
     // The timestamp of when this campaign is starting.
     starting: StorageU64,
@@ -81,6 +88,9 @@ pub struct StorageCampaign {
     // Token being distributed.
     token: StorageAddress,
 
+    // Pool that this campaign is eligible for.
+    pool: StorageAddress,
+
     // Amount that can be distributed.
     maximum: StorageU256,
 
@@ -92,10 +102,13 @@ pub struct StorageCampaign {
 pub struct StoragePosition {
     owner: StorageAddress,
 
-    // Internal state of the user's timestamp position.
+    // Internal state of the user's timestamp position, specifically when
+    // it was claimed last. This is updated across the board so the user
+    // needs to be careful they don't forget to claim from campaigns!
     timestamp: StorageU64,
 
-    token: StorageAddress,
+    // Pool that this position was created for in Longtail.
+    pool: StorageAddress,
 
     tick_lower: StorageI32,
     tick_upper: StorageI32,
@@ -137,7 +150,7 @@ impl Leo {
         let mut position = self.positions.setter(id);
         position.owner.set(recipient);
         position.timestamp.set(U64::from(block::timestamp()));
-        position.token.set(pool);
+        position.pool.set(pool);
         position.tick_lower.set(I32::from_le_bytes(
             seawater::tick_lower(pool, id)?.to_le_bytes(),
         ));
@@ -170,35 +183,28 @@ impl Leo {
         pool: Address,
         tick_lower: i32,
         tick_upper: i32,
-        per_second: u64,
+        per_sec: u64,
         token: Address,
-        extra_max: U256,
+        maximum: U256,
         starting: u64,
         ending: u64,
     ) -> Result<(), Vec<u8>> {
         assert_or!(self.enabled.get(), Error::NotEnabled);
 
         // Sanity checks to prevent junk campaigns from being made.
-        assert_or!(per_second > 0, Error::BadCampaignConfig);
+        assert_or!(per_sec > 0, Error::BadCampaignConfig);
 
         // Take the ERC20 from the user for the maximum run of the campaign.
-        let mut pool_campaigns = self.campaigns.setter(pool);
-        let mut pool_campaigns_ongoing = pool_campaigns.ongoing.setter(identifier);
+        let mut campaign = self.campaigns.setter(identifier);
 
         // Make sure this campaign doesn't exist already.
-        assert_or!(
-            pool_campaigns_ongoing.is_empty(),
-            Error::CampaignAlreadyExists
-        );
+        assert_or!(campaign.token.get().is_zero(), Error::CampaignAlreadyExists);
 
-        let mut campaign = pool_campaigns_ongoing.grow();
+        // Make sure that this campaign's end is after the starting.
+        assert_or!(starting < ending, Error::BadCampaignConfig);
 
-        // Make sure the sender owns the campaign balance.
-        let campaign_bal_owner = self.campaign_balances.getter(identifier).owner.get();
-        assert_or!(
-            campaign_bal_owner.is_zero() || campaign_bal_owner == msg::sender(),
-            Error::NotCampaignOwner
-        );
+        // Make sure this campaign starts after the current timestamp.
+        assert_or!(starting > block::timestamp(), Error::BadCampaignConfig);
 
         // Set everything related to the pool.
         campaign
@@ -207,31 +213,16 @@ impl Leo {
         campaign
             .tick_upper
             .set(I32::from_le_bytes(tick_upper.to_le_bytes()));
-        campaign.per_second.set(U64::from(per_second));
+        campaign.per_sec.set(U256::from(per_sec));
         campaign
             .starting
             .set(U64::from_le_bytes(starting.to_le_bytes()));
         campaign
             .ending
             .set(U64::from_le_bytes(ending.to_le_bytes()));
-
-        let mut campaign_bal = self.campaign_balances.setter(identifier);
-        campaign_bal.owner.set(msg::sender());
-        campaign_bal.token.set(token);
-
-        if !extra_max.is_zero() {
-            let existing_maximum = campaign_bal.maximum.get();
-            let new_maximum = existing_maximum + extra_max;
-            campaign_bal.maximum.set(new_maximum);
-
-            // Take the token's amounts for the campaign.
-            erc20::take(token, pool, extra_max)?;
-
-            evm::log(events::CampaignBalanceUpdated {
-                identifier: identifier.as_slice().try_into().unwrap(),
-                newMaximum: new_maximum,
-            });
-        }
+        campaign.maximum.set(maximum);
+        campaign.token.set(token);
+        campaign.pool.set(pool);
 
         // Pack the words for CampaignCreated, and then emit that event.
         events::emit_campaign_created(
@@ -243,119 +234,19 @@ impl Leo {
             tick_upper,
             starting,
             ending,
-            per_second,
+            per_sec,
         );
 
         Ok(())
     }
 
-    /// Update a campaign by taking the last campaign versions item, and
-    /// setting the ending timestamp to the current timestamp, then inserting
-    /// a new record to the campaign versions array with the settings we
-    /// requested. Allows 0 to be provided as the ending timestamp, which is the equivalent of
-    /// cancelling the campaign if it's provided.
-    #[allow(clippy::too_many_arguments)]
-    pub fn update_campaign(
-        &mut self,
-        identifier: CampaignId,
-        pool: Address,
-        tick_lower: i32,
-        tick_upper: i32,
-        per_second: u64,
-        extra_max: U256,
-        starting: u64,
-        ending: u64,
-    ) -> Result<(), Vec<u8>> {
+    pub fn cancel_campaign(&mut self, identifier: CampaignId) -> Result<(), Vec<u8>> {
         assert_or!(self.enabled.get(), Error::NotEnabled);
+        assert_eq!(self.campaigns.getter(identifier).owner.get(), msg::sender());
+        // Cancel this campaign by setting its ending date to the current
+        // time, and set the "cancelled" field to true.
+        let pool = self.campaigns.getter(identifier).pool.get();
 
-        // Make sure we're the actual owner of the campaign globally!
-        assert_eq!(
-            self.campaign_balances.getter(identifier).owner.get(),
-            msg::sender()
-        );
-        assert_or!(per_second > 0, Error::BadCampaignConfig);
-        assert_or!(starting >= block::timestamp(), Error::BadCampaignConfig);
-        assert_or!(ending > block::timestamp(), Error::BadCampaignConfig);
-
-        // Push to the campaign versions the new content, setting the previous
-        // campaign's ending timestamp to the current timestamp.
-        let ongoing_campaigns = &mut self.campaigns.setter(pool).ongoing;
-        let mut campaign_versions = ongoing_campaigns.setter(identifier);
-        let campaign_versions_len = campaign_versions.len();
-        assert_or!(!campaign_versions.is_empty(), Error::NoCampaign);
-        campaign_versions
-            .setter(campaign_versions_len - 1)
-            .unwrap()
-            .ending
-            .set(U64::from(block::timestamp()));
-        let mut campaign = campaign_versions.grow();
-        campaign
-            .tick_lower
-            .set(I32::from_le_bytes(tick_lower.to_le_bytes()));
-        campaign
-            .tick_upper
-            .set(I32::from_le_bytes(tick_upper.to_le_bytes()));
-        campaign.per_second.set(U64::from(per_second));
-        campaign
-            .starting
-            .set(U64::from_le_bytes(starting.to_le_bytes()));
-        campaign
-            .ending
-            .set(U64::from_le_bytes(ending.to_le_bytes()));
-
-        if !extra_max.is_zero() {
-            let mut campaign_bal = self.campaign_balances.setter(identifier);
-            let existing_maximum = campaign_bal.maximum.get();
-            let token = campaign_bal.token.get();
-            let new_maximum = existing_maximum + extra_max;
-            campaign_bal.maximum.set(new_maximum);
-
-            // Take the token's amounts for the campaign.
-            erc20::take(token, pool, extra_max)?;
-
-            evm::log(events::CampaignBalanceUpdated {
-                identifier: identifier.as_slice().try_into().unwrap(),
-                newMaximum: new_maximum,
-            });
-        }
-
-        events::emit_campaign_updated(
-            identifier, pool, per_second, tick_lower, tick_upper, starting, ending,
-        );
-
-        Ok(())
-    }
-
-    pub fn campaign_revisions(
-        &self,
-        pool: Address,
-        identifier: CampaignId,
-    ) -> Result<U256, Vec<u8>> {
-        Ok(U256::from(
-            self.campaigns.getter(pool).ongoing.getter(identifier).len(),
-        ))
-    }
-
-    pub fn cancel_campaign(
-        &mut self,
-        pool: Address,
-        identifier: CampaignId,
-    ) -> Result<(), Vec<u8>> {
-        assert_or!(self.enabled.get(), Error::NotEnabled);
-        assert_eq!(
-            self.campaign_balances.getter(identifier).owner.get(),
-            msg::sender()
-        );
-        let ongoing_campaigns = &mut self.campaigns.setter(pool).ongoing;
-        let mut campaign_versions = ongoing_campaigns.setter(identifier);
-        let campaign_versions_len = campaign_versions.len();
-        assert_or!(!campaign_versions.is_empty(), Error::NoCampaign);
-        campaign_versions
-            .setter(campaign_versions_len - 1)
-            .unwrap()
-            .ending
-            .set(U64::from(block::timestamp()));
-        campaign_versions.grow(); // Grow with an empty value so it's 0 for all!
         events::emit_campaign_updated(identifier, pool, 0, 0, 0, 0, 0);
         Ok(())
     }
@@ -371,19 +262,14 @@ impl Leo {
         pool: Address,
         id: CampaignId,
     ) -> Result<(i32, i32, u64, Address, U256, U256, u64, u64), Vec<u8>> {
-        let len = self.campaigns.getter(pool).ongoing.getter(id).len();
-        assert_or!(len > 0, Error::NoCampaign);
-        let campaigns = self.campaigns.getter(pool);
-        let campaigns_ongoing = &campaigns.ongoing.getter(id);
-        let campaign = campaigns_ongoing.getter(len - 1).unwrap();
-        let campaign_bal = self.campaign_balances.getter(id);
+        let campaign = self.campaigns.getter(id);
         Ok((
             i32::from_le_bytes(campaign.tick_lower.get().to_le_bytes()),
             i32::from_le_bytes(campaign.tick_upper.get().to_le_bytes()),
-            u64::from_le_bytes(campaign.per_second.get().to_le_bytes()),
-            campaign_bal.token.get(),
-            campaign_bal.distributed.get(),
-            campaign_bal.maximum.get(),
+            u64::from_le_bytes(campaign.per_sec.get().to_le_bytes()),
+            campaign.token.get(),
+            campaign.distributed.get(),
+            campaign.maximum.get(),
             u64::from_le_bytes(campaign.starting.get().to_le_bytes()),
             u64::from_le_bytes(campaign.ending.get().to_le_bytes()),
         ))
@@ -409,220 +295,91 @@ impl Leo {
     }
 
     // Return the LP and pool rewards paid by Leo for vesting this NFT position.
-    // Update the current position of the user per campaign that's
-    // ongoing, and send them rewards using the time that was spent in
-    // each campaign setting before the update occured. An update to a
-    // campaign is tracked by updating its end date to earlier so the lp
-    // rewards code attempts to roll over. In doing so, update the
-    // timestamp to reset the rewards they've earned so far, and set them
-    // to the latest version of each campaign update.
     #[allow(clippy::type_complexity)]
     pub fn collect(
         &mut self,
-        position_details: Vec<(Address, U256)>,
-        campaign_ids: Vec<CampaignId>,
+        mut positions: Vec<(Address, U256)>,
+        mut campaign_ids: Vec<CampaignId>,
+        recipient: Address,
     ) -> Result<(Vec<(Address, u128, u128)>, Vec<(U256, Address, U256)>), Vec<u8>> {
-        assert_or!(self.enabled.get(), Error::NotEnabled);
-
-        // Track amounts owed to this array to return.
-        let mut pool_owed = Vec::new();
-        let mut campaign_owed = Vec::new();
-
-        for (pool, position_id) in position_details {
-            // Call the collect yield for the position to send to the user. And track it.
-            {
-                let (amount_0_lp, amount_1_lp) =
-                    seawater::collect_yield_single_to(pool, position_id, msg::sender())?;
-                pool_owed.push((pool, amount_0_lp, amount_1_lp));
-            }
-
-            for &campaign_id in &campaign_ids {
+        // For each address and position id, go into each campaign id,
+        // check if it's eligible, and if it is, check if they exceed the
+        // time spent and they're after the beginning date. If the
+        // campaign hasn't started yet, then we revert with an error as a
+        // precaution to prevent users from spending too much gas.
+        positions.sort();
+        campaign_ids.sort();
+        positions.dedup();
+        campaign_ids.dedup();
+        // The accumulated tokens to send, ready to iterate through.
+        let mut tokens_to_send: HashMap<Address, U256> = HashMap::new();
+        // The pool rewards that we send to users.
+        let mut pool_rewards = vec![];
+        // The Leo rewards that we send to users.
+        let mut campaign_rewards = vec![];
+        for (position_pool, position_id) in positions {
+            let position = self.positions.getter(position_id);
+            // Ensure that the sender owns this position to prevent griefing.
+            assert_or!(
+                position.owner.get() == msg::sender(),
+                Error::NotPositionOwner
+            );
+            // Before we get into the Leo distribution, let's try to collect on their behalf
+            // using Longtail.
+            let (pool_rewards_token0, pool_rewards_token1) =
+                seawater::collect_yield_single_to(position_pool, position_id, recipient)?;
+            pool_rewards.push((position_pool, pool_rewards_token0, pool_rewards_token1));
+            for campaign_id in campaign_ids.iter() {
+                let campaign = self.campaigns.getter(*campaign_id);
+                let campaign_starting = campaign.starting.get().to_u64().unwrap();
+                let campaign_ending = campaign.ending.get().to_u64().unwrap();
                 assert_or!(
-                    self.positions.getter(position_id).owner.get() == msg::sender(),
-                    Error::NotPositionOwner
+                    campaign_starting > block::timestamp(),
+                    Error::CampaignHasntBegun
                 );
-
-                // Iterate through every copy of the campaign details until we pass the ending.
-                let mut position = self.positions.setter(position_id);
-                let position_tick_lower = position.tick_lower.get();
-                let position_tick_upper = position.tick_upper.get();
-                let position_liquidity = position.liquidity.get();
-
-                let position_token = position.token.get();
-
-                let offsets = position.offsets.getter(campaign_id);
-                let mut offset = offsets.get();
-                let campaigns = &self.campaigns;
-                let campaigns_ongoing = &campaigns.getter(pool).ongoing;
-                let campaign_versions = campaigns_ongoing.getter(campaign_id);
-
-                let campaign_bal = self.campaign_balances.getter(campaign_id);
-                let campaign_token = campaign_bal.token.get();
-                let campaign_maximum = campaign_bal.maximum.get();
-
-                // Weird issues could come up if the campaign maximum is empty.
-                assert_or!(campaign_maximum > U256::ZERO, Error::CampaignMaxEmpty);
-
-                // The amount distributed in this campaign, mutable in a way that
-                // lets us set it later.
-                let mut distributed = self.campaign_balances.setter(campaign_id).distributed.get();
-
-                let mut cur_timestamp = U64::from(block::timestamp());
-
-                loop {
-                    let campaign_updates = campaign_versions.getter(offset);
-
-                    if campaign_updates.is_none() {
-                        break;
-                    }
-
-                    let campaign = campaign_updates.unwrap();
-
-                    let campaign_starting = campaign.starting.get();
-                    let campaign_ending = campaign.ending.get();
-
-                    if campaign_ending.is_zero() {
-                        // We should terminate, the campaign was cancelled.
-                        break;
-                    }
-
-                    // If we've exceeded or are equal to the ending date of
-                    // the campaign, we assume it's finished.
-                    if cur_timestamp >= campaign_ending {
-                        offset += U256::from(1);
-                        continue;
-                    }
-
-                    // Set the timestamp to either the ending timestamp for the current campaign,
-                    // or the block timestamp.
-                    let clamped_timestamp = U64::min(campaign_ending, cur_timestamp);
-
-                    // If this campaign hasn't started, we need to terminate so the user can wait.
-                    if clamped_timestamp < campaign_starting {
-                        break;
-                    }
-
-                    // Go to the next campaign iteration, hoping that an update might take place
-                    // that makes the user eligible.
-                    let should_skip = position_tick_lower < campaign.tick_lower.get()
-                        || position_tick_upper > campaign.tick_upper.get();
-                    if should_skip {
-                        offset += U256::from(1);
-                        continue;
-                    }
-
-                    // Since we're continuing, we figure out what the user is owed, and we set the
-                    // timestamp to the ending of this campaign.
-                    let clamped_secs_since = clamped_timestamp - campaign_starting;
-
-                    if clamped_secs_since <= U64::ZERO {
-                        break;
-                    }
-
-                    let base_rewards = maths::calc_base_rewards(
-                        self.liquidity.getter(pool).get(),     // Pool LP
-                        position_liquidity,                    // User LP
-                        U256::from(campaign.per_second.get()), // Campaign rewards per sec
-                    );
-
-                    let rewards = base_rewards * U256::from(clamped_secs_since);
-                    campaign_owed.push((position_id, campaign_token, rewards));
-
-                    erc20::give(campaign_token, rewards)?;
-
-                    // Use the minimum of the existing current timestamp or the ending timestamp.
-                    cur_timestamp = clamped_timestamp;
-                    distributed += rewards;
-
-                    // Extra protection incase we blow past the amount that should be allocated somehow.
-                    assert_or!(
-                        distributed < self.campaign_balances.getter(campaign_id).maximum.get(),
-                        Error::CampaignDistributedCompletely
-                    );
-
-                    offset += U256::from(1);
+                // Check if the position is eligible for this campaign.
+                let is_eligible = campaign.pool.get() == position.pool.get()
+                    && campaign.tick_lower.get() >= position.tick_lower.get()
+                    || campaign.tick_upper.get() <= position.tick_upper.get();
+                // If they're not eligible, we need to skip them.
+                if !is_eligible {
+                    continue;
                 }
-
-                // Update the position's tracked last claim timestamp.
-                position.timestamp.set(U64::from(block::timestamp()));
-
-                // Update what we've sent out so far!
-                self.campaign_balances
-                    .setter(campaign_id)
-                    .distributed
-                    .set(distributed);
+                let current_start = max(campaign_starting, block::timestamp());
+                let current_end = min(campaign_ending, block::timestamp());
+                let secs_since = U256::from(current_end - current_start);
+                if secs_since.is_zero() {
+                    continue;
+                }
+                // Scale the token amount by 1e12, by ((secs_since *
+                // SCALING_FACTOR) * campaign_per_sec) / SCALING_FACTOR
+                let token_amt = secs_since
+                    .checked_mul(SCALING_FACTOR)
+                    .ok_or(Error::CheckedMul)?
+                    .checked_mul(campaign.per_sec.get())
+                    .ok_or(Error::CheckedMul)?
+                    .checked_div(SCALING_FACTOR)
+                    .ok_or(Error::CheckedDiv)?;
+                let campaign_token = campaign.token.get();
+                campaign_rewards.push((position_id, campaign_token, token_amt));
+                // Track that we have to sent some rewards for this position.
+                tokens_to_send.insert(
+                    campaign_token,
+                    tokens_to_send[&campaign_token]
+                        .checked_add(token_amt)
+                        .ok_or(Error::CheckedAdd)?,
+                );
             }
         }
-
-        Ok((pool_owed, campaign_owed))
+        for (token_addr, token_amt) in tokens_to_send {
+            erc20::transfer(token_addr, recipient, token_amt)?;
+        }
+        Ok((pool_rewards, campaign_rewards))
     }
 
     // Divest LP positions from this contract, sending them back to the
     // original owner.
     pub fn divest_position(&mut self, pool: Address, position_id: U256) -> Result<(), Vec<u8>> {
-        assert_or!(self.enabled.get(), Error::NotEnabled);
-        // Check if the user owns this position. Do this even though the
-        // claim LP function would do this, just incase they pass zero campaigns.
-        assert_or!(
-            self.positions.getter(position_id).owner.get() == msg::sender(),
-            Error::NotPositionOwner
-        );
-        // This should be enough to zero out the position.
-        self.positions.setter(position_id).owner.set(Address::ZERO);
-        let existing_liq = self.liquidity.getter(pool).get();
-        self.liquidity
-            .setter(pool)
-            .set(existing_liq - self.positions.getter(position_id).liquidity.get());
-
-        nft_manager::give_position(position_id)?;
-
-        evm::log(events::PositionDivested {
-            positionId: position_id,
-        });
-
-        Ok(())
-    }
-
-    pub fn admin_reduce_pos_time(&mut self, _id: U256, _secs: u64) -> Result<(), Vec<u8>> {
-        #[cfg(feature = "testing")]
-        {
-            let ts = self.positions.setter(_id).timestamp.get();
-            self.positions
-                .setter(_id)
-                .timestamp
-                .set(ts - U64::from(_secs));
-        }
-        Ok(())
-    }
-
-    pub fn admin_reduce_campaign_starting_last_iteration(
-        &mut self,
-        _pool: Address,
-        _id: FixedBytes<8>,
-        _secs: u64,
-    ) -> Result<(), Vec<u8>> {
-        #[cfg(feature = "testing")]
-        {
-            let campaigns = self.campaigns.getter(_pool).ongoing.getter(_id);
-            let len = self.campaigns.getter(_pool).ongoing.getter(_id).len();
-            let starting = self
-                .campaigns
-                .setter(_pool)
-                .ongoing
-                .setter(_id)
-                .setter(len - 1)
-                .unwrap()
-                .starting
-                .get();
-            self.campaigns
-                .setter(_pool)
-                .ongoing
-                .setter(_id)
-                .setter(len - 1)
-                .unwrap()
-                .starting
-                .set(starting - U64::from(_secs));
-        }
         Ok(())
     }
 }

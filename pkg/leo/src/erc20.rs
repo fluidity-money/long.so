@@ -13,10 +13,6 @@ pub fn take(token: Address, pool: Address, amount: U256) -> Result<(), Vec<u8>> 
     transfer_from(token, msg::sender(), contract::address(), amount)
 }
 
-pub fn give(token: Address, amount: U256) -> Result<(), Vec<u8>> {
-    transfer(token, msg::sender(), amount)
-}
-
 fn transfer_from(
     token: Address,
     sender: Address,
@@ -32,7 +28,7 @@ fn transfer_from(
     }
 }
 
-fn transfer(token: Address, recipient: Address, amount: U256) -> Result<(), Vec<u8>> {
+pub fn transfer(token: Address, recipient: Address, amount: U256) -> Result<(), Vec<u8>> {
     if cfg!(target_arch = "wasm32") {
         unpack_bool_safe(&RawCall::new().call(token, &pack_transfer(recipient, amount))?)
     } else {

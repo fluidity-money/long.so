@@ -1,4 +1,4 @@
-use stylus_sdk::alloy_primitives::Address;
+use stylus_sdk::alloy_primitives::{U256, Address};
 
 // test only implementation that returns a dummy value (so you can pick it from logs)
 #[cfg(feature = "testing")]
@@ -23,6 +23,9 @@ macro_rules! addr {
         )
     };
 }
+
+/// Scaling factor that's used to scale the distribution of the token per second.
+pub const SCALING_FACTOR: U256 = U256::from_limbs([1000000000000, 0, 0, 0]);
 
 #[allow(dead_code)]
 pub const SEAWATER_ADDR: Address = addr!("FLU_SEAWATER_ADDR");

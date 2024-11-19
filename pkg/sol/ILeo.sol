@@ -33,38 +33,6 @@ interface ILeo is ILeoEvents {
         uint64 ending
     ) external;
 
-    /// @notice create a campaign with the parameters given.
-    /// @param campaignId to modify for the pool given
-    /// @param pool to reward positions that participate in with
-    /// @param tickLower to reward positions in this range with
-    /// @param tickUpper to reward positions in this range with
-    /// @param perSecond distribution to send
-    /// @param token to give out
-    /// @param extraMax to start the pool amount with for this pool
-    /// @param starting to when to start the token distribution with
-    /// @param ending for when to stop the token distribution
-    /// @dev takes extraMax from the user of the token given
-    function updateCampaign(
-        bytes8 campaignId,
-        address pool,
-        int32 tickLower,
-        int32 tickUpper,
-        uint64 perSecond,
-        address token,
-        uint256 extraMax,
-        uint64 starting,
-        uint64 ending
-    ) external;
-
-    /// @notice the amount of times this campaign was modified for the pool
-    /// @param pool to check the campaign for
-    /// @param campaignId to check revisions for
-    /// @return the amount of times the campaign was modified
-    function campaignRevisions(
-        address pool,
-        bytes8 campaignId
-    ) external view returns (uint256);
-
     /// @notice cancel an ongoing campaign by amending it to have 0
     /// @param pool to modify the campaign for
     /// @param campaignId to modify

@@ -88,6 +88,32 @@ pub enum Error {
     // 14 (0x0e)
     #[error("Only the NFT manager")]
     OnlyNftManager,
+
+    /// The campaign hasn't begun.
+    // 14 (0x0e)
+    #[error("Campaign hasn't begun")]
+    CampaignHasntBegun,
+
+    /// The campaign that a user requested to redeem was duplicated in
+    /// the calldata.
+    // 15 (0x0f)
+    #[error("Campaign ids were duplicated")]
+    DuplicateCampaignIds,
+
+    /// A checked multiplication failed!
+    // 16 (0x10)
+    #[error("Checked multiplication failed")]
+    CheckedMul,
+
+    /// A checked division failed!
+    // 17 (0x11)
+    #[error("Checked division failed")]
+    CheckedDiv,
+
+    /// A checked add failed!
+    // 18 (0x12)
+    #[error("Checked add failed")]
+    CheckedAdd,
 }
 
 impl From<Error> for Vec<u8> {

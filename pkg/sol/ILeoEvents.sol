@@ -2,14 +2,6 @@
 pragma solidity 0.8.16;
 
 interface ILeoEvents {
-    /// @notice a campaign's balance was updated to reflect a new amount to give out max
-    /// @param identifier that was computed to represent this campaign
-    /// @param newMaximum from the previous to give out
-    event CampaignBalanceUpdated(
-        bytes8 indexed identifier,
-        uint256 indexed newMaximum
-    );
-
     /// @notice a campaign was created. Includes the details.
     /// @param identifier that was computed to represent this campaign
     /// @param pool that this is eligible for

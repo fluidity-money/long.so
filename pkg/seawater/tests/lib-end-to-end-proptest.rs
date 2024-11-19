@@ -219,7 +219,7 @@ proptest! {
                         ()
                         //println!("{fee},{sqrt_price},{zero_for_one},{amount},{taken0},{taken1},SWAPOK")
                     },
-                    Err(b) => () // eprintln!("{fee},{sqrt_price},{zero_for_one},{amount},SWAPERR,{:?}", std::str::from_utf8(&b).unwrap()),
+                    Err(_b) => () // eprintln!("{fee},{sqrt_price},{zero_for_one},{amount},SWAPERR,{:?}", std::str::from_utf8(&b).unwrap()),
                 }
             };
 
