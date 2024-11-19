@@ -319,7 +319,7 @@ export const getAmountsForLiquidity = (
       liquidity,
     );
     const amount1 = getAmount1ForLiquidity(
-      sqrtRatio1X96,
+      sqrtRatio0X96,
       sqrtRatioX96,
       liquidity,
     );
