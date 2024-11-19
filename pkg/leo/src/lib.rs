@@ -245,9 +245,15 @@ impl Leo {
         assert_eq!(self.campaigns.getter(identifier).owner.get(), msg::sender());
         // Cancel this campaign by setting its ending date to the current
         // time, and set the "cancelled" field to true.
-        let pool = self.campaigns.getter(identifier).pool.get();
-
-        events::emit_campaign_updated(identifier, pool, 0, 0, 0, 0, 0);
+        events::emit_campaign_updated(
+            identifier,
+            self.campaigns.getter(identifier).pool.get(),
+            0,
+            0,
+            0,
+            0,
+            0,
+        );
         Ok(())
     }
 
@@ -334,7 +340,7 @@ impl Leo {
                 let campaign_starting = campaign.starting.get().to_u64().unwrap();
                 let campaign_ending = campaign.ending.get().to_u64().unwrap();
                 assert_or!(
-                    campaign_starting > block::timestamp(),
+                    block::timestamp() > campaign_starting,
                     Error::CampaignHasntBegun
                 );
                 // Check if the position is eligible for this campaign.
@@ -347,6 +353,7 @@ impl Leo {
                 }
                 let current_start = max(campaign_starting, block::timestamp());
                 let current_end = min(campaign_ending, block::timestamp());
+                dbg!(current_start, current_end);
                 let secs_since = U256::from(current_end - current_start);
                 if secs_since.is_zero() {
                     continue;
@@ -379,8 +386,19 @@ impl Leo {
 
     // Divest LP positions from this contract, sending them back to the
     // original owner.
-    pub fn divest_position(&mut self, pool: Address, position_id: U256) -> Result<(), Vec<u8>> {
-        Ok(())
+    pub fn divest_position(&mut self, position_id: U256) -> Result<(), Vec<u8>> {
+        assert_or!(
+            self.positions.getter(position_id).owner.get() == msg::sender(),
+            Error::NotCampaignOwner
+        );
+        let pool = self.positions.getter(position_id).pool.get();
+        let pool_liq = self.liquidity.getter(pool).get();
+        self.liquidity
+            .setter(pool)
+            .set(pool_liq - self.positions.getter(position_id).liquidity.get());
+        self.positions.setter(position_id).owner.set(Address::ZERO);
+        evm::log(events::PositionDivested{positionId: position_id});
+        nft_manager::give_position(position_id)
     }
 }
 

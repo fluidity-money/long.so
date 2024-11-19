@@ -85,15 +85,15 @@ mod testing {
             assert!(leo.vest_position(POOL, POS_ID, msg::sender()).is_err());
 
             leo.create_campaign(
-                CAMPAIGN_ID,                // Identifier
-                POOL,                       // Pool
-                0,                          // Tick lower
-                1,                          // Tick upper
-                100,                        // Per second distribution
-                POOL,                       // Token to send
-                U256::from(100),            // Starting pool of liquidity
-                block::timestamp() - 20000, // Starting timestamp
-                block::timestamp() + 1000,  // Ending timestamp
+                CAMPAIGN_ID,            // Identifier
+                POOL,                   // Pool
+                0,                      // Tick lower
+                1,                      // Tick upper
+                100,                    // Per second distribution
+                POOL,                   // Token to send
+                U256::from(100),        // Starting pool of liquidity
+                block::timestamp(),     // Starting timestamp
+                block::timestamp() + 2, // Ending timestamp
             )
             .unwrap();
 

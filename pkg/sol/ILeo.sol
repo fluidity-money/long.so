@@ -91,7 +91,7 @@ interface ILeo is ILeoEvents {
     );
 
     /// @notice divest a position, returning the position ID to the user
-    /// @param pool to check
-    /// @param positionId to check
-    function divestPosition(address pool, uint256 positionId) external;
+    /// @param positionId to move out
+    /// @param recipient to send this to
+    function divestPosition(uint256 positionId, address recipient) external;
 }
