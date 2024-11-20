@@ -42,7 +42,7 @@ contract PositionHandler {
                 fusdcMax
             );
         IERC20(pool).transfer(msg.sender, amount0Max - amount0Taken);
-        IERC20(pool).transfer(msg.sender, fusdcMax - fusdcTaken);
+        IERC20(FUSDC).transfer(msg.sender, fusdcMax - fusdcTaken);
         if (shouldVest) {
             LEO.vestPosition(pool, id, recipient);
         } else {
