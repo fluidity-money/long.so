@@ -4,17 +4,20 @@ pragma solidity 0.8.16;
 import "./ISeawaterAMM.sol";
 import "./ILeo.sol";
 import "./IERC20.sol";
+import "./OwnershipNFTs.sol";
 
 contract PositionHandler {
     ISeawaterAMM immutable LONGTAIL;
     ILeo immutable LEO;
     IERC20 immutable FUSDC;
+    OwnershipNFTs immutable NFT_MANAGER;
 
-    constructor(ISeawaterAMM longtail, ILeo leo, IERC20 fusdcAddr) {
+    constructor(ISeawaterAMM longtail, ILeo leo, OwnershipNFTs nftManager, IERC20 fusdcAddr) {
         LONGTAIL = longtail;
         LEO = leo;
         FUSDC = fusdcAddr;
         FUSDC.approve(address(longtail), type(uint256).max);
+        NFT_MANAGER = nftManager;
     }
 
     function proxyVestIncr(
@@ -44,8 +47,10 @@ contract PositionHandler {
         IERC20(pool).transfer(msg.sender, amount0Max - amount0Taken);
         IERC20(FUSDC).transfer(msg.sender, fusdcMax - fusdcTaken);
         if (shouldVest) {
+            NFT_MANAGER.approve(address(LEO), id);
             LEO.vestPosition(pool, id, recipient);
         } else {
+            NFT_MANAGER.approve(recipient, id);
             LONGTAIL.transferPositionEEC7A3CD(id, address(this), recipient);
         }
         return id;
