@@ -97,7 +97,7 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "spin-once": "spin-once 1s ease-in-out",
-        rotate180: "rotate180 2s ease-in-out infinite",
+        rotate180: "rotate180 1.5s ease-in-out infinite",
       },
       dropShadow: {
         white: "0px 4px 32.5px rgba(235, 235, 235, 0.6)",
