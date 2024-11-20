@@ -10,6 +10,7 @@ const appSchema = z.object({
     url: z.string().url(),
     icons: z.array(z.string()),
   }),
+  pointsGraphUrl: z.string().url(),
   nullAddress: z
     .string()
     .regex(/^0x[a-fA-F0-9]+$/, {
@@ -31,6 +32,7 @@ const appVars = appSchema.safeParse({
     url: "https://long.so",
     icons: [""],
   },
+  pointsGraphUrl: "https://points-graph.superposition.so",
   nullAddress: "0x0000000000000000000000000000000000000000",
 });
 

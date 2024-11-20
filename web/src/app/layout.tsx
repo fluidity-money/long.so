@@ -17,7 +17,7 @@ import ErrorReportingDialog from "@/components/ErrorReportingDialog";
 import { superpositionTestnet } from "@/config/chains";
 import CookieBanner from "@/components/CookieBanner";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
-
+import Points from "@/components/Points";
 const title = "Longtail";
 
 const description = "Longtail is Arbitrum's cheapest and most rewarding AMM.";
@@ -96,6 +96,7 @@ export default async function RootLayout({
                   <DemoData />
                 </div>
                 <div className="flex flex-row items-center gap-4">
+                  <Points />
                   <FaucetDropdown allowedChains={faucetChains} />
                   <NetworkSelection />
                   <ConnectWalletButton />

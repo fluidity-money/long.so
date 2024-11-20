@@ -63,6 +63,11 @@ export const graphqlQueryUser = graphql(`
     }
   }
 `);
+export const queryGetPoints = graphql(`
+  query queryGetPoints($wallet: String!) {
+    getPointsComponent(wallet: $wallet)
+  }
+`);
 /**
  * Fetch all data from the global GraphQL endpoint.
  */
@@ -90,5 +95,20 @@ export const useGraphqlUser = () => {
       }),
     refetchInterval: 20 * 1000, // 20 seconds
     enabled: !!address,
+  });
+};
+
+export const usePointsGraph = () => {
+  const { address } = useAccount();
+
+  return useQuery({
+    queryKey: ["points", address],
+    queryFn: async () => {
+      const res = await request(appConfig.pointsGraphUrl, queryGetPoints, {
+        wallet: address ?? "",
+      });
+      return res.getPointsComponent;
+    },
+    refetchInterval: 20 * 1000, // 20 seconds
   });
 };

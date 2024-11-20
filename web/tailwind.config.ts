@@ -88,11 +88,16 @@ const config = {
           from: { transform: "rotate(0deg)" },
           to: { transform: "rotate(360deg)" },
         },
+        rotate180: {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(180deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "spin-once": "spin-once 1s ease-in-out",
+        rotate180: "rotate180 2s ease-in-out infinite",
       },
       dropShadow: {
         white: "0px 4px 32.5px rgba(235, 235, 235, 0.6)",
