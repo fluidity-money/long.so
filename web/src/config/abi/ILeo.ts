@@ -60,30 +60,6 @@ export const ILeo = [
   },
   {
     type: "function",
-    name: "campaignRevisions",
-    inputs: [
-      {
-        name: "pool",
-        type: "address",
-        internalType: "address",
-      },
-      {
-        name: "campaignId",
-        type: "bytes8",
-        internalType: "bytes8",
-      },
-    ],
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
     name: "cancelCampaign",
     inputs: [
       {
@@ -240,14 +216,14 @@ export const ILeo = [
     name: "divestPosition",
     inputs: [
       {
-        name: "pool",
-        type: "address",
-        internalType: "address",
-      },
-      {
         name: "positionId",
         type: "uint256",
         internalType: "uint256",
+      },
+      {
+        name: "recipient",
+        type: "address",
+        internalType: "address",
       },
     ],
     outputs: [],
@@ -274,59 +250,6 @@ export const ILeo = [
   },
   {
     type: "function",
-    name: "updateCampaign",
-    inputs: [
-      {
-        name: "campaignId",
-        type: "bytes8",
-        internalType: "bytes8",
-      },
-      {
-        name: "pool",
-        type: "address",
-        internalType: "address",
-      },
-      {
-        name: "tickLower",
-        type: "int32",
-        internalType: "int32",
-      },
-      {
-        name: "tickUpper",
-        type: "int32",
-        internalType: "int32",
-      },
-      {
-        name: "perSecond",
-        type: "uint64",
-        internalType: "uint64",
-      },
-      {
-        name: "token",
-        type: "address",
-        internalType: "address",
-      },
-      {
-        name: "extraMax",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "starting",
-        type: "uint64",
-        internalType: "uint64",
-      },
-      {
-        name: "ending",
-        type: "uint64",
-        internalType: "uint64",
-      },
-    ],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
     name: "vestPosition",
     inputs: [
       {
@@ -339,28 +262,14 @@ export const ILeo = [
         type: "uint256",
         internalType: "uint256",
       },
+      {
+        name: "recipient",
+        type: "address",
+        internalType: "address",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
-  },
-  {
-    type: "event",
-    name: "CampaignBalanceUpdated",
-    inputs: [
-      {
-        name: "identifier",
-        type: "bytes8",
-        indexed: true,
-        internalType: "bytes8",
-      },
-      {
-        name: "newMaximum",
-        type: "uint256",
-        indexed: true,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
   },
   {
     type: "event",
@@ -445,13 +354,19 @@ export const ILeo = [
   },
   {
     type: "event",
-    name: "PositionVested",
+    name: "PositionVested2",
     inputs: [
       {
         name: "positionId",
         type: "uint256",
         indexed: true,
         internalType: "uint256",
+      },
+      {
+        name: "owner",
+        type: "address",
+        indexed: true,
+        internalType: "address",
       },
     ],
     anonymous: false,
