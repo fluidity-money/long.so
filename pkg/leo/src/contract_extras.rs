@@ -163,12 +163,12 @@ impl StorageLeo {
     pub fn campaign_details(
         &self,
         id: CampaignId,
-    ) -> Result<(i32, i32, u64, Address, U256, U256, u64, u64), Vec<u8>> {
+    ) -> Result<(i32, i32, U256, Address, U256, U256, u64, u64), Vec<u8>> {
         let campaign = self.campaigns.getter(id);
         Ok((
             i32::from_le_bytes(campaign.tick_lower.get().to_le_bytes()),
             i32::from_le_bytes(campaign.tick_upper.get().to_le_bytes()),
-            u64::from_le_bytes(campaign.per_sec.get().to_le_bytes()),
+            campaign.per_sec.get(),
             campaign.token.get(),
             campaign.distributed.get(),
             campaign.maximum.get(),

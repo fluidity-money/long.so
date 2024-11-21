@@ -36,6 +36,10 @@ pub fn reset_storage() {
     STORAGE.with(|s| s.borrow_mut().clear())
 }
 
+pub fn advance_time(s: u64) {
+    CURRENT_TIME.with(|x| *x.borrow_mut() += s)
+}
+
 /// # Safety
 ///
 /// This will read the word from the bytes array, and should be fine as it uses
@@ -153,10 +157,7 @@ pub fn with_storage<T, P: StorageNew, F: FnOnce(&mut P) -> T>(
     f: F,
 ) -> T {
     reset_storage();
-    CURRENT_TIME.with(|t| {
-        let mut ts = t.borrow_mut();
-        *ts = current_timestamp();
-    });
+    CURRENT_TIME.with(|x| *x.borrow_mut() = 1);
     POSITIONS.with(|positions| {
         let mut h = positions.borrow_mut();
         h.clear();
