@@ -301,15 +301,6 @@ impl Pools {
         erc20::take(from, amount_in, permit2)?;
         erc20::transfer_to_sender(to, amount_out)?;
 
-        if original_amount > amount_in {
-            erc20::transfer_to_sender(
-                to,
-                original_amount
-                    .checked_sub(amount_in)
-                    .ok_or(Error::TransferToSenderSub)?,
-            )?;
-        }
-
         evm::log(events::Swap2 {
             user: msg::sender(),
             from,
