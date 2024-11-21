@@ -9,7 +9,7 @@ use crate::calldata::{write_address, write_selector, write_u256};
 //transfer(address,uint256)
 const TRANSFER_SELECTOR: [u8; 4] = [0xa9, 0x05, 0x9c, 0xbb];
 
-pub fn take(token: Address, pool: Address, amount: U256) -> Result<(), Vec<u8>> {
+pub fn take(token: Address, amount: U256) -> Result<(), Vec<u8>> {
     transfer_from(token, msg::sender(), contract::address(), amount)
 }
 

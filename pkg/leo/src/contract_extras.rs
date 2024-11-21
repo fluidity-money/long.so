@@ -2,25 +2,17 @@ use stylus_sdk::{
     abi::Bytes,
     alloy_primitives::{aliases::*, *},
     evm, msg,
-    prelude::*,
-    storage::*,
-};
-
-use num_traits::cast::ToPrimitive;
-
-use std::{
-    cmp::{max, min},
-    collections::HashMap,
 };
 
 use crate::{
-    assert_or, error::Error, immutables::SCALING_FACTOR, nft_manager, seawater,
-    storage::{StorageLeo, CampaignId}, utils::block_timestamp,
-    events,
-    immutables
+    assert_or,
+    error::Error,
+    events, immutables, nft_manager, seawater,
+    storage::{CampaignId, StorageLeo},
+    utils::block_timestamp,
 };
 
-#[cfg_attr(feature = "contract-extras", public)]
+#[cfg_attr(feature = "contract-extras", stylus_sdk::prelude::public)]
 impl StorageLeo {
     pub fn ctor(&mut self, emergency: Address) -> Result<(), Vec<u8>> {
         assert_or!(self.version.get().is_zero(), Error::AlreadySetUp);
@@ -169,7 +161,6 @@ impl StorageLeo {
     #[allow(clippy::type_complexity)]
     pub fn campaign_details(
         &self,
-        pool: Address,
         id: CampaignId,
     ) -> Result<(i32, i32, u64, Address, U256, U256, u64, u64), Vec<u8>> {
         let campaign = self.campaigns.getter(id);

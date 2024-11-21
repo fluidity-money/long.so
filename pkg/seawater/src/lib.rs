@@ -282,7 +282,7 @@ impl Pools {
         ));
 
         let (
-            original_amount,
+            _original_amount,
             amount_in,
             amount_out,
             _interim_usdc_out,

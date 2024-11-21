@@ -36,13 +36,12 @@ interface ILeo is ILeoEvents {
     /// @notice cancel an ongoing campaign by amending it to have 0
     /// @param pool to modify the campaign for
     /// @param campaignId to modify
-    /// @dev only usable by the admin of the pool
+    /// @dev only usable by the admin of the campaign
     function cancelCampaign(address pool, bytes8 campaignId) external;
 
     /// @notice details of a campaign
-    /// @param pool this campaign is for
     /// @param campaignId to identify this campaign
-    function campaignDetails(address pool, bytes8 campaignId) external view returns (
+    function campaignDetails(bytes8 campaignId) external returns (
         int32 tickLower,
         int32 tickUpper,
         uint64 perSecond,
@@ -83,12 +82,12 @@ interface ILeo is ILeoEvents {
     /// @notice collect rewards for a position vested in a pool with the campaigns given
     /// @param positionDetails to check
     /// @param campaignIds to check
+    /// @param recipient of the returned amounts
     function collect(
         PositionDetails[] memory positionDetails,
-        bytes8[] memory campaignIds
-    ) external returns (
-        CollectRewards memory collectRewards
-    );
+        bytes8[] memory campaignIds,
+        address recipient
+    ) external returns (CollectRewards memory collectRewards);
 
     /// @notice divest a position, returning the position ID to the user
     /// @param positionId to move out

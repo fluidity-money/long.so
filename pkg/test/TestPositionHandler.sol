@@ -8,6 +8,7 @@ import "./MockLeo.sol";
 import "./LightweightERC20.sol";
 
 import "../sol/PositionHandler.sol";
+import "../sol/OwnershipNFTs.sol";
 
 import "../sol/ISeawater.sol";
 import "../sol/ILeo.sol";
@@ -18,6 +19,7 @@ contract TestPositionHandler is Test {
     ILeo leo;
     IERC20 fusdc;
     IERC20 otherToken;
+    OwnershipNFTs nftManager;
 
     PositionHandler positionHandler;
 
@@ -37,8 +39,9 @@ contract TestPositionHandler is Test {
             address(this)
         )));
         seawater = ISeawater(address(new MockLongtail(fusdc)));
+        nftManager = new OwnershipNFTs("Longtail LPs", "LTLPS", "", seawater);
         leo = ILeo(address(new MockLeo()));
-        positionHandler = new PositionHandler(seawater, leo, fusdc);
+        positionHandler = new PositionHandler(seawater, leo, nftManager, fusdc);
     }
 
     function testShouldTakePositions() external {

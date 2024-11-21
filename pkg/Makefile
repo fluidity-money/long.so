@@ -34,7 +34,9 @@ swaps: ${OUT_SEAWATER_SWAPS}
 quotes: ${OUT_SEAWATER_QUOTES}
 migrations: ${OUT_SEAWATER_MIGRATIONS}
 
-leo: ${OUT_LEO}
+leo: leo-collect leo-extras
+leo-collect: ${OUT_LEO_COLLECT}
+leo-extras: ${OUT_LEO_EXTRAS}
 
 seawater: \
 	admin \
@@ -138,10 +140,15 @@ ${OUT_SEAWATER_SWAP_PERMIT2_B}: ${FILES_RUST}
 	@${WASM_OPT_PASS_SEAWATER_CODESIZE} ${OUT_SEAWATER_SWAP_PERMIT2_B}
 	@rm -f ${SEAWATER_CODESIZE_RELEASE}
 
-${OUT_LEO}: ${FILES_RUST}
-	@rm -f ${OUT_LEO}
-	@${CARGO_BUILD_STYLUS} leo --profile release-codesize
-	@${WASM_OPT_PASS_LEO} leo.wasm
+${OUT_LEO_COLLECT}: ${FILES_RUST}
+	@rm -f ${OUT_LEO_COLLECT}
+	@${CARGO_BUILD_STYLUS} leo --features contract-collect --profile release-codesize
+	@${WASM_OPT_PASS_LEO} leo-collect.wasm
+
+${OUT_LEO_EXTRAS}: ${FILES_RUST}
+	@rm -f ${OUT_LEO_EXTRAS}
+	${CARGO_BUILD_STYLUS} leo --features contract-extras --profile release-codesize
+	@${WASM_OPT_PASS_LEO} leo-extras.wasm
 
 ### STYLUS CHECK
 

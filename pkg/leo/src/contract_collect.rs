@@ -1,9 +1,6 @@
 use stylus_sdk::{
-    abi::Bytes,
     alloy_primitives::{aliases::*, *},
-    evm, msg,
-    prelude::*,
-    storage::*,
+    msg,
 };
 
 use num_traits::cast::ToPrimitive;
@@ -23,7 +20,7 @@ use crate::{
     erc20
 };
 
-#[cfg_attr(feature = "contract-collect", public)]
+#[cfg_attr(feature = "contract-collect", stylus_sdk::prelude::public)]
 impl StorageLeo {
     // Return the LP and pool rewards paid by Leo for vesting this NFT position.
     #[allow(clippy::type_complexity)]

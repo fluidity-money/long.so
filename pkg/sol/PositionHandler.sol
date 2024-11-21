@@ -12,7 +12,12 @@ contract PositionHandler {
     IERC20 immutable FUSDC;
     OwnershipNFTs immutable NFT_MANAGER;
 
-    constructor(ISeawaterAMM longtail, ILeo leo, OwnershipNFTs nftManager, IERC20 fusdcAddr) {
+    constructor(
+        ISeawaterAMM longtail,
+        ILeo leo,
+        OwnershipNFTs nftManager,
+        IERC20 fusdcAddr
+    ) {
         LONGTAIL = longtail;
         LEO = leo;
         FUSDC = fusdcAddr;
