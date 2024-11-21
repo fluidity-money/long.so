@@ -18,39 +18,23 @@ import { superpositionTestnet } from "@/config/chains";
 import CookieBanner from "@/components/CookieBanner";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import Points from "@/components/Points";
-const title = "Longtail";
-
-const description = "Longtail is Arbitrum's cheapest and most rewarding AMM.";
-
-const image = "https://static.long.so/embed.png";
 
 export const metadata: Metadata = {
-  title: title,
-  description: description,
+  title: "Longtail",
+  description: "Longtail is Arbitrum's cheapest and most rewarding AMM.",
   metadataBase: new URL("https://long.so"),
-  twitter: {
-    card: "summary_large_image",
-    title: title,
-    description: description,
-    site: "@superpositionso",
-    siteId: "",
-    creator: "@superpositionso",
-    creatorId: "",
-    images: [image],
-  },
-  openGraph: {
-    title: "Longtail AMM",
-    url: "https://long.so",
-    images: [
-      {
-        url: image,
-        secureUrl: image,
-        width: 1200,
-        height: 800,
-        alt: "Longtail AMM",
-      },
-    ],
-  },
+  keywords: [
+    "amm",
+    "automated market maker",
+    "dex",
+    "defi",
+    "longtail",
+    "superposition",
+    "onchain",
+    "arbitrum",
+    "superposition",
+    "blockchain",
+  ],
 };
 
 const inter = Inter({
