@@ -8,9 +8,10 @@ use crate::{
     assert_or,
     error::Error,
     events, immutables, nft_manager, seawater,
-    storage::{CampaignId, StorageLeo},
     utils::block_timestamp,
 };
+
+pub use crate::storage::*;
 
 #[cfg_attr(feature = "contract-extras", stylus_sdk::prelude::public)]
 impl StorageLeo {

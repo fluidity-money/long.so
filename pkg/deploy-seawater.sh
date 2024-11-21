@@ -82,4 +82,3 @@ cat <<EOF
 	"seawater_proxy_admin": "$SEAWATER_PROXY_ADMIN",
 	"seawater_fusdc_addr": "$FLU_SEAWATER_FUSDC_ADDR"
 }
-EOF

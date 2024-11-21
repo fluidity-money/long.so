@@ -12,13 +12,14 @@ use std::{
 
 use crate::{
     assert_or,
-    storage::{CampaignId, StorageLeo},
     error::Error,
     seawater,
     utils::block_timestamp,
     immutables::SCALING_FACTOR,
     erc20
 };
+
+pub use crate::storage::*;
 
 #[cfg_attr(feature = "contract-collect", stylus_sdk::prelude::public)]
 impl StorageLeo {

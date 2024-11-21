@@ -20,6 +20,10 @@ library StorageSlot {
     }
 }
 
+interface LeoCtor {
+    function ctor(address) external;
+}
+
 contract LeoProxy is ILeo {
     function directDelegate(address to) internal {
         assembly {
@@ -46,9 +50,14 @@ contract LeoProxy is ILeo {
         }
     }
 
-    constructor(address _extras, address _collect) {
-        StorageSlot.getAddressSlot(EXTRAS_SLOT).value = _extras;
+    constructor(address _collect, address _extras, address _emergency) {
         StorageSlot.getAddressSlot(COLLECT_SLOT).value = _collect;
+        StorageSlot.getAddressSlot(EXTRAS_SLOT).value = _extras;
+        (bool success,) =
+            StorageSlot.getAddressSlot(EXTRAS_SLOT).value.delegatecall(
+                abi.encodeWithSelector(LeoCtor.ctor.selector, _emergency)
+            );
+        require(success, "setup failed");
     }
 
     /// @inheritdoc ILeo

@@ -58,9 +58,11 @@ Longtail is Arbitrum's cheapest and most rewarding AMM.
 
 ##### Leo contract deployments
 
-|  Deployment name |              Deployment address            |
-|------------------|--------------------------------------------|
-| Implementation   | 0x66da765fc4066719f924faa731923e374d4d9555 |
+|     Deployment name    |              Deployment address            |
+|------------------------|--------------------------------------------|
+| Leo                    | 0x5E25820540021d0c69392EfD06a9918c41B2ffA9 |
+| Collect implementation | 0x96e845346505136cfc535298f55e9dc6d18ffbc1 |
+| Extras implementation  | 0xf9a283f837b94b7f5c414cb5a649e3d0425b9b8a |
 
 ##### Useful testing token deployments
 

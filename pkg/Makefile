@@ -211,6 +211,8 @@ clean:
 		${OUT_SEAWATER_QUOTES} \
 		${OUT_SEAWATER_MIGRATIONS} \
 		${OUT_SEAWATER_ADJUST_POSITIONS} \
+		${OUT_LEO_COLLECT} \
+		${OUT_LEO_EXTRAS} \
 		cache \
 		target \
 		out \
