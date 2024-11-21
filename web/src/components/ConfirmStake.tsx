@@ -14,8 +14,8 @@ import {
 } from "wagmi";
 import useWriteContract from "@/fixtures/wagmi/useWriteContract";
 import { sqrtPriceX96ToPrice, snapTickToSpacing } from "@/lib/math";
-import { useEffect, useCallback, useMemo } from "react";
-import { Hash, hexToBigInt } from "viem";
+import { useEffect, useCallback } from "react";
+import { Hash } from "viem";
 import Confirm from "@/components/sequence/Confirm";
 import { EnableSpending } from "@/components/sequence/EnableSpending";
 import { Fail } from "@/components/sequence/Fail";
@@ -63,8 +63,11 @@ export const ConfirmStake = ({
   const expectedChainId = useChainId();
   const fUSDC = useTokens("fusdc");
   const ammContract = useContracts(expectedChainId, "amm");
+  const positionHandlerContract = useContracts(
+    expectedChainId,
+    "positionHandler",
+  );
   const leoContract = useContracts(expectedChainId, "leo");
-  const ownershipNFTContract = useContracts(expectedChainId, "ownershipNFTs");
   const showBoostIncentives = useFeatureFlag("ui show boost incentives");
   const showStakeApr = useFeatureFlag("ui show stake apr");
 
@@ -129,20 +132,6 @@ export const ConfirmStake = ({
     args: [address as Hash, ammContract.address],
   });
 
-  // Current tick of the pool
-  const { data: curTickNum } = useSimulateContract({
-    address: ammContract.address,
-    abi: ammContract.abi,
-    functionName: "curTick181C6FD9",
-    args: [token0.address],
-  });
-  const curTick = useMemo(
-    () => ({
-      result: BigInt(curTickNum?.result ?? 0),
-    }),
-    [curTickNum],
-  );
-
   const { data: tickSpacing } = useSimulateContract({
     address: ammContract.address,
     abi: ammContract.abi,
@@ -152,10 +141,10 @@ export const ConfirmStake = ({
 
   // set up write contract hooks
   const {
-    writeContractAsync: writeContractMint,
-    data: mintData,
-    error: mintError,
-    isPending: isMintPending,
+    writeContractAsync: writeContractProxyVestIncr,
+    data: proxyVestIncrData,
+    error: proxyVestIncrError,
+    isPending: isProxyVestIncrPending,
   } = useWriteContract();
   const {
     writeContractAsync: writeContractApprovalToken0,
@@ -179,64 +168,16 @@ export const ConfirmStake = ({
     reset: resetIncrPosition,
   } = useWriteContract();
   const {
-    writeContractAsync: writeContractVestPosition,
-    data: vestPositionData,
-    error: vestPositionError,
-    isPending: isVestPositionPending,
-    reset: resetVestPosition,
-  } = useWriteContract();
-  const {
     writeContractAsync: writeContractDivestPosition,
     data: divestPositionData,
     error: divestPositionError,
     isPending: isDivestPositionPending,
     reset: resetDivestPosition,
   } = useWriteContract();
-  const {
-    writeContractAsync: writeContractApproveOwnershipNFT,
-    data: approveOwnershipNFTData,
-    error: approveOwnershipNFTError,
-    isPending: isApproveOwnershipNFTPending,
-    reset: resetApproveOwnershipNFT,
-  } = useWriteContract();
 
   const divestPositionResult = useWaitForTransactionReceipt({
     hash: divestPositionData,
   });
-
-  const vestPositionResult = useWaitForTransactionReceipt({
-    hash: vestPositionData,
-  });
-
-  /**
-   * Create a new position in the AMM.
-   *
-   * Step 1. Mint a new position
-   */
-  const createPosition = () => {
-    if (
-      tickLower === undefined ||
-      tickUpper === undefined ||
-      tickLower >= tickUpper ||
-      !tickSpacing
-    )
-      return;
-
-    const { result: spacing } = tickSpacing;
-
-    // snap ticks to spacing
-    const lower = snapTickToSpacing(tickLower, spacing);
-    const upper = snapTickToSpacing(tickUpper, spacing);
-
-    if (isNaN(lower) || isNaN(upper)) return;
-
-    writeContractMint({
-      address: ammContract.address,
-      abi: ammContract.abi,
-      functionName: "mintPositionBC5B086D",
-      args: [token0.address, lower, upper],
-    });
-  };
 
   const usdTokenOPrice = getFormattedPriceFromAmount(
     token0Amount,
@@ -248,12 +189,17 @@ export const ConfirmStake = ({
     getFormattedPriceFromAmount(token0Amount, tokenPrice, fUSDC.decimals) +
     Number(token1Amount);
 
-  // wait for the mintPosition transaction to complete
-  const result = useWaitForTransactionReceipt({
-    hash: mintData,
+  // wait for the incrPosition transaction to complete
+  const incrPositionResult = useWaitForTransactionReceipt({
+    hash: incrPositionData,
   });
 
-  // extract the position ID from the mintPosition transaction
+  // wait for the proxyVestIncr transaction to complete
+  const result = useWaitForTransactionReceipt({
+    hash: proxyVestIncrData,
+  });
+
+  // extract the position ID from the proxyVestIncr transaction
   const mintPositionId = result?.data?.logs[0].topics[1];
 
   // divest if already vested before updating
@@ -263,10 +209,15 @@ export const ConfirmStake = ({
         address: leoContract.address,
         abi: leoContract.abi,
         functionName: "divestPosition",
-        args: [token0.address, BigInt(id ?? 0)],
+        args: [BigInt(id ?? 0), address],
       });
     },
-    [writeContractDivestPosition, token0, leoContract.address, leoContract.abi],
+    [
+      writeContractDivestPosition,
+      address,
+      leoContract.address,
+      leoContract.abi,
+    ],
   );
 
   const incrPosition = useCallback(
@@ -314,9 +265,55 @@ export const ConfirmStake = ({
   /**
    * Approve the AMM to spend the token
    *
-   * Step 3. Approve token 1
+   * Step 0. Approve token 1
    */
   const approveToken1 = useCallback(() => {
+    const createPosition = () => {
+      if (
+        tickLower === undefined ||
+        tickUpper === undefined ||
+        tickLower >= tickUpper ||
+        !tickSpacing
+      )
+        return;
+
+      const { result: spacing } = tickSpacing;
+
+      // snap ticks to spacing
+      const lower = snapTickToSpacing(tickLower, spacing);
+      const upper = snapTickToSpacing(tickUpper, spacing);
+
+      if (isNaN(lower) || isNaN(upper)) return;
+
+      const amount0 = BigInt(token0AmountRaw);
+      const amount1 = BigInt(token1AmountRaw);
+      // amount0 - 33%
+      const amount0Min = amount0 - amount0 / 3n;
+      // amount1 - 33%
+      const amount1Min = amount1 - amount1 / 3n;
+      // amount0 - 5%
+      const amount0Desired = amount0 - amount0 / 20n;
+      // amount1 - 5%
+      const amount1Desired = amount1 - amount1 / 20n;
+
+      // Call proxyVestIncr function
+      writeContractProxyVestIncr({
+        address: positionHandlerContract.address,
+        abi: positionHandlerContract.abi,
+        functionName: "proxyVestIncr",
+        args: [
+          token0.address,
+          lower,
+          upper,
+          amount0Min,
+          amount1Min,
+          amount0Desired,
+          amount1Desired,
+          isVesting,
+          address,
+        ],
+      });
+    };
     if (
       token1.abi &&
       (!allowanceDataToken1?.result ||
@@ -329,21 +326,44 @@ export const ConfirmStake = ({
         args: [ammContract.address, token1AmountRaw],
       });
     } else {
-      incrPosition(hexToBigInt(mintPositionId as Hash));
+      switch (true) {
+        case mode === "new":
+          createPosition();
+          break;
+        case isDivesting:
+          divestPosition(BigInt(positionId));
+          break;
+        default:
+          incrPosition(BigInt(positionId));
+          break;
+      }
     }
   }, [
-    allowanceDataToken1,
-    writeContractApprovalToken1,
+    address,
+    mode,
+    incrPosition,
+    divestPosition,
+    isVesting,
+    isDivesting,
+    tickLower,
+    tickUpper,
+    tickSpacing,
+    token0AmountRaw,
+    token0.address,
+    token1AmountRaw,
     token1.address,
     token1.abi,
-    incrPosition,
-    mintPositionId,
+    allowanceDataToken1,
+    writeContractProxyVestIncr,
+    writeContractApprovalToken1,
+    positionId,
+    positionHandlerContract.address,
+    positionHandlerContract.abi,
     ammContract.address,
-    token1AmountRaw,
   ]);
 
   /**
-   * Step 2. Approve token 0
+   * Step 1. Approve token 0
    */
   const approveToken0 = useCallback(() => {
     if (
@@ -370,16 +390,6 @@ export const ConfirmStake = ({
     token0AmountRaw,
   ]);
 
-  // once we have the position ID, approve the AMM to spend the token
-  useEffect(() => {
-    if (!mintPositionId) return;
-
-    approveToken0();
-    // including approveToken0 in this dependency array causes changes in allowance data
-    // to retrigger the staking flow, as allowance data is a dependency of approveToken0
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mintPositionId]);
-
   // wait for the approval transaction to complete
   const approvalToken0Result = useWaitForTransactionReceipt({
     hash: approvalDataToken0,
@@ -387,31 +397,20 @@ export const ConfirmStake = ({
 
   // once approval of token 0 is complete,
   useEffect(() => {
-    if (!approvalToken0Result.data || !mintPositionId) return;
+    if (!approvalToken0Result.data) return;
     approveToken1();
     // including approveToken1 in this dependency array causes changes in allowance data
     // to retrigger the staking flow, as allowance data is a dependency of approveToken1
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [approvalToken0Result.data, mintPositionId]);
+  }, [approvalToken0Result.data]);
 
   const approvalToken1Result = useWaitForTransactionReceipt({
     hash: approvalDataToken1,
   });
 
-  // incr the position once the approval is complete
-  useEffect(() => {
-    if (!approvalToken1Result.data || !mintPositionId) return;
-    incrPosition(hexToBigInt(mintPositionId as Hash));
-  }, [approvalToken1Result.data, mintPositionId, incrPosition]);
-
-  // wait for the incrPosition transaction to complete
-  const incrPositionResult = useWaitForTransactionReceipt({
-    hash: incrPositionData,
-  });
-
-  // wait for the approveOwnershipNFT transaction to complete
-  const approveOwnershipNFTResult = useWaitForTransactionReceipt({
-    hash: approveOwnershipNFTData,
+  // wait for the proxyVestIncr transaction to complete
+  const proxyVestIncrResult = useWaitForTransactionReceipt({
+    hash: proxyVestIncrData,
   });
 
   const getAmountsAndSetPosition = useCallback(
@@ -461,44 +460,8 @@ export const ConfirmStake = ({
     ],
   );
 
-  const approveOwnershipNFT = useCallback(
-    () =>
-      writeContractApproveOwnershipNFT({
-        address: ownershipNFTContract.address,
-        abi: ownershipNFTContract.abi,
-        functionName: "approve",
-        args: [leoContract.address, BigInt(positionId ?? mintPositionId ?? 0)],
-      }),
-    [
-      writeContractApproveOwnershipNFT,
-      ownershipNFTContract.address,
-      ownershipNFTContract.abi,
-      positionId,
-      mintPositionId,
-      leoContract.address,
-    ],
-  );
-
-  const vestPositionResultIdle = useCallback(
-    () =>
-      writeContractVestPosition({
-        address: leoContract.address,
-        abi: leoContract.abi,
-        functionName: "vestPosition",
-        args: [token0.address, BigInt(positionId ?? mintPositionId ?? 0)],
-      }),
-    [
-      leoContract.abi,
-      leoContract.address,
-      positionId,
-      mintPositionId,
-      token0.address,
-      writeContractVestPosition,
-    ],
-  );
-
   useEffect(() => {
-    if (incrPositionResult.isSuccess) {
+    if (proxyVestIncrResult.isSuccess || incrPositionResult.isSuccess) {
       const id = positionId ?? Number(mintPositionId);
       if (id && tickLower && tickUpper) {
         getAmountsAndSetPosition(id, tickLower, tickUpper);
@@ -510,65 +473,27 @@ export const ConfirmStake = ({
     positionId,
     tickLower,
     tickUpper,
+    proxyVestIncrResult.isSuccess,
     incrPositionResult.isSuccess,
-  ]);
-
-  useEffect(() => {
-    if (incrPositionResult.isSuccess && isVesting) {
-      approveOwnershipNFT();
-    }
-  }, [incrPositionResult.isSuccess, isVesting, approveOwnershipNFT]);
-
-  useEffect(() => {
-    // if we're vesting in Leo, have approved the ownership transfer, but haven't vested the position, do so now
-    if (
-      approveOwnershipNFTResult.isSuccess &&
-      isVesting &&
-      vestPositionResult.fetchStatus === "idle" &&
-      !vestPositionResult.data
-    )
-      vestPositionResultIdle();
-  }, [
-    vestPositionResultIdle,
-    isVesting,
-    approveOwnershipNFTResult.isSuccess,
-    vestPositionResult.data,
-    vestPositionResult.fetchStatus,
   ]);
 
   const handleDone = useCallback(() => {
     resetIncrPosition();
     resetApproveToken0();
     resetApproveToken1();
-    resetVestPosition();
     resetDivestPosition();
-    resetApproveOwnershipNFT();
-    incrPositionResult.refetch();
+    proxyVestIncrResult.refetch();
     router.push("/stake");
   }, [
     resetIncrPosition,
     resetApproveToken0,
     resetApproveToken1,
-    resetVestPosition,
     resetDivestPosition,
-    resetApproveOwnershipNFT,
-    incrPositionResult,
+    proxyVestIncrResult,
     router,
   ]);
 
   // step 1 pending
-  if (isMintPending || (mintData && result?.isPending)) {
-    return (
-      <Confirm
-        text={"Stake"}
-        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
-        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
-        transactionHash={mintData}
-      />
-    );
-  }
-
-  // step 2 pending
   if (
     isApprovalPendingToken0 ||
     (approvalDataToken0 && approvalToken0Result?.isPending)
@@ -581,7 +506,7 @@ export const ConfirmStake = ({
     );
   }
 
-  // step 3 pending
+  // step 2 pending
   if (
     isApprovalPendingToken1 ||
     (approvalDataToken1 && approvalToken1Result?.isPending)
@@ -590,6 +515,18 @@ export const ConfirmStake = ({
       <EnableSpending
         tokenName={token1.symbol}
         transactionHash={approvalDataToken1}
+      />
+    );
+  }
+
+  // step 3 pending
+  if (isProxyVestIncrPending || (proxyVestIncrData && result?.isPending)) {
+    return (
+      <Confirm
+        text={"Stake"}
+        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+        transactionHash={proxyVestIncrData}
       />
     );
   }
@@ -612,8 +549,9 @@ export const ConfirmStake = ({
 
   // step 5 pending
   if (
-    isIncrPositionPending ||
-    (incrPositionData && incrPositionResult?.isPending)
+    mode === "existing" &&
+    (isIncrPositionPending ||
+      (incrPositionData && incrPositionResult?.isPending))
   ) {
     return (
       <Confirm
@@ -625,39 +563,16 @@ export const ConfirmStake = ({
     );
   }
 
-  // step 6 approving NFT ownership transfer for vesting
-  if (
-    isVesting &&
-    (isApproveOwnershipNFTPending ||
-      (approveOwnershipNFTData && approveOwnershipNFTResult?.isPending))
-  ) {
-    return (
-      <Confirm
-        text={"Vest Position"}
-        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
-        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
-        transactionHash={vestPositionData}
-      />
-    );
-  }
-
-  // step 7 vesting position
-  if (
-    isVesting &&
-    (isVestPositionPending ||
-      (vestPositionData && vestPositionResult?.isPending))
-  ) {
-    return (
-      <Confirm
-        text={"Vest Position"}
-        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
-        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
-        transactionHash={vestPositionData}
-      />
-    );
-  }
-
   // success
+  if (proxyVestIncrResult.data) {
+    return (
+      <Success
+        transactionHash={proxyVestIncrResult.data.transactionHash}
+        onDone={handleDone}
+      />
+    );
+  }
+
   if (incrPositionResult.data) {
     return (
       <Success
@@ -669,22 +584,18 @@ export const ConfirmStake = ({
 
   // error
   if (
-    mintError ||
+    proxyVestIncrError ||
     approvalErrorToken0 ||
     approvalErrorToken1 ||
     incrPositionError ||
-    divestPositionError ||
-    vestPositionError ||
-    approveOwnershipNFTError
+    divestPositionError
   ) {
     const error =
-      mintError ||
+      proxyVestIncrError ||
       approvalErrorToken0 ||
       approvalErrorToken1 ||
       incrPositionError ||
-      divestPositionError ||
-      vestPositionError ||
-      approveOwnershipNFTError;
+      divestPositionError;
     return <Fail text={(error as any)?.shortMessage} />;
   }
 
@@ -935,13 +846,8 @@ export const ConfirmStake = ({
           <Button
             variant={"secondary"}
             className="w-full max-w-[350px]"
-            onClick={() => {
-              mode === "new"
-                ? createPosition()
-                : isDivesting
-                  ? divestPosition(BigInt(positionId))
-                  : incrPosition(BigInt(positionId));
-            }}
+            // all paths begin with ensuring we have approval
+            onClick={approveToken0}
           >
             {isVesting
               ? "Confirm Stake and Vest"
