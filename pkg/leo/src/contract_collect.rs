@@ -1,0 +1,131 @@
+use stylus_sdk::{
+    abi::Bytes,
+    alloy_primitives::{aliases::*, *},
+    evm, msg,
+    prelude::*,
+    storage::*,
+};
+
+use num_traits::cast::ToPrimitive;
+
+use std::{
+    cmp::{max, min},
+    collections::HashMap,
+};
+
+use crate::{
+    assert_or,
+    storage::{CampaignId, StorageLeo},
+    error::Error,
+    seawater,
+    utils::block_timestamp,
+    immutables::SCALING_FACTOR,
+    erc20
+};
+
+#[cfg_attr(feature = "contract-collect", public)]
+impl StorageLeo {
+    // Return the LP and pool rewards paid by Leo for vesting this NFT position.
+    #[allow(clippy::type_complexity)]
+    pub fn collect(
+        &mut self,
+        positions: Vec<(Address, U256)>,
+        campaign_ids: Vec<CampaignId>,
+        recipient: Address,
+    ) -> Result<(Vec<(Address, u128, u128)>, Vec<(U256, Address, U256)>), Vec<u8>> {
+        // For each address and position id, go into each campaign id,
+        // check if it's eligible, and if it is, check if they exceed the
+        // time spent and they're after the beginning date. If the
+        // campaign hasn't started yet, then we revert with an error as a
+        // precaution to prevent users from spending too much gas.
+        // We track seen positions and campaigns using a hashmap in lieu of
+        // sorting to reduce codesize.
+        let mut seen_positions = HashMap::new();
+        let mut seen_campaigns = HashMap::new();
+        // The accumulated tokens to send, ready to iterate through.
+        let mut tokens_to_send: HashMap<Address, U256> = HashMap::new();
+        // The pool rewards that we send to users.
+        let mut pool_rewards = vec![];
+        // The Leo rewards that we send to users.
+        let mut campaign_rewards = vec![];
+        for (position_pool, position_id) in positions {
+            let position = self.positions.getter(position_id);
+            // Ensure that the sender owns this position to prevent griefing.
+            assert_or!(
+                position.owner.get() == msg::sender(),
+                Error::NotPositionOwner
+            );
+            assert_or!(
+                seen_positions.get(&position_id).is_none(),
+                Error::DuplicatedPosition
+            );
+            seen_positions.insert(position_id, true);
+            // Before we get into the Leo distribution, let's try to collect on their behalf
+            // using Longtail.
+            let (pool_rewards_token0, pool_rewards_token1) =
+                seawater::collect_yield_single_to(position_pool, position_id, recipient)?;
+            pool_rewards.push((position_pool, pool_rewards_token0, pool_rewards_token1));
+            for campaign_id in campaign_ids.iter() {
+                assert_or!(
+                    seen_campaigns.get(campaign_id).is_none(),
+                    Error::DuplicatedCampaign
+                );
+                seen_campaigns.insert(campaign_id, true);
+                let campaign = self.campaigns.getter(*campaign_id);
+                let campaign_starting = campaign.starting.get().to_u64().unwrap();
+                let campaign_ending = campaign.ending.get().to_u64().unwrap();
+                assert_or!(
+                    block_timestamp() > campaign_starting,
+                    Error::CampaignHasntBegun
+                );
+                // Check if the position is eligible for this campaign.
+                let campaign_pool = campaign.pool.get();
+                let is_eligible = campaign_pool == position.pool.get()
+                    && campaign.tick_lower.get() >= position.tick_lower.get()
+                    || campaign.tick_upper.get() <= position.tick_upper.get();
+                // If they're not eligible, we need to skip them.
+                if !is_eligible {
+                    continue;
+                }
+                let current_start = max(campaign_starting, block_timestamp());
+                let current_end = min(campaign_ending, block_timestamp());
+                dbg!(current_start, current_end);
+                let secs_since = U256::from(current_end - current_start);
+                if secs_since.is_zero() {
+                    continue;
+                }
+                // (position lp token / global lp token) * campaign per sec * secs_since
+                let position_liq = position.liquidity.get();
+                let scaled_pos_liq = position_liq
+                    .checked_mul(SCALING_FACTOR)
+                    .ok_or(Error::CheckedMul)?;
+                let scaled_pool_liq = self
+                    .liquidity
+                    .get(campaign_pool)
+                    .checked_mul(SCALING_FACTOR)
+                    .ok_or(Error::CheckedMul)?;
+                let share_of_pool = scaled_pos_liq / scaled_pool_liq;
+                let token_amt = campaign
+                    .per_sec
+                    .get()
+                    .checked_mul(share_of_pool)
+                    .ok_or(Error::CheckedMul)?
+                    .checked_div(SCALING_FACTOR)
+                    .ok_or(Error::CheckedDiv)?;
+                let campaign_token = campaign.token.get();
+                campaign_rewards.push((position_id, campaign_token, token_amt));
+                // Track that we have to sent some rewards for this position.
+                tokens_to_send.insert(
+                    campaign_token,
+                    tokens_to_send[&campaign_token]
+                        .checked_add(token_amt)
+                        .ok_or(Error::CheckedAdd)?,
+                );
+            }
+        }
+        for (token_addr, token_amt) in tokens_to_send {
+            erc20::transfer(token_addr, recipient, token_amt)?;
+        }
+        Ok((pool_rewards, campaign_rewards))
+    }
+}

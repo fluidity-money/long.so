@@ -4,7 +4,7 @@ use std::cell::RefCell;
 use std::ptr;
 use std::time;
 
-use crate::StorageNew;
+use crate::storage::StorageNew;
 
 use stylus_sdk::alloy_primitives::{Address, U256};
 

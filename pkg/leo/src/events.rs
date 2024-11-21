@@ -71,7 +71,7 @@ fn pack_extras(tick_lower: i32, tick_upper: i32, starting: u64, ending: u64) -> 
 
 #[test]
 fn test_pack_details() {
-    use crate::address;
+    use stylus_sdk::alloy_primitives::address;
 
     dbg!(pack_details(
         -20,

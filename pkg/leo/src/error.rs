@@ -114,6 +114,16 @@ pub enum Error {
     // 18 (0x12)
     #[error("Checked add failed")]
     CheckedAdd,
+
+    /// Sender tried to duplicate a position in their claim.
+    // 19 (0x13)
+    #[error("Sender duplicated position")]
+    DuplicatedPosition,
+
+    /// Sender tried to duplicate a campaign in their claim.
+    // 20 (0x14)
+    #[error("Sender duplicated campaign")]
+    DuplicatedCampaign,
 }
 
 impl From<Error> for Vec<u8> {

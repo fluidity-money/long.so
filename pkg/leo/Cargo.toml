@@ -33,3 +33,5 @@ proptest = "1.5.0"
 [features]
 export-abi = ["stylus-sdk/export-abi"]
 testing = []
+contract-collect = []
+contract-extras = []

@@ -13,7 +13,7 @@ mod testing {
 
     #[test]
     fn campaign_creation() {
-        libleo::host::with_storage::<_, libleo::Leo, _>(&[(POOL, POS_ID, -10, 100, 100)], |leo| {
+        libleo::host::with_storage::<_, libleo::StorageLeo, _>(&[(POOL, POS_ID, -10, 100, 100)], |leo| {
             let expected_starting = block::timestamp();
             let expected_ending = expected_starting + 1000;
 
@@ -47,7 +47,7 @@ mod testing {
 
     #[test]
     fn lower_tick_out_of_range() {
-        libleo::host::with_storage::<_, libleo::Leo, _>(&[(POOL, POS_ID, -10, 100, 100)], |leo| {
+        libleo::host::with_storage::<_, libleo::StorageLeo, _>(&[(POOL, POS_ID, -10, 100, 100)], |leo| {
             leo.ctor(Address::ZERO).unwrap();
 
             leo.create_campaign(
@@ -77,7 +77,7 @@ mod testing {
 
     #[test]
     fn upper_tick_out_of_range() {
-        libleo::host::with_storage::<_, libleo::Leo, _>(&[(POOL, POS_ID, 0, 100, 1000)], |leo| {
+        libleo::host::with_storage::<_, libleo::StorageLeo, _>(&[(POOL, POS_ID, 0, 100, 1000)], |leo| {
             leo.ctor(Address::ZERO).unwrap();
 
             leo.vest_position(POOL, POS_ID, msg::sender()).unwrap();
@@ -109,7 +109,7 @@ mod testing {
 
     #[test]
     fn campaign_created_cancelled_then_claimed() {
-        libleo::host::with_storage::<_, libleo::Leo, _>(&[(POOL, POS_ID, -10, 100, 123)], |leo| {
+        libleo::host::with_storage::<_, libleo::StorageLeo, _>(&[(POOL, POS_ID, -10, 100, 123)], |leo| {
             let expected_starting = block::timestamp();
             let expected_ending = expected_starting + 1000;
 
@@ -177,7 +177,6 @@ mod proptesting {
 
     use stylus_sdk::{
         alloy_primitives::{Address, FixedBytes, U256},
-        block, msg,
     };
 
     const POOL: Address = Address::ZERO;
