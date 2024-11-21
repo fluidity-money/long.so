@@ -51,7 +51,7 @@ contract PositionHandler {
             LEO.vestPosition(pool, id, recipient);
         } else {
             NFT_MANAGER.approve(recipient, id);
-            LONGTAIL.transferPositionEEC7A3CD(id, address(this), recipient);
+            NFT_MANAGER.transferFrom(address(this), recipient, id);
         }
         return id;
     }
