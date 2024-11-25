@@ -176,7 +176,6 @@ mod testing {
     }
 }
 
-/*
 #[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
 mod proptesting {
     use libleo;
@@ -197,6 +196,13 @@ mod proptesting {
 
     proptest! {
         #[test]
+        fn proptest_liquidity_ratios(
+            other_positions in 100..
+        ) {
+            // This
+        }
+
+        #[test]
         fn proptest_full_story(
             mut tick_lower in MIN_TICK..MAX_TICK,
             mut tick_upper in MIN_TICK..MAX_TICK,
@@ -208,7 +214,7 @@ mod proptesting {
             position_lp in 1..u128::MAX,
             other_position_lp in 1..u128::MAX,
         ) {
+            // This test
         }
     }
 }
-*/

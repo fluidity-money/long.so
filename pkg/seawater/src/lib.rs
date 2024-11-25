@@ -894,9 +894,7 @@ impl Pools {
             self.seawater_admin.get(),
             Error::SeawaterAdminOnly
         );
-
-        self.pools.setter(pool).set_sqrt_price(new_price);
-
+        self.pools.setter(pool).set_sqrt_price(new_price)?;
         Ok(())
     }
 

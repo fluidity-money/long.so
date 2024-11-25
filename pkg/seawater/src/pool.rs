@@ -64,6 +64,15 @@ impl StoragePool {
         self.max_liquidity_per_tick
             .set(U128::lib(&max_liquidity_per_tick));
 
+        assert_or!(
+            price != tick_math::MIN_SQRT_RATIO + U256::one(),
+            Error::BadPrice
+        );
+        assert_or!(
+            price != tick_math::MAX_SQRT_RATIO - U256::one(),
+            Error::BadPrice
+        );
+
         Ok(())
     }
 
@@ -546,8 +555,17 @@ impl StoragePool {
         self.enabled.set(enabled)
     }
 
-    pub fn set_sqrt_price(&mut self, new_price: U256) {
+    pub fn set_sqrt_price(&mut self, new_price: U256) -> Result<(), Error> {
+        assert_or!(
+            new_price != tick_math::MIN_SQRT_RATIO + U256::one(),
+            Error::BadPrice
+        );
+        assert_or!(
+            new_price != tick_math::MAX_SQRT_RATIO - U256::one(),
+            Error::BadPrice
+        );
         self.sqrt_price.set(new_price);
+        Ok(())
     }
 
     pub fn set_fee_protocol(&mut self, fee_protocol: u8) {

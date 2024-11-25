@@ -269,6 +269,10 @@ pub enum Error {
     // 50 (0x32)
     #[error("Debug assert")]
     DebugAssert,
+
+    // 51 (0x33)
+    #[error("Bad sqrt price")]
+    BadPrice,
 }
 
 impl From<Error> for Vec<u8> {
