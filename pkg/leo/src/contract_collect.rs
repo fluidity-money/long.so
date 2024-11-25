@@ -48,7 +48,7 @@ impl StorageLeo {
                 Error::NotPositionOwner
             );
             // Before we get into the Leo distribution, let's try to collect on their behalf
-            // using Longtail.
+            // using Longtail for LPing (the fees collected).
             let position_pool = position.pool.get();
             let (seawater_rewards_token0, seawater_rewards_token1) =
                 seawater::collect_yield_single_to(position_pool, position_id, recipient)?;
@@ -57,6 +57,7 @@ impl StorageLeo {
                 seawater_rewards_token0,
                 seawater_rewards_token1,
             ));
+            // We're done sending Longtail rewards, now we need to collect Leo.
             let position_last_updated = position.timestamp.get().to_u64().unwrap();
             for campaign_id in campaign_ids.iter() {
                 let campaign = self.campaigns.getter(*campaign_id);
