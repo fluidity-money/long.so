@@ -35,7 +35,7 @@ impl StorageLeo {
         campaign_ids.sort();
         campaign_ids.dedup();
         // The accumulated tokens to send, ready to iterate through.
-        let mut tokens_to_send: HashMap<Address, U256> = HashMap::new();
+        let mut leo_tokens_to_send: HashMap<Address, U256> = HashMap::new();
         // The pool rewards that we send to users.
         let mut seawater_rewards = vec![];
         // The Leo rewards that we send to users.
@@ -93,16 +93,16 @@ impl StorageLeo {
                     maths::calc_rewards(campaign_liq, campaign_per_sec, secs_since, position_liq)?;
                 leo_rewards.push((position_id, campaign_token, token_amt));
                 // Track that we have to sent some rewards for this position.
-                tokens_to_send.insert(
+                leo_tokens_to_send.insert(
                     campaign_token,
-                    tokens_to_send[&campaign_token]
+                    leo_tokens_to_send[&campaign_token]
                         .checked_add(token_amt)
                         .ok_or(Error::CheckedAdd)?,
                 );
             }
             position.timestamp.set(U64::from(block_timestamp()));
         }
-        for (token_addr, token_amt) in tokens_to_send {
+        for (token_addr, token_amt) in leo_tokens_to_send {
             erc20::transfer(token_addr, recipient, token_amt)?;
         }
         Ok((seawater_rewards, leo_rewards))
