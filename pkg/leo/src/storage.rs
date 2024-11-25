@@ -60,19 +60,25 @@ pub struct StoragePosition {
     entrypoint
 )]
 pub struct StorageLeo {
+    /// Version of the contract. Set during initialisation.
     pub version: StorageU8,
 
+    /// Is the contract disabled?
     pub enabled: StorageBool,
 
+    /// The emergency operator can activate the not emergency field.
     pub emergency_council: StorageAddress,
 
+    /// Ongoing token distribution "campaigns".
     // campaign id => campaign
     pub campaigns: StorageMap<CampaignId, StorageCampaign>,
 
+    /// Positions vested by users.
     // position id => position
     pub positions: StorageMap<U256, StoragePosition>,
 
-    // pool address => LP token count
+    /// Tracked liquidity amount that should be updated on request.
+    /// pool address => LP token count
     pub liquidity: StorageMap<Address, StorageU256>,
 }
 
