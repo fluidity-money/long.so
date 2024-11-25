@@ -31,7 +31,9 @@ impl StorageLeo {
         // campaign hasn't started yet, then we revert with an error as a
         // precaution to prevent users from spending too much gas.
         // The accumulated tokens to send, ready to iterate through.
+        positions.sort();
         positions.dedup();
+        campaign_ids.sort();
         campaign_ids.dedup();
         let mut tokens_to_send: HashMap<Address, U256> = HashMap::new();
         // The pool rewards that we send to users.
