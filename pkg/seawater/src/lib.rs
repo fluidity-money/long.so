@@ -717,6 +717,7 @@ impl Pools {
             self.position_owners.get(id),
             Error::PositionOwnerOnly
         );
+        assert_or!(pool.enabled.get(), Error::PoolDisabled);
 
         let (amount_0, amount_1) =
             self.pools
@@ -815,7 +816,7 @@ impl Pools {
             500 => Ok(10),
             3000 => Ok(60),
             10_000 => Ok(200),
-            _ => Err(Error::BadFee)
+            _ => Err(Error::BadFee),
         }?;
 
         let max_liq_per_tick = tick_math::tick_spacing_to_max_liq(tick_spacing)?;
@@ -1077,11 +1078,7 @@ impl Pools {
     }
 
     #[allow(non_snake_case)]
-    pub fn send_token_to_sender(
-        &mut self,
-        token: Address,
-        amount: U256,
-    ) -> Result<(), Vec<u8>> {
+    pub fn send_token_to_sender(&mut self, token: Address, amount: U256) -> Result<(), Vec<u8>> {
         assert_eq_or!(
             msg::sender(),
             self.seawater_admin.get(),
