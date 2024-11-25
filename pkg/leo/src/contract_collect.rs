@@ -66,6 +66,7 @@ impl StorageLeo {
                 let campaign = self.campaigns.getter(*campaign_id);
                 let campaign_starting = campaign.starting.get().to_u64().unwrap();
                 let campaign_ending = campaign.ending.get().to_u64().unwrap();
+                let position_last_updated = position.timestamp.get();
                 assert_or!(
                     block_timestamp() > campaign_starting,
                     Error::CampaignHasntBegun
@@ -79,8 +80,8 @@ impl StorageLeo {
                 if !is_eligible {
                     continue;
                 }
-                let current_start = max(campaign_starting, block_timestamp());
-                let current_end = min(campaign_ending, block_timestamp());
+                let current_start = max(campaign_starting, position_last_updated);
+                let current_end = min(campaign_ending, block_timestamp);
                 let secs_since = U256::from(current_end - current_start);
                 if secs_since.is_zero() {
                     continue;
