@@ -10,14 +10,7 @@ use std::{
     collections::HashMap,
 };
 
-use crate::{
-    assert_or,
-    error::Error,
-    seawater,
-    utils::block_timestamp,
-    immutables::SCALING_FACTOR,
-    erc20
-};
+use crate::{assert_or, erc20, error::Error, maths, seawater, utils::block_timestamp};
 
 pub use crate::storage::*;
 
@@ -88,30 +81,17 @@ impl StorageLeo {
                 }
                 let current_start = max(campaign_starting, block_timestamp());
                 let current_end = min(campaign_ending, block_timestamp());
-                dbg!(current_start, current_end);
                 let secs_since = U256::from(current_end - current_start);
                 if secs_since.is_zero() {
                     continue;
                 }
-                // (position lp token / global lp token) * campaign per sec * secs_since
-                let position_liq = position.liquidity.get();
-                let scaled_pos_liq = position_liq
-                    .checked_mul(SCALING_FACTOR)
-                    .ok_or(Error::CheckedMul)?;
-                let scaled_pool_liq = self
-                    .liquidity
-                    .get(campaign_pool)
-                    .checked_mul(SCALING_FACTOR)
-                    .ok_or(Error::CheckedMul)?;
-                let share_of_pool = scaled_pos_liq / scaled_pool_liq;
-                let token_amt = campaign
-                    .per_sec
-                    .get()
-                    .checked_mul(share_of_pool)
-                    .ok_or(Error::CheckedMul)?
-                    .checked_div(SCALING_FACTOR)
-                    .ok_or(Error::CheckedDiv)?;
                 let campaign_token = campaign.token.get();
+                let campaign_liq = self.liquidity.get(campaign_pool);
+                let position_liq = position.liquidity.get();
+                let campaign_per_sec = campaign.per_sec.get();
+                // This is the amount of token rewards that we're sending to the user.
+                let token_amt =
+                    maths::calc_rewards(campaign_liq, campaign_per_sec, secs_since, position_liq)?;
                 campaign_rewards.push((position_id, campaign_token, token_amt));
                 // Track that we have to sent some rewards for this position.
                 tokens_to_send.insert(

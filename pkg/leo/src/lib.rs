@@ -23,6 +23,8 @@ mod utils;
 
 pub mod storage;
 
+pub mod maths;
+
 pub mod contract_collect;
 pub mod contract_extras;
 
