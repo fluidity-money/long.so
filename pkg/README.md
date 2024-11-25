@@ -56,9 +56,9 @@
 
 |     Deployment name    |              Deployment address            |
 |------------------------|--------------------------------------------|
-| Leo                    | 0x5E25820540021d0c69392EfD06a9918c41B2ffA9 |
-| Collect implementation | 0x96e845346505136cfc535298f55e9dc6d18ffbc1 |
-| Extras implementation  | 0xf9a283f837b94b7f5c414cb5a649e3d0425b9b8a |
+| Leo                    | 0xfeb228265453717352d8035b2E8e7aBFbb88d417 |
+| Collect implementation | 0x94e6db65496382cdfaaa6bfc89bbfdf48e7d99c7 |
+| Extras implementation  | 0xe5e2137ff1c51ba42e0d7f8c29f73e2f4a06f526 |
 
 #### Useful testing token deployments
 
