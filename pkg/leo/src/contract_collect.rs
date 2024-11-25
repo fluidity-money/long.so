@@ -30,16 +30,16 @@ impl StorageLeo {
         // time spent and they're after the beginning date. If the
         // campaign hasn't started yet, then we revert with an error as a
         // precaution to prevent users from spending too much gas.
-        // The accumulated tokens to send, ready to iterate through.
         positions.sort();
         positions.dedup();
         campaign_ids.sort();
         campaign_ids.dedup();
+        // The accumulated tokens to send, ready to iterate through.
         let mut tokens_to_send: HashMap<Address, U256> = HashMap::new();
         // The pool rewards that we send to users.
-        let mut pool_rewards = vec![];
+        let mut seawater_rewards = vec![];
         // The Leo rewards that we send to users.
-        let mut campaign_rewards = vec![];
+        let mut leo_rewards = vec![];
         for position_id in positions {
             let mut position = self.positions.setter(position_id);
             // Ensure that the sender owns this position to prevent griefing.
@@ -50,9 +50,13 @@ impl StorageLeo {
             // Before we get into the Leo distribution, let's try to collect on their behalf
             // using Longtail.
             let position_pool = position.pool.get();
-            let (pool_rewards_token0, pool_rewards_token1) =
+            let (seawater_rewards_token0, seawater_rewards_token1) =
                 seawater::collect_yield_single_to(position_pool, position_id, recipient)?;
-            pool_rewards.push((position_pool, pool_rewards_token0, pool_rewards_token1));
+            seawater_rewards.push((
+                position_pool,
+                seawater_rewards_token0,
+                seawater_rewards_token1,
+            ));
             let position_last_updated = position.timestamp.get().to_u64().unwrap();
             for campaign_id in campaign_ids.iter() {
                 let campaign = self.campaigns.getter(*campaign_id);
@@ -87,7 +91,7 @@ impl StorageLeo {
                 // This is the amount of token rewards that we're sending to the user.
                 let token_amt =
                     maths::calc_rewards(campaign_liq, campaign_per_sec, secs_since, position_liq)?;
-                campaign_rewards.push((position_id, campaign_token, token_amt));
+                leo_rewards.push((position_id, campaign_token, token_amt));
                 // Track that we have to sent some rewards for this position.
                 tokens_to_send.insert(
                     campaign_token,
@@ -101,6 +105,6 @@ impl StorageLeo {
         for (token_addr, token_amt) in tokens_to_send {
             erc20::transfer(token_addr, recipient, token_amt)?;
         }
-        Ok((pool_rewards, campaign_rewards))
+        Ok((seawater_rewards, leo_rewards))
     }
 }
