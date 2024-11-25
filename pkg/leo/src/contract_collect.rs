@@ -31,6 +31,7 @@ impl StorageLeo {
         campaign_ids: Vec<CampaignId>,
         recipient: Address,
     ) -> Result<(Vec<(Address, u128, u128)>, Vec<(U256, Address, U256)>), Vec<u8>> {
+        assert_or!(self.enabled.get(), Error::NotEnabled);
         // For each address and position id, go into each campaign id,
         // check if it's eligible, and if it is, check if they exceed the
         // time spent and they're after the beginning date. If the

@@ -32,11 +32,11 @@ pub fn take_position(id: U256) -> Result<(), Vec<u8>> {
     }
 }
 
-pub fn give_position(id: U256) -> Result<(), Vec<u8>> {
+pub fn transfer_position(id: U256, recipient: Address) -> Result<(), Vec<u8>> {
     if cfg!(target_arch = "wasm32") {
         RawCall::new().call(
             NFT_MANAGER_ADDR,
-            &pack_transfer_from(contract::address(), msg::sender(), id),
+            &pack_transfer_from(contract::address(), recipient, id),
         )?;
         Ok(())
     } else {

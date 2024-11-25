@@ -32,6 +32,7 @@ impl StorageLeo {
         id: U256,
         recipient: Address,
     ) -> Result<(), Vec<u8>> {
+            assert_or!(self.enabled.get(), Error::NotEnabled);
         // Just to be safe, check if we already have this position tracked.
         assert_or!(
             self.positions.get(id).timestamp.get().is_zero(),
@@ -138,7 +139,6 @@ impl StorageLeo {
     }
 
     pub fn cancel_campaign(&mut self, identifier: CampaignId) -> Result<(), Vec<u8>> {
-        assert_or!(self.enabled.get(), Error::NotEnabled);
         assert_eq!(self.campaigns.getter(identifier).owner.get(), msg::sender());
         // Cancel this campaign by setting its ending date to the current
         // time, and set the "cancelled" field to true.
@@ -198,7 +198,7 @@ impl StorageLeo {
 
     // Divest LP positions from this contract, sending them back to the
     // original owner.
-    pub fn divest_position(&mut self, position_id: U256) -> Result<(), Vec<u8>> {
+    pub fn divest_position(&mut self, position_id: U256, recipient: Address) -> Result<(), Vec<u8>> {
         assert_or!(
             self.positions.getter(position_id).owner.get() == msg::sender(),
             Error::NotCampaignOwner
@@ -209,9 +209,10 @@ impl StorageLeo {
             .setter(pool)
             .set(pool_liq - self.positions.getter(position_id).liquidity.get());
         self.positions.setter(position_id).owner.set(Address::ZERO);
-        evm::log(events::PositionDivested {
+        evm::log(events::PositionDivested2 {
             positionId: position_id,
+            recipient,
         });
-        nft_manager::give_position(position_id)
+        nft_manager::transfer_position(position_id, recipient)
     }
 }

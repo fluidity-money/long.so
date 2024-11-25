@@ -175,3 +175,40 @@ mod testing {
         })
     }
 }
+
+/*
+#[cfg(all(not(target_arch = "wasm32"), feature = "testing"))]
+mod proptesting {
+    use libleo;
+    use proptest::prelude::*;
+
+    use stylus_sdk::{
+        alloy_primitives::{Address, FixedBytes, U256},
+    };
+
+    const POOL: Address = Address::ZERO;
+    const CAMPAIGN_ID: FixedBytes<8> = FixedBytes::ZERO;
+
+    const POS_ID: U256 = U256::ZERO;
+    const POS_ID_OTHER: U256 = U256::from_limbs([1, 0, 0, 0]);
+
+    const MIN_TICK: i32 = -887272;
+    const MAX_TICK: i32 = -MIN_TICK;
+
+    proptest! {
+        #[test]
+        fn proptest_full_story(
+            mut tick_lower in MIN_TICK..MAX_TICK,
+            mut tick_upper in MIN_TICK..MAX_TICK,
+            per_second in 1..u64::MAX,
+            starting_pool in any::<[u64; 4]>(),
+            expected_starting in 0..libleo::host::current_timestamp(),
+            expected_ending in any::<u64>(),
+            //secs_in in 1..u64::MAX,
+            position_lp in 1..u128::MAX,
+            other_position_lp in 1..u128::MAX,
+        ) {
+        }
+    }
+}
+*/

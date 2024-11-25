@@ -18,7 +18,7 @@ var (
 	TopicCampaignCreated        = abi.Events["CampaignCreated"].ID
 	TopicCampaignUpdated        = abi.Events["CampaignUpdated"].ID
 	TopicPositionVested2        = abi.Events["PositionVested2"].ID
-	TopicPositionDivested       = abi.Events["PositionDivested"].ID
+	TopicPositionDivested2      = abi.Events["PositionDivested2"].ID
 )
 
 //go:embed abi.json
@@ -98,9 +98,10 @@ func UnpackPositionVested2(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*Po
 	}, nil
 }
 
-func UnpackPositionDivested(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*PositionDivested, error) {
-	return &PositionDivested{
+func UnpackPositionDivested2(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*PositionDivested, error) {
+	return &PositionDivested2{
 		PositionId: hashToNumber(topic1),
+		Recipient:  hashToAddr(topic2),
 	}, nil
 }
 

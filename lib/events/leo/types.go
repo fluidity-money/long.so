@@ -46,13 +46,14 @@ type (
 	PositionVested2 struct {
 		events.Event
 
-		PositionId types.Number `json:"positionId"`
-		Owner types.Address `json:"owner"`
+		PositionId types.Number  `json:"positionId"`
+		Owner      types.Address `json:"owner"`
 	}
 
-	PositionDivested struct {
+	PositionDivested2 struct {
 		events.Event
 
-		PositionId types.Number `json:"positionId"`
+		PositionId types.Number  `json:"positionId"`
+		Recipient  types.Address `json:"address"`
 	}
 )
