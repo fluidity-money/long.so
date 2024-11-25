@@ -113,6 +113,11 @@ export const ConfirmStake = ({
     router.push("/stake/pool/create");
   }, [router, token0, token0Amount]);
 
+  // for pre-existing positions, call incrPosition on the AMM
+  // for new positions, call proxyVestIncr on the position handler
+  const allowanceContract =
+    mode === "existing" ? ammContract.address : positionHandlerContract.address;
+
   // read the allowance of the token
   const { data: allowanceDataToken0 } = useSimulateContract({
     address: token0.address,
@@ -120,7 +125,7 @@ export const ConfirmStake = ({
     // @ts-ignore this needs to use useSimulateContract which breaks the types
     functionName: "allowance",
     // @ts-ignore
-    args: [address as Hash, ammContract.address],
+    args: [address as Hash, allowanceContract],
   });
 
   const { data: allowanceDataToken1 } = useSimulateContract({
@@ -129,7 +134,7 @@ export const ConfirmStake = ({
     // @ts-ignore this needs to use useSimulateContract which breaks the types
     functionName: "allowance",
     // @ts-ignore
-    args: [address as Hash, ammContract.address],
+    args: [address as Hash, allowanceContract],
   });
 
   const { data: tickSpacing } = useSimulateContract({
@@ -255,19 +260,7 @@ export const ConfirmStake = ({
     ],
   );
 
-  // once token is divested, continue to updating
-  useEffect(() => {
-    if (!divestPositionResult.data || !positionId) return;
-    // the position already exists so use positionId rather than mintPositionId
-    incrPosition(BigInt(positionId));
-  }, [divestPositionResult.data, positionId, incrPosition]);
-
-  /**
-   * Approve the AMM to spend the token
-   *
-   * Step 0. Approve token 1
-   */
-  const approveToken1 = useCallback(() => {
+  const handlePositionAction = useCallback(() => {
     const createPosition = () => {
       if (
         tickLower === undefined ||
@@ -314,6 +307,49 @@ export const ConfirmStake = ({
         ],
       });
     };
+    switch (true) {
+      case mode === "new":
+        createPosition();
+        break;
+      case isDivesting:
+        divestPosition(BigInt(positionId));
+        break;
+      default:
+        incrPosition(BigInt(positionId));
+        break;
+    }
+  }, [
+    address,
+    isVesting,
+    mode,
+    incrPosition,
+    divestPosition,
+    isDivesting,
+    tickLower,
+    tickUpper,
+    tickSpacing,
+    token0AmountRaw,
+    token0.address,
+    token1AmountRaw,
+    writeContractProxyVestIncr,
+    positionId,
+    positionHandlerContract.address,
+    positionHandlerContract.abi,
+  ]);
+
+  // once token is divested, continue to updating
+  useEffect(() => {
+    if (!divestPositionResult.data || !positionId) return;
+    // the position already exists so use positionId rather than mintPositionId
+    incrPosition(BigInt(positionId));
+  }, [divestPositionResult.data, positionId, incrPosition]);
+
+  /**
+   * Approve the AMM to spend the token
+   *
+   * Step 0. Approve token 1
+   */
+  const approveToken1 = useCallback(() => {
     if (
       token1.abi &&
       (!allowanceDataToken1?.result ||
@@ -323,43 +359,19 @@ export const ConfirmStake = ({
         address: token1.address,
         abi: token1.abi,
         functionName: "approve",
-        args: [ammContract.address, token1AmountRaw],
+        args: [allowanceContract, token1AmountRaw],
       });
     } else {
-      switch (true) {
-        case mode === "new":
-          createPosition();
-          break;
-        case isDivesting:
-          divestPosition(BigInt(positionId));
-          break;
-        default:
-          incrPosition(BigInt(positionId));
-          break;
-      }
+      handlePositionAction();
     }
   }, [
-    address,
-    mode,
-    incrPosition,
-    divestPosition,
-    isVesting,
-    isDivesting,
-    tickLower,
-    tickUpper,
-    tickSpacing,
-    token0AmountRaw,
-    token0.address,
     token1AmountRaw,
     token1.address,
     token1.abi,
+    allowanceContract,
     allowanceDataToken1,
-    writeContractProxyVestIncr,
     writeContractApprovalToken1,
-    positionId,
-    positionHandlerContract.address,
-    positionHandlerContract.abi,
-    ammContract.address,
+    handlePositionAction,
   ]);
 
   /**
@@ -375,7 +387,7 @@ export const ConfirmStake = ({
         address: token0.address,
         abi: token0.abi,
         functionName: "approve",
-        args: [ammContract.address, token0AmountRaw],
+        args: [allowanceContract, token0AmountRaw],
       });
     } else {
       approveToken1();
@@ -385,9 +397,9 @@ export const ConfirmStake = ({
     writeContractApprovalToken0,
     token0.address,
     token0.abi,
-    ammContract.address,
     approveToken1,
     token0AmountRaw,
+    allowanceContract,
   ]);
 
   // wait for the approval transaction to complete
@@ -395,7 +407,11 @@ export const ConfirmStake = ({
     hash: approvalDataToken0,
   });
 
-  // once approval of token 0 is complete,
+  const approvalToken1Result = useWaitForTransactionReceipt({
+    hash: approvalDataToken1,
+  });
+
+  // once approval of token 0 is complete, begin approving token 1
   useEffect(() => {
     if (!approvalToken0Result.data) return;
     approveToken1();
@@ -404,9 +420,11 @@ export const ConfirmStake = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [approvalToken0Result.data]);
 
-  const approvalToken1Result = useWaitForTransactionReceipt({
-    hash: approvalDataToken1,
-  });
+  // once approval of token 1 is complete, continue to the next action
+  useEffect(() => {
+    if (!approvalToken1Result.data) return;
+    handlePositionAction();
+  }, [approvalToken1Result.data, handlePositionAction]);
 
   // wait for the proxyVestIncr transaction to complete
   const proxyVestIncrResult = useWaitForTransactionReceipt({

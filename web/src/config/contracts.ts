@@ -46,7 +46,7 @@ const chainContracts: {
   },
   98985: {
     amm: { address: "0x2A4a912970b780C29cf5b97aaD45ea5f98A07341" },
-    leo: { address: "0x66da765fc4066719f924faa731923e374d4d9555" },
+    leo: { address: "0x5E25820540021d0c69392EfD06a9918c41B2ffA9" },
     ownershipNFTs: { address: "0x380C38108a46F81F340a0837a572c7966a8552b5" },
     positionHandler: { address: "0x6fb3bB3E654E5f71198d56a4A5d2e64464B80458" },
   },
