@@ -44,7 +44,7 @@ interface ILeo is ILeoEvents {
     function campaignDetails(bytes8 campaignId) external returns (
         int32 tickLower,
         int32 tickUpper,
-        uint256 perSecond,
+        uint64 perSecond,
         address token,
         uint256 distributed,
         uint256 maximum,

@@ -118,7 +118,7 @@ impl StorageLeo {
         campaign
             .tick_upper
             .set(I32::from_le_bytes(tick_upper.to_le_bytes()));
-        campaign.per_sec.set(U256::from(per_sec));
+        campaign.per_sec.set(U64::from(per_sec));
         campaign
             .starting
             .set(U64::from_le_bytes(starting.to_le_bytes()));
@@ -150,15 +150,7 @@ impl StorageLeo {
         // Cancel this campaign by setting its ending date to the current
         // time, and set the "cancelled" field to true.
         let campaign = self.campaigns.getter(identifier);
-        events::emit_campaign_updated(
-            identifier,
-            campaign.pool.get(),
-            0,
-            0,
-            0,
-            0,
-            0,
-        );
+        events::emit_campaign_updated(identifier, campaign.pool.get(), 0, 0, 0, 0, 0);
         // This should be safe since we're constantly checking this elsewhere.
         let outstanding_token = campaign.maximum.get() - campaign.distributed.get();
         if outstanding_token > U256::ZERO {
@@ -176,12 +168,12 @@ impl StorageLeo {
     pub fn campaign_details(
         &self,
         id: CampaignId,
-    ) -> Result<(i32, i32, U256, Address, U256, U256, u64, u64), Vec<u8>> {
+    ) -> Result<(i32, i32, u64, Address, U256, U256, u64, u64), Vec<u8>> {
         let campaign = self.campaigns.getter(id);
         Ok((
-            i32::from_le_bytes(campaign.tick_lower.get().to_le_bytes()),
-            i32::from_le_bytes(campaign.tick_upper.get().to_le_bytes()),
-            campaign.per_sec.get(),
+            campaign.tick_lower.get().as_i32(),
+            campaign.tick_upper.get().as_i32(),
+            u64::from_le_bytes(campaign.per_sec.get().to_le_bytes()),
             campaign.token.get(),
             campaign.distributed.get(),
             campaign.maximum.get(),
@@ -233,13 +225,42 @@ impl StorageLeo {
         nft_manager::transfer_position(position_id, recipient)
     }
 
-    pub fn update_maximum(&mut self, campaign_id: CampaignId, increased_max: U256) -> Result<U256, Error> {
+    pub fn update_maximum(
+        &mut self,
+        campaign_id: CampaignId,
+        increased_max: U256,
+    ) -> Result<U256, Vec<u8>> {
         let mut campaign = self.campaigns.setter(campaign_id);
         let token = campaign.token.get();
         assert_or!(!token.is_zero(), Error::NoCampaign);
-        erc20::take(token, increased_max);
+        erc20::take(token, increased_max)?;
         let new_max = campaign.maximum.get() + increased_max;
         campaign.maximum.set(new_max);
         Ok(new_max)
+    }
+
+    pub fn update_ending(&mut self, campaign_id: CampaignId, new_ending: u64) -> Result<(), Error> {
+        let mut campaign = self.campaigns.setter(campaign_id);
+        let token = campaign.token.get();
+        assert_or!(!token.is_zero(), Error::NoCampaign);
+        assert_or!(new_ending > block_timestamp(), Error::BadCampaignConfig);
+        assert_or!(
+            campaign.owner.get() == msg::sender(),
+            Error::NotCampaignOwner
+        );
+        let cur_ending = campaign.ending.get();
+        let new_ending_ruint = U64::from(new_ending);
+        assert_or!(cur_ending < new_ending_ruint, Error::BadCampaignConfig);
+        campaign.ending.set(new_ending_ruint);
+        events::emit_campaign_updated(
+            campaign_id,
+            campaign.pool.get(),
+            u64::from_le_bytes(campaign.per_sec.get().to_le_bytes()),
+            i32::from_le_bytes(campaign.tick_lower.get().to_le_bytes()),
+            i32::from_le_bytes(campaign.tick_upper.get().to_le_bytes()),
+            u64::from_le_bytes(campaign.starting.get().to_le_bytes()),
+            new_ending,
+        );
+        Ok(())
     }
 }

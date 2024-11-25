@@ -11,7 +11,7 @@ pub struct StorageCampaign {
     pub tick_upper: StorageI32,
 
     // Amount of token emitted per second.
-    pub per_sec: StorageU256,
+    pub per_sec: StorageU64,
 
     // The timestamp of when this campaign is starting.
     pub starting: StorageU64,

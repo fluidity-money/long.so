@@ -79,7 +79,7 @@ contract LeoProxy is ILeo {
     function campaignDetails(bytes8 /* campaignId */) external returns (
         int32,
         int32,
-        uint256,
+        uint64,
         address,
         uint256,
         uint256,

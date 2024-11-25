@@ -102,6 +102,7 @@ impl StorageLeo {
                 // to the user. Either what we owe the user, or whatever's left
                 // in the campaign by comparing what's sent to what's left
                 // to send, whatever's the maximum.
+                let campaign_per_sec = U256::from(campaign_per_sec);
                 let token_amt =
                     maths::calc_rewards(campaign_liq, campaign_per_sec, secs_since, position_liq)?;
                 let token_amt_remaining = min(campaign_remaining, token_amt);
