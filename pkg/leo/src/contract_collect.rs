@@ -41,7 +41,7 @@ impl StorageLeo {
         // The Leo rewards that we send to users.
         let mut campaign_rewards = vec![];
         for (position_pool, position_id) in positions {
-            let position = self.positions.getter(position_id);
+            let position = self.positions.setter(position_id);
             // Ensure that the sender owns this position to prevent griefing.
             assert_or!(
                 position.owner.get() == msg::sender(),
@@ -57,6 +57,7 @@ impl StorageLeo {
             let (pool_rewards_token0, pool_rewards_token1) =
                 seawater::collect_yield_single_to(position_pool, position_id, recipient)?;
             pool_rewards.push((position_pool, pool_rewards_token0, pool_rewards_token1));
+            let position_last_updated = position.timestamp.get();
             for campaign_id in campaign_ids.iter() {
                 assert_or!(
                     seen_campaigns.get(campaign_id).is_none(),
@@ -66,7 +67,6 @@ impl StorageLeo {
                 let campaign = self.campaigns.getter(*campaign_id);
                 let campaign_starting = campaign.starting.get().to_u64().unwrap();
                 let campaign_ending = campaign.ending.get().to_u64().unwrap();
-                let position_last_updated = position.timestamp.get();
                 assert_or!(
                     block_timestamp() > campaign_starting,
                     Error::CampaignHasntBegun
@@ -80,6 +80,9 @@ impl StorageLeo {
                 if !is_eligible {
                     continue;
                 }
+		// When the position either was created for the first
+		// time, or the last time that they chose to collect from
+		// this code.
                 let current_start = max(campaign_starting, position_last_updated);
                 let current_end = min(campaign_ending, block_timestamp);
                 let secs_since = U256::from(current_end - current_start);
@@ -102,6 +105,7 @@ impl StorageLeo {
                         .ok_or(Error::CheckedAdd)?,
                 );
             }
+            position.timestamp.set(block_number());
         }
         for (token_addr, token_amt) in tokens_to_send {
             erc20::transfer(token_addr, recipient, token_amt)?;
