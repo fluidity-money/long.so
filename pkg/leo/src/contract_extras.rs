@@ -5,10 +5,7 @@ use stylus_sdk::{
 };
 
 use crate::{
-    assert_or,
-    error::Error,
-    events, immutables, nft_manager, seawater,
-    utils::block_timestamp,
+    assert_or, error::Error, events, immutables, nft_manager, seawater, utils::block_timestamp,
 };
 
 pub use crate::storage::*;
@@ -32,7 +29,7 @@ impl StorageLeo {
         id: U256,
         recipient: Address,
     ) -> Result<(), Vec<u8>> {
-            assert_or!(self.enabled.get(), Error::NotEnabled);
+        assert_or!(self.enabled.get(), Error::NotEnabled);
         // Just to be safe, check if we already have this position tracked.
         assert_or!(
             self.positions.get(id).timestamp.get().is_zero(),
@@ -198,7 +195,11 @@ impl StorageLeo {
 
     // Divest LP positions from this contract, sending them back to the
     // original owner.
-    pub fn divest_position(&mut self, position_id: U256, recipient: Address) -> Result<(), Vec<u8>> {
+    pub fn divest_position(
+        &mut self,
+        position_id: U256,
+        recipient: Address,
+    ) -> Result<(), Vec<u8>> {
         assert_or!(
             self.positions.getter(position_id).owner.get() == msg::sender(),
             Error::NotCampaignOwner
