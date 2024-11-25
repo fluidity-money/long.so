@@ -99,12 +99,15 @@ impl StorageLeo {
                 let position_liq = position.liquidity.get();
                 let campaign_per_sec = campaign.per_sec.get();
                 // This is the amount of token rewards that we're sending
-                // to the user. The maximum that's left over from the
-                // campaign currently ongoing.
+                // to the user. Either what we owe the user, or whatever's left
+                // in the campaign by comparing what's sent to what's left
+                // to send, whatever's the maximum.
                 let token_amt =
                     maths::calc_rewards(campaign_liq, campaign_per_sec, secs_since, position_liq)?;
                 let token_amt_remaining = min(campaign_remaining, token_amt);
-                // Set the campaign remaining amount to whatever's left. If we've exceeded the amount to distribute, then we cap the amount to track as sent.
+		// Set the campaign remaining amount to whatever's left.
+		// If we've exceeded the amount to distribute, then we
+		// cap the amount to track as sent.
                 campaign
                     .distributed
                     .set(min(campaign_distributed + token_amt, campaign_maximum));
