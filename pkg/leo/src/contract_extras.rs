@@ -5,7 +5,8 @@ use stylus_sdk::{
 };
 
 use crate::{
-    assert_or, error::Error, events, immutables, nft_manager, seawater, utils::block_timestamp,
+    assert_or, erc20, error::Error, events, immutables, nft_manager, seawater,
+    utils::block_timestamp,
 };
 
 pub use crate::storage::*;
@@ -68,9 +69,8 @@ impl StorageLeo {
         Ok(())
     }
 
-    // Create a campaign, setting its current iteration to these parameters,
-    // taking the maximum balance of tokens to distribute into this
-    // contract for later distribution.
+    /// Create a campaign, setting parameters. The date must be in the
+    /// future for the start and end dates.
     #[allow(clippy::type_complexity, clippy::too_many_arguments)]
     pub fn create_campaign(
         &mut self,
@@ -87,9 +87,16 @@ impl StorageLeo {
         assert_or!(self.enabled.get(), Error::NotEnabled);
 
         // Sanity checks to prevent junk campaigns from being made.
-        assert_or!(per_sec > 0, Error::BadCampaignConfig);
+        assert_or!(
+            per_sec > 0
+                && !token.is_zero()
+                && tick_lower != tick_upper
+                && tick_lower >= immutables::MIN_TICK
+                && tick_upper <= immutables::MAX_TICK
+                && !maximum.is_zero(),
+            Error::BadCampaignConfig
+        );
 
-        // Take the ERC20 from the user for the maximum run of the campaign.
         let mut campaign = self.campaigns.setter(identifier);
 
         // Make sure this campaign doesn't exist already.
@@ -100,6 +107,9 @@ impl StorageLeo {
 
         // Make sure this campaign starts after the current timestamp.
         assert_or!(starting > block_timestamp(), Error::BadCampaignConfig);
+
+        // Take the tokens from the creator.
+        erc20::take(token, maximum)?;
 
         // Set everything related to the pool.
         campaign

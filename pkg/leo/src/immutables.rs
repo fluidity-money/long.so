@@ -32,3 +32,9 @@ pub const SEAWATER_ADDR: Address = addr!("FLU_SEAWATER_ADDR");
 
 #[allow(dead_code)]
 pub const NFT_MANAGER_ADDR: Address = addr!("FLU_NFT_MANAGER_ADDR");
+
+/// Minimum tick to gate for using Seawater.
+pub const MIN_TICK: i32 = -887272;
+
+/// Maximum tick to gate for using Seawater.
+pub const MAX_TICK: i32 = -MIN_TICK;

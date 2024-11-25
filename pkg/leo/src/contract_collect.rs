@@ -62,13 +62,20 @@ impl StorageLeo {
             // the position was vested in Leo.
             let position_last_updated = position.timestamp.get().to_u64().unwrap();
             for campaign_id in campaign_ids.iter() {
-                let campaign = self.campaigns.getter(*campaign_id);
+                let mut campaign = self.campaigns.setter(*campaign_id);
                 let campaign_starting = campaign.starting.get().to_u64().unwrap();
                 let campaign_ending = campaign.ending.get().to_u64().unwrap();
+                let campaign_maximum = campaign.maximum.get();
+                let campaign_distributed = campaign.distributed.get();
                 assert_or!(
                     block_timestamp() > campaign_starting,
                     Error::CampaignHasntBegun
                 );
+                // If the amount that's left to distribute is 0, then we skip this campaign.
+                let campaign_remaining = campaign_maximum - campaign_distributed;
+                if campaign_remaining.is_zero() {
+                    continue;
+                }
                 // Check if the position is eligible for this campaign.
                 let campaign_pool = campaign.pool.get();
                 let is_eligible = campaign_pool == position.pool.get()
@@ -91,15 +98,22 @@ impl StorageLeo {
                 let campaign_liq = self.liquidity.get(campaign_pool);
                 let position_liq = position.liquidity.get();
                 let campaign_per_sec = campaign.per_sec.get();
-                // This is the amount of token rewards that we're sending to the user.
+                // This is the amount of token rewards that we're sending
+                // to the user. The maximum that's left over from the
+                // campaign currently ongoing.
                 let token_amt =
                     maths::calc_rewards(campaign_liq, campaign_per_sec, secs_since, position_liq)?;
+                let token_amt_remaining = min(campaign_remaining, token_amt);
+                // Set the campaign remaining amount to whatever's left. If we've exceeded the amount to distribute, then we cap the amount to track as sent.
+                campaign
+                    .distributed
+                    .set(min(campaign_distributed + token_amt, campaign_maximum));
                 leo_rewards.push((position_id, campaign_token, token_amt));
                 // Track that we have to sent some rewards for this position.
                 leo_tokens_to_send.insert(
                     campaign_token,
                     leo_tokens_to_send[&campaign_token]
-                        .checked_add(token_amt)
+                        .checked_add(token_amt_remaining)
                         .ok_or(Error::CheckedAdd)?,
                 );
             }
