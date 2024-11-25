@@ -20,8 +20,8 @@ impl StorageLeo {
     #[allow(clippy::type_complexity)]
     pub fn collect(
         &mut self,
-        positions: Vec<(Address, U256)>,
-        campaign_ids: Vec<CampaignId>,
+        mut positions: Vec<U256>,
+        mut campaign_ids: Vec<CampaignId>,
         recipient: Address,
     ) -> Result<(Vec<(Address, u128, u128)>, Vec<(U256, Address, U256)>), Vec<u8>> {
         assert_or!(self.enabled.get(), Error::NotEnabled);
@@ -30,40 +30,29 @@ impl StorageLeo {
         // time spent and they're after the beginning date. If the
         // campaign hasn't started yet, then we revert with an error as a
         // precaution to prevent users from spending too much gas.
-        // We track seen positions and campaigns using a hashmap in lieu of
-        // sorting to reduce codesize.
-        let mut seen_positions = HashMap::new();
-        let mut seen_campaigns = HashMap::new();
         // The accumulated tokens to send, ready to iterate through.
+        positions.dedup();
+        campaign_ids.dedup();
         let mut tokens_to_send: HashMap<Address, U256> = HashMap::new();
         // The pool rewards that we send to users.
         let mut pool_rewards = vec![];
         // The Leo rewards that we send to users.
         let mut campaign_rewards = vec![];
-        for (position_pool, position_id) in positions {
-            let position = self.positions.setter(position_id);
+        for position_id in positions {
+            let mut position = self.positions.setter(position_id);
             // Ensure that the sender owns this position to prevent griefing.
             assert_or!(
                 position.owner.get() == msg::sender(),
                 Error::NotPositionOwner
             );
-            assert_or!(
-                seen_positions.get(&position_id).is_none(),
-                Error::DuplicatedPosition
-            );
-            seen_positions.insert(position_id, true);
             // Before we get into the Leo distribution, let's try to collect on their behalf
             // using Longtail.
+            let position_pool = position.pool.get();
             let (pool_rewards_token0, pool_rewards_token1) =
                 seawater::collect_yield_single_to(position_pool, position_id, recipient)?;
             pool_rewards.push((position_pool, pool_rewards_token0, pool_rewards_token1));
-            let position_last_updated = position.timestamp.get();
+            let position_last_updated = position.timestamp.get().to_u64().unwrap();
             for campaign_id in campaign_ids.iter() {
-                assert_or!(
-                    seen_campaigns.get(campaign_id).is_none(),
-                    Error::DuplicatedCampaign
-                );
-                seen_campaigns.insert(campaign_id, true);
                 let campaign = self.campaigns.getter(*campaign_id);
                 let campaign_starting = campaign.starting.get().to_u64().unwrap();
                 let campaign_ending = campaign.ending.get().to_u64().unwrap();
@@ -80,11 +69,11 @@ impl StorageLeo {
                 if !is_eligible {
                     continue;
                 }
-		// When the position either was created for the first
-		// time, or the last time that they chose to collect from
-		// this code.
+                // When the position either was created for the first
+                // time, or the last time that they chose to collect from
+                // this code.
                 let current_start = max(campaign_starting, position_last_updated);
-                let current_end = min(campaign_ending, block_timestamp);
+                let current_end = min(campaign_ending, block_timestamp());
                 let secs_since = U256::from(current_end - current_start);
                 if secs_since.is_zero() {
                     continue;
@@ -105,7 +94,7 @@ impl StorageLeo {
                         .ok_or(Error::CheckedAdd)?,
                 );
             }
-            position.timestamp.set(block_number());
+            position.timestamp.set(U64::from(block_timestamp()));
         }
         for (token_addr, token_amt) in tokens_to_send {
             erc20::transfer(token_addr, recipient, token_amt)?;
