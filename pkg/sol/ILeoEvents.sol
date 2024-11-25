@@ -38,5 +38,6 @@ interface ILeoEvents {
 
     /// @notice a specific position was just divested from Leo
     /// @param positionId that was divested
-    event PositionDivested(uint256 indexed positionId);
+    /// @param recipient of the divested position
+    event PositionDivested2(uint256 indexed positionId, address indexed recipient);
 }
