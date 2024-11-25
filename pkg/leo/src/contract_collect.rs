@@ -58,6 +58,8 @@ impl StorageLeo {
                 seawater_rewards_token1,
             ));
             // We're done sending Longtail rewards, now we need to collect Leo.
+            // Position last updated is the last time that a user collected, or the time that
+            // the position was vested in Leo.
             let position_last_updated = position.timestamp.get().to_u64().unwrap();
             for campaign_id in campaign_ids.iter() {
                 let campaign = self.campaigns.getter(*campaign_id);
@@ -101,8 +103,11 @@ impl StorageLeo {
                         .ok_or(Error::CheckedAdd)?,
                 );
             }
+            // Now that we've gone through the positions list, we need to mark that
+            // we've seen their position by updating the timestamp.
             position.timestamp.set(U64::from(block_timestamp()));
         }
+        // Send the rewards from Leo.
         for (token_addr, token_amt) in leo_tokens_to_send {
             erc20::transfer(token_addr, recipient, token_amt)?;
         }
