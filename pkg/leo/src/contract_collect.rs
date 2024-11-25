@@ -105,12 +105,15 @@ impl StorageLeo {
                 let token_amt =
                     maths::calc_rewards(campaign_liq, campaign_per_sec, secs_since, position_liq)?;
                 let token_amt_remaining = min(campaign_remaining, token_amt);
-		// Set the campaign remaining amount to whatever's left.
-		// If we've exceeded the amount to distribute, then we
-		// cap the amount to track as sent.
-                campaign
-                    .distributed
-                    .set(min(campaign_distributed + token_amt, campaign_maximum));
+                // Set the campaign remaining amount to whatever's left.
+                // If we've exceeded the amount to distribute, then we
+                // cap the amount to track as sent.
+                campaign.distributed.set(min(
+                    campaign_distributed
+                        .checked_add(token_amt)
+                        .ok_or(Error::CheckedAdd)?,
+                    campaign_maximum,
+                ));
                 leo_rewards.push((position_id, campaign_token, token_amt));
                 // Track that we have to sent some rewards for this position.
                 leo_tokens_to_send.insert(

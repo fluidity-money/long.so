@@ -149,15 +149,21 @@ impl StorageLeo {
         assert_eq!(self.campaigns.getter(identifier).owner.get(), msg::sender());
         // Cancel this campaign by setting its ending date to the current
         // time, and set the "cancelled" field to true.
+        let campaign = self.campaigns.getter(identifier);
         events::emit_campaign_updated(
             identifier,
-            self.campaigns.getter(identifier).pool.get(),
+            campaign.pool.get(),
             0,
             0,
             0,
             0,
             0,
         );
+        // This should be safe since we're constantly checking this elsewhere.
+        let outstanding_token = campaign.maximum.get() - campaign.distributed.get();
+        if outstanding_token > U256::ZERO {
+            erc20::transfer(campaign.token.get(), msg::sender(), outstanding_token)?;
+        }
         Ok(())
     }
 
@@ -225,5 +231,15 @@ impl StorageLeo {
             recipient,
         });
         nft_manager::transfer_position(position_id, recipient)
+    }
+
+    pub fn update_maximum(&mut self, campaign_id: CampaignId, increased_max: U256) -> Result<U256, Error> {
+        let mut campaign = self.campaigns.setter(campaign_id);
+        let token = campaign.token.get();
+        assert_or!(!token.is_zero(), Error::NoCampaign);
+        erc20::take(token, increased_max);
+        let new_max = campaign.maximum.get() + increased_max;
+        campaign.maximum.set(new_max);
+        Ok(new_max)
     }
 }
