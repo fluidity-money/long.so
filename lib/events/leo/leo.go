@@ -98,7 +98,7 @@ func UnpackPositionVested2(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*Po
 	}, nil
 }
 
-func UnpackPositionDivested2(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*PositionDivested, error) {
+func UnpackPositionDivested2(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*PositionDivested2, error) {
 	return &PositionDivested2{
 		PositionId: hashToNumber(topic1),
 		Recipient:  hashToAddr(topic2),
