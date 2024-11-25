@@ -76,7 +76,7 @@ const ManagePoolFragment = graphql(`
 
 export default function PoolPage() {
   const router = useRouter();
-  const { chainId } = useAccount();
+  const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
   const fUSDC = useTokens("fusdc");
   const { getTokenFromAddress } = useTokens();
@@ -379,7 +379,7 @@ export default function PoolPage() {
         address: leoContract.address,
         abi: leoContract.abi,
         functionName: "vestPosition",
-        args: [token0.address, id],
+        args: [token0.address, id, address],
       });
     },
     [
@@ -387,6 +387,7 @@ export default function PoolPage() {
       leoContract.address,
       leoContract.abi,
       token0.address,
+      address,
     ],
   );
 
