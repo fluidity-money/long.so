@@ -228,9 +228,6 @@ impl StoragePool {
         .to_i128()
         .ok_or(Error::LiquidityAmountTooWide)?;
 
-        // [update_position] should also ensure that we don't do this on a pool that's not currently
-        // running
-
         self.update_position(id, delta)
     }
 

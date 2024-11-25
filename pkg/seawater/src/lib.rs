@@ -717,6 +717,7 @@ impl Pools {
             self.position_owners.get(id),
             Error::PositionOwnerOnly
         );
+
         assert_or!(pool.enabled.get(), Error::PoolDisabled);
 
         let (amount_0, amount_1) =
