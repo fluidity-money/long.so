@@ -12,11 +12,8 @@ pub fn calc_rewards(
     let scaled_pos_liq = position_liq
         .checked_mul(SCALING_FACTOR)
         .ok_or(Error::CheckedMul)?;
-    let scaled_pool_liq = pool_liq
-        .checked_mul(SCALING_FACTOR)
-        .ok_or(Error::CheckedMul)?;
     let share_of_campaign = scaled_pos_liq
-        .checked_div(scaled_pool_liq)
+        .checked_div(pool_liq)
         .ok_or(Error::CheckedMul)?;
     token_per_sec
         .checked_mul(share_of_campaign)
