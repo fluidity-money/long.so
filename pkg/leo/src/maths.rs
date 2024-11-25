@@ -8,7 +8,7 @@ pub fn calc_rewards(
     secs_since: U256,
     position_liq: U256,
 ) -> Result<U256, Error> {
-    // (position lp token / global lp token) * campaign per sec * secs_since start
+    // (position_liq / pool_liq) * token_per_sec * secs_since
     let scaled_pos_liq = position_liq
         .checked_mul(SCALING_FACTOR)
         .ok_or(Error::CheckedMul)?;
