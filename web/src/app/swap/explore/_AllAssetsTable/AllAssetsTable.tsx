@@ -31,6 +31,12 @@ import { useState } from "react";
 import { rankItem } from "@tanstack/match-sorter-utils";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { useRouter } from "next/navigation";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface AllPoolsTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -151,33 +157,66 @@ export function AllAssetsTable<TData, TValue>({
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className="cursor-pointer border-b-0 text-[10px] hover:bg-black md:text-xs"
-                onClick={() => {
-                  const {
-                    original: { token: rowToken },
-                  } = row;
-                  const { address } = rowToken;
-                  if (token === "0") {
-                    if (address === token1.address) flipTokens();
-                    else setToken0(rowToken);
-                  } else if (token === "1") {
-                    if (address === token0.address) flipTokens();
-                    else setToken1(rowToken);
-                  }
-                  router.back();
-                }}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="h-8 p-0">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
+            table.getRowModel().rows.map((row) => {
+              const tokenAddress = row.original.address; // Access address from row data
+              const blockExplorerUrl = `https://testnet-explorer.superposition.so/address/${tokenAddress}`;
+
+              return (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="relative cursor-pointer border-b-0 text-[10px] hover:bg-black md:text-xs"
+                  onClick={() => {
+                    const {
+                      original: { token: rowToken },
+                    } = row;
+                    const { address } = rowToken;
+                    if (token === "0") {
+                      if (address === token1.address) flipTokens();
+                      else setToken0(rowToken);
+                    } else if (token === "1") {
+                      if (address === token0.address) flipTokens();
+                      else setToken1(rowToken);
+                    }
+                    router.back();
+                  }}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="h-8 p-0">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                      {cell.column.getIndex() === 0 ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger className="absolute inset-0" />
+                            <TooltipContent
+                              side={"bottom"}
+                              className="relative flex justify-center overflow-visible bg-black p-0 text-white"
+                            >
+                              <div className="absolute -top-1 z-20 border-x-4 border-b-4 border-transparent border-b-black" />
+                              <a
+                                onClick={(e) => e.stopPropagation()}
+                                href={blockExplorerUrl}
+                                target="_blank"
+                                className="px-3 py-1.5 text-xs"
+                              >
+                                See on block explorer{" "}
+                                <span className="inline-block -rotate-45">
+                                  -&gt;
+                                </span>
+                                {/* ↗️ */}
+                              </a>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : null}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              );
+            })
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">

@@ -24,6 +24,12 @@ import { useStakeStore } from "@/stores/useStakeStore";
 import { useTokens } from "@/config/tokens";
 import { rankItem } from "@tanstack/match-sorter-utils";
 import { useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -126,29 +132,62 @@ export function SelectPrimeAssetTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="cursor-pointer border-b-0"
-                  onClick={() => {
-                    // assume the first token is always the original
-                    const [token0] = row.original.tokens;
-                    setToken0(token0);
-                    setToken1(fUSDC);
-                    router.push(`/stake/pool/create?id=${token0.address}`);
-                  }}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="p-0 py-[4px] text-2xs">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const token0Address = row.original.token0Address; // Access token0Address from row data
+                const blockExplorerUrl = `https://testnet-explorer.superposition.so/address/${token0Address}`;
+
+                return (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="relative cursor-pointer border-b-0"
+                    onClick={() => {
+                      // assume the first token is always the original
+                      const [token0] = row.original.tokens;
+                      setToken0(token0);
+                      setToken1(fUSDC);
+                      router.push(`/stake/pool/create?id=${token0.address}`);
+                    }}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        className="p-0 py-[4px] text-2xs"
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                        {cell.column.getIndex() === 0 ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger className="absolute inset-0" />
+                              <TooltipContent
+                                side={"bottom"}
+                                className="relative flex justify-center overflow-visible bg-black p-0 text-white"
+                              >
+                                <div className="absolute -top-1 z-20 border-x-4 border-b-4 border-transparent border-b-black" />
+                                <a
+                                  onClick={(e) => e.stopPropagation()}
+                                  href={blockExplorerUrl}
+                                  target="_blank"
+                                  className="px-3 py-1.5 text-xs"
+                                >
+                                  See on block explorer{" "}
+                                  <span className="inline-block -rotate-45">
+                                    -&gt;
+                                  </span>
+                                  {/* ↗️ */}
+                                </a>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : null}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell
