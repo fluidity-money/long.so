@@ -135,10 +135,15 @@ export default function ConfirmWithdrawLiquidity() {
         address: leoContract.address,
         abi: leoContract.abi,
         functionName: "divestPosition",
-        args: [token0.address, BigInt(id ?? 0)],
+        args: [BigInt(id ?? 0), address],
       });
     },
-    [writeContractDivestPosition, token0, leoContract.abi, leoContract.address],
+    [
+      writeContractDivestPosition,
+      address,
+      leoContract.abi,
+      leoContract.address,
+    ],
   );
 
   // price of the current pool
