@@ -303,6 +303,7 @@ export const MyPositions = () => {
   const collectAll = useCallback(() => {
     // for all positions that are in leo, call leo collect
     vestedPositions.length > 0 &&
+      !!unclaimedLeoRewardsData?.result &&
       writeContractCollectLeo({
         address: leoContract.address,
         abi: leoContract.abi,
@@ -326,6 +327,7 @@ export const MyPositions = () => {
     ammContract.address,
     leoContract.abi,
     leoContract.address,
+    unclaimedLeoRewardsData,
   ]);
 
   return (
