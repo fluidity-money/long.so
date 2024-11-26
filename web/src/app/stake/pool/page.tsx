@@ -342,6 +342,11 @@ export default function PoolPage() {
     tokenPrice,
     campaignTokenPrices,
   ]);
+  const collectYieldButtonDisabled =
+    !!collectData ||
+    isCollectPending ||
+    isLeoRewardsOnly ||
+    unclaimedRewards === "$0.00";
 
   const collect = useCallback(
     (id: bigint) => {
@@ -830,11 +835,7 @@ export default function PoolPage() {
                           variant={collectError ? "destructive" : "secondary"}
                           className="h-[19px] w-[75px] select-none px-[27px] py-[5px] md:h-[22px] md:w-[92px]"
                           size="sm"
-                          disabled={
-                            !!collectData ||
-                            isCollectPending ||
-                            isLeoRewardsOnly
-                          }
+                          disabled={collectYieldButtonDisabled}
                           onClick={() =>
                             positionId && collect(BigInt(positionId))
                           }
@@ -848,7 +849,9 @@ export default function PoolPage() {
                                   ? "Claimed!"
                                   : isCollectPending
                                     ? "Claiming..."
-                                    : "Claim Yield"}
+                                    : unclaimedRewards === "$0.00"
+                                      ? "No Yield to Claim"
+                                      : "Claim Yield"}
                           </div>
                         </Button>
                       </div>

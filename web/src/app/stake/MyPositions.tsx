@@ -294,6 +294,11 @@ export const MyPositions = () => {
     campaignTokenPrices,
     getTokenFromAddress,
   ]);
+  const collectAllYieldButtonDisabled =
+    !!collectData ||
+    isCollectPending ||
+    isLeoRewardsOnly ||
+    unclaimedRewards === "$0.00";
 
   const collectAll = useCallback(() => {
     // for all positions that are in leo, call leo collect
@@ -494,7 +499,7 @@ export const MyPositions = () => {
             <Button
               className="w-full text-3xs text-black md:text-xs"
               variant={collectError ? "destructive" : "iridescent"}
-              disabled={!!collectData || isCollectPending || isLeoRewardsOnly}
+              disabled={collectAllYieldButtonDisabled}
               size="sm"
               onClick={() => collectAll()}
             >
@@ -506,13 +511,15 @@ export const MyPositions = () => {
                     ? "Claimed!"
                     : isCollectPending
                       ? "Claiming..."
-                      : "Claim All Yield"}
+                      : unclaimedRewards === "$0.00"
+                        ? "No Yield to Claim"
+                        : "Claim All Yield"}
             </Button>
             <Badge
               variant={collectError ? "destructive" : "iridescent"}
               className={cn(
                 "-mt-2 gap-2 border-2 border-black text-3xs",
-                (collectData || isCollectPending || isLeoRewardsOnly) &&
+                collectAllYieldButtonDisabled &&
                   "pointer-events-none opacity-70",
               )}
             >
