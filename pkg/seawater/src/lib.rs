@@ -710,6 +710,7 @@ impl Pools {
         amount_1_min: U256,
         amount_0_desired: U256,
         amount_1_desired: U256,
+        giving: bool,
         permit2: Option<(Permit2Args, Permit2Args)>,
     ) -> Result<(U256, U256), Revert> {
         assert_eq_or!(
@@ -718,7 +719,7 @@ impl Pools {
             Error::PositionOwnerOnly
         );
 
-        assert_or!(pool.enabled.get(), Error::PoolDisabled);
+        assert_or!(self.pools.getter(pool).enabled.get(), Error::PoolDisabled);
 
         let (amount_0, amount_1) =
             self.pools
@@ -731,18 +732,27 @@ impl Pools {
             token1: amount_1,
         });
 
-        let (amount_0, amount_1) = (amount_0.abs_pos()?, amount_1.abs_pos()?);
+        let (amount_0, amount_1) = if giving {
+            (amount_0.abs_neg()?, amount_1.abs_neg()?)
+        } else {
+            (amount_0.abs_pos()?, amount_1.abs_pos()?)
+        };
 
         assert_or!(amount_0 >= amount_0_min, Error::LiqResultTooLow);
         assert_or!(amount_1 >= amount_1_min, Error::LiqResultTooLow);
 
-        let (permit_0, permit_1) = match permit2 {
-            Some((permit_0, permit_1)) => (Some(permit_0), Some(permit_1)),
-            None => (None, None),
-        };
+        if giving {
+            erc20::transfer_to_sender(pool, amount_0)?;
+            erc20::transfer_to_sender(FUSDC_ADDR, amount_1)?;
+        } else {
+            let (permit_0, permit_1) = match permit2 {
+                Some((permit_0, permit_1)) => (Some(permit_0), Some(permit_1)),
+                None => (None, None),
+            };
 
-        erc20::take(pool, amount_0, permit_0)?;
-        erc20::take(FUSDC_ADDR, amount_1, permit_1)?;
+            erc20::take(pool, amount_0, permit_0)?;
+            erc20::take(FUSDC_ADDR, amount_1, permit_1)?;
+        }
 
         Ok((amount_0, amount_1))
     }
@@ -1136,6 +1146,32 @@ impl Pools {
             amount_1_min,
             amount_0_desired,
             amount_1_desired,
+            false,
+            None,
+        )
+    }
+
+    /// Refreshes and updates liquidity in a position, transferring
+    /// tokens to the user with restrictions.
+    /// See [Self::adjust_position_internal].
+    #[allow(non_snake_case)]
+    pub fn decr_position_09293696(
+        &mut self,
+        pool: Address,
+        id: U256,
+        amount_0_min: U256,
+        amount_1_min: U256,
+        amount_0_max: U256,
+        amount_1_max: U256,
+    ) -> Result<(U256, U256), Revert> {
+        self.adjust_position_internal(
+            pool,
+            id,
+            amount_0_min,
+            amount_1_min,
+            amount_0_max,
+            amount_1_max,
+            true,
             None,
         )
     }
