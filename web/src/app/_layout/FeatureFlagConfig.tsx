@@ -90,7 +90,6 @@ export const FeatureFlagConfig = () => {
               </button>
             </div>
           </div>
-
           <div className={"text-xs"}>Overrides</div>
           <div className={"flex flex-row items-center justify-between"}>
             <div className={"flex flex-col"}>
@@ -111,6 +110,9 @@ export const FeatureFlagConfig = () => {
             >
               <Label>{label}</Label>
               <Switch
+                className={cn(
+                  featureFlags[key] !== undefined && "!bg-destructive",
+                )}
                 disabled={!override}
                 checked={featureFlags[key] ?? data?.[key]}
                 onCheckedChange={(value) => setFeatureFlagOverride(key, value)}
