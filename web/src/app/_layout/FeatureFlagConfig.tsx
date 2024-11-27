@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Flag, LoaderIcon } from "lucide-react";
 import { FeatureFlags, useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useQuery } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
 type FeatureFlagKey = Exclude<keyof FeatureFlags, `graphql${string}`>;
 
@@ -50,7 +51,7 @@ const featureFlagsLabels: { [K in FeatureFlagKey]: string } = {
 };
 
 export const FeatureFlagConfig = () => {
-  const { featureFlags, setFeatureFlagOverride, override, setOverride } =
+  const { featureFlags, setFeatureFlagOverride, override, setOverride, reset } =
     useFeatureFlagOverride();
 
   const { data, isLoading, refetch } = useQuery({
@@ -80,11 +81,13 @@ export const FeatureFlagConfig = () => {
         >
           <div className={"flex flex-row justify-between"}>
             <div className={"text-xs"}>Default Feature Flags</div>
-            <div
-              onClick={() => refetch()}
-              className={"cursor-pointer text-xs underline"}
-            >
-              Reload
+            <div className={"flex flex-row justify-end gap-1"}>
+              <button onClick={() => refetch()} className={"text-xs underline"}>
+                Reload
+              </button>
+              <button onClick={() => reset()} className={"text-xs underline"}>
+                Reset
+              </button>
             </div>
           </div>
 

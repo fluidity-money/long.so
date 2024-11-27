@@ -183,7 +183,7 @@
 }
 
 div[data-radix-popper-content-wrapper] {
-  z-index: 10 !important;
+  z-index: 50 !important;
 }
 
 .banner > img {

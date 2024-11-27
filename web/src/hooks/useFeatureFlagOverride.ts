@@ -14,6 +14,7 @@ export const useFeatureFlagOverride = create(
       featureFlag: keyof FeatureFlags,
       value: boolean,
     ) => void;
+    reset: () => void;
   }>(
     (set) => ({
       override: false,
@@ -25,6 +26,10 @@ export const useFeatureFlagOverride = create(
             ...state.featureFlags,
             [featureFlag]: value,
           },
+        })),
+      reset: () =>
+        set(() => ({
+          featureFlags: {},
         })),
     }),
     {
