@@ -109,7 +109,7 @@ export const FeatureFlagConfig = () => {
               <Label>{label}</Label>
               <Switch
                 disabled={!override}
-                checked={featureFlags[key]}
+                checked={featureFlags[key] ?? data?.[key]}
                 onCheckedChange={(value) => setFeatureFlagOverride(key, value)}
               />
             </div>
