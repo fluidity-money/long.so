@@ -201,7 +201,9 @@ export const useFeatureFlag = <T extends keyof FeatureFlags>(
    */
   return useMemo(() => {
     if (skipOverride) return data?.[featureFlag];
-    if (override) return featureFlagOverride[featureFlag];
+    // if override isn't set for this flag, use the existing value
+    if (override && featureFlagOverride[featureFlag] !== undefined)
+      return featureFlagOverride[featureFlag];
     return data?.[featureFlag];
   }, [skipOverride, override, featureFlagOverride, data, featureFlag]);
 };
