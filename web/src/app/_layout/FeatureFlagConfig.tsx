@@ -73,7 +73,11 @@ export const FeatureFlagConfig = () => {
         {isLoading ? <LoaderIcon className={"animate-spin"} /> : <Flag />}
       </PopoverTrigger>
       <PopoverContent>
-        <div className={"flex flex-col gap-2"}>
+        <div
+          className={
+            "no-scrollbar flex max-h-[calc(100vh-64.5px-4rem)] flex-col gap-2 overflow-y-scroll"
+          }
+        >
           <div className={"flex flex-row justify-between"}>
             <div className={"text-xs"}>Default Feature Flags</div>
             <div
@@ -82,9 +86,6 @@ export const FeatureFlagConfig = () => {
             >
               Reload
             </div>
-          </div>
-          <div className={"rounded-lg bg-gray-200 p-2 font-mono text-xs"}>
-            {JSON.stringify(data, null, 2)}
           </div>
 
           <div className={"text-xs"}>Overrides</div>
@@ -98,7 +99,6 @@ export const FeatureFlagConfig = () => {
 
             <Switch checked={override} onCheckedChange={setOverride} />
           </div>
-
           {(
             Object.entries(featureFlagsLabels) as [FeatureFlagKey, string][]
           ).map(([key, label]) => (
@@ -114,6 +114,9 @@ export const FeatureFlagConfig = () => {
               />
             </div>
           ))}
+          <div className={"rounded-lg bg-gray-200 p-2 font-mono text-xs"}>
+            {JSON.stringify(data, null, 2)}
+          </div>
         </div>
       </PopoverContent>
     </Popover>
