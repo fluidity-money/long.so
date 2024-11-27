@@ -36,7 +36,7 @@ export function AllPoolsTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = useState({
     fees: true,
     rewards: true,
-    annualPercentageYield: true,
+    annualPercentageRate: true,
   });
 
   const showApr = useFeatureFlag("ui show pool apr");
@@ -45,7 +45,7 @@ export function AllPoolsTable<TData, TValue>({
     setColumnVisibility({
       fees: isMd,
       rewards: isMd,
-      annualPercentageYield: showApr,
+      annualPercentageRate: showApr,
     });
   }, [isMd, showApr]);
 
