@@ -61,15 +61,6 @@ const SelectPrimeAsset = () => {
 
   const poolsData = useFragment(SelectPrimeAssetFragment, data?.pools);
 
-  const tokens: Token[] = poolsData
-    ? poolsData?.map((pool) => ({
-        name: pool.token.name,
-        symbol: pool.token.symbol,
-        address: pool.token.address as Hash,
-        decimals: pool.token.decimals,
-      }))
-    : [];
-
   /**
    * Reformat our data to match the table columns
    */
@@ -102,13 +93,7 @@ const SelectPrimeAsset = () => {
       APR: 0, // TODO: calculate APR
       duration: 0, // TODO: get duration
       tokens: [
-        {
-          name: pool.token.name,
-          symbol: pool.token.symbol,
-          address: pool.token.address as Hash,
-          decimals: pool.token.decimals,
-          icon: getTokenFromAddress(pool.token.address)?.icon,
-        },
+        getTokenFromAddress(pool.token.address) ?? DefaultToken,
         // assume the second token is always fUSDC
         fUSDC,
       ],
