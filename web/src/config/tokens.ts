@@ -1,11 +1,13 @@
 import { allChains } from "./chains";
 import LightweightERC20 from "./abi/LightweightERC20";
+import WETH10 from "./abi/WETH10";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { graphql, useFragment } from "@/gql";
 import { useCallback, useEffect, useMemo } from "react";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { EmptyToken } from "@/lib/utils";
 import { useStakeStore } from "@/stores/useStakeStore";
+import { useChainId } from "wagmi";
 
 export type ChainIdTypes = (typeof allChains)[number]["id"];
 
@@ -14,9 +16,17 @@ export type Token = {
   symbol: string;
   name: string;
   decimals: number;
-  abi?: typeof LightweightERC20;
   icon?: string;
-};
+} & (
+  | {
+      abi?: typeof LightweightERC20;
+      isGasToken?: false | never;
+    }
+  | {
+      abi?: typeof WETH10;
+      isGasToken: true;
+    }
+);
 
 const TokensFragment = graphql(`
   fragment TokensFragment on SeawaterPool {
@@ -61,6 +71,14 @@ export function useTokens(token?: "default" | string) {
     setToken1: setStakeToken1,
   } = useStakeStore();
 
+  const chainId = useChainId();
+  const gasToken = allChains.find((c) => c.id === chainId)!.nativeCurrency;
+  // TODO we should resolve this from the backend, or have a stronger check
+  const isGasToken = useCallback(
+    (s: string) => s.toLowerCase() === "w" + gasToken.symbol.toLowerCase(),
+    [gasToken],
+  );
+
   const { data } = useGraphqlGlobal();
   const tokensData = useFragment(TokensFragment, data?.pools);
   const fusdcData_ = useFragment(FusdcFragment, data?.fusdc);
@@ -73,13 +91,21 @@ export function useTokens(token?: "default" | string) {
         [t.token.symbol.toLowerCase()]: {
           ...t.token,
           address: t.token.address as `0x${string}`,
-          abi: LightweightERC20,
           icon: t.token.image,
+          ...(isGasToken(t.token.symbol)
+            ? {
+                abi: WETH10,
+                isGasToken: true as true,
+              }
+            : {
+                abi: LightweightERC20,
+                isGasToken: false as false,
+              }),
         },
       }),
       {} as { [symbol: string]: Token },
     );
-  }, [tokensData, fusdcData_]);
+  }, [tokensData, fusdcData_, isGasToken]);
   const isTokens = fusdcData_ && tokensData;
 
   const DefaultToken = isTokens

@@ -182,12 +182,14 @@ export const SwapForm = () => {
 
   const { data: token0Balance } = useBalance({
     address,
-    token: token0.address,
+    // display gas token balance for WETH
+    token: token0.isGasToken ? undefined : token0.address,
   });
 
   const { data: token1Balance } = useBalance({
     address,
-    token: token1.address,
+    // display gas token balance for WETH
+    token: token1.isGasToken ? undefined : token1.address,
   });
 
   const { error: quote1Error, isLoading: quote1IsLoading } =

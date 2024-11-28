@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { redirect, useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, getAmountFromMaybeTransfer, TransferTopic } from "@/lib/utils";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { motion } from "framer-motion";
 import {
@@ -129,6 +129,21 @@ export const ConfirmSwap = () => {
     isPending: isSwapPending,
     reset: resetSwap,
   } = useWriteContract();
+  const {
+    writeContractAsync: writeContractDepositGasToken,
+    data: depositGasTokenData,
+    error: depositGasTokenError,
+    isPending: isDepositGasTokenPending,
+    reset: resetDepositGasToken,
+  } = useWriteContract();
+
+  const {
+    writeContractAsync: writeContractWithdrawGasToken,
+    data: withdrawGasTokenData,
+    error: withdrawGasTokenError,
+    isPending: isWithdrawGasTokenPending,
+    reset: resetWithdrawGasToken,
+  } = useWriteContract();
 
   const token0Price = token0SqrtPriceX96
     ? sqrtPriceX96ToPrice(token0SqrtPriceX96.result, token0.decimals)
@@ -199,6 +214,26 @@ export const ConfirmSwap = () => {
   });
 
   const onSubmit = () => {
+    if (token0.isGasToken && token0.abi) {
+      writeContractDepositGasToken({
+        address: token0.address,
+        abi: token0.abi,
+        functionName: "deposit",
+        // TODO our type for wrapping writeContract incorrectly narrows this to undefined, when it should be bigint | undefined
+        // @ts-ignore
+        value: BigInt(token0AmountRaw ?? 0n),
+      });
+    } else approve();
+  };
+
+  const performSwap = useCallback(() => {
+    writeContractSwap({
+      ...swapOptions,
+      args: swapOptions.args,
+    });
+  }, [swapOptions, writeContractSwap]);
+
+  const approve = useCallback(() => {
     if (
       token0.abi &&
       (!allowanceData?.result ||
@@ -213,24 +248,78 @@ export const ConfirmSwap = () => {
     } else {
       performSwap();
     }
-  };
+  }, [
+    token0,
+    allowanceData?.result,
+    token0AmountRaw,
+    ammContract.address,
+    performSwap,
+    writeContractApproval,
+  ]);
 
-  const performSwap = useCallback(() => {
-    writeContractSwap({
-      ...swapOptions,
-      args: swapOptions.args,
-    });
-  }, [swapOptions, writeContractSwap]);
+  const withdrawGasToken = useCallback(
+    (amount: bigint) => {
+      if (token1.isGasToken && token1.abi) {
+        writeContractWithdrawGasToken({
+          address: token1.address,
+          abi: token1.abi,
+          functionName: "withdraw",
+          args: [amount],
+        });
+      }
+    },
+    [writeContractWithdrawGasToken, token1],
+  );
 
   const swapResult = useWaitForTransactionReceipt({
     hash: swapData,
   });
+  const swapAmountReceived = getAmountFromMaybeTransfer(
+    swapResult.data?.logs,
+    token1.address,
+  );
+
+  const depositGasTokenResult = useWaitForTransactionReceipt({
+    hash: depositGasTokenData,
+  });
+  const withdrawGasTokenResult = useWaitForTransactionReceipt({
+    hash: withdrawGasTokenData,
+  });
+
+  useEffect(() => {
+    if (!depositGasTokenResult.data) return;
+    approve();
+  }, [depositGasTokenResult.data, approve]);
 
   // once we have the result, initiate the swap
   useEffect(() => {
     if (!approvalResult.data) return;
     performSwap();
   }, [approvalResult.data, performSwap]);
+
+  // if we swapped the gas token, unwrap it now
+  useEffect(() => {
+    if (!swapResult.data) return;
+    withdrawGasToken(swapAmountReceived);
+  }, [swapResult.data, withdrawGasToken, swapAmountReceived]);
+
+  if (
+    isDepositGasTokenPending ||
+    (depositGasTokenData && !depositGasTokenResult.data)
+  ) {
+    return (
+      <Confirm
+        text={"Wrap"}
+        // remove "W" from wrapping token
+        fromAsset={{
+          symbol: token0.symbol.substring(1),
+          amount: token0Amount ?? "0",
+        }}
+        toAsset={{ symbol: token1.symbol, amount: token1Amount ?? "0" }}
+        transactionHash={depositGasTokenData}
+      />
+    );
+  }
 
   if (isApprovalPending || (approvalData && !approvalResult.data)) {
     return (
@@ -252,6 +341,23 @@ export const ConfirmSwap = () => {
     );
   }
 
+  if (
+    isWithdrawGasTokenPending ||
+    (withdrawGasTokenData && !withdrawGasTokenResult.data)
+  )
+    return (
+      <Confirm
+        text={"Unwrap"}
+        fromAsset={{ symbol: token0.symbol, amount: token0Amount ?? "0" }}
+        // remove "W" from wrapping token
+        toAsset={{
+          symbol: token1.symbol.substring(1),
+          amount: token1Amount ?? "0",
+        }}
+        transactionHash={withdrawGasTokenData}
+      />
+    );
+
   // success
   if (swapResult.data) {
     return (
@@ -261,6 +367,8 @@ export const ConfirmSwap = () => {
           setToken1Amount("0");
           resetApproval();
           resetSwap();
+          resetDepositGasToken();
+          resetWithdrawGasToken();
           swapResult.refetch();
           router.push("/");
         }}
@@ -270,14 +378,25 @@ export const ConfirmSwap = () => {
   }
 
   // error
-  if (swapError || approvalError) {
-    const error = swapError || approvalError;
+  if (
+    swapError ||
+    approvalError ||
+    depositGasTokenError ||
+    withdrawGasTokenError
+  ) {
+    const error =
+      swapError ||
+      approvalError ||
+      depositGasTokenError ||
+      withdrawGasTokenError;
     return (
       <Fail
         text={(error as any)?.shortMessage}
         onDone={() => {
           resetApproval();
           resetSwap();
+          resetDepositGasToken();
+          resetWithdrawGasToken();
           swapResult.refetch();
           router.push("/");
         }}
