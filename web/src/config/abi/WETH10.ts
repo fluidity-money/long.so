@@ -607,5 +607,4 @@ const WETH10 = [
     anonymous: false,
   },
 ] as const;
-
 export default WETH10;
