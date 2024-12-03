@@ -11,7 +11,7 @@ import "./ISeawaterAMM.sol";
 /// @dev 0xb27456616f8c77c635d3551b8179f6887795e920c5c4421a6fa3c3c76fc90fa8
 bytes32 constant EXECUTOR_SWAP_SLOT = bytes32(uint256(keccak256("seawater.impl.swap")) - 1);
 
-/// @dev 0x70879b7e5737e63f52eca3402c644a487e49ffeb7d78b75e54b18301a4f376ac
+/// @dev 0x918729dd8afb81fac3242345361976256d4c1121ed7c3b67e14c9e3fd9e750e2
 bytes32 constant EXECUTOR_SWAP_PERMIT2_A_SLOT = bytes32(uint256(keccak256("seawater.impl.swap_permit2.a")) - 1);
 
 /// @dev 0x031aae58aa658a4a607141f8a509c1b56789f013acaf58a8e12eb86456e099e4
@@ -29,7 +29,7 @@ bytes32 constant EXECUTOR_ADMIN_SLOT = bytes32(uint256(keccak256("seawater.impl.
 // @dev 0x6900bb4487f5e0a95cdc7bac5eb373be96a438664bb0fafeee9ffbdf0b0cd667
 bytes32 constant EXECUTOR_ADJUST_POSITION_SLOT = bytes32(uint256(keccak256("seawater.impl.adjust_position")) - 1);
 
-// @dev 0x6900bb4487f5e0a95cdc7bac5eb373be96a438664bb0fafeee9ffbdf0b0cd667
+// @dev 0x5a903794749d4e6d7a8e031428d2a1644bb99ba3d55885eb685244d45ae58a14
 bytes32 constant EXECUTOR_SWAP_PERMIT2_B_SLOT = bytes32(uint256(keccak256("seawater.impl.swap_permit2.b")) - 1);
 
 /// @dev 0xa77145850668b2edbbe1c458388a99e3dca3d62b8335520225dc4d03b2e2bfe0
