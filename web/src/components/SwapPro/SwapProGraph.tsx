@@ -27,9 +27,9 @@ export const Graph = ({
   pool?: SwapProPoolFragmentFragment;
   currentPrice: string;
 }) => {
-  const [activeGraphType, setActiveGraphType] = useState<
-    "price" | "volume" | "liquidity"
-  >("volume");
+  const [activeGraphType, setActiveGraphType] = useState<"price" | "volume">(
+    "volume",
+  );
 
   const [duration, setDuration] = useState<"7D" | "1M" | "6M" | "1Y" | "ALL">(
     "7D",
@@ -108,30 +108,6 @@ export const Graph = ({
       ];
     }
 
-    if (activeGraphType === "liquidity") {
-      // return the data for the duration
-      let slicedData = pool?.liquidityOverTime[durationKey];
-
-      if (duration !== "ALL") {
-        slicedData = slicedData?.slice(0, durationToDays[duration]);
-      }
-      slicedData = slicedData?.reverse();
-
-      const last = slicedData?.at(-1);
-      // TODO - should liquidity include token1 value as well?
-      const header = usdFormat(parseFloat(last?.fusdc.valueUsd ?? "0"));
-
-      return [
-        slicedData
-          // reformat pool data to match expected graph data
-          ?.map((d) => ({
-            date: new Date(d.timestamp * 1000),
-            value: parseFloat(d.fusdc.valueUsd),
-          })),
-        header,
-      ];
-    }
-
     // should never reach here
     return [];
   }, [
@@ -157,11 +133,6 @@ export const Graph = ({
             {
               label: "Volume",
               value: "volume",
-              ref: useRef(),
-            },
-            {
-              label: "Liquidity",
-              value: "liquidity",
               ref: useRef(),
             },
           ]}
