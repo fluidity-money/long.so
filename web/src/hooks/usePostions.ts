@@ -40,7 +40,7 @@ export type Position = {
   isVested: boolean;
 };
 
-interface PositionStore {
+interface PositionStoreState {
   // positionsLocal is a list of positions modified by local actions
   positionsLocal: {
     [chainId: number]: {
@@ -58,6 +58,10 @@ interface PositionStore {
       };
     };
   };
+  commitHash: string;
+}
+
+interface PositionStoreActions {
   // receive new positions, preferring the newest version of each position
   updatePositionsFromGraph: (
     chainId: ChainIdTypes,
@@ -72,14 +76,25 @@ interface PositionStore {
     address: `0x${string}`,
     newPosition: Position,
   ) => void;
+  // clear state entirely, useful for invalidating if deployment address
+  // has changed
+  reset: () => void;
 }
+
+interface PositionStore extends PositionStoreState, PositionStoreActions {}
+
+const initialState = {
+  positions: {},
+  positionsLocal: {},
+  commitHash: process.env.NEXT_PUBLIC_GIT_HASH,
+};
 
 const usePositionStore = create<PositionStore>()(
   persist(
     (set) => {
       return {
-        positions: {},
-        positionsLocal: {},
+        ...initialState,
+        reset: () => set(initialState),
         updatePositionsFromGraph: (chainId, address, newPositions) =>
           set(({ positions, positionsLocal }) => {
             const positionsUpdated = newPositions.reduce(
@@ -187,10 +202,19 @@ export const usePositions = () => {
     (useAccount().address?.toLowerCase() as `0x${string}`) || undefined;
   const positionsData = useFragment(PositionsFragment, userData?.getWallet);
   const positions = usePositionStore((s) => s.positions);
+  const { reset: resetPositions, commitHash } = usePositionStore();
   const updatePositionLocal = usePositionStore((s) => s.updatePositionLocal);
   const updatePositionsFromGraph = usePositionStore(
     (s) => s.updatePositionsFromGraph,
   );
+
+  // clear local positions if the commit hash has changed
+  useEffect(() => {
+    if (commitHash !== process.env.NEXT_PUBLIC_GIT_HASH) {
+      resetPositions();
+    }
+  }, [resetPositions, commitHash]);
+
   const chainPositions = useMemo(
     () =>
       address
