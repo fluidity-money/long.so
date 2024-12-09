@@ -35,7 +35,7 @@ import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 import { useToast } from "@/components/ui/use-toast";
-import { estimateContractGas } from "viem/actions";
+import { estimateContractGas, getChainId } from "viem/actions";
 import {
   getFormattedPriceFromAmount,
   snapAmountToDecimals,
@@ -44,7 +44,7 @@ import { RewardsBreakdown } from "@/components/RewardsBreakdown";
 import { useRouter } from "next/navigation";
 import { TokenIcon } from "./TokenIcon";
 import { useContracts } from "@/config/contracts";
-import { superpositionTestnet } from "@/config/chains";
+import { superpositionTestnet, useChain } from "@/config/chains";
 
 const SwapFormFragment = graphql(`
   fragment SwapFormFragment on SeawaterPool {
@@ -139,6 +139,7 @@ export const SwapForm = () => {
     () => chainId === expectedChainId,
     [chainId, expectedChainId],
   );
+  const { nativeCurrency: gasToken } = useChain(expectedChainId);
 
   // the user is currently swapping the "base" asset, the fUSDC
   // asset, into the other.
@@ -564,7 +565,9 @@ export const SwapForm = () => {
                 )}
               >
                 <Gas />
-                <div>{formatEther(gas)} SPN</div>
+                <div>
+                  {formatEther(gas)} {gasToken.symbol}
+                </div>
               </div>
 
               <div

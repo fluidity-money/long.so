@@ -1,4 +1,3 @@
-import { allChains } from "./chains";
 import LightweightERC20 from "./abi/LightweightERC20";
 import WETH10 from "./abi/WETH10";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
@@ -8,6 +7,7 @@ import { useSwapStore } from "@/stores/useSwapStore";
 import { EmptyToken } from "@/lib/utils";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useChainId } from "wagmi";
+import { useChain } from "./chains";
 
 export type ChainIdTypes = (typeof allChains)[number]["id"];
 
@@ -72,7 +72,7 @@ export function useTokens(token?: "default" | string) {
   } = useStakeStore();
 
   const chainId = useChainId();
-  const gasToken = allChains.find((c) => c.id === chainId)!.nativeCurrency;
+  const { nativeCurrency: gasToken } = useChain(chainId);
   // TODO we should resolve this from the backend, or have a stronger check
   const isGasToken = useCallback(
     (s: string) => s.toLowerCase() === "w" + gasToken.symbol.toLowerCase(),
