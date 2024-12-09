@@ -7,7 +7,7 @@ import { useSwapStore } from "@/stores/useSwapStore";
 import { EmptyToken } from "@/lib/utils";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useChainId } from "wagmi";
-import { useChain } from "./chains";
+import { allChains, useChain } from "./chains";
 
 export type ChainIdTypes = (typeof allChains)[number]["id"];
 
