@@ -25,6 +25,7 @@ import {
   useClient,
   useChainId,
   useConnectorClient,
+  useEstimateGas,
 } from "wagmi";
 import { formatEther, maxUint256 } from "viem";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
@@ -252,25 +253,14 @@ export const SwapForm = () => {
     ammContract,
   ]);
 
-  // TODO this is in ETH(/SPN), not USD
+  // this is in ETH(/SPN), not USD
+  const estimatedGas = useEstimateGas({
+    ...swapOptions,
+    account: address,
+  });
   useEffect(() => {
-    (async () => {
-      if (!client || !address || BigInt(token0AmountRaw ?? 0) === 0n) return;
-      try {
-        const estimatedGas = await estimateContractGas(client, {
-          ...swapOptions,
-          // Typescript doesn't support strongly typing this with destructuring
-          // https://github.com/microsoft/TypeScript/issues/46680
-          // @ts-expect-error
-          args: swapOptions.args,
-          account: address,
-        });
-        setGas(estimatedGas);
-      } catch (e) {
-        console.error(e);
-      }
-    })();
-  }, [address, client, token1, token0AmountRaw, setGas, swapOptions]);
+    setGas(estimatedGas.data ?? 0n);
+  }, [estimatedGas.data, setGas]);
 
   const { error: quote2Error, isLoading: quote2IsLoading } =
     useSimulateContract({
