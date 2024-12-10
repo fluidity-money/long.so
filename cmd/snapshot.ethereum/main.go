@@ -45,7 +45,7 @@ func main() {
 	slog.Debug("about to make another lookup")
 	// Get every active position in the database, including the pools.
 	var positions []seawater.Position
-	err = db.Table("seawater_active_positions_1").
+	err = db.Table("seawater_active_positions_6").
 		Select("pos_id", "pool", "lower", "upper").
 		Scan(&positions).
 		Error
