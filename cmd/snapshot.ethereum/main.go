@@ -77,7 +77,11 @@ func main() {
 	// position id.
 	positionMap := make(map[string]seawater.Position, len(positions))
 	for _, p := range positions {
-		positionMap[encodeId(p.Pool, p.Id)] = p
+		id := encodeId(p.Pool, p.Id)
+		if _, exists := positionMap[id]; exists {
+			setup.Exitf("duplicate positions with id %v exists: %v", p.Id, p)
+		}
+		positionMap[id] = p
 	}
 	d := packRpcPosData(config.SeawaterAddr.String(), positionMap)
 	// Request from the RPC the batched lookup of this data.
