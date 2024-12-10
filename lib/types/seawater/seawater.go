@@ -18,7 +18,7 @@ type Pool struct {
 	TickSpacing     uint8         `json:"tickSpacing"`
 }
 
-// Position is set by seawater_active_positions_1
+// Position is set by seawater_active_positions_6
 type Position struct {
 	CreatedBy       time.Time     `json:"createdBy"`
 	BlockHash       types.Hash    `json:"blockHash"`

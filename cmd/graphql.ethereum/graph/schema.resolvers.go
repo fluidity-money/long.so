@@ -343,7 +343,7 @@ func (r *queryResolver) GetPoolPositions(ctx context.Context, pool string, first
 		positions = model.SeawaterPositionsGlobal(MockGetPoolPositions(p))
 		return
 	}
-	stmt := r.DB.Table("seawater_active_positions_5").
+	stmt := r.DB.Table("seawater_active_positions_6").
 		Where("pool = ?", p).
 		Limit(*first).
 		Order("created_by desc")
@@ -380,7 +380,7 @@ func (r *queryResolver) GetPosition(ctx context.Context, id int) (position *seaw
 		position = MockGetPosition(id)
 		return
 	}
-	err = r.DB.Table("seawater_positions_4").
+	err = r.DB.Table("seawater_positions_5").
 		Where("pos_id = ?", id).
 		Scan(&position).
 		Error
@@ -405,7 +405,7 @@ func (r *queryResolver) GetPositions(ctx context.Context, wallet string, first *
 		)
 		return
 	}
-	stmt := r.DB.Table("seawater_active_positions_5").
+	stmt := r.DB.Table("seawater_active_positions_6").
 		Where("owner = ?", w).
 		Limit(*first).
 		Order("created_by desc")
@@ -1093,7 +1093,7 @@ func (r *seawaterPoolResolver) Positions(ctx context.Context, obj *seawater.Pool
 		positions = model.SeawaterPositionsGlobal(MockGetPoolPositions(obj.Token))
 		return
 	}
-	stmt := r.DB.Table("seawater_active_positions_5").
+	stmt := r.DB.Table("seawater_active_positions_6").
 		Where("pool = ?", obj.Token).
 		Limit(*first).
 		Order("created_by desc")
@@ -1130,7 +1130,7 @@ func (r *seawaterPoolResolver) PositionsForUser(ctx context.Context, obj *seawat
 		positions = model.SeawaterPositionsUser(MockGetPoolPositions(w))
 		return
 	}
-	err = r.DB.Table("seawater_active_positions_5").
+	err = r.DB.Table("seawater_active_positions_6").
 		Where("pool = ? and owner = ?", obj.Token, wallet).
 		Scan(&positions).
 		Error
@@ -1506,7 +1506,7 @@ func (r *seawaterPositionsGlobalResolver) Next(ctx context.Context, obj *model.S
 	to := time.Unix(int64(*obj.To), 0)
 	// Start to construct a statement based on whether internally a
 	// wallet, or a pool, was used.
-	stmt := r.DB.Table("seawater_active_positions_5").
+	stmt := r.DB.Table("seawater_active_positions_6").
 		Where("created_by < ?", to).
 		Limit(*first).
 		Order("created_by desc")
@@ -1614,7 +1614,7 @@ func (r *seawaterPositionsUserResolver) Next(ctx context.Context, obj *model.Sea
 	to := time.Unix(int64(*obj.To), 0)
 	// Start to construct a statement based on whether internally a
 	// wallet, or a pool, was used.
-	stmt := r.DB.Table("seawater_active_positions_5").
+	stmt := r.DB.Table("seawater_active_positions_6").
 		Where("created_by < ?", to).
 		Limit(*first).
 		Order("created_by desc")
@@ -1853,7 +1853,7 @@ func (r *walletResolver) Positions(ctx context.Context, obj *model.Wallet, first
 		)
 		return
 	}
-	stmt := r.DB.Table("seawater_active_positions_5").
+	stmt := r.DB.Table("seawater_active_positions_6").
 		Where("owner = ?", obj.Address).
 		Limit(*first).
 		Order("created_by desc")
