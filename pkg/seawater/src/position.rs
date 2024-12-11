@@ -75,6 +75,7 @@ impl StoragePositions {
                 .token_owed_0
                 .get()
                 .wrapping_add(U128::wrapping_from(owed_fees_0));
+
             info.token_owed_0.set(new_fees_0);
         }
         if !owed_fees_1.is_zero() {

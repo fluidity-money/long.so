@@ -582,13 +582,7 @@ impl Pools {
         Ok(upper.sys())
     }
 
-    #[allow(non_snake_case)]
-    pub fn collect_single_to_6_D_76575_F(
-        &mut self,
-        pool: Address,
-        id: U256,
-        recipient: Address,
-    ) -> Result<(u128, u128), Revert> {
+    fn internal_collect_fees(&mut self, pool: Address, id: U256, recipient: Address) -> Result<(u128, u128), Revert> {
         assert_eq_or!(
             msg::sender(),
             self.position_owners.get(id),
@@ -610,6 +604,17 @@ impl Pools {
         erc20::transfer_to_addr(FUSDC_ADDR, recipient, U256::from(token_1))?;
 
         Ok(res)
+    }
+
+    #[allow(non_snake_case)]
+    pub fn collect_single_to_6_D_76575_F(
+        &mut self,
+        pool: Address,
+        id: U256,
+        recipient: Address,
+    ) -> Result<(u128, u128), Revert> {
+        self.pools.setter(pool).update_position(id, 0)?;
+        self.internal_collect_fees(pool, id, recipient)
     }
 
     /// Collects AMM fees from a position, and triggers a release of fluid LP rewards.
@@ -636,7 +641,7 @@ impl Pools {
         pools
             .iter()
             .zip(ids.iter())
-            .map(|(&pool, &id)| self.collect_single_to_6_D_76575_F(pool, id, msg::sender()))
+            .map(|(&pool, &id)| self.internal_collect_fees(pool, id, msg::sender()))
             .collect::<Result<Vec<(u128, u128)>, Revert>>()
     }
 }
@@ -754,7 +759,13 @@ impl Pools {
             erc20::take(FUSDC_ADDR, amount_1, permit_1)?;
         }
 
-        Ok((amount_0, amount_1))
+        let (amount0_collected, amount1_collected) =
+            self.internal_collect_fees(pool, id, msg::sender())?;
+
+        Ok((
+            amount_0 + U256::from(amount0_collected),
+            amount_1 + U256::from(amount1_collected),
+        ))
     }
 }
 

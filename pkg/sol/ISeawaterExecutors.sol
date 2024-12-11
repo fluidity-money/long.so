@@ -282,7 +282,8 @@ interface ISeawaterExecutorAdmin is ISeawaterExecutorAdminExposed {
 }
 
 interface ISeawaterExecutorAdjustPosition {
-    /// @notice refreshes a position's fees, and adds liquidity, preventing less than the minimum from being taken.
+    /// @notice refreshes and takes a position's fees, and adds liquidity, preventing less than
+    /// the minimum from being taken.
     /// @param pool of the token to use
     /// @param id the id of the position
     /// @param amount0Min minimum of amount0 to take from the user
@@ -291,6 +292,24 @@ interface ISeawaterExecutorAdjustPosition {
     /// @param amount1Desired to take from the user. May exceed.
     /// @return the deltas for token0, and token1
     function incrPositionE2437399(
+        address pool,
+        uint256 id,
+        uint256 amount0Min,
+        uint256 amount1Min,
+        uint256 amount0Desired,
+        uint256 amount1Desired
+    ) external returns (uint256, uint256);
+
+    /// @notice refreshes and takes a position's fees, and adds liquidity, preventing less than
+    /// the minimum from being taken.
+    /// @param pool of the token to use
+    /// @param id the id of the position
+    /// @param amount0Min minimum of amount0 to take from the user
+    /// @param amount1Min minimum of amount1 to take from the user
+    /// @param amount0Desired to give to the user. May go lower.
+    /// @param amount1Desired to give to the user. May go lower.
+    /// @return the deltas for token0, and token1
+    function decrPosition09293696(
         address pool,
         uint256 id,
         uint256 amount0Min,

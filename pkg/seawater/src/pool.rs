@@ -389,6 +389,7 @@ impl StoragePool {
 
             // shift tick
             if state.price == step_next_price {
+
                 if step_next_tick_initialised {
                     let (fee_0, fee_1) = match zero_for_one {
                         true => (state.fee_growth_global, self.fee_growth_global_1.get()),
