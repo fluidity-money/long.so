@@ -78,8 +78,13 @@ export const AllPoolsFragment = graphql(`
         }
       }
     }
-    tvlOverTime {
-      daily
+    amounts {
+      token1 {
+        valueUsd
+      }
+      fusdc {
+        valueUsd
+      }
     }
     liquidityOverTime {
       daily {
@@ -130,11 +135,9 @@ export const AllPools = () => {
           );
         return 0;
       })();
-      const totalValueLocked = (() => {
-        if (pool.tvlOverTime.daily.length > 0)
-          return parseFloat(pool.tvlOverTime.daily[0] ?? 0);
-        return 0;
-      })();
+      const totalValueLocked = (() =>
+        parseFloat(pool.amounts.token1.valueUsd) +
+        parseFloat(pool.amounts.fusdc.valueUsd))();
 
       const liquidityRange = pool.positions.positions
         .reduce(
@@ -174,9 +177,7 @@ export const AllPools = () => {
     });
   }, [showDemoData, poolsData, fUSDC]);
 
-  const poolTvlSummed = sum(
-    poolsData?.map((pool) => parseFloat(pool.tvlOverTime.daily[0] ?? 0)),
-  );
+  const poolTvlSummed = sum(pools?.map((p) => p.totalValueLocked));
 
   return (
     <div className="flex w-full flex-col items-center">
