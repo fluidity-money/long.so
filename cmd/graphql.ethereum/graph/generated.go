@@ -174,6 +174,7 @@ type ComplexityRoot struct {
 		Token               func(childComplexity int) int
 		TotalFee            func(childComplexity int) int
 		TvlOverTime         func(childComplexity int) int
+		Volume              func(childComplexity int) int
 		VolumeOverTime      func(childComplexity int) int
 		YieldOverTime       func(childComplexity int) int
 	}
@@ -322,6 +323,7 @@ type SeawaterPoolResolver interface {
 	EarnedFeesAprfusdc(ctx context.Context, obj *seawater.Pool) ([]string, error)
 	EarnedFeesAPRToken1(ctx context.Context, obj *seawater.Pool) ([]string, error)
 	Apr(ctx context.Context, obj *seawater.Pool) (model.Apr, error)
+	Volume(ctx context.Context, obj *seawater.Pool) (model.PairAmount, error)
 	LiquidityCampaigns(ctx context.Context, obj *seawater.Pool) ([]model.LiquidityCampaign, error)
 	Positions(ctx context.Context, obj *seawater.Pool, first *int, after *int) (model.SeawaterPositionsGlobal, error)
 	PositionsForUser(ctx context.Context, obj *seawater.Pool, wallet string, first *int, after *int) (model.SeawaterPositionsUser, error)
@@ -992,6 +994,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SeawaterPool.TvlOverTime(childComplexity), true
+
+	case "SeawaterPool.volume":
+		if e.complexity.SeawaterPool.Volume == nil {
+			break
+		}
+
+		return e.complexity.SeawaterPool.Volume(childComplexity), true
 
 	case "SeawaterPool.volumeOverTime":
 		if e.complexity.SeawaterPool.VolumeOverTime == nil {
@@ -1693,9 +1702,14 @@ type SeawaterPool {
 
 
   """
-  APR for this pool, containing USD values for campaign rewards and pool fees.
+  APR for this pool, containing scaled percentage values for campaign rewards and pool fees.
   """
   APR: APR!
+
+  """
+  Volume for this pool, containing the volume of each token for the whole lifetime of the pool.
+  """
+  volume: PairAmount!
 
   """
   Liquidity campaigns currently available for this pool.
@@ -2251,15 +2265,15 @@ type Note {
 
 type APR {
   """ 
-  Scaled USD value of the APR available from rewards from campaign tokens, for campaigns that are currently active on this pool.
+  Scaled percentage APR available from rewards from campaign tokens, for campaigns that are currently active on this pool.
   """
   campaign: String!
   """
-  Scaled USD value of the APR available from the fee this pool takes, containing the amount of fUSDC, pool token, and sum of both that is available.
+  Scaled percentage APR available from the fee this pool takes, containing the amount of fUSDC, pool token, and sum of both that is available.
   """
   fee: APRFee!
   """ 
-  Scaled USD value representing the total APR of this pool, summing the pool fees of fUSDC and the pool token, and the campaign rewards for all active campaigns on the pool.
+  Scaled percentage representing the total APR of this pool, summing the pool fees of fUSDC and the pool token, and the campaign rewards for all active campaigns on the pool.
   """
   total: String!
 }
@@ -4412,6 +4426,8 @@ func (ec *executionContext) fieldContext_LiquidityCampaign_pool(_ context.Contex
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
 			case "APR":
 				return ec.fieldContext_SeawaterPool_APR(ctx, field)
+			case "volume":
+				return ec.fieldContext_SeawaterPool_volume(ctx, field)
 			case "liquidityCampaigns":
 				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
@@ -5052,6 +5068,8 @@ func (ec *executionContext) fieldContext_Query_pools(_ context.Context, field gr
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
 			case "APR":
 				return ec.fieldContext_SeawaterPool_APR(ctx, field)
+			case "volume":
+				return ec.fieldContext_SeawaterPool_volume(ctx, field)
 			case "liquidityCampaigns":
 				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
@@ -5330,6 +5348,8 @@ func (ec *executionContext) fieldContext_Query_getPool(ctx context.Context, fiel
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
 			case "APR":
 				return ec.fieldContext_SeawaterPool_APR(ctx, field)
+			case "volume":
+				return ec.fieldContext_SeawaterPool_volume(ctx, field)
 			case "liquidityCampaigns":
 				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
@@ -6055,6 +6075,8 @@ func (ec *executionContext) fieldContext_SeawaterConfig_pool(_ context.Context, 
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
 			case "APR":
 				return ec.fieldContext_SeawaterPool_APR(ctx, field)
+			case "volume":
+				return ec.fieldContext_SeawaterPool_volume(ctx, field)
 			case "liquidityCampaigns":
 				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
@@ -7154,6 +7176,58 @@ func (ec *executionContext) fieldContext_SeawaterPool_APR(_ context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _SeawaterPool_volume(ctx context.Context, field graphql.CollectedField, obj *seawater.Pool) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SeawaterPool_volume(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.SeawaterPool().Volume(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.PairAmount)
+	fc.Result = res
+	return ec.marshalNPairAmount2githubᚗcomᚋfluidityᚑmoneyᚋlongᚗsoᚋcmdᚋgraphqlᚗethereumᚋgraphᚋmodelᚐPairAmount(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SeawaterPool_volume(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SeawaterPool",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "timestamp":
+				return ec.fieldContext_PairAmount_timestamp(ctx, field)
+			case "fusdc":
+				return ec.fieldContext_PairAmount_fusdc(ctx, field)
+			case "token1":
+				return ec.fieldContext_PairAmount_token1(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PairAmount", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _SeawaterPool_liquidityCampaigns(ctx context.Context, field graphql.CollectedField, obj *seawater.Pool) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 	if err != nil {
@@ -7878,6 +7952,8 @@ func (ec *executionContext) fieldContext_SeawaterPosition_pool(_ context.Context
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
 			case "APR":
 				return ec.fieldContext_SeawaterPool_APR(ctx, field)
+			case "volume":
+				return ec.fieldContext_SeawaterPool_volume(ctx, field)
 			case "liquidityCampaigns":
 				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
@@ -8694,6 +8770,8 @@ func (ec *executionContext) fieldContext_SeawaterSwap_pool(_ context.Context, fi
 				return ec.fieldContext_SeawaterPool_earnedFeesAPRToken1(ctx, field)
 			case "APR":
 				return ec.fieldContext_SeawaterPool_APR(ctx, field)
+			case "volume":
+				return ec.fieldContext_SeawaterPool_volume(ctx, field)
 			case "liquidityCampaigns":
 				return ec.fieldContext_SeawaterPool_liquidityCampaigns(ctx, field)
 			case "positions":
@@ -13861,6 +13939,42 @@ func (ec *executionContext) _SeawaterPool(ctx context.Context, sel ast.Selection
 					}
 				}()
 				res = ec._SeawaterPool_APR(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "volume":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SeawaterPool_volume(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

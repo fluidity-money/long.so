@@ -237,6 +237,11 @@ type SeawaterPool {
   APR: APR!
 
   """
+  Volume for this pool, containing the volume of each token for the whole lifetime of the pool.
+  """
+  volume: PairAmount!
+
+  """
   Liquidity campaigns currently available for this pool.
   """
   liquidityCampaigns: [LiquidityCampaign!]!

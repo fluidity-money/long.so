@@ -1065,6 +1065,41 @@ func (r *seawaterPoolResolver) Apr(ctx context.Context, obj *seawater.Pool) (mod
 	}, nil
 }
 
+// Volume is the resolver for the Volume field.
+func (r *seawaterPoolResolver) Volume(ctx context.Context, obj *seawater.Pool) (model.PairAmount, error) {
+	var volume struct {
+		Pool                 types.Address        `json:"pool"`
+		Decimals             int                  `json:"decimals"`
+		TokenAVolumeUnscaled types.UnscaledNumber `json:"tokena_volume_unscaled"`
+		FusdcVolumeUnscaled  types.UnscaledNumber `json:"fusdc_volume_unscaled"`
+	}
+	err := r.DB.Table("seawater_pool_swap_volume_hourly_2").
+		Where("pool = ?", obj.Token).
+		Select("pool, decimals, SUM(fusdc_volume_unscaled) AS fusdc_volume_unscaled, SUM(tokena_volume_unscaled) AS tokena_volume_unscaled").
+		Group("pool, decimals").
+		Scan(&volume).
+		Error
+	if err != nil {
+		return model.PairAmount{}, err
+	}
+	ts := int(time.Now().Unix())
+	return model.PairAmount{
+		Timestamp: ts,
+		Fusdc: model.Amount{
+			Token:         r.C.FusdcAddr,
+			Decimals:      r.C.FusdcDecimals,
+			Timestamp:     ts,
+			ValueUnscaled: volume.FusdcVolumeUnscaled,
+		},
+		Token1: model.Amount{
+			Token:         volume.Pool,
+			Decimals:      volume.Decimals,
+			Timestamp:     ts,
+			ValueUnscaled: volume.TokenAVolumeUnscaled,
+		},
+	}, nil
+}
+
 // LiquidityCampaigns is the resolver for the liquidityCampaigns field.
 func (r *seawaterPoolResolver) LiquidityCampaigns(ctx context.Context, obj *seawater.Pool) ([]model.LiquidityCampaign, error) {
 	var c []model.LiquidityCampaign
