@@ -1070,7 +1070,7 @@ func (r *seawaterPoolResolver) Volume(ctx context.Context, obj *seawater.Pool) (
 	var volume struct {
 		Pool                 types.Address        `json:"pool"`
 		Decimals             int                  `json:"decimals"`
-		TokenAVolumeUnscaled types.UnscaledNumber `json:"tokena_volume_unscaled"`
+		TokenAVolumeUnscaled types.UnscaledNumber `json:"tokena_volume_unscaled" gorm:"column:tokena_volume_unscaled"`
 		FusdcVolumeUnscaled  types.UnscaledNumber `json:"fusdc_volume_unscaled"`
 	}
 	err := r.DB.Table("seawater_pool_swap_volume_hourly_2").
