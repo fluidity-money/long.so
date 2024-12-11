@@ -118,6 +118,18 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 			return fmt.Sprintf("%0.8f", x), nil
 		}
 	}
+	// HACK until we can find a better way.
+	defaultPrice := r.PoolsConfig[obj.Token].Price
+	if defaultPrice == "" {
+		defaultPrice = "1"
+	}
+	if obj.ValueUnscaled.Int == nil {
+		slog.Error("value unscaled not set",
+			"pool", obj.Token,
+			"default price", defaultPrice,
+		)
+		return defaultPrice, nil
+	}
 	if obj.ValueUnscaled.Cmp(types.EmptyUnscaledNumber().Int) == 0 {
 		return "0", nil
 	}
@@ -140,13 +152,10 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 		// toml to find the default price visually.
 		slog.Error(`error getting ValueUsd. Using default (or "1")`,
 			"pool", obj.Token,
+			"default price", defaultPrice,
 			"err", err,
 		)
-		p := r.PoolsConfig[obj.Token].Price
-		if p == "" {
-			p = "1"
-		}
-		return p, nil
+		return defaultPrice, nil
 	}
 	sqrtPrice := math.GetSqrtRatioAtTick(finalTick.FinalTick.Big())
 	price := math.GetPriceAtSqrtRatio(sqrtPrice)
