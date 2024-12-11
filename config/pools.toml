@@ -8,11 +8,13 @@ image = "/icons/fUSDC.svg"
 displayed = true
 classification = "VOLATILE"
 image = "/icons/ethereum-eth-logo.svg"
+price = "3802.12"
 
 [0x6437fdc89cED41941b97A9f1f8992D88718C81c5]
 displayed = true
 classification = "STABLECOIN"
 image = "/icons/usd-coin-usdc-logo.svg"
+price = "1"
 
 [0x09f7156aae9c903f90b1cb1e312582c4f208a759]
 displayed = true

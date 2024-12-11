@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"math/big"
 	"strconv"
+	"log/slog"
 	"time"
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
@@ -135,7 +136,17 @@ func (r *amountResolver) ValueUsd(ctx context.Context, obj *model.Amount) (strin
 		First(&finalTick).
 		Error
 	if err != nil {
-		return "", err
+		// Log that an error took place here, then use the pools
+		// toml to find the default price visually.
+		slog.Error(`error getting ValueUsd. Using default (or "1")`,
+			"pool", obj.Token,
+			"err", err,
+		)
+		p := r.PoolsConfig[obj.Token].Price
+		if p == "" {
+			p = "1"
+		}
+		return p, nil
 	}
 	sqrtPrice := math.GetSqrtRatioAtTick(finalTick.FinalTick.Big())
 	price := math.GetPriceAtSqrtRatio(sqrtPrice)

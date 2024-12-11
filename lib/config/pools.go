@@ -7,4 +7,5 @@ type Pool struct {
 	Displayed      bool                    `toml:"displayed" json:"displayed"`
 	Classification seawater.Classification `toml:"classification" json:"classification"`
 	Image          string                  `toml:"image" json:"image"`
+	Price          string                  `toml:"price" json:"price"`
 }
