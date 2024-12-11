@@ -39,26 +39,26 @@
 
 |         Deployment name        |              Deployment address            |
 |--------------------------------|--------------------------------------------|
-| Longtail AMM                   | 0x2A4a912970b780C29cf5b97aaD45ea5f98A07341 |
-| Longtail NFT manager           | 0x380C38108a46F81F340a0837a572c7966a8552b5 |
-| Position Handler               | 0x41AbD25155F98fF26F5e48a931c7565f04Fc6b1a |
+| Longtail AMM                   | 0x2B82dA1C1Be91eE6cF7aec0A37E38aD39fF4A87D |
+| Longtail NFT manager           | 0xCbaEe72552E80d23026037ef0F489B97863C431e |
+| Position Handler               | 0x3511aF458F39cF609719070636B033A07F327C29 |
 | Permit2 router                 | 0x2246431582087b930F2CE561c34deb8E7e5c44bE |
-| Swaps implementation           | 0xc28bbb1f15fa27d32c6c892928cef984fdafae90 |
-| Swaps permit2 A implementation | 0xbc005f1d3b52b939a91954159320df6bed66ce17 |
-| Quotes implementation          | 0xc8730b8ca0bc8631c75d2df6dec6244fafa2ccfd |
-| Positions implementation       | 0x69300b5761a79ced0322c3f0b7d6092ef0da5309 |
-| Update position implementation | 0xac59e975cd18bc44b6abc9fc37b14ff28f59fd42 |
-| Admin implementation           | 0xb724609002f7651c81dd2dac9191a591805885e4 |
-| Adjust position implementation | 0x57470a0f95d4843adea37ec47b8e6a0616e45a58 |
-| Swaps permit2 B implementation | 0x0000000000000000000000000000000000000000 |
+| Swaps implementation           | 0x4d1ceb7fc6bf11dc71ecf6709c2c0fe1d972a44f |
+| Swaps permit2 A implementation | 0x9fb4739e1d5491518ded1f22124b6c441d795dd6 |
+| Quotes implementation          | 0x98bff3634ab7d4a5b9bf7dd167a4b30a0e9ffb34 |
+| Positions implementation       | 0x3ff169fa977cedc78b142dd514be7af9991faed8 |
+| Update position implementation | 0x4b3a392e030d01d2f6515ca9f2b188a178bf1b37 |
+| Admin implementation           | 0x0362fa856225208a29be7c1404704cc1abd4f0b6 |
+| Adjust position implementation | 0x2f479a4802e38d58ad8136980b8834d03ef237d5 |
+| Swaps permit2 B implementation | 0xc870bc6e2d198f15e9689a2db0ea6b3c4c2296cc |
 
 #### Leo contract deployments
 
 |     Deployment name    |              Deployment address            |
 |------------------------|--------------------------------------------|
-| Leo                    | 0xfeb228265453717352d8035b2E8e7aBFbb88d417 |
-| Collect implementation | 0x94e6db65496382cdfaaa6bfc89bbfdf48e7d99c7 |
-| Extras implementation  | 0xe5e2137ff1c51ba42e0d7f8c29f73e2f4a06f526 |
+| Leo                    | 0xDa620A2008C648B5927D7AdAa0B065c17AbBC682 |
+| Collect implementation | 0x76f409bdc1c41b46f2cb69587411f382b633d0a4 |
+| Extras implementation  | 0x1ad50018e9ddc2fc91dd586b976055ebac9efe70 |
 
 #### Useful testing token deployments
 

@@ -582,30 +582,6 @@ impl Pools {
         Ok(upper.sys())
     }
 
-    fn internal_collect_fees(&mut self, pool: Address, id: U256, recipient: Address) -> Result<(u128, u128), Revert> {
-        assert_eq_or!(
-            msg::sender(),
-            self.position_owners.get(id),
-            Error::PositionOwnerOnly
-        );
-
-        let res = self.pools.setter(pool).collect(id)?;
-        let (token_0, token_1) = res;
-
-        evm::log(events::CollectFees {
-            id,
-            pool,
-            to: msg::sender(),
-            amount0: token_0,
-            amount1: token_1,
-        });
-
-        erc20::transfer_to_addr(pool, recipient, U256::from(token_0))?;
-        erc20::transfer_to_addr(FUSDC_ADDR, recipient, U256::from(token_1))?;
-
-        Ok(res)
-    }
-
     #[allow(non_snake_case)]
     pub fn collect_single_to_6_D_76575_F(
         &mut self,
@@ -614,7 +590,7 @@ impl Pools {
         recipient: Address,
     ) -> Result<(u128, u128), Revert> {
         self.pools.setter(pool).update_position(id, 0)?;
-        self.internal_collect_fees(pool, id, recipient)
+        self.collect_fees_internal(pool, id, recipient)
     }
 
     /// Collects AMM fees from a position, and triggers a release of fluid LP rewards.
@@ -641,12 +617,36 @@ impl Pools {
         pools
             .iter()
             .zip(ids.iter())
-            .map(|(&pool, &id)| self.internal_collect_fees(pool, id, msg::sender()))
+            .map(|(&pool, &id)| self.collect_fees_internal(pool, id, msg::sender()))
             .collect::<Result<Vec<(u128, u128)>, Revert>>()
     }
 }
 
 impl Pools {
+    pub fn collect_fees_internal(&mut self, pool: Address, id: U256, recipient: Address) -> Result<(u128, u128), Revert> {
+        assert_eq_or!(
+            msg::sender(),
+            self.position_owners.get(id),
+            Error::PositionOwnerOnly
+        );
+
+        let res = self.pools.setter(pool).collect(id)?;
+        let (token_0, token_1) = res;
+
+        evm::log(events::CollectFees {
+            id,
+            pool,
+            to: msg::sender(),
+            amount0: token_0,
+            amount1: token_1,
+        });
+
+        erc20::transfer_to_addr(pool, recipient, U256::from(token_0))?;
+        erc20::transfer_to_addr(FUSDC_ADDR, recipient, U256::from(token_1))?;
+
+        Ok(res)
+    }
+
     /// Refreshes the amount of liquidity in a position, and adds or removes liquidity. Only usable
     /// by the position's owner.
     ///
@@ -760,7 +760,7 @@ impl Pools {
         }
 
         let (amount0_collected, amount1_collected) =
-            self.internal_collect_fees(pool, id, msg::sender())?;
+            self.collect_fees_internal(pool, id, msg::sender())?;
 
         Ok((
             amount_0 + U256::from(amount0_collected),

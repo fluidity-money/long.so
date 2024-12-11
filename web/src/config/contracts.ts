@@ -45,10 +45,10 @@ const chainContracts: {
     },
   },
   98985: {
-    amm: { address: "0x2A4a912970b780C29cf5b97aaD45ea5f98A07341" },
-    leo: { address: "0xfeb228265453717352d8035b2E8e7aBFbb88d417" },
-    ownershipNFTs: { address: "0x380C38108a46F81F340a0837a572c7966a8552b5" },
-    positionHandler: { address: "0x41AbD25155F98fF26F5e48a931c7565f04Fc6b1a" },
+    amm: { address: "0x2B82dA1C1Be91eE6cF7aec0A37E38aD39fF4A87D" },
+    leo: { address: "0xDa620A2008C648B5927D7AdAa0B065c17AbBC682" },
+    ownershipNFTs: { address: "0xCbaEe72552E80d23026037ef0F489B97863C431e" },
+    positionHandler: { address: "0x3511aF458F39cF609719070636B033A07F327C29" },
   },
   55244: {
     amm: { address: "0xe89E8Cb7E84Dd1b4460cF2a51B3f0B05Ff952bB6" },
