@@ -482,7 +482,9 @@ contract SeawaterAMM is ISeawaterAMM {
         uint256 /* amount1Min */,
         uint256 /* amount0Desired */,
         uint256 /* amount1Desired */
-    ) external returns (uint256, uint256);
+    ) external returns (uint256, uint256) {
+        directDelegate(_getExecutorAdjustPosition());
+    }
 
     function setExecutorSwap(address a) external onlyProxyAdmin {
         StorageSlot.getAddressSlot(EXECUTOR_SWAP_SLOT).value = a;

@@ -282,8 +282,8 @@ interface ISeawaterExecutorAdmin is ISeawaterExecutorAdminExposed {
 }
 
 interface ISeawaterExecutorAdjustPosition {
-    /// @notice refreshes and takes a position's fees, and adds liquidity, preventing less than
-    /// the minimum from being taken.
+    /// @notice refreshes and takes a position's fees, and returns liquidity, preventing less than
+    /// the minimum from being taken to be sent to the user.
     /// @param pool of the token to use
     /// @param id the id of the position
     /// @param amount0Min minimum of amount0 to take from the user
