@@ -71,11 +71,12 @@ export const AllPoolsFragment = graphql(`
       symbol
       image
     }
-    volumeOverTime {
-      daily {
-        fusdc {
-          valueScaled
-        }
+    volume {
+      token1 {
+        valueUsd
+      }
+      fusdc {
+        valueUsd
       }
     }
     amounts {
@@ -128,13 +129,9 @@ export const AllPools = () => {
 
     // reformat the data to match the Pool type
     return poolsData?.map((pool): Pool => {
-      const volume = (() => {
-        if (pool.volumeOverTime.daily.length > 0)
-          return parseFloat(
-            pool.volumeOverTime.daily?.[0].fusdc.valueScaled ?? 0,
-          );
-        return 0;
-      })();
+      const volume =
+        parseFloat(pool.volume.token1.valueUsd) +
+        parseFloat(pool.volume.fusdc.valueUsd);
       const totalValueLocked = (() =>
         parseFloat(pool.amounts.token1.valueUsd) +
         parseFloat(pool.amounts.fusdc.valueUsd))();
