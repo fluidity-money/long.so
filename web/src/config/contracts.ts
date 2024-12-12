@@ -51,10 +51,10 @@ const chainContracts: {
     positionHandler: { address: "0x3511aF458F39cF609719070636B033A07F327C29" },
   },
   55244: {
-    amm: { address: "0x5A708114dc7d7c5C0D6E6acA1CAb1e5Dec05b7e9" },
-    leo: { address: "0x9598E4056866F7d7085Ef56fD9594deb0D5d7e1d" },
-    ownershipNFTs: { address: "0xD6F671E7B5bae3c462F03FcaAd03751cCd8Df82b" },
-    positionHandler: { address: "0x17A45B74Cd8817e237119D28e46c09fF6c9caF91" },
+    amm: { address: "0x452D796b656D3720f2d06B3439eF95899f0db755" },
+    leo: { address: "0x815e104dCe7e818211A06962b917Fd115eb71fc9" },
+    ownershipNFTs: { address: "0x1C3D5CF4F56af1cB8f810F49eFfF3d5970a274D0" },
+    positionHandler: { address: "0xc81915AF9ba5477eD31e71CbEc8955636D55B730" },
   },
 };
 

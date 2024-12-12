@@ -624,7 +624,12 @@ impl Pools {
 }
 
 impl Pools {
-    pub fn collect_fees_internal(&mut self, pool: Address, id: U256, recipient: Address) -> Result<(u128, u128), Revert> {
+    pub fn collect_fees_internal(
+        &mut self,
+        pool: Address,
+        id: U256,
+        recipient: Address,
+    ) -> Result<(u128, u128), Revert> {
         assert_eq_or!(
             msg::sender(),
             self.position_owners.get(id),
@@ -760,13 +765,7 @@ impl Pools {
             erc20::take(FUSDC_ADDR, amount_1, permit_1)?;
         }
 
-        let (amount0_collected, amount1_collected) =
-            self.collect_fees_internal(pool, id, msg::sender())?;
-
-        Ok((
-            amount_0 + U256::from(amount0_collected),
-            amount_1 + U256::from(amount1_collected),
-        ))
+        Ok((amount_0, amount_1))
     }
 }
 
