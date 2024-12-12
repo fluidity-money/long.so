@@ -1,4 +1,6 @@
 
+## TESTNET
+
 [0xA8EA92c819463EFbEdDFB670FEfC881A480f0115]
 displayed = true
 classification = "STABLECOIN"
@@ -34,6 +36,14 @@ image = "/icons/ICON_BLACK.png"
 displayed = true
 classification = "VOLATILE"
 
+## MAINNET
+
+[0x6c030c5CC283F791B26816f325b9C632d964F8A1]
+displayed = true
+classification = "STABLECOIN"
+image = "/icons/fUSDC.svg"
+
 [0x546db1432dafd619c1ba63a3ba72b09c6b852066]
 displayed = true
 classification = "VOLATILE"
+image = "/icons/ethereum-eth-logo.svg"
