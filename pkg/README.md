@@ -31,7 +31,7 @@
 | Adjust position A implementation | 0xff634a3cb97bcf8cbaf8d2379afc8360c541218a |
 | Swaps permit2 B implementation   | 0xe3bafbd8f86800bac86025b2903335b32aa6f51f |
 | Adjust position B implementation | 0xb4647415a644f6a09c84a2af6458d1d38d6e9d80 |
-| Position Handler               |  |
+| Position Handler               | 0x46f9dea606a3D5890aD6d36C64acD55C26C51B8a |
 
 #### Administrative deployments
 
