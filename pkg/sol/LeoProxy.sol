@@ -3,6 +3,8 @@ pragma solidity 0.8.16;
 
 import "./ILeo.sol";
 
+bytes32 constant ADMIN_SLOT = bytes32(uint256(keccak256('eip1967.proxy.admin')) - 1);
+
 /// @dev 0x265c22645a278354f32cb66e6ace5ae683d2e0f04117019dbeb0727f85f1690e
 bytes32 constant EXTRAS_SLOT = bytes32(uint256(keccak256("leo.impl.extras")) - 1);
 
@@ -25,6 +27,9 @@ interface LeoCtor {
 }
 
 contract LeoProxy is ILeo {
+    event AdminChanged(address indexed oldAdmin, address indexed newAdmin);
+    event Upgraded(address indexed extras, address indexed collect);
+
     function directDelegate(address to) internal {
         assembly {
             // Copy msg.data. We take full control of memory in this inline assembly
@@ -50,7 +55,8 @@ contract LeoProxy is ILeo {
         }
     }
 
-    constructor(address _collect, address _extras, address _emergency) {
+    constructor(address _admin, address _collect, address _extras, address _emergency) {
+        StorageSlot.getAddressSlot(ADMIN_SLOT).value = _admin;
         StorageSlot.getAddressSlot(COLLECT_SLOT).value = _collect;
         StorageSlot.getAddressSlot(EXTRAS_SLOT).value = _extras;
         (bool success,) =
@@ -58,6 +64,7 @@ contract LeoProxy is ILeo {
                 abi.encodeWithSelector(LeoCtor.ctor.selector, _emergency)
             );
         require(success, "setup failed");
+        emit AdminChanged(address(0), _admin);
     }
 
     /// @inheritdoc ILeo
@@ -73,6 +80,13 @@ contract LeoProxy is ILeo {
         uint64 /* ending */
     ) external {
         directDelegate(StorageSlot.getAddressSlot(EXTRAS_SLOT).value);
+    }
+
+    function upgrade(address _collect, address _extras) external {
+        require(msg.sender == StorageSlot.getAddressSlot(ADMIN_SLOT).value, "not admin");
+        StorageSlot.getAddressSlot(COLLECT_SLOT).value = _collect;
+        StorageSlot.getAddressSlot(EXTRAS_SLOT).value = _extras;
+        emit Upgraded(_collect, _extras);
     }
 
     /// @inheritdoc ILeo

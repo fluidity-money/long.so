@@ -208,6 +208,11 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorAdminExposed
+    function setFeeProtocolCBD3EC35(address /* pool */, uint8 /* feeProtocol0 */, uint8 /* feeProtocol1 */) external {
+        directDelegate(_getExecutorAdmin());
+    }
+
+    /// @inheritdoc ISeawaterExecutorAdminExposed
     function updateNftManager9BDF41F6(address /* manager */) external {
         directDelegate(_getExecutorAdmin());
     }

@@ -9,6 +9,7 @@ err() {
 	exit 1
 }
 
+[ -z "$LEO_PROXY_ADMIN" ] && err "LEO_PROXY_ADMIN unset"
 [ -z "$LEO_EMERGENCY_COUNCIL" ] && err "LEO_EMERGENCY_COUNCIL unset"
 [ -z "$STYLUS_ENDPOINT" ] && err "STYLUS_ENDPOINT unset"
 [ -z "$STYLUS_PRIVATE_KEY" ] && err "STYLUS_PRIVATE_KEY unset"
@@ -23,6 +24,7 @@ log "LEO_EXTRAS=$LEO_EXTRAS"
 
 leo_proxy="$(\
 	sh deploy-solidity.sh "LeoProxy" --constructor-args \
+		"$LEO_PROXY_ADMIN" \
 		"$LEO_COLLECT" \
 		"$LEO_EXTRAS" \
 		"$LEO_EMERGENCY_COUNCIL")"

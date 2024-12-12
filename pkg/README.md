@@ -20,7 +20,7 @@
 |          Deployment name         |              Deployment address            |
 |----------------------------------|--------------------------------------------|
 | Longtail AMM                     | 0x5A708114dc7d7c5C0D6E6acA1CAb1e5Dec05b7e9 |
-| Longtail NFT manager             |  |
+| Longtail NFT manager             | 0xD6F671E7B5bae3c462F03FcaAd03751cCd8Df82b |
 | Permit2 router                   | 0x244517Dc59943E8CdFbD424Bdb3262c5f04a1387 |
 | Swaps implementation             | 0xfc66c25dbdb0606e7f9ca1d2754eb0a0f8306da9 |
 | Swaps permit2 A implementation   | 0x0b319db00d07c8fadfaaef13c910141a5da0aa8f |
@@ -32,13 +32,19 @@
 | Swaps permit2 B implementation   | 0xe3bafbd8f86800bac86025b2903335b32aa6f51f |
 | Adjust position B implementation | 0x6c6c9d1a30f14adec11c7cf9f0f6ae0926822682 |
 
+####Administrative deployments
+
+|     Deployment name    |              Deployment address            |
+|------------------------|--------------------------------------------|
+| Proxy admin for Leo    | 0x1192fC9c51C421578c099e4251D04F762bf87F68 |
+
 #### Leo contract deployments
 
 |     Deployment name    |              Deployment address            |
 |------------------------|--------------------------------------------|
-| Leo                    |  |
-| Collect implementation |  |
-| Extras implementation  |  |
+| Leo proxy              | 0x9598E4056866F7d7085Ef56fD9594deb0D5d7e1d |
+| Collect implementation | 0x83ec9543a48e3760a659594868ed51553d2c6f16 |
+| Extras implementation  | 0x506cb07805ef6ca654edad999526607b703e5e43 |
 
 #### Token deployments
 
