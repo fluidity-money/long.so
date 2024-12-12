@@ -16,7 +16,7 @@ import (
 )
 
 // multicallAddr from the default web config multicall (testnet only!)
-var multicallAddr = ethCommon.HexToAddress("0x1cAE7315c6E1dd217982317F2d1399e76F4BD994")
+var multicallAddr = ethCommon.HexToAddress("0xcA11bde05977b3631167028862bE2a173976CA11")
 
 var (
 	//go:embed erc20.json
