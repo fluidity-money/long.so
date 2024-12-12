@@ -380,12 +380,13 @@ export default function PoolPage() {
 
   const vestPosition = useCallback(
     (id: bigint) => {
-      writeContractVestPosition({
-        address: leoContract.address,
-        abi: leoContract.abi,
-        functionName: "vestPosition",
-        args: [token0.address, id, address],
-      });
+      address &&
+        writeContractVestPosition({
+          address: leoContract.address,
+          abi: leoContract.abi,
+          functionName: "vestPosition",
+          args: [token0.address, id, address],
+        });
     },
     [
       writeContractVestPosition,
