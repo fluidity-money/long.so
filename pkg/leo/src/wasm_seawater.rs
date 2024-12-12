@@ -9,6 +9,8 @@ use crate::{calldata::*, error::Error, immutables::SEAWATER_ADDR};
 sol! {
     function collectSingleTo6D76575F(address pool, uint256 id, address recipient);
     function positionLiquidity8D11C045(address pool, uint256 id);
+    function positionTickLower2F77CCE1(address pool, uint256 id);
+    function positionTickUpper67FD55BA(address pool, uint256 id);
 }
 
 /// Collect yield, using the [collect_single_to_6_D_76575_F] function in Longtail.
@@ -32,11 +34,19 @@ pub fn collect_yield_single_to(
 }
 
 pub fn tick_lower(pool: Address, id: U256) -> Result<i32, Vec<u8>> {
-    Ok(0) // TODO
+    unpack_i32(&RawCall::new().call(
+        SEAWATER_ADDR,
+        &positionTickLower2F77CCE1Call { pool, id }.abi_encode(),
+    )?)
+    .ok_or(Error::SeawaterDecode.into())
 }
 
 pub fn tick_upper(pool: Address, id: U256) -> Result<i32, Vec<u8>> {
-    Ok(0) // TODO
+    unpack_i32(&RawCall::new().call(
+        SEAWATER_ADDR,
+        &positionTickUpper67FD55BACall { pool, id }.abi_encode(),
+    )?)
+    .ok_or(Error::SeawaterDecode.into())
 }
 
 pub fn position_liquidity(pool: Address, id: U256) -> Result<u128, Vec<u8>> {

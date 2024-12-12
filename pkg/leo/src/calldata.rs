@@ -16,17 +16,29 @@ pub fn write_u256(bytes: &mut [u8], slot: usize, uint: U256) {
 }
 
 pub fn unpack_i32(data: &[u8]) -> Option<i32> {
-    data[28..].try_into().ok().map(i32::from_be_bytes)
+    if data.len() != 32 {
+        None
+    } else {
+        data[28..].try_into().ok().map(i32::from_be_bytes)
+    }
 }
 
 pub fn unpack_u128(data: &[u8]) -> Option<u128> {
-    data[16..].try_into().ok().map(u128::from_be_bytes)
+    if data.len() != 32 {
+        None
+    } else {
+        data[16..].try_into().ok().map(u128::from_be_bytes)
+    }
 }
 
 pub fn unpack_u128_double(data: &[u8]) -> Option<(u128, u128)> {
-    let first = u128::from_be_bytes(data[16..32].try_into().ok()?);
-    let end = u128::from_be_bytes(data[32 + 16..].try_into().ok()?);
-    Some((first, end))
+    if data.len() != 32 * 2 {
+        None
+    } else {
+        let first = u128::from_be_bytes(data[16..32].try_into().ok()?);
+        let end = u128::from_be_bytes(data[32 + 16..].try_into().ok()?);
+        Some((first, end))
+    }
 }
 
 pub fn pack_transfer_from(sender: Address, recipient: Address, amount: U256) -> [u8; 4 + 32 * 3] {
