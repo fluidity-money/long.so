@@ -1,11 +1,6 @@
-import { useWriteContract as baseUseWriteContract, Config } from "wagmi";
-import { WriteContractMutateAsync } from "wagmi/query";
+import { useWriteContract as baseUseWriteContract } from "wagmi";
 import { useErrorReportingStore } from "@/stores/useErrorReport";
 import { useCallback } from "react";
-
-type VariablesType<T> = T extends (variables: infer V, ...args: any[]) => void
-  ? V
-  : never;
 
 export default function useWriteContract() {
   const {
@@ -26,12 +21,13 @@ export default function useWriteContract() {
     [setError, setIsOpen],
   );
 
-  const writeContractAsync = useCallback(
-    async function (props: VariablesType<WriteContractMutateAsync<Config>>) {
+  const writeContractAsync = useCallback<typeof baseWriteContractAsync>(
+    async function (props) {
       try {
         return await baseWriteContractAsync(props);
       } catch (error) {
         handleError(error);
+        return "0x";
       }
     },
     [baseWriteContractAsync, handleError],

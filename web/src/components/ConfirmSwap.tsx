@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { redirect, useRouter } from "next/navigation";
-import { cn, getAmountFromMaybeTransfer, TransferTopic } from "@/lib/utils";
+import { cn, getAmountFromMaybeTransfer } from "@/lib/utils";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { motion } from "framer-motion";
 import {
@@ -75,45 +75,6 @@ export const ConfirmSwap = () => {
   const isSwappingBaseAsset = token0.address === fUSDC.address;
   const isSwap1 = isSwappingBaseAsset || token1.address === fUSDC.address;
 
-  const swapOptions = useMemo(() => {
-    if (isSwappingBaseAsset) {
-      // if one of the assets is fusdc, use swap1
-      return {
-        address: ammContract.address,
-        abi: ammContract.abi,
-        functionName: "swap904369BE",
-        args: [token1.address, false, BigInt(token0AmountRaw ?? 0), maxUint256],
-      } as const;
-    } else if (token1.address === fUSDC.address) {
-      return {
-        address: ammContract.address,
-        abi: ammContract.abi,
-        functionName: "swap904369BE",
-        args: [token0.address, true, BigInt(token0AmountRaw ?? 0), maxUint256],
-      } as const;
-    } else {
-      // if both of the assets aren't fusdc, use swap2
-      return {
-        address: ammContract.address,
-        abi: ammContract.abi,
-        functionName: "swap2ExactIn41203F1D",
-        args: [
-          token0.address,
-          token1.address,
-          BigInt(token0AmountRaw ?? 0),
-          BigInt(0),
-        ],
-      } as const;
-    }
-  }, [
-    isSwappingBaseAsset,
-    ammContract,
-    token0AmountRaw,
-    token0.address,
-    token1.address,
-    fUSDC.address,
-  ]);
-
   // set up write hooks
   const {
     writeContractAsync: writeContractApproval,
@@ -182,9 +143,7 @@ export const ConfirmSwap = () => {
   const { data: allowanceData } = useSimulateContract({
     address: token0.address,
     abi: token0.abi,
-    // @ts-ignore this needs to use useSimulateContract which breaks the types
     functionName: "allowance",
-    // @ts-ignore
     args: [address as Hash, ammContract.address],
   });
 
@@ -219,23 +178,55 @@ export const ConfirmSwap = () => {
         address: token0.address,
         abi: token0.abi,
         functionName: "deposit",
-        // TODO our type for wrapping writeContract incorrectly narrows this to undefined, when it should be bigint | undefined
-        // @ts-ignore
         value: BigInt(token0AmountRaw ?? 0n),
       });
     } else approve();
   };
 
   const performSwap = useCallback(() => {
-    writeContractSwap({
-      ...swapOptions,
-      args: swapOptions.args,
-    });
-  }, [swapOptions, writeContractSwap]);
+    if (isSwappingBaseAsset) {
+      // if one of the assets is fusdc, use swap1
+      writeContractSwap({
+        address: ammContract.address,
+        abi: ammContract.abi,
+        functionName: "swap904369BE",
+        args: [token1.address, false, BigInt(token0AmountRaw ?? 0), maxUint256],
+      });
+    } else if (token1.address === fUSDC.address) {
+      writeContractSwap({
+        address: ammContract.address,
+        abi: ammContract.abi,
+        functionName: "swap904369BE",
+        args: [token0.address, true, BigInt(token0AmountRaw ?? 0), maxUint256],
+      });
+    } else {
+      // if both of the assets aren't fusdc, use swap2
+      writeContractSwap({
+        address: ammContract.address,
+        abi: ammContract.abi,
+        functionName: "swap2ExactIn41203F1D",
+        args: [
+          token0.address,
+          token1.address,
+          BigInt(token0AmountRaw ?? 0),
+          BigInt(0),
+        ],
+      });
+    }
+  }, [
+    writeContractSwap,
+    isSwappingBaseAsset,
+    ammContract,
+    token0AmountRaw,
+    token0.address,
+    token1.address,
+    fUSDC.address,
+  ]);
 
   const approve = useCallback(() => {
     if (
       token0.abi &&
+      token0AmountRaw !== undefined &&
       (!allowanceData?.result ||
         allowanceData.result < BigInt(token0AmountRaw ?? 0))
     ) {
@@ -243,7 +234,7 @@ export const ConfirmSwap = () => {
         address: token0.address,
         abi: token0.abi,
         functionName: "approve",
-        args: [ammContract.address, token0AmountRaw],
+        args: [ammContract.address, BigInt(token0AmountRaw)],
       });
     } else {
       performSwap();

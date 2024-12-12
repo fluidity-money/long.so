@@ -49,7 +49,6 @@ export default function ConfirmWithdrawLiquidity() {
   const {
     token0,
     token0Amount,
-    token0AmountRaw,
     token1,
     token1Amount,
     delta,
@@ -131,12 +130,13 @@ export default function ConfirmWithdrawLiquidity() {
 
   const divestPosition = useCallback(
     (id: bigint) => {
-      writeContractDivestPosition({
-        address: leoContract.address,
-        abi: leoContract.abi,
-        functionName: "divestPosition",
-        args: [BigInt(id ?? 0), address],
-      });
+      address &&
+        writeContractDivestPosition({
+          address: leoContract.address,
+          abi: leoContract.abi,
+          functionName: "divestPosition",
+          args: [BigInt(id ?? 0), address],
+        });
     },
     [
       writeContractDivestPosition,

@@ -122,18 +122,14 @@ export const ConfirmStake = ({
   const { data: allowanceDataToken0 } = useSimulateContract({
     address: token0.address,
     abi: token0.abi,
-    // @ts-ignore this needs to use useSimulateContract which breaks the types
     functionName: "allowance",
-    // @ts-ignore
     args: [address as Hash, allowanceContract],
   });
 
   const { data: allowanceDataToken1 } = useSimulateContract({
     address: token1.address,
     abi: token1.abi,
-    // @ts-ignore this needs to use useSimulateContract which breaks the types
     functionName: "allowance",
-    // @ts-ignore
     args: [address as Hash, allowanceContract],
   });
 
@@ -210,12 +206,13 @@ export const ConfirmStake = ({
   // divest if already vested before updating
   const divestPosition = useCallback(
     (id: bigint) => {
-      writeContractDivestPosition({
-        address: leoContract.address,
-        abi: leoContract.abi,
-        functionName: "divestPosition",
-        args: [BigInt(id ?? 0), address],
-      });
+      address &&
+        writeContractDivestPosition({
+          address: leoContract.address,
+          abi: leoContract.abi,
+          functionName: "divestPosition",
+          args: [BigInt(id ?? 0), address],
+        });
     },
     [
       writeContractDivestPosition,
@@ -266,7 +263,8 @@ export const ConfirmStake = ({
         tickLower === undefined ||
         tickUpper === undefined ||
         tickLower >= tickUpper ||
-        !tickSpacing
+        !tickSpacing ||
+        !address
       )
         return;
 
@@ -359,7 +357,7 @@ export const ConfirmStake = ({
         address: token1.address,
         abi: token1.abi,
         functionName: "approve",
-        args: [allowanceContract, token1AmountRaw],
+        args: [allowanceContract, BigInt(token1AmountRaw)],
       });
     } else {
       handlePositionAction();
@@ -387,7 +385,7 @@ export const ConfirmStake = ({
         address: token0.address,
         abi: token0.abi,
         functionName: "approve",
-        args: [allowanceContract, token0AmountRaw],
+        args: [allowanceContract, BigInt(token0AmountRaw)],
       });
     } else {
       approveToken1();
