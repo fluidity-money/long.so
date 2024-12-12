@@ -51,7 +51,7 @@ const chainContracts: {
     positionHandler: { address: "0x3511aF458F39cF609719070636B033A07F327C29" },
   },
   55244: {
-    amm: { address: "0xe89E8Cb7E84Dd1b4460cF2a51B3f0B05Ff952bB6" },
+    amm: { address: "0x5A708114dc7d7c5C0D6E6acA1CAb1e5Dec05b7e9" },
     leo: { address: appConfig.nullAddress },
     ownershipNFTs: { address: appConfig.nullAddress },
     positionHandler: { address: appConfig.nullAddress },
