@@ -43,9 +43,7 @@
 
 |     Deployment name    |              Deployment address            |
 |------------------------|--------------------------------------------|
-| Leo proxy              | 0x785303290eF659A6dfdB3126EE18F5a02c51d7bf |
-| Collect implementation | 0x0eceb467927179abc16cbba00e552d5d6299a21a |
-| Extras implementation  | 0x3845bb696d6c6334c7edcd9157fafe6c6d03c0f5 |
+| Leo proxy              | 0xF3a2F99EDC730651428A490eDa4b1Fe4278bF0bb |
 
 #### Token deployments
 
