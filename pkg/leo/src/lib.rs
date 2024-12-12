@@ -4,8 +4,6 @@ pub mod error;
 pub mod events;
 pub mod nft_manager;
 
-mod calldata_seawater;
-
 #[cfg(not(feature = "testing"))]
 mod wasm_seawater;
 

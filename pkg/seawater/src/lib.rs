@@ -617,7 +617,7 @@ impl Pools {
         pools
             .iter()
             .zip(ids.iter())
-            .map(|(&pool, &id)| self.collect_fees_internal(pool, id, msg::sender()))
+            .map(|(&pool, &id)| self.collect_single_to_6_D_76575_F(pool, id, msg::sender()))
             .collect::<Result<Vec<(u128, u128)>, Revert>>()
     }
 }
@@ -1161,7 +1161,7 @@ impl Pools {
             None,
         )
     }
-
+/*
     /// Refreshes and updates liquidity in a position, transferring
     /// tokens to the user with restrictions.
     /// See [Self::adjust_position_internal].
@@ -1185,7 +1185,7 @@ impl Pools {
             true,
             None,
         )
-    }
+    } */
 }
 
 /// Some swap functions using Permit2. Only enabled when the `swap_permit2_b` feature is

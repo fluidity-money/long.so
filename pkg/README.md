@@ -49,7 +49,7 @@
 | Positions implementation       | 0x3ff169fa977cedc78b142dd514be7af9991faed8 |
 | Update position implementation | 0x4b3a392e030d01d2f6515ca9f2b188a178bf1b37 |
 | Admin implementation           | 0x0362fa856225208a29be7c1404704cc1abd4f0b6 |
-| Adjust position implementation | 0x2f479a4802e38d58ad8136980b8834d03ef237d5 |
+| Adjust position implementation | 0x96b305cfeb235d9cca5f85148df8643f168b54f2 |
 | Swaps permit2 B implementation | 0xc870bc6e2d198f15e9689a2db0ea6b3c4c2296cc |
 
 #### Leo contract deployments

@@ -62,6 +62,9 @@ CARGO_BUILD_STYLUS := \
 CARGO_BUILD_STYLUS_SEAWATER := \
 	${CARGO_BUILD_STYLUS} seawater --profile
 
+CARGO_BUILD_STYLUS_LEO := \
+	${CARGO_BUILD_STYLUS} leo --profile
+
 FORGE_BUILD := forge build
 DOCKER_BUILD := docker build
 
@@ -82,7 +85,7 @@ WASM_OPT_PASS_SEAWATER_COMPLETE := \
 	${WASM_OPT_PASS} ${SEAWATER_COMPLETE_RELEASE} -o
 
 WASM_OPT_PASS_LEO := \
-	${WASM_OPT_PASS} ${STYLUS_RELEASE_CODESIZE_DIR}/leo.wasm -o
+	${WASM_OPT_PASS} ${STYLUS_RELEASE_COMPLETE_DIR}/leo.wasm -o
 
 ### SEAWATER
 
@@ -130,8 +133,8 @@ ${OUT_SEAWATER_MIGRATIONS}: ${FILES_RUST}
 
 ${OUT_SEAWATER_ADJUST_POSITIONS}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_ADJUST_POSITIONS}
-	@${CARGO_BUILD_STYLUS_SEAWATER} release-codesize --features adjust_positions
-	@${WASM_OPT_PASS_SEAWATER_CODESIZE} ${OUT_SEAWATER_ADJUST_POSITIONS}
+	@${CARGO_BUILD_STYLUS_SEAWATER} release-complete --features adjust_positions
+	@${WASM_OPT_PASS_SEAWATER_COMPLETE} ${OUT_SEAWATER_ADJUST_POSITIONS}
 	@rm -f ${SEAWATER_COMPLETE_RELEASE}
 
 ${OUT_SEAWATER_SWAP_PERMIT2_B}: ${FILES_RUST}
@@ -142,12 +145,13 @@ ${OUT_SEAWATER_SWAP_PERMIT2_B}: ${FILES_RUST}
 
 ${OUT_LEO_COLLECT}: ${FILES_RUST}
 	@rm -f ${OUT_LEO_COLLECT}
-	@${CARGO_BUILD_STYLUS} leo --features contract-collect --profile release-codesize
+	@${CARGO_BUILD_STYLUS_LEO} release-complete --features contract-collect
 	@${WASM_OPT_PASS_LEO} leo-collect.wasm
 
 ${OUT_LEO_EXTRAS}: ${FILES_RUST}
 	@rm -f ${OUT_LEO_EXTRAS}
-	${CARGO_BUILD_STYLUS} leo --features contract-extras --profile release-codesize
+	${CARGO_BUILD_STYLUS_LEO} release-complete --features contract-extras
+	@${CARGO_BUILD_STYLUS_LEO} release-complete --features contract-extras
 	@${WASM_OPT_PASS_LEO} leo-extras.wasm
 
 ### STYLUS CHECK
