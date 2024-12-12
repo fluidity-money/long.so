@@ -48,8 +48,9 @@ seawater: \
 	swap-permit2-a \
 	quotes \
 	migrations \
-	adjust-positions \
-	swap-permit2-b
+	adjust-positions-a \
+	swap-permit2-b \
+	adjust-positions-b
 
 amm-entrypoint: ${OUT_SEAWATER_AMM}
 ownership-nfts: ${OUT_OWNERSHIP_NFTS}

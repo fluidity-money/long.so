@@ -42,13 +42,17 @@ log "SEAWATER_UPDATE_POSITIONS=$SEAWATER_UPDATE_POSITIONS"
 [ -z "$SEAWATER_ADMIN" ] && err "Failed to deploy seawater_admin"
 log "SEAWATER_ADMIN=$SEAWATER_ADMIN"
 
-[ -z "$SEAWATER_ADJUST_POSITIONS" ] && SEAWATER_ADJUST_POSITIONS="$(sh deploy-stylus.sh seawater-adjust-positions.wasm)"
-[ -z "$SEAWATER_ADJUST_POSITIONS" ] && err "Failed to deploy seawater_adjust_positions"
-log "SEAWATER_ADJUST_POSITIONS=$SEAWATER_ADJUST_POSITIONS"
+[ -z "$SEAWATER_ADJUST_POSITIONS_A" ] && SEAWATER_ADJUST_POSITIONS_A="$(sh deploy-stylus.sh seawater-adjust-positions-a.wasm)"
+[ -z "$SEAWATER_ADJUST_POSITIONS_A" ] && err "Failed to deploy seawater_adjust_positions_a"
+log "SEAWATER_ADJUST_POSITIONS_A=$SEAWATER_ADJUST_POSITIONS_A"
 
 [ -z "$SEAWATER_SWAP_PERMIT2_B" ] && SEAWATER_SWAP_PERMIT2_B="$(sh deploy-stylus.sh seawater-swap-permit2-b.wasm)"
 [ -z "$SEAWATER_SWAP_PERMIT2_B" ] && err "Failed to deploy seawater_swap_permit2_b"
 log "SEAWATER_SWAP_PERMIT2_B=$SEAWATER_SWAP_PERMIT2_B"
+
+[ -z "$SEAWATER_ADJUST_POSITIONS_B" ] && SEAWATER_ADJUST_POSITIONS_B="$(sh deploy-stylus.sh seawater-adjust-positions-b.wasm)"
+[ -z "$SEAWATER_ADJUST_POSITIONS_B" ] && err "Failed to deploy seawater_adjust_positions_b"
+log "SEAWATER_ADJUST_POSITIONS_B=$SEAWATER_ADJUST_POSITIONS_B"
 
 seawater_proxy="$(\
 	sh deploy-solidity.sh "SeawaterAMM" --constructor-args \
@@ -62,8 +66,9 @@ seawater_proxy="$(\
 		"$SEAWATER_POSITIONS" \
 		"$SEAWATER_UPDATE_POSITIONS" \
 		"$SEAWATER_ADMIN" \
-		"$SEAWATER_ADJUST_POSITIONS" \
+		"$SEAWATER_ADJUST_POSITIONS_A" \
 		"$SEAWATER_SWAP_PERMIT2_B" \
+		"$SEAWATER_ADJUST_POSITIONS_B" \
 		"$(cast --address-zero)")"
 [ -z "$seawater_proxy" ] && err "Failed to deploy seawater_proxy"
 log "Seawater proxy deployed to $seawater_proxy"
@@ -77,8 +82,9 @@ cat <<EOF
 	"seawater_positions_impl": "$SEAWATER_POSITIONS",
 	"seawater_update_positions_impl": "$SEAWATER_UPDATE_POSITIONS",
 	"seawater_admin_impl": "$SEAWATER_ADMIN",
-	"seawater_adjust_position_impl": "$SEAWATER_ADJUST_POSITIONS",
+	"seawater_adjust_position_a_impl": "$SEAWATER_ADJUST_POSITIONS_A",
 	"seawater_swap_permit2_b_impl": "$SEAWATER_SWAP_PERMIT2_B",
+	"seawater_adjust_position_b_impl": "$SEAWATER_ADJUST_POSITIONS_B",
 	"seawater_proxy_admin": "$SEAWATER_PROXY_ADMIN",
 	"seawater_fusdc_addr": "$FLU_SEAWATER_FUSDC_ADDR"
 }

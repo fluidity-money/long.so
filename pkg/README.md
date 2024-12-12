@@ -15,21 +15,37 @@
 
 [Superposition RPC](https://docs.superposition.so/superposition-mainnet/network-details)
 
-##### AMM contract deployments
+#### AMM contract deployments
 
-|         Deployment name        |              Deployment address            |
-|--------------------------------|--------------------------------------------|
-| Longtail AMM                   |  |
-| Longtail NFT manager           |  |
-| Permit2 router                 |  |
-| Swaps implementation           |  |
-| Swaps permit2 A implementation |  |
-| Quotes implementation          |  |
-| Positions implementation       |  |
-| Update position implementation |  |
-| Admin implementation           |  |
-| Adjust position implementation |  |
-| Swaps permit2 B implementation |  |
+|          Deployment name         |              Deployment address            |
+|----------------------------------|--------------------------------------------|
+| Longtail AMM                     | 0x5A708114dc7d7c5C0D6E6acA1CAb1e5Dec05b7e9 |
+| Longtail NFT manager             |  |
+| Permit2 router                   | 0x244517Dc59943E8CdFbD424Bdb3262c5f04a1387 |
+| Swaps implementation             | 0xfc66c25dbdb0606e7f9ca1d2754eb0a0f8306da9 |
+| Swaps permit2 A implementation   | 0x0b319db00d07c8fadfaaef13c910141a5da0aa8f |
+| Quotes implementation            | 0x05c1702aa4e5590970884645eae4bfa1b5210b27 |
+| Positions implementation         | 0xb7a2930e66d84da74cdcfe4f97fae9fc8f1114e8 |
+| Update position implementation   | 0x3079a40a0e0eaeef4d5d74fe22063b35844b3761 |
+| Admin implementation             | 0xc0b176592d1f7abe464d3f27aec6d9f27bb5f6e1 |
+| Adjust position A implementation | 0xda823e1c520c1d85584cf0ce92b7fb8ccdb11006 |
+| Swaps permit2 B implementation   | 0xe3bafbd8f86800bac86025b2903335b32aa6f51f |
+| Adjust position B implementation | 0x6c6c9d1a30f14adec11c7cf9f0f6ae0926822682 |
+
+#### Leo contract deployments
+
+|     Deployment name    |              Deployment address            |
+|------------------------|--------------------------------------------|
+| Leo                    |  |
+| Collect implementation |  |
+| Extras implementation  |  |
+
+#### Token deployments
+
+|  Deployment name  |            Deployment address              |
+|-------------------|--------------------------------------------|
+| USDC (base asset) | 0x6c030c5CC283F791B26816f325b9C632d964F8A1 |
+| WETH (native)     | 0x1fB719f10b56d7a85DCD32f27f897375fB21cfdd |
 
 ### Superposition Testnet
 
