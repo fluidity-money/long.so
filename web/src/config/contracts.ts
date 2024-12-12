@@ -52,9 +52,9 @@ const chainContracts: {
   },
   55244: {
     amm: { address: "0x452D796b656D3720f2d06B3439eF95899f0db755" },
-    leo: { address: "0x815e104dCe7e818211A06962b917Fd115eb71fc9" },
-    ownershipNFTs: { address: "0x1C3D5CF4F56af1cB8f810F49eFfF3d5970a274D0" },
-    positionHandler: { address: "0xc81915AF9ba5477eD31e71CbEc8955636D55B730" },
+    leo: { address: "0xF3a2F99EDC730651428A490eDa4b1Fe4278bF0bb" },
+    ownershipNFTs: { address: "0x42f104ed693792c858D03f987DfFB30e39cC1ce9" },
+    positionHandler: { address: "0x46f9dea606a3D5890aD6d36C64acD55C26C51B8a" },
   },
 };
 

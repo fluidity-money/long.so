@@ -9,8 +9,8 @@ import "./OwnershipNFTs.sol";
 contract PositionHandler {
     ISeawaterAMM immutable LONGTAIL;
     ILeo immutable LEO;
-    IERC20 immutable FUSDC;
     OwnershipNFTs immutable NFT_MANAGER;
+    IERC20 immutable FUSDC;
 
     constructor(
         ISeawaterAMM longtail,
