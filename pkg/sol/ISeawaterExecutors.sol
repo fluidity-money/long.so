@@ -281,7 +281,7 @@ interface ISeawaterExecutorAdmin is ISeawaterExecutorAdminExposed {
     function ctor(address seawaterAdmin, address nftManager, address emergencyCouncil) external;
 }
 
-interface ISeawaterExecutorAdjustPosition {
+interface ISeawaterExecutorAdjustPositionA {
     /// @notice refreshes and takes a position's fees, and returns liquidity, preventing less than
     /// the minimum from being taken to be sent to the user.
     /// @param pool of the token to use
@@ -299,7 +299,9 @@ interface ISeawaterExecutorAdjustPosition {
         uint256 amount0Desired,
         uint256 amount1Desired
     ) external returns (uint256, uint256);
+}
 
+interface ISeawaterExecutorAdjustPositionB {
     /// @notice refreshes and takes a position's fees, and adds liquidity, preventing less than
     /// the minimum from being taken.
     /// @param pool of the token to use
@@ -309,7 +311,7 @@ interface ISeawaterExecutorAdjustPosition {
     /// @param amount0Desired to give to the user. May go lower.
     /// @param amount1Desired to give to the user. May go lower.
     /// @return the deltas for token0, and token1
-    function decrPosition09293696(
+    function decrPosition9A7D32E2(
         address pool,
         uint256 id,
         uint256 amount0Min,

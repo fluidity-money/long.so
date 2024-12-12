@@ -13,8 +13,9 @@ interface ISeawaterAMM is
     ISeawaterExecutorPosition,
     ISeawaterExecutorUpdatePosition,
     ISeawaterExecutorAdminExposed,
-    ISeawaterExecutorAdjustPosition,
-    ISeawaterExecutorSwapPermit2B
+    ISeawaterExecutorAdjustPositionA,
+    ISeawaterExecutorSwapPermit2B,
+    ISeawaterExecutorAdjustPositionB
     {
     /// @notice swaps _token for USDC
     /// @param _token the token to swap

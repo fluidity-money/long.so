@@ -19,8 +19,9 @@ OUT_SEAWATER_SWAPS := seawater-swaps.wasm
 OUT_SEAWATER_SWAP_PERMIT2_A := seawater-swap-permit2-a.wasm
 OUT_SEAWATER_QUOTES := seawater-quotes.wasm
 OUT_SEAWATER_MIGRATIONS := seawater-migrations.wasm
-OUT_SEAWATER_ADJUST_POSITIONS := seawater-adjust-positions.wasm
+OUT_SEAWATER_ADJUST_POSITIONS_A := seawater-adjust-positions-a.wasm
 OUT_SEAWATER_SWAP_PERMIT2_B := seawater-swap-permit2-b.wasm
+OUT_SEAWATER_ADJUST_POSITIONS_B := seawater-adjust-positions-b.wasm
 
 OUT_LEO_COLLECT := leo-collect.wasm
 OUT_LEO_EXTRAS := leo-extras.wasm

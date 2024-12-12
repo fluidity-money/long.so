@@ -7,7 +7,8 @@ include config.mk
 	admin \
 	positions \
 	update-positions \
-	adjust-positions \
+	adjust-positions-a \
+	adjust-positions-b \
 	swaps \
 	swap-permit2-a \
 	swap-permit2-b \
@@ -27,7 +28,8 @@ build: solidity seawater leo check
 admin: ${OUT_SEAWATER_ADMIN}
 positions: ${OUT_SEAWATER_POSITIONS}
 update-positions: ${OUT_SEAWATER_UPDATE_POSITIONS}
-adjust-positions: ${OUT_SEAWATER_ADJUST_POSITIONS}
+adjust-positions-a: ${OUT_SEAWATER_ADJUST_POSITIONS_A}
+adjust-positions-b: ${OUT_SEAWATER_ADJUST_POSITIONS_B}
 swap-permit2-a: ${OUT_SEAWATER_SWAP_PERMIT2_A}
 swap-permit2-b: ${OUT_SEAWATER_SWAP_PERMIT2_B}
 swaps: ${OUT_SEAWATER_SWAPS}
@@ -131,10 +133,16 @@ ${OUT_SEAWATER_MIGRATIONS}: ${FILES_RUST}
 	@${WASM_OPT_PASS_SEAWATER_COMPLETE} ${OUT_SEAWATER_MIGRATIONS}
 	@rm -f ${SEAWATER_COMPLETE_RELEASE}
 
-${OUT_SEAWATER_ADJUST_POSITIONS}: ${FILES_RUST}
-	@rm -f ${OUT_SEAWATER_ADJUST_POSITIONS}
-	@${CARGO_BUILD_STYLUS_SEAWATER} release-complete --features adjust_positions
-	@${WASM_OPT_PASS_SEAWATER_COMPLETE} ${OUT_SEAWATER_ADJUST_POSITIONS}
+${OUT_SEAWATER_ADJUST_POSITIONS_A}: ${FILES_RUST}
+	@rm -f ${OUT_SEAWATER_ADJUST_POSITIONS_A}
+	@${CARGO_BUILD_STYLUS_SEAWATER} release-complete --features adjust_positions_a
+	@${WASM_OPT_PASS_SEAWATER_COMPLETE} ${OUT_SEAWATER_ADJUST_POSITIONS_A}
+	@rm -f ${SEAWATER_COMPLETE_RELEASE}
+
+${OUT_SEAWATER_ADJUST_POSITIONS_B}: ${FILES_RUST}
+	@rm -f ${OUT_SEAWATER_ADJUST_POSITIONS_B}
+	@${CARGO_BUILD_STYLUS_SEAWATER} release-complete --features adjust_positions_b
+	@${WASM_OPT_PASS_SEAWATER_COMPLETE} ${OUT_SEAWATER_ADJUST_POSITIONS_B}
 	@rm -f ${SEAWATER_COMPLETE_RELEASE}
 
 ${OUT_SEAWATER_SWAP_PERMIT2_B}: ${FILES_RUST}

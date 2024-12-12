@@ -98,13 +98,14 @@ register_custom_getrandom!(wasm_get_random);
     feature = "update_positions",
     feature = "admin",
     feature = "migrations",
-    feature = "adjust_positions",
+    feature = "adjust_positions_a",
+    feature = "adjust_positions_b",
     feature = "swap_permit2_b"
 )))]
 mod shim {
     #[cfg(all(not(target_arch = "wasm32"), not(feature = "testing")))]
     compile_error!(
-        "Either `swaps` or `swap_permit2_a` or `quotes` or `positions` or `update_positions`, `admin`, `migrations`, `adjust_positions` or `swap_permit2_b` must be enabled when building for wasm."
+        "Either `swaps` or `swap_permit2_a` or `quotes` or `positions` or `update_positions`, `admin`, `migrations`, `adjust_positions_a`, `adjust_positions_b`, or `swap_permit2_b` must be enabled when building for wasm."
     );
     #[stylus_sdk::prelude::public]
     impl crate::Pools {}
@@ -1134,9 +1135,9 @@ impl Pools {
 
 /// Functions for adjusting positions using in-contract calculation of certain values.
 /// Functions here are dispatched into by when the proxy
-/// sees the EXECUTOR_ADJUST_POSITION_DISPATCH magic byte in
+/// sees the EXECUTOR_ADJUST_POSITION_A_DISPATCH magic byte in
 /// its fallback function.
-#[cfg_attr(feature = "adjust_positions", public)]
+#[cfg_attr(feature = "adjust_positions_a", public)]
 impl Pools {
     /// Refreshes and updates liquidity in a position, transferring tokens from the user with a restriction on the amount taken.
     /// See [Self::adjust_position_internal].
@@ -1161,12 +1162,19 @@ impl Pools {
             None,
         )
     }
-/*
+}
+
+/// Functions for adjusting positions using in-contract calculation of certain values.
+/// Functions here are dispatched into by when the proxy
+/// sees the EXECUTOR_ADJUST_POSITION_A_DISPATCH magic byte in
+/// its fallback function.
+#[cfg_attr(feature = "adjust_positions_b", public)]
+impl Pools {
     /// Refreshes and updates liquidity in a position, transferring
     /// tokens to the user with restrictions.
     /// See [Self::adjust_position_internal].
     #[allow(non_snake_case)]
-    pub fn decr_position_09293696(
+    pub fn decr_position_9_A_7_D_32_E_2(
         &mut self,
         pool: Address,
         id: U256,
@@ -1185,7 +1193,7 @@ impl Pools {
             true,
             None,
         )
-    } */
+    }
 }
 
 /// Some swap functions using Permit2. Only enabled when the `swap_permit2_b` feature is
