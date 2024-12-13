@@ -1,6 +1,8 @@
 module github.com/fluidity-money/long.so
 
-go 1.23
+go 1.22.5
+
+toolchain go1.22.10
 
 require (
 	github.com/99designs/gqlgen v0.17.55
