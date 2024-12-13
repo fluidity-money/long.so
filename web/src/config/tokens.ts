@@ -7,16 +7,9 @@ import { useSwapStore } from "@/stores/useSwapStore";
 import { EmptyToken } from "@/lib/utils";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useChainId } from "wagmi";
-import { allChains, superpositionMainnet, useChain } from "./chains";
+import { allChains, useChain } from "./chains";
 
 export type ChainIdTypes = (typeof allChains)[number]["id"];
-
-function getDisplaySymbol(symbol: string, chainId: number): string {
-  if (chainId === superpositionMainnet.id && symbol.toLowerCase() === "fusdc") {
-    return "USDC";
-  }
-  return symbol;
-}
 
 export type Token = {
   address: `0x${string}`;
@@ -99,7 +92,6 @@ export function useTokens(token?: "default" | string) {
           ...t.token,
           address: t.token.address as `0x${string}`,
           icon: t.token.image,
-          symbol: getDisplaySymbol(t.token.symbol, chainId),
           ...(isGasToken(t.token.symbol)
             ? {
                 abi: WETH10,
@@ -113,7 +105,7 @@ export function useTokens(token?: "default" | string) {
       }),
       {} as { [symbol: string]: Token },
     );
-  }, [tokensData, fusdcData_, isGasToken, chainId]);
+  }, [tokensData, fusdcData_, isGasToken]);
   const isTokens = fusdcData_ && tokensData;
 
   const DefaultToken = isTokens
