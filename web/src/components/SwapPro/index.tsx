@@ -109,6 +109,9 @@ export const SwapPro = ({
   });
 
   const formattedTokenPrice = useMemo(() => {
+    // Early return if fUSDC is not available
+    if (!fUSDC) return "0";
+
     const token0Price = token0SqrtPriceX96
       ? Number(
           sqrtPriceX96ToPrice(token0SqrtPriceX96.result, token0.decimals),
@@ -135,8 +138,7 @@ export const SwapPro = ({
     token1,
     token0SqrtPriceX96,
     token1SqrtPriceX96,
-    fUSDC.address,
-    fUSDC.decimals,
+    fUSDC, // Add fUSDC as a dependency since we use it in the callback
   ]);
 
   const transactions = poolSwapPro?.swaps.swaps;
