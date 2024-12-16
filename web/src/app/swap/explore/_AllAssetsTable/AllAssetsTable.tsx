@@ -37,6 +37,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useChainId } from "wagmi";
+import { useChain } from "@/config/chains";
 
 interface AllPoolsTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -93,6 +95,9 @@ export function AllAssetsTable<TData, TValue>({
   const { token0, token1, setToken1, setToken0, flipTokens } = useSwapStore();
 
   const router = useRouter();
+
+  const chainId = useChainId();
+  const chain = useChain(chainId);
 
   return (
     <div>
@@ -159,7 +164,7 @@ export function AllAssetsTable<TData, TValue>({
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => {
               const tokenAddress = row.original.address; // Access address from row data
-              const blockExplorerUrl = `https://testnet-explorer.superposition.so/address/${tokenAddress}`;
+              const blockExplorerUrl = `${chain.blockExplorers.default.url}/address/${tokenAddress}`;
 
               return (
                 <TableRow

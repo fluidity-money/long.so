@@ -21,6 +21,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useChain } from "@/config/chains";
+import { useChainId } from "wagmi";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -35,6 +37,8 @@ export function DataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+  const chainId = useChainId();
+  const chain = useChain(chainId);
 
   return (
     <div className="rounded-lg text-sm">
@@ -66,7 +70,7 @@ export function DataTable<TData, TValue>({
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => {
               const transactionHash = (row.original as any).transactionHash; // Access the transactionHash from row data
-              const blockExplorerUrl = `https://testnet-explorer.superposition.so/tx/${transactionHash}`;
+              const blockExplorerUrl = `${chain.blockExplorers.default.url}/tx/${transactionHash}`;
               return (
                 <TableRow
                   key={row.id}

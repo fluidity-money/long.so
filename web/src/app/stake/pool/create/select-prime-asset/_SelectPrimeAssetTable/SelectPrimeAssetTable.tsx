@@ -30,6 +30,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useChain } from "@/config/chains";
+import { useChainId } from "wagmi";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -72,6 +74,8 @@ export function SelectPrimeAssetTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState("");
   const fUSDC = useTokens("fusdc");
+  const chainId = useChainId();
+  const chain = useChain(chainId);
   const table = useReactTable({
     data,
     columns,
@@ -134,7 +138,7 @@ export function SelectPrimeAssetTable<TData, TValue>({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 const token0Address = row.original.token0Address; // Access token0Address from row data
-                const blockExplorerUrl = `https://testnet-explorer.superposition.so/address/${token0Address}`;
+                const blockExplorerUrl = `${chain.blockExplorers.default.url}/address/${token0Address}`;
 
                 return (
                   <TableRow
