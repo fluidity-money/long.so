@@ -7,7 +7,7 @@ import { useSwapStore } from "@/stores/useSwapStore";
 import { EmptyToken } from "@/lib/utils";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useChainId } from "wagmi";
-import { allChains, useChain } from "./chains";
+import { allChains, superpositionMainnet, useChain } from "./chains";
 
 export type ChainIdTypes = (typeof allChains)[number]["id"];
 
@@ -17,6 +17,10 @@ export type Token = {
   name: string;
   decimals: number;
   icon?: string;
+  // Is this token the base token for the AMM (i.e. fUSDC)?
+  // This property exists for SPN mainnet's naming convention of the base token being named USDC,
+  // making it impossible to identify the "fUSDC" token by name or symbol alone.
+  isBaseToken?: boolean;
 } & (
   | {
       abi?: typeof LightweightERC20;
@@ -50,14 +54,14 @@ const FusdcFragment = graphql(`
   }
 `);
 
-export function useTokens(token: "default" | string): Token;
+export function useTokens(token: "default" | "fusdc" | string): Token;
 export function useTokens(token?: never): {
   tokens: { [symbol: string]: Token };
   DefaultToken: Token;
   getTokenFromSymbol: (symbol: string) => Token | undefined;
   getTokenFromAddress: (address: string) => Token | undefined;
 };
-export function useTokens(token?: "default" | string) {
+export function useTokens(token?: "default" | "fusdc" | string) {
   const {
     token0: swapToken0,
     token1: swapToken1,
@@ -84,15 +88,30 @@ export function useTokens(token?: "default" | string) {
   const fusdcData_ = useFragment(FusdcFragment, data?.fusdc);
 
   const tokens = useMemo(() => {
-    const fusdcData = fusdcData_ ? [{ token: fusdcData_ }] : [];
+    // fUSDC on SPN mainnet is displayed as USDC
+    const fusdcData = fusdcData_
+      ? [
+          {
+            token: {
+              ...fusdcData_,
+              ...(chainId === superpositionMainnet.id && {
+                name: "USD Coin",
+                symbol: "USDC",
+              }),
+            },
+          },
+        ]
+      : [];
     return [...fusdcData, ...(tokensData ?? [])].reduce(
-      (acc, t) => ({
+      (acc, { token }, i) => ({
         ...acc,
-        [t.token.symbol.toLowerCase()]: {
-          ...t.token,
-          address: t.token.address as `0x${string}`,
-          icon: t.token.image,
-          ...(isGasToken(t.token.symbol)
+        [token.symbol.toLowerCase()]: {
+          ...token,
+          address: token.address as `0x${string}`,
+          icon: token.image,
+          /// base token is always the first token
+          isBaseToken: i === 0,
+          ...(isGasToken(token.symbol)
             ? {
                 abi: WETH10,
                 isGasToken: true as true,
@@ -105,14 +124,15 @@ export function useTokens(token?: "default" | string) {
       }),
       {} as { [symbol: string]: Token },
     );
-  }, [tokensData, fusdcData_, isGasToken]);
+  }, [tokensData, fusdcData_, isGasToken, chainId]);
   const isTokens = fusdcData_ && tokensData;
 
   const DefaultToken = isTokens
-    ? Object.values(tokens).find((t) => t.symbol !== "fUSDC")
+    ? Object.values(tokens).find((t) => !t.isBaseToken)
     : undefined;
+
   const fUSDC = isTokens
-    ? Object.values(tokens).find((t) => t.symbol === "fUSDC")
+    ? Object.values(tokens).find((t) => t.isBaseToken)
     : undefined;
 
   const getTokenFromAddress = useCallback(
@@ -148,6 +168,7 @@ export function useTokens(token?: "default" | string) {
       }
     }
   }, [
+    chainId,
     DefaultToken,
     fUSDC,
     swapToken0,

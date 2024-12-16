@@ -43,7 +43,7 @@ import { TokenIcon } from "@/components/TokenIcon";
 import { usePositions } from "@/hooks/usePostions";
 import { useTokens, Token as TokenType } from "@/config/tokens";
 import { useContracts } from "@/config/contracts";
-import { superpositionTestnet } from "@/config/chains";
+import { superpositionMainnet, superpositionTestnet } from "@/config/chains";
 import { simulateContract } from "wagmi/actions";
 import config from "@/config";
 
@@ -517,6 +517,8 @@ export default function PoolPage() {
 
   const liquidityCampaignsApr = 0;
 
+  const fusdcSymbol = chainId === superpositionMainnet.id ? "USDC" : "ƒUSDC";
+
   return (
     <div className="flex w-full flex-col">
       <div className="flex max-w-full flex-col-reverse justify-center gap-8 lg:flex-row">
@@ -550,7 +552,8 @@ export default function PoolPage() {
                   <Badge className="iridescent z-20 -ml-1 flex flex-row gap-2 border-4 border-black pl-1 text-black">
                     <Token className={"size-[24px]"} />
                     <div className="text-nowrap text-sm">
-                      fUSDC-{showMockData ? "ETH" : poolData?.token?.symbol}
+                      {fusdcSymbol}-
+                      {showMockData ? "ETH" : poolData?.token?.symbol}
                     </div>
                   </Badge>
                 </div>

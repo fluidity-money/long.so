@@ -29,7 +29,7 @@ import { useContracts } from "@/config/contracts";
 import { TokenIcon } from "./TokenIcon";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usePositions } from "@/hooks/usePostions";
-import { superpositionTestnet } from "@/config/chains";
+import { superpositionMainnet, superpositionTestnet } from "@/config/chains";
 
 type ConfirmStakeProps =
   | {
@@ -615,6 +615,8 @@ export const ConfirmStake = ({
     return <Fail text={(error as any)?.shortMessage} />;
   }
 
+  const fusdcSymbol = chainId === superpositionMainnet.id ? "USDC" : "ƒUSDC";
+
   return (
     <div className="z-10 flex flex-col items-center">
       <motion.div
@@ -675,7 +677,7 @@ export const ConfirmStake = ({
               : "Approximate Total Deposit Amount in"}{" "}
             <span className="hidden md:inline-flex">
               {" "}
-              <span className="font-medium underline">ƒUSDC</span>
+              <span className="font-medium underline">{fusdcSymbol}</span>
             </span>
           </div>
           <div className="mt-[4px] flex flex-row items-center gap-[6px] text-2xl font-medium md:text-3xl">
@@ -686,9 +688,9 @@ export const ConfirmStake = ({
             (= $700)
           </div>
           <div className="mt-[19px] w-[212px] text-center text-3xs font-medium text-gray-2 md:mt-[17px] md:w-[250px] md:text-2xs">
-            Your <span className="iridescent-text">700 ƒUSDC</span> will be
-            converted into the following two tokens to set your position in this
-            pool <div className="inline-block rotate-90">{"->"}</div>
+            Your <span className="iridescent-text">700 {fusdcSymbol}</span> will
+            be converted into the following two tokens to set your position in
+            this pool <div className="inline-block rotate-90">{"->"}</div>
           </div>
         </div>
 
@@ -717,7 +719,7 @@ export const ConfirmStake = ({
 
             <div className="flex flex-1 flex-row justify-between pl-[18px] pr-[26px] pt-[16px]">
               <div className="flex w-full flex-col gap-1">
-                <div className="text-3xs md:text-2xs">ƒUSDC</div>
+                <div className="text-3xs md:text-2xs">{fusdcSymbol}</div>
                 <div className="flex flex-row items-center justify-between">
                   <div className="flex flex-row items-center gap-1 text-sm md:gap-2 md:text-2xl">
                     <TokenIridescent />
@@ -753,7 +755,7 @@ export const ConfirmStake = ({
             hidden: multiSingleToken === "single",
           })}
         >
-          <div className="text-3xs font-medium md:text-2xs">ƒUSDC</div>
+          <div className="text-3xs font-medium md:text-2xs">{fusdcSymbol}</div>
           <div className="mt-1 flex flex-row items-center gap-1 text-2xl">
             <TokenIcon src={token1.icon} className={"size-[24px] invert"} />{" "}
             {token1Amount}

@@ -53,7 +53,7 @@ import { TokenIcon } from "./TokenIcon";
 import LiquidityRangeVisualizer from "./LiquidityRangeVisualizer";
 import { useContracts } from "@/config/contracts";
 import { CheckboxContainer } from "./ui/checkbox";
-import { superpositionTestnet } from "@/config/chains";
+import { superpositionMainnet, superpositionTestnet } from "@/config/chains";
 import { usePositions } from "@/hooks/usePostions";
 
 type StakeFormProps = { poolId: string } & (
@@ -448,6 +448,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
   const { open } = useWeb3Modal();
 
+  const fusdcSymbol = chainId === superpositionMainnet.id ? "USDC" : "ƒUSDC";
+
   return (
     <div className="z-10 flex flex-col items-center">
       <div className="w-[318px] md:w-[392px]">
@@ -474,7 +476,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 className="-ml-2 h-[30px] justify-between border-[3px] bg-black pl-px text-white"
               >
                 <Token className="size-[25px] invert" />
-                ƒUSDC - {token0.symbol}
+                {fusdcSymbol} - {token0.symbol}
               </Badge>
             </div>
 
@@ -610,7 +612,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     src={token1.icon}
                     className="size-[20px] invert md:size-[25px]"
                   />
-                  <div className="iridescent-text">ƒUSDC</div>
+                  <div className="iridescent-text">{fusdcSymbol}</div>
                   <Padlock className="ml-[2px] h-[7.53px] w-[6.45px] md:h-[10.3px] md:w-[8.82px]" />
                 </Badge>
               </div>
@@ -826,7 +828,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 onChange={(e) => setPriceLower(e.target.value, token0.decimals)}
               />
               <div className="mt-1 flex flex-row items-start gap-1 whitespace-nowrap text-3xs font-semibold">
-                <Token className="size-[12px] invert" /> fUSDC per {token0.name}
+                <Token className="size-[12px] invert" /> {fusdcSymbol} per{" "}
+                {token0.name}
               </div>
             </div>
 
@@ -849,7 +852,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               />
 
               <div className="mt-1 flex flex-row items-start gap-1 whitespace-nowrap text-3xs font-semibold">
-                <Token className="size-[12px] invert" /> fUSDC per {token0.name}
+                <Token className="size-[12px] invert" /> {fusdcSymbol} per{" "}
+                {token0.name}
               </div>
             </div>
           </div>
