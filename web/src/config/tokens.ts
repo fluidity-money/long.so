@@ -2,7 +2,7 @@ import LightweightERC20 from "./abi/LightweightERC20";
 import WETH10 from "./abi/WETH10";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
 import { graphql, useFragment } from "@/gql";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { EmptyToken } from "@/lib/utils";
 import { useStakeStore } from "@/stores/useStakeStore";
@@ -181,7 +181,29 @@ export function useTokens(token?: "default" | "fusdc" | string) {
     setStakeToken1,
   ]);
 
-  if (token === "default") return DefaultToken;
+  // invalidate tokens when changing network
+  const [previousNetwork, setPreviousNetwork] = useState(chainId);
+  useEffect(() => {
+    if (chainId !== previousNetwork && DefaultToken && fUSDC) {
+      setSwapToken0(fUSDC);
+      setSwapToken1(DefaultToken);
+      setStakeToken0(DefaultToken);
+      setStakeToken1(fUSDC);
+      setPreviousNetwork(chainId);
+    }
+  }, [
+    chainId,
+    previousNetwork,
+    DefaultToken,
+    fUSDC,
+    setSwapToken0,
+    setSwapToken1,
+    setStakeToken0,
+    setStakeToken1,
+  ]);
+
+  if (token === "default") return DefaultToken ?? EmptyToken;
+  if (token === "fusdc") return fUSDC ?? EmptyToken;
   if (token) return getTokenFromSymbol(token);
   return { tokens, DefaultToken, getTokenFromAddress, getTokenFromSymbol };
 }
