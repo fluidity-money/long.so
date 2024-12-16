@@ -110,6 +110,15 @@ export default async function RootLayout({
                     Audits
                   </a>
                 </small>
+                <small>
+                  <a
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    href="https://docs.long.so"
+                  >
+                    Docs/addresses
+                  </a>
+                </small>
               </div>
               <div className="flex items-center gap-x-[10px]">
                 <small>
