@@ -53,6 +53,9 @@ export const SwapProPoolFragment = graphql(`
         }
       }
     }
+    APR {
+      total
+    }
     swaps {
       swaps {
         transactionHash

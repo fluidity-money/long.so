@@ -63,6 +63,8 @@ export const SwapPro = ({
 
   const poolSwapPro = useFragment(SwapProPoolFragment, pool);
 
+  const stakeApr = Number(poolSwapPro?.APR.total).toFixed(2);
+
   const volume24H = useMemo(() => {
     const [
       { fusdc: { valueUsd: fusdcValue }, token1: { valueUsd: token1Value } } = {
@@ -237,7 +239,7 @@ export const SwapPro = ({
 
           <div>
             <p className="text-2xs">Stake APR</p>
-            <p className="text-xl">{showStakeApr ? "1.62%" : "-"}</p>
+            <p className="text-xl">{showStakeApr ? `${stakeApr}%` : "-"}</p>
           </div>
 
           <div>

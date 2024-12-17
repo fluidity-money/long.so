@@ -21,7 +21,7 @@
 	"ui show pool reward range": false,
 	"ui show pools tab": false,
 	"ui show rewards claimed": false,
-	"ui show stake apr": false,
+	"ui show stake apr": true,
 	"ui show super incentives": false,
 	"ui show superloop": false,
 	"ui show swap breakdown": false,
