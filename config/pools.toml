@@ -43,7 +43,7 @@ displayed = true
 classification = "STABLECOIN"
 image = "/icons/fUSDC.svg"
 
-[0x546db1432dafd619c1ba63a3ba72b09c6b852066]
+[0x1fb719f10b56d7a85dcd32f27f897375fb21cfdd]
 displayed = true
 classification = "VOLATILE"
 image = "/icons/ethereum-eth-logo.svg"
