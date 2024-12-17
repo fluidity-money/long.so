@@ -41,8 +41,23 @@ export const useSwapStore = create<SwapStore>((set) => ({
   token0: EmptyToken,
   token1: EmptyToken,
 
-  setToken0: (token) => set({ token0: token }),
-  setToken1: (token) => set({ token1: token }),
+  // Override WETH name to ETH on swap-related pages
+  setToken0: (token) =>
+    set({
+      token0: {
+        ...token,
+        symbol: token.symbol === "WETH" ? "ETH" : token.symbol,
+        name: token.name === "WETH" ? "ETH" : token.name,
+      },
+    }),
+  setToken1: (token) =>
+    set({
+      token1: {
+        ...token,
+        symbol: token.symbol === "WETH" ? "ETH" : token.symbol,
+        name: token.name === "WETH" ? "ETH" : token.name,
+      },
+    }),
   flipTokens: () => {
     set(
       ({

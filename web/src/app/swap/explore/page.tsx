@@ -92,10 +92,19 @@ const ExplorePage = () => {
     [fUSDC],
   );
 
-  const tokensData = useMemo(
-    () => [fUSDCData, ...(tokensData_ ?? [])],
-    [fUSDCData, tokensData_],
-  );
+  const tokensData = useMemo(() => {
+    // Override WETH name to ETH on swap-related pages
+    const tokens =
+      tokensData_?.map((t) => ({
+        ...t,
+        token: {
+          ...t.token,
+          symbol: t.token.symbol === "WETH" ? "ETH" : t.token.symbol,
+          name: t.token.name === "WETH" ? "ETH" : t.token.name,
+        },
+      })) ?? [];
+    return [fUSDCData, ...tokens];
+  }, [fUSDCData, tokensData_]);
 
   const showMockData = useFeatureFlag("ui show demo data");
 
