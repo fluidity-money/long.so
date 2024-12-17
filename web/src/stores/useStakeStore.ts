@@ -75,10 +75,26 @@ export const useStakeStore = create<StakeStore>((set) => ({
   setMultiSingleToken: (multiSingleToken) => set({ multiSingleToken }),
 
   token0: EmptyToken,
-  setToken0: (token0) => set({ token0 }),
+  // changing token invalidates all amounts
+  setToken0: (token0) =>
+    set({
+      token0,
+      token0Amount: "0",
+      token0AmountRaw: "0",
+      token1Amount: "0",
+      token1AmountRaw: "0",
+    }),
 
   token1: EmptyToken,
-  setToken1: (token1) => set({ token1 }),
+  // changing token invalidates all amounts
+  setToken1: (token1) =>
+    set({
+      token1,
+      token0Amount: "0",
+      token0AmountRaw: "0",
+      token1Amount: "0",
+      token1AmountRaw: "0",
+    }),
 
   token0Amount: "",
   token1Amount: "",
