@@ -498,6 +498,8 @@ export const SwapForm = () => {
               className={
                 "z-50 mt-[-12px] size-[32px] p-0 transition-all hover:rounded-[20px] hover:bg-white md:mt-[-15px] md:size-[40px]"
               }
+              // flipping when quote is loading can lead to invalid state, e.g. swapping 0 -> >0
+              disabled={quoteIsLoading}
               onClick={flipTokens}
             >
               <Swap className="h-[17px] w-[11px]" />
