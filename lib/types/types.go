@@ -119,6 +119,16 @@ func (int *Number) Scan(v interface{}) error {
 	case uint64:
 		n := NumberFromUint64(c)
 		*int = n
+	case []uint8:
+		// Assume this is a string that's encoded this way for some reason.
+		int_, err := NumberFromBase10(string(v.([]uint8)))
+		if err != nil {
+			return fmt.Errorf(
+				"failed to scan uint8[]! %v",
+				err,
+			)
+		}
+		*int = *int_
 	default:
 		return fmt.Errorf(
 			"failed to scan type %T content %v into the Number type!",
