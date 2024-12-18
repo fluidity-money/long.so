@@ -12,10 +12,13 @@ import Slider from "@/components/Slider";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useAccount, useChainId, useSimulateContract } from "wagmi";
-import { graphql } from "@/gql";
 import { useEffect, useMemo, useState } from "react";
 import { usdFormat } from "@/lib/usdFormat";
-import { sqrtPriceX96ToPrice } from "@/lib/math";
+import {
+  getAmountsForLiquidity,
+  getSqrtRatioAtTick,
+  sqrtPriceX96ToPrice,
+} from "@/lib/math";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { TokenIcon } from "@/components/TokenIcon";
 import { useTokens } from "@/config/tokens";
@@ -52,16 +55,8 @@ export default function WithdrawLiquidity() {
 
   const { open } = useWeb3Modal();
 
-  const {
-    token0,
-    token0Amount,
-    token1,
-    token1Amount,
-    setTickLower,
-    setTickUpper,
-    setDelta,
-    deltaDisplay,
-  } = useStakeStore();
+  const { token0, token1, setTickLower, setTickUpper, setDelta, deltaDisplay } =
+    useStakeStore();
 
   // Current tick of the pool
   const { data: { result: curTickNum } = { result: 0 } } = useSimulateContract({
@@ -110,17 +105,41 @@ export default function WithdrawLiquidity() {
 
   const positionBalance = positionLiquidity?.result ?? 0n;
 
-  const deltaUsd = useMemo(() => {
-    if (!token0Amount || !token1Amount) return "$0.00";
-    const token0AmountScaled =
-      (Number(token0Amount) * Number(tokenPrice)) / 10 ** fUSDC.decimals;
-    return usdFormat(token0AmountScaled + parseFloat(token1Amount));
-  }, [token0Amount, token1Amount, fUSDC.decimals, tokenPrice]);
+  // balanceUsd is the total balance of the position scaled to USD, used to determine a raw delta from a user-provided USD value
+  const balanceUsd = useMemo(() => {
+    if (curTick === 0n || !lowerTick || !upperTick) return 0;
+
+    const [amount0, amount1] = getAmountsForLiquidity(
+      getSqrtRatioAtTick(curTick),
+      getSqrtRatioAtTick(BigInt(lowerTick)),
+      getSqrtRatioAtTick(BigInt(upperTick)),
+      positionBalance,
+    );
+    const amount0Scaled =
+      (Number(amount0) * Number(tokenPrice)) /
+      10 ** (fUSDC.decimals + token0.decimals);
+    const amount1Scaled = Number(amount1) / 10 ** token1.decimals;
+    return amount0Scaled + amount1Scaled;
+  }, [
+    curTick,
+    lowerTick,
+    upperTick,
+    positionBalance,
+    fUSDC.decimals,
+    tokenPrice,
+    token0.decimals,
+    token1.decimals,
+  ]);
 
   // set the delta to delta/denom
-  const setDeltaOverDenom = (denom: bigint) =>
-    setDelta((positionBalance / denom).toString(), curTick);
-  const setMaxBalance = () => setDeltaOverDenom(1n);
+  const setDeltaOverDenom = (denom: number) =>
+    setDelta(
+      (balanceUsd / denom).toString(),
+      curTick,
+      positionBalance,
+      balanceUsd,
+    );
+  const setMaxBalance = () => setDeltaOverDenom(1);
 
   // TODO when clicking on a selected balance, should it unselect and set to 0?
   const [balancePercent, setBalancePercent] = useState("");
@@ -128,16 +147,18 @@ export default function WithdrawLiquidity() {
     setBalancePercent(percentString);
     switch (percentString) {
       case "25%":
-        setDeltaOverDenom(4n);
+        setDeltaOverDenom(4);
         break;
       case "50%":
-        setDeltaOverDenom(2n);
+        setDeltaOverDenom(2);
         break;
       case "75%":
         // 50% + 25%
         setDelta(
-          (positionBalance / 4n + positionBalance / 2n).toString(),
+          (balanceUsd / 4 + balanceUsd / 2).toString(),
           curTick,
+          positionBalance,
+          balanceUsd,
         );
         break;
       case "100%":
@@ -215,18 +236,14 @@ export default function WithdrawLiquidity() {
               variant={"no-ring"}
               value={deltaDisplay}
               onChange={(e) => {
-                setDelta(
-                  e.target.value,
-                  curTick,
-                  positionLiquidity?.result ?? 0n,
-                );
+                setDelta(e.target.value, curTick, positionBalance, balanceUsd);
               }}
             />
           </div>
 
           <div className={"flex flex-row justify-between md:mt-[8px]"}>
             <div className={"text-2xs"}>
-              Balance: {positionBalance.toString()}{" "}
+              Balance: {usdFormat(balanceUsd)}{" "}
               <span
                 onClick={setMaxBalance}
                 className="cursor-pointer underline"
@@ -234,8 +251,6 @@ export default function WithdrawLiquidity() {
                 Max
               </span>
             </div>
-
-            <div className={"text-2xs"}>{deltaUsd}</div>
           </div>
 
           <div className="mt-[20px] md:mt-[25px]">

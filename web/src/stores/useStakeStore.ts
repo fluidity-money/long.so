@@ -48,7 +48,16 @@ interface StakeStore {
 
   // input field
   deltaDisplay: string;
-  setDelta: (value: string, tick: bigint, max?: bigint) => void;
+  // @param value: USD value of delta to set
+  // @param tick: current tick of the pool
+  // @param balance: Raw liquidity balance of the position
+  // @param balanceUsd: `balance` scaled to USD using the token price
+  setDelta: (
+    value: string,
+    tick: bigint,
+    balance: bigint,
+    balanceUsd: number,
+  ) => void;
 
   priceLower: string;
   priceUpper: string;
@@ -162,12 +171,17 @@ export const useStakeStore = create<StakeStore>((set) => ({
 
   delta: 0n,
   deltaDisplay: "0",
-  setDelta: (liquidity, tick, max) => {
-    const validNumber = !liquidity.includes(" ") && !isNaN(Number(liquidity));
+  setDelta: (usdInput, tick, balance, balanceUsd) => {
+    const validNumber = !usdInput.includes(" ") && !isNaN(Number(usdInput));
     // update display amount if `amount` is valid as a display number
     if (!validNumber) return;
     // always set the display value for input components
-    set({ deltaDisplay: liquidity });
+    set({ deltaDisplay: usdInput });
+
+    // find the liquidity by finding the ratio between the input and balance (both in USD - we can't use the raw balance since the input is in USD), then scaling the raw balance by the ratio
+    const ratio = balanceUsd / parseFloat(usdInput);
+    const liquidity = (Number(balance) / ratio).toFixed(0);
+
     set(({ tickLower, tickUpper, setToken0AmountRaw, setToken1AmountRaw }) => {
       if (tickLower === undefined || tickUpper === undefined) return {};
       // try to derive the new delta and token amounts
@@ -179,7 +193,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
           tickLower,
           tickUpper,
         );
-        if (!max || BigInt(liquidity) <= max) {
+        if (delta <= balance) {
           setToken0AmountRaw(amount0.toString());
           setToken1AmountRaw(amount1.toString());
           return { delta };
