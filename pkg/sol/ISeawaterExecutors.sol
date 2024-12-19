@@ -1,7 +1,7 @@
 // SPDX-Identifier: MIT
 pragma solidity 0.8.16;
 
-interface ISeawaterExecutorSwap {
+interface ISeawaterExecutorSwapA {
     /// @notice swaps within a pool
     /// @param pool the pool to swap on
     /// @param zeroForOne true if swapping token->fluid token
@@ -14,19 +14,6 @@ interface ISeawaterExecutorSwap {
         int256 amount,
         uint256 priceLimit
     ) external returns (int256, int256);
-
-    /// @notice performs a two stage swap across two pools
-    /// @param from the input token
-    /// @param to the output token
-    /// @param amount the amount of the input token to use
-    /// @param minOut the minimum valid amount of the output token, reverts if not reached
-    /// @return (amount in, amount out)
-    function swap2ExactIn41203F1D(
-        address from,
-        address to,
-        uint256 amount,
-        uint256 minOut
-    ) external returns (uint256, uint256);
 }
 
 interface ISeawaterExecutorSwapPermit2A {
@@ -273,6 +260,21 @@ interface ISeawaterExecutorAdminExposed {
     /// @notice updateEmergencyCouncil to a new address.
     /// @param newCouncil to set the emergency council to
     function updateEmergencyCouncil7D0C1C58(address newCouncil) external;
+}
+
+interface ISeawaterExecutorSwapB {
+    /// @notice performs a two stage swap across two pools
+    /// @param from the input token
+    /// @param to the output token
+    /// @param amount the amount of the input token to use
+    /// @param minOut the minimum valid amount of the output token, reverts if not reached
+    /// @return (amount in, amount out)
+    function swap2ExactIn41203F1D(
+        address from,
+        address to,
+        uint256 amount,
+        uint256 minOut
+    ) external returns (uint256, uint256);
 }
 
 interface ISeawaterExecutorAdmin is ISeawaterExecutorAdminExposed {

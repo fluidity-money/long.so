@@ -91,7 +91,7 @@ register_custom_getrandom!(wasm_get_random);
 // we split our entrypoint functions into three sets, and call them via diamond proxies, to
 // save on binary size
 #[cfg(not(any(
-    feature = "swaps",
+    feature = "swaps_a",
     feature = "swap_permit2_a",
     feature = "quotes",
     feature = "positions",
@@ -100,12 +100,13 @@ register_custom_getrandom!(wasm_get_random);
     feature = "migrations",
     feature = "adjust_positions_a",
     feature = "adjust_positions_b",
-    feature = "swap_permit2_b"
+    feature = "swap_permit2_b",
+    feature = "swaps_b",
 )))]
 mod shim {
     #[cfg(all(not(target_arch = "wasm32"), not(feature = "testing")))]
     compile_error!(
-        "Either `swaps` or `swap_permit2_a` or `quotes` or `positions` or `update_positions`, `admin`, `migrations`, `adjust_positions_a`, `adjust_positions_b`, or `swap_permit2_b` must be enabled when building for wasm."
+        "A contract facet feature flag must be enabled when building for wasm."
     );
     #[stylus_sdk::prelude::public]
     impl crate::Pools {}
@@ -319,11 +320,11 @@ impl Pools {
     }
 }
 
-/// Swap functions. Only enabled when the `swaps` feature is set.
+/// Swap functions. Only enabled when the `swaps_a` feature is set.
 /// Functions here are dispatched into by when the proxy
-/// sees the EXECUTOR_SWAP_DISPATCH magic byte in
+/// sees the EXECUTOR_SWAP_A_DISPATCH magic byte in
 /// its fallback function.
-#[cfg_attr(feature = "swaps", public)]
+#[cfg_attr(feature = "swaps_a", public)]
 impl Pools {
     #[allow(non_snake_case)]
     pub fn swap_904369_B_E(
@@ -335,7 +336,14 @@ impl Pools {
     ) -> Result<(I256, I256), Revert> {
         Pools::swap_internal(self, pool, zero_for_one, amount, price_limit_x96, None)
     }
+}
 
+/// Swap functions. Only enabled when the `swaps_b` feature is set.
+/// Functions here are dispatched into by when the proxy
+/// sees the EXECUTOR_SWAP_B_DISPATCH magic byte in
+/// its fallback function.
+#[cfg_attr(feature = "swaps_b", public)]
+impl Pools {
     /// Performs a two stage swap, using approvals to transfer tokens. See [Self::swap_2_internal].
     #[allow(non_snake_case)]
     pub fn swap_2_exact_in_41203_F1_D(
@@ -592,34 +600,6 @@ impl Pools {
     ) -> Result<(u128, u128), Revert> {
         self.pools.setter(pool).update_position(id, 0)?;
         self.collect_fees_internal(pool, id, recipient)
-    }
-
-    /// Collects AMM fees from a position, and triggers a release of fluid LP rewards.
-    /// Only usable by the position's owner.
-    ///
-    /// # Arguments
-    /// * `pools` - The pool the position belongs to.
-    /// * `ids` - The ID of the positions.
-    ///
-    /// # Side effects
-    /// Transfers tokens to the caller, and triggers a release of fluid LP rewards.
-    ///
-    /// # Errors
-    /// Requires the caller to be the position owner. Requires the pool to be enabled.
-    /// Requires the length of the pools and ids to be equal.
-    #[allow(non_snake_case)]
-    pub fn collect_7_F21947_C(
-        &mut self,
-        pools: Vec<Address>,
-        ids: Vec<U256>,
-    ) -> Result<Vec<(u128, u128)>, Revert> {
-        assert_eq!(ids.len(), pools.len());
-
-        pools
-            .iter()
-            .zip(ids.iter())
-            .map(|(&pool, &id)| self.collect_single_to_6_D_76575_F(pool, id, msg::sender()))
-            .collect::<Result<Vec<(u128, u128)>, Revert>>()
     }
 }
 
@@ -897,7 +877,8 @@ impl Pools {
         Ok(self.pools.getter(pool).get_fee_growth_global_0())
     }
 
-    pub fn token_reserves(&self, pool: Address) -> Result<(U256, U256), Revert> {
+    #[allow(non_snake_case)]
+    pub fn token_reserves_F_F_C_C_D_B_8_F(&self, pool: Address) -> Result<(U256, U256), Revert> {
         Ok(self.pools.getter(pool).get_token_reserves())
     }
 

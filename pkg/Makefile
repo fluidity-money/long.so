@@ -32,7 +32,8 @@ adjust-positions-a: ${OUT_SEAWATER_ADJUST_POSITIONS_A}
 adjust-positions-b: ${OUT_SEAWATER_ADJUST_POSITIONS_B}
 swap-permit2-a: ${OUT_SEAWATER_SWAP_PERMIT2_A}
 swap-permit2-b: ${OUT_SEAWATER_SWAP_PERMIT2_B}
-swaps: ${OUT_SEAWATER_SWAPS}
+swaps-a: ${OUT_SEAWATER_SWAPS_A}
+swaps-b: ${OUT_SEAWATER_SWAPS_B}
 quotes: ${OUT_SEAWATER_QUOTES}
 migrations: ${OUT_SEAWATER_MIGRATIONS}
 
@@ -44,13 +45,14 @@ seawater: \
 	admin \
 	positions \
 	update-positions \
-	swaps \
+	swaps-a \
 	swap-permit2-a \
 	quotes \
 	migrations \
 	adjust-positions-a \
 	swap-permit2-b \
-	adjust-positions-b
+	adjust-positions-b \
+	swaps-b
 
 amm-entrypoint: ${OUT_SEAWATER_AMM}
 ownership-nfts: ${OUT_OWNERSHIP_NFTS}
@@ -110,10 +112,10 @@ ${OUT_SEAWATER_UPDATE_POSITIONS}: ${FILES_RUST}
 	@${WASM_OPT_PASS_SEAWATER_COMPLETE} ${OUT_SEAWATER_UPDATE_POSITIONS}
 	@rm -f ${SEAWATER_COMPLETE_RELEASE}
 
-${OUT_SEAWATER_SWAPS}: ${FILES_RUST}
-	@rm -f ${OUT_SEAWATER_SWAPS}
-	@${CARGO_BUILD_STYLUS_SEAWATER} release-codesize --features swaps
-	@${WASM_OPT_PASS_SEAWATER_CODESIZE} ${OUT_SEAWATER_SWAPS}
+${OUT_SEAWATER_SWAPS_A}: ${FILES_RUST}
+	@rm -f ${OUT_SEAWATER_SWAPS_A}
+	@${CARGO_BUILD_STYLUS_SEAWATER} release-codesize --features swaps_a
+	@${WASM_OPT_PASS_SEAWATER_CODESIZE} ${OUT_SEAWATER_SWAPS_A}
 	@rm -f ${SEAWATER_CODESIZE_RELEASE}
 
 ${OUT_SEAWATER_SWAP_PERMIT2_A}: ${FILES_RUST}
@@ -150,6 +152,12 @@ ${OUT_SEAWATER_SWAP_PERMIT2_B}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_SWAP_PERMIT2_B}
 	@${CARGO_BUILD_STYLUS_SEAWATER} release-codesize --features swap_permit2_b
 	@${WASM_OPT_PASS_SEAWATER_CODESIZE} ${OUT_SEAWATER_SWAP_PERMIT2_B}
+	@rm -f ${SEAWATER_CODESIZE_RELEASE}
+
+${OUT_SEAWATER_SWAPS_B}: ${FILES_RUST}
+	@rm -f ${OUT_SEAWATER_SWAPS_B}
+	@${CARGO_BUILD_STYLUS_SEAWATER} release-codesize --features swaps_b
+	@${WASM_OPT_PASS_SEAWATER_CODESIZE} ${OUT_SEAWATER_SWAPS_B}
 	@rm -f ${SEAWATER_CODESIZE_RELEASE}
 
 ${OUT_LEO_COLLECT}: ${FILES_RUST}
@@ -218,7 +226,8 @@ clean:
 		${OUT_SEAWATER_ADMIN} \
 		${OUT_SEAWATER_POSITIONS} \
 		${OUT_SEAWATER_UPDATE_POSITIONS} \
-		${OUT_SEAWATER_SWAPS} \
+		${OUT_SEAWATER_SWAPS_A} \
+		${OUT_SEAWATER_SWAPS_B} \
 		${OUT_SEAWATER_SWAP_PERMIT2_A} \
 		${OUT_SEAWATER_SWAP_PERMIT2_B} \
 		${OUT_SEAWATER_QUOTES} \
