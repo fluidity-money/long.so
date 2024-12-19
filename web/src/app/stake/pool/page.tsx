@@ -11,7 +11,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { graphql, useFragment } from "@/gql";
-import { useGraphqlGlobal } from "@/hooks/useGraphql";
+import { useGetPool } from "@/hooks/useGraphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usdFormat } from "@/lib/usdFormat";
 import {
@@ -90,8 +90,6 @@ export default function PoolPage() {
   const id = params.get("id");
   const positionIdParam = Number(params.get("positionId"));
 
-  const { data: globalData } = useGraphqlGlobal();
-  const allPoolsData = useFragment(ManagePoolFragment, globalData?.pools);
   const { positions: positionsData_, updatePositionLocal } = usePositions();
   const positionsData = useMemo(
     () =>
@@ -133,7 +131,8 @@ export default function PoolPage() {
     handleTokens(token, fUSDC);
   }, [id, expectedChainId, fUSDC, handleTokens, getTokenFromAddress]);
 
-  const poolData = allPoolsData?.find((pool) => pool.id === id);
+  const { data: getPoolData } = useGetPool(id as `0x${string}`);
+  const poolData = useFragment(ManagePoolFragment, getPoolData?.getPool);
 
   const { liquidityCampaigns } = poolData || { liquidityCampaigns: [] };
 

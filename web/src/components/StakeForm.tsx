@@ -5,9 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import Padlock from "@/assets/icons/padlock.svg";
 import Token from "@/assets/icons/token.svg";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, EmptyToken } from "@/lib/utils";
 import {
   MAX_TICK,
   MIN_TICK,
@@ -45,7 +45,7 @@ import Index from "@/components/Slider";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
-import { useGraphqlGlobal } from "@/hooks/useGraphql";
+import { useGetPool, useGraphqlGlobal } from "@/hooks/useGraphql";
 import { usdFormat } from "@/lib/usdFormat";
 import { useTokens, type Token as TokenType } from "@/config/tokens";
 import { getFormattedPriceFromAmount } from "@/lib/amounts";
@@ -55,6 +55,7 @@ import { useContracts } from "@/config/contracts";
 import { CheckboxContainer } from "./ui/checkbox";
 import { superpositionMainnet, superpositionTestnet } from "@/config/chains";
 import { usePositions } from "@/hooks/usePostions";
+import LightweightERC20 from "@/config/abi/LightweightERC20";
 
 type StakeFormProps = { poolId: string } & (
   | {
@@ -83,6 +84,17 @@ const StakeFormFragment = graphql(`
       tickUpper
       price
       liquidity
+    }
+  }
+`);
+
+const StakeFormPoolFragment = graphql(`
+  fragment StakeFormPoolFragment on SeawaterPool {
+    token {
+      decimals
+      address
+      name
+      symbol
     }
   }
 `);
@@ -133,7 +145,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     if (token0.address !== poolId && token1.address !== poolId) {
       const poolToken = getTokenFromAddress(poolId);
       if (!poolToken) {
-        router.push("/stake");
+        // check if this pool exists in the contract first
+        setToken0(EmptyToken);
         return;
       }
       setToken0(poolToken);
@@ -159,6 +172,33 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const poolData = poolsData?.find(
     (pool) => pool.address === poolId || pool.address === token0.address,
   );
+
+  const { data: getPoolData } = useGetPool(poolId as `0x${string}`);
+  const poolFromId = useFragment(StakeFormPoolFragment, getPoolData?.getPool);
+  useEffect(() => {
+    if (!poolData) {
+      const { token } = poolFromId || {};
+      // this pool doesn't exist at all
+      if (!token) {
+        router.push("/stake");
+        return;
+      }
+      const name = token.name.split(/#\d+/)?.[1]?.trim();
+      // this pool isn't a 9lives share
+      if (!name) {
+        router.push("/stake");
+        return;
+      }
+      // this pool isn't tracked in the main list, but does exist - it's probably a 9lives share
+      setToken0({
+        ...token,
+        address: token.address as `0x${string}`,
+        abi: LightweightERC20,
+        // assume 9lives tokens are always of the form '9lives #<number> <name>'
+        name,
+      });
+    }
+  }, [poolData, poolFromId, setToken0, router]);
 
   useEffect(() => {
     if (poolData?.fee) {

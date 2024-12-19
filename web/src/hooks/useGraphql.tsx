@@ -68,6 +68,15 @@ export const queryGetPoints = graphql(`
     getPointsComponent(wallet: $wallet)
   }
 `);
+export const queryGetPool = graphql(`
+  query queryGetPool($token: String!) {
+    getPool(token: $token) {
+      ...StakeFormPoolFragment
+      ...ManagePoolFragment
+    }
+  }
+`);
+
 /**
  * Fetch all data from the global GraphQL endpoint.
  */
@@ -109,6 +118,20 @@ export const usePointsGraph = () => {
       });
       return res.getPointsComponent;
     },
+    refetchInterval: 20 * 1000, // 20 seconds
+  });
+};
+
+export const useGetPool = (token: `0x${string}`) => {
+  const chainId = useChainId();
+  const { gqlUrl } = useChain(chainId);
+
+  return useQuery({
+    queryKey: ["pool", chainId],
+    queryFn: async () =>
+      request(gqlUrl, queryGetPool, {
+        token,
+      }),
     refetchInterval: 20 * 1000, // 20 seconds
   });
 };

@@ -21,6 +21,7 @@ const documents = {
     "\n  fragment MyPositionsInventoryWalletFragment on Wallet {\n    id\n    positions {\n      positions {\n        id\n        pool {\n          token {\n            name\n            address\n            symbol\n          }\n        }\n      }\n    }\n  }\n": types.MyPositionsInventoryWalletFragmentFragmentDoc,
     "\n  fragment TradeTabTransactionsFragment on SeawaterSwap {\n    timestamp\n    amountIn {\n      token {\n        symbol\n      }\n      valueScaled\n    }\n    amountOut {\n      token {\n        symbol\n      }\n      valueScaled\n    }\n  }\n": types.TradeTabTransactionsFragmentFragmentDoc,
     "\n  fragment StakeFormFragment on SeawaterPool {\n    address\n    earnedFeesAPRFUSDC\n    fee\n    config {\n      classification\n    }\n    priceOverTime {\n      daily\n    }\n    liquidity {\n      tickLower\n      tickUpper\n      price\n      liquidity\n    }\n  }\n": types.StakeFormFragmentFragmentDoc,
+    "\n  fragment StakeFormPoolFragment on SeawaterPool {\n    token {\n      decimals\n      address\n      name\n      symbol\n    }\n  }\n": types.StakeFormPoolFragmentFragmentDoc,
     "\n  fragment SwapFormFragment on SeawaterPool {\n    address\n    fee\n    earnedFeesAPRFUSDC\n    earnedFeesAPRToken1\n    token {\n      address\n      decimals\n      name\n      symbol\n    }\n  }\n": types.SwapFormFragmentFragmentDoc,
     "\n  fragment SwapProPoolFragment on SeawaterPool {\n    address\n    token {\n      address\n      symbol\n    }\n    liquidity {\n      liquidity\n    }\n    priceOverTime {\n      daily\n      monthly\n    }\n    volumeOverTime {\n      monthly {\n        token1 {\n          timestamp\n          valueUsd\n        }\n        fusdc {\n          timestamp\n          valueUsd\n        }\n      }\n      daily {\n        token1 {\n          timestamp\n          valueUsd\n        }\n        fusdc {\n          timestamp\n          valueUsd\n        }\n      }\n    }\n    liquidityOverTime {\n      daily {\n        timestamp\n        fusdc {\n          valueUsd\n        }\n      }\n      monthly {\n        timestamp\n        fusdc {\n          valueUsd\n        }\n      }\n    }\n    APR {\n      total\n    }\n    swaps {\n      swaps {\n        transactionHash\n        timestamp\n        amountIn {\n          valueScaled\n          token {\n            symbol\n          }\n        }\n        amountOut {\n          valueScaled\n          token {\n            symbol\n          }\n        }\n      }\n    }\n  }\n": types.SwapProPoolFragmentFragmentDoc,
     "\n  fragment TokensFragment on SeawaterPool {\n    token {\n      address\n      decimals\n      name\n      symbol\n      image\n    }\n  }\n": types.TokensFragmentFragmentDoc,
@@ -28,6 +29,7 @@ const documents = {
     "\n  query AllData {\n    fusdc {\n      address\n      ...FusdcFragment\n    }\n    pools {\n      # used for the pool selector\n      address\n\n      # add general fragments here\n      ...SwapProPoolFragment\n      ...AllPoolsFragment\n      ...SelectPrimeAssetFragment\n      ...SwapExploreFragment\n      ...ManagePoolFragment\n      ...SwapFormFragment\n      ...StakeFormFragment\n      ...TokensFragment\n    }\n  }\n": types.AllDataDocument,
     "\n  query ForUser($wallet: String!) {\n    getSwapsForUser(wallet: $wallet, first: 10) {\n      data {\n        swaps {\n          # add transaction fragments here\n          ...TradeTabTransactionsFragment\n        }\n      }\n    }\n\n    getWallet(address: $wallet) {\n      # add wallet fragments here\n      ...MyPositionsInventoryWalletFragment\n      ...PositionsFragment\n    }\n\n    notes(wallet: $wallet) {\n      # add notes fragments here\n      ...NotesFragment\n    }\n  }\n": types.ForUserDocument,
     "\n  query queryGetPoints($wallet: String!) {\n    getPointsComponent(wallet: $wallet)\n  }\n": types.QueryGetPointsDocument,
+    "\n  query queryGetPool($token: String!) {\n    getPool(token: $token) {\n      ...StakeFormPoolFragment\n      ...ManagePoolFragment\n    }\n  }\n": types.QueryGetPoolDocument,
     "\n  fragment PositionsFragment on Wallet {\n    id\n    positions {\n      positions {\n        created\n        served {\n          timestamp\n        }\n        positionId\n        pool {\n          token {\n            name\n            address\n            symbol\n            decimals\n          }\n          liquidityCampaigns {\n            campaignId\n            tickLower\n            tickUpper\n            fromTimestamp\n            endTimestamp\n          }\n        }\n        lower\n        upper\n        liquidity {\n          fusdc {\n            valueUsd\n          }\n          token1 {\n            valueUsd\n          }\n        }\n        isVested\n      }\n    }\n  }\n": types.PositionsFragmentFragmentDoc,
 };
 
@@ -80,6 +82,10 @@ export function graphql(source: "\n  fragment StakeFormFragment on SeawaterPool 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  fragment StakeFormPoolFragment on SeawaterPool {\n    token {\n      decimals\n      address\n      name\n      symbol\n    }\n  }\n"): (typeof documents)["\n  fragment StakeFormPoolFragment on SeawaterPool {\n    token {\n      decimals\n      address\n      name\n      symbol\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  fragment SwapFormFragment on SeawaterPool {\n    address\n    fee\n    earnedFeesAPRFUSDC\n    earnedFeesAPRToken1\n    token {\n      address\n      decimals\n      name\n      symbol\n    }\n  }\n"): (typeof documents)["\n  fragment SwapFormFragment on SeawaterPool {\n    address\n    fee\n    earnedFeesAPRFUSDC\n    earnedFeesAPRToken1\n    token {\n      address\n      decimals\n      name\n      symbol\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -105,6 +111,10 @@ export function graphql(source: "\n  query ForUser($wallet: String!) {\n    getS
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query queryGetPoints($wallet: String!) {\n    getPointsComponent(wallet: $wallet)\n  }\n"): (typeof documents)["\n  query queryGetPoints($wallet: String!) {\n    getPointsComponent(wallet: $wallet)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query queryGetPool($token: String!) {\n    getPool(token: $token) {\n      ...StakeFormPoolFragment\n      ...ManagePoolFragment\n    }\n  }\n"): (typeof documents)["\n  query queryGetPool($token: String!) {\n    getPool(token: $token) {\n      ...StakeFormPoolFragment\n      ...ManagePoolFragment\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -59,13 +59,13 @@ export default function WithdrawLiquidity() {
     useStakeStore();
 
   // Current tick of the pool
-  const { data: { result: curTickNum } = { result: 0 } } = useSimulateContract({
+  const { data: curTickData } = useSimulateContract({
     address: ammContract.address,
     abi: ammContract.abi,
     functionName: "curTick181C6FD9",
     args: [token0.address],
   });
-  const curTick = BigInt(curTickNum);
+  const curTick = curTickData ? BigInt(curTickData.result) : undefined;
 
   // Current liquidity of the position
   const { data: positionLiquidity } = useSimulateContract({
@@ -107,7 +107,7 @@ export default function WithdrawLiquidity() {
 
   // balanceUsd is the total balance of the position scaled to USD, used to determine a raw delta from a user-provided USD value
   const balanceUsd = useMemo(() => {
-    if (curTick === 0n || !lowerTick || !upperTick) return 0;
+    if (curTick === undefined || !lowerTick || !upperTick) return 0;
 
     const [amount0, amount1] = getAmountsForLiquidity(
       getSqrtRatioAtTick(curTick),
@@ -133,6 +133,7 @@ export default function WithdrawLiquidity() {
 
   // set the delta to delta/denom
   const setDeltaOverDenom = (denom: number) =>
+    curTick !== undefined &&
     setDelta(
       (balanceUsd / denom).toString(),
       curTick,
@@ -144,6 +145,7 @@ export default function WithdrawLiquidity() {
   // TODO when clicking on a selected balance, should it unselect and set to 0?
   const [balancePercent, setBalancePercent] = useState("");
   const handleBalancePercentButton = (percentString: string) => {
+    if (curTick === undefined) return;
     setBalancePercent(percentString);
     switch (percentString) {
       case "25%":
@@ -236,7 +238,12 @@ export default function WithdrawLiquidity() {
               variant={"no-ring"}
               value={deltaDisplay}
               onChange={(e) => {
-                setDelta(e.target.value, curTick, positionBalance, balanceUsd);
+                setDelta(
+                  e.target.value,
+                  curTick ?? 0n,
+                  positionBalance,
+                  balanceUsd,
+                );
               }}
             />
           </div>
