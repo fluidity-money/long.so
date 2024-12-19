@@ -204,7 +204,7 @@ export const ConfirmSwap = () => {
       writeContractSwap({
         address: ammContract.address,
         abi: ammContract.abi,
-        functionName: "swap2ExactIn41203F1D",
+        functionName: "swap2ExactInED91BB1D",
         args: [
           token0.address,
           token1.address,

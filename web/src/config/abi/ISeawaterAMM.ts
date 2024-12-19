@@ -462,7 +462,7 @@ const ISeawaterAMM = [
   },
   {
     type: "function",
-    name: "quote2CD06B86E",
+    name: "quote2A9EFFCC6",
     inputs: [
       {
         name: "from",
@@ -555,7 +555,7 @@ const ISeawaterAMM = [
   },
   {
     type: "function",
-    name: "swap2ExactIn41203F1D",
+    name: "swap2ExactInED91BB1D",
     inputs: [
       {
         name: "_tokenA",
