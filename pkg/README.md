@@ -20,7 +20,7 @@
 |          Deployment name         |              Deployment address            |
 |----------------------------------|--------------------------------------------|
 | Longtail AMM                     | 0x452D796b656D3720f2d06B3439eF95899f0db755 |
-| Longtail NFT manager           | 0x42f104ed693792c858D03f987DfFB30e39cC1ce9 |
+| Longtail NFT manager             | 0x42f104ed693792c858D03f987DfFB30e39cC1ce9 |
 | Permit2 router                   | 0x244517Dc59943E8CdFbD424Bdb3262c5f04a1387 |
 | Swaps implementation             | 0xfc66c25dbdb0606e7f9ca1d2754eb0a0f8306da9 |
 | Swaps permit2 A implementation   | 0x0b319db00d07c8fadfaaef13c910141a5da0aa8f |
@@ -31,7 +31,7 @@
 | Adjust position A implementation | 0xff634a3cb97bcf8cbaf8d2379afc8360c541218a |
 | Swaps permit2 B implementation   | 0xe3bafbd8f86800bac86025b2903335b32aa6f51f |
 | Adjust position B implementation | 0xb4647415a644f6a09c84a2af6458d1d38d6e9d80 |
-| Position Handler               | 0x46f9dea606a3D5890aD6d36C64acD55C26C51B8a |
+| Position Handler                 | 0x46f9dea606a3D5890aD6d36C64acD55C26C51B8a |
 
 #### Administrative deployments
 
@@ -58,28 +58,31 @@
 
 #### AMM contract deployments
 
-|         Deployment name        |              Deployment address            |
+|        Deployment name         |              Deployment address            |
 |--------------------------------|--------------------------------------------|
-| Longtail AMM                   | 0x2B82dA1C1Be91eE6cF7aec0A37E38aD39fF4A87D |
-| Longtail NFT manager           | 0xCbaEe72552E80d23026037ef0F489B97863C431e |
-| Position Handler               | 0x3511aF458F39cF609719070636B033A07F327C29 |
+| Longtail AMM                   | 0xAe86141e3f1C9168cE6c948FDC884F2A5f45d7B6 |
+| Longtail NFT manager           | 0x8aa3750A7e8c98830e3421a89bFf80Fc175e4C98 |
+| Position Handler               | 0x73387E7E4DF41f58Be13cdE4Dd4EAf3675c1C44c |
 | Permit2 router                 | 0x2246431582087b930F2CE561c34deb8E7e5c44bE |
-| Swaps implementation           | 0x4d1ceb7fc6bf11dc71ecf6709c2c0fe1d972a44f |
-| Swaps permit2 A implementation | 0x9fb4739e1d5491518ded1f22124b6c441d795dd6 |
-| Quotes implementation          | 0x98bff3634ab7d4a5b9bf7dd167a4b30a0e9ffb34 |
-| Positions implementation       | 0x3ff169fa977cedc78b142dd514be7af9991faed8 |
-| Update position implementation | 0x4b3a392e030d01d2f6515ca9f2b188a178bf1b37 |
-| Admin implementation           | 0x0362fa856225208a29be7c1404704cc1abd4f0b6 |
-| Adjust position implementation | 0x96b305cfeb235d9cca5f85148df8643f168b54f2 |
-| Swaps permit2 B implementation | 0xc870bc6e2d198f15e9689a2db0ea6b3c4c2296cc |
+| Swaps A implementation         | 0x0dc55b20bdf11fb0ea39e61743532711cda5436c |
+| Swaps B implementation         | 0xea0edbb819bcf094590000e36f19a5285c6457c3 |
+| Swaps permit2 A implementation | 0x0000000000000000000000000000000000000000 |
+| Quotes A implementation        | 0xb5fb8fae334286f992a697e75f0c5d68d845415b |
+| Quotes B implementation        | 0xd8d7f75988556fb2dd1b971a4848f7b56cbcfd39 |
+| Positions implementation       | 0xc9328bb8cdc2a890d428709b781f5f5932addb99 |
+| Update position implementation | 0xe6474ec944b35a914f915ce7686cd0003ca5b695 |
+| Admin implementation           | 0x60c8d4ef56fd56967fcc123fe6b677bf41105180 |
+| Adjust position A impl         | 0xc0111b0fae58f58451ba64dabfc5a2d5aaa0d5d3 |
+| Swaps permit2 B implementation | 0x0000000000000000000000000000000000000000 |
+| Adjust position B impl         | 0xe96e51ced07a09d99c5b4c6068d274fdb12f9264 |
 
 #### Leo contract deployments
 
 |     Deployment name    |              Deployment address            |
 |------------------------|--------------------------------------------|
-| Leo                    | 0x18cd0c5907574107C6ce73B10703150AB2e88E50 |
-| Collect implementation | 0x76054c3de8598746bf76a3c0caeda9036f988f4d |
-| Extras implementation  | 0x2baca7a2dfc8aa03f10864dbf49e82d2a195ea41 |
+| Leo                    | 0xADA1629b77A4864340b7b9Dc4B9874068E844b08 |
+| Collect implementation | 0xcc76d4d1e7e021bd2309bfe236b345d95b8526c5 |
+| Extras implementation  | 0x50bdc4ea3f3003099f936f2fc6f8cee0b730c168 |
 
 #### Useful testing token deployments
 
