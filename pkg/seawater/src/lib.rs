@@ -93,7 +93,7 @@ register_custom_getrandom!(wasm_get_random);
 #[cfg(not(any(
     feature = "swaps_a",
     feature = "swap_permit2_a",
-    feature = "quotes",
+    feature = "quotes_a",
     feature = "positions",
     feature = "update_positions",
     feature = "admin",
@@ -102,6 +102,7 @@ register_custom_getrandom!(wasm_get_random);
     feature = "adjust_positions_b",
     feature = "swap_permit2_b",
     feature = "swaps_b",
+    feature = "quotes_b",
 )))]
 mod shim {
     #[cfg(all(not(target_arch = "wasm32"), not(feature = "testing")))]
@@ -346,7 +347,7 @@ impl Pools {
 impl Pools {
     /// Performs a two stage swap, using approvals to transfer tokens. See [Self::swap_2_internal].
     #[allow(non_snake_case)]
-    pub fn swap_2_exact_in_41203_F1_D(
+    pub fn swap_2_exact_in_E_D_91_B_B_1_D(
         &mut self,
         from: Address,
         to: Address,
@@ -357,11 +358,11 @@ impl Pools {
     }
 }
 
-/// Quote functions. Only enabled when the `quotes` feature is set.
+/// Single swap quote function. Only enabled when the `quotes` feature is set.
 /// Functions here are dispatched into by when the proxy
-/// sees the EXECUTOR_QUOTES_DISPATCH magic byte in
+/// sees the EXECUTOR_QUOTES_A_DISPATCH magic byte in
 /// its fallback function.
-#[cfg_attr(feature = "quotes", public)]
+#[cfg_attr(feature = "quotes_a", public)]
 impl Pools {
     /// Quote a [Self::swap]. Will revert with the result of the swap
     /// as a decimal number as the message of an `Error(string)`.
@@ -399,12 +400,19 @@ impl Pools {
             Err(e) => Err(e),
         }
     }
+}
 
+/// Two swap quote function. Only enabled when the `quotes` feature is set.
+/// Functions here are dispatched into by when the proxy
+/// sees the EXECUTOR_QUOTES_B_DISPATCH magic byte in
+/// its fallback function.
+#[cfg_attr(feature = "quotes_b", public)]
+impl Pools {
     /// Quote a [Self::swap_2_exact_ine4f82465]. Will revert with the result of the swap
     /// as a decimal number as the message of an `Error(string)`.
     /// Returns a `Result` as Stylus expects but will always only fill the `Revert`.
     #[allow(non_snake_case)]
-    pub fn quote_2_C_D06_B86_E(
+    pub fn quote_2_A_9_E_F_F_C_C_6(
         &mut self,
         from: Address,
         to: Address,

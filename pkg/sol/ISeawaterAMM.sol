@@ -9,14 +9,15 @@ interface ISeawaterAMM is
     ISeawaterEvents,
     ISeawaterExecutorSwapA,
     ISeawaterExecutorSwapPermit2A,
-    ISeawaterExecutorQuote,
+    ISeawaterExecutorQuoteA,
     ISeawaterExecutorPosition,
     ISeawaterExecutorUpdatePosition,
     ISeawaterExecutorAdminExposed,
     ISeawaterExecutorAdjustPositionA,
     ISeawaterExecutorSwapPermit2B,
     ISeawaterExecutorAdjustPositionB,
-    ISeawaterExecutorSwapB
+    ISeawaterExecutorSwapB,
+    ISeawaterExecutorQuoteB
     {
     /// @notice swaps _token for USDC
     /// @param _token the token to swap
@@ -84,7 +85,7 @@ interface ISeawaterAMM is
     /// @param _amount input amount (tokenA)
     /// @param _minOut the minimum output amount (tokenB), reverting if the actual output is lower
     /// @return amount of token A in, amount of token B out
-    function swap2ExactIn41203F1D(
+    function swap2ExactInED91BB1D(
         address _tokenA,
         address _tokenB,
         uint256 _amount,

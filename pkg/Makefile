@@ -9,11 +9,13 @@ include config.mk
 	update-positions \
 	adjust-positions-a \
 	adjust-positions-b \
-	swaps \
+	swaps-a \
+	swaps-b \
 	swap-permit2-a \
 	swap-permit2-b \
-	quotes \
+	quotes-a \
 	migrations \
+	quotes-b \
 	leo \
 	solidity \
 	amm-entrypoint \
@@ -34,7 +36,8 @@ swap-permit2-a: ${OUT_SEAWATER_SWAP_PERMIT2_A}
 swap-permit2-b: ${OUT_SEAWATER_SWAP_PERMIT2_B}
 swaps-a: ${OUT_SEAWATER_SWAPS_A}
 swaps-b: ${OUT_SEAWATER_SWAPS_B}
-quotes: ${OUT_SEAWATER_QUOTES}
+quotes-a: ${OUT_SEAWATER_QUOTES_A}
+quotes-b: ${OUT_SEAWATER_QUOTES_B}
 migrations: ${OUT_SEAWATER_MIGRATIONS}
 
 leo: leo-collect leo-extras
@@ -47,11 +50,12 @@ seawater: \
 	update-positions \
 	swaps-a \
 	swap-permit2-a \
-	quotes \
+	quotes-a \
 	migrations \
 	adjust-positions-a \
 	swap-permit2-b \
 	adjust-positions-b \
+	quotes-b \
 	swaps-b
 
 amm-entrypoint: ${OUT_SEAWATER_AMM}
@@ -124,10 +128,16 @@ ${OUT_SEAWATER_SWAP_PERMIT2_A}: ${FILES_RUST}
 	@${WASM_OPT_PASS_SEAWATER_CODESIZE} ${OUT_SEAWATER_SWAP_PERMIT2_A}
 	@rm -f ${SEAWATER_CODESIZE_RELEASE}
 
-${OUT_SEAWATER_QUOTES}: ${FILES_RUST}
-	@rm -f ${OUT_SEAWATER_QUOTES}
-	@${CARGO_BUILD_STYLUS_SEAWATER} release-codesize --features quotes
-	@${WASM_OPT_PASS_SEAWATER_CODESIZE} ${OUT_SEAWATER_QUOTES}
+${OUT_SEAWATER_QUOTES_A}: ${FILES_RUST}
+	@rm -f ${OUT_SEAWATER_QUOTES_A}
+	@${CARGO_BUILD_STYLUS_SEAWATER} release-codesize --features quotes_a
+	@${WASM_OPT_PASS_SEAWATER_CODESIZE} ${OUT_SEAWATER_QUOTES_A}
+	@rm -f ${SEAWATER_CODESIZE_RELEASE}
+
+${OUT_SEAWATER_QUOTES_B}: ${FILES_RUST}
+	@rm -f ${OUT_SEAWATER_QUOTES_B}
+	@${CARGO_BUILD_STYLUS_SEAWATER} release-codesize --features quotes_b
+	@${WASM_OPT_PASS_SEAWATER_CODESIZE} ${OUT_SEAWATER_QUOTES_B}
 	@rm -f ${SEAWATER_CODESIZE_RELEASE}
 
 ${OUT_SEAWATER_MIGRATIONS}: ${FILES_RUST}

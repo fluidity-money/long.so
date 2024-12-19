@@ -18,17 +18,25 @@ err() {
 [ -z "$STYLUS_PRIVATE_KEY" ] && err "STYLUS_PRIVATE_KEY unset"
 [ -z "$FLU_SEAWATER_FUSDC_ADDR" ] && err "FLU_SEAWATER_FUSDC_ADDR unset"
 
-[ -z "$SEAWATER_SWAPS" ] && SEAWATER_SWAPS="$(sh deploy-stylus.sh seawater-swaps.wasm)"
-[ -z "$SEAWATER_SWAPS" ] && err "Failed to deploy seawater_swaps"
-log "SEAWATER_SWAPS=$SEAWATER_SWAPS"
+[ -z "$SEAWATER_SWAPS_A" ] && SEAWATER_SWAPS_A="$(sh deploy-stylus.sh seawater-swaps-a.wasm)"
+[ -z "$SEAWATER_SWAPS_A" ] && err "Failed to deploy seawater_swaps_a"
+log "SEAWATER_SWAPS_A=$SEAWATER_SWAPS_A"
+
+[ -z "$SEAWATER_SWAPS_B" ] && SEAWATER_SWAPS_B="$(sh deploy-stylus.sh seawater-swaps-b.wasm)"
+[ -z "$SEAWATER_SWAPS_B" ] && err "Failed to deploy seawater_swaps_b"
+log "SEAWATER_SWAPS_B=$SEAWATER_SWAPS_B"
 
 [ -z "$SEAWATER_SWAP_PERMIT2_A" ] && SEAWATER_SWAP_PERMIT2_A="$(sh deploy-stylus.sh seawater-swap-permit2-a.wasm)"
 [ -z "$SEAWATER_SWAP_PERMIT2_A" ] && err "Failed to deploy seawater_swap_permit2_a"
 log "SEAWATER_SWAP_PERMIT2_A=$SEAWATER_SWAP_PERMIT2_A"
 
-[ -z "$SEAWATER_QUOTES" ] && SEAWATER_QUOTES="$(sh deploy-stylus.sh seawater-quotes.wasm)"
-[ -z "$SEAWATER_QUOTES" ] && err "Failed to deploy seawater_quotes"
-log "SEAWATER_QUOTES=$SEAWATER_QUOTES"
+[ -z "$SEAWATER_QUOTES_A" ] && SEAWATER_QUOTES_A="$(sh deploy-stylus.sh seawater-quotes-a.wasm)"
+[ -z "$SEAWATER_QUOTES_A" ] && err "Failed to deploy seawater_quotes_a"
+log "SEAWATER_QUOTES_A=$SEAWATER_QUOTES_A"
+
+[ -z "$SEAWATER_QUOTES_B" ] && SEAWATER_QUOTES_B="$(sh deploy-stylus.sh seawater-quotes-b.wasm)"
+[ -z "$SEAWATER_QUOTES_B" ] && err "Failed to deploy seawater_quotes_b"
+log "SEAWATER_QUOTES_B=$SEAWATER_QUOTES_B"
 
 [ -z "$SEAWATER_POSITIONS" ] && SEAWATER_POSITIONS="$(sh deploy-stylus.sh seawater-positions.wasm)"
 [ -z "$SEAWATER_POSITIONS" ] && err "Failed to deploy seawater_positions"
@@ -60,15 +68,17 @@ seawater_proxy="$(\
 		"$SEAWATER_PROXY_ADMIN" \
 		"$(cast --address-zero)" \
 		"$SEAWATER_EMERGENCY_COUNCIL" \
-		"$SEAWATER_SWAPS" \
+		"$SEAWATER_SWAPS_A" \
 		"$SEAWATER_SWAP_PERMIT2_A" \
-		"$SEAWATER_QUOTES" \
+		"$SEAWATER_QUOTES_A" \
 		"$SEAWATER_POSITIONS" \
 		"$SEAWATER_UPDATE_POSITIONS" \
 		"$SEAWATER_ADMIN" \
 		"$SEAWATER_ADJUST_POSITIONS_A" \
 		"$SEAWATER_SWAP_PERMIT2_B" \
 		"$SEAWATER_ADJUST_POSITIONS_B" \
+		"$SEAWATER_SWAPS_B" \
+		"$SEAWATER_QUOTES_B" \
 		"$(cast --address-zero)")"
 [ -z "$seawater_proxy" ] && err "Failed to deploy seawater_proxy"
 log "Seawater proxy deployed to $seawater_proxy"
