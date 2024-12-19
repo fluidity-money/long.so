@@ -273,6 +273,14 @@ pub enum Error {
     // 51 (0x33)
     #[error("Bad sqrt price")]
     BadPrice,
+
+    // 52 (0x34)
+    #[error("Checked reserve sub overflow")]
+    ReserveSub,
+
+    // 53 (0x35)
+    #[error("Checked reserve add overflow")]
+    ReserveAdd,
 }
 
 impl From<Error> for Vec<u8> {

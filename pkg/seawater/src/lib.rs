@@ -897,6 +897,10 @@ impl Pools {
         Ok(self.pools.getter(pool).get_fee_growth_global_0())
     }
 
+    pub fn token_reserves(&self, pool: Address) -> Result<(U256, U256), Revert> {
+        Ok(self.pools.getter(pool).get_token_reserves())
+    }
+
     /// Getter method for getting the fee growth for token 1
     #[allow(non_snake_case)]
     pub fn fee_growth_global_1_A_33_A_5_A_1_B(&self, pool: Address) -> Result<U256, Revert> {
@@ -1085,21 +1089,6 @@ impl Pools {
 /// intending to be used in the catch all feature.
 #[cfg_attr(feature = "migrations", public)]
 impl Pools {
-    pub fn disable_pools(&mut self, pools: Vec<Address>) -> Result<(), Vec<u8>> {
-        assert_eq_or!(
-            msg::sender(),
-            self.seawater_admin.get(),
-            Error::SeawaterAdminOnly
-        );
-
-        for pool in pools {
-            self.pools.setter(pool).set_enabled(false);
-        }
-
-        Ok(())
-    }
-
-    #[allow(non_snake_case)]
     pub fn send_token_to_sender(&mut self, token: Address, amount: U256) -> Result<(), Vec<u8>> {
         assert_eq_or!(
             msg::sender(),
@@ -1108,25 +1097,6 @@ impl Pools {
         );
 
         erc20::transfer_to_sender(token, amount)?;
-
-        Ok(())
-    }
-
-    #[allow(non_snake_case)]
-    pub fn send_amounts_from_sender(
-        &mut self,
-        token: Address,
-        recipients: Vec<(Address, U256)>,
-    ) -> Result<(), Revert> {
-        assert_eq_or!(
-            msg::sender(),
-            self.seawater_admin.get(),
-            Error::SeawaterAdminOnly
-        );
-
-        for (addr, amount) in recipients {
-            erc20::take_from_to(token, addr, amount)?;
-        }
 
         Ok(())
     }

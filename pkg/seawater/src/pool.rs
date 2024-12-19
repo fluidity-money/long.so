@@ -39,6 +39,9 @@ pub struct StoragePool {
     tick_bitmap: tick::StorageTickBitmap,
 
     pub initialised: StorageBool,
+
+    pub token0_reserves: StorageU256,
+    pub token1_reserves: StorageU256,
 }
 
 impl StoragePool {
@@ -197,10 +200,46 @@ impl StoragePool {
                 )
             };
 
+            // Update the informational state of the liquidity amounts.
+            if amount_0.is_negative() {
+                self.token0_reserves.set(
+                    self.token0_reserves
+                        .get()
+                        .checked_sub(amount_0.abs().into_raw())
+                        .ok_or(Error::ReserveSub)?,
+                );
+            } else {
+                self.token0_reserves.set(
+                    self.token0_reserves
+                        .get()
+                        .checked_add(amount_0.into_raw())
+                        .ok_or(Error::ReserveAdd)?,
+                );
+            }
+            if amount_1.is_negative() {
+                self.token1_reserves.set(
+                    self.token1_reserves
+                        .get()
+                        .checked_sub(amount_1.abs().into_raw())
+                        .ok_or(Error::ReserveSub)?,
+                );
+            } else {
+                self.token1_reserves.set(
+                    self.token1_reserves
+                        .get()
+                        .checked_add(amount_1.into_raw())
+                        .ok_or(Error::ReserveAdd)?,
+                );
+            }
+
             Ok((amount_0, amount_1))
         } else {
             Ok((I256::zero(), I256::zero()))
         }
+    }
+
+    pub fn get_token_reserves(&self) -> (U256, U256) {
+        (self.token0_reserves.get(), self.token1_reserves.get())
     }
 
     pub fn adjust_position(
@@ -389,7 +428,6 @@ impl StoragePool {
 
             // shift tick
             if state.price == step_next_price {
-
                 if step_next_tick_initialised {
                     let (fee_0, fee_1) = match zero_for_one {
                         true => (state.fee_growth_global, self.fee_growth_global_1.get()),
@@ -463,6 +501,38 @@ impl StoragePool {
             true => (amount - state.amount_remaining, state.amount_calculated),
             false => (state.amount_calculated, amount - state.amount_remaining),
         };
+
+        // Track the informational state of the liquidity amounts.
+        if amount_0.is_negative() {
+            self.token0_reserves.set(
+                self.token0_reserves
+                    .get()
+                    .checked_sub(amount_0.abs().into_raw())
+                    .ok_or(Error::ReserveSub)?,
+            );
+        } else {
+            self.token0_reserves.set(
+                self.token0_reserves
+                    .get()
+                    .checked_add(amount_0.into_raw())
+                    .ok_or(Error::ReserveAdd)?,
+            );
+        }
+        if amount_1.is_negative() {
+            self.token1_reserves.set(
+                self.token1_reserves
+                    .get()
+                    .checked_sub(amount_1.abs().into_raw())
+                    .ok_or(Error::ReserveSub)?,
+            );
+        } else {
+            self.token1_reserves.set(
+                self.token1_reserves
+                    .get()
+                    .checked_add(amount_1.into_raw())
+                    .ok_or(Error::ReserveAdd)?,
+            );
+        }
 
         Ok((amount_0, amount_1, state.tick))
     }
