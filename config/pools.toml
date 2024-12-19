@@ -28,7 +28,7 @@ classification = "VOLATILE"
 image = "/icons/cbux.svg"
 
 [0x22b9fa698b68bBA071B513959794E9a47d19214c]
-displayed = true
+displayed = false
 classification = "VOLATILE"
 image = "/icons/ICON_BLACK.png"
 
