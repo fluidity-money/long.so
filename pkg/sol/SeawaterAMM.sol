@@ -262,7 +262,7 @@ contract SeawaterAMM is ISeawaterAMM {
     }
 
     /// @inheritdoc ISeawaterExecutorQuoteB
-    function swap2ExactInED91BB1D(
+    function quote2A9EFFCC6(
         address /* from */,
         address /* to */,
         uint256 /* amount */,
