@@ -7,7 +7,7 @@ classification = "STABLECOIN"
 image = "/icons/fUSDC.svg"
 
 [0xde104342B32BCa03ec995f999181f7Cf1fFc04d7]
-displayed = true
+displayed = false
 classification = "VOLATILE"
 image = "/icons/ethereum-eth-logo.svg"
 price = "3802.12"
@@ -19,11 +19,11 @@ image = "/icons/usd-coin-usdc-logo.svg"
 price = "1"
 
 [0x09f7156aae9c903f90b1cb1e312582c4f208a759]
-displayed = true
+displayed = false
 classification = "VOLATILE"
 
 [0x36c116a8851869cf8a99b3bda0fad42453d32b99]
-displayed = true
+displayed = false
 classification = "VOLATILE"
 image = "/icons/cbux.svg"
 
