@@ -660,7 +660,7 @@ export default function PoolPage() {
                   </div>
                   <div className="flex flex-1 flex-col">
                     <div className="text-3xs md:text-2xs">
-                      Current Position Balance
+                      Selected Position Balance
                     </div>
                     <div className="text-xl md:text-2xl">{positionBalance}</div>
                   </div>
