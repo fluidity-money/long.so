@@ -19,6 +19,7 @@ import {
   sqrtPriceX96ToPrice,
 } from "@/lib/math";
 import { useRouter } from "next/navigation";
+import posthog from "@/config/posthog";
 import { useHotkeys } from "react-hotkeys-hook";
 import { AnimatePresence, motion } from "framer-motion";
 import * as RadioGroup from "@radix-ui/react-radio-group";
@@ -241,6 +242,18 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     expectedChainId === superpositionTestnet.id;
 
   const onSubmit = () => {
+    // Track LP initiation
+    posthog.capture("lp_initiated", {
+      mode,
+      poolId,
+      token0: token0.symbol,
+      token1: token1.symbol,
+      token0Amount,
+      token1Amount,
+      isVesting,
+      chainId: expectedChainId,
+    });
+
     if (mode === "new") {
       router.push(`/stake/pool/create/confirm?isVested=${isVesting}`);
     } else {

@@ -1,4 +1,6 @@
 import { useStakeWelcomeBackStore } from "@/stores/useStakeWelcomeBackStore";
+import { useEffect } from "react";
+import posthog from "@/config/posthog";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { motion } from "framer-motion";
@@ -67,6 +69,15 @@ export const YieldBreakdownModal = () => {
 
   const { isLtSm } = useMediaQuery();
 
+  // Track modal open/close
+  useEffect(() => {
+    if (yieldBreakdown && !isLtSm) {
+      posthog.capture("modal_opened", { modal: "YieldBreakdownModal" });
+    } else if (!yieldBreakdown) {
+      posthog.capture("modal_closed", { modal: "YieldBreakdownModal" });
+    }
+  }, [yieldBreakdown, isLtSm]);
+
   return (
     <>
       <AlertDialog.Root open={yieldBreakdown && !isLtSm}>
@@ -88,7 +99,13 @@ export const YieldBreakdownModal = () => {
                       </div>
                       <Button
                         variant="secondary"
-                        onClick={() => setYieldBreakdown(false)}
+                        onClick={() => {
+                          posthog.capture("modal_closed", {
+                            modal: "YieldBreakdownModal",
+                            trigger: "esc_button",
+                          });
+                          setYieldBreakdown(false);
+                        }}
                         size={"esc"}
                       >
                         Esc
@@ -142,6 +159,11 @@ export const YieldBreakdownModal = () => {
                       variant="secondary"
                       className={"mt-[25px] h-[37px] w-full text-xs"}
                       onClick={() => {
+                        posthog.capture("yield_claim_confirmed", {
+                          modal: "YieldBreakdownModal",
+                          totalAmount: 1433.35,
+                          tokenCount: yieldData.length,
+                        });
                         setYieldBreakdown(false);
                         setYieldBreakdownClaimed(true);
                       }}

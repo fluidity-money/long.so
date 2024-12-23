@@ -42,6 +42,7 @@ import {
 } from "@/lib/amounts";
 import { RewardsBreakdown } from "@/components/RewardsBreakdown";
 import { useRouter } from "next/navigation";
+import posthog from "@/config/posthog";
 import { TokenIcon } from "./TokenIcon";
 import { useContracts } from "@/config/contracts";
 import { superpositionTestnet, useChain } from "@/config/chains";
@@ -357,6 +358,18 @@ export const SwapForm = () => {
       setAllowZeroSwap(true);
       return;
     }
+
+    // Track swap initiation
+    posthog.capture("swap_initiated", {
+      token0: token0.symbol,
+      token1: token1.symbol,
+      token0Amount,
+      token1Estimated: token1Amount,
+      usdPriceToken0,
+      usdPriceToken1,
+      isSwappingBaseAsset,
+      chainId: expectedChainId,
+    });
 
     router.push(`/swap/confirm`);
   };

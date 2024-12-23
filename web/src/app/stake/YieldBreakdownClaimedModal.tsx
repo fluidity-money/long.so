@@ -1,4 +1,6 @@
 import { useStakeWelcomeBackStore } from "@/stores/useStakeWelcomeBackStore";
+import { useEffect } from "react";
+import posthog from "@/config/posthog";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { motion } from "framer-motion";
@@ -11,6 +13,15 @@ export const YieldBreakdownClaimedModal = () => {
     useStakeWelcomeBackStore();
 
   const { isLtSm } = useMediaQuery();
+
+  // Track modal open/close
+  useEffect(() => {
+    if (yieldBreakdownClaimed && !isLtSm) {
+      posthog.capture("modal_opened", { modal: "YieldBreakdownClaimedModal" });
+    } else if (!yieldBreakdownClaimed) {
+      posthog.capture("modal_closed", { modal: "YieldBreakdownClaimedModal" });
+    }
+  }, [yieldBreakdownClaimed, isLtSm]);
 
   return (
     <>
@@ -37,7 +48,13 @@ export const YieldBreakdownClaimedModal = () => {
                         </div>
                         <Button
                           variant="secondary"
-                          onClick={() => setYieldBreakdownClaimed(false)}
+                          onClick={() => {
+                            posthog.capture("modal_closed", {
+                              modal: "YieldBreakdownClaimedModal",
+                              trigger: "esc_button",
+                            });
+                            setYieldBreakdownClaimed(false);
+                          }}
                           size={"esc"}
                         >
                           Esc
@@ -58,13 +75,25 @@ export const YieldBreakdownClaimedModal = () => {
                       </div>
 
                       <div className="mt-[26px] flex w-full flex-row gap-2">
-                        <Button variant="outline" className="flex-1 text-2xs">
+                        <Button
+                          variant="outline"
+                          className="flex-1 text-2xs"
+                          onClick={() => {
+                            posthog.capture("yield_add_to_wallet_clicked", {
+                              modal: "YieldBreakdownClaimedModal",
+                            });
+                          }}
+                        >
                           Add to Your Wallet
                         </Button>
                         <Button
                           variant="outline"
                           className="flex-1 text-2xs"
                           onClick={() => {
+                            posthog.capture("modal_closed", {
+                              modal: "YieldBreakdownClaimedModal",
+                              trigger: "done_button",
+                            });
                             setYieldBreakdownClaimed(false);
                           }}
                         >

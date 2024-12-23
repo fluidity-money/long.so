@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import posthog from "@/config/posthog";
 import { cn } from "@/lib/utils";
 import { useStakeStore } from "@/stores/useStakeStore";
 import TokenIridescent from "@/assets/icons/token-iridescent.svg";
@@ -258,6 +259,19 @@ export const ConfirmStake = ({
   );
 
   const handlePositionAction = useCallback(() => {
+    // Track LP confirmation attempt
+    posthog.capture("lp_confirmed", {
+      mode,
+      positionId: positionId ?? undefined,
+      token0: token0.symbol,
+      token1: token1.symbol,
+      token0Amount,
+      token1Amount,
+      isVesting,
+      isVested,
+      chainId: expectedChainId,
+    });
+
     const createPosition = () => {
       if (
         tickLower === undefined ||
@@ -328,11 +342,17 @@ export const ConfirmStake = ({
     tickSpacing,
     token0AmountRaw,
     token0.address,
+    token0.symbol,
+    token1.symbol,
+    token0Amount,
+    token1Amount,
     token1AmountRaw,
     writeContractProxyVestIncr,
     positionId,
     positionHandlerContract.address,
     positionHandlerContract.abi,
+    isVested,
+    expectedChainId,
   ]);
 
   // once token is divested, continue to updating

@@ -1,4 +1,6 @@
 import { useStakeWelcomeBackStore } from "@/stores/useStakeWelcomeBackStore";
+import { useEffect } from "react";
+import posthog from "@/config/posthog";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { motion } from "framer-motion";
 import { CampaignBanner } from "@/components/CampaignBanner";
@@ -10,6 +12,15 @@ import Token from "@/assets/icons/token.svg";
 
 export const WelcomeModal = () => {
   const { welcome, setWelcome, setYieldBreakdown } = useStakeWelcomeBackStore();
+
+  // Track modal open/close
+  useEffect(() => {
+    if (welcome) {
+      posthog.capture("modal_opened", { modal: "WelcomeModal" });
+    } else {
+      posthog.capture("modal_closed", { modal: "WelcomeModal" });
+    }
+  }, [welcome]);
 
   return (
     <>
@@ -40,7 +51,13 @@ export const WelcomeModal = () => {
                       </div>
                       <Button
                         variant="secondary"
-                        onClick={() => setWelcome(false)}
+                        onClick={() => {
+                          posthog.capture("modal_closed", {
+                            modal: "WelcomeModal",
+                            trigger: "esc_button",
+                          });
+                          setWelcome(false);
+                        }}
                         size={"esc"}
                       >
                         Esc
@@ -117,6 +134,9 @@ export const WelcomeModal = () => {
                         variant="iridescent"
                         className="h-[37px] w-full"
                         onClick={() => {
+                          posthog.capture("yield_claim_initiated", {
+                            modal: "WelcomeModal",
+                          });
                           setWelcome(false);
                           setYieldBreakdown(true);
                         }}

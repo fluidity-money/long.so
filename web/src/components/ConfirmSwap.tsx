@@ -29,6 +29,7 @@ import { RewardsBreakdown } from "./RewardsBreakdown";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { TokenIcon } from "./TokenIcon";
 import Gas from "@/assets/icons/gas.svg";
+import posthog from "@/config/posthog";
 
 export const ConfirmSwap = () => {
   const router = useRouter();
@@ -184,6 +185,18 @@ export const ConfirmSwap = () => {
   };
 
   const performSwap = useCallback(() => {
+    // Track swap execution attempt
+    posthog.capture("swap_executed", {
+      token0: token0.symbol,
+      token1: token1.symbol,
+      token0Amount,
+      token1Amount,
+      usdPriceToken0,
+      usdPriceToken1,
+      isSwappingBaseAsset,
+      chainId: expectedChainId,
+    });
+
     if (isSwappingBaseAsset) {
       // if one of the assets is fusdc, use swap1
       writeContractSwap({
@@ -219,8 +232,15 @@ export const ConfirmSwap = () => {
     ammContract,
     token0AmountRaw,
     token0.address,
+    token0.symbol,
     token1.address,
+    token1.symbol,
+    token0Amount,
+    token1Amount,
+    usdPriceToken0,
+    usdPriceToken1,
     fUSDC.address,
+    expectedChainId,
   ]);
 
   const approve = useCallback(() => {
@@ -351,6 +371,20 @@ export const ConfirmSwap = () => {
 
   // success
   if (swapResult.data) {
+    // Track successful swap completion
+    posthog.capture("swap_completed", {
+      token0: token0.symbol,
+      token1: token1.symbol,
+      token0Amount,
+      token1Amount,
+      txHash: swapData,
+      usdPriceToken0,
+      usdPriceToken1,
+      isSwappingBaseAsset,
+      chainId: expectedChainId,
+      swapAmountReceived: swapAmountReceived?.toString(),
+    });
+
     return (
       <Success
         onDone={() => {

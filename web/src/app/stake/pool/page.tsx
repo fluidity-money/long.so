@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
+import posthog from "@/config/posthog";
 import { SwapPro } from "@/components/SwapPro";
 import { useHotkeys } from "react-hotkeys-hook";
 import Token from "@/assets/icons/token.svg";
@@ -349,6 +350,14 @@ export default function PoolPage() {
 
   const collect = useCallback(
     (id: bigint) => {
+      // Track LP rewards collection attempt
+      posthog.capture("lp_rewards_collection_initiated", {
+        positionId: id.toString(),
+        poolId: token0.address,
+        chainId: expectedChainId,
+        hasLeoRewards: !!unclaimedLeoRewardsData?.result,
+      });
+
       if (unclaimedLeoRewardsData?.result)
         writeContractCollect({
           address: leoContract.address,
@@ -374,11 +383,20 @@ export default function PoolPage() {
       unclaimedLeoRewardsData?.result,
       leoContract,
       liquidityCampaigns,
+      expectedChainId,
     ],
   );
 
   const vestPosition = useCallback(
     (id: bigint) => {
+      // Track position vesting attempt
+      posthog.capture("lp_position_vesting_initiated", {
+        positionId: id.toString(),
+        poolId: token0.address,
+        chainId: expectedChainId,
+        userAddress: address,
+      });
+
       address &&
         writeContractVestPosition({
           address: leoContract.address,
@@ -393,6 +411,7 @@ export default function PoolPage() {
       leoContract.abi,
       token0.address,
       address,
+      expectedChainId,
     ],
   );
 
@@ -441,12 +460,27 @@ export default function PoolPage() {
   // update local position when vesting is completed
   useEffect(() => {
     if (position && vestPositionResult.isSuccess) {
+      // Track successful position vesting
+      posthog.capture("lp_position_vesting_completed", {
+        positionId: position.positionId,
+        poolId: token0.address,
+        chainId: expectedChainId,
+        userAddress: address,
+      });
+
       updatePositionLocal({
         ...position,
         isVested: true,
       });
     }
-  }, [updatePositionLocal, vestPositionResult.isSuccess, position]);
+  }, [
+    updatePositionLocal,
+    vestPositionResult.isSuccess,
+    position,
+    token0.address,
+    expectedChainId,
+    address,
+  ]);
 
   // reset callbacks when switching positions
   useEffect(() => {
