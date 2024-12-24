@@ -210,6 +210,7 @@ export const SwapForm = () => {
       query: {
         retry: false,
         retryOnMount: false,
+        enabled: isSwap1,
       },
     });
 
@@ -280,6 +281,7 @@ export const SwapForm = () => {
       query: {
         retry: false,
         retryOnMount: false,
+        enabled: !isSwap1,
       },
     });
 
