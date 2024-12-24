@@ -73,7 +73,7 @@ const SegmentedControl = <T extends string>({
         {segments?.map((item: Segment<T>, i: number) => (
           <div
             key={item.value}
-            className={"relative z-10 w-full text-center"}
+            className={"relative z-10 w-full select-none text-center"}
             ref={item.ref}
           >
             <input

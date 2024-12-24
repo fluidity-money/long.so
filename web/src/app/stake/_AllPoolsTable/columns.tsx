@@ -26,11 +26,11 @@ export type Pool = {
 export const columns: ColumnDef<Pool>[] = [
   {
     accessorKey: "tokens",
-    header: "Pair",
+    header: () => <div className="select-none">Pair</div>,
     cell: ({ row }) => {
       return (
         <Link href={`/stake/pool?id=${row.original.id}`}>
-          <Badge className="h-[35.61px] cursor-pointer gap-1 pl-1 text-2xs md:text-xs">
+          <Badge className="h-[35.61px] cursor-pointer select-none gap-1 pl-1 text-2xs md:text-xs">
             <div className={"flex flex-row items-center"}>
               <TokenIcon
                 src={row.original.tokens[0].icon}
@@ -52,7 +52,7 @@ export const columns: ColumnDef<Pool>[] = [
     header: ({ column }) => {
       return (
         <div
-          className="flex cursor-pointer flex-row items-center"
+          className="flex cursor-pointer select-none flex-row items-center"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           TVL
@@ -69,7 +69,7 @@ export const columns: ColumnDef<Pool>[] = [
     header: ({ column }) => {
       return (
         <div
-          className="flex cursor-pointer flex-row items-center"
+          className="flex cursor-pointer select-none flex-row items-center"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Fees
@@ -86,7 +86,7 @@ export const columns: ColumnDef<Pool>[] = [
     header: ({ column }) => {
       return (
         <div
-          className="flex cursor-pointer flex-row items-center"
+          className="flex cursor-pointer select-none flex-row items-center"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Volume
@@ -103,7 +103,7 @@ export const columns: ColumnDef<Pool>[] = [
     header: ({ column }) => {
       return (
         <div
-          className="flex cursor-pointer flex-row items-center"
+          className="flex cursor-pointer select-none flex-row items-center"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Rewards
@@ -128,7 +128,7 @@ export const columns: ColumnDef<Pool>[] = [
     header: ({ column }) => {
       return (
         <div
-          className="flex cursor-pointer flex-row items-center"
+          className="flex cursor-pointer select-none flex-row items-center"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           APR
@@ -142,7 +142,7 @@ export const columns: ColumnDef<Pool>[] = [
   },
   {
     id: "action",
-    header: "Action",
+    header: () => <div className="select-none">Action</div>,
     cell: ({ row }) => {
       return (
         <div className="flex flex-row gap-2 group-hover:invert">

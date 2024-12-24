@@ -148,7 +148,7 @@ const Menu: React.FC<MenuProps> = ({
       : "light";
 
   return (
-    <div className={cn("flex flex-row gap-3 rounded", className)}>
+    <div className={cn("flex select-none flex-row gap-3 rounded", className)}>
       <LayoutGroup id={id}>
         {children.map((item, i) => {
           return (

@@ -499,7 +499,7 @@ export const MyPositions = () => {
         {pools && showClaimAllYield && pools.length > 0 && (
           <div className="flex flex-1 flex-col items-center">
             <Button
-              className="w-full text-3xs text-black md:text-xs"
+              className="w-full select-none text-3xs text-black md:text-xs"
               variant={collectError ? "destructive" : "iridescent"}
               disabled={collectAllYieldButtonDisabled}
               size="sm"
@@ -531,7 +531,7 @@ export const MyPositions = () => {
         )}
         <Link href={"/stake/pool/create"} className="flex-1">
           <Button
-            className="w-full text-3xs md:text-xs"
+            className="w-full select-none text-3xs md:text-xs"
             variant="secondary"
             size="sm"
           >
