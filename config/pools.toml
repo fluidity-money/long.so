@@ -7,7 +7,7 @@ classification = "STABLECOIN"
 image = "/icons/fUSDC.svg"
 
 [0xde104342B32BCa03ec995f999181f7Cf1fFc04d7]
-displayed = false
+displayed = true
 classification = "VOLATILE"
 image = "/icons/ethereum-eth-logo.svg"
 price = "3802.12"
