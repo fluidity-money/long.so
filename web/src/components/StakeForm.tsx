@@ -119,12 +119,14 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     setToken0,
     token0Amount,
     token0AmountRaw,
+    token0AmountExceedsBalance,
     setToken0Amount,
     setToken0AmountRaw,
     token1,
     setToken1,
     token1Amount,
     token1AmountRaw,
+    token1AmountExceedsBalance,
     setToken1Amount,
     setToken1AmountRaw,
     priceLower,
@@ -338,8 +340,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         BigInt(token0AmountRaw),
       );
       const newToken1Amount = getAmount1ForLiquidity(sqa, sqp, liq);
-      if (token1Balance?.value && newToken1Amount > token1Balance.value) return;
-      setToken1AmountRaw(newToken1Amount.toString());
+      setToken1AmountRaw(
+        newToken1Amount.toString(),
+        token1Balance?.value.toString(),
+      );
     } else {
       if (!token1AmountRaw) return;
       // delta is a guard for same lower and upper ticks
@@ -350,8 +354,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         BigInt(token1AmountRaw),
       );
       const newToken0Amount = getAmount0ForLiquidity(sqb, sqp, liq);
-      if (token0Balance?.value && newToken0Amount > token0Balance.value) return;
-      setToken0AmountRaw(newToken0Amount.toString());
+      setToken0AmountRaw(
+        newToken0Amount.toString(),
+        token0Balance?.value.toString(),
+      );
     }
   }, [
     setToken0Amount,
@@ -370,13 +376,17 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   ]);
 
   const setMaxBalance = (token: TokenType) => {
-    token.address === token0.address
-      ? setToken0AmountRaw(
-          token0Balance?.value.toString() ?? token0Amount ?? "0",
-        )
-      : setToken1AmountRaw(
-          token1Balance?.value.toString() ?? token1Amount ?? "0",
-        );
+    if (token.address === token0.address) {
+      const balance = token0Balance?.value.toString();
+      if (!balance) return;
+      setToken0AmountRaw(balance);
+      setQuotedToken("token0");
+    } else if (token.address === token1.address) {
+      const balance = token1Balance?.value.toString();
+      if (!balance) return;
+      setToken1AmountRaw(balance);
+      setQuotedToken("token1");
+    }
   };
 
   const usdPriceToken0 =
@@ -570,7 +580,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
             <div className="mt-[7px] flex w-full flex-row items-center justify-between gap-4">
               <Input
-                className="-ml-2 border-0 bg-black pl-2 text-2xl"
+                className={cn(
+                  "-ml-2 border-0 bg-black pl-2 text-2xl",
+                  token0AmountExceedsBalance && "text-destructive",
+                )}
                 autoFocus
                 placeholder="0"
                 variant={"no-ring"}
@@ -634,7 +647,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
               <div className="mt-[7px] flex w-full flex-row items-center justify-between">
                 <Input
-                  className="-ml-2 border-0 bg-black pl-2 text-2xl"
+                  className={cn(
+                    "-ml-2 border-0 bg-black pl-2 text-2xl",
+                    token1AmountExceedsBalance && "text-destructive",
+                  )}
                   autoFocus
                   placeholder="0"
                   variant={"no-ring"}
@@ -1190,7 +1206,11 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               <Button
                 className="w-full"
                 onClick={onSubmit}
-                disabled={!token0Amount}
+                disabled={
+                  !token0Amount ||
+                  token0AmountExceedsBalance ||
+                  token1AmountExceedsBalance
+                }
               >
                 {mode === "new" && isVesting
                   ? "Stake with liquidity rewards"

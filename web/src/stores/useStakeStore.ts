@@ -30,12 +30,15 @@ interface StakeStore {
   token0AmountRaw: string;
   token1AmountRaw: string;
 
+  token0AmountExceedsBalance: boolean;
+  token1AmountExceedsBalance: boolean;
+
   // parse and set from a display amount
   setToken0Amount: (amount: string, balanceRaw?: string) => void;
   setToken1Amount: (amount: string, balanceRaw?: string) => void;
 
-  setToken0AmountRaw: (amountRaw: string) => void;
-  setToken1AmountRaw: (amountRaw: string) => void;
+  setToken0AmountRaw: (amountRaw: string, balanceRaw?: string) => void;
+  setToken1AmountRaw: (amountRaw: string, balanceRaw?: string) => void;
 
   tickLower: number | undefined;
   tickUpper: number | undefined;
@@ -109,29 +112,44 @@ export const useStakeStore = create<StakeStore>((set) => ({
   token1Amount: "",
   token0AmountRaw: "",
   token1AmountRaw: "",
-  setToken0AmountRaw: (amountRaw: string) =>
+  token0AmountExceedsBalance: false,
+  token1AmountExceedsBalance: false,
+  setToken0AmountRaw: (amountRaw: string, balanceRaw?: string) => {
+    if (balanceRaw && BigInt(amountRaw) > BigInt(balanceRaw)) {
+      set({ token0AmountExceedsBalance: true });
+      return;
+    }
     set(({ token0 }) => ({
+      token0AmountExceedsBalance: false,
       token0AmountRaw: amountRaw,
       token0Amount: getFormattedStringFromTokenAmount(
         amountRaw,
         token0.decimals,
       ),
-    })),
-  setToken1AmountRaw: (amountRaw: string) =>
+    }));
+  },
+  setToken1AmountRaw: (amountRaw: string, balanceRaw?: string) => {
+    if (balanceRaw && BigInt(amountRaw) > BigInt(balanceRaw)) {
+      set({ token1AmountExceedsBalance: true });
+      return;
+    }
     set(({ token1 }) => ({
+      token1AmountExceedsBalance: false,
       token1AmountRaw: amountRaw,
       token1Amount: getFormattedStringFromTokenAmount(
         amountRaw,
         token1.decimals,
       ),
-    })),
-
+    }));
+  },
   setToken0Amount: (amount, balanceRaw) => {
     set(({ token0, token0Amount, setToken0AmountRaw }) => {
       const validNumber =
         (!amount.includes(" ") && !isNaN(Number(amount))) || amount === ".";
       // update display amount if `amount` is valid as a display number
-      if (!validNumber) return { token0Amount };
+      if (!validNumber)
+        return { token0Amount, token0AmountExceedsBalance: false };
+      let exceedsBalance = false;
       try {
         const amountRaw = getTokenAmountFromFormattedString(
           amount,
@@ -140,8 +158,12 @@ export const useStakeStore = create<StakeStore>((set) => ({
         // update raw amount if it doesn't exceed balance
         if (!balanceRaw || amountRaw <= BigInt(balanceRaw))
           setToken0AmountRaw(amountRaw.toString());
+        else exceedsBalance = true;
       } catch {}
-      return { token0Amount: amount };
+      return {
+        token0Amount: amount,
+        token0AmountExceedsBalance: exceedsBalance,
+      };
     });
   },
   setToken1Amount: (amount, balanceRaw) => {
@@ -150,6 +172,7 @@ export const useStakeStore = create<StakeStore>((set) => ({
         (!amount.includes(" ") && !isNaN(Number(amount))) || amount === ".";
       // update display amount if `amount` is valid as a display number
       if (!validNumber) return { token1Amount };
+      let exceedsBalance = false;
       try {
         const amountRaw = getTokenAmountFromFormattedString(
           amount,
@@ -158,8 +181,12 @@ export const useStakeStore = create<StakeStore>((set) => ({
         // update raw amount if it doesn't exceed balance
         if (!balanceRaw || amountRaw <= BigInt(balanceRaw))
           setToken1AmountRaw(amountRaw.toString());
+        else exceedsBalance = true;
       } catch {}
-      return { token1Amount: amount };
+      return {
+        token1Amount: amount,
+        token1AmountExceedsBalance: exceedsBalance,
+      };
     });
   },
 
