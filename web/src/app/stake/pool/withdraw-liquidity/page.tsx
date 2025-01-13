@@ -32,8 +32,7 @@ export default function WithdrawLiquidity() {
   const router = useRouter();
   const params = useSearchParams();
 
-  const positionId_ = params.get("positionId");
-  const positionId = positionId_ ? Number(positionId_) : undefined;
+  const positionId = params.get("positionId");
 
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
