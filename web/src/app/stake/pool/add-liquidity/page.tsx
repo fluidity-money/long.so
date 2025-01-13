@@ -6,7 +6,8 @@ import { useEffect } from "react";
 
 export default function CreatePoolPage() {
   const params = useSearchParams();
-  const positionId = Number(params.get("positionId"));
+  const positionId_ = params.get("positionId");
+  const positionId = positionId_ ? Number(positionId_) : undefined;
   const poolId = params.get("id");
   const router = useRouter();
 

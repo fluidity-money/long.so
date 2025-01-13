@@ -88,7 +88,8 @@ export default function PoolPage() {
   // get the id from the query params
   const params = useSearchParams();
   const id = params.get("id");
-  const positionIdParam = Number(params.get("positionId"));
+  const positionId_ = params.get("positionId");
+  const positionIdParam = positionId_ ? Number(positionId_) : undefined;
 
   const { positions: positionsData_, updatePositionLocal } = usePositions();
   const positionsData = useMemo(
