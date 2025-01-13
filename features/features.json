@@ -33,5 +33,5 @@
 	"ui show banners": true,
 	"ui show leo": true,
 	"ui show pool apr": true,
-	"ui is mainnet enabled": false
+	"ui is mainnet enabled": true
 }
