@@ -80,24 +80,28 @@ fn test_swap() -> Result<(), Vec<u8>> {
             true,
             I256::unchecked_from(-10),
             test_utils::encode_sqrt_price(60, 1),
+            true,
         )?;
 
         storage.swap(
             true,
             I256::unchecked_from(10),
             test_utils::encode_sqrt_price(50, 1),
+            true,
         )?;
 
         storage.swap(
             false,
             I256::unchecked_from(10),
             test_utils::encode_sqrt_price(120, 1),
+            true,
         )?;
 
         storage.swap(
             false,
             I256::unchecked_from(-10000),
             test_utils::encode_sqrt_price(120, 1),
+            true,
         )?;
 
         Ok(())
@@ -156,7 +160,7 @@ fn test_pool_swaps_reverts() {
     test_utils::with_storage::<_, StoragePool, _>(None, None, None, |pool| {
         let sqrt_price = test_utils::encode_sqrt_price(1, 1);
 
-        match pool.swap(true, I256::unchecked_from(1), sqrt_price) {
+        match pool.swap(true, I256::unchecked_from(1), sqrt_price, true) {
             Err(r) => assert_eq!(
                 Error::PoolDisabled.to_string(),
                 String::from_utf8(r).unwrap()
@@ -168,7 +172,12 @@ fn test_pool_swaps_reverts() {
 
         pool.enabled.set(true);
 
-        match pool.swap(true, I256::unchecked_from(1), sqrt_price + U256::from(1)) {
+        match pool.swap(
+            true,
+            I256::unchecked_from(1),
+            sqrt_price + U256::from(1),
+            true,
+        ) {
             Err(r) => assert_eq!(
                 Error::PriceLimitTooLow.to_string(),
                 String::from_utf8(r).unwrap()
@@ -176,7 +185,12 @@ fn test_pool_swaps_reverts() {
             _ => panic!("expected PriceLimitTooLow"),
         }
 
-        match pool.swap(true, I256::unchecked_from(1), tick_math::MIN_SQRT_RATIO) {
+        match pool.swap(
+            true,
+            I256::unchecked_from(1),
+            tick_math::MIN_SQRT_RATIO,
+            true,
+        ) {
             Err(r) => assert_eq!(
                 Error::PriceLimitTooLow.to_string(),
                 String::from_utf8(r).unwrap()
@@ -184,7 +198,12 @@ fn test_pool_swaps_reverts() {
             _ => panic!("expected PriceLimitTooLow"),
         }
 
-        match pool.swap(false, I256::unchecked_from(1), tick_math::MAX_SQRT_RATIO) {
+        match pool.swap(
+            false,
+            I256::unchecked_from(1),
+            tick_math::MAX_SQRT_RATIO,
+            true,
+        ) {
             Err(r) => assert_eq!(
                 Error::PriceLimitTooHigh.to_string(),
                 String::from_utf8(r).unwrap()
@@ -192,7 +211,12 @@ fn test_pool_swaps_reverts() {
             _ => panic!("expected PriceLimitTooHigh"),
         }
 
-        match pool.swap(false, I256::unchecked_from(1), sqrt_price - U256::from(1)) {
+        match pool.swap(
+            false,
+            I256::unchecked_from(1),
+            sqrt_price - U256::from(1),
+            true,
+        ) {
             Err(r) => assert_eq!(
                 Error::PriceLimitTooHigh.to_string(),
                 String::from_utf8(r).unwrap()
@@ -357,7 +381,7 @@ fn test_swap_inside_liq_range() -> Result<(), Vec<u8>> {
             pool.update_position(pos_id, delta).unwrap();
 
             let (a0, _a1, _final_tick) = pool
-                .swap(true, I256::unchecked_from(*swap_amount), U256::MAX)
+                .swap(true, I256::unchecked_from(*swap_amount), U256::MAX, true)
                 .unwrap();
 
             assert!(a0 == I256::unchecked_from(*swap_amount));
