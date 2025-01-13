@@ -61,7 +61,7 @@ price = "1"
 [0xA2555701754464d32D9624149E3fDb459F3c8DE4]
 displayed = true
 classification = "VOLATILE"
-image =  "/icons/ARB.svg"
+image =  "/icons/arbitrum-arb-logo.svg"
 
 ### WBTC
 [0x6e142cDaeFA4BA7786e8d1Ff74968Db67C3b910d]
