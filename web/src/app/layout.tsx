@@ -119,6 +119,15 @@ export default async function RootLayout({
                     Docs/addresses
                   </a>
                 </small>
+                <small>
+                  <a
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    href="https://bridge.superposition.so"
+                  >
+                    Bridge to Superposition
+                  </a>
+                </small>
               </div>
               <div className="flex items-center gap-x-[10px]">
                 <small>
