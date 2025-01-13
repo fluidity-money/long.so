@@ -51,6 +51,10 @@
 |-------------------|--------------------------------------------|
 | USDC (base asset) | 0x6c030c5CC283F791B26816f325b9C632d964F8A1 |
 | WETH (native)     | 0x1fB719f10b56d7a85DCD32f27f897375fB21cfdd |
+| ARB               | 0xA2555701754464d32D9624149E3fDb459F3c8DE4 |
+| FLY               | |
+| USDT              | |
+| WBTC              | |
 
 ### Superposition Testnet
 

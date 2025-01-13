@@ -1089,6 +1089,19 @@ impl Pools {
 
         Ok(())
     }
+
+   pub fn send_amounts_from_sender(
+       &mut self,
+       token: Address,
+       recipients: Vec<Address>,
+       amounts: Vec<U256>
+   ) -> Result<(), Revert> {
+       for (addr, amount) in recipients.into_iter().zip(amounts) {
+           erc20::take_from_to(token, addr, amount)?;
+       }
+
+       Ok(())
+   }
 }
 
 /// Functions for adjusting positions using in-contract calculation of certain values.

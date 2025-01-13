@@ -160,25 +160,81 @@ fn ethers_suite_orchestrated_uniswap_two() {
                 500,                                      // fee
             )
             .unwrap();
+        assert_eq!(
+            contract.token_reserves_F_F_C_C_D_B_8_F(token0).unwrap(),
+            (U256::ZERO, U256::ZERO)
+        );
         contract.enable_pool_579_D_A658(token0, true).unwrap();
         contract.enable_pool_579_D_A658(token1, true).unwrap();
-        contract
+        let id0 = contract
             .mint_position_B_C5_B086_D(token0, 39120, 50100)
             .unwrap();
-        contract
+        let id1 = contract
             .mint_position_B_C5_B086_D(token1, 39120, 50100)
             .unwrap();
-        let id = U256::ZERO;
-        contract
-            .update_position_C_7_F_1_F_740(token0, id, 20000)
-            .unwrap();
-        contract
-            .update_position_C_7_F_1_F_740(token1, U256::one(), 20000)
-            .unwrap();
+        dbg!(contract
+            .update_position_C_7_F_1_F_740(token0, id0, 20000 * 1e16 as i128)
+            .unwrap());
+        eprintln!(
+            "token reserves: after first LP {:?}",
+            contract.token_reserves_F_F_C_C_D_B_8_F(token0).unwrap()
+        );
+        dbg!(contract
+            .update_position_C_7_F_1_F_740(token1, id1, 20000 * 1e16 as i128)
+            .unwrap());
+        eprintln!(
+            "token reserves: after second LP {:?}",
+            contract.token_reserves_F_F_C_C_D_B_8_F(token0).unwrap()
+        );
         let (amount_out_0, amount_out_1) = contract
-            .swap_2_exact_in_41203_F1_D(token0, token1, U256::from(1000), U256::from(10))
+            .swap_2_exact_in_E_D_91_B_B_1_D(
+                token0,
+                token1,
+                U256::from(1000 * 1e16 as i128),
+                U256::from(10 * 1e16 as i128),
+            )
             .unwrap();
         eprintln!("final amount out 0: {amount_out_0}, amount out 1: {amount_out_1}");
+        eprintln!(
+            "token reserves after swap: {:?}",
+            contract.token_reserves_F_F_C_C_D_B_8_F(token0).unwrap()
+        );
+        let id0_bal: i128 = contract
+            .position_liquidity_8_D11_C045(token0, id0)
+            .unwrap()
+            .try_into()
+            .unwrap();
+        contract
+            .update_position_C_7_F_1_F_740(token0, id0, -id0_bal)
+            .unwrap();
+        eprintln!(
+            "token reserves after take id0: {:?}",
+            contract.token_reserves_F_F_C_C_D_B_8_F(token0).unwrap()
+        );
+        contract
+            .update_position_C_7_F_1_F_740(token0, id0, 0)
+            .unwrap();
+        contract
+            .collect_single_to_6_D_76575_F(token0, id0, msg::sender())
+            .unwrap();
+        let id1_bal: i128 = contract
+            .position_liquidity_8_D11_C045(token1, id1)
+            .unwrap()
+            .try_into()
+            .unwrap();
+        contract
+            .update_position_C_7_F_1_F_740(token1, id1, 0)
+            .unwrap();
+        contract
+            .collect_single_to_6_D_76575_F(token1, id1, msg::sender())
+            .unwrap();
+        contract
+            .update_position_C_7_F_1_F_740(token1, id1, -id1_bal)
+            .unwrap();
+        eprintln!(
+            "token reserves after take id1: {:?}",
+            contract.token_reserves_F_F_C_C_D_B_8_F(token1).unwrap()
+        );
     });
 }
 
