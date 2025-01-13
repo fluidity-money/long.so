@@ -38,12 +38,45 @@ classification = "VOLATILE"
 
 ## MAINNET
 
+### fUSDC
 [0x6c030c5CC283F791B26816f325b9C632d964F8A1]
 displayed = true
 classification = "STABLECOIN"
 image = "/icons/fUSDC.svg"
 
+### ETH
 [0x1fb719f10b56d7a85dcd32f27f897375fb21cfdd]
 displayed = true
 classification = "VOLATILE"
 image = "/icons/ethereum-eth-logo.svg"
+
+### USDC
+[0xBb762989DE0bcfCA4db5F3A51926C59cC43243cD]
+displayed = true
+classification = "STABLECOIN"
+image = "/icons/usd-coin-usdc-logo.svg"
+price = "1"
+
+### ARB
+[0xA2555701754464d32D9624149E3fDb459F3c8DE4]
+displayed = true
+classification = "VOLATILE"
+image =  "/icons/ARB.svg"
+
+### WBTC
+[0x6e142cDaeFA4BA7786e8d1Ff74968Db67C3b910d]
+displayed = true
+classification = "VOLATILE"
+image = "/icons/wrapped-bitcoin-wbtc-icon.svg"
+
+### FLY
+[0x80eFAD50D395671C13C4b1FA2969f7a7Aa9EF7b3]
+displayed = true
+classification = "VOLATILE"
+image = "/icons/FLY ICON.svg"
+
+### USDT
+[0xa5a817116109C7a69e37936B8d46E7bE6F55FC39]
+displayed = true
+classification = "STABLECOIN"
+image = "/icons/tether-usdt-logo.svg"
