@@ -418,6 +418,9 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
       setPriceLower(priceLower, token0.decimals);
       setPriceUpper(priceHigher, token0.decimals);
+      // always set the ticks, since the display price might be invalid due to bigint/decimal interop
+      positionData?.lower && setTickLower(positionData.lower);
+      positionData?.upper && setTickUpper(positionData.upper);
     }
   }, [
     mode,
@@ -426,6 +429,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     fUSDC.decimals,
     setPriceLower,
     setPriceUpper,
+    setTickLower,
+    setTickUpper,
     token0.decimals,
   ]);
 
