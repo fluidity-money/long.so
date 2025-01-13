@@ -65,7 +65,7 @@ export const allTestnets = [superpositionTestnet] as const;
 
 export const allMainnets = [superpositionMainnet] as const;
 
-export const allChains = [...allTestnets, ...allMainnets] as const;
+export const allChains = [...allMainnets, ...allTestnets] as const;
 
 declare module "wagmi" {
   function useChainId(): (typeof allChains)[number]["id"];
