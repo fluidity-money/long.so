@@ -17,21 +17,23 @@
 
 #### AMM contract deployments
 
-|          Deployment name         |              Deployment address            |
-|----------------------------------|--------------------------------------------|
-| Longtail AMM                     | 0x452D796b656D3720f2d06B3439eF95899f0db755 |
-| Longtail NFT manager             | 0x42f104ed693792c858D03f987DfFB30e39cC1ce9 |
-| Permit2 router                   | 0x244517Dc59943E8CdFbD424Bdb3262c5f04a1387 |
-| Swaps implementation             | 0xfc66c25dbdb0606e7f9ca1d2754eb0a0f8306da9 |
-| Swaps permit2 A implementation   | 0x0b319db00d07c8fadfaaef13c910141a5da0aa8f |
-| Quotes implementation            | 0x05c1702aa4e5590970884645eae4bfa1b5210b27 |
-| Positions implementation         | 0xb7a2930e66d84da74cdcfe4f97fae9fc8f1114e8 |
-| Update position implementation   | 0x3079a40a0e0eaeef4d5d74fe22063b35844b3761 |
-| Admin implementation             | 0xc0b176592d1f7abe464d3f27aec6d9f27bb5f6e1 |
-| Adjust position A implementation | 0xff634a3cb97bcf8cbaf8d2379afc8360c541218a |
-| Swaps permit2 B implementation   | 0xe3bafbd8f86800bac86025b2903335b32aa6f51f |
-| Adjust position B implementation | 0xb4647415a644f6a09c84a2af6458d1d38d6e9d80 |
-| Position Handler                 | 0x46f9dea606a3D5890aD6d36C64acD55C26C51B8a |
+|        Deployment name         |              Deployment address            |
+|--------------------------------|--------------------------------------------|
+| Longtail AMM                   | 0xF3334049A3ce7e890bd4f8C6a0FBC70e38fd3746 |
+| Longtail NFT manager           |  |
+| Position Handler               |  |
+| Permit2 router                 |  |
+| Swaps A implementation         | 0x5ad9286c0f0f306022d172d32b27f1b28a8ffc3a |
+| Swaps B implementation         | 0x7d0d7d04b2ac05c159972612ef5bf384116c4cf7 |
+| Swaps permit2 A implementation | 0x0000000000000000000000000000000000000000 |
+| Quotes A implementation        | 0xcb937ecaf8cf29dd9bdb45418d17cfee74673535 |
+| Quotes B implementation        | 0x0314353a14099895d2510483b18b52e7bd1a2528 |
+| Positions implementation       | 0x206ded2b8c44a0aa08a09845da274059544b23d4 |
+| Update position implementation | 0xfd066c8a3dfc1626473aa86a793e6bd73963ce4c |
+| Admin implementation           | 0x1292733b7936ed63b4aec201f9fd4c68be2d7c71 |
+| Adjust position A impl         | 0xc2311bef0c737d658a4cf3a8022bd907eb584592 |
+| Swaps permit2 B implementation | 0x0000000000000000000000000000000000000000 |
+| Adjust position B impl         | 0xffb57bb85e00c8ddd80cf45a91e11628ceabab89 |
 
 #### Administrative deployments
 
