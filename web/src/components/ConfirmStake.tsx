@@ -14,7 +14,7 @@ import {
 } from "wagmi";
 import useWriteContract from "@/fixtures/wagmi/useWriteContract";
 import { sqrtPriceX96ToPrice, snapTickToSpacing } from "@/lib/math";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { Hash } from "viem";
 import Confirm from "@/components/sequence/Confirm";
 import { EnableSpending } from "@/components/sequence/EnableSpending";
@@ -30,6 +30,16 @@ import { TokenIcon } from "./TokenIcon";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usePositions } from "@/hooks/usePostions";
 import { superpositionMainnet, superpositionTestnet } from "@/config/chains";
+import { graphql, useFragment } from "@/gql";
+import { useGraphqlGlobal } from "@/hooks/useGraphql";
+
+export const ConfirmStakeFragment = graphql(`
+  fragment ConfirmStakeFragment on SeawaterPool {
+    APR {
+      total
+    }
+  }
+`);
 
 type ConfirmStakeProps =
   | {
@@ -91,6 +101,20 @@ export const ConfirmStake = ({
     multiSingleToken,
     feePercentage,
   } = useStakeStore();
+
+  const { data: dataGlobal } = useGraphqlGlobal();
+  // the selected pool
+  const pool = useMemo(
+    () =>
+      dataGlobal?.pools?.find(
+        (pool) =>
+          pool.address.toLowerCase() === token0.address.toLowerCase() ||
+          pool.address.toLowerCase() === token1.address.toLowerCase(),
+      ),
+    [dataGlobal?.pools, token0.address, token1.address],
+  );
+  const poolApr = useFragment(ConfirmStakeFragment, pool);
+  const stakeApr = Number(poolApr?.APR.total).toFixed(2);
 
   const { updatePositionLocal } = usePositions();
 
@@ -813,7 +837,7 @@ export const ConfirmStake = ({
                 <div className="mt-[15px] flex flex-row justify-between">
                   <div>APR</div>
                   <div className="iridescent rounded px-1 text-black">
-                    12.09%
+                    {stakeApr}%
                   </div>
                 </div>
 

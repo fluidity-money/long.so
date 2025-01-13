@@ -32,6 +32,7 @@ export const graphqlQueryGlobal = graphql(`
       ...SwapFormFragment
       ...StakeFormFragment
       ...TokensFragment
+      ...ConfirmStakeFragment
     }
   }
 `);
