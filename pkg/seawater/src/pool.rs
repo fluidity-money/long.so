@@ -280,6 +280,7 @@ impl StoragePool {
         zero_for_one: bool,
         amount: I256,
         mut price_limit: U256,
+        track_reserves: bool,
     ) -> Result<(I256, I256, i32), Revert> {
         assert_or!(self.enabled.get(), Error::PoolDisabled);
 
@@ -505,55 +506,57 @@ impl StoragePool {
             true => (amount - state.amount_remaining, state.amount_calculated),
             false => (state.amount_calculated, amount - state.amount_remaining),
         };
-        if !amount_0.is_zero() {
-            // Track the informational state of the liquidity amounts.
-            if amount_0.is_negative() {
-                self.token0_reserves.set(
-                    self.token0_reserves
-                        .get()
-                        .checked_sub(amount_0.abs().into_raw())
-                        .ok_or(Error::ReserveSub)?,
-                );
-            } else {
-                // Add to the token reserves without the fee.
-                self.token0_reserves.set(
-                    self.token0_reserves
-                        .get()
-                        .checked_add(
-                            crate::pool::full_math::mul_div(
-                                amount_0.into_raw(),
-                                U256::from(1e6 as u32 - fee),
-                                U256::from(1e6),
+        if track_reserves {
+            if !amount_0.is_zero() {
+                // Track the informational state of the liquidity amounts.
+                if amount_0.is_negative() {
+                    self.token0_reserves.set(
+                        self.token0_reserves
+                            .get()
+                            .checked_sub(amount_0.abs().into_raw())
+                            .ok_or(Error::ReserveSub)?,
+                    );
+                } else {
+                    // Add to the token reserves without the fee.
+                    self.token0_reserves.set(
+                        self.token0_reserves
+                            .get()
+                            .checked_add(
+                                crate::pool::full_math::mul_div(
+                                    amount_0.into_raw(),
+                                    U256::from(1e6 as u32 - fee),
+                                    U256::from(1e6),
+                                )
+                                .unwrap(),
                             )
-                            .unwrap(),
-                        )
-                        .ok_or(Error::ReserveAdd)?,
-                );
+                            .ok_or(Error::ReserveAdd)?,
+                    );
+                }
             }
-        }
-        if !amount_1.is_zero() {
-            if amount_1.is_negative() {
-                // Subtract the fee that was paid from the token reserves that we track here!
-                self.token1_reserves.set(
-                    self.token1_reserves
-                        .get()
-                        .checked_sub(amount_1.abs().into_raw())
-                        .ok_or(Error::ReserveSub)?,
-                );
-            } else {
-                self.token1_reserves.set(
-                    self.token1_reserves
-                        .get()
-                        .checked_add(
-                            crate::pool::full_math::mul_div(
-                                amount_1.into_raw(),
-                                U256::from(1e6 as u32 - fee),
-                                U256::from(1e6),
+            if !amount_1.is_zero() {
+                if amount_1.is_negative() {
+                    // Subtract the fee that was paid from the token reserves that we track here!
+                    self.token1_reserves.set(
+                        self.token1_reserves
+                            .get()
+                            .checked_sub(amount_1.abs().into_raw())
+                            .ok_or(Error::ReserveSub)?,
+                    );
+                } else {
+                    self.token1_reserves.set(
+                        self.token1_reserves
+                            .get()
+                            .checked_add(
+                                crate::pool::full_math::mul_div(
+                                    amount_1.into_raw(),
+                                    U256::from(1e6 as u32 - fee),
+                                    U256::from(1e6),
+                                )
+                                .unwrap(),
                             )
-                            .unwrap(),
-                        )
-                        .ok_or(Error::ReserveAdd)?,
-                );
+                            .ok_or(Error::ReserveAdd)?,
+                    );
+                }
             }
         }
 

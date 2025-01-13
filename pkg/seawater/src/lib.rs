@@ -174,7 +174,7 @@ impl Pools {
             pools
                 .pools
                 .setter(pool)
-                .swap(zero_for_one, amount, price_limit_x96)?;
+                .swap(zero_for_one, amount, price_limit_x96, true)?;
 
         // entirely reentrant safe because stylus
         // denies all reentrancy unless explicity allowed (which we don't)
@@ -221,6 +221,7 @@ impl Pools {
         to: Address,
         amount: U256,
         min_out: U256,
+        track_reserves: bool
     ) -> Result<(U256, U256, U256, I256, i32, i32), Revert> {
         assert_or!(from != to, Error::SamePool);
         assert_or!(!amount.is_zero(), Error::SwapIsZero);
@@ -235,6 +236,7 @@ impl Pools {
             amount,
             // swap with no price limit, since we use min_out instead
             tick_math::MIN_SQRT_RATIO + U256::one(),
+            track_reserves
         )?;
 
         // make this positive for exact in
@@ -247,6 +249,7 @@ impl Pools {
             false,
             interim_usdc_out,
             tick_math::MAX_SQRT_RATIO - U256::one(),
+            track_reserves
         )?;
 
         let amount_in = amount_in.abs_pos()?;
@@ -291,7 +294,7 @@ impl Pools {
             _interim_usdc_out,
             _final_tick_in,
             _final_tick_out,
-        ) = Self::swap_2_internal(pools, from, to, amount, min_out)?;
+        ) = Self::swap_2_internal(pools, from, to, amount, min_out, true)?;
 
         #[cfg(feature = "testing-dbg")]
         dbg!((
@@ -378,7 +381,7 @@ impl Pools {
         let swapped = self
             .pools
             .setter(pool)
-            .swap(zero_for_one, amount, price_limit_x96);
+            .swap(zero_for_one, amount, price_limit_x96, false);
 
         match swapped {
             Ok((amount_0, amount_1, _)) => {
@@ -419,7 +422,7 @@ impl Pools {
         amount: U256,
         min_out: U256,
     ) -> Result<(), Revert> {
-        let swapped = Pools::swap_2_internal(self, from, to, amount, min_out);
+        let swapped = Pools::swap_2_internal(self, from, to, amount, min_out, false);
 
         match swapped {
             Ok((_, _, amount_out, _, _, _)) => {

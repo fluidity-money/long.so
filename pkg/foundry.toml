@@ -3,6 +3,8 @@ src = "sol"
 out = "out"
 libs = ["lib"]
 via_ir = true
+optimizer = true
+optimizer_runs = 20_000
 
 [doc]
 out = "docs-out"
