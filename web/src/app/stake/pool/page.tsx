@@ -50,6 +50,9 @@ import config from "@/config";
 export type CampaignPrices = {
   [k: `0x${string}`]: { decimals: number; tokenPrice: bigint };
 };
+export type TokenPrices = {
+  [k: `0x${string}`]: bigint;
+};
 
 const ManagePoolFragment = graphql(`
   fragment ManagePoolFragment on SeawaterPool {

@@ -29,7 +29,7 @@ import { useContracts } from "@/config/contracts";
 import { simulateContract } from "wagmi/actions";
 import config from "@/config";
 import { getFormattedPriceFromUnscaledAmount } from "@/lib/amounts";
-import { CampaignPrices } from "./pool/page";
+import { CampaignPrices, TokenPrices } from "./pool/page";
 
 export const MyPositions = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
@@ -164,6 +164,50 @@ export const MyPositions = () => {
     unclaimedRewardsData?.result.length === 0 &&
     unclaimedLeoRewardsData?.result.campaignRewards.length !== 0;
 
+  // tokenPrices is the price of each token that has at least one position
+  const [tokenPrices, setTokenPrices] = useState<TokenPrices>({});
+  useEffect(() => {
+    (async () => {
+      const prices: TokenPrices = {};
+      if (!unclaimedRewardsData) return prices;
+      for (const positionToken of collectSeawaterArgs[0]) {
+        // already seen this token
+        if (positionToken in prices) continue;
+        // find token details
+        const token = getTokenFromAddress(positionToken);
+        if (!token) {
+          console.warn("Token not found, skipping!", positionToken);
+          continue;
+        }
+        // look up price
+        const { result: poolSqrtPriceX96 } = await simulateContract(
+          config.wagmiConfig,
+          {
+            address: ammContract.address,
+            abi: ammContract.abi,
+            functionName: "sqrtPriceX967B8F5FC5",
+            args: [token.address],
+          },
+        );
+        // store converted price
+        const tokenPrice = sqrtPriceX96ToPrice(
+          poolSqrtPriceX96,
+          token.decimals,
+        );
+        prices[positionToken] = tokenPrice;
+      }
+      setTokenPrices(prices);
+    })();
+  }, [
+    collectSeawaterArgs,
+    unclaimedRewardsData,
+    setTokenPrices,
+    ammContract.abi,
+    ammContract.address,
+    chainId,
+    getTokenFromAddress,
+  ]);
+
   // campaignTokenPrices is the price of each token used in a campaign for this position
   const [campaignTokenPrices, setCampaignTokenPrices] =
     useState<CampaignPrices>({});
@@ -253,6 +297,8 @@ export const MyPositions = () => {
           const token = getTokenFromAddress(nonVestedPositions[i].id);
           // this should never happen as nonVestedPositions is passed to collect
           if (!token) return acc;
+          const tokenPrice = tokenPrices[token.address];
+          if (tokenPrice === undefined) return acc;
           const token0AmountScaled = getFormattedPriceFromUnscaledAmount(
             c.amount0,
             token.decimals,
@@ -287,10 +333,10 @@ export const MyPositions = () => {
   }, [
     unclaimedRewardsData,
     unclaimedLeoRewardsData,
-    tokenPrice,
     fUSDC.decimals,
     vestedPositions,
     nonVestedPositions,
+    tokenPrices,
     campaignTokenPrices,
     getTokenFromAddress,
   ]);
