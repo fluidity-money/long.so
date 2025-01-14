@@ -2,7 +2,9 @@
 
 pragma solidity 0.8.16;
 
-interface IWETH10 {
+import "./IERC20.sol";
+
+interface IWETH10 is IERC20 {
     /// @dev `msg.value` of ETH sent to this contract grants caller account a matching increase in WETH10 token balance.
     /// Emits {Transfer} event to reflect WETH10 token mint of `msg.value` from `address(0)` to caller account.
     function deposit() external payable;
