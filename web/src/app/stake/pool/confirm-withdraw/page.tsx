@@ -204,7 +204,7 @@ export default function ConfirmWithdrawLiquidity() {
         },
         lower: tickLower,
         upper: tickUpper,
-        isVested: !isDivesting,
+        isVested: showLeo && !isDivesting,
       };
       getUsdTokenAmountsForPosition(
         expectedChainId,
@@ -231,6 +231,7 @@ export default function ConfirmWithdrawLiquidity() {
       );
     },
     [
+      showLeo,
       expectedChainId,
       isDivesting,
       token0,
