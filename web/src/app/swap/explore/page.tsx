@@ -122,9 +122,11 @@ const ExplorePage = () => {
           if (!tokenAddress || tokenAddress === appConfig.nullAddress)
             return { amount: 0, amountUSD: 0 };
 
+          const { isGasToken } = getTokenFromAddress(tokenAddress) || {};
           const { value } = await getBalance(appConfig.wagmiConfig, {
             address,
-            token: tokenAddress,
+            // display gas token balance for WETH
+            token: isGasToken ? undefined : tokenAddress,
           });
           const amount = Number(
             getFormattedStringFromTokenAmount(
@@ -138,7 +140,7 @@ const ExplorePage = () => {
       );
       setTokenBalances(balances);
     })();
-  }, [address, tokensData]);
+  }, [address, tokensData, getTokenFromAddress]);
 
   const allAssetsData = useMemo(() => {
     if (showMockData) return mockSwapExploreAssets();
