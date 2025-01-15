@@ -6,7 +6,7 @@ export const usdFormat = (value: number) => {
     notation: value < 1000000 ? "standard" : "compact",
     minimumFractionDigits: 2,
     // For tiny values, we should display the entire thing without rounding.
-    // 100 is the maximum number of digits supported by Intl.NumberFormat.
-    maximumFractionDigits: value < 0.01 ? 100 : undefined,
+    // 20 is the maximum number of digits supported by Intl.NumberFormat in our Node version.
+    maximumFractionDigits: value < 0.01 ? 20 : undefined,
   }).format(value);
 };
