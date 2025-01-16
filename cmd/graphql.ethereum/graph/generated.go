@@ -169,7 +169,7 @@ type ComplexityRoot struct {
 		Price               func(childComplexity int) int
 		PriceOverTime       func(childComplexity int) int
 		Served              func(childComplexity int) int
-		Swaps               func(childComplexity int, first *int, after *int) int
+		Swaps               func(childComplexity int, first *int, after *int, filter *string) int
 		TickSpacing         func(childComplexity int) int
 		Token               func(childComplexity int) int
 		TotalFee            func(childComplexity int) int
@@ -328,7 +328,7 @@ type SeawaterPoolResolver interface {
 	Positions(ctx context.Context, obj *seawater.Pool, first *int, after *int) (model.SeawaterPositionsGlobal, error)
 	PositionsForUser(ctx context.Context, obj *seawater.Pool, wallet string, first *int, after *int) (model.SeawaterPositionsUser, error)
 	Liquidity(ctx context.Context, obj *seawater.Pool) ([]model.SeawaterLiquidity, error)
-	Swaps(ctx context.Context, obj *seawater.Pool, first *int, after *int) (model.SeawaterSwaps, error)
+	Swaps(ctx context.Context, obj *seawater.Pool, first *int, after *int, filter *string) (model.SeawaterSwaps, error)
 	Amounts(ctx context.Context, obj *seawater.Pool) (model.PairAmount, error)
 	Config(ctx context.Context, obj *seawater.Pool) (model.SeawaterConfig, error)
 }
@@ -965,7 +965,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.SeawaterPool.Swaps(childComplexity, args["first"].(*int), args["after"].(*int)), true
+		return e.complexity.SeawaterPool.Swaps(childComplexity, args["first"].(*int), args["after"].(*int), args["filter"].(*string)), true
 
 	case "SeawaterPool.tickSpacing":
 		if e.complexity.SeawaterPool.TickSpacing == nil {
@@ -1734,8 +1734,10 @@ type SeawaterPool {
 
   """
   Swaps that were made using this pool.
+  If filter is set, only swaps between the pool token and the filter token will be returned.
+  If filter isn't set, only swaps between the pool token and fUSDC will be returned.
   """
-  swaps(first: Int, after: Int): SeawaterSwaps!
+  swaps(first: Int, after: Int, filter: String): SeawaterSwaps!
 
   """
   Amounts currently contained in this pool.
@@ -3036,6 +3038,11 @@ func (ec *executionContext) field_SeawaterPool_swaps_args(ctx context.Context, r
 		return nil, err
 	}
 	args["after"] = arg1
+	arg2, err := ec.field_SeawaterPool_swaps_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg2
 	return args, nil
 }
 func (ec *executionContext) field_SeawaterPool_swaps_argsFirst(
@@ -3079,6 +3086,28 @@ func (ec *executionContext) field_SeawaterPool_swaps_argsAfter(
 	}
 
 	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_SeawaterPool_swaps_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["filter"]
+	if !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
 	return zeroVal, nil
 }
 
@@ -7492,7 +7521,7 @@ func (ec *executionContext) _SeawaterPool_swaps(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.SeawaterPool().Swaps(rctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*int))
+		return ec.resolvers.SeawaterPool().Swaps(rctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*int), fc.Args["filter"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

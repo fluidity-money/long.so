@@ -264,8 +264,10 @@ type SeawaterPool {
 
   """
   Swaps that were made using this pool.
+  If filter is set, only swaps between the pool token and the filter token will be returned.
+  If filter isn't set, only swaps between the pool token and fUSDC will be returned.
   """
-  swaps(first: Int, after: Int): SeawaterSwaps!
+  swaps(first: Int, after: Int, filter: String): SeawaterSwaps!
 
   """
   Amounts currently contained in this pool.

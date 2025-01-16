@@ -8,9 +8,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"math/big"
 	"strconv"
-	"log/slog"
 	"time"
 
 	"github.com/fluidity-money/long.so/cmd/graphql.ethereum/graph/model"
@@ -1248,7 +1248,7 @@ func (r *seawaterPoolResolver) Liquidity(ctx context.Context, obj *seawater.Pool
 }
 
 // Swaps is the resolver for the swaps field.
-func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, first *int, after *int) (swaps model.SeawaterSwaps, err error) {
+func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, first *int, after *int, filter *string) (swaps model.SeawaterSwaps, err error) {
 	if obj == nil {
 		return swaps, fmt.Errorf("empty pool")
 	}
@@ -1266,10 +1266,16 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 		swaps = MockSwaps(r.C.FusdcAddr, 150, obj.Token)
 		return
 	}
+	var filterAddress types.Address
+	if filter != nil {
+		filterAddress = types.Address(*filter)
+	} else {
+		filterAddress = r.C.FusdcAddr
+	}
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
 		"SELECT * FROM seawater_swaps_pool_3(?, ?, ?, ?, ?)",
-		r.C.FusdcAddr,
+		filterAddress,
 		r.C.FusdcDecimals,
 		obj.Token,
 		time.Unix(int64(*after), 0),
