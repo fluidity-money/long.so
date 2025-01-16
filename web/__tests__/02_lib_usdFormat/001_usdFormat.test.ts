@@ -5,8 +5,12 @@ describe("usdFormat", () => {
     expect(usdFormat(1.0000000123)).toEqual("$1.00");
   });
   it("0<n<0.1 is entire number", () => {
-    expect(usdFormat(0.00152)).toEqual("$0.00152");
-    expect(usdFormat(0.000000000000152)).toEqual("$0.000000000000152");
+    expect(usdFormat(0.00152, true)).toEqual("$0.00152");
+    expect(usdFormat(0.000000000000152, true)).toEqual("$0.000000000000152");
+  });
+  it("price/non price truncation works", () => {
+    expect(usdFormat(0.0099, false)).toEqual("<$0.01");
+    expect(usdFormat(0.0099, true)).toEqual("$0.0099");
   });
   it("tens", () => {
     expect(usdFormat(10.256)).toEqual("$10.26");

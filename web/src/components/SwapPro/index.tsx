@@ -126,11 +126,11 @@ export const SwapPro = ({
 
     switch (fUSDC.address) {
       case token0.address:
-        return usdFormat(token1Price);
+        return usdFormat(token1Price, true);
       case token1.address:
-        return usdFormat(token0Price);
+        return usdFormat(token0Price, true);
       default:
-        return `${usdFormat(token0Price)}/${usdFormat(token1Price)}`;
+        return `${usdFormat(token0Price, true)}/${usdFormat(token1Price, true)}`;
     }
   }, [
     token0,
