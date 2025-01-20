@@ -7,8 +7,8 @@ import { startCase } from "lodash";
 import { DurationSegmentedControl } from "@/components/DurationSegmentedControl";
 import { TypographyH2 } from "@/components/ui/typography";
 import ReactECharts from "echarts-for-react";
-import { format, subDays } from "date-fns";
-import { SwapProPoolFragmentFragment } from "@/gql/graphql";
+import { format } from "date-fns";
+import { SwapProPoolFilteredFragmentFragment } from "@/gql/graphql";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usdFormat } from "@/lib/usdFormat";
 
@@ -24,7 +24,7 @@ export const Graph = ({
   pool,
   currentPrice,
 }: {
-  pool?: SwapProPoolFragmentFragment;
+  pool?: SwapProPoolFilteredFragmentFragment;
   currentPrice: string;
 }) => {
   const [activeGraphType, setActiveGraphType] = useState<"price" | "volume">(

@@ -77,6 +77,13 @@ export const queryGetPool = graphql(`
     }
   }
 `);
+export const queryGetFilteredPool = graphql(`
+  query queryGetFilteredPool($token: String!, $filter: String!) {
+    getPool(token: $token) {
+      ...SwapProPoolFilteredFragment
+    }
+  }
+`);
 
 /**
  * Fetch all data from the global GraphQL endpoint.
@@ -132,6 +139,24 @@ export const useGetPool = (token: `0x${string}`) => {
     queryFn: async () =>
       request(gqlUrl, queryGetPool, {
         token,
+      }),
+    refetchInterval: 20 * 1000, // 20 seconds
+  });
+};
+
+export const useGetFilteredPool = (
+  token: `0x${string}`,
+  filter: `0x${string}`,
+) => {
+  const chainId = useChainId();
+  const { gqlUrl } = useChain(chainId);
+
+  return useQuery({
+    queryKey: ["pool", chainId],
+    queryFn: async () =>
+      request(gqlUrl, queryGetFilteredPool, {
+        token,
+        filter,
       }),
     refetchInterval: 20 * 1000, // 20 seconds
   });

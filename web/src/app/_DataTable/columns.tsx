@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import Token from "@/assets/icons/token.svg";
 import { usdFormat } from "@/lib/usdFormat";
 import { useSwapStore } from "@/stores/useSwapStore";
+import { TokenIcon } from "@/components/TokenIcon";
 
 export type Transaction = {
   id: string;
@@ -14,6 +15,8 @@ export type Transaction = {
   time: Date;
   amountFrom: number;
   amountTo: number;
+  iconFrom: string;
+  iconTo: string;
 };
 
 const AmountHeader = () => {
@@ -38,7 +41,7 @@ export const columns: (ColumnDef<Transaction> & { colSpan?: number })[] = [
     cell: ({ row }) => {
       return (
         <div className="flex flex-row items-center gap-2">
-          <Token />
+          <TokenIcon src={row.original.iconFrom} className="size-[12px]" />
           {row.original.amountFrom}
         </div>
       );
@@ -57,7 +60,7 @@ export const columns: (ColumnDef<Transaction> & { colSpan?: number })[] = [
     cell: ({ row }) => {
       return (
         <div className="flex flex-row items-center gap-2">
-          <Token size="small" />
+          <TokenIcon src={row.original.iconTo} className="size-[12px]" />
           {row.original.amountTo}
         </div>
       );

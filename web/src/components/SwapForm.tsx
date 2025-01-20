@@ -149,7 +149,7 @@ export const SwapForm = () => {
   const isSwap1 = isSwappingBaseAsset || token1.address === fUSDC.address;
 
   // the pool currently in use's price
-  const poolAddress = isSwappingBaseAsset ? token1!.address : token0.address;
+  const poolAddress = isSwappingBaseAsset ? token1.address : token0.address;
 
   // useSimulateContract throws if connector.account is not defined
   // so we must check if it exists or use a dummy address for sqrtPriceX96 and quote/quote2

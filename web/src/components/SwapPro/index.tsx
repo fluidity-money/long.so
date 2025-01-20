@@ -13,9 +13,9 @@ import { Graph } from "@/components/SwapPro/SwapProGraph";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { columns, Transaction } from "@/app/_DataTable/columns";
 import { DataTable } from "@/app/_DataTable/DataTable";
-import { useGraphqlGlobal } from "@/hooks/useGraphql";
+import { useGetFilteredPool } from "@/hooks/useGraphql";
 import { useFragment } from "@/gql";
-import { SwapProPoolFragment } from "@/components/SwapPro/SwapProPoolFragment";
+import { SwapProPoolFilteredFragment } from "@/components/SwapPro/SwapProPoolFragment";
 import { useMemo } from "react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { usdFormat } from "@/lib/usdFormat";
@@ -48,20 +48,17 @@ export const SwapPro = ({
 
   const isOpen = override || (!welcome && (swapPro || isLtSm));
 
-  const { data: dataGlobal, isLoading: isLoadingGlobal } = useGraphqlGlobal();
+  const isSwap1 =
+    token0.address === fUSDC.address || token1.address === fUSDC.address;
+  const filterToken = isSwap1 ? fUSDC.address : token1.address;
+  const poolToken =
+    token0.address === fUSDC.address ? token1.address : token0.address;
 
-  // the selected pool
-  const pool = useMemo(
-    () =>
-      dataGlobal?.pools?.find(
-        (pool) =>
-          pool.address.toLowerCase() === token0.address.toLowerCase() ||
-          pool.address.toLowerCase() === token1.address.toLowerCase(),
-      ),
-    [dataGlobal?.pools, token0.address, token1.address],
+  const pool = useGetFilteredPool(poolToken, filterToken);
+  const poolSwapPro = useFragment(
+    SwapProPoolFilteredFragment,
+    pool.data?.getPool,
   );
-
-  const poolSwapPro = useFragment(SwapProPoolFragment, pool);
 
   const stakeApr = Number(poolSwapPro?.APR.total).toFixed(2);
 
@@ -173,10 +170,12 @@ export const SwapPro = ({
       ?.map((transaction) => {
         return {
           id: transaction.timestamp.toString(),
-          value: parseFloat(transaction.amountIn.valueScaled),
+          value: parseFloat(transaction.amountIn.valueUsd),
           rewards: 0,
           time: new Date(transaction.timestamp * 1000),
           amountFrom: parseFloat(transaction.amountIn.valueScaled),
+          iconFrom: transaction.amountIn.token.image,
+          iconTo: transaction.amountOut.token.image,
           amountTo: parseFloat(transaction.amountOut.valueScaled),
           transactionHash: transaction.transactionHash,
         };
