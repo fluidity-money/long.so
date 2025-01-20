@@ -1274,12 +1274,13 @@ func (r *seawaterPoolResolver) Swaps(ctx context.Context, obj *seawater.Pool, fi
 	}
 	// DB.RAW doesn't support chaining
 	err = r.DB.Raw(
-		"SELECT * FROM seawater_swaps_pool_3(?, ?, ?, ?, ?)",
-		filterAddress,
+		"SELECT * FROM seawater_swaps_pool_4(?, ?, ?, ?, ?, ?)",
+		r.C.FusdcAddr,
 		r.C.FusdcDecimals,
 		obj.Token,
 		time.Unix(int64(*after), 0),
 		*first,
+		filterAddress,
 	).
 		Scan(&swaps.Swaps).
 		Error
