@@ -39,7 +39,7 @@ type EventTypes = {
   fees_claimed: {
     chain_id: number;
     pool_address: string;
-    amount: number;
+    amount: string;
   };
   transaction_failed: {
     error_code: string;
