@@ -15,7 +15,7 @@ type EventTypes = {
     chain_id: number;
   };
   tokens_changed: {
-    chain_id: number;
+    type: "swap" | "stake";
     from_token: string;
     to_token: string;
   };

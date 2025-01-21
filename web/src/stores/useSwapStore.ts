@@ -5,6 +5,7 @@ import {
   getTokenAmountFromFormattedString,
 } from "@/lib/amounts";
 import { EmptyToken } from "@/lib/utils";
+import { EVENTS, track } from "@/lib/analytics";
 
 interface SwapStore {
   token0: Token;
@@ -43,20 +44,34 @@ export const useSwapStore = create<SwapStore>((set) => ({
 
   // Override WETH name to ETH on swap-related pages
   setToken0: (token) =>
-    set({
-      token0: {
-        ...token,
-        symbol: token.symbol === "WETH" ? "ETH" : token.symbol,
-        name: token.name === "WETH" ? "ETH" : token.name,
-      },
+    set(({ token1 }) => {
+      track(EVENTS.TOKENS_CHANGED, {
+        type: "swap",
+        from_token: token1.address,
+        to_token: token.address,
+      });
+      return {
+        token0: {
+          ...token,
+          symbol: token.symbol === "WETH" ? "ETH" : token.symbol,
+          name: token.name === "WETH" ? "ETH" : token.name,
+        },
+      };
     }),
   setToken1: (token) =>
-    set({
-      token1: {
-        ...token,
-        symbol: token.symbol === "WETH" ? "ETH" : token.symbol,
-        name: token.name === "WETH" ? "ETH" : token.name,
-      },
+    set(({ token0 }) => {
+      track(EVENTS.TOKENS_CHANGED, {
+        type: "swap",
+        from_token: token.address,
+        to_token: token0.address,
+      });
+      return {
+        token1: {
+          ...token,
+          symbol: token.symbol === "WETH" ? "ETH" : token.symbol,
+          name: token.name === "WETH" ? "ETH" : token.name,
+        },
+      };
     }),
   flipTokens: () => {
     set(
@@ -67,16 +82,23 @@ export const useSwapStore = create<SwapStore>((set) => ({
         token0Amount,
         token0AmountRaw,
         token1AmountRaw,
-      }) => ({
-        token0: token1,
-        token1: token0,
-        token0Amount:
-          token1Amount === "." || token1Amount === "" ? "0" : token1Amount,
-        token1Amount:
-          token0Amount === "." || token0Amount === "" ? "0" : token0Amount,
-        token0AmountRaw: token1AmountRaw,
-        token1AmountRaw: token0AmountRaw,
-      }),
+      }) => {
+        track(EVENTS.TOKENS_CHANGED, {
+          type: "swap",
+          from_token: token1.address,
+          to_token: token0.address,
+        });
+        return {
+          token0: token1,
+          token1: token0,
+          token0Amount:
+            token1Amount === "." || token1Amount === "" ? "0" : token1Amount,
+          token1Amount:
+            token0Amount === "." || token0Amount === "" ? "0" : token0Amount,
+          token0AmountRaw: token1AmountRaw,
+          token1AmountRaw: token0AmountRaw,
+        };
+      },
     );
   },
 

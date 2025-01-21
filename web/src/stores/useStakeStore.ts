@@ -13,6 +13,7 @@ import {
   getTokenAmountFromFormattedString,
 } from "@/lib/amounts";
 import { EmptyToken } from "@/lib/utils";
+import { EVENTS, track } from "@/lib/analytics";
 
 interface StakeStore {
   multiSingleToken: "multi" | "single";
@@ -89,23 +90,37 @@ export const useStakeStore = create<StakeStore>((set) => ({
   token0: EmptyToken,
   // changing token invalidates all amounts
   setToken0: (token0) =>
-    set({
-      token0,
-      token0Amount: "0",
-      token0AmountRaw: "0",
-      token1Amount: "0",
-      token1AmountRaw: "0",
+    set(({ token1 }) => {
+      track(EVENTS.TOKENS_CHANGED, {
+        type: "stake",
+        from_token: token1.address,
+        to_token: token0.address,
+      });
+      return {
+        token0,
+        token0Amount: "0",
+        token0AmountRaw: "0",
+        token1Amount: "0",
+        token1AmountRaw: "0",
+      };
     }),
 
   token1: EmptyToken,
   // changing token invalidates all amounts
   setToken1: (token1) =>
-    set({
-      token1,
-      token0Amount: "0",
-      token0AmountRaw: "0",
-      token1Amount: "0",
-      token1AmountRaw: "0",
+    set(({ token0 }) => {
+      track(EVENTS.TOKENS_CHANGED, {
+        type: "stake",
+        from_token: token1.address,
+        to_token: token0.address,
+      });
+      return {
+        token1,
+        token0Amount: "0",
+        token0AmountRaw: "0",
+        token1Amount: "0",
+        token1AmountRaw: "0",
+      };
     }),
 
   token0Amount: "",
