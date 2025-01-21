@@ -31,8 +31,7 @@ const documents = {
     "\n  query AllData {\n    fusdc {\n      address\n      ...FusdcFragment\n    }\n    pools {\n      # used for the pool selector\n      address\n\n      # add general fragments here\n      ...SwapProPoolFragment\n      ...AllPoolsFragment\n      ...SelectPrimeAssetFragment\n      ...SwapExploreFragment\n      ...ManagePoolFragment\n      ...SwapFormFragment\n      ...StakeFormFragment\n      ...TokensFragment\n      ...ConfirmStakeFragment\n    }\n  }\n": types.AllDataDocument,
     "\n  query ForUser($wallet: String!) {\n    getSwapsForUser(wallet: $wallet, first: 10) {\n      data {\n        swaps {\n          # add transaction fragments here\n          ...TradeTabTransactionsFragment\n        }\n      }\n    }\n\n    getWallet(address: $wallet) {\n      # add wallet fragments here\n      ...MyPositionsInventoryWalletFragment\n      ...PositionsFragment\n    }\n\n    notes(wallet: $wallet) {\n      # add notes fragments here\n      ...NotesFragment\n    }\n  }\n": types.ForUserDocument,
     "\n  query queryGetPoints($wallet: String!) {\n    getPointsComponent(wallet: $wallet)\n  }\n": types.QueryGetPointsDocument,
-    "\n  query queryGetPool($token: String!) {\n    getPool(token: $token) {\n      ...StakeFormPoolFragment\n      ...ManagePoolFragment\n    }\n  }\n": types.QueryGetPoolDocument,
-    "\n  query queryGetFilteredPool($token: String!, $filter: String!) {\n    getPool(token: $token) {\n      ...SwapProPoolFilteredFragment\n    }\n  }\n": types.QueryGetFilteredPoolDocument,
+    "\n  query queryGetPool($token: String!, $filter: String = \"\") {\n    getPool(token: $token) {\n      ...StakeFormPoolFragment\n      ...ManagePoolFragment\n      ...SwapProPoolFilteredFragment\n    }\n  }\n": types.QueryGetPoolDocument,
     "\n  fragment PositionsFragment on Wallet {\n    id\n    positions {\n      positions {\n        created\n        served {\n          timestamp\n        }\n        positionId\n        pool {\n          token {\n            name\n            address\n            symbol\n            decimals\n          }\n          liquidityCampaigns {\n            campaignId\n            tickLower\n            tickUpper\n            fromTimestamp\n            endTimestamp\n          }\n        }\n        lower\n        upper\n        liquidity {\n          fusdc {\n            valueUsd\n          }\n          token1 {\n            valueUsd\n          }\n        }\n        isVested\n      }\n    }\n  }\n": types.PositionsFragmentFragmentDoc,
 };
 
@@ -125,11 +124,7 @@ export function graphql(source: "\n  query queryGetPoints($wallet: String!) {\n 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query queryGetPool($token: String!) {\n    getPool(token: $token) {\n      ...StakeFormPoolFragment\n      ...ManagePoolFragment\n    }\n  }\n"): (typeof documents)["\n  query queryGetPool($token: String!) {\n    getPool(token: $token) {\n      ...StakeFormPoolFragment\n      ...ManagePoolFragment\n    }\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query queryGetFilteredPool($token: String!, $filter: String!) {\n    getPool(token: $token) {\n      ...SwapProPoolFilteredFragment\n    }\n  }\n"): (typeof documents)["\n  query queryGetFilteredPool($token: String!, $filter: String!) {\n    getPool(token: $token) {\n      ...SwapProPoolFilteredFragment\n    }\n  }\n"];
+export function graphql(source: "\n  query queryGetPool($token: String!, $filter: String = \"\") {\n    getPool(token: $token) {\n      ...StakeFormPoolFragment\n      ...ManagePoolFragment\n      ...SwapProPoolFilteredFragment\n    }\n  }\n"): (typeof documents)["\n  query queryGetPool($token: String!, $filter: String = \"\") {\n    getPool(token: $token) {\n      ...StakeFormPoolFragment\n      ...ManagePoolFragment\n      ...SwapProPoolFilteredFragment\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

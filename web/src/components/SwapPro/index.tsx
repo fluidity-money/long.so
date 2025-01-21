@@ -13,7 +13,7 @@ import { Graph } from "@/components/SwapPro/SwapProGraph";
 import { useSwapStore } from "@/stores/useSwapStore";
 import { columns, Transaction } from "@/app/_DataTable/columns";
 import { DataTable } from "@/app/_DataTable/DataTable";
-import { useGetFilteredPool } from "@/hooks/useGraphql";
+import { useGetPool } from "@/hooks/useGraphql";
 import { useFragment } from "@/gql";
 import { SwapProPoolFilteredFragment } from "@/components/SwapPro/SwapProPoolFragment";
 import { useMemo } from "react";
@@ -54,7 +54,7 @@ export const SwapPro = ({
   const poolToken =
     token0.address === fUSDC.address ? token1.address : token0.address;
 
-  const pool = useGetFilteredPool(poolToken, filterToken);
+  const pool = useGetPool(poolToken, filterToken);
   const poolSwapPro = useFragment(
     SwapProPoolFilteredFragment,
     pool.data?.getPool,

@@ -70,16 +70,10 @@ export const queryGetPoints = graphql(`
   }
 `);
 export const queryGetPool = graphql(`
-  query queryGetPool($token: String!) {
+  query queryGetPool($token: String!, $filter: String = "") {
     getPool(token: $token) {
       ...StakeFormPoolFragment
       ...ManagePoolFragment
-    }
-  }
-`);
-export const queryGetFilteredPool = graphql(`
-  query queryGetFilteredPool($token: String!, $filter: String!) {
-    getPool(token: $token) {
       ...SwapProPoolFilteredFragment
     }
   }
@@ -130,7 +124,7 @@ export const usePointsGraph = () => {
   });
 };
 
-export const useGetPool = (token: `0x${string}`) => {
+export const useGetPool = (token: `0x${string}`, filter?: `0x${string}`) => {
   const chainId = useChainId();
   const { gqlUrl } = useChain(chainId);
 
@@ -138,23 +132,6 @@ export const useGetPool = (token: `0x${string}`) => {
     queryKey: ["pool", chainId],
     queryFn: async () =>
       request(gqlUrl, queryGetPool, {
-        token,
-      }),
-    refetchInterval: 20 * 1000, // 20 seconds
-  });
-};
-
-export const useGetFilteredPool = (
-  token: `0x${string}`,
-  filter: `0x${string}`,
-) => {
-  const chainId = useChainId();
-  const { gqlUrl } = useChain(chainId);
-
-  return useQuery({
-    queryKey: ["pool", chainId],
-    queryFn: async () =>
-      request(gqlUrl, queryGetFilteredPool, {
         token,
         filter,
       }),
