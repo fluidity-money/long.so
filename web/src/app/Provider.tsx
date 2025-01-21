@@ -1,6 +1,7 @@
 import "./globals.css";
 import Web3ModalProvider from "@/context";
 import { Toaster } from "@/components/ui/toaster";
+import PostHogProvider from "@/providers/postHog";
 
 /**
  * Providers which wrap the entire application
@@ -8,7 +9,7 @@ import { Toaster } from "@/components/ui/toaster";
 export function Provider({ children }: { children: React.ReactNode }) {
   return (
     <Web3ModalProvider>
-      {children}
+      <PostHogProvider>{children}</PostHogProvider>
       <Toaster />
     </Web3ModalProvider>
   );

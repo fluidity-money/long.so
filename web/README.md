@@ -16,3 +16,5 @@ First, run the development server:
 | ----------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `LONGTAIL_GRAPHQL_SCHEMA`                       | Real path to the GraphQL schema file found in the cmd/graphql.ethereum directory. Used for codegen. |
 | `NEXT_PUBLIC_LONGTAIL_WALLETCONNECT_PROJECT_ID` | Walletconnect project ID that's needed to build the frontend.                                       |
+| `NEXT_PUBLIC_POSTHOG_KEY`                       | Posthog API Key.                                                                                    |
+| `NEXT_PUBLIC_POSTHOG_HOST`                      | Posthog API Host.                                                                                   |

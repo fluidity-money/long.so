@@ -10,6 +10,9 @@ jobs:
     environment: mainnet
     env:
       NEXT_PUBLIC_LONGTAIL_WALLETCONNECT_PROJECT_ID: bf05d5b47c6d5a47c0de300dc3b80f70
+      NEXT_PUBLIC_POSTHOG_KEY: phc_aEM5K1XbRkMqSfW1GhAoX3KAJ3QLNekaVlAJ8Q26j55
+      NEXT_PUBLIC_POSTHOG_HOST: https://us.i.posthog.com
+
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
     steps:
       - uses: actions/checkout@v3
