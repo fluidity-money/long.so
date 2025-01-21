@@ -29,6 +29,7 @@ import { RewardsBreakdown } from "./RewardsBreakdown";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { TokenIcon } from "./TokenIcon";
 import Gas from "@/assets/icons/gas.svg";
+import { EVENTS, track } from "@/lib/analytics";
 
 export const ConfirmSwap = () => {
   const router = useRouter();
