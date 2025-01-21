@@ -32,6 +32,7 @@ import { usePositions } from "@/hooks/usePostions";
 import { superpositionMainnet, superpositionTestnet } from "@/config/chains";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";
+import { EVENTS, track } from "@/lib/analytics";
 
 export const ConfirmStakeFragment = graphql(`
   fragment ConfirmStakeFragment on SeawaterPool {
@@ -455,6 +456,12 @@ export const ConfirmStake = ({
 
   const getAmountsAndSetPosition = useCallback(
     function (id: number, tickLower: number, tickUpper: number) {
+      track(EVENTS.LIQUIDITY_ADDED, {
+        chain_id: expectedChainId,
+        pool_address: token0.address,
+        position_id: id,
+        position: mode,
+      });
       const position = {
         positionId: id,
         pool: {
@@ -491,6 +498,7 @@ export const ConfirmStake = ({
       );
     },
     [
+      mode,
       expectedChainId,
       isVesting,
       token0,
