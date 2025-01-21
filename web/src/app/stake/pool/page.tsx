@@ -46,6 +46,7 @@ import { useContracts } from "@/config/contracts";
 import { superpositionMainnet, superpositionTestnet } from "@/config/chains";
 import { simulateContract } from "wagmi/actions";
 import config from "@/config";
+import { EVENTS, track } from "@/lib/analytics";
 
 export type CampaignPrices = {
   [k: `0x${string}`]: { decimals: number; tokenPrice: bigint };
@@ -353,7 +354,7 @@ export default function PoolPage() {
 
   const collect = useCallback(
     (id: bigint) => {
-      if (unclaimedLeoRewardsData?.result)
+      if (unclaimedLeoRewardsData?.result) {
         writeContractCollect({
           address: leoContract.address,
           abi: leoContract.abi,
@@ -363,13 +364,19 @@ export default function PoolPage() {
             liquidityCampaigns?.map((c) => c.campaignId as `0x${string}`),
           ],
         });
-      else
+      } else {
+        track(EVENTS.FEES_CLAIMED, {
+          chain_id: expectedChainId,
+          pool_address: token0.address,
+          amount: unclaimedRewards,
+        });
         writeContractCollect({
           address: ammContract.address,
           abi: ammContract.abi,
           functionName: "collect7F21947C",
           args: [[token0.address], [id]],
         });
+      }
     },
     [
       writeContractCollect,
@@ -378,6 +385,8 @@ export default function PoolPage() {
       unclaimedLeoRewardsData?.result,
       leoContract,
       liquidityCampaigns,
+      expectedChainId,
+      unclaimedRewards,
     ],
   );
 

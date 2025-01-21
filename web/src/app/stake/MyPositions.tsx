@@ -30,6 +30,7 @@ import { simulateContract } from "wagmi/actions";
 import config from "@/config";
 import { getFormattedPriceFromUnscaledAmount } from "@/lib/amounts";
 import { CampaignPrices, TokenPrices } from "./pool/page";
+import { EVENTS, track } from "@/lib/analytics";
 
 export const MyPositions = () => {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
@@ -347,6 +348,11 @@ export const MyPositions = () => {
     unclaimedRewards === "$0.00";
 
   const collectAll = useCallback(() => {
+    track(EVENTS.FEES_CLAIMED, {
+      chain_id: chainId,
+      pool_address: token0.address,
+      amount: unclaimedRewards,
+    });
     // for all positions that are in leo, call leo collect
     vestedPositions.length > 0 &&
       !!unclaimedLeoRewardsData?.result &&
@@ -364,6 +370,9 @@ export const MyPositions = () => {
       args: collectSeawaterArgs,
     });
   }, [
+    token0.address,
+    unclaimedRewards,
+    chainId,
     writeContractCollectLeo,
     writeContractCollectSeawater,
     vestedPositions,

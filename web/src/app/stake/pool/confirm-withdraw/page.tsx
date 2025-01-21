@@ -119,6 +119,11 @@ export default function ConfirmWithdrawLiquidity() {
 
   const collect = useCallback(
     (id: bigint) => {
+      track(EVENTS.FEES_CLAIMED, {
+        chain_id: expectedChainId,
+        pool_address: token0.address,
+        amount: "unknown",
+      });
       writeContractCollect({
         address: ammContract.address,
         abi: ammContract.abi,
@@ -126,7 +131,7 @@ export default function ConfirmWithdrawLiquidity() {
         args: [[token0.address], [BigInt(id ?? 0)]],
       });
     },
-    [writeContractCollect, token0, ammContract],
+    [writeContractCollect, token0, ammContract, expectedChainId],
   );
 
   const divestPosition = useCallback(
