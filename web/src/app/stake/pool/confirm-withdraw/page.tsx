@@ -25,6 +25,7 @@ import { usePositions } from "@/hooks/usePostions";
 import { useContracts } from "@/config/contracts";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { superpositionTestnet } from "@/config/chains";
+import { EVENTS, track } from "@/lib/analytics";
 
 export default function ConfirmWithdrawLiquidity() {
   const router = useRouter();
@@ -196,6 +197,11 @@ export default function ConfirmWithdrawLiquidity() {
 
   const getAmountsAndSetPosition = useCallback(
     function (tickLower: number, tickUpper: number) {
+      track(EVENTS.LIQUIDITY_WITHDRAWN, {
+        chain_id: expectedChainId,
+        pool_address: token0.address,
+        position_id: Number(positionId),
+      });
       const position = {
         positionId: Number(positionId),
         pool: {
