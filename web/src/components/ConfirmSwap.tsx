@@ -173,6 +173,16 @@ export const ConfirmSwap = () => {
   });
 
   const onSubmit = () => {
+    track(EVENTS.SWAP_INITIATED, {
+      wallet: address,
+      from_token: token0.address,
+      to_token: token1.address,
+      amount_from: token0AmountFloat,
+      amount_to: token1AmountFloat,
+      gas_estimated: Number(gas),
+      chain_id: chainId,
+    });
+
     if (token0.isGasToken && token0.abi) {
       writeContractDepositGasToken({
         address: token0.address,
