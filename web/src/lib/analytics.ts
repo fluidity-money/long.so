@@ -12,6 +12,7 @@ export const EVENTS = {
 type EventKeys = (typeof EVENTS)[keyof typeof EVENTS];
 type EventTypes = {
   wallet_connected: {
+    wallet_name: string;
     chain_id: number;
   };
   tokens_changed: {

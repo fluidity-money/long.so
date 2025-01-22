@@ -18,6 +18,7 @@ import { superpositionTestnet } from "@/config/chains";
 import CookieBanner from "@/components/CookieBanner";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import Points from "@/components/Points";
+import { WalletConnectionStatus } from "@/components/WalletConnectionStatus";
 
 export const metadata: Metadata = {
   title: "Longtail",
@@ -65,6 +66,7 @@ export default async function RootLayout({
         className={cn("flex min-h-screen flex-col bg-white", inter.className)}
       >
         <Provider>
+          <WalletConnectionStatus />
           <PopulateQueryCache featuresData={featuresData} />
           <div className="iridescent-blur absolute left-1/2 top-[180px] size-full max-h-[305px] max-w-[557px] -translate-x-1/2" />
 
