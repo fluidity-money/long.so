@@ -91,7 +91,7 @@ const Item: React.FC<ItemProps> = ({
       >
         {children}
         {proToggle && (
-          <div className="hidden md:inline-flex">
+          <div id="swap-pro-toggle" className="hidden md:inline-flex">
             <div className="group-hover:hidden">
               {selected ? (
                 <ArrowDownWhite height={10} width={10} />
