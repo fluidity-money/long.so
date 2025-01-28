@@ -76,10 +76,8 @@ export const SwapPro = ({
     () =>
       usdFormat(
         poolSwapPro
-          ? poolSwapPro.liquidity.reduce(
-              (total, { liquidity }) => total + parseFloat(liquidity),
-              0,
-            )
+          ? parseFloat(poolSwapPro.amounts.token1.valueUsd) +
+              parseFloat(poolSwapPro.amounts.fusdc.valueUsd)
           : 0,
       ),
     [poolSwapPro],

@@ -87,8 +87,13 @@ export const SwapProPoolFilteredFragment = graphql(`
       address
       symbol
     }
-    liquidity {
-      liquidity
+    amounts {
+      token1 {
+        valueUsd
+      }
+      fusdc {
+        valueUsd
+      }
     }
     priceOverTime {
       daily
