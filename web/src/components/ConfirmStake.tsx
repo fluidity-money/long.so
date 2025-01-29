@@ -251,26 +251,15 @@ export const ConfirmStake = ({
     (id: bigint) => {
       const amount0 = BigInt(token0AmountRaw);
       const amount1 = BigInt(token1AmountRaw);
-      // amount0 - 33%
-      const amount0Min = amount0 - amount0 / 3n;
-      // amount1 - 33%
-      const amount1Min = amount1 - amount1 / 3n;
-      // amount0 - 5%
-      const amount0Desired = amount0 - amount0 / 20n;
-      // amount1 - 5%
-      const amount1Desired = amount1 - amount1 / 20n;
+      // amount0 - 0.5%
+      const amount0Min = amount0 - amount0 / 200n;
+      // amount1 - 0.5%
+      const amount1Min = amount1 - amount1 / 200n;
       writeContractIncrPosition({
         address: ammContract.address,
         abi: ammContract.abi,
         functionName: "incrPositionE2437399",
-        args: [
-          token0.address,
-          id,
-          amount0Min,
-          amount1Min,
-          amount0Desired,
-          amount1Desired,
-        ],
+        args: [token0.address, id, amount0Min, amount1Min, amount0, amount1],
       });
     },
     [
@@ -303,14 +292,10 @@ export const ConfirmStake = ({
 
       const amount0 = BigInt(token0AmountRaw);
       const amount1 = BigInt(token1AmountRaw);
-      // amount0 - 33%
-      const amount0Min = amount0 - amount0 / 3n;
-      // amount1 - 33%
-      const amount1Min = amount1 - amount1 / 3n;
-      // amount0 - 5%
-      const amount0Desired = amount0 - amount0 / 20n;
-      // amount1 - 5%
-      const amount1Desired = amount1 - amount1 / 20n;
+      // amount0 - 0.5%
+      const amount0Min = amount0 - amount0 / 200n;
+      // amount1 - 0.5%
+      const amount1Min = amount1 - amount1 / 200n;
 
       // Call proxyVestIncr function
       writeContractProxyVestIncr({
@@ -323,8 +308,8 @@ export const ConfirmStake = ({
           upper,
           amount0Min,
           amount1Min,
-          amount0Desired,
-          amount1Desired,
+          amount0,
+          amount1,
           isVesting,
           address,
         ],
