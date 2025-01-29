@@ -21,7 +21,7 @@
 |--------------------------------|--------------------------------------------|
 | Longtail AMM                   | 0xF3334049A3ce7e890bd4f8C6a0FBC70e38fd3746 |
 | Longtail NFT manager           | 0xdD193817F66276d1EAd064dF8F3112b553A50d10 |
-| Position Handler               | 0x7C70a15Fee9Db2aFf632cc378D8f11bcac0d516d |
+| Position Handler               | 0x1aC593E976bD676Aa9609677AB41d52436e40260 |
 | Permit2 router                 | 0x244517Dc59943E8CdFbD424Bdb3262c5f04a1387 |
 | Swaps A implementation         | 0x5ad9286c0f0f306022d172d32b27f1b28a8ffc3a |
 | Swaps B implementation         | 0x7d0d7d04b2ac05c159972612ef5bf384116c4cf7 |

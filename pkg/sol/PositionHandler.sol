@@ -60,4 +60,29 @@ contract PositionHandler {
         }
         return id;
     }
+
+    error Quoted(uint256 token0, uint256 token1);
+
+    function quoteProxyVestIncr(
+        address pool,
+        int32 lower,
+        int32 upper,
+        uint256 amount0Max,
+        uint256 fusdcMax
+    ) external{
+        uint256 id = LONGTAIL.mintPositionBC5B086D(pool, lower, upper);
+        IERC20(pool).transferFrom(msg.sender, address(this), amount0Max);
+        FUSDC.transferFrom(msg.sender, address(this), fusdcMax);
+        IERC20(pool).approve(address(LONGTAIL), amount0Max);
+        (uint256 amount0Taken, uint256 fusdcTaken) =
+            LONGTAIL.incrPositionE2437399(
+                pool,
+                id,
+                0,
+                0,
+                amount0Max,
+                fusdcMax
+            );
+        revert Quoted(amount0Taken, fusdcTaken);
+    }
 }
