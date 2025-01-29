@@ -463,11 +463,11 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         priceUpper = Math.max(...lastSevenDays).toFixed(fUSDC.decimals);
       }
 
-      if (
-        !isVolatile ||
-        Number(priceLower) > priceCurrent ||
-        Number(priceUpper) < priceCurrent
-      ) {
+      // This is a workaround for display amounts being incorrect if this position would move the price out of its own range, causing creation to fail. We instead display the +-10% range as auto for volatile positions, for now.
+      const fl = priceCurrent * 0.95;
+      const fu = priceCurrent * 1.05;
+
+      if (!isVolatile || Number(priceLower) > fl || Number(priceUpper) < fu) {
         const diff = priceAtTick / 10n;
         const pu = priceAtTick + diff;
         const pl = priceAtTick - diff;
