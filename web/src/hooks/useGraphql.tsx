@@ -129,7 +129,7 @@ export const useGetPool = (token: `0x${string}`, filter?: `0x${string}`) => {
   const { gqlUrl } = useChain(chainId);
 
   return useQuery({
-    queryKey: ["pool", chainId],
+    queryKey: ["pool", chainId, token, filter],
     queryFn: async () =>
       request(gqlUrl, queryGetPool, {
         token,
