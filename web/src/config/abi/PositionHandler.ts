@@ -13,6 +13,11 @@ export const PositionHandler = [
         internalType: "contract ILeo",
       },
       {
+        name: "nftManager",
+        type: "address",
+        internalType: "contract OwnershipNFTs",
+      },
+      {
         name: "fusdcAddr",
         type: "address",
         internalType: "contract IERC20",
@@ -78,6 +83,55 @@ export const PositionHandler = [
       },
     ],
     stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "quoteProxyVestIncr",
+    inputs: [
+      {
+        name: "pool",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "lower",
+        type: "int32",
+        internalType: "int32",
+      },
+      {
+        name: "upper",
+        type: "int32",
+        internalType: "int32",
+      },
+      {
+        name: "amount0Max",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "fusdcMax",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "error",
+    name: "Quoted",
+    inputs: [
+      {
+        name: "token0",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "token1",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
   },
 ] as const;
 
