@@ -131,7 +131,13 @@ export const useStakeStore = create<StakeStore>((set) => ({
   token1AmountExceedsBalance: false,
   setToken0AmountRaw: (amountRaw: string, balanceRaw?: string) => {
     if (balanceRaw && BigInt(amountRaw) > BigInt(balanceRaw)) {
-      set({ token0AmountExceedsBalance: true });
+      set(({ token0 }) => ({
+        token0AmountExceedsBalance: true,
+        token0Amount: getFormattedStringFromTokenAmount(
+          amountRaw,
+          token0.decimals,
+        ),
+      }));
       return;
     }
     set(({ token0 }) => ({
@@ -145,7 +151,13 @@ export const useStakeStore = create<StakeStore>((set) => ({
   },
   setToken1AmountRaw: (amountRaw: string, balanceRaw?: string) => {
     if (balanceRaw && BigInt(amountRaw) > BigInt(balanceRaw)) {
-      set({ token1AmountExceedsBalance: true });
+      set(({ token1 }) => ({
+        token1AmountExceedsBalance: true,
+        token1Amount: getFormattedStringFromTokenAmount(
+          amountRaw,
+          token1.decimals,
+        ),
+      }));
       return;
     }
     set(({ token1 }) => ({
