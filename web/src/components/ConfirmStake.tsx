@@ -255,22 +255,11 @@ export const ConfirmStake = ({
       const amount0Min = amount0 - amount0 / 3n;
       // amount1 - 33%
       const amount1Min = amount1 - amount1 / 3n;
-      // amount0 - 5%
-      const amount0Desired = amount0 - amount0 / 20n;
-      // amount1 - 5%
-      const amount1Desired = amount1 - amount1 / 20n;
       writeContractIncrPosition({
         address: ammContract.address,
         abi: ammContract.abi,
         functionName: "incrPositionE2437399",
-        args: [
-          token0.address,
-          id,
-          amount0Min,
-          amount1Min,
-          amount0Desired,
-          amount1Desired,
-        ],
+        args: [token0.address, id, amount0Min, amount1Min, amount0, amount1],
       });
     },
     [
