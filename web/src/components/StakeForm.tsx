@@ -547,7 +547,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         priceUpper = Math.max(...lastSevenDays).toFixed(fUSDC.decimals);
       }
 
-      // This is a workaround for display amounts being incorrect if this position would move the price out of its own range, causing creation to fail. We instead display the +-10% range as auto for volatile positions, for now.
+      // Volatile positions that are too close to the current price may cause position creation to have extremely unbalanced amounts, especially for positions that would move the price out of their own range upon creation.
       const fl = priceCurrent * 0.95;
       const fu = priceCurrent * 1.05;
 
