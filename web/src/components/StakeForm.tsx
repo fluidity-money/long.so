@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import ArrowDown from "@/assets/icons/arrow-down-white.svg";
 import Padlock from "@/assets/icons/padlock.svg";
 import Token from "@/assets/icons/token.svg";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn, EmptyToken } from "@/lib/utils";
 import {
@@ -16,6 +16,7 @@ import {
   getLiquidityForAmount0,
   getLiquidityForAmount1,
   getSqrtRatioAtTick,
+  snapTickToSpacing,
   sqrtPriceX96ToPrice,
 } from "@/lib/math";
 import { useRouter } from "next/navigation";
@@ -104,6 +105,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const { address, chainId } = useAccount();
   const expectedChainId = useChainId();
   const ammContract = useContracts(expectedChainId, "amm");
+  const positionHandlerContract = useContracts(
+    expectedChainId,
+    "positionHandler",
+  );
   const fUSDC = useTokens("fusdc");
   const { getTokenFromAddress } = useTokens();
   const isCorrectChain = useMemo(
@@ -284,7 +289,14 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     token: token1.address,
   });
 
-  const [quotedToken, setQuotedToken] = useState<"token0" | "token1">("token0");
+  // token0 - user inputs token0
+  // token1 - user inputs token1
+  // quote0 - user inputs token1 and quoted amount for token0 doesn't match, so token0 is set by the onchain quote
+  // quote1 - user inputs token0 and quoted amount for token1 doesn't match, so token1 is set by the onchain quote
+  // quote0/1 are separated so we don't infinitely loop setting inputted -> quoted amount.
+  const [quotedToken, setQuotedToken] = useState<
+    "token0" | "token1" | "quote0" | "quote1"
+  >("token0");
   const quoteTokenAmount = (
     value: string,
     quotedToken: "token0" | "token1",
@@ -307,6 +319,78 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     () => ({ result: BigInt(curTickNum?.result ?? 0) }),
     [curTickNum],
   );
+
+  const { data: tickSpacing } = useSimulateContract({
+    address: ammContract.address,
+    abi: ammContract.abi,
+    functionName: "tickSpacing653FE28F",
+    args: [token0.address],
+  });
+  const { error: quoteError, isLoading: quoteIsLoading } = useSimulateContract({
+    address: positionHandlerContract.address,
+    account: simulateAccount,
+    abi: positionHandlerContract.abi,
+    functionName: "quoteProxyVestIncr",
+    args: [
+      token0.address,
+      snapTickToSpacing(tickLower ?? 0, tickSpacing?.result ?? 0),
+      snapTickToSpacing(tickUpper ?? 0, tickSpacing?.result ?? 0),
+      // using balance allows the maximum possible amount of this token to be quoted, since quote uses the smaller of the two values.
+      // e.g. if we desire 5 token0 and 10 token1, once 5 token0 is fulfilled it will stop, even if 10 token1 is the value the user
+      // has input, and therefore we care about more. In this case, if token0 balance is 20 we will quote 20 token0 and 10 token1
+      // thereby creating a quote for 10 token1 correctly.
+      quotedToken === "quote1"
+        ? (token0Balance?.value ?? 0n)
+        : BigInt(token0AmountRaw),
+      quotedToken === "quote0"
+        ? (token1Balance?.value ?? 0n)
+        : BigInt(token1AmountRaw),
+    ],
+    // since this is intended to throw an error, we want to disable retries
+    query: {
+      retry: false,
+      retryOnMount: false,
+      enabled: mode === "new",
+    },
+  });
+
+  // extract from the tuple message "(<amount0>, <amount1>)"
+  const [, amount0Quote, amount1Quote] =
+    quoteError?.message.match(/\((\d+), (\d+)\)/) || [];
+  useEffect(() => {
+    if (amount0Quote === undefined || quoteIsLoading) return;
+    // if the input token is token 1, and the quote for token 0
+    // is different to what we expect use the quoted values
+    if (
+      amount0Quote !== token0AmountRaw &&
+      (quotedToken === "token1" || quotedToken === "quote1")
+    ) {
+      setToken0AmountRaw(amount0Quote, token0Balance?.value.toString());
+      setToken1AmountRaw(amount1Quote, token1Balance?.value.toString());
+      setQuotedToken("quote1");
+    }
+    // if the input token is token 0, and the quote for token 1
+    // is different to what we expect use the quoted values
+    else if (
+      amount1Quote !== token1AmountRaw &&
+      (quotedToken === "token0" || quotedToken === "quote0")
+    ) {
+      setToken0AmountRaw(amount0Quote, token0Balance?.value.toString());
+      setToken1AmountRaw(amount1Quote, token1Balance?.value.toString());
+      setQuotedToken("quote0");
+    }
+  }, [
+    amount0Quote,
+    amount1Quote,
+    token0Balance,
+    token1Balance,
+    token0AmountRaw,
+    token1AmountRaw,
+    setToken0AmountRaw,
+    setToken1AmountRaw,
+    quoteIsLoading,
+    quotedToken,
+  ]);
 
   useEffect(() => {
     if (!curTick || tickLower === undefined || tickUpper === undefined) return;
@@ -344,7 +428,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         newToken1Amount.toString(),
         token1Balance?.value.toString(),
       );
-    } else {
+    } else if (quotedToken === "token1") {
       if (!token1AmountRaw) return;
       // delta is a guard for same lower and upper ticks
       const delta = cur === lower ? 1n : 0n;
