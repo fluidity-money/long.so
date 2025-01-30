@@ -1217,13 +1217,15 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   token1AmountExceedsBalance
                 }
               >
-                {mode === "new" && isVesting
-                  ? "Stake with liquidity rewards"
-                  : mode === "new"
-                    ? "Stake"
-                    : isVested
-                      ? "Unstake NFT and add liquidity"
-                      : "Stake"}
+                {token0AmountExceedsBalance || token1AmountExceedsBalance
+                  ? "Insufficient Balance"
+                  : mode === "new" && isVesting
+                    ? "Stake with liquidity rewards"
+                    : mode === "new"
+                      ? "Stake"
+                      : isVested
+                        ? "Unstake NFT and add liquidity"
+                        : "Stake"}
               </Button>
             ) : (
               <Button
