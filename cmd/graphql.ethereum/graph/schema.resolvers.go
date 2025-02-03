@@ -1032,22 +1032,37 @@ func (r *seawaterPoolResolver) Apr(ctx context.Context, obj *seawater.Pool) (mod
 	if tvl.Cmp(big.NewRat(0, 1)) == 0 {
 		tvl.SetInt64(1)
 	}
-	// Get total fees from this pool
-	yield, err := r.TotalFee(ctx, obj)
+	// APR per pool = ([Fee% * Daily Volume] / Pool's Total Liquidity ) * 365 * 100%
+	fee, err := r.Fee(ctx, obj)
 	if err != nil {
-		return model.Apr{}, fmt.Errorf("tvl: %v", err)
+		return model.Apr{}, fmt.Errorf("fee percentage: %v", err)
 	}
-	var yieldString string
-	if yield.Total == "" {
-		yieldString = "0"
-	} else {
-		yieldString = yield.Total
+	// Fee as a percentage is divided by 10e6, e.g. 3000 -> 0.3% fee (0.03)
+	feePercentRat := new(big.Rat).SetInt64(int64(fee))
+	feePercentRat.Quo(feePercentRat, big.NewRat(1000000, 1))
+	v, err := r.VolumeOverTime(ctx, obj)
+	if err != nil || len(v.Daily) == 0 {
+		return model.Apr{}, fmt.Errorf("volume over time: %v", err)
 	}
-	// Fee APR = (total yield from fees) / TVL * 100
-	ratOneHundred := big.NewRat(100, 1)
-	feeApr, _ := new(big.Rat).SetString(yieldString)
-	feeApr.Mul(feeApr, ratOneHundred)
-	feeApr.Quo(feeApr, tvl)
+	// Use only the first day's volume
+	firstDayVolume := v.Daily[0]
+	fusdcVolUsd, err := firstDayVolume.Fusdc.UsdValue(price, r.C.FusdcAddr)
+	if err != nil {
+		return model.Apr{}, fmt.Errorf("fusdc daily volume usd value: %v", err)
+	}
+	token1VolUsd, err := firstDayVolume.Token1.UsdValue(price, r.C.FusdcAddr)
+	if err != nil {
+		return model.Apr{}, fmt.Errorf("token1 daily volume usd value: %v", err)
+	}
+
+	fusdcVolRat, _ := new(big.Rat).SetString(fusdcVolUsd)
+	token1VolRat, _ := new(big.Rat).SetString(token1VolUsd)
+	totalDailyVolume := new(big.Rat).Add(fusdcVolRat, token1VolRat)
+	totalLiquidity := tvl
+
+	feeApr := feePercentRat.Mul(feePercentRat, totalDailyVolume)
+	feeApr.Quo(feeApr, totalLiquidity)
+	feeApr.Mul(feeApr, big.NewRat(36500, 1))
 
 	// Get campaign rewards
 	activeLiquidityCampaigns, err := r.LiquidityCampaigns(ctx, obj)
@@ -1074,14 +1089,10 @@ func (r *seawaterPoolResolver) Apr(ctx context.Context, obj *seawater.Pool) (mod
 		maxAmt = maxAmt.Quo(maxAmt, decimals)
 		allCampaignRewards.Add(allCampaignRewards, maxAmt)
 	}
-	// Campaign APR = (total campaign rewards) / TVL * 100
-	campaignApr := allCampaignRewards.Mul(allCampaignRewards, ratOneHundred)
-	campaignApr.Quo(campaignApr, tvl)
-	totalApr := feeApr.Add(feeApr, campaignApr)
 	return model.Apr{
 		// TODO Campaign: ,
 		// TODO Fee: ,
-		Total: totalApr.FloatString(8),
+		Total: feeApr.FloatString(8),
 	}, nil
 }
 
