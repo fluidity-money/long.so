@@ -351,10 +351,16 @@ export const ConfirmStake = ({
 
   // once token is divested, continue to updating
   useEffect(() => {
-    if (!divestPositionResult.data || !positionId) return;
+    if (!divestPositionResult.data || !positionId || incrPositionResult.data)
+      return;
     // the position already exists so use positionId rather than mintPositionId
     incrPosition(BigInt(positionId));
-  }, [divestPositionResult.data, positionId, incrPosition]);
+  }, [
+    divestPositionResult.data,
+    positionId,
+    incrPositionResult.data,
+    incrPosition,
+  ]);
 
   /**
    * Approve the AMM to spend the token

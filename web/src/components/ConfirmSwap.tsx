@@ -292,9 +292,9 @@ export const ConfirmSwap = () => {
 
   // once we have the result, initiate the swap
   useEffect(() => {
-    if (!approvalResult.data) return;
+    if (!approvalResult.data || swapResult.data) return;
     performSwap();
-  }, [approvalResult.data, performSwap]);
+  }, [approvalResult.data, swapResult.data, performSwap]);
 
   // if we swapped the gas token, unwrap it now
   useEffect(() => {
