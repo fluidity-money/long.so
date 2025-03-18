@@ -94,7 +94,7 @@ export default async function RootLayout({
             </div>
           </header>
 
-          <div className={"z-10 flex-1"}>{children}</div>
+          <div className={"z-10 flex flex-1 flex-col"}>{children}</div>
 
           <footer className="w-full self-end p-8">
             <div className="flex flex-row justify-between">
