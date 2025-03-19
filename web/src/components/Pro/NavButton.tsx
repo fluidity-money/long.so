@@ -1,0 +1,29 @@
+import ETH from "@/assets/icons/ETH.svg";
+import ArrowDown from "@/assets/icons/arrow-down.svg";
+
+const KeyItem = ({ char }: { char: string }) => (
+  <div className="flex size-6 items-center justify-center rounded-sm bg-black/10 p-1">
+    {char}
+  </div>
+);
+const searchKeys = ["⌘", "K"];
+export default function NavButton() {
+  return (
+    <div className="flex items-center gap-2 rounded bg-black/10 p-4">
+      <ETH className="size-6" />
+      <span className="font-inter text-xl font-medium">ETH-USD</span>
+      <div className="flex items-center gap-1 rounded-3xl bg-slate-500 px-2 py-1">
+        <div className="relative h-3 w-3 rounded-[100px] bg-slate-500 outline outline-1 outline-offset-[-1px] outline-sky-100">
+          <div className="absolute left-[2px] top-[2px] h-2 w-2 rounded-full bg-sky-100" />
+        </div>
+        <span className="font-white">Spot</span>
+      </div>
+      <div className="flex items-center gap-0.5">
+        {searchKeys.map((key) => (
+          <KeyItem key={key} char={key} />
+        ))}
+      </div>
+      <ArrowDown className="size-2.5" />
+    </div>
+  );
+}
