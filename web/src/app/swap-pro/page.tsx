@@ -3,7 +3,7 @@ import ProHeader from "@/components/Pro/ProHeader";
 
 export default function ProMode() {
   return (
-    <div className="flex flex-1 gap-4 px-4">
+    <div className="flex flex-1 gap-4 bg-black px-4">
       <div className="flex flex-[4] flex-col gap-4">
         <ProHeader />
         <div className="flex-grow bg-green-700">

@@ -22,6 +22,7 @@ const buttonVariants = cva(
         "less-iridescent": "less-iridescent text-primary",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        tint: "bg-green-200 text-black hover:bg-green-300",
       },
       size: {
         default: "h-10 px-12 py-0",
