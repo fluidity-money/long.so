@@ -9,7 +9,7 @@ const KeyItem = ({ char }: { char: string }) => (
 const searchKeys = ["⌘", "K"];
 export default function NavButton() {
   return (
-    <div className="flex items-center gap-2 rounded bg-white/10 p-4">
+    <div className="flex items-center gap-2 self-stretch rounded bg-white/10 p-4">
       <ETH className="size-6" />
       <span className="font-inter text-xl font-medium text-white">ETH-USD</span>
       <div className="flex items-center gap-1 rounded-3xl bg-slate-500 px-2 py-1">
