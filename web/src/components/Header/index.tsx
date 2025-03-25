@@ -1,11 +1,11 @@
-import { DemoData } from "@/app/_layout/DemoData";
-import { FeatureFlagConfig } from "@/app/_layout/FeatureFlagConfig";
-import { MobileNetworkSelection } from "@/app/_layout/MobileNetworkSelection";
-import { NavigationMenu } from "@/app/_layout/NavigationMenu";
+import { DemoData } from "@/components/Header/DemoData";
+import { FeatureFlagConfig } from "@/components/Header/FeatureFlagConfig";
+import { MobileNetworkSelection } from "@/components/Header/MobileNetworkSelection";
+import { NavigationMenu } from "@/components/Header/NavigationMenu";
 import LongTail from "@/assets/icons/long-tail.svg";
-import Points from "./Points";
-import { NetworkSelection } from "@/app/_layout/NetworkSelection";
-import { ConnectWalletButton } from "@/app/_layout/ConnectWalletButton";
+import Points from "../Points";
+import { NetworkSelection } from "@/components/Header/NetworkSelection";
+import { ConnectWalletButton } from "@/components/Header/ConnectWalletButton";
 import { superpositionTestnet } from "@/config/chains";
 const faucetChains = [superpositionTestnet];
 

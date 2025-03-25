@@ -8,7 +8,7 @@ import ErrorReportingDialog from "@/components/ErrorReportingDialog";
 import CookieBanner from "@/components/CookieBanner";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { WalletConnectionStatus } from "@/components/WalletConnectionStatus";
-import Header from "@/components/header";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
