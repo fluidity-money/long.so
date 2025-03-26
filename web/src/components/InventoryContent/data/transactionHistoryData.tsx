@@ -1,4 +1,4 @@
-import { TransactionHistory } from "@/app/_TransactionHistoryTable/columns";
+import { TransactionHistory } from "@/components/TransactionHistoryTable/columns";
 import { nanoid } from "nanoid";
 import Token from "@/assets/icons/token.svg";
 import Ethereum from "@/assets/icons/ethereum.svg";

@@ -1,19 +1,19 @@
 "use client";
 
 import { CampaignBanner } from "@/components/CampaignBanner";
-import { MyPositions } from "@/app/stake/MyPositions";
-import { YieldOverTimeGraph } from "@/app/stake/YieldOverTimeGraph";
-import { AllPools } from "@/app/stake/AllPools";
+import { MyPositions } from "@/app/(default)/stake/MyPositions";
+import { YieldOverTimeGraph } from "@/app/(default)/stake/YieldOverTimeGraph";
+import { AllPools } from "@/app/(default)/stake/AllPools";
 import { motion } from "framer-motion";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useStakeWelcomeBackStore } from "@/stores/useStakeWelcomeBackStore";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { WelcomeModal } from "@/app/stake/WelcomeModal";
-import { YieldBreakdownModal } from "@/app/stake/YieldBreakdownModal";
-import { YieldBreakdownClaimedModal } from "@/app/stake/YieldBreakdownClaimedModal";
-import { YieldBreakdownDrawer } from "@/app/stake/YieldBreakdownDrawer";
-import { YieldBreakdownClaimedDrawer } from "@/app/stake/YieldBreakdownClaimedDrawer";
+import { WelcomeModal } from "@/app/(default)/stake/WelcomeModal";
+import { YieldBreakdownModal } from "@/app/(default)/stake/YieldBreakdownModal";
+import { YieldBreakdownClaimedModal } from "@/app/(default)/stake/YieldBreakdownClaimedModal";
+import { YieldBreakdownDrawer } from "@/app/(default)/stake/YieldBreakdownDrawer";
+import { YieldBreakdownClaimedDrawer } from "@/app/(default)/stake/YieldBreakdownClaimedDrawer";
 import { useAccount } from "wagmi";
 import { useState } from "react";
 import { Rnd } from "react-rnd";

@@ -2,10 +2,10 @@
 
 import List from "@/assets/icons/list.svg";
 import Grid from "@/assets/icons/grid.svg";
-import { AllPoolsTable } from "@/app/stake/_AllPoolsTable/AllPoolsTable";
-import { columns, Pool } from "@/app/stake/_AllPoolsTable/columns";
+import { AllPoolsTable } from "@/app/(default)/stake/_AllPoolsTable/AllPoolsTable";
+import { columns, Pool } from "@/app/(default)/stake/_AllPoolsTable/columns";
 import { useMemo, useRef, useState } from "react";
-import { AllPoolsFilter } from "@/app/stake/AllPoolsFilter";
+import { AllPoolsFilter } from "@/app/(default)/stake/AllPoolsFilter";
 import SegmentedControl from "@/components/ui/segmented-control";
 import { Badge } from "@/components/ui/badge";
 import IridescentToken from "@/assets/icons/iridescent-token.svg";

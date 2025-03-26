@@ -1,7 +1,7 @@
 import Discord from "@/assets/icons/discord.svg";
 const gitHash = process.env.NEXT_PUBLIC_GIT_HASH;
 
-export default function Footer() {
+export default function Footer({ isDark }: { isDark: boolean }) {
   return (
     <footer className="w-full self-end p-8">
       <div className="flex flex-row justify-between">

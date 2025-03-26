@@ -8,6 +8,7 @@ import { useSwapPro } from "@/stores/useSwapPro";
 import { cn } from "@/lib/utils";
 import { clsx } from "clsx";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
+import { usePathname, useRouter } from "next/navigation";
 
 interface ItemProps {
   children: React.ReactNode;
@@ -40,17 +41,17 @@ const Item: React.FC<ItemProps> = ({
     ${selected ? styles.selected : ""}
     ${styles[background]}
   `;
-
-  const { swapPro, setSwapPro } = useSwapPro();
+  const pathname = usePathname();
+  const isPro = pathname.startsWith("/pro");
   const { setWelcome } = useWelcomeStore();
-
+  const router = useRouter();
   return (
     <motion.div
       className={cn(
         classes,
         "group rounded-md",
         proToggle &&
-          `h-[43px] px-2 transition-[width] ${swapPro ? "md:w-[125px] md:hover:w-[147px]" : "md:w-[97px] md:hover:w-[122px]"}`,
+          `h-[43px] px-2 transition-[width] ${isPro ? "md:w-[125px] md:hover:w-[147px]" : "md:w-[97px] md:hover:w-[122px]"}`,
         selected ? "cursor-default" : "cursor-pointer",
         className,
       )}
@@ -72,7 +73,7 @@ const Item: React.FC<ItemProps> = ({
             className={cn(
               "absolute inset-0 -z-10 rounded-md",
               background === "light" ? "bg-black" : "bg-white",
-              proToggle && swapPro && "shine",
+              proToggle && isPro && "shine",
               {
                 iridescent: variant === "iridescent",
               },
@@ -105,10 +106,10 @@ const Item: React.FC<ItemProps> = ({
               })}
               onClick={() => {
                 setWelcome(false);
-                setSwapPro(!swapPro);
+                router.push(isPro ? "/" : "/pro");
               }}
             >
-              {swapPro ? (
+              {isPro ? (
                 <ProToggleSelected className="h-[20px] w-[35px]" />
               ) : (
                 <ProToggle className="h-[20px] w-[35px]" />

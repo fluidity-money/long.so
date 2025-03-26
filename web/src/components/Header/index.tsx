@@ -9,7 +9,7 @@ import { ConnectWalletButton } from "@/components/Header/ConnectWalletButton";
 import { superpositionTestnet } from "@/config/chains";
 const faucetChains = [superpositionTestnet];
 
-export default function Header() {
+export default function Header({ isDark }: { isDark: boolean }) {
   return (
     <header className="z-20 p-8">
       <div className="flex w-full flex-col gap-8">

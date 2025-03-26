@@ -8,11 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { SelectPrimeAssetTable } from "@/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/SelectPrimeAssetTable";
+import { SelectPrimeAssetTable } from "@/app/(default)/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/SelectPrimeAssetTable";
 import {
   columns,
   Pool,
-} from "@/app/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/columns";
+} from "@/app/(default)/stake/pool/create/select-prime-asset/_SelectPrimeAssetTable/columns";
 import { nanoid } from "nanoid";
 import { Token, useTokens } from "@/config/tokens";
 import { useGraphqlGlobal } from "@/hooks/useGraphql";

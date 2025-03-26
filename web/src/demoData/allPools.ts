@@ -1,4 +1,4 @@
-import { Pool } from "@/app/stake/_AllPoolsTable/columns";
+import { Pool } from "@/app/(default)/stake/_AllPoolsTable/columns";
 
 export const mockAllPools: Pool[] = [
   {

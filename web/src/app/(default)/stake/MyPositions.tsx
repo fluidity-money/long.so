@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import List from "@/assets/icons/list.svg";
 import Grid from "@/assets/icons/grid.svg";
 import { cn } from "@/lib/utils";
-import { MyPositionsTable } from "@/app/stake/_MyPositionsTable/MyPositionsTable";
-import { columns, Pool } from "@/app/stake/_MyPositionsTable/columns";
+import { MyPositionsTable } from "@/app/(default)/stake/_MyPositionsTable/MyPositionsTable";
+import { columns, Pool } from "@/app/(default)/stake/_MyPositionsTable/columns";
 import { Badge } from "@/components/ui/badge";
 import { usdFormat } from "@/lib/usdFormat";
 import Position from "@/assets/icons/position.svg";
@@ -123,7 +123,7 @@ export const MyPositions = () => {
               p.liquidityCampaigns?.map((l) => l.campaignId as `0x${string}`),
             ),
           ),
-        ] ?? [],
+        ],
         // positions that are leo
         pools
           ?.filter((p) => p.isVested)

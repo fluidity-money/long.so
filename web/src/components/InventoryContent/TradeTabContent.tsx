@@ -10,11 +10,11 @@ import {
 import ReactECharts from "echarts-for-react";
 import { traderRewardsData } from "@/components/InventoryContent/data/traderRewardsData";
 import { format, startOfDay } from "date-fns";
-import { TransactionHistoryTable } from "@/app/_TransactionHistoryTable/TransactionHistoryTable";
+import { TransactionHistoryTable } from "@/components/TransactionHistoryTable/TransactionHistoryTable";
 import {
   columns,
   TransactionHistory,
-} from "@/app/_TransactionHistoryTable/columns";
+} from "@/components/TransactionHistoryTable/columns";
 import { transactionHistoryData as mockTransactionHistoryData } from "@/components/InventoryContent/data/transactionHistoryData";
 import { graphql, useFragment } from "@/gql";
 import { useGraphqlUser } from "@/hooks/useGraphql";

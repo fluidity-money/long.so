@@ -10,21 +10,23 @@ import { useSwapPro } from "@/stores/useSwapPro";
 export const NavigationMenu = () => {
   const pathname = usePathname();
   const router = useRouter();
-
-  const { swapPro } = useSwapPro();
-
+  // const { swapPro } = useSwapPro();
+  const isPro = pathname.startsWith("/pro");
   return (
     <Menu id="nav">
       <Menu.Item
-        onClick={() => {
-          router.push("/");
-        }}
-        selected={pathname === "/" || pathname.startsWith("/swap")}
+        // onClick={() => {
+        //   router.push("/");
+        // }}
+        selected={
+          pathname === "/" ||
+          pathname.startsWith("/swap") ||
+          pathname.startsWith("/pro")
+        }
         proToggle
       >
         <div className="text-nowrap">
-          Swap{" "}
-          {swapPro && <div className="hidden md:inline-flex">{" Pro"}</div>}
+          Swap {isPro && <div className="hidden md:inline-flex">{" Pro"}</div>}
         </div>
       </Menu.Item>
       <Menu.Item
