@@ -4,8 +4,9 @@ import { InventoryContent } from "@/components/InventoryContent";
 import { useInventorySheet } from "@/stores/useInventorySheet";
 import { useAccount, useEnsName } from "wagmi";
 import { mainnet } from "wagmi/chains";
+import { cn } from "@/lib/utils";
 
-export const InventorySheet = () => {
+export const InventorySheet = ({ isDark }: { isDark: boolean }) => {
   const { isOpen, setIsOpen } = useInventorySheet();
 
   const { address } = useAccount();
@@ -24,7 +25,10 @@ export const InventorySheet = () => {
         <SheetTrigger asChild>
           <div
             id="wallet-connected-btn"
-            className="cursor-pointer text-nowrap rounded p-1 text-right text-xs font-semibold text-black transition-all hover:bg-black hover:text-base hover:text-white"
+            className={cn(
+              isDark ? "text-white" : "text-black",
+              "cursor-pointer text-nowrap rounded p-1 text-right text-xs font-semibold transition-all hover:bg-black hover:text-base hover:text-white",
+            )}
           >
             {ensName ? (
               ensName

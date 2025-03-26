@@ -32,7 +32,7 @@ export default function Header({ isDark }: { isDark: boolean }) {
             <Points />
             {/* <FaucetDropdown allowedChains={faucetChains} /> */}
             <NetworkSelection />
-            <ConnectWalletButton />
+            <ConnectWalletButton isDark={isDark} />
           </div>
         </div>
       </div>

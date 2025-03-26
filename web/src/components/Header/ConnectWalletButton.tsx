@@ -8,8 +8,9 @@ import { InventorySheet } from "@/components/InventorySheet";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useAccount, useEnsName } from "wagmi";
 import { mainnet } from "wagmi/chains";
+import { cn } from "@/lib/utils";
 
-export const ConnectWalletButton = () => {
+export const ConnectWalletButton = ({ isDark }: { isDark: boolean }) => {
   const { address } = useAccount();
   const { data: ensName } = useEnsName({
     address,
@@ -24,7 +25,7 @@ export const ConnectWalletButton = () => {
   const { open } = useWeb3Modal();
 
   if (address && !isLtSm) {
-    return <InventorySheet />;
+    return <InventorySheet isDark={isDark} />;
   }
 
   if (address && isLtSm && pathname === "/swap/inventory") {
@@ -51,7 +52,10 @@ export const ConnectWalletButton = () => {
       <div className="flex flex-row items-center justify-center gap-[10px] rounded">
         <div
           onClick={() => router.push("/swap/inventory")}
-          className="cursor-pointer text-nowrap rounded p-1 text-right text-xs font-semibold text-black transition-all hover:bg-black hover:text-base hover:text-white"
+          className={cn(
+            isDark ? "text-white" : "text-black",
+            "cursor-pointer text-nowrap rounded p-1 text-right text-xs font-semibold transition-all hover:bg-black hover:text-base hover:text-white",
+          )}
         >
           {ensName ? (
             ensName
