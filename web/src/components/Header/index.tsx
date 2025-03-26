@@ -2,6 +2,7 @@ import { DemoData } from "@/components/Header/DemoData";
 import { FeatureFlagConfig } from "@/components/Header/FeatureFlagConfig";
 import { MobileNetworkSelection } from "@/components/Header/MobileNetworkSelection";
 import { NavigationMenu } from "@/components/Header/NavigationMenu";
+import LongTailDark from "@/assets/icons/long-tail-dark.svg";
 import LongTail from "@/assets/icons/long-tail.svg";
 import Points from "../Points";
 import { NetworkSelection } from "@/components/Header/NetworkSelection";
@@ -16,13 +17,17 @@ export default function Header({ isDark }: { isDark: boolean }) {
         <div className="flex flex-row items-start justify-around">
           <div className="flex grow basis-0 flex-row items-center gap-4">
             <a href="/">
-              <LongTail height={34} width={34} />
+              {isDark ? (
+                <LongTailDark height={34} width={34} />
+              ) : (
+                <LongTail height={34} width={34} />
+              )}
             </a>
             <MobileNetworkSelection />
             <FeatureFlagConfig />
             <DemoData />
           </div>
-          <NavigationMenu />
+          <NavigationMenu isDark={isDark} />
           <div className="flex grow basis-0 flex-row items-center justify-end gap-4">
             <Points />
             {/* <FaucetDropdown allowedChains={faucetChains} /> */}
