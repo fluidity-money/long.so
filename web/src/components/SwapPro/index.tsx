@@ -1,6 +1,5 @@
 "use client";
 
-import { useSwapPro } from "@/stores/useSwapPro";
 import { TypographyH3 } from "@/components/ui/typography";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
@@ -36,7 +35,6 @@ export const SwapPro = ({
   override?: boolean;
   badgeTitle?: boolean;
 }) => {
-  const swapPro = useSwapPro((s) => s.swapPro);
   const welcome = useWelcomeStore((s) => s.welcome);
   const chainId = useChainId();
   const fUSDC = useTokens("fusdc");
@@ -46,7 +44,7 @@ export const SwapPro = ({
 
   const { token0, token1 } = useSwapStore();
 
-  const isOpen = override || (!welcome && (swapPro || isLtSm));
+  const isOpen = override || (!welcome && isLtSm);
 
   const isSwap1 =
     token0.address === fUSDC.address || token1.address === fUSDC.address;

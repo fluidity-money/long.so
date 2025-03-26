@@ -4,7 +4,6 @@ import ArrowDownWhite from "@/assets/icons/arrow-down-white.svg";
 import ArrowDown from "@/assets/icons/arrow-down.svg";
 import ProToggle from "@/assets/icons/pro-toggle.svg";
 import ProToggleSelected from "@/assets/icons/pro-toggle-selected.svg";
-import { useSwapPro } from "@/stores/useSwapPro";
 import { cn } from "@/lib/utils";
 import { clsx } from "clsx";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
