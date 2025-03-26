@@ -71,7 +71,7 @@ export default function DurationControl() {
         {durations.map((dur, idx) => (
           <DurationItem active={idx === 0} key={dur} duration={dur} />
         ))}
-        <div className="absolute inset-x-0 top-[10px] z-[0] h-1 bg-white/10"></div>
+        <div className="absolute inset-x-0 top-[10px] z-0 h-1 bg-white/10"></div>
       </div>
       <div className="flex flex-col gap-2 rounded-lg bg-white/10 p-4">
         {table.map((item) => (

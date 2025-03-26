@@ -11,12 +11,12 @@ export default function NavButton() {
   return (
     <div className="flex items-center gap-2 self-stretch rounded bg-white/10 p-4">
       <ETH className="size-6" />
-      <span className="font-inter text-xl font-medium text-white">ETH-USD</span>
+      <span className="text-xl font-medium text-white">ETH-USD</span>
       <div className="flex items-center gap-1 rounded-3xl bg-slate-500 px-2 py-1">
-        <div className="relative h-3 w-3 rounded-[100px] bg-slate-500 outline outline-1 outline-offset-[-1px] outline-sky-100">
-          <div className="absolute left-[2px] top-[2px] h-2 w-2 rounded-full bg-sky-100" />
+        <div className="relative size-3 rounded-[100px] bg-slate-500 outline outline-1 outline-offset-[-1px] outline-sky-100">
+          <div className="absolute left-[2px] top-[2px] size-2 rounded-full bg-sky-100" />
         </div>
-        <span className="font-white">Spot</span>
+        <span className="text-white">Spot</span>
       </div>
       <div className="flex items-center gap-0.5">
         {searchKeys.map((key) => (

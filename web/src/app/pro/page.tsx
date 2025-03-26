@@ -9,7 +9,7 @@ export default function ProMode() {
     <div className="flex flex-1 gap-4 px-4">
       <div className="flex flex-[4] flex-col gap-4">
         <ProHeader />
-        <div className="flex flex-grow items-center justify-center rounded-lg bg-white/10 text-white">
+        <div className="flex grow items-center justify-center rounded-lg bg-white/10 text-white">
           Middle Left/Candlestick Chart
         </div>
         <div className="flex h-[200px]">
