@@ -1,5 +1,4 @@
 import Discord from "@/assets/icons/discord.svg";
-import DiscordWhite from "@/assets/icons/discord-white.svg";
 import { cn } from "@/lib/utils";
 const gitHash = process.env.NEXT_PUBLIC_GIT_HASH;
 
@@ -9,8 +8,8 @@ export default function Footer({ isDark }: { isDark: boolean }) {
       <div className="flex flex-row justify-between">
         <div className="flex items-center gap-x-[10px]">
           <a href="https://x.com/superpositionso">𝕏</a>
-          <a href="https://discord.gg/VjUWjRQP8y">
-            {isDark ? <DiscordWhite /> : <Discord />}
+          <a href="https://discord.gg/VjUWjRQP8y" className="text-white">
+            <Discord className={cn(isDark && "text-white")} />
           </a>
           <small>
             <a

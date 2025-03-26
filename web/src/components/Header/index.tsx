@@ -2,12 +2,12 @@ import { DemoData } from "@/components/Header/DemoData";
 import { FeatureFlagConfig } from "@/components/Header/FeatureFlagConfig";
 import { MobileNetworkSelection } from "@/components/Header/MobileNetworkSelection";
 import { NavigationMenu } from "@/components/Header/NavigationMenu";
-import LongTailDark from "@/assets/icons/long-tail-dark.svg";
 import LongTail from "@/assets/icons/long-tail.svg";
 import Points from "../Points";
 import { NetworkSelection } from "@/components/Header/NetworkSelection";
 import { ConnectWalletButton } from "@/components/Header/ConnectWalletButton";
 import { superpositionTestnet } from "@/config/chains";
+import { cn } from "@/lib/utils";
 const faucetChains = [superpositionTestnet];
 
 export default function Header({ isDark }: { isDark: boolean }) {
@@ -17,14 +17,14 @@ export default function Header({ isDark }: { isDark: boolean }) {
         <div className="flex flex-row items-start justify-around">
           <div className="flex grow basis-0 flex-row items-center gap-4">
             <a href="/">
-              {isDark ? (
-                <LongTailDark height={34} width={34} />
-              ) : (
-                <LongTail height={34} width={34} />
-              )}
+              <LongTail
+                height={34}
+                width={34}
+                className={cn(isDark && "text-white")}
+              />
             </a>
             <MobileNetworkSelection />
-            <FeatureFlagConfig />
+            <FeatureFlagConfig isDark={isDark} />
             <DemoData />
           </div>
           <NavigationMenu isDark={isDark} />
