@@ -56,9 +56,12 @@ export const NetworkSelection = () => {
                 <ArrowDown
                   width={10}
                   height={6}
-                  className={cn({
-                    invert: address,
-                  })}
+                  className={cn(
+                    {
+                      invert: address,
+                    },
+                    "text-black",
+                  )}
                 />
               </div>
             </div>

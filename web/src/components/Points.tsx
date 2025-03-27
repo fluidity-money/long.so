@@ -29,7 +29,7 @@ export default function Points() {
             </div>
             <div className="text-nowrap">Points</div>
             <div className="ml-2 hidden w-0 transition-[width] group-hover:inline-flex group-hover:w-2 group-data-[state=open]:inline-flex group-data-[state=open]:w-2">
-              <ArrowDown width={10} height={6} className={"invert"} />
+              <ArrowDown width={10} height={6} className={"text-white"} />
             </div>
           </div>
         </Badge>
