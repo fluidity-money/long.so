@@ -1,6 +1,5 @@
 import { LayoutGroup, motion } from "framer-motion";
 import styles from "./Menu.module.scss";
-import ArrowDownWhite from "@/assets/icons/arrow-down-white.svg";
 import ArrowDown from "@/assets/icons/arrow-down.svg";
 import ProToggle from "@/assets/icons/pro-toggle.svg";
 import ProToggleSelected from "@/assets/icons/pro-toggle-selected.svg";
@@ -93,11 +92,11 @@ const Item: React.FC<ItemProps> = ({
         {proToggle && (
           <div id="swap-pro-toggle" className="hidden md:inline-flex">
             <div className="group-hover:hidden">
-              {selected ? (
-                <ArrowDownWhite height={10} width={10} />
-              ) : (
-                <ArrowDown height={10} width={10} />
-              )}
+              <ArrowDown
+                height={10}
+                width={10}
+                className={cn(selected && "text-white")}
+              />
             </div>
             <div
               className={clsx(`hidden cursor-pointer group-hover:inline-flex`, {

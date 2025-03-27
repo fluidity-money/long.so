@@ -1,5 +1,5 @@
 import ETH from "@/assets/icons/eth-white.svg";
-import ArrowDown from "@/assets/icons/arrow-down-white.svg";
+import ArrowDown from "@/assets/icons/arrow-down.svg";
 
 const KeyItem = ({ char }: { char: string }) => (
   <div className="flex size-6 items-center justify-center rounded-sm bg-white/10 p-1 text-white">
@@ -23,7 +23,7 @@ export default function NavButton() {
           <KeyItem key={key} char={key} />
         ))}
       </div>
-      <ArrowDown className="size-2.5" />
+      <ArrowDown className="size-2.5 text-white" />
     </div>
   );
 }

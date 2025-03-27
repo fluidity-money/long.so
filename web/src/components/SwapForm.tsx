@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Token from "@/assets/icons/token.svg";
 import Swap from "@/assets/icons/Swap.svg";
-import ArrowDown from "@/assets/icons/arrow-down-white.svg";
+import ArrowDown from "@/assets/icons/arrow-down.svg";
 import { SuperloopPopover } from "@/app/SuperloopPopover";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -450,7 +450,7 @@ export const SwapForm = () => {
                       src={token0.icon}
                     />
                     <div>{token0.symbol}</div>
-                    <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
+                    <ArrowDown className="ml-1 h-[5.22px] w-[9.19px] text-white md:h-[6.46px] md:w-[11.38px]" />
                   </Badge>
                 </Link>
               </div>

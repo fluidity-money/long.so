@@ -1,4 +1,4 @@
-import ArrowDown from "@/assets/icons/arrow-down-white.svg";
+import ArrowDown from "@/assets/icons/arrow-down.svg";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { TokenIcon } from "../TokenIcon";
@@ -27,7 +27,7 @@ const Tabs = () => (
       className="flex flex-1 items-center gap-1 text-white"
     >
       <span>More</span>
-      <ArrowDown className="size-2.5 bg-black" />
+      <ArrowDown className="size-2.5" />
     </Button>
   </div>
 );

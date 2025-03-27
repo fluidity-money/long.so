@@ -9,7 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import Slider from "@/components/Slider";
-import ArrowDown from "@/assets/icons/arrow-down-white.svg";
+import ArrowDown from "@/assets/icons/arrow-down.svg";
 import { useStakeStore } from "@/stores/useStakeStore";
 import { useAccount, useChainId, useSimulateContract } from "wagmi";
 import { useEffect, useMemo, useState } from "react";
@@ -229,7 +229,7 @@ export default function WithdrawLiquidity() {
               <div className="text-nowrap text-sm font-semibold text-white">
                 {token0.symbol} x {token1.symbol}
               </div>
-              <ArrowDown />
+              <ArrowDown className="text-white" />
             </Badge>
 
             <Input

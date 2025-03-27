@@ -2,7 +2,7 @@
 
 import { CampaignBanner } from "@/components/CampaignBanner";
 import { Badge } from "@/components/ui/badge";
-import ArrowDown from "@/assets/icons/arrow-down-white.svg";
+import ArrowDown from "@/assets/icons/arrow-down.svg";
 import Padlock from "@/assets/icons/padlock.svg";
 import Token from "@/assets/icons/token.svg";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -695,7 +695,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     className="size-[20px] invert md:size-[25px]"
                   />
                   <div>{token0.symbol}</div>
-                  <ArrowDown className="h-[5.22px] w-[9.19px] md:h-[6.46px] md:w-[11.38px]" />
+                  <ArrowDown className="h-[5.22px] w-[9.19px] text-white md:h-[6.46px] md:w-[11.38px]" />
                 </Badge>
               </Link>
             </div>
