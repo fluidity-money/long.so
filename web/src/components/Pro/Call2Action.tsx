@@ -4,16 +4,27 @@ import { Badge } from "../ui/badge";
 import { TokenIcon } from "../TokenIcon";
 const Tabs = () => (
   <div className="flex items-center gap-1">
-    <Button variant={"outline"} className="text-white" title="Market">
+    <Button
+      size={"sm"}
+      variant={"outline"}
+      className="flex-1 text-white"
+      title="Market"
+    >
       Market
     </Button>
-    <Button variant={"outline"} title="Limit" className="text-white">
+    <Button
+      size={"sm"}
+      variant={"outline"}
+      title="Limit"
+      className="flex-1 text-white"
+    >
       Limit
     </Button>
     <Button
       title="More"
+      size={"sm"}
       variant={"outline"}
-      className="flex items-center gap-1 text-white"
+      className="flex flex-1 items-center gap-1 text-white"
     >
       <span>More</span>
       <ArrowDown className="size-2.5 bg-black" />
@@ -60,10 +71,14 @@ export default function Call2Action() {
       <Tabs />
       <div className="flex flex-col gap-4 rounded-lg bg-white/10 p-4">
         <div className="flex gap-1">
-          <Button variant={"tint"} className="flex-1 bg-green-200 text-black">
+          <Button
+            size={"sm"}
+            variant={"tint"}
+            className="flex-1 bg-green-200 text-black"
+          >
             Buy/Long
           </Button>
-          <Button className="flex-1 text-white" variant="outline">
+          <Button size={"sm"} className="flex-1 text-white" variant="outline">
             Sell/Short
           </Button>
         </div>
