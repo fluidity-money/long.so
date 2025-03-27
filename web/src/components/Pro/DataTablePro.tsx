@@ -28,7 +28,7 @@ export function DataTablePro<TData, TValue>({
   });
   return (
     <Table>
-      <TableHeader className="border-b border-b-white">
+      <TableHeader className="sticky top-0 border-b border-b-white bg-black">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id}>
             {headerGroup.headers.map((header) => {
