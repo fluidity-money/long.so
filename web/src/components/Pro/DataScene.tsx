@@ -1,7 +1,5 @@
 "use client";
-// Get Token Events for Txns
-// GetTokenPrice for Holders
-
+import { useGetTokenEvents } from "@/hooks/useGraphql";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { DataTablePro } from "./DataTablePro";
@@ -12,10 +10,12 @@ const Tabs = () => (
     <Button size={"sm"}>Holders</Button>
   </div>
 );
-
 export default function DataScene() {
   const titleStyle = "text-gray-200 text-xs font-semibold";
   const contentStyle = "text-xs font-medium text-white";
+  const { data: events, isLoading } = useGetTokenEvents(
+    "0x7fc956a5c0aef46aa25b8911f4cb4619cbb7d90f",
+  );
 
   interface Data {
     type: string;
@@ -142,7 +142,7 @@ export default function DataScene() {
   return (
     <div className="flex w-full flex-col gap-2">
       <Tabs />
-      <DataTablePro columns={columns} data={data} />
+      <DataTablePro isLoading={isLoading} columns={columns} data={data} />
     </div>
   );
 }

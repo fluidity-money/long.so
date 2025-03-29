@@ -11,6 +11,7 @@ const appSchema = z.object({
     icons: z.array(z.string()),
   }),
   pointsGraphUrl: z.string().url(),
+  codexApiUrl: z.string().url(),
   nullAddress: z
     .string()
     .regex(/^0x[a-fA-F0-9]+$/, {
@@ -33,6 +34,7 @@ const appVars = appSchema.safeParse({
     icons: [""],
   },
   pointsGraphUrl: "https://points-graph.superposition.so",
+  codexApiUrl: "https://graph.codex.io/graphql",
   nullAddress: "0x0000000000000000000000000000000000000000",
 });
 

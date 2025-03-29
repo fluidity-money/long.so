@@ -4,6 +4,7 @@ import appConfig from "@/config";
 import { graphql } from "@/gql";
 import { useAccount, useChainId } from "wagmi";
 import { useChain } from "@/config/chains";
+import { QuoteToken, RankingDirection } from "@/gql/graphql";
 
 /**
  * The main GraphQL query to fetch all data. The global query that should be run and
@@ -135,6 +136,133 @@ export const useGetPool = (token: `0x${string}`, filter?: `0x${string}`) => {
         token,
         filter,
       }),
+    refetchInterval: 20 * 1000, // 20 seconds
+  });
+};
+
+export const queryGetTokenEvents = graphql(`
+  query GetTokenEvents(
+    $limit: Int
+    $query: EventsQueryInput!
+    $cursor: String
+    $direction: RankingDirection
+  ) {
+    getTokenEvents(
+      limit: $limit
+      query: $query
+      cursor: $cursor
+      direction: $direction
+    ) {
+      items {
+        address
+        baseTokenPrice
+        blockNumber
+        eventDisplayType
+        eventType
+        id
+        liquidityToken
+        logIndex
+        maker
+        timestamp
+        token0SwapValueUsd
+        token0ValueBase
+        token1SwapValueUsd
+        token1ValueBase
+        transactionHash
+        labels {
+          sandwich {
+            label
+            sandwichType
+            token0DrainedAmount
+            token1DrainedAmount
+          }
+        }
+        transactionIndex
+        quoteToken
+        data {
+          __typename
+          ... on BurnEventData {
+            amount0
+            amount1
+            amount0Shifted
+            amount1Shifted
+            type
+            __typename
+          }
+          ... on MintEventData {
+            amount0
+            amount1
+            amount0Shifted
+            amount1Shifted
+            type
+            __typename
+          }
+          ... on PoolBalanceChangedEventData {
+            amount0
+            amount1
+            amount0Shifted
+            amount1Shifted
+            type
+            __typename
+          }
+          ... on SwapEventData {
+            amount0In
+            amount0Out
+            amount1In
+            amount1Out
+            amount0
+            amount1
+            amountNonLiquidityToken
+            priceUsd
+            priceUsdTotal
+            priceBaseToken
+            priceBaseTokenTotal
+            type
+            __typename
+          }
+        }
+      }
+      cursor
+    }
+  }
+`);
+
+export const useGetTokenEvents = (poolAddress: string) => {
+  return useQuery({
+    queryKey: ["tokenEvents", poolAddress],
+    queryFn: async () => {
+      const res = await request(appConfig.codexApiUrl, queryGetTokenEvents, {
+        query: {
+          address: poolAddress,
+          networkId: 55244,
+          quoteToken: QuoteToken.Token0,
+        },
+        limit: 30,
+        direction: RankingDirection.Desc,
+        cursor: null,
+      });
+
+      interface Data {
+        type: string;
+        price: string;
+        age: number;
+        usd: string;
+        eth: string;
+        mode: string;
+        maker: string;
+      }
+      if (!res?.getTokenEvents?.items) return [];
+      return res.getTokenEvents.items
+        .filter((i) => i?.data?.__typename === "SwapEventData")
+        .map(
+          (i) =>
+            ({
+              age: i?.timestamp,
+              eth: i?.data?.type,
+              price: i?.token0SwapValueUsd,
+            }) as Data,
+        );
+    },
     refetchInterval: 20 * 1000, // 20 seconds
   });
 };
