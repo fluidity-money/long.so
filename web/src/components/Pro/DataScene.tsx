@@ -1,5 +1,5 @@
 "use client";
-import { useGetTokenEvents } from "@/hooks/useGraphql";
+import { useGetTokenEvents, TokenEvent } from "@/hooks/useGraphql";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { DataTablePro } from "./DataTablePro";
@@ -13,78 +13,13 @@ const Tabs = () => (
 export default function DataScene() {
   const titleStyle = "text-gray-200 text-xs font-semibold";
   const contentStyle = "text-xs font-medium text-white";
-  const { data: events, isLoading } = useGetTokenEvents(
-    "0x7fc956a5c0aef46aa25b8911f4cb4619cbb7d90f",
-  );
+  const {
+    data: events,
+    isLoading,
+    isSuccess,
+  } = useGetTokenEvents("0x7fc956a5c0aef46aa25b8911f4cb4619cbb7d90f");
 
-  interface Data {
-    type: string;
-    price: string;
-    age: string;
-    usd: string;
-    eth: string;
-    mode: string;
-    maker: string;
-  }
-
-  const data: Data[] = [
-    {
-      type: "Sell",
-      price: "$1000",
-      age: "7min",
-      usd: "$63.00",
-      eth: "0.02309",
-      mode: "3,706.19",
-      maker: "0x...001",
-    },
-    {
-      type: "Buy",
-      price: "$1000",
-      age: "7min",
-      usd: "$63.00",
-      eth: "0.02309",
-      mode: "3,706.19",
-      maker: "0x...001",
-    },
-    {
-      type: "Sell",
-      price: "$1000",
-      age: "7min",
-      usd: "$63.00",
-      eth: "0.02309",
-      mode: "3,706.19",
-      maker: "0x...001",
-    },
-    {
-      type: "Buy",
-      price: "$1000",
-      age: "7min",
-      usd: "$63.00",
-      eth: "0.02309",
-      mode: "3,706.19",
-      maker: "0x...001",
-    },
-    {
-      type: "Sell",
-      price: "$1000",
-      age: "7min",
-      usd: "$63.00",
-      eth: "0.02309",
-      mode: "3,706.19",
-      maker: "0x...001",
-    },
-    {
-      type: "Buy",
-      price: "$1000",
-      age: "7min",
-      usd: "$63.00",
-      eth: "0.02309",
-      mode: "3,706.19",
-      maker: "0x...001",
-    },
-  ];
-
-  const columns: ColumnDef<Data>[] = [
+  const columns: ColumnDef<TokenEvent>[] = [
     {
       header: () => <span className={titleStyle}>Type</span>,
       accessorKey: "type",
@@ -97,17 +32,17 @@ export default function DataScene() {
       ),
     },
     {
-      header: () => <span className={titleStyle}>Price</span>,
-      accessorKey: "price",
-      cell: ({ row }) => (
-        <span className={contentStyle}>{row.getValue("price")}</span>
-      ),
-    },
-    {
       header: () => <span className={titleStyle}>Age</span>,
       accessorKey: "age",
       cell: ({ row }) => (
         <span className={contentStyle}>{row.getValue("age")}</span>
+      ),
+    },
+    {
+      header: () => <span className={titleStyle}>Price</span>,
+      accessorKey: "price",
+      cell: ({ row }) => (
+        <span className={contentStyle}>{row.getValue("price")}</span>
       ),
     },
     {
@@ -142,7 +77,12 @@ export default function DataScene() {
   return (
     <div className="flex w-full flex-col gap-2">
       <Tabs />
-      <DataTablePro isLoading={isLoading} columns={columns} data={data} />
+      <DataTablePro
+        isLoading={isLoading}
+        columns={columns}
+        data={events ?? []}
+        isSuccess={isSuccess}
+      />
     </div>
   );
 }

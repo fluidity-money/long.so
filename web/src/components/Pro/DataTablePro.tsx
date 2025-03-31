@@ -17,11 +17,13 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading: boolean;
+  isSuccess: boolean;
 }
 export function DataTablePro<TData, TValue>({
   columns,
   data,
   isLoading,
+  isSuccess,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -50,9 +52,12 @@ export function DataTablePro<TData, TValue>({
         ))}
       </TableHeader>
       <TableBody>
-        {isLoading ? (
+        {isLoading || (!isSuccess && !data.length) ? (
           <TableRow>
-            <TableCell colSpan={columns.length} className="h-24 text-center">
+            <TableCell
+              colSpan={columns.length}
+              className="h-24 text-center text-gray-200"
+            >
               Loading...
             </TableCell>
           </TableRow>
@@ -63,17 +68,34 @@ export function DataTablePro<TData, TValue>({
                 key={row.id}
                 className="border-0 hover:bg-black hover:text-white"
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="px-0 py-2">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+                {row
+                  .getVisibleCells()
+                  .filter((c) => !!c.getValue())
+                  .map((cell) => (
+                    <TableCell
+                      colSpan={
+                        cell.id === "price" && row.getValue("type") !== "swap"
+                          ? 3
+                          : undefined
+                      }
+                      key={cell.id}
+                      className="px-0 py-2"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
               </TableRow>
             );
           })
         ) : (
           <TableRow>
-            <TableCell colSpan={columns.length} className="h-24 text-center">
+            <TableCell
+              colSpan={columns.length}
+              className="h-24 text-center text-gray-200"
+            >
               No results.
             </TableCell>
           </TableRow>

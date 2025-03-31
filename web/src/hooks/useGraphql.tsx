@@ -4,7 +4,7 @@ import appConfig from "@/config";
 import { graphql } from "@/gql";
 import { useAccount, useChainId } from "wagmi";
 import { useChain } from "@/config/chains";
-import { QuoteToken, RankingDirection } from "@/gql/graphql";
+import { QuoteToken, RankingDirection, SwapEventData } from "@/gql/graphql";
 
 /**
  * The main GraphQL query to fetch all data. The global query that should be run and
@@ -226,7 +226,15 @@ export const queryGetTokenEvents = graphql(`
     }
   }
 `);
-
+export interface TokenEvent {
+  type: string;
+  price: string;
+  age: string;
+  usd: string;
+  eth: string;
+  mode: string;
+  maker: string;
+}
 export const useGetTokenEvents = (poolAddress: string) => {
   return useQuery({
     queryKey: ["tokenEvents", poolAddress],
@@ -241,27 +249,37 @@ export const useGetTokenEvents = (poolAddress: string) => {
         direction: RankingDirection.Desc,
         cursor: null,
       });
-
-      interface Data {
-        type: string;
-        price: string;
-        age: number;
-        usd: string;
-        eth: string;
-        mode: string;
-        maker: string;
-      }
       if (!res?.getTokenEvents?.items) return [];
       return res.getTokenEvents.items
-        .filter((i) => i?.data?.__typename === "SwapEventData")
-        .map(
-          (i) =>
-            ({
-              age: i?.timestamp,
-              eth: i?.data?.type,
-              price: i?.token0SwapValueUsd,
-            }) as Data,
-        );
+        .filter((i) => !!i)
+        .map((item) => {
+          switch (item.data?.__typename) {
+            case "SwapEventData": {
+              const swapData = item.data as SwapEventData;
+              return {
+                age: item.timestamp.toString(),
+                eth: item.data.amountNonLiquidityToken,
+                price: item.token1SwapValueUsd?.toString() ?? "0",
+                usd: swapData.priceUsdTotal?.toString() ?? "0",
+                mode: swapData.amountNonLiquidityToken?.toString() ?? "0",
+                type: item.data?.type,
+                maker: item.maker,
+              };
+            }
+            default: {
+              const data = item.data as NonNullable<typeof item.data>;
+              return {
+                age: item.timestamp.toString(),
+                eth: null,
+                price: `${data.amount0Shifted} and ${data.amount1Shifted}`,
+                usd: null,
+                mode: null,
+                type: item.data?.type,
+                maker: item.maker,
+              };
+            }
+          }
+        }) as TokenEvent[];
     },
     refetchInterval: 20 * 1000, // 20 seconds
   });
