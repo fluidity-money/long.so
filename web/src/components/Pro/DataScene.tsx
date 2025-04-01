@@ -13,12 +13,9 @@ const Tabs = () => (
 export default function DataScene() {
   const titleStyle = "text-gray-200 text-xs font-semibold";
   const contentStyle = "text-xs font-medium text-white";
-  const {
-    data: events,
-    isLoading,
-    isSuccess,
-  } = useGetTokenEvents("0x7fc956a5c0aef46aa25b8911f4cb4619cbb7d90f");
-
+  const { data, isLoading, isSuccess, hasNextPage, fetchNextPage } =
+    useGetTokenEvents("0x7fc956a5c0aef46aa25b8911f4cb4619cbb7d90f");
+  const events = data?.pages?.flatMap((page) => page.items) ?? [];
   const columns: ColumnDef<TokenEvent>[] = [
     {
       header: () => <span className={titleStyle}>Type</span>,
@@ -61,9 +58,9 @@ export default function DataScene() {
     },
     {
       header: () => <span className={titleStyle}>Mode</span>,
-      accessorKey: "mode",
+      accessorKey: "token",
       cell: ({ row }) => (
-        <span className={contentStyle}>{row.getValue("mode")}</span>
+        <span className={contentStyle}>{row.getValue("token")}</span>
       ),
     },
     {
@@ -80,7 +77,7 @@ export default function DataScene() {
       <DataTablePro
         isLoading={isLoading}
         columns={columns}
-        data={events ?? []}
+        data={events}
         isSuccess={isSuccess}
       />
     </div>

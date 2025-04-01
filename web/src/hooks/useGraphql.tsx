@@ -227,13 +227,13 @@ export const queryGetTokenEvents = graphql(`
   }
 `);
 export interface TokenEvent {
-  type: string;
+  type?: string | null;
   price: string;
   age: string;
-  usd: string;
-  eth: string;
-  mode: string;
-  maker: string;
+  usd: string | null;
+  eth?: string | null;
+  token: string | null;
+  maker?: string | null;
 }
 export const useGetTokenEvents = (poolAddress: string) => {
   return useInfiniteQuery({
@@ -261,7 +261,7 @@ export const useGetTokenEvents = (poolAddress: string) => {
                 eth: item.data.amountNonLiquidityToken,
                 price: item.token1SwapValueUsd?.toString() ?? "0",
                 usd: swapData.priceUsdTotal?.toString() ?? "0",
-                mode: swapData.amountNonLiquidityToken?.toString() ?? "0",
+                token: swapData.amountNonLiquidityToken?.toString() ?? "0",
                 type: item.data?.type,
                 maker: item.maker,
               };
@@ -273,7 +273,7 @@ export const useGetTokenEvents = (poolAddress: string) => {
                 eth: null,
                 price: `${data.amount0Shifted} and ${data.amount1Shifted}`,
                 usd: null,
-                mode: null,
+                token: null,
                 type: item.data?.type,
                 maker: item.maker,
               };
