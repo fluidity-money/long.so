@@ -5,6 +5,7 @@ import { graphql } from "@/gql";
 import { useAccount, useChainId } from "wagmi";
 import { useChain } from "@/config/chains";
 import { QuoteToken, RankingDirection, SwapEventData } from "@/gql/graphql";
+import { timeAgo } from "@/lib/time";
 
 /**
  * The main GraphQL query to fetch all data. The global query that should be run and
