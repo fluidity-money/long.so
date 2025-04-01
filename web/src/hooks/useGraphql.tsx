@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import request from "graphql-request";
 import appConfig from "@/config";
 import { graphql } from "@/gql";
@@ -236,9 +236,9 @@ export interface TokenEvent {
   maker: string;
 }
 export const useGetTokenEvents = (poolAddress: string) => {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ["tokenEvents", poolAddress],
-    queryFn: async () => {
+    queryFn: async ({ pageParam }: { pageParam?: string }) => {
       const res = await request(appConfig.codexApiUrl, queryGetTokenEvents, {
         query: {
           address: poolAddress,
@@ -247,10 +247,10 @@ export const useGetTokenEvents = (poolAddress: string) => {
         },
         limit: 30,
         direction: RankingDirection.Desc,
-        cursor: null,
+        cursor: pageParam,
       });
-      if (!res?.getTokenEvents?.items) return [];
-      return res.getTokenEvents.items
+      if (!res?.getTokenEvents?.items) return { items: [] };
+      const items = res.getTokenEvents.items
         .filter((i) => !!i)
         .map((item) => {
           switch (item.data?.__typename) {
@@ -279,8 +279,10 @@ export const useGetTokenEvents = (poolAddress: string) => {
               };
             }
           }
-        }) as TokenEvent[];
+        });
+      return { cursor: res?.getTokenEvents?.cursor, items };
     },
-    refetchInterval: 20 * 1000, // 20 seconds
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => lastPage.cursor,
   });
 };
