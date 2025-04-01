@@ -257,7 +257,7 @@ export const useGetTokenEvents = (poolAddress: string) => {
             case "SwapEventData": {
               const swapData = item.data as SwapEventData;
               return {
-                age: item.timestamp.toString(),
+                age: timeAgo(item.timestamp),
                 eth: item.data.amountNonLiquidityToken,
                 price: item.token1SwapValueUsd?.toString() ?? "0",
                 usd: swapData.priceUsdTotal?.toString() ?? "0",
@@ -269,7 +269,7 @@ export const useGetTokenEvents = (poolAddress: string) => {
             default: {
               const data = item.data as NonNullable<typeof item.data>;
               return {
-                age: item.timestamp.toString(),
+                age: timeAgo(item.timestamp),
                 eth: null,
                 price: `${data.amount0Shifted} and ${data.amount1Shifted}`,
                 usd: null,
