@@ -259,10 +259,10 @@ export const useGetTokenEvents = (poolAddress: string) => {
               const swapData = item.data as SwapEventData;
               return {
                 age: timeAgo(item.timestamp),
-                eth: item.data.amountNonLiquidityToken,
-                price: item.token1SwapValueUsd?.toString() ?? "0",
-                usd: swapData.priceUsdTotal?.toString() ?? "0",
-                token: swapData.amountNonLiquidityToken?.toString() ?? "0",
+                eth: +Number(item.data.amountNonLiquidityToken).toFixed(4),
+                price: +Number(item.token1SwapValueUsd)?.toFixed(4),
+                usd: +Number(swapData.priceUsdTotal).toFixed(4),
+                token: +Number(swapData.amountNonLiquidityToken).toFixed(4),
                 type: item.data?.type,
                 maker: item.maker,
               };
@@ -272,7 +272,7 @@ export const useGetTokenEvents = (poolAddress: string) => {
               return {
                 age: timeAgo(item.timestamp),
                 eth: null,
-                price: `${data.amount0Shifted} and ${data.amount1Shifted}`,
+                price: `${+Number(data.amount0Shifted).toFixed(4)} and ${+Number(data.amount1Shifted).toFixed(4)}`,
                 usd: null,
                 token: null,
                 type: item.data?.type,
