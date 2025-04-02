@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { clsx } from "clsx";
 import { useWelcomeStore } from "@/stores/useWelcomeStore";
 import { usePathname, useRouter } from "next/navigation";
+import config from "@/config";
 
 interface ItemProps {
   children: React.ReactNode;
@@ -104,7 +105,7 @@ const Item: React.FC<ItemProps> = ({
               })}
               onClick={() => {
                 setWelcome(false);
-                router.push(isPro ? "/" : "/pro");
+                router.push(isPro ? "/" : `/pro/${config.pairs[0].address}`);
               }}
             >
               {isPro ? (

@@ -10,7 +10,6 @@ const gitHash = childProcess
 module.exports = withSentryConfig(
   /** @type {import("next").NextConfig} */
   {
-    output: "export",
     images: { unoptimized: true },
     env: {
       NEXT_PUBLIC_GIT_HASH: gitHash,

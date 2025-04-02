@@ -3,12 +3,31 @@ import DataScene from "@/components/Pro/DataScene";
 import DurationControl from "@/components/Pro/DurationControl";
 import ProHeader from "@/components/Pro/ProHeader";
 import TokenDetails from "@/components/Pro/TokenDetails";
+import config from "@/config/app";
+import { notFound } from "next/navigation";
+export const dynamicParams = false;
+export async function generateStaticParams() {
+  return config.pairs.map((p) => p.address);
+}
+type Params = Promise<{ address: string; quoteToken: string }>;
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
-export default function ProMode() {
+export default async function ProMode({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams: SearchParams;
+}) {
+  const { address } = await params;
+  const { quoteToken } = await searchParams;
+  console.log("quoteToken", quoteToken);
+  const name = config.pairs.find((p) => p.address === address)?.name;
+  if (!name) notFound();
   return (
     <div className="flex flex-1 gap-4 px-4">
       <div className="flex grow flex-col gap-4">
-        <ProHeader />
+        <ProHeader name={name} />
         <div className="flex grow items-center justify-center rounded-lg bg-white/10 text-white">
           Middle Left/Candlestick Chart
         </div>
