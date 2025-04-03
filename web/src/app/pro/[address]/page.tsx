@@ -7,11 +7,10 @@ import config from "@/config/app";
 import { notFound } from "next/navigation";
 export const dynamicParams = false;
 export async function generateStaticParams() {
-  return config.pairs.map((p) => p.address);
+  return config.pairs.map((p) => ({ address: p.address }));
 }
-type Params = Promise<{ address: string; quoteToken: string }>;
-type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
-
+type Params = Promise<{ address: string }>;
+type SearchParams = Promise<{ quoteToken?: string }>;
 export default async function ProMode({
   params,
   searchParams,
@@ -20,8 +19,7 @@ export default async function ProMode({
   searchParams: SearchParams;
 }) {
   const { address } = await params;
-  const { quoteToken } = await searchParams;
-  console.log("quoteToken", quoteToken);
+  const { quoteToken = "0" } = await searchParams;
   const name = config.pairs.find((p) => p.address === address)?.name;
   if (!name) notFound();
   return (
@@ -30,6 +28,7 @@ export default async function ProMode({
         <ProHeader name={name} />
         <div className="flex grow items-center justify-center rounded-lg bg-white/10 text-white">
           Middle Left/Candlestick Chart
+          {JSON.stringify(quoteToken)}
         </div>
         <div className="flex h-[200px]">
           <DataScene />

@@ -240,16 +240,23 @@ export const useGetTokenEvents = (poolAddress: string) => {
   return useInfiniteQuery({
     queryKey: ["tokenEvents", poolAddress],
     queryFn: async ({ pageParam }: { pageParam?: string }) => {
-      const res = await request(appConfig.codexApiUrl, queryGetTokenEvents, {
-        query: {
-          address: poolAddress,
-          networkId: 55244,
-          quoteToken: QuoteToken.Token0,
+      const res = await request(
+        appConfig.codexApiUrl,
+        queryGetTokenEvents,
+        {
+          query: {
+            address: poolAddress,
+            networkId: 55244,
+            quoteToken: QuoteToken.Token0,
+          },
+          limit: 30,
+          direction: RankingDirection.Desc,
+          cursor: pageParam,
         },
-        limit: 30,
-        direction: RankingDirection.Desc,
-        cursor: pageParam,
-      });
+        {
+          Authorization: "597c0b48301be1731314a255fe5fca6eef4002aa",
+        },
+      );
       if (!res?.getTokenEvents?.items) return { items: [] };
       const items = res.getTokenEvents.items
         .filter((i) => !!i)

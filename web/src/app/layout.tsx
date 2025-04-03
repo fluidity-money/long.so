@@ -25,9 +25,6 @@ export const metadata: Metadata = {
   ],
 };
 
-// force the static export to fetch data from the server
-export const dynamic = "force-static";
-
 export default async function RootLayout({
   children,
 }: {
