@@ -1,5 +1,4 @@
 import { LayoutGroup, motion } from "framer-motion";
-import styles from "./Menu.module.scss";
 import ArrowDown from "@/assets/icons/arrow-down.svg";
 import ProToggle from "@/assets/icons/pro-toggle.svg";
 import ProToggleSelected from "@/assets/icons/pro-toggle-selected.svg";
@@ -35,11 +34,6 @@ const Item: React.FC<ItemProps> = ({
   className,
   variant,
 }) => {
-  const classes = `
-    ${styles.Item}
-    ${selected ? styles.selected : ""}
-    ${styles[background]}
-  `;
   const pathname = usePathname();
   const isPro = pathname.startsWith("/pro");
   const { setWelcome } = useWelcomeStore();
@@ -47,8 +41,11 @@ const Item: React.FC<ItemProps> = ({
   return (
     <motion.div
       className={cn(
-        classes,
-        "group rounded-md",
+        "z-1 group relative rounded-md",
+        selected && "box-content",
+        background === "dark"
+          ? "bg-[#EBEBEB] text-[#1E1E1E]"
+          : "bg-[#1E1E1E] text-[#EBEBEB]",
         proToggle &&
           `h-[43px] px-2 transition-[width] ${isPro ? "md:w-[125px] md:hover:w-[147px]" : "md:w-[97px] md:hover:w-[122px]"}`,
         selected ? "cursor-default" : "cursor-pointer",

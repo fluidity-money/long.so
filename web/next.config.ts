@@ -1,5 +1,4 @@
 import { NextConfig } from "next";
-import path from "node:path";
 import childProcess from "node:child_process";
 import { withSentryConfig } from "@sentry/nextjs";
 const gitHash = childProcess
@@ -57,13 +56,6 @@ const nextConfig: NextConfig = {
     config.externals.push("pino-pretty", "lokijs", "encoding");
 
     return config;
-  },
-  sassOptions: {
-    includePaths: [path.join(__dirname, "src/styles")],
-    prependData: `
-      @use "@/styles/variables" as *;
-      @use "@/styles/mixins" as *;
-    `,
   },
 };
 export default withSentryConfig(nextConfig, {
