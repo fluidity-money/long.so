@@ -20,17 +20,15 @@ export default function PopulateQueryCache({
   const chainId = useChainId();
   const chain = useChain(chainId);
   const queryClient = useQueryClient();
-  const fetchQueryData = useCallback(
-    async function () {
-      const data = await request(chain.gqlUrl, graphqlQueryGlobal);
-      queryClient.setQueryData(["graphql", chainId], data);
-    },
-    [chain.gqlUrl, chainId, queryClient],
-  );
-
   useEffect(() => {
-    fetchQueryData();
-  }, [fetchQueryData]);
+    chain.gqlUrl &&
+      chainId &&
+      queryClient &&
+      (async function () {
+        const data = await request(chain.gqlUrl, graphqlQueryGlobal);
+        queryClient.setQueryData(["graphql", chainId], data);
+      })();
+  }, [chain.gqlUrl, chainId, queryClient]);
 
   useEffect(() => {
     // using the same query key as in useFeatureFlag.tsx
