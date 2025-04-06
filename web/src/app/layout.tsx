@@ -1,11 +1,13 @@
-import { Provider } from "@/app/Provider";
 import { Metadata } from "next";
-import PopulateQueryCache from "@/app/PopulateQueryCache";
+import Providers from "@/providers";
 import BottomBanner from "@/components/Banners/BottomBanner";
 import ErrorReportingDialog from "@/components/ErrorReportingDialog";
 import CookieBanner from "@/components/CookieBanner";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { WalletConnectionStatus } from "@/components/WalletConnectionStatus";
+import { Toaster } from "@/components/ui/toaster";
+import { headers } from "next/headers";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Longtail",
@@ -34,18 +36,20 @@ export default async function RootLayout({
     "https://features.long.so/features.json",
   );
   const featuresData = await featuresDataRequest.json();
+  const headersObj = await headers();
+  const cookies = headersObj.get("cookie");
   return (
     <html lang="en">
       <body>
-        <Provider>
+        <Providers featuresData={featuresData} cookies={cookies}>
           <WalletConnectionStatus />
-          <PopulateQueryCache featuresData={featuresData} />
           {children}
           <BottomBanner />
           <ErrorReportingDialog />
-        </Provider>
+        </Providers>
         <CookieBanner />
         <GoogleAnalytics />
+        <Toaster />
       </body>
     </html>
   );

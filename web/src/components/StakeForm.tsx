@@ -43,7 +43,7 @@ import Gas from "@/assets/icons/gas.svg";
 import Link from "next/link";
 import Menu from "@/components/Menu";
 import Index from "@/components/Slider";
-import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { useAppKit } from "@reown/appkit/react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { graphql, useFragment } from "@/gql";
 import { useGetPool, useGraphqlGlobal } from "@/hooks/useGraphql";
@@ -585,7 +585,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
   const autoFeeTierRef = useRef();
   const manualFeeTierRef = useRef();
 
-  const { open } = useWeb3Modal();
+  const { open } = useAppKit();
 
   const fusdcSymbol = chainId === superpositionMainnet.id ? "USDC" : "ƒUSDC";
 

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePathname, useRouter } from "next/navigation";
 import { InventorySheet } from "@/components/InventorySheet";
-import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { useAppKit } from "@reown/appkit/react";
 import { useAccount, useEnsName } from "wagmi";
 import { mainnet } from "wagmi/chains";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,7 @@ export const ConnectWalletButton = ({ isDark }: { isDark: boolean }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const { open } = useWeb3Modal();
+  const { open } = useAppKit();
 
   if (address && !isLtSm) {
     return <InventorySheet isDark={isDark} />;

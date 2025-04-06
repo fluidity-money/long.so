@@ -19,7 +19,7 @@ import {
   getSqrtRatioAtTick,
   sqrtPriceX96ToPrice,
 } from "@/lib/math";
-import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { useAppKit } from "@reown/appkit/react";
 import { TokenIcon } from "@/components/TokenIcon";
 import { useTokens } from "@/config/tokens";
 import { useContracts } from "@/config/contracts";
@@ -53,7 +53,7 @@ export default function WithdrawLiquidity() {
     isCorrectChain &&
     expectedChainId === superpositionTestnet.id;
 
-  const { open } = useWeb3Modal();
+  const { open } = useAppKit();
 
   const { token0, token1, setTickLower, setTickUpper, setDelta, deltaDisplay } =
     useStakeStore();

@@ -28,7 +28,7 @@ import {
   useEstimateGas,
 } from "wagmi";
 import { formatEther, maxUint256 } from "viem";
-import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { useAppKit } from "@reown/appkit/react";
 import { useTokens } from "@/config/tokens";
 import { LoaderIcon } from "lucide-react";
 import { graphql, useFragment } from "@/gql";
@@ -308,7 +308,7 @@ export const SwapForm = () => {
     setToken0AmountRaw(token0Balance?.value.toString() ?? token0Amount ?? "0");
   };
 
-  const { open } = useWeb3Modal();
+  const { open } = useAppKit();
 
   const usdPriceToken0 = snapAmountToDecimals(
     token0.address === fUSDC.address

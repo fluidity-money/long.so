@@ -1,6 +1,6 @@
 import z from "zod";
-import { defineChain } from "viem";
 import "wagmi";
+import { AppKitNetwork, defineChain } from "@reown/appkit/networks";
 
 const networkSchema = z.object({
   id: z.number(),
@@ -28,6 +28,8 @@ const networkSchema = z.object({
 export const superpositionTestnet = defineChain({
   name: "Superposition Testnet",
   id: 98985,
+  caipNetworkId: "eip155:98985",
+  chainNamespace: "eip155",
   nativeCurrency: { name: "Superposition", symbol: "SPN", decimals: 18 },
   rpcUrls: {
     default: { http: ["https://testnet-rpc.superposition.so"] },
@@ -46,6 +48,8 @@ export const superpositionTestnet = defineChain({
 export const superpositionMainnet = defineChain({
   name: "Superposition",
   id: 55244,
+  caipNetworkId: "eip155:55244",
+  chainNamespace: "eip155",
   nativeCurrency: { name: "Ethereum", symbol: "ETH", decimals: 18 },
   rpcUrls: {
     default: { http: ["https://rpc.superposition.so"] },
@@ -61,11 +65,11 @@ export const superpositionMainnet = defineChain({
   icon: "/icons/spn.svg",
 });
 
-export const allTestnets = [superpositionTestnet] as const;
+export const allTestnets = [superpositionTestnet];
 
-export const allMainnets = [superpositionMainnet] as const;
+export const allMainnets = [superpositionMainnet];
 
-export const allChains = [...allMainnets, ...allTestnets] as const;
+export const allChains = [...allMainnets, ...allTestnets];
 
 declare module "wagmi" {
   function useChainId(): (typeof allChains)[number]["id"];

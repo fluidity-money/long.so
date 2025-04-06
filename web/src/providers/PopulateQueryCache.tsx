@@ -2,11 +2,11 @@
 //
 
 import { useCallback, useEffect } from "react";
-import { queryClient } from "@/context";
 import request from "graphql-request";
 import { graphqlQueryGlobal } from "@/hooks/useGraphql";
 import { useChainId } from "wagmi";
 import { useChain } from "@/config/chains";
+import { useQueryClient } from "@tanstack/react-query";
 
 /**
  * This component is used to populate the query cache with the data fetched from the server.
@@ -19,12 +19,13 @@ export default function PopulateQueryCache({
 }) {
   const chainId = useChainId();
   const chain = useChain(chainId);
+  const queryClient = useQueryClient();
   const fetchQueryData = useCallback(
     async function () {
       const data = await request(chain.gqlUrl, graphqlQueryGlobal);
       queryClient.setQueryData(["graphql", chainId], data);
     },
-    [chain.gqlUrl, chainId],
+    [chain.gqlUrl, chainId, queryClient],
   );
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export default function PopulateQueryCache({
   useEffect(() => {
     // using the same query key as in useFeatureFlag.tsx
     queryClient.setQueryData(["featureFlags"], featuresData);
-  }, [featuresData]);
+  }, [featuresData, queryClient]);
 
   return null;
 }
