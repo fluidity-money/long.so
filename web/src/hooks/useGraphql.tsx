@@ -229,11 +229,11 @@ export const queryGetTokenEvents = graphql(`
 `);
 export interface TokenEvent {
   type?: string | null;
-  price: string;
+  price: string | number;
   age: string;
-  usd: string | null;
-  eth?: string | null;
-  token: string | null;
+  usd: number | null;
+  eth?: number | null;
+  token: number | null;
   maker?: string | null;
 }
 export const useGetTokenEvents = (poolAddress: string) => {

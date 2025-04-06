@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -71,22 +72,23 @@ export function DataTablePro<TData, TValue>({
                 {row
                   .getVisibleCells()
                   .filter((c) => !!c.getValue())
-                  .map((cell) => (
-                    <TableCell
-                      colSpan={
-                        cell.id === "price" && row.getValue("type") !== "swap"
-                          ? 3
-                          : undefined
-                      }
-                      key={cell.id}
-                      className="px-0 py-2"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
+                  .map((cell) => {
+                    const isNotSwap =
+                      cell.column.id === "price" &&
+                      row.getValue("type") !== "Swap";
+                    return (
+                      <TableCell
+                        colSpan={isNotSwap ? 4 : undefined}
+                        key={cell.id}
+                        className={cn("px-0 py-2", isNotSwap && "text-center")}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    );
+                  })}
               </TableRow>
             );
           })
