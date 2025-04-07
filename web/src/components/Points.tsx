@@ -17,10 +17,10 @@ export default function Points() {
 
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger className="group">
+      <DropdownMenu.Trigger className="group h-6">
         <Badge
           className={
-            "h-[28px] rounded-2xl px-0.5 pr-2 transition-[width] group-data-[state=open]:border-b-0 md:inline-flex"
+            "h-6 rounded-2xl px-0.5 py-0 pr-2 transition-[width] group-data-[state=open]:border-b-0 md:inline-flex"
           }
         >
           <div className="flex flex-row items-center">
@@ -35,7 +35,7 @@ export default function Points() {
         </Badge>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content sideOffset={5}>
+        <DropdownMenu.Content sideOffset={2}>
           <DropdownMenu.Item>
             {isLoading ? (
               <PlaceholderDiv>

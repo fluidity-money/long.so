@@ -71,7 +71,11 @@ export const FeatureFlagConfig = ({ isDark }: { isDark: boolean }) => {
   return (
     <Popover>
       <PopoverTrigger className={cn(isDark && "text-white")}>
-        {isLoading ? <LoaderIcon className={"animate-spin"} /> : <Flag />}
+        {isLoading ? (
+          <LoaderIcon className={"size-6 animate-spin"} />
+        ) : (
+          <Flag className="size-6" />
+        )}
       </PopoverTrigger>
       <PopoverContent>
         <div

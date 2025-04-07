@@ -41,13 +41,13 @@ const Item: React.FC<ItemProps> = ({
   return (
     <motion.div
       className={cn(
-        "z-1 group relative rounded-md",
+        "group relative z-1 rounded-md",
         selected && "box-content",
         background === "dark"
           ? "bg-[#EBEBEB] text-[#1E1E1E]"
           : "bg-[#1E1E1E] text-[#EBEBEB]",
         proToggle &&
-          `h-[43px] px-2 transition-[width] ${isPro ? "md:w-[125px] md:hover:w-[147px]" : "md:w-[97px] md:hover:w-[122px]"}`,
+          `h-6 px-3 transition-[width] ${isPro ? "md:w-[110px] md:hover:w-[130px]" : "md:w-[70px] md:hover:w-[100px]"}`,
         selected ? "cursor-default" : "cursor-pointer",
         className,
       )}
@@ -88,13 +88,12 @@ const Item: React.FC<ItemProps> = ({
       >
         {children}
         {proToggle && (
-          <div id="swap-pro-toggle" className="hidden md:inline-flex">
+          <div
+            id="swap-pro-toggle"
+            className="hidden items-center justify-center md:flex"
+          >
             <div className="group-hover:hidden">
-              <ArrowDown
-                height={10}
-                width={10}
-                className={cn(selected && "text-white")}
-              />
+              <ArrowDown className={cn(selected && "text-white", "size-2")} />
             </div>
             <div
               className={clsx(`hidden cursor-pointer group-hover:inline-flex`, {
@@ -106,9 +105,9 @@ const Item: React.FC<ItemProps> = ({
               }}
             >
               {isPro ? (
-                <ProToggleSelected className="h-[20px] w-[35px]" />
+                <ProToggleSelected className="my-0.5 h-[15px] w-auto" />
               ) : (
-                <ProToggle className="h-[20px] w-[35px]" />
+                <ProToggle className="my-0.5 h-[15px] w-auto" />
               )}
             </div>
           </div>
@@ -145,7 +144,7 @@ const Menu: React.FC<MenuProps> = ({
       : "light";
 
   return (
-    <div className={cn("flex select-none flex-row gap-3 rounded", className)}>
+    <div className={cn("flex flex-row gap-3 rounded select-none", className)}>
       <LayoutGroup id={id}>
         {children.map((item, i) => {
           return (

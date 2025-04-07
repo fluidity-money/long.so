@@ -9,6 +9,7 @@ import { useAppKit } from "@reown/appkit/react";
 import { useAccount, useEnsName } from "wagmi";
 import { mainnet } from "wagmi/chains";
 import { cn } from "@/lib/utils";
+import PP from "@/assets/profile-picture.png";
 
 export const ConnectWalletButton = ({ isDark }: { isDark: boolean }) => {
   const { address } = useAccount();
@@ -31,18 +32,10 @@ export const ConnectWalletButton = ({ isDark }: { isDark: boolean }) => {
   if (address && isLtSm && pathname === "/swap/inventory") {
     return (
       <div className="flex flex-row items-center justify-center gap-[10px] rounded">
-        <Button
-          size={"sm"}
-          className={"h-[28px]"}
-          onClick={() => router.back()}
-        >
+        <Button size={"sm"} className={"h-6"} onClick={() => router.back()}>
           X Close
         </Button>
-        <Image
-          src={require("@/assets/profile-picture.png")}
-          alt={"profile picture"}
-          className={"size-[28px] rounded"}
-        />
+        <Image src={PP} alt={"profile picture"} className={"size-6 rounded"} />
       </div>
     );
   }
@@ -54,7 +47,7 @@ export const ConnectWalletButton = ({ isDark }: { isDark: boolean }) => {
           onClick={() => router.push("/swap/inventory")}
           className={cn(
             isDark ? "text-white" : "text-black",
-            "cursor-pointer text-nowrap rounded p-1 text-right text-xs font-semibold transition-all hover:bg-black hover:text-base hover:text-white",
+            "cursor-pointer rounded p-1 text-right text-xs font-semibold text-nowrap transition-all hover:bg-black hover:text-base hover:text-white",
           )}
         >
           {ensName ? (
@@ -66,7 +59,7 @@ export const ConnectWalletButton = ({ isDark }: { isDark: boolean }) => {
           )}
         </div>
         <Image
-          src={require("@/assets/profile-picture.png")}
+          src={PP}
           alt={"profile picture"}
           className={"size-[28px] rounded"}
         />
@@ -78,7 +71,7 @@ export const ConnectWalletButton = ({ isDark }: { isDark: boolean }) => {
     <Button
       size="sm"
       color="light"
-      className="mb-1 h-[26px] text-sm"
+      className="h-6 text-sm"
       onClick={() => open()}
       id="wallet-connect-btn"
     >

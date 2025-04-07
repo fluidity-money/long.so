@@ -25,11 +25,11 @@ export const NetworkSelection = () => {
 
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger className="group">
+      <DropdownMenu.Trigger className="group h-6">
         <Badge
           variant={address ? "default" : "invert"}
           className={
-            "hidden h-[28px] rounded-2xl px-0.5 pr-2 transition-[width] group-data-[state=open]:rounded-b-none group-data-[state=open]:border-b-0 md:inline-flex"
+            "hidden h-6 rounded-2xl px-0.5 pr-2 transition-[width] group-data-[state=open]:rounded-b-none group-data-[state=open]:border-b-0 md:inline-flex"
           }
         >
           <div className="flex-col">
@@ -45,7 +45,7 @@ export const NetworkSelection = () => {
                   />
                 ) : (
                   <SPNTest
-                    className={cn("size-[20px] transition-none", {
+                    className={cn("size-5 transition-none", {
                       invert: address,
                     })}
                   />
