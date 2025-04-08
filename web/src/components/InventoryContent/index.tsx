@@ -17,8 +17,8 @@ export const InventoryContent = () => {
   const showPoolsTab = useFeatureFlag("ui show pools tab");
 
   const settings = useInventorySettings((s) => s.settings);
-  const tradesRef = useRef();
-  const poolsRef = useRef();
+  const tradesRef = useRef(null);
+  const poolsRef = useRef(null);
   return (
     <div className="flex flex-col items-center">
       <InventoryHeader />
@@ -53,7 +53,6 @@ export const InventoryContent = () => {
             ]}
           />
         </div>
-
         <Tabs defaultValue="trade" value={content}>
           <TabsContent value="trade">
             <TradeTabContent />
