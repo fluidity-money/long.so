@@ -1,5 +1,5 @@
+import ProBody from "@/components/Pro/ProBody";
 import Call2Action from "@/components/Pro/Call2Action";
-import DataScene from "@/components/Pro/DataScene";
 import DurationControl from "@/components/Pro/DurationControl";
 import ProHeader from "@/components/Pro/ProHeader";
 import TokenDetails from "@/components/Pro/TokenDetails";
@@ -26,13 +26,7 @@ export default async function ProMode({
     <div className="flex flex-1 gap-4 px-4">
       <div className="flex grow flex-col gap-4">
         <ProHeader name={name} />
-        <div className="flex grow items-center justify-center rounded-lg bg-white/10 text-white">
-          Middle Left/Candlestick Chart
-          {JSON.stringify(quoteToken)}
-        </div>
-        <div className="flex h-[200px]">
-          <DataScene />
-        </div>
+        <ProBody quoteToken={quoteToken} />
       </div>
       <div className="relative w-[300px]">
         <div className="absolute inset-0 flex flex-col gap-4 overflow-y-auto border-l border-black px-2">
