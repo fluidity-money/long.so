@@ -23,10 +23,12 @@ export function EventsTable({
   tokenName,
   poolAddress,
   initialData,
+  quoteToken,
 }: {
   poolAddress: string;
   tokenName: string;
   initialData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
+  quoteToken: "0" | "1";
 }) {
   const columnHelper = createColumnHelper<TokenEvent>();
   const titleStyle = "text-gray-200 text-xs font-semibold";
@@ -87,7 +89,7 @@ export function EventsTable({
     isLoading,
     isSuccess,
     //  hasNextPage, fetchNextPage
-  } = useGetTokenEvents({ poolAddress, initialData });
+  } = useGetTokenEvents({ poolAddress, initialData, quoteToken });
   const events = data?.pages?.flatMap((page) => page.items) ?? [];
   const table = useReactTable({
     data: events ?? [],

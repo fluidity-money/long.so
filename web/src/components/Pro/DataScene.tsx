@@ -27,6 +27,7 @@ export default function DataScene({
         <TabsContent value="txns">
           <EventsTable
             tokenName={tokenName}
+            quoteToken={quoteToken}
             initialData={initialData}
             poolAddress={poolAddress}
           />

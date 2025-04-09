@@ -6,9 +6,11 @@ import { queryGetTokenEvents } from "@/hooks/useGraphql";
 
 export async function requestGetTokenEvents({
   poolAddress,
+  quoteToken = "0",
   pageParam,
 }: {
   poolAddress: string;
+  quoteToken: "0" | "1";
   pageParam?: string | null;
 }) {
   const res = await request(
@@ -38,8 +40,12 @@ export async function requestGetTokenEvents({
           return {
             age: timeAgo(item.timestamp),
             eth: +Number(item.data.amountNonLiquidityToken).toFixed(4),
-            price: +Number(item.token1SwapValueUsd)?.toFixed(4),
-            usd: +Number(swapData.priceUsdTotal).toFixed(4),
+            price: +Number(
+              quoteToken === "0"
+                ? item.token0SwapValueUsd
+                : item.token1SwapValueUsd,
+            )?.toFixed(2),
+            usd: +Number(swapData.priceUsdTotal).toFixed(2),
             token: +Number(swapData.amountNonLiquidityToken).toFixed(4),
             type: item.data?.type,
             maker: item.maker,

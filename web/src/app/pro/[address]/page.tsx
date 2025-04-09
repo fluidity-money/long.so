@@ -5,6 +5,7 @@ import ProHeader from "@/components/Pro/ProHeader";
 import TokenDetails from "@/components/Pro/TokenDetails";
 import config from "@/config/app";
 import { notFound } from "next/navigation";
+import { requestGetTokenEvents } from "@/data";
 export const dynamicParams = false;
 export async function generateStaticParams() {
   return config.pairs.map((p) => ({ address: p.address }));
@@ -22,11 +23,16 @@ export default async function ProMode({
   const { quoteToken = "0" } = await searchParams;
   const name = config.pairs.find((p) => p.address === address)?.name;
   if (!name || !(quoteToken === "0" || quoteToken === "1")) notFound();
+  const initialData = await requestGetTokenEvents({
+    poolAddress: address,
+    quoteToken,
+  });
   return (
     <div className="flex flex-1 gap-4 px-4">
       <div className="flex grow flex-col gap-4">
         <ProHeader name={name} />
         <ProBody
+          initialData={initialData}
           poolAddress={address}
           name={name}
           quoteToken={quoteToken as "0" | "1"}
