@@ -301,9 +301,9 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     value: string,
     quotedToken: "token0" | "token1",
   ) => {
-    quotedToken === "token0"
-      ? setToken0Amount(value, token0Balance?.value.toString())
-      : setToken1Amount(value, token1Balance?.value.toString());
+    if (quotedToken === "token0")
+      setToken0Amount(value, token0Balance?.value.toString());
+    else setToken1Amount(value, token1Balance?.value.toString());
     setQuotedToken(quotedToken);
   };
 
@@ -503,8 +503,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
       setPriceLower(priceLower, token0.decimals);
       setPriceUpper(priceHigher, token0.decimals);
       // always set the ticks, since the display price might be invalid due to bigint/decimal interop
-      positionData?.lower && setTickLower(positionData.lower);
-      positionData?.upper && setTickUpper(positionData.upper);
+      if (positionData?.lower) setTickLower(positionData.lower);
+      if (positionData?.upper) setTickUpper(positionData.upper);
     }
   }, [
     mode,
@@ -582,8 +582,8 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
     dailyPrices,
   ]);
 
-  const autoFeeTierRef = useRef();
-  const manualFeeTierRef = useRef();
+  const autoFeeTierRef = useRef(null);
+  const manualFeeTierRef = useRef(null);
 
   const { open } = useAppKit();
 
@@ -620,7 +620,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             </div>
 
             {showSingleToken && mode === "existing" && (
-              <div className="absolute right-0 top-[-15px]">
+              <div className="absolute top-[-15px] right-0">
                 <Menu
                   id={"tokens"}
                   background="dark"
@@ -633,7 +633,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     selected={multiSingleToken === "multi"}
                     onClick={() => setMultiSingleToken("multi")}
                   >
-                    <div className="text-nowrap px-1 text-3xs font-medium md:text-2xs">
+                    <div className="text-3xs md:text-2xs px-1 font-medium text-nowrap">
                       Multi-Token
                     </div>
                   </Menu.Item>
@@ -643,7 +643,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                     onClick={() => setMultiSingleToken("single")}
                     variant={"iridescent"}
                   >
-                    <div className="text-nowrap px-1 text-3xs font-medium md:text-2xs">
+                    <div className="text-3xs md:text-2xs px-1 font-medium text-nowrap">
                       Single-Token
                     </div>
                   </Menu.Item>
@@ -651,7 +651,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               </div>
             )}
 
-            <div className="absolute -right-16 top-0 hidden md:inline-flex">
+            <div className="absolute top-0 -right-16 hidden md:inline-flex">
               <Button
                 size={"sm"}
                 className="h-[30px] w-[48px]"
@@ -688,7 +688,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
               >
                 <Badge
                   variant="outline"
-                  className="flex h-[26px] cursor-pointer flex-row justify-between gap-1 pl-0.5 pr-1 text-white md:h-[33px] md:pl-[4px] md:text-base"
+                  className="flex h-[26px] cursor-pointer flex-row justify-between gap-1 pr-1 pl-0.5 text-white md:h-[33px] md:pl-[4px] md:text-base"
                 >
                   <TokenIcon
                     src={token0.icon}
@@ -703,7 +703,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             <div className="mt-[5px] flex w-full flex-row items-center justify-between">
               <div className="text-2xs md:text-gray-1">${usdPriceToken0}</div>
 
-              <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
+              <div className="text-3xs md:text-2xs flex flex-row gap-[8px]">
                 {token0Balance && (
                   <>
                     <div>Balance: {token0Balance.formatted}</div>
@@ -751,7 +751,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
                 <Badge
                   variant="outline"
-                  className="flex h-[26px] w-[82px] flex-row justify-between pl-0.5 pr-1 text-white md:h-[33px] md:w-[107px] md:pl-[4px] md:text-base"
+                  className="flex h-[26px] w-[82px] flex-row justify-between pr-1 pl-0.5 text-white md:h-[33px] md:w-[107px] md:pl-[4px] md:text-base"
                 >
                   <TokenIcon
                     src={token1.icon}
@@ -764,7 +764,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
               <div className="mt-[5px] flex w-full flex-row items-center justify-between">
                 <div className="text-2xs md:text-gray-1">${usdPriceToken1}</div>
-                <div className="flex flex-row gap-[8px] text-3xs md:text-2xs">
+                <div className="text-3xs md:text-2xs flex flex-row gap-[8px]">
                   {token1Balance && (
                     <>
                       <div>Balance: {token1Balance.formatted}</div>
@@ -804,7 +804,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             <SegmentedControl
               variant={"secondary"}
               className={cn(
-                "h-[26px] rounded-lg bg-black text-3xs md:text-2xs",
+                "text-3xs md:text-2xs h-[26px] rounded-lg bg-black",
                 {
                   hidden: !showManualFees,
                 },
@@ -842,13 +842,13 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   </div>
                   <Badge
                     variant="iridescent"
-                    className="h-[10px] px-[7px] text-4xs font-normal md:h-[12px] md:text-3xs"
+                    className="text-4xs md:text-3xs h-[10px] px-[7px] font-normal md:h-[12px]"
                   >
                     Fee Percentage
                   </Badge>
                 </div>
 
-                <div className="iridescent-text w-[200px] text-3xs md:w-[247px] md:text-2xs">
+                <div className="iridescent-text text-3xs md:text-2xs w-[200px] md:w-[247px]">
                   The protocol automatically adjust your fees in order to
                   maximise rewards and reduce impermanent loss
                 </div>
@@ -867,52 +867,52 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 >
                   <RadioGroup.Item
                     value="0.01"
-                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                    className="hover:bg-gray-0 flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pt-[9px] pb-[7px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.01%</div>
-                    <div className="text-center text-3xs text-gray-2">
+                    <div className="text-3xs text-gray-2 text-center">
                       Best for Very <br /> Stable Pairs
                     </div>
-                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                    <div className="text-4xs text-gray-2 md:text-3xs rounded bg-[#D8D8D8] px-1">
                       (0% popularity)
                     </div>
                   </RadioGroup.Item>
 
                   <RadioGroup.Item
                     value={"0.05"}
-                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                    className="hover:bg-gray-0 flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pt-[9px] pb-[7px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.05%</div>
-                    <div className="text-center text-3xs text-gray-2">
+                    <div className="text-3xs text-gray-2 text-center">
                       Best for <br /> Stable Pairs
                     </div>
-                    <div className="iridescent rounded bg-[#D8D8D8] px-1 text-4xs text-black md:text-3xs">
+                    <div className="iridescent text-4xs md:text-3xs rounded bg-[#D8D8D8] px-1 text-black">
                       (99% popularity)
                     </div>
                   </RadioGroup.Item>
 
                   <RadioGroup.Item
                     value={"0.10"}
-                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                    className="hover:bg-gray-0 flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pt-[9px] pb-[7px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.10%</div>
-                    <div className="text-center text-3xs text-gray-2">
+                    <div className="text-3xs text-gray-2 text-center">
                       Best for <br /> Stable Pairs
                     </div>
-                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                    <div className="text-4xs text-gray-2 md:text-3xs rounded bg-[#D8D8D8] px-1">
                       (0% popularity)
                     </div>
                   </RadioGroup.Item>
 
                   <RadioGroup.Item
                     value={"0.15"}
-                    className="flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pb-[7px] pt-[9px] hover:bg-gray-0 data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
+                    className="hover:bg-gray-0 flex h-[66px] w-[75px] flex-col items-center rounded-md border border-black px-[7px] pt-[9px] pb-[7px] data-[state=checked]:bg-black data-[state=checked]:text-white md:h-[80px] md:w-[93px] md:gap-1"
                   >
                     <div className="text-2xs font-medium md:text-xs">0.15%</div>
-                    <div className="text-center text-3xs text-gray-2">
+                    <div className="text-3xs text-gray-2 text-center">
                       Best for <br /> Stable Pairs
                     </div>
-                    <div className="rounded bg-[#D8D8D8] px-1 text-4xs text-gray-2 md:text-3xs">
+                    <div className="text-4xs text-gray-2 md:text-3xs rounded bg-[#D8D8D8] px-1">
                       (0% popularity)
                     </div>
                   </RadioGroup.Item>
@@ -936,19 +936,19 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 {
                   label: "Full Range",
                   value: "full-range",
-                  ref: useRef(),
+                  ref: useRef(null),
                   disabled: mode === "existing",
                 },
                 {
                   label: "Auto",
                   value: "auto",
-                  ref: useRef(),
+                  ref: useRef(null),
                   disabled: mode === "existing",
                 },
                 {
                   label: "Custom",
                   value: "custom",
-                  ref: useRef(),
+                  ref: useRef(null),
                   disabled: mode === "existing",
                 },
               ]}
@@ -963,7 +963,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   liquidityRangeType === "full-range"
                     ? "md:text-2xl"
                     : "md:text-sm",
-                  "rounded-none border-x-0 border-b border-t-0 border-b-white bg-black px-0 text-2xs font-semibold",
+                  "text-2xs rounded-none border-x-0 border-t-0 border-b border-b-white bg-black px-0 font-semibold",
                 )}
                 disabled={
                   liquidityRangeType !== "custom" || mode === "existing"
@@ -972,7 +972,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 value={liquidityRangeType === "full-range" ? "-∞" : priceLower}
                 onChange={(e) => setPriceLower(e.target.value, token0.decimals)}
               />
-              <div className="mt-1 flex flex-row items-start gap-1 whitespace-nowrap text-3xs font-semibold">
+              <div className="text-3xs mt-1 flex flex-row items-start gap-1 font-semibold whitespace-nowrap">
                 <Token className="size-[12px] invert" /> {fusdcSymbol} per{" "}
                 {token0.name}
               </div>
@@ -987,7 +987,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                   liquidityRangeType === "full-range"
                     ? "md:text-2xl"
                     : "md:text-sm",
-                  "rounded-none border-x-0 border-b border-t-0 border-b-white bg-black px-0 text-2xs font-semibold",
+                  "text-2xs rounded-none border-x-0 border-t-0 border-b border-b-white bg-black px-0 font-semibold",
                 )}
                 disabled={
                   liquidityRangeType !== "custom" || mode === "existing"
@@ -996,7 +996,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
                 onChange={(e) => setPriceUpper(e.target.value, token0.decimals)}
               />
 
-              <div className="mt-1 flex flex-row items-start gap-1 whitespace-nowrap text-3xs font-semibold">
+              <div className="text-3xs mt-1 flex flex-row items-start gap-1 font-semibold whitespace-nowrap">
                 <Token className="size-[12px] invert" /> {fusdcSymbol} per{" "}
                 {token0.name}
               </div>
@@ -1020,12 +1020,12 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             {breakdownHidden ? (
               <>
                 <div className="text-2xs underline">Show Breakdown</div>
-                <div className="ml-1 rotate-90 text-2xs">{"<-"}</div>
+                <div className="text-2xs ml-1 rotate-90">{"<-"}</div>
               </>
             ) : (
               <>
                 <div className="text-2xs underline">Hide breakdown</div>
-                <div className="ml-1 rotate-90 text-2xs">{"->"}</div>
+                <div className="text-2xs ml-1 rotate-90">{"->"}</div>
               </>
             )}
           </div>
@@ -1033,7 +1033,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
         <div
           className={cn(
-            "mt-[10px] flex h-[60px] w-[318px] flex-col gap-[5px] overflow-hidden text-2xs transition-[height] md:w-[392px]",
+            "text-2xs mt-[10px] flex h-[60px] w-[318px] flex-col gap-[5px] overflow-hidden transition-[height] md:w-[392px]",
             {
               "h-0": breakdownHidden,
             },
@@ -1096,10 +1096,10 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge className="h-[17px] px-1 text-2xs font-normal">
+                  <Badge className="text-2xs h-[17px] px-1 font-normal">
                     <Token />
                     <Token className={"-ml-1"} />
-                    <Token className={"-ml-1 mr-1"} />
+                    <Token className={"mr-1 -ml-1"} />
                     <div className="iridescent-text">
                       {showMockData
                         ? "$6.11 - $33.12"
@@ -1170,13 +1170,13 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
         >
           <div>Yield Breakdown</div>
 
-          <div className="mt-[14px] flex w-full flex-col gap-[5px] pl-[5px] text-2xs">
+          <div className="text-2xs mt-[14px] flex w-full flex-col gap-[5px] pl-[5px]">
             <div className="flex flex-row justify-between">
               <div>Pool Fees</div>
 
               <div className={"flex flex-row items-center"}>
                 <Token />
-                <Token className={"-ml-1 mr-1"} />
+                <Token className={"mr-1 -ml-1"} />
                 {+feePercentage.toFixed(3)}%
               </div>
             </div>
@@ -1188,7 +1188,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
                   <div className={"flex flex-row items-center"}>
                     <Token />
-                    <Token className={"-ml-1 mr-1"} />
+                    <Token className={"mr-1 -ml-1"} />
                     $0.20 - $13.06
                   </div>
                 </div>
@@ -1198,7 +1198,7 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
                   <div className={"flex flex-row items-center"}>
                     <Token />
-                    <Token className={"-ml-1 mr-1"} />
+                    <Token className={"mr-1 -ml-1"} />
                     $5.91 - $8.34
                   </div>
                 </div>
@@ -1211,18 +1211,18 @@ export const StakeForm = ({ mode, poolId, positionId }: StakeFormProps) => {
 
             <Badge
               variant="iridescent"
-              className="h-[17px] px-1 text-2xs font-normal"
+              className="text-2xs h-[17px] px-1 font-normal"
             >
               <Token />
               <Token className={"-ml-1"} />
-              <Token className={"-ml-1 mr-1"} />
+              <Token className={"mr-1 -ml-1"} />
               <div>???</div>
             </Badge>
           </div>
 
           {showBoostIncentives && (
             <>
-              <div className="mt-[20px] flex flex-row gap-1 text-2xs">
+              <div className="text-2xs mt-[20px] flex flex-row gap-1">
                 <div className="flex w-[3%] flex-col">
                   <div>3%</div>
                   <div className="h-1 w-full rounded bg-white"></div>
