@@ -21,12 +21,16 @@ export default async function ProMode({
   const { address } = await params;
   const { quoteToken = "0" } = await searchParams;
   const name = config.pairs.find((p) => p.address === address)?.name;
-  if (!name) notFound();
+  if (!name || !(quoteToken === "0" || quoteToken === "1")) notFound();
   return (
     <div className="flex flex-1 gap-4 px-4">
       <div className="flex grow flex-col gap-4">
         <ProHeader name={name} />
-        <ProBody poolAddress={address} name={name} quoteToken={quoteToken} />
+        <ProBody
+          poolAddress={address}
+          name={name}
+          quoteToken={quoteToken as "0" | "1"}
+        />
       </div>
       <div className="relative w-[300px]">
         <div className="absolute inset-0 flex flex-col gap-4 overflow-y-auto border-l border-black px-2">
