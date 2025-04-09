@@ -29,7 +29,7 @@ export default async function ProMode({
   });
   return (
     <div className="flex flex-1 gap-4 px-4">
-      <div className="flex grow flex-col gap-4">
+      <div className="flex grow flex-col gap-2">
         <ProHeader name={name} />
         <ProBody
           initialData={initialData}

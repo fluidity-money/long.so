@@ -33,7 +33,7 @@ export default function DataScene({
           />
         </TabsContent>
         <TabsContent value="holders">
-          <div>Holders</div>
+          <div className="h-[300px] w-full bg-red-200">Holders</div>
         </TabsContent>
       </Tabs>
     </div>
