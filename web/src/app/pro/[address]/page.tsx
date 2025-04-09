@@ -26,7 +26,7 @@ export default async function ProMode({
     <div className="flex flex-1 gap-4 px-4">
       <div className="flex grow flex-col gap-4">
         <ProHeader name={name} />
-        <ProBody quoteToken={quoteToken} />
+        <ProBody poolAddress={address} name={name} quoteToken={quoteToken} />
       </div>
       <div className="relative w-[300px]">
         <div className="absolute inset-0 flex flex-col gap-4 overflow-y-auto border-l border-black px-2">

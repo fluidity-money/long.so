@@ -1,6 +1,6 @@
 "use client";
 import {
-  ColumnDef,
+  createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -14,20 +14,83 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  isLoading: boolean;
-  isSuccess: boolean;
-}
-export function DataTablePro<TData, TValue>({
-  columns,
-  data,
-  isLoading,
-  isSuccess,
-}: DataTableProps<TData, TValue>) {
-  const table = useReactTable({
+import { TokenEvent, useGetTokenEvents } from "@/hooks/useGraphql";
+import { Badge } from "../ui/badge";
+import { useMemo } from "react";
+import { requestGetTokenEvents } from "@/data";
+
+export function EventsTable({
+  tokenName,
+  poolAddress,
+  initialData,
+}: {
+  poolAddress: string;
+  tokenName: string;
+  initialData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
+}) {
+  const columnHelper = createColumnHelper<TokenEvent>();
+  const titleStyle = "text-gray-200 text-xs font-semibold";
+  const contentStyle = "text-xs font-medium text-white";
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("type", {
+        header: () => <span className={titleStyle}>Type</span>,
+        cell: ({ row }) => (
+          <Badge
+            variant={row.getValue("type") === "Sell" ? "destructive" : "action"}
+          >
+            {row.getValue("type")}
+          </Badge>
+        ),
+      }),
+      columnHelper.accessor("age", {
+        header: () => <span className={titleStyle}>Age</span>,
+        cell: ({ row }) => (
+          <span className={contentStyle}>{row.getValue("age")}</span>
+        ),
+      }),
+      columnHelper.accessor("price", {
+        header: () => <span className={titleStyle}>Price</span>,
+        cell: ({ row }) => (
+          <span className={contentStyle}>{row.getValue("price")}</span>
+        ),
+      }),
+      columnHelper.accessor("usd", {
+        header: () => <span className={titleStyle}>USD</span>,
+        cell: ({ row }) => (
+          <span className={contentStyle}>{row.getValue("usd")}</span>
+        ),
+      }),
+      columnHelper.accessor("eth", {
+        header: () => <span className={titleStyle}>ETH</span>,
+        cell: ({ row }) => (
+          <span className={contentStyle}>{row.getValue("eth")}</span>
+        ),
+      }),
+      columnHelper.accessor("token", {
+        header: () => <span className={titleStyle}>{tokenName}</span>,
+        cell: ({ row }) => (
+          <span className={contentStyle}>{row.getValue("token")}</span>
+        ),
+      }),
+      columnHelper.accessor("maker", {
+        header: () => <span className={titleStyle}>Maker</span>,
+        cell: ({ row }) => (
+          <span className={contentStyle}>{row.getValue("maker")}</span>
+        ),
+      }),
+    ],
+    [tokenName, columnHelper],
+  );
+  const {
     data,
+    isLoading,
+    isSuccess,
+    //  hasNextPage, fetchNextPage
+  } = useGetTokenEvents({ poolAddress, initialData });
+  const events = data?.pages?.flatMap((page) => page.items) ?? [];
+  const table = useReactTable({
+    data: events ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -53,7 +116,7 @@ export function DataTablePro<TData, TValue>({
         ))}
       </TableHeader>
       <TableBody>
-        {isLoading || (!isSuccess && !data.length) ? (
+        {isLoading || (!isSuccess && !events?.length) ? (
           <TableRow>
             <TableCell
               colSpan={columns.length}

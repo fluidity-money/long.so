@@ -1,11 +1,10 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import request from "graphql-request";
-import appConfig from "@/config";
+import appConfig from "@/config/app";
 import { graphql } from "@/gql";
 import { useAccount, useChainId } from "wagmi";
 import { useChain } from "@/config/chains";
-import { QuoteToken, RankingDirection, SwapEventData } from "@/gql/graphql";
-import { timeAgo } from "@/lib/time";
+import { requestGetTokenEvents } from "@/data";
 
 /**
  * The main GraphQL query to fetch all data. The global query that should be run and
@@ -236,61 +235,22 @@ export interface TokenEvent {
   token: number | null;
   maker?: string | null;
 }
-export const useGetTokenEvents = (poolAddress: string) => {
+export const useGetTokenEvents = ({
+  poolAddress,
+  initialData,
+}: {
+  poolAddress: string;
+  initialData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
+}) => {
   return useInfiniteQuery({
     queryKey: ["tokenEvents", poolAddress],
-    queryFn: async ({ pageParam }: { pageParam?: string }) => {
-      const res = await request(
-        appConfig.codexApiUrl,
-        queryGetTokenEvents,
-        {
-          query: {
-            address: poolAddress,
-            networkId: 55244,
-            quoteToken: QuoteToken.Token0,
-          },
-          limit: 30,
-          direction: RankingDirection.Desc,
-          cursor: pageParam,
-        },
-        {
-          Authorization: "597c0b48301be1731314a255fe5fca6eef4002aa",
-        },
-      );
-      if (!res?.getTokenEvents?.items) return { items: [] };
-      const items = res.getTokenEvents.items
-        .filter((i) => !!i)
-        .map((item) => {
-          switch (item.data?.__typename) {
-            case "SwapEventData": {
-              const swapData = item.data as SwapEventData;
-              return {
-                age: timeAgo(item.timestamp),
-                eth: +Number(item.data.amountNonLiquidityToken).toFixed(4),
-                price: +Number(item.token1SwapValueUsd)?.toFixed(4),
-                usd: +Number(swapData.priceUsdTotal).toFixed(4),
-                token: +Number(swapData.amountNonLiquidityToken).toFixed(4),
-                type: item.data?.type,
-                maker: item.maker,
-              };
-            }
-            default: {
-              const data = item.data as NonNullable<typeof item.data>;
-              return {
-                age: timeAgo(item.timestamp),
-                eth: null,
-                price: `${+Number(data.amount0Shifted).toFixed(4)} and ${+Number(data.amount1Shifted).toFixed(4)}`,
-                usd: null,
-                token: null,
-                type: item.data?.type,
-                maker: item.maker,
-              };
-            }
-          }
-        });
-      return { cursor: res?.getTokenEvents?.cursor, items };
-    },
-    initialPageParam: undefined,
+    queryFn: async ({ pageParam }: { pageParam?: string | null }) =>
+      await requestGetTokenEvents({ poolAddress, pageParam }),
+    initialPageParam: initialData.cursor,
     getNextPageParam: (lastPage) => lastPage.cursor,
+    initialData: {
+      pageParams: [initialData.cursor],
+      pages: [initialData],
+    },
   });
 };
