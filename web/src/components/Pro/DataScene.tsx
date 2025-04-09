@@ -1,15 +1,9 @@
 "use client";
 // import { Badge } from "../ui/badge";
-// import { Button } from "../ui/button";
 import { EventsTable } from "./EventsTable";
-import { Tabs, TabsContent } from "../ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { requestGetTokenEvents } from "@/data";
-// const Tabs = () => (
-//   <div className="flex gap-2">
-//     <Button size={"sm"}>Txns</Button>
-//     <Button size={"sm"}>Holders</Button>
-//   </div>
-// );
+
 export default function DataScene({
   name,
   quoteToken,
@@ -17,7 +11,7 @@ export default function DataScene({
   initialData,
 }: {
   name: string;
-  quoteToken: string;
+  quoteToken: "0" | "1";
   poolAddress: string;
   initialData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
 }) {
@@ -26,6 +20,10 @@ export default function DataScene({
   return (
     <div className="flex w-full flex-col gap-2">
       <Tabs defaultValue="txns">
+        <TabsList className="bg-black">
+          <TabsTrigger value="txns">Txns</TabsTrigger>
+          <TabsTrigger value="holders">Holders</TabsTrigger>
+        </TabsList>
         <TabsContent value="txns">
           <EventsTable
             tokenName={tokenName}
@@ -37,7 +35,6 @@ export default function DataScene({
           <div>Holders</div>
         </TabsContent>
       </Tabs>
-      {/* <Tabs /> */}
     </div>
   );
 }
