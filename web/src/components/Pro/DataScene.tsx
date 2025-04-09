@@ -19,12 +19,12 @@ export default function DataScene({
   const tokenName = pairNames[+quoteToken];
   return (
     <div className="flex w-full flex-col gap-2">
-      <Tabs defaultValue="txns">
-        <TabsList className="bg-black">
+      <Tabs defaultValue="txns" className="flex flex-1 flex-col">
+        <TabsList className="self-start bg-black">
           <TabsTrigger value="txns">Txns</TabsTrigger>
           <TabsTrigger value="holders">Holders</TabsTrigger>
         </TabsList>
-        <TabsContent value="txns">
+        <TabsContent value="txns" className="relative flex grow">
           <EventsTable
             tokenName={tokenName}
             quoteToken={quoteToken}

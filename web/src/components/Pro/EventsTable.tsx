@@ -127,7 +127,7 @@ export function EventsTable({
     getCoreRowModel: getCoreRowModel(),
   });
   return (
-    <Table>
+    <Table className="absolute inset-0 overflow-y-auto">
       <TableHeader className="sticky top-0 bg-black shadow-[0px_0.5px_0px_white]">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id}>
