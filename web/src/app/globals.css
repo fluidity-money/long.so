@@ -84,6 +84,10 @@
   --color-accent-foreground: hsl(var(--accent-foreground));
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-purple-light: #e0ceff;
+  --color-purple-dark: #755da0;
+  --color-blue-light: #dbf8ff;
+  --color-blue-dark: #45737e;
   --color-gray-0: #d8d8d8;
   --color-gray-1: #aeaeae;
   --color-gray-2: #8e8e8e;

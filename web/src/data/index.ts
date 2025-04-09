@@ -30,6 +30,7 @@ export async function requestGetTokenEvents({
       Authorization: "597c0b48301be1731314a255fe5fca6eef4002aa",
     },
   );
+
   if (!res?.getTokenEvents?.items) return { cursor: undefined, items: [] };
   const items = res.getTokenEvents.items
     .filter((i) => !!i)
@@ -39,16 +40,20 @@ export async function requestGetTokenEvents({
           const swapData = item.data as SwapEventData;
           return {
             age: timeAgo(item.timestamp),
-            eth: +Number(item.data.amountNonLiquidityToken).toFixed(4),
+            eth: +Number(swapData.amountNonLiquidityToken).toFixed(4) || "-",
             price: +Number(
               quoteToken === "0"
                 ? item.token0SwapValueUsd
                 : item.token1SwapValueUsd,
             )?.toFixed(2),
             usd: +Number(swapData.priceUsdTotal).toFixed(2),
-            token: +Number(swapData.amountNonLiquidityToken).toFixed(4),
-            type: item.data?.type,
+            token: +Number(swapData.amountNonLiquidityToken).toFixed(4) || "-",
             maker: item.maker,
+            eventDisplayType: item.eventDisplayType as
+              | "Mint"
+              | "Burn"
+              | "Buy"
+              | "Sell",
           };
         }
         default: {
@@ -59,8 +64,12 @@ export async function requestGetTokenEvents({
             price: `${+Number(data.amount0Shifted).toFixed(4)} and ${+Number(data.amount1Shifted).toFixed(4)}`,
             usd: null,
             token: null,
-            type: item.data?.type,
             maker: item.maker,
+            eventDisplayType: item.eventDisplayType as
+              | "Mint"
+              | "Burn"
+              | "Buy"
+              | "Sell",
           };
         }
       }

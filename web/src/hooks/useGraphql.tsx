@@ -231,9 +231,10 @@ export interface TokenEvent {
   price: string | number;
   age: string;
   usd: number | null;
-  eth?: number | null;
-  token: number | null;
+  eth?: number | string | null;
+  token: number | string | null;
   maker?: string | null;
+  eventDisplayType: "Buy" | "Sell" | "Mint" | "Burn";
 }
 export const useGetTokenEvents = ({
   poolAddress,

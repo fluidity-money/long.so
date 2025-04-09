@@ -32,57 +32,87 @@ export function EventsTable({
 }) {
   const columnHelper = createColumnHelper<TokenEvent>();
   const titleStyle = "text-gray-200 text-xs font-semibold";
-  const contentStyle = "text-xs font-medium text-white";
+  const contentStyle = "text-xs font-medium";
+  const eventDisplayTypeBadgeMap: Record<
+    TokenEvent["eventDisplayType"],
+    "buy" | "destructive" | "mint" | "burn"
+  > = useMemo(
+    () =>
+      ({
+        Buy: "buy",
+        Sell: "destructive",
+        Mint: "mint",
+        Burn: "burn",
+      }) as const,
+    [],
+  );
+  const eventDisplayTypeColorMap: Record<
+    TokenEvent["eventDisplayType"],
+    string
+  > = useMemo(
+    () =>
+      ({
+        Burn: "text-purple-light",
+        Mint: "text-blue-light",
+        Buy: "text-green-200",
+        Sell: "text-red-200",
+      }) as const,
+    [],
+  );
   const columns = useMemo(
     () => [
-      columnHelper.accessor("type", {
+      columnHelper.accessor("eventDisplayType", {
         header: () => <span className={titleStyle}>Type</span>,
-        cell: ({ row }) => (
+        cell: ({ cell }) => (
           <Badge
-            variant={row.getValue("type") === "Sell" ? "destructive" : "action"}
+            variant={
+              eventDisplayTypeBadgeMap[
+                cell.getValue() as keyof typeof eventDisplayTypeBadgeMap
+              ]
+            }
           >
-            {row.getValue("type")}
+            {cell.getValue()}
           </Badge>
         ),
       }),
       columnHelper.accessor("age", {
         header: () => <span className={titleStyle}>Age</span>,
-        cell: ({ row }) => (
-          <span className={contentStyle}>{row.getValue("age")}</span>
+        cell: ({ cell }) => (
+          <span className={contentStyle}>{cell.getValue()}</span>
         ),
       }),
       columnHelper.accessor("price", {
         header: () => <span className={titleStyle}>Price</span>,
-        cell: ({ row }) => (
-          <span className={contentStyle}>{row.getValue("price")}</span>
+        cell: ({ cell }) => (
+          <span className={contentStyle}>{cell.getValue()}</span>
         ),
       }),
       columnHelper.accessor("usd", {
         header: () => <span className={titleStyle}>USD</span>,
-        cell: ({ row }) => (
-          <span className={contentStyle}>{row.getValue("usd")}</span>
+        cell: ({ cell }) => (
+          <span className={contentStyle}>{cell.getValue()}</span>
         ),
       }),
       columnHelper.accessor("eth", {
         header: () => <span className={titleStyle}>ETH</span>,
-        cell: ({ row }) => (
-          <span className={contentStyle}>{row.getValue("eth")}</span>
+        cell: ({ cell }) => (
+          <span className={contentStyle}>{cell.getValue()}</span>
         ),
       }),
       columnHelper.accessor("token", {
         header: () => <span className={titleStyle}>{tokenName}</span>,
-        cell: ({ row }) => (
-          <span className={contentStyle}>{row.getValue("token")}</span>
+        cell: ({ cell }) => (
+          <span className={contentStyle}>{cell.getValue()}</span>
         ),
       }),
       columnHelper.accessor("maker", {
         header: () => <span className={titleStyle}>Maker</span>,
-        cell: ({ row }) => (
-          <span className={contentStyle}>{row.getValue("maker")}</span>
+        cell: ({ cell }) => (
+          <span className={contentStyle}>{cell.getValue()}</span>
         ),
       }),
     ],
-    [tokenName, columnHelper],
+    [tokenName, columnHelper, eventDisplayTypeBadgeMap],
   );
   const {
     data,
@@ -132,7 +162,14 @@ export function EventsTable({
             return (
               <TableRow
                 key={row.id}
-                className="border-0 hover:bg-black hover:text-white"
+                className={cn(
+                  "border-0 hover:bg-black hover:text-white",
+                  eventDisplayTypeColorMap[
+                    row.getValue(
+                      "eventDisplayType",
+                    ) as keyof typeof eventDisplayTypeColorMap
+                  ],
+                )}
               >
                 {row
                   .getVisibleCells()
@@ -140,7 +177,8 @@ export function EventsTable({
                   .map((cell) => {
                     const isNotSwap =
                       cell.column.id === "price" &&
-                      row.getValue("type") !== "Swap";
+                      (row.getValue("eventDisplayType") === "Burn" ||
+                        row.getValue("eventDisplayType") === "Mint");
                     return (
                       <TableCell
                         colSpan={isNotSwap ? 4 : undefined}
