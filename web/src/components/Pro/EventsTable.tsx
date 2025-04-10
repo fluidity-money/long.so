@@ -18,6 +18,9 @@ import { TokenEvent, useGetTokenEvents } from "@/hooks/useGraphql";
 import { Badge } from "../ui/badge";
 import { useMemo } from "react";
 import { requestGetTokenEvents } from "@/data";
+import ArrowIcon from "@/assets/icons/arrow-up-right.svg";
+import FilterIcon from "@/assets/icons/filter.svg";
+import Link from "next/link";
 const columnHelper = createColumnHelper<TokenEvent>();
 const titleStyle = "text-gray-200 text-xs font-semibold";
 const contentStyle = "text-xs font-medium";
@@ -94,6 +97,18 @@ export function EventsTable({
           <span className={contentStyle}>{cell.getValue()}</span>
         ),
       }),
+      {
+        id: "actions",
+        header: () => <span className={titleStyle}>Actions</span>,
+        cell: () => (
+          <div className="flex justify-end gap-2 pr-2">
+            <FilterIcon className="size-3 text-white" />
+            <Link href={"#"}>
+              <ArrowIcon className="size-3 text-white" />
+            </Link>
+          </div>
+        ),
+      },
     ],
     [tokenName],
   );
@@ -159,7 +174,7 @@ export function EventsTable({
               >
                 {row
                   .getVisibleCells()
-                  .filter((c) => !!c.getValue())
+                  .filter((cell) => cell.getValue() !== null)
                   .map((cell) => {
                     const isNotSwap =
                       cell.column.id === "price" &&
