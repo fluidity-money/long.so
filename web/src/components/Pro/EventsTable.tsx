@@ -18,7 +18,25 @@ import { TokenEvent, useGetTokenEvents } from "@/hooks/useGraphql";
 import { Badge } from "../ui/badge";
 import { useMemo } from "react";
 import { requestGetTokenEvents } from "@/data";
-
+const columnHelper = createColumnHelper<TokenEvent>();
+const titleStyle = "text-gray-200 text-xs font-semibold";
+const contentStyle = "text-xs font-medium";
+const eventDisplayTypeBadgeMap: Record<
+  TokenEvent["eventDisplayType"],
+  "buy" | "destructive" | "mint" | "burn"
+> = {
+  Buy: "buy",
+  Sell: "destructive",
+  Mint: "mint",
+  Burn: "burn",
+} as const;
+const eventDisplayTypeColorMap: Record<TokenEvent["eventDisplayType"], string> =
+  {
+    Burn: "text-purple-light",
+    Mint: "text-blue-light",
+    Buy: "text-green-200",
+    Sell: "text-red-200",
+  } as const;
 export function EventsTable({
   tokenName,
   poolAddress,
@@ -30,47 +48,12 @@ export function EventsTable({
   initialData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
   quoteToken: "0" | "1";
 }) {
-  const columnHelper = createColumnHelper<TokenEvent>();
-  const titleStyle = "text-gray-200 text-xs font-semibold";
-  const contentStyle = "text-xs font-medium";
-  const eventDisplayTypeBadgeMap: Record<
-    TokenEvent["eventDisplayType"],
-    "buy" | "destructive" | "mint" | "burn"
-  > = useMemo(
-    () =>
-      ({
-        Buy: "buy",
-        Sell: "destructive",
-        Mint: "mint",
-        Burn: "burn",
-      }) as const,
-    [],
-  );
-  const eventDisplayTypeColorMap: Record<
-    TokenEvent["eventDisplayType"],
-    string
-  > = useMemo(
-    () =>
-      ({
-        Burn: "text-purple-light",
-        Mint: "text-blue-light",
-        Buy: "text-green-200",
-        Sell: "text-red-200",
-      }) as const,
-    [],
-  );
   const columns = useMemo(
     () => [
       columnHelper.accessor("eventDisplayType", {
         header: () => <span className={titleStyle}>Type</span>,
         cell: ({ cell }) => (
-          <Badge
-            variant={
-              eventDisplayTypeBadgeMap[
-                cell.getValue() as keyof typeof eventDisplayTypeBadgeMap
-              ]
-            }
-          >
+          <Badge variant={eventDisplayTypeBadgeMap[cell.getValue()]}>
             {cell.getValue()}
           </Badge>
         ),
@@ -112,7 +95,7 @@ export function EventsTable({
         ),
       }),
     ],
-    [tokenName, columnHelper, eventDisplayTypeBadgeMap],
+    [tokenName],
   );
   const {
     data,
@@ -120,9 +103,12 @@ export function EventsTable({
     isSuccess,
     //  hasNextPage, fetchNextPage
   } = useGetTokenEvents({ poolAddress, initialData, quoteToken });
-  const events = data?.pages?.flatMap((page) => page.items) ?? [];
+  const events = useMemo(
+    () => data?.pages?.flatMap((page) => page.items) ?? [],
+    [data],
+  );
   const table = useReactTable({
-    data: events ?? [],
+    data: events,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });

@@ -20,7 +20,8 @@ export default async function ProMode({
   searchParams: SearchParams;
 }) {
   const { address } = await params;
-  const { quoteToken = "0" } = await searchParams;
+  const filters = await searchParams;
+  const quoteToken = filters?.quoteToken || "0";
   const name = config.pairs.find((p) => p.address === address)?.name;
   if (!name || !(quoteToken === "0" || quoteToken === "1")) notFound();
   const initialData = await requestGetTokenEvents({
