@@ -18,7 +18,7 @@ const segmentedControlVariants = cva(
 export interface Segment<T extends string> {
   label: React.ReactNode;
   value: T;
-  ref: React.RefObject<HTMLDivElement>;
+  ref: React.RefObject<HTMLDivElement | null>;
   disabled?: boolean;
 }
 
@@ -44,7 +44,8 @@ const SegmentedControl = <T extends string>({
 
   useEffect(() => {
     const activeSegmentRef = segments[activeIndex].ref;
-    const { offsetWidth, offsetLeft } = activeSegmentRef.current;
+    const offsetWidth = activeSegmentRef.current?.offsetWidth ?? 0;
+    const offsetLeft = activeSegmentRef.current?.offsetLeft ?? 0;
     const style = controlRef.current?.style;
 
     style?.setProperty("--highlight-width", `${offsetWidth}px`);
