@@ -1,4 +1,4 @@
-import { NextConfig } from "next";
+import type { NextConfig } from "next";
 import childProcess from "node:child_process";
 import { withSentryConfig } from "@sentry/nextjs";
 const gitHash = childProcess
@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_GIT_HASH: gitHash,
   },
-  turbo: {
+  turbopack: {
     rules: {
       "*.svg": {
         loaders: ["@svgr/webpack"],
@@ -20,44 +20,44 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  webpack(config) {
-    if (process.env.NODE_V8_COVERAGE) {
-      Object.defineProperty(config, "devtool", {
-        get() {
-          return "source-map";
-        },
-        set() {},
-      });
-    }
+  // webpack(config) {
+  //   if (process.env.NODE_V8_COVERAGE) {
+  //     Object.defineProperty(config, "devtool", {
+  //       get() {
+  //         return "source-map";
+  //       },
+  //       set() {},
+  //     });
+  //   }
 
-    // Grab the existing rule that handles SVG imports
-    const fileLoaderRule = config.module.rules.find((rule: any) =>
-      rule.test?.test?.(".svg"),
-    );
+  //   // Grab the existing rule that handles SVG imports
+  //   const fileLoaderRule = config.module.rules.find((rule: any) =>
+  //     rule.test?.test?.(".svg"),
+  //   );
 
-    config.module.rules.push(
-      // Reapply the existing rule, but only for svg imports ending in ?url
-      {
-        ...fileLoaderRule,
-        test: /\.svg$/i,
-        resourceQuery: /url/, // *.svg?url
-      },
-      // Convert all other *.svg imports to React components
-      {
-        test: /\.svg$/i,
-        issuer: fileLoaderRule.issuer,
-        resourceQuery: { not: [...fileLoaderRule.resourceQuery.not, /url/] }, // exclude if *.svg?url
-        use: [{ loader: "@svgr/webpack", options: { icon: true } }],
-      },
-    );
+  //   config.module.rules.push(
+  //     // Reapply the existing rule, but only for svg imports ending in ?url
+  //     {
+  //       ...fileLoaderRule,
+  //       test: /\.svg$/i,
+  //       resourceQuery: /url/, // *.svg?url
+  //     },
+  //     // Convert all other *.svg imports to React components
+  //     {
+  //       test: /\.svg$/i,
+  //       issuer: fileLoaderRule.issuer,
+  //       resourceQuery: { not: [...fileLoaderRule.resourceQuery.not, /url/] }, // exclude if *.svg?url
+  //       use: [{ loader: "@svgr/webpack", options: { icon: true } }],
+  //     },
+  //   );
 
-    // Modify the file loader rule to ignore *.svg, since we have it handled now.
-    fileLoaderRule.exclude = /\.svg$/i;
+  //   // Modify the file loader rule to ignore *.svg, since we have it handled now.
+  //   fileLoaderRule.exclude = /\.svg$/i;
 
-    config.externals.push("pino-pretty", "lokijs", "encoding");
+  //   config.externals.push("pino-pretty", "lokijs", "encoding");
 
-    return config;
-  },
+  //   return config;
+  // },
 };
 export default withSentryConfig(nextConfig, {
   org: "fluidity-money",

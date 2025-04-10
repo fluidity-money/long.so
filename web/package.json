@@ -1,12 +1,12 @@
 {
   "name": "web",
   "version": "0.1.0",
-  "packageManager": "pnpm@9.15.1+sha256.9e534e70afef06374f6126b44bda5760947135ce16a30aef1010e965fb7e3e3e",
+  "packageManager": "pnpm@9.15.9+sha256.cf86a7ad764406395d4286a6d09d730711720acc6d93e9dce9ac7ac4dc4a28a7",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "npx serve@latest out",
+    "build": "next build --turbopack",
+    "start": "next start",
     "lint:next": "next lint",
     "lint:tests": "eslint '__tests__/**/*.{ts,tsx}' && eslint 'e2e/**/*.{ts,tsx}'",
     "codegen": "graphql-codegen --config codegen.ts --require dotenv/config",
