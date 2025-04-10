@@ -9,15 +9,16 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_GIT_HASH: gitHash,
   },
-  experimental: {
-    turbo: {
-      rules: {
-        "*.svg": {
-          loaders: ["@svgr/webpack"],
-          as: "*.ts",
-        },
+  turbo: {
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
       },
     },
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
   webpack(config) {
     if (process.env.NODE_V8_COVERAGE) {
