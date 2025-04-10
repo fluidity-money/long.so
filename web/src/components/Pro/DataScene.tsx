@@ -18,7 +18,7 @@ export default function DataScene({
   const pairNames = name.split("/");
   const tokenName = pairNames[+quoteToken];
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex w-full flex-1 flex-col gap-2">
       <Tabs defaultValue="txns" className="flex flex-1 flex-col">
         <TabsList className="self-start bg-black">
           <TabsTrigger value="txns">Txns</TabsTrigger>

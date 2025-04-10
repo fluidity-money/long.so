@@ -4,7 +4,7 @@ import Chart from "./Chart";
 import { requestGetTokenEvents } from "@/data";
 import { useEffect, useRef } from "react";
 import interact from "interactjs";
-
+import ResizeVerticalIcon from "@/assets/icons/sort.svg";
 export default function ProBody({
   name,
   quoteToken,
@@ -53,10 +53,12 @@ export default function ProBody({
       <div className="flex grow items-center justify-center rounded-lg bg-white/10 text-white">
         <Chart quoteToken={quoteToken} />
       </div>
-      <div
-        className="flex h-[300px] border-t-2 border-t-white/10 pt-2"
-        ref={tableContainerRef}
-      >
+      <div className="flex h-[300px] flex-col gap-2" ref={tableContainerRef}>
+        <div className="flex h-0.5 items-center">
+          <div className="h-0.5 grow bg-white/20" />
+          <ResizeVerticalIcon className="mx-2 size-3 bg-[#000] text-white/20" />
+          <div className="h-0.5 grow bg-white/20" />
+        </div>
         <DataScene
           quoteToken={quoteToken}
           name={name}
