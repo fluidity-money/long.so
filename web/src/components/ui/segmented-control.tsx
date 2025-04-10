@@ -18,7 +18,7 @@ const segmentedControlVariants = cva(
 export interface Segment<T extends string> {
   label: React.ReactNode;
   value: T;
-  ref: React.MutableRefObject<any>;
+  ref: React.RefObject<HTMLDivElement>;
   disabled?: boolean;
 }
 
@@ -40,16 +40,16 @@ const SegmentedControl = <T extends string>({
   name,
 }: SegmentedControlProps<T>) => {
   const [activeIndex, setActiveIndex] = useState(defaultIndex);
-  const controlRef = useRef<any>();
+  const controlRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const activeSegmentRef = segments[activeIndex].ref;
     const { offsetWidth, offsetLeft } = activeSegmentRef.current;
-    const { style } = controlRef.current;
+    const style = controlRef.current?.style;
 
-    style.setProperty("--highlight-width", `${offsetWidth}px`);
-    style.setProperty("--highlight-x-pos", `${offsetLeft}px`);
-  }, [activeIndex, controlRef, segments]);
+    style?.setProperty("--highlight-width", `${offsetWidth}px`);
+    style?.setProperty("--highlight-x-pos", `${offsetLeft}px`);
+  }, [activeIndex, segments]);
 
   /**
    * reset by calling the callback with the defaultIndex on mount
@@ -59,7 +59,7 @@ const SegmentedControl = <T extends string>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultIndex]);
 
-  const onInputChange = (value: any, index: any) => {
+  const onInputChange = (value: T, index: number) => {
     setActiveIndex(index);
     if (callback) callback(value, index);
   };
@@ -73,7 +73,7 @@ const SegmentedControl = <T extends string>({
         {segments?.map((item: Segment<T>, i: number) => (
           <div
             key={item.value}
-            className={"relative z-10 w-full select-none text-center"}
+            className={"relative z-10 w-full text-center select-none"}
             ref={item.ref}
           >
             <input
@@ -91,7 +91,7 @@ const SegmentedControl = <T extends string>({
             <label
               id={`${name}-${item.value}`}
               className={cn(
-                `mx-[6px] block text-nowrap font-medium transition-colors ${item.disabled ? "text-gray-500" : ""}`,
+                `mx-[6px] block font-medium text-nowrap transition-colors ${item.disabled ? "text-gray-500" : ""}`,
                 {
                   invert: i === activeIndex,
                 },

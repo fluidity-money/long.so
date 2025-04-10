@@ -35,7 +35,7 @@ export const SuperloopPopover = () => {
         className={"absolute -top-3 right-0"}
       >
         <div className="flex items-center justify-center rounded-full bg-black p-[4px]">
-          <Cog className="relative size-[18px] hover:size-[25px] hover:animate-spin-once" />
+          <Cog className="hover:animate-spin-once relative size-[18px] hover:size-[25px]" />
         </div>
       </PopoverTrigger>
       <PopoverContent className="bg-black text-xs text-white">
@@ -60,12 +60,12 @@ export const SuperloopPopover = () => {
                 {
                   label: "Auto",
                   value: "auto" as const,
-                  ref: useRef(),
+                  ref: useRef(null),
                 },
                 {
                   label: "Custom",
                   value: "custom" as const,
-                  ref: useRef(),
+                  ref: useRef(null),
                 },
               ]}
             />
@@ -93,12 +93,12 @@ export const SuperloopPopover = () => {
                 {
                   label: "None",
                   value: "none" as const,
-                  ref: useRef(),
+                  ref: useRef(null),
                 },
                 {
                   label: "Custom",
                   value: "custom" as const,
-                  ref: useRef(),
+                  ref: useRef(null),
                 },
               ]}
             />

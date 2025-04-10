@@ -43,12 +43,12 @@ export const InventorySettings = () => {
             {
               label: "Auto",
               value: "auto" as const,
-              ref: useRef(),
+              ref: useRef(null),
             },
             {
               label: "Custom",
               value: "custom" as const,
-              ref: useRef(),
+              ref: useRef(null),
             },
           ]}
         />
@@ -82,12 +82,12 @@ export const InventorySettings = () => {
             {
               label: "None",
               value: "none" as const,
-              ref: useRef(),
+              ref: useRef(null),
             },
             {
               label: "Custom",
               value: "custom" as const,
-              ref: useRef(),
+              ref: useRef(null),
             },
           ]}
         />

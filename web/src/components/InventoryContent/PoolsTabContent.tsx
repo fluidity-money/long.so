@@ -82,17 +82,17 @@ export const PoolsTabContent = () => {
               {
                 label: "Unclaimed",
                 value: "unclaimed" as const,
-                ref: useRef(),
+                ref: useRef(null),
               },
               {
                 label: "All",
                 value: "all" as const,
-                ref: useRef(),
+                ref: useRef(null),
               },
               {
                 label: "Historical",
                 value: "historical" as const,
-                ref: useRef(),
+                ref: useRef(null),
               },
             ]}
           />

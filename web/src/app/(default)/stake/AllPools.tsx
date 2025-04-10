@@ -25,7 +25,7 @@ import { useRouter } from "next/navigation";
 import { getFormattedPriceFromTick } from "@/lib/amounts";
 import { Token as TokenType, useTokens } from "@/config/tokens";
 import { TokenIcon } from "@/components/TokenIcon";
-import { useChainId } from "wagmi";
+// import { useChainId } from "wagmi";
 
 const DisplayModeMenu = ({
   setDisplayMode,
@@ -45,7 +45,7 @@ const DisplayModeMenu = ({
             </div>
           ),
           value: "list",
-          ref: useRef(),
+          ref: useRef(null),
         },
         {
           label: (
@@ -55,7 +55,7 @@ const DisplayModeMenu = ({
             </div>
           ),
           value: "grid",
-          ref: useRef(),
+          ref: useRef(null),
         },
       ]}
     />
@@ -115,7 +115,7 @@ export const AllPools = () => {
   const { data, isLoading } = useGraphqlGlobal();
 
   const router = useRouter();
-  const chainId = useChainId();
+  // const chainId = useChainId();
   const fUSDC = useTokens("fusdc");
 
   const poolsData = useFragment(AllPoolsFragment, data?.pools);
@@ -250,7 +250,7 @@ export const AllPools = () => {
                   "relative h-[169px] w-[179px] rounded-[5px] bg-black text-white"
                 }
               >
-                <div className={"absolute -left-1 -top-2 flex flex-row"}>
+                <div className={"absolute -top-2 -left-1 flex flex-row"}>
                   <TokenIcon
                     src={pool.tokens[0].icon}
                     className={"size-[24px] rounded-full"}
@@ -265,7 +265,7 @@ export const AllPools = () => {
                 </div>
 
                 {pool.boosted && (
-                  <div className={"absolute -right-1 -top-3"}>
+                  <div className={"absolute -top-3 -right-1"}>
                     <Badge
                       variant={"iridescent"}
                       className={

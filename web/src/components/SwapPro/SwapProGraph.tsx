@@ -128,12 +128,12 @@ export const Graph = ({
             {
               label: "Price",
               value: "price",
-              ref: useRef(),
+              ref: useRef(null),
             },
             {
               label: "Volume",
               value: "volume",
-              ref: useRef(),
+              ref: useRef(null),
             },
           ]}
         />

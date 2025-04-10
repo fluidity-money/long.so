@@ -22,27 +22,27 @@ export const DurationSegmentedControl = ({
         {
           label: "7D",
           value: "7D",
-          ref: useRef(),
+          ref: useRef(null),
         },
         {
           label: "1M",
           value: "1M",
-          ref: useRef(),
+          ref: useRef(null),
         },
         {
           label: "6M",
           value: "6M",
-          ref: useRef(),
+          ref: useRef(null),
         },
         {
           label: "1Y",
           value: "1Y",
-          ref: useRef(),
+          ref: useRef(null),
         },
         {
           label: "ALL",
           value: "ALL",
-          ref: useRef(),
+          ref: useRef(null),
         },
       ]}
     />
