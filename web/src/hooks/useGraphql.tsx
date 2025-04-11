@@ -264,3 +264,25 @@ export const useGetTokenEvents = ({
     },
   });
 };
+export const queryGetHolders = graphql(`
+  query GetHolders($input: HoldersInput!, $tokenInput: TokenInput!) {
+    token(input: $tokenInput) {
+      id
+      totalSupply
+      __typename
+    }
+    holders(input: $input) {
+      count
+      status
+      items {
+        balance
+        shiftedBalance
+        tokenId
+        walletId
+        __typename
+      }
+      cursor
+      __typename
+    }
+  }
+`);

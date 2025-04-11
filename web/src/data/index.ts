@@ -2,15 +2,17 @@ import request from "graphql-request";
 import appConfig from "@/config/app";
 import { QuoteToken, RankingDirection, SwapEventData } from "@/gql/graphql";
 import { timeAgo } from "@/lib/time";
-import { queryGetTokenEvents } from "@/hooks/useGraphql";
+import { queryGetHolders, queryGetTokenEvents } from "@/hooks/useGraphql";
 
 export async function requestGetTokenEvents({
   poolAddress,
+  networkId,
   quoteToken = "0",
   pageParam,
 }: {
   poolAddress: string;
   quoteToken: "0" | "1";
+  networkId: number;
   pageParam?: string | null;
 }) {
   const res = await request(
@@ -19,7 +21,7 @@ export async function requestGetTokenEvents({
     {
       query: {
         address: poolAddress,
-        networkId: 55244,
+        networkId,
         quoteToken: QuoteToken.Token0,
       },
       limit: 30,
@@ -40,14 +42,14 @@ export async function requestGetTokenEvents({
           const swapData = item.data as SwapEventData;
           return {
             age: timeAgo(item.timestamp),
-            eth: +Number(swapData.amountNonLiquidityToken).toFixed(4) || "-",
+            eth: +Number(swapData.amountNonLiquidityToken).toFixed(4),
             price: +Number(
               quoteToken === "0"
                 ? item.token0SwapValueUsd
                 : item.token1SwapValueUsd,
             )?.toFixed(2),
             usd: +Number(swapData.priceUsdTotal).toFixed(2),
-            token: +Number(swapData.amountNonLiquidityToken).toFixed(4) || "-",
+            token: +Number(swapData.amountNonLiquidityToken).toFixed(4),
             maker: item.maker,
             eventDisplayType: item.eventDisplayType as
               | "Mint"
@@ -75,4 +77,33 @@ export async function requestGetTokenEvents({
       }
     });
   return { cursor: res?.getTokenEvents?.cursor, items };
+}
+
+export async function requestGetHolders({
+  poolAddress,
+  networkId,
+  pageParam,
+}: {
+  poolAddress: string;
+  networkId: number;
+  pageParam?: string | null;
+}) {
+  const res = await request(
+    appConfig.codexApiUrl,
+    queryGetHolders,
+    {
+      tokenInput: {
+        address: poolAddress,
+        networkId,
+      },
+      input: {
+        tokenId: `${poolAddress}:${networkId}`,
+        cursor: pageParam,
+      },
+    },
+    {
+      Authorization: "597c0b48301be1731314a255fe5fca6eef4002aa",
+    },
+  );
+  return res;
 }
