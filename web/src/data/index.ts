@@ -78,7 +78,13 @@ export async function requestGetTokenEvents({
     });
   return { cursor: res?.getTokenEvents?.cursor, items };
 }
-
+export interface Holder {
+  address: string;
+  percentage: string;
+  totalSupply?: string | null;
+  amount: number;
+  value: string;
+}
 export async function requestGetHolders({
   poolAddress,
   networkId,
@@ -105,5 +111,18 @@ export async function requestGetHolders({
       Authorization: "597c0b48301be1731314a255fe5fca6eef4002aa",
     },
   );
-  return res;
+  const items = res.holders.items.map(
+    (item) =>
+      ({
+        address: item.walletId,
+        amount: item.shiftedBalance,
+        percentage: (
+          (item.shiftedBalance / Number(res.token.totalSupply)) *
+          100
+        ).toFixed(2),
+        totalSupply: res.token.totalSupply,
+        value: "?",
+      }) as Holder,
+  );
+  return { cursor: res?.holders?.cursor, items };
 }

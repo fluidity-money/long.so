@@ -4,7 +4,7 @@ import appConfig from "@/config/app";
 import { graphql } from "@/gql";
 import { useAccount, useChainId } from "wagmi";
 import { useChain } from "@/config/chains";
-import { requestGetTokenEvents } from "@/data";
+import { requestGetHolders, requestGetTokenEvents } from "@/data";
 
 /**
  * The main GraphQL query to fetch all data. The global query that should be run and
@@ -248,7 +248,7 @@ export const useGetTokenEvents = ({
   quoteToken: "0" | "1";
 }) => {
   return useInfiniteQuery({
-    queryKey: ["tokenEvents", poolAddress, quoteToken],
+    queryKey: ["tokenEvents", poolAddress, quoteToken, networkId],
     queryFn: async ({ pageParam }: { pageParam?: string | null }) =>
       await requestGetTokenEvents({
         poolAddress,
@@ -286,3 +286,28 @@ export const queryGetHolders = graphql(`
     }
   }
 `);
+export const useGetHolders = ({
+  poolAddress,
+  initialData,
+  networkId,
+}: {
+  poolAddress: string;
+  initialData: Awaited<ReturnType<typeof requestGetHolders>>;
+  networkId: number;
+}) => {
+  return useInfiniteQuery({
+    queryKey: ["tokenHolders", poolAddress, networkId],
+    queryFn: async ({ pageParam }: { pageParam?: string | null }) =>
+      await requestGetHolders({
+        poolAddress,
+        pageParam,
+        networkId,
+      }),
+    initialPageParam: initialData.cursor,
+    getNextPageParam: (lastPage) => lastPage.cursor,
+    initialData: {
+      pageParams: [initialData.cursor],
+      pages: [initialData],
+    },
+  });
+};
