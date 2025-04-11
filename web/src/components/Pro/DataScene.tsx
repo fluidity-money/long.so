@@ -9,11 +9,13 @@ export default function DataScene({
   quoteToken,
   poolAddress,
   initialData,
+  networkId,
 }: {
   name: string;
   quoteToken: "0" | "1";
   poolAddress: string;
   initialData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
+  networkId: number;
 }) {
   const pairNames = name.split("/");
   const tokenName = pairNames[+quoteToken];
@@ -26,6 +28,7 @@ export default function DataScene({
         </TabsList>
         <TabsContent value="txns" className="relative flex grow">
           <EventsTable
+            networkId={networkId}
             tokenName={tokenName}
             quoteToken={quoteToken}
             initialData={initialData}

@@ -10,11 +10,13 @@ export default function ProBody({
   quoteToken,
   poolAddress,
   initialData,
+  networkId,
 }: {
   name: string;
   quoteToken: "0" | "1";
   poolAddress: string;
   initialData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
+  networkId: number;
 }) {
   const tableContainerRef = useRef(null);
   useEffect(() => {
@@ -61,6 +63,7 @@ export default function ProBody({
         </div>
         <DataScene
           quoteToken={quoteToken}
+          networkId={networkId}
           name={name}
           poolAddress={poolAddress}
           initialData={initialData}

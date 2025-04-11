@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { requestGetTokenEvents } from "@/data";
 export const dynamicParams = false;
 export async function generateStaticParams() {
-  return config.pairs.map((p) => ({ address: p.address }));
+  return config.pools.map((p) => ({ address: p.address }));
 }
 type Params = Promise<{ address: string }>;
 type SearchParams = Promise<{ quoteToken?: string }>;
@@ -22,11 +22,14 @@ export default async function ProMode({
   const { address } = await params;
   const filters = await searchParams;
   const quoteToken = filters?.quoteToken || "0";
-  const name = config.pairs.find((p) => p.address === address)?.name;
-  if (!name || !(quoteToken === "0" || quoteToken === "1")) notFound();
+  const name = config.pools.find((p) => p.address === address)?.name;
+  const networkId = config.pools.find((p) => p.address === address)?.networkId;
+  if (!name || !networkId || !(quoteToken === "0" || quoteToken === "1"))
+    notFound();
   const initialData = await requestGetTokenEvents({
     poolAddress: address,
     quoteToken,
+    networkId,
   });
   return (
     <div className="flex flex-1 gap-4 px-4">
@@ -35,6 +38,7 @@ export default async function ProMode({
         <ProBody
           initialData={initialData}
           poolAddress={address}
+          networkId={networkId}
           name={name}
           quoteToken={quoteToken as "0" | "1"}
         />

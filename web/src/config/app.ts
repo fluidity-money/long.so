@@ -1,4 +1,5 @@
 import z from "zod";
+import { superpositionMainnet } from "./chains";
 
 const appSchema = z.object({
   /**
@@ -22,7 +23,7 @@ const appSchema = z.object({
       message:
         "Address must be exactly 42 characters long, including the '0x' prefix.",
     }),
-  pairs: z.array(
+  pools: z.array(
     z.object({
       address: z
         .string()
@@ -34,6 +35,7 @@ const appSchema = z.object({
           message:
             "Address must be exactly 42 characters long, including the '0x' prefix.",
         }),
+      networkId: z.number(),
       name: z.string(),
     }),
   ),
@@ -51,9 +53,10 @@ const appVars = appSchema.safeParse({
   pointsGraphUrl: "https://points-graph.superposition.so",
   codexApiUrl: "https://graph.codex.io/graphql",
   nullAddress: "0x0000000000000000000000000000000000000000",
-  pairs: [
+  pools: [
     {
       address: "0x7fc956a5c0aef46aa25b8911f4cb4619cbb7d90f",
+      networkId: superpositionMainnet.id,
       name: "WETH/USDC.e",
     },
   ],

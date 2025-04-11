@@ -239,16 +239,23 @@ export interface TokenEvent {
 export const useGetTokenEvents = ({
   poolAddress,
   initialData,
+  networkId,
   quoteToken,
 }: {
   poolAddress: string;
   initialData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
+  networkId: number;
   quoteToken: "0" | "1";
 }) => {
   return useInfiniteQuery({
     queryKey: ["tokenEvents", poolAddress, quoteToken],
     queryFn: async ({ pageParam }: { pageParam?: string | null }) =>
-      await requestGetTokenEvents({ poolAddress, pageParam, quoteToken }),
+      await requestGetTokenEvents({
+        poolAddress,
+        pageParam,
+        quoteToken,
+        networkId,
+      }),
     initialPageParam: initialData.cursor,
     getNextPageParam: (lastPage) => lastPage.cursor,
     initialData: {
