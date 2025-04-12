@@ -5,7 +5,7 @@ import ProHeader from "@/components/Pro/ProHeader";
 import TokenDetails from "@/components/Pro/TokenDetails";
 import config from "@/config/app";
 import { notFound } from "next/navigation";
-import { requestGetTokenEvents } from "@/data";
+import { requestGetHolders, requestGetTokenEvents } from "@/data";
 export const dynamicParams = false;
 export async function generateStaticParams() {
   return config.pools.map((p) => ({ address: p.address }));
@@ -26,9 +26,13 @@ export default async function ProMode({
   const networkId = config.pools.find((p) => p.address === address)?.networkId;
   if (!name || !networkId || !(quoteToken === "0" || quoteToken === "1"))
     notFound();
-  const initialData = await requestGetTokenEvents({
+  const initialEventsData = await requestGetTokenEvents({
     poolAddress: address,
     quoteToken,
+    networkId,
+  });
+  const initialHoldersData = await requestGetHolders({
+    poolAddress: address,
     networkId,
   });
   return (
@@ -36,7 +40,8 @@ export default async function ProMode({
       <div className="flex grow flex-col gap-2">
         <ProHeader name={name} />
         <ProBody
-          initialData={initialData}
+          initialEventsData={initialEventsData}
+          initialHoldersData={initialHoldersData}
           poolAddress={address}
           networkId={networkId}
           name={name}

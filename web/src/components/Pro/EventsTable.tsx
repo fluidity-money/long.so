@@ -116,8 +116,6 @@ export function EventsTable({
   );
   const {
     data,
-    isLoading,
-    isSuccess,
     //  hasNextPage, fetchNextPage
   } = useGetTokenEvents({ poolAddress, initialData, quoteToken, networkId });
   const events = useMemo(
@@ -151,16 +149,7 @@ export function EventsTable({
         ))}
       </TableHeader>
       <TableBody>
-        {isLoading || (!isSuccess && !events?.length) ? (
-          <TableRow>
-            <TableCell
-              colSpan={columns.length}
-              className="h-24 text-center text-gray-200"
-            >
-              Loading...
-            </TableCell>
-          </TableRow>
-        ) : table.getRowModel().rows?.length ? (
+        {table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row) => {
             return (
               <TableRow

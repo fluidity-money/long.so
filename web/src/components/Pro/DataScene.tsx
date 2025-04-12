@@ -2,19 +2,22 @@
 // import { Badge } from "../ui/badge";
 import { EventsTable } from "./EventsTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { requestGetTokenEvents } from "@/data";
+import { requestGetHolders, requestGetTokenEvents } from "@/data";
+import { HoldersTable } from "./HoldersTable";
 
 export default function DataScene({
   name,
   quoteToken,
   poolAddress,
-  initialData,
+  initialEventsData,
+  initialHoldersData,
   networkId,
 }: {
   name: string;
   quoteToken: "0" | "1";
   poolAddress: string;
-  initialData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
+  initialEventsData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
+  initialHoldersData: Awaited<ReturnType<typeof requestGetHolders>>;
   networkId: number;
 }) {
   const pairNames = name.split("/");
@@ -31,12 +34,16 @@ export default function DataScene({
             networkId={networkId}
             tokenName={tokenName}
             quoteToken={quoteToken}
-            initialData={initialData}
+            initialData={initialEventsData}
             poolAddress={poolAddress}
           />
         </TabsContent>
-        <TabsContent value="holders">
-          <div className="h-[300px] w-full bg-red-200">Holders</div>
+        <TabsContent value="holders" className="relative flex grow">
+          <HoldersTable
+            networkId={networkId}
+            initialData={initialHoldersData}
+            poolAddress={poolAddress}
+          />
         </TabsContent>
       </Tabs>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 import DataScene from "./DataScene";
 import Chart from "./Chart";
-import { requestGetTokenEvents } from "@/data";
+import { requestGetHolders, requestGetTokenEvents } from "@/data";
 import { useEffect, useRef } from "react";
 import interact from "interactjs";
 import ResizeVerticalIcon from "@/assets/icons/sort.svg";
@@ -9,13 +9,15 @@ export default function ProBody({
   name,
   quoteToken,
   poolAddress,
-  initialData,
+  initialEventsData,
+  initialHoldersData,
   networkId,
 }: {
   name: string;
   quoteToken: "0" | "1";
   poolAddress: string;
-  initialData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
+  initialEventsData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
+  initialHoldersData: Awaited<ReturnType<typeof requestGetHolders>>;
   networkId: number;
 }) {
   const tableContainerRef = useRef(null);
@@ -66,7 +68,8 @@ export default function ProBody({
           networkId={networkId}
           name={name}
           poolAddress={poolAddress}
-          initialData={initialData}
+          initialHoldersData={initialHoldersData}
+          initialEventsData={initialEventsData}
         />
       </div>
     </>

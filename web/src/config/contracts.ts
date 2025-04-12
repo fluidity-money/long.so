@@ -2,7 +2,6 @@ import z from "zod";
 import { allChains } from "./chains";
 import AMMContract from "./abi/ISeawaterAMM";
 import LeoContract from "./abi/ILeo";
-import appConfig from "./app";
 import OwnershipNFTsContract from "./abi/IOwnershipNFTs";
 import PositionHandlerContract from "./abi/PositionHandler";
 
