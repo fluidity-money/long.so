@@ -305,10 +305,10 @@ export const useGetHolders = ({
         pageParam,
         networkId,
       }),
-    initialPageParam: initialData.cursor,
+    initialPageParam: undefined,
     getNextPageParam: (lastPage) => lastPage.cursor,
     initialData: {
-      pageParams: [initialData.cursor],
+      pageParams: [undefined],
       pages: [initialData],
     },
   });
