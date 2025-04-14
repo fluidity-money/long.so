@@ -55,6 +55,7 @@ const appSchema = z.object({
           message:
             "Address must be exactly 42 characters long, including the '0x' prefix.",
         }),
+      createdAt: z.date(),
       networkId: z.number(),
       name: z.string(),
     }),
@@ -78,6 +79,7 @@ const appVars = appSchema.safeParse({
       pair: "0x7fc956a5c0aef46aa25b8911f4cb4619cbb7d90f",
       networkId: superpositionMainnet.id,
       name: "WETH/USDC.e",
+      createdAt: new Date("2025-02-01 21:39:58"),
       quoteToken0: "0x1fb719f10b56d7a85dcd32f27f897375fb21cfdd",
       quoteToken1: "0x6c030c5cc283f791b26816f325b9c632d964f8a1",
     },
