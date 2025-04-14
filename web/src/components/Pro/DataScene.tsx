@@ -32,11 +32,11 @@ export default function DataScene({
 }) {
   const [isPersonal, setIsPersonal] = useState(false);
   const activeTabBtnStyle = "bg-black text-white";
-  const tabBtnStyleCommon = "cursor-pointer rounded-2xl h-full px-2";
+  const tabBtnStyleCommon = "cursor-pointer rounded-2xl h-full px-2 text-xs";
   return (
     <div className="flex w-full flex-1 flex-col gap-2">
       <Tabs defaultValue="txns" className="flex flex-1 flex-col">
-        <TabsList className="self-start bg-black">
+        <TabsList className="h-auto self-start bg-black">
           <TabsTrigger value="txns" className="group gap-1">
             <span>Transaction History</span>
             <div className="hidden gap-1 rounded-2xl border border-black p-0.5 group-data-[state=active]:flex">
@@ -64,6 +64,7 @@ export default function DataScene({
         </TabsList>
         <TabsContent value="txns" className="relative flex grow">
           <EventsTable
+            isPersonal={isPersonal}
             networkId={networkId}
             tokenName={tokenName}
             quoteToken={quoteToken}

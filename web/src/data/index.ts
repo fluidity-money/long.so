@@ -12,11 +12,13 @@ export async function requestGetTokenEvents({
   poolAddress,
   networkId,
   quoteToken = "0",
+  maker,
   pageParam,
 }: {
   poolAddress: string;
   quoteToken: "0" | "1";
   networkId: number;
+  maker?: string;
   pageParam?: string | null;
 }) {
   const res = await request(
@@ -27,6 +29,7 @@ export async function requestGetTokenEvents({
         address: poolAddress,
         networkId,
         quoteToken: QuoteToken.Token0,
+        maker,
       },
       limit: 30,
       direction: RankingDirection.Desc,

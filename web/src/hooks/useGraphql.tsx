@@ -9,6 +9,7 @@ import {
   requestGetTokenEvents,
   requestGetTokenPrice,
 } from "@/data";
+import { useAppKitAccount } from "@reown/appkit/react";
 
 /**
  * The main GraphQL query to fetch all data. The global query that should be run and
@@ -245,21 +246,34 @@ export const useGetTokenEvents = ({
   initialData,
   networkId,
   quoteToken,
+  isPersonal,
 }: {
   poolAddress: string;
   initialData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
   networkId: number;
   quoteToken: "0" | "1";
+  isPersonal: boolean;
 }) => {
+  const account = useAppKitAccount();
   return useInfiniteQuery({
-    queryKey: ["tokenEvents", poolAddress, quoteToken, networkId],
-    queryFn: async ({ pageParam }: { pageParam?: string | null }) =>
-      await requestGetTokenEvents({
+    queryKey: [
+      "tokenEvents",
+      poolAddress,
+      quoteToken,
+      networkId,
+      isPersonal,
+      account?.address,
+    ],
+    queryFn: async ({ pageParam }: { pageParam?: string | null }) => {
+      if (isPersonal && account?.address) return { cursor: null, items: [] };
+      return await requestGetTokenEvents({
         poolAddress,
         pageParam,
         quoteToken,
         networkId,
-      }),
+        maker: isPersonal ? account?.address : undefined,
+      });
+    },
     initialPageParam: initialData.cursor,
     getNextPageParam: (lastPage) => lastPage.cursor,
     initialData: {

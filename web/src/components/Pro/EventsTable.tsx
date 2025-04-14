@@ -46,12 +46,14 @@ export function EventsTable({
   initialData,
   networkId,
   quoteToken,
+  isPersonal,
 }: {
   poolAddress: string;
   tokenName: string;
   initialData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
   quoteToken: "0" | "1";
   networkId: number;
+  isPersonal: boolean;
 }) {
   const columns = useMemo(
     () => [
@@ -117,7 +119,13 @@ export function EventsTable({
   const {
     data,
     //  hasNextPage, fetchNextPage
-  } = useGetTokenEvents({ poolAddress, initialData, quoteToken, networkId });
+  } = useGetTokenEvents({
+    isPersonal,
+    poolAddress,
+    initialData,
+    quoteToken,
+    networkId,
+  });
   const events = useMemo(
     () => data?.pages?.flatMap((page) => page.items) ?? [],
     [data],
