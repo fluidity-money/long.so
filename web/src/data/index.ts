@@ -115,7 +115,7 @@ export async function requestGetHolders({
     (item) =>
       ({
         address: item.walletId.split(":")[0],
-        amount: item.shiftedBalance,
+        amount: +item.shiftedBalance.toFixed(5),
         percentage: (
           (item.shiftedBalance / Number(res.token.info?.totalSupply)) *
           100

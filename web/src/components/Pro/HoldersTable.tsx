@@ -37,14 +37,16 @@ const columns = [
   }),
   columnHelper.accessor("percentage", {
     header: () => <span className={titleStyle}>%</span>,
-    cell: ({ cell }) => <span className={contentStyle}>{cell.getValue()}</span>,
+    cell: ({ cell }) => (
+      <span className={contentStyle}>{cell.getValue() + "%"}</span>
+    ),
   }),
   columnHelper.accessor("amount", {
     header: () => <span className={titleStyle}>Amount</span>,
     cell: ({ cell }) => <span className={contentStyle}>{cell.getValue()}</span>,
   }),
   columnHelper.accessor("value", {
-    header: () => <span className={titleStyle}>ETH</span>,
+    header: () => <span className={titleStyle}>Value (USD)</span>,
     cell: ({ cell }) => <span className={contentStyle}>{cell.getValue()}</span>,
   }),
   {
