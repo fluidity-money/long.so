@@ -67,8 +67,18 @@ export function HoldersTable({
       }),
       columnHelper.accessor("amount", {
         header: () => <span className={titleStyle}>Amount</span>,
-        cell: ({ cell }) => (
-          <span className={contentStyle}>{cell.getValue()}</span>
+        cell: ({ cell, row }) => (
+          <div className="flex items-center gap-2">
+            <div className="relative h-3 w-32 overflow-hidden rounded-sm bg-black">
+              <div
+                className="absolute inset-0 h-3 bg-green-200"
+                style={{
+                  width: `${row.getValue("percentage")}%`,
+                }}
+              />
+            </div>
+            <span className={contentStyle}>{cell.getValue()}</span>
+          </div>
         ),
       }),
       columnHelper.accessor("value", {
