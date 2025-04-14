@@ -6,16 +6,18 @@ import { useEffect, useRef } from "react";
 import interact from "interactjs";
 import ResizeVerticalIcon from "@/assets/icons/sort.svg";
 export default function ProBody({
-  name,
+  tokenName,
   quoteToken,
   poolAddress,
   initialEventsData,
   initialHoldersData,
   networkId,
+  tokenAddress,
 }: {
-  name: string;
+  tokenName: string;
   quoteToken: "0" | "1";
   poolAddress: string;
+  tokenAddress: string;
   initialEventsData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
   initialHoldersData: Awaited<ReturnType<typeof requestGetHolders>>;
   networkId: number;
@@ -66,7 +68,8 @@ export default function ProBody({
         <DataScene
           quoteToken={quoteToken}
           networkId={networkId}
-          name={name}
+          tokenName={tokenName}
+          tokenAddress={tokenAddress}
           poolAddress={poolAddress}
           initialHoldersData={initialHoldersData}
           initialEventsData={initialEventsData}

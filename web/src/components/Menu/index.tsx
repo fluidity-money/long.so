@@ -101,7 +101,7 @@ const Item: React.FC<ItemProps> = ({
               })}
               onClick={() => {
                 setWelcome(false);
-                router.push(isPro ? "/" : `/pro/${config.pools[0].address}`);
+                router.push(isPro ? "/" : `/pro/${config.pairs[0].pair}`);
               }}
             >
               {isPro ? (

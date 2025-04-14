@@ -23,9 +23,29 @@ const appSchema = z.object({
       message:
         "Address must be exactly 42 characters long, including the '0x' prefix.",
     }),
-  pools: z.array(
+  pairs: z.array(
     z.object({
-      address: z
+      pair: z
+        .string()
+        .regex(/^0x[a-fA-F0-9]+$/, {
+          message:
+            "Invalid hex string. It must start with '0x' and contain only hexadecimal characters.",
+        })
+        .length(42, {
+          message:
+            "Address must be exactly 42 characters long, including the '0x' prefix.",
+        }),
+      quoteToken0: z
+        .string()
+        .regex(/^0x[a-fA-F0-9]+$/, {
+          message:
+            "Invalid hex string. It must start with '0x' and contain only hexadecimal characters.",
+        })
+        .length(42, {
+          message:
+            "Address must be exactly 42 characters long, including the '0x' prefix.",
+        }),
+      quoteToken1: z
         .string()
         .regex(/^0x[a-fA-F0-9]+$/, {
           message:
@@ -53,11 +73,13 @@ const appVars = appSchema.safeParse({
   pointsGraphUrl: "https://points-graph.superposition.so",
   codexApiUrl: "https://graph.codex.io/graphql",
   nullAddress: "0x0000000000000000000000000000000000000000",
-  pools: [
+  pairs: [
     {
-      address: "0x7fc956a5c0aef46aa25b8911f4cb4619cbb7d90f",
+      pair: "0x7fc956a5c0aef46aa25b8911f4cb4619cbb7d90f",
       networkId: superpositionMainnet.id,
       name: "WETH/USDC.e",
+      quoteToken0: "0x1fb719f10b56d7a85dcd32f27f897375fb21cfdd",
+      quoteToken1: "0x6c030c5cc283f791b26816f325b9c632d964f8a1",
     },
   ],
 });

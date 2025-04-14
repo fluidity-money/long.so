@@ -6,22 +6,22 @@ import { requestGetHolders, requestGetTokenEvents } from "@/data";
 import { HoldersTable } from "./HoldersTable";
 
 export default function DataScene({
-  name,
   quoteToken,
   poolAddress,
+  tokenName,
+  tokenAddress,
   initialEventsData,
   initialHoldersData,
   networkId,
 }: {
-  name: string;
   quoteToken: "0" | "1";
   poolAddress: string;
+  tokenName: string;
+  tokenAddress: string;
   initialEventsData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
   initialHoldersData: Awaited<ReturnType<typeof requestGetHolders>>;
   networkId: number;
 }) {
-  const pairNames = name.split("/");
-  const tokenName = pairNames[+quoteToken];
   return (
     <div className="flex w-full flex-1 flex-col gap-2">
       <Tabs defaultValue="txns" className="flex flex-1 flex-col">
@@ -42,7 +42,7 @@ export default function DataScene({
           <HoldersTable
             networkId={networkId}
             initialData={initialHoldersData}
-            poolAddress={poolAddress}
+            tokenAddress={tokenAddress}
           />
         </TabsContent>
       </Tabs>

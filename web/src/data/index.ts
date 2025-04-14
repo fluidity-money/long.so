@@ -29,7 +29,7 @@ export async function requestGetTokenEvents({
       cursor: pageParam,
     },
     {
-      Authorization: "597c0b48301be1731314a255fe5fca6eef4002aa",
+      Authorization: process.env.NEXT_PUBLIC_CODEX_API_KEY!,
     },
   );
 
@@ -86,12 +86,12 @@ export interface Holder {
   value: string;
 }
 export async function requestGetHolders({
-  poolAddress,
   networkId,
+  tokenAddress,
   pageParam,
 }: {
-  poolAddress: string;
   networkId: number;
+  tokenAddress: string;
   pageParam?: string | null;
 }) {
   const res = await request(
@@ -99,28 +99,28 @@ export async function requestGetHolders({
     queryGetHolders,
     {
       tokenInput: {
-        address: poolAddress,
+        address: tokenAddress,
         networkId,
       },
       input: {
-        tokenId: `${poolAddress}:${networkId}`,
+        tokenId: `${tokenAddress}:${networkId}`,
         cursor: pageParam,
       },
     },
     {
-      Authorization: "597c0b48301be1731314a255fe5fca6eef4002aa",
+      Authorization: process.env.NEXT_PUBLIC_CODEX_API_KEY!,
     },
   );
   const items = res.holders.items.map(
     (item) =>
       ({
-        address: item.walletId,
+        address: item.walletId.split(":")[0],
         amount: item.shiftedBalance,
         percentage: (
-          (item.shiftedBalance / Number(res.token.totalSupply)) *
+          (item.shiftedBalance / Number(res.token.info?.totalSupply)) *
           100
         ).toFixed(2),
-        totalSupply: res.token.totalSupply,
+        totalSupply: res.token.info?.totalSupply,
         value: "?",
       }) as Holder,
   );

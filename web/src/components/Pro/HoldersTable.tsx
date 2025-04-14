@@ -61,18 +61,18 @@ const columns = [
   },
 ];
 export function HoldersTable({
-  poolAddress,
+  tokenAddress,
   initialData,
   networkId,
 }: {
-  poolAddress: string;
+  tokenAddress: string;
   initialData: Awaited<ReturnType<typeof requestGetHolders>>;
   networkId: number;
 }) {
   const {
     data,
     //  hasNextPage, fetchNextPage
-  } = useGetHolders({ poolAddress, initialData, networkId });
+  } = useGetHolders({ tokenAddress, initialData, networkId });
   const events = useMemo(
     () => data?.pages?.flatMap((page) => page.items) ?? [],
     [data],
@@ -109,7 +109,7 @@ export function HoldersTable({
             return (
               <TableRow
                 key={row.id}
-                className={cn("border-0 hover:bg-black hover:text-white")}
+                className={cn("border-0 text-white hover:bg-black")}
               >
                 {row
                   .getVisibleCells()

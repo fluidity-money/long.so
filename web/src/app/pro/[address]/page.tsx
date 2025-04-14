@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { requestGetHolders, requestGetTokenEvents } from "@/data";
 export const dynamicParams = false;
 export async function generateStaticParams() {
-  return config.pools.map((p) => ({ address: p.address }));
+  return config.pairs.map((p) => ({ pair: p.pair }));
 }
 type Params = Promise<{ address: string }>;
 type SearchParams = Promise<{ quoteToken?: string }>;
@@ -22,17 +22,20 @@ export default async function ProMode({
   const { address } = await params;
   const filters = await searchParams;
   const quoteToken = filters?.quoteToken || "0";
-  const name = config.pools.find((p) => p.address === address)?.name;
-  const networkId = config.pools.find((p) => p.address === address)?.networkId;
-  if (!name || !networkId || !(quoteToken === "0" || quoteToken === "1"))
-    notFound();
+  const pair = config.pairs.find((p) => p.pair === address);
+  if (!pair || !(quoteToken === "0" || quoteToken === "1")) notFound();
+  const name = pair.name;
+  const networkId = pair.networkId;
+  const tokenAddress = quoteToken === "0" ? pair.quoteToken0 : pair.quoteToken1;
+  const pairNames = name.split("/");
+  const tokenName = pairNames[+quoteToken];
   const initialEventsData = await requestGetTokenEvents({
     poolAddress: address,
     quoteToken,
     networkId,
   });
   const initialHoldersData = await requestGetHolders({
-    poolAddress: address,
+    tokenAddress,
     networkId,
   });
   return (
@@ -43,8 +46,9 @@ export default async function ProMode({
           initialEventsData={initialEventsData}
           initialHoldersData={initialHoldersData}
           poolAddress={address}
+          tokenName={tokenName}
+          tokenAddress={tokenAddress}
           networkId={networkId}
-          name={name}
           quoteToken={quoteToken as "0" | "1"}
         />
       </div>

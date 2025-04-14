@@ -268,7 +268,9 @@ export const queryGetHolders = graphql(`
   query GetHolders($input: HoldersInput!, $tokenInput: TokenInput!) {
     token(input: $tokenInput) {
       id
-      totalSupply
+      info {
+        totalSupply
+      }
       __typename
     }
     holders(input: $input) {
@@ -287,19 +289,19 @@ export const queryGetHolders = graphql(`
   }
 `);
 export const useGetHolders = ({
-  poolAddress,
+  tokenAddress,
   initialData,
   networkId,
 }: {
-  poolAddress: string;
+  tokenAddress: string;
   initialData: Awaited<ReturnType<typeof requestGetHolders>>;
   networkId: number;
 }) => {
   return useInfiniteQuery({
-    queryKey: ["tokenHolders", poolAddress, networkId],
+    queryKey: ["tokenHolders", tokenAddress, networkId],
     queryFn: async ({ pageParam }: { pageParam?: string | null }) =>
       await requestGetHolders({
-        poolAddress,
+        tokenAddress,
         pageParam,
         networkId,
       }),
