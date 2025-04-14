@@ -65,7 +65,7 @@ export default async function ProMode({
         <div className="absolute inset-0 flex flex-col gap-4 overflow-y-auto border-l border-black px-2">
           <Call2Action />
           <DurationControl />
-          <TokenDetails />
+          <TokenDetails pair={pair} />
         </div>
       </div>
     </div>
