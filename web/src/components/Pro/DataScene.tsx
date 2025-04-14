@@ -2,7 +2,11 @@
 // import { Badge } from "../ui/badge";
 import { EventsTable } from "./EventsTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { requestGetHolders, requestGetTokenEvents } from "@/data";
+import {
+  requestGetHolders,
+  requestGetTokenEvents,
+  requestGetTokenPrice,
+} from "@/data";
 import { HoldersTable } from "./HoldersTable";
 
 export default function DataScene({
@@ -12,6 +16,7 @@ export default function DataScene({
   tokenAddress,
   initialEventsData,
   initialHoldersData,
+  initialTokenPriceData,
   networkId,
 }: {
   quoteToken: "0" | "1";
@@ -20,6 +25,7 @@ export default function DataScene({
   tokenAddress: string;
   initialEventsData: Awaited<ReturnType<typeof requestGetTokenEvents>>;
   initialHoldersData: Awaited<ReturnType<typeof requestGetHolders>>;
+  initialTokenPriceData: Awaited<ReturnType<typeof requestGetTokenPrice>>;
   networkId: number;
 }) {
   return (
@@ -42,6 +48,7 @@ export default function DataScene({
           <HoldersTable
             networkId={networkId}
             initialData={initialHoldersData}
+            initialTokenPriceData={initialTokenPriceData}
             tokenAddress={tokenAddress}
           />
         </TabsContent>

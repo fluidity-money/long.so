@@ -14,67 +14,87 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { useGetHolders } from "@/hooks/useGraphql";
+import { useGetHolders, useGetTokenPrice } from "@/hooks/useGraphql";
 import { useMemo } from "react";
-import { requestGetHolders, Holder } from "@/data";
+import { requestGetHolders, Holder, requestGetTokenPrice } from "@/data";
 import ArrowIcon from "@/assets/icons/arrow-up-right.svg";
 import FilterIcon from "@/assets/icons/filter.svg";
 import Link from "next/link";
 const columnHelper = createColumnHelper<Holder>();
 const titleStyle = "text-gray-200 text-xs font-semibold";
 const contentStyle = "text-xs font-medium";
-const columns = [
-  {
-    id: "idx",
-    header: () => <span className={titleStyle}>#</span>,
-    cell: (p: { row: { index: number } }) => (
-      <span className={contentStyle}>{p.row.index + 1}</span>
-    ),
-  },
-  columnHelper.accessor("address", {
-    header: () => <span className={titleStyle}>Address</span>,
-    cell: ({ cell }) => <span className={contentStyle}>{cell.getValue()}</span>,
-  }),
-  columnHelper.accessor("percentage", {
-    header: () => <span className={titleStyle}>%</span>,
-    cell: ({ cell }) => (
-      <span className={contentStyle}>{cell.getValue() + "%"}</span>
-    ),
-  }),
-  columnHelper.accessor("amount", {
-    header: () => <span className={titleStyle}>Amount</span>,
-    cell: ({ cell }) => <span className={contentStyle}>{cell.getValue()}</span>,
-  }),
-  columnHelper.accessor("value", {
-    header: () => <span className={titleStyle}>Value (USD)</span>,
-    cell: ({ cell }) => <span className={contentStyle}>{cell.getValue()}</span>,
-  }),
-  {
-    id: "actions",
-    header: () => <span className={titleStyle}>Actions</span>,
-    cell: () => (
-      <div className="flex justify-end gap-2 pr-2">
-        <FilterIcon className="size-3 text-white" />
-        <Link href={"#"}>
-          <ArrowIcon className="size-3 text-white" />
-        </Link>
-      </div>
-    ),
-  },
-];
+
 export function HoldersTable({
   tokenAddress,
   initialData,
+  initialTokenPriceData,
   networkId,
 }: {
   tokenAddress: string;
   initialData: Awaited<ReturnType<typeof requestGetHolders>>;
+  initialTokenPriceData: Awaited<ReturnType<typeof requestGetTokenPrice>>;
   networkId: number;
 }) {
   const {
     data,
     //  hasNextPage, fetchNextPage
   } = useGetHolders({ tokenAddress, initialData, networkId });
+  const { data: tokenPrice } = useGetTokenPrice({
+    tokenAddress,
+    initialData: initialTokenPriceData,
+    networkId,
+  });
+  const columns = useMemo(
+    () => [
+      {
+        id: "idx",
+        header: () => <span className={titleStyle}>#</span>,
+        cell: (p: { row: { index: number } }) => (
+          <span className={contentStyle}>{p.row.index + 1}</span>
+        ),
+      },
+      columnHelper.accessor("address", {
+        header: () => <span className={titleStyle}>Address</span>,
+        cell: ({ cell }) => (
+          <span className={contentStyle}>{cell.getValue()}</span>
+        ),
+      }),
+      columnHelper.accessor("percentage", {
+        header: () => <span className={titleStyle}>%</span>,
+        cell: ({ cell }) => (
+          <span className={contentStyle}>{cell.getValue() + "%"}</span>
+        ),
+      }),
+      columnHelper.accessor("amount", {
+        header: () => <span className={titleStyle}>Amount</span>,
+        cell: ({ cell }) => (
+          <span className={contentStyle}>{cell.getValue()}</span>
+        ),
+      }),
+      columnHelper.accessor("value", {
+        header: () => <span className={titleStyle}>Value (USD)</span>,
+        cell: ({ row }) => (
+          <span className={contentStyle}>
+            {"$" +
+              ((row.getValue("amount") as number) * tokenPrice!).toFixed(2)}
+          </span>
+        ),
+      }),
+      {
+        id: "actions",
+        header: () => <span className={titleStyle}>Actions</span>,
+        cell: () => (
+          <div className="flex justify-end gap-2 pr-2">
+            <FilterIcon className="size-3 text-white" />
+            <Link href={"#"}>
+              <ArrowIcon className="size-3 text-white" />
+            </Link>
+          </div>
+        ),
+      },
+    ],
+    [tokenPrice],
+  );
   const events = useMemo(
     () => data?.pages?.flatMap((page) => page.items) ?? [],
     [data],

@@ -4,7 +4,11 @@ import appConfig from "@/config/app";
 import { graphql } from "@/gql";
 import { useAccount, useChainId } from "wagmi";
 import { useChain } from "@/config/chains";
-import { requestGetHolders, requestGetTokenEvents } from "@/data";
+import {
+  requestGetHolders,
+  requestGetTokenEvents,
+  requestGetTokenPrice,
+} from "@/data";
 
 /**
  * The main GraphQL query to fetch all data. The global query that should be run and
@@ -311,5 +315,33 @@ export const useGetHolders = ({
       pageParams: [undefined],
       pages: [initialData],
     },
+  });
+};
+export const queryGetTokenPrice = graphql(`
+  query GetTokenPrice($inputs: [GetPriceInput]) {
+    getTokenPrices(inputs: $inputs) {
+      priceUsd
+      timestamp
+      __typename
+    }
+  }
+`);
+export const useGetTokenPrice = ({
+  tokenAddress,
+  initialData,
+  networkId,
+}: {
+  tokenAddress: string;
+  initialData: Awaited<ReturnType<typeof requestGetTokenPrice>>;
+  networkId: number;
+}) => {
+  return useQuery({
+    queryKey: ["tokenPrice", tokenAddress, networkId],
+    queryFn: async () =>
+      await requestGetTokenPrice({
+        tokenAddress,
+        networkId,
+      }),
+    initialData,
   });
 };

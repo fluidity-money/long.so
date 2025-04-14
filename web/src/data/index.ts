@@ -2,7 +2,11 @@ import request from "graphql-request";
 import appConfig from "@/config/app";
 import { QuoteToken, RankingDirection, SwapEventData } from "@/gql/graphql";
 import { timeAgo } from "@/lib/time";
-import { queryGetHolders, queryGetTokenEvents } from "@/hooks/useGraphql";
+import {
+  queryGetHolders,
+  queryGetTokenEvents,
+  queryGetTokenPrice,
+} from "@/hooks/useGraphql";
 
 export async function requestGetTokenEvents({
   poolAddress,
@@ -125,4 +129,30 @@ export async function requestGetHolders({
       }) as Holder,
   );
   return { cursor: res?.holders?.cursor, items };
+}
+export async function requestGetTokenPrice({
+  networkId,
+  tokenAddress,
+}: {
+  networkId: number;
+  tokenAddress: string;
+}) {
+  const res = await request(
+    appConfig.codexApiUrl,
+    queryGetTokenPrice,
+    {
+      inputs: [
+        {
+          address: tokenAddress,
+          networkId,
+        },
+      ],
+    },
+    {
+      Authorization: process.env.NEXT_PUBLIC_CODEX_API_KEY!,
+    },
+  );
+  const data = res.getTokenPrices?.[0];
+  const tokenPrice = data?.priceUsd;
+  return tokenPrice;
 }

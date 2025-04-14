@@ -5,7 +5,11 @@ import ProHeader from "@/components/Pro/ProHeader";
 import TokenDetails from "@/components/Pro/TokenDetails";
 import config from "@/config/app";
 import { notFound } from "next/navigation";
-import { requestGetHolders, requestGetTokenEvents } from "@/data";
+import {
+  requestGetHolders,
+  requestGetTokenEvents,
+  requestGetTokenPrice,
+} from "@/data";
 export const dynamicParams = false;
 export async function generateStaticParams() {
   return config.pairs.map((p) => ({ pair: p.pair }));
@@ -38,6 +42,10 @@ export default async function ProMode({
     tokenAddress,
     networkId,
   });
+  const initialTokenPriceData = await requestGetTokenPrice({
+    tokenAddress,
+    networkId,
+  });
   return (
     <div className="flex flex-1 gap-4 px-4">
       <div className="flex grow flex-col gap-2">
@@ -45,6 +53,7 @@ export default async function ProMode({
         <ProBody
           initialEventsData={initialEventsData}
           initialHoldersData={initialHoldersData}
+          initialTokenPriceData={initialTokenPriceData}
           poolAddress={address}
           tokenName={tokenName}
           tokenAddress={tokenAddress}
