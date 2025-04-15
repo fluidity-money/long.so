@@ -8,7 +8,7 @@ const PairDetailItem = ({ title, value }: { title: string; value: string }) => {
     </div>
   );
 };
-const keys = ["price", "24hr_change", "24hr_vol", "contract", "market_cap"];
+const keys = ["price", "market_cap", "liquidity", "24hr_change", "24hr_vol"];
 export default function PairDetails() {
   return (
     <div className="flex grow grid-cols-5 items-center justify-between gap-2">
