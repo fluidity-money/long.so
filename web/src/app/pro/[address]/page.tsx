@@ -11,6 +11,7 @@ import {
   requestGetTokenPrice,
 } from "@/data";
 export const dynamicParams = false;
+export const revalidate = 300;
 export async function generateStaticParams() {
   return config.pairs.map((p) => ({ pair: p.pair }));
 }
