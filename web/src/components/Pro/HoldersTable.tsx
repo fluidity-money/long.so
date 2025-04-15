@@ -20,6 +20,7 @@ import { requestGetHolders, Holder, requestGetTokenPrice } from "@/data";
 import ArrowIcon from "@/assets/icons/arrow-up-right.svg";
 import FilterIcon from "@/assets/icons/filter.svg";
 import Link from "next/link";
+import CopyIcon from "@/assets/icons/copy.svg";
 const columnHelper = createColumnHelper<Holder>();
 const titleStyle = "text-gray-200 text-xs font-semibold";
 const contentStyle = "text-xs font-medium";
@@ -56,7 +57,17 @@ export function HoldersTable({
       columnHelper.accessor("address", {
         header: () => <span className={titleStyle}>Address</span>,
         cell: ({ cell }) => (
-          <span className={contentStyle}>{cell.getValue()}</span>
+          <div
+            className={cn(
+              contentStyle,
+              "text-green inline-flex items-center gap-1 rounded-full bg-black px-2 py-0.5",
+            )}
+          >
+            <span>
+              {cell.getValue().slice(0, 6)}...{cell.getValue().slice(-6)}
+            </span>
+            <CopyIcon className="size-3 text-white" />
+          </div>
         ),
       }),
       columnHelper.accessor("percentage", {
@@ -71,7 +82,7 @@ export function HoldersTable({
           <div className="flex items-center gap-2">
             <div className="relative h-3 w-32 overflow-hidden rounded-sm bg-black">
               <div
-                className="absolute inset-0 h-3 bg-green-200"
+                className="iridescent absolute inset-0 h-3"
                 style={{
                   width: `${row.getValue("percentage")}%`,
                 }}
