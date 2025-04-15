@@ -20,7 +20,7 @@ const badgeVariants = cva(
         "outline-dark": "border-white/10 text-white bg-black",
         iridescent: "iridescent border-transparent text-primary",
         "iridescent-border": "iridescent-text font-medium",
-        buy: "border-transparent bg-green-200 text-black hover:bg-green-300",
+        buy: "border-transparent bg-green-light text-black hover:bg-green-dark",
         mint: "border-transparent bg-blue-light text-blue-dark hover:bg-blue-dark hover:text-blue-light",
         burn: "border-transparent bg-purple-light text-purple-dark hover:bg-purple-dark hover:text-purple-light",
       },

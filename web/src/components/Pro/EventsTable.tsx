@@ -37,8 +37,8 @@ const eventDisplayTypeColorMap: Record<TokenEvent["eventDisplayType"], string> =
   {
     Burn: "text-purple-light",
     Mint: "text-blue-light",
-    Buy: "text-green-200",
-    Sell: "text-red-200",
+    Buy: "text-green-light",
+    Sell: "text-destructive-foreground",
   } as const;
 export function EventsTable({
   tokenName,
