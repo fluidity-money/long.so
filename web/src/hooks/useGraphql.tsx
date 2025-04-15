@@ -266,7 +266,7 @@ export const useGetTokenEvents = ({
       account?.address,
     ],
     queryFn: async ({ pageParam }: { pageParam?: string | null }) => {
-      if (isPersonal && account?.address) return { cursor: null, items: [] };
+      if (isPersonal && !account?.address) return { cursor: null, items: [] };
       return await requestGetTokenEvents({
         poolAddress,
         pageParam,
