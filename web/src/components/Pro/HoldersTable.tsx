@@ -116,7 +116,7 @@ export function HoldersTable({
   });
   return (
     <Table className="absolute inset-0 overflow-y-auto">
-      <TableHeader className="sticky top-0 bg-black shadow-[0px_0.5px_0px_white]">
+      <TableHeader className="sticky top-0 z-[99] bg-black shadow-[0px_0.5px_0px_white]">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id}>
             {headerGroup.headers.map((header) => {
