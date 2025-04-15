@@ -6,6 +6,7 @@ import { useAccount, useChainId } from "wagmi";
 import { useChain } from "@/config/chains";
 import {
   requestGetHolders,
+  requestGetPairDetails,
   requestGetTokenEvents,
   requestGetTokenPrice,
 } from "@/data";
@@ -356,6 +357,48 @@ export const useGetTokenPrice = ({
         tokenAddress,
         networkId,
       }),
+    initialData,
+  });
+};
+export const queryGetPairDetails = graphql(`
+  query FilterTokens(
+    $filters: TokenFilters
+    $statsType: TokenPairStatisticsType
+    $phrase: String
+    $tokens: [String]
+    $rankings: [TokenRanking]
+    $limit: Int
+    $offset: Int
+  ) {
+    filterTokens(
+      filters: $filters
+      statsType: $statsType
+      phrase: $phrase
+      tokens: $tokens
+      rankings: $rankings
+      limit: $limit
+      offset: $offset
+    ) {
+      results {
+        liquidity
+        marketCap
+        change24
+        volume24
+        priceUSD
+      }
+    }
+  }
+`);
+export const useGetPairDetails = ({
+  tokenAddress,
+  initialData,
+}: {
+  tokenAddress: string;
+  initialData: Awaited<ReturnType<typeof requestGetPairDetails>>;
+}) => {
+  return useQuery({
+    queryKey: ["pairDetails", tokenAddress],
+    queryFn: () => requestGetPairDetails(tokenAddress),
     initialData,
   });
 };

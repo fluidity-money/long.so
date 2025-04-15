@@ -7,6 +7,7 @@ import config from "@/config/app";
 import { notFound } from "next/navigation";
 import {
   requestGetHolders,
+  requestGetPairDetails,
   requestGetTokenEvents,
   requestGetTokenPrice,
 } from "@/data";
@@ -47,10 +48,15 @@ export default async function ProMode({
     tokenAddress,
     networkId,
   });
+  const pairDetails = await requestGetPairDetails(tokenAddress);
   return (
     <div className="flex flex-1 gap-4 px-4">
       <div className="flex grow flex-col gap-2">
-        <ProHeader name={name} />
+        <ProHeader
+          name={name}
+          pairDetails={pairDetails}
+          tokenAddress={tokenAddress}
+        />
         <ProBody
           initialEventsData={initialEventsData}
           initialHoldersData={initialHoldersData}

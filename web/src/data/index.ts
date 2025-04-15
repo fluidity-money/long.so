@@ -4,6 +4,7 @@ import { QuoteToken, RankingDirection, SwapEventData } from "@/gql/graphql";
 import { timeAgo } from "@/lib/time";
 import {
   queryGetHolders,
+  queryGetPairDetails,
   queryGetTokenEvents,
   queryGetTokenPrice,
 } from "@/hooks/useGraphql";
@@ -158,4 +159,18 @@ export async function requestGetTokenPrice({
   const data = res.getTokenPrices?.[0];
   const tokenPrice = data?.priceUsd;
   return tokenPrice;
+}
+export async function requestGetPairDetails(tokenAddress: string) {
+  const res = await request(
+    appConfig.codexApiUrl,
+    queryGetPairDetails,
+    {
+      tokens: [tokenAddress],
+      limit: 1,
+    },
+    {
+      Authorization: process.env.NEXT_PUBLIC_CODEX_API_KEY!,
+    },
+  );
+  return res?.filterTokens?.results?.[0];
 }
