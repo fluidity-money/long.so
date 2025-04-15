@@ -4,9 +4,8 @@ import { InventoryContent } from "@/components/InventoryContent";
 import { useInventorySheet } from "@/stores/useInventorySheet";
 import { useAccount, useEnsName } from "wagmi";
 import { mainnet } from "wagmi/chains";
-import { cn } from "@/lib/utils";
-
-export const InventorySheet = ({ isDark }: { isDark: boolean }) => {
+import PP from "@/assets/profile-picture.png";
+export const InventorySheet = () => {
   const { isOpen, setIsOpen } = useInventorySheet();
 
   const { address } = useAccount();
@@ -25,10 +24,9 @@ export const InventorySheet = ({ isDark }: { isDark: boolean }) => {
         <SheetTrigger asChild>
           <div
             id="wallet-connected-btn"
-            className={cn(
-              isDark ? "text-white" : "text-black",
-              "cursor-pointer text-nowrap rounded p-1 text-right text-xs font-semibold transition-all hover:bg-black hover:text-base hover:text-white",
-            )}
+            className={
+              "cursor-pointer rounded p-1 text-right text-xs font-semibold text-nowrap text-black transition-all hover:bg-black hover:text-base hover:text-white dark:text-white"
+            }
           >
             {ensName ? (
               ensName
@@ -40,7 +38,7 @@ export const InventorySheet = ({ isDark }: { isDark: boolean }) => {
           </div>
         </SheetTrigger>
         <Image
-          src={require("@/assets/profile-picture.png")}
+          src={PP}
           alt={"profile picture"}
           className={"size-[28px] rounded"}
         />

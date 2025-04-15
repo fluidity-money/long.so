@@ -10,10 +10,10 @@ const inter = Inter({
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className={cn("flex min-h-screen flex-col bg-white", inter.className)}>
-      <div className="iridescent-blur absolute left-1/2 top-[180px] size-full max-h-[305px] max-w-[557px] -translate-x-1/2" />
-      <Header isDark={false} />
+      <div className="iridescent-blur absolute top-[180px] left-1/2 size-full max-h-[305px] max-w-[557px] -translate-x-1/2" />
+      <Header />
       <main className={"z-10 flex flex-1 flex-col"}>{children}</main>
-      <Footer isDark={false} />
+      <Footer />
     </div>
   );
 }

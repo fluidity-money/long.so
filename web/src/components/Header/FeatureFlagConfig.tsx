@@ -50,7 +50,7 @@ const featureFlagsLabels: { [K in FeatureFlagKey]: string } = {
   "ui is mainnet enabled": "UI Is Mainnet Enabled",
 };
 
-export const FeatureFlagConfig = ({ isDark }: { isDark: boolean }) => {
+export const FeatureFlagConfig = () => {
   const { featureFlags, setFeatureFlagOverride, override, setOverride, reset } =
     useFeatureFlagOverride();
 
@@ -70,7 +70,7 @@ export const FeatureFlagConfig = ({ isDark }: { isDark: boolean }) => {
 
   return (
     <Popover>
-      <PopoverTrigger className={cn(isDark && "text-white")}>
+      <PopoverTrigger className={"dark:text-white"}>
         {isLoading ? (
           <LoaderIcon className={"size-6 animate-spin"} />
         ) : (

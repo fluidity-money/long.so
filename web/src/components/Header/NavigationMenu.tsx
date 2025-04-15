@@ -2,12 +2,11 @@
 
 import Menu from "@/components/Menu";
 import { usePathname, useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 
 /**
  * The main Swap/Stake navigation menu.
  */
-export const NavigationMenu = ({ isDark }: { isDark: boolean }) => {
+export const NavigationMenu = () => {
   const pathname = usePathname();
   const router = useRouter();
   const isPro = pathname.startsWith("/pro");
@@ -35,7 +34,7 @@ export const NavigationMenu = ({ isDark }: { isDark: boolean }) => {
         }}
         selected={pathname.startsWith("/stake")}
       >
-        <span className={cn(isDark && "text-white")}>Stake</span>
+        <span className={"dark:text-white"}>Stake</span>
       </Menu.Item>
     </Menu>
   );

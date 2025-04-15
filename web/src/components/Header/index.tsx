@@ -6,10 +6,9 @@ import LongTail from "@/assets/icons/long-tail.svg";
 import Points from "../Points";
 import { NetworkSelection } from "@/components/Header/NetworkSelection";
 import { ConnectWalletButton } from "@/components/Header/ConnectWalletButton";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-export default function Header({ isDark }: { isDark: boolean }) {
+export default function Header() {
   return (
     <header className="z-20 px-8 py-4">
       <div className="flex w-full flex-col gap-8">
@@ -19,19 +18,19 @@ export default function Header({ isDark }: { isDark: boolean }) {
               <LongTail
                 width={24}
                 height={24}
-                className={cn(isDark && "text-white", "size-6")}
+                className={"size-6 dark:text-white"}
               />
             </Link>
             <MobileNetworkSelection />
-            <FeatureFlagConfig isDark={isDark} />
+            <FeatureFlagConfig />
             <DemoData />
           </div>
-          <NavigationMenu isDark={isDark} />
+          <NavigationMenu />
           <div className="flex grow basis-0 flex-row items-center justify-end gap-4">
             <Points />
             {/* <FaucetDropdown allowedChains={faucetChains} /> */}
             <NetworkSelection />
-            <ConnectWalletButton isDark={isDark} />
+            <ConnectWalletButton />
           </div>
         </div>
       </div>

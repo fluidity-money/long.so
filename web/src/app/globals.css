@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: 0 0% 100%;
@@ -32,7 +33,7 @@
   --radius: 0.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: 224 71.4% 4.1%;
     --foreground: 210 20% 98%;
@@ -61,8 +62,10 @@
     --border: 215 27.9% 16.9%;
     --input: 215 27.9% 16.9%;
     --ring: 216 12.2% 83.9%;
-  }
-}
+
+    scrollbar-color: rgba(215, 213, 230, 0.5) rgb(17, 18, 18)!important;
+  };
+} */
 
 @theme {
   --color-border: hsl(var(--border));
@@ -167,6 +170,12 @@
 @layer base {
   * {
     @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(17, 18, 18) rgb(215, 213, 230, 0.5);
+  }
+
+  .dark * {
+    scrollbar-color: rgb(215, 213, 230, 0.5) rgba(17, 18, 18);
   }
 
   body {

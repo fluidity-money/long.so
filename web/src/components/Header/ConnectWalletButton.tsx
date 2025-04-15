@@ -8,10 +8,9 @@ import { InventorySheet } from "@/components/InventorySheet";
 import { useAppKit } from "@reown/appkit/react";
 import { useAccount, useEnsName } from "wagmi";
 import { mainnet } from "wagmi/chains";
-import { cn } from "@/lib/utils";
 import PP from "@/assets/profile-picture.png";
 
-export const ConnectWalletButton = ({ isDark }: { isDark: boolean }) => {
+export const ConnectWalletButton = () => {
   const { address } = useAccount();
   const { data: ensName } = useEnsName({
     address,
@@ -26,7 +25,7 @@ export const ConnectWalletButton = ({ isDark }: { isDark: boolean }) => {
   const { open } = useAppKit();
 
   if (address && !isLtSm) {
-    return <InventorySheet isDark={isDark} />;
+    return <InventorySheet />;
   }
 
   if (address && isLtSm && pathname === "/swap/inventory") {
@@ -45,10 +44,9 @@ export const ConnectWalletButton = ({ isDark }: { isDark: boolean }) => {
       <div className="flex flex-row items-center justify-center gap-[10px] rounded">
         <div
           onClick={() => router.push("/swap/inventory")}
-          className={cn(
-            isDark ? "text-white" : "text-black",
-            "cursor-pointer rounded p-1 text-right text-xs font-semibold text-nowrap transition-all hover:bg-black hover:text-base hover:text-white",
-          )}
+          className={
+            "cursor-pointer rounded p-1 text-right text-xs font-semibold text-nowrap text-black transition-all hover:bg-black hover:text-base hover:text-white dark:text-white"
+          }
         >
           {ensName ? (
             ensName
