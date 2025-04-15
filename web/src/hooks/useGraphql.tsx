@@ -274,10 +274,10 @@ export const useGetTokenEvents = ({
         maker: isPersonal ? account?.address : undefined,
       });
     },
-    initialPageParam: initialData.cursor,
+    initialPageParam: undefined,
     getNextPageParam: (lastPage) => lastPage.cursor,
     initialData: {
-      pageParams: [initialData.cursor],
+      pageParams: [undefined],
       pages: [initialData],
     },
   });
