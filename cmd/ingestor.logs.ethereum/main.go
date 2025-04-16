@@ -21,8 +21,10 @@ import (
 )
 
 const (
-	EnvThirdwebAddr     = "SPN_THIRDWEB_ACCOUNT_FACTORY_ADDR"
-	EnvLeoAddr          = "SPN_LEO_ADDR"
+	EnvThirdwebAddr   = "SPN_THIRDWEB_ACCOUNT_FACTORY_ADDR"
+	EnvLeoAddr        = "SPN_LEO_ADDR"
+	EnvPurrStreamAddr = "SPN_PURR_STREAM_ADDR"
+
 	EnvShouldTrackErc20 = "SPN_TRACK_ERC20"
 )
 
@@ -71,18 +73,26 @@ func main() {
 		setup.Exitf("%v not set", EnvLeoAddr)
 	}
 	leoAddr := types.AddressFromString(leoAddr_)
+	purrStreamAddr_ := os.Getenv(EnvPurrStreamAddr)
+	if purrStreamAddr_ == "" {
+		setup.Exitf("%v not set", EnvPurrStreamAddr)
+	}
+	purrStreamAddr := types.AddressFromString(purrStreamAddr_)
 	shouldTrackErc20 := os.Getenv(EnvShouldTrackErc20) != ""
+	f := features.Get()
+	shouldTrackPurrStream := f.Is(features.FeatureShouldTrackPurrStream)
 	slog.Info("environment variable config",
 		"thirdweb factory addr", thirdwebFactoryAddr,
 		"leo addr", leoAddr,
 		"should track erc20?", shouldTrackErc20,
 	)
-	Entry(
-		features.Get(),
+	Entry(f,
 		config,
 		thirdwebFactoryAddr,
 		leoAddr,
+		purrStreamAddr,
 		shouldTrackErc20,
+		shouldTrackPurrStream,
 		ingestorPagination,
 		DefaultPaginationPollWait,
 		c,

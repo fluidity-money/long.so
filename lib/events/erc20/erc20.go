@@ -20,9 +20,12 @@ var abi, _ = ethAbi.JSON(bytes.NewReader(abiBytes))
 // TopicTransfer emitted by Transfer(address,uint256)
 var TopicTransfer = abi.Events["Transfer"].ID
 
-func UnpackTransfer(topic1, topic2 ethCommon.Hash, d []byte) (*Transfer, error) {
-	amount := new(big.Int) // Set to 0 as default, if the data is empty it will be 0
-	if len(d) > 0 {
+func UnpackTransfer(topic1, topic2, topic3 ethCommon.Hash, d []byte) (*Transfer, error) {
+	// We're compliant with NFT transfers as well.
+	var amount *big.Int
+	if len(d) == 0 {
+		amount = topic3.Big()
+	} else {
 		i, err := abi.Unpack("Transfer", d)
 		if err != nil {
 			return nil, err
@@ -42,5 +45,5 @@ func UnpackTransfer(topic1, topic2 ethCommon.Hash, d []byte) (*Transfer, error) 
 
 func hashToAddr(h ethCommon.Hash) types.Address {
 	v := ethCommon.BytesToAddress(h.Bytes())
-	return types.Address(v.String())
+	return types.AddressFromString(v.String())
 }

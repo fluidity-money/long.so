@@ -23,4 +23,7 @@ const (
 
 	// FeatureFaucetEnabled is allowed to be used.
 	FeatureFaucetEnabled = "faucet enabled"
+
+	// FeatureShouldTrackPurrStream is enabled to track any logs from purr.stream
+	FeatureShouldTrackPurrStream = "should track purrstream"
 )

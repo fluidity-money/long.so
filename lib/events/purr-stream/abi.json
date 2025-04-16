@@ -1,0 +1,117 @@
+[
+	{
+		"type": "function",
+		"name": "get",
+		"inputs": [
+			{
+				"name": "cat",
+				"type": "bytes8",
+				"internalType": "bytes8"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "makeDonation",
+		"inputs": [
+			{
+				"name": "cat",
+				"type": "bytes8",
+				"internalType": "bytes8"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "payable"
+	},
+	{
+		"type": "function",
+		"name": "reset",
+		"inputs": [],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "wallet",
+		"inputs": [
+			{
+				"name": "wallet",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "walletCount",
+		"inputs": [
+			{
+				"name": "cat",
+				"type": "bytes8",
+				"internalType": "bytes8"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "event",
+		"name": "Donated",
+		"inputs": [
+			{
+				"name": "cat",
+				"type": "bytes8",
+				"indexed": true,
+				"internalType": "bytes8"
+			},
+			{
+				"name": "donater",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"indexed": true,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "DonationsDrained",
+		"inputs": [
+			{
+				"name": "amount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	}
+]

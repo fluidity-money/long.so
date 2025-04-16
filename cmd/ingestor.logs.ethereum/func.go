@@ -15,6 +15,7 @@ import (
 	"github.com/fluidity-money/long.so/lib/types"
 
 	"github.com/fluidity-money/long.so/lib/events/erc20"
+	"github.com/fluidity-money/long.so/lib/events/purr-stream"
 	"github.com/fluidity-money/long.so/lib/events/leo"
 	"github.com/fluidity-money/long.so/lib/events/seawater"
 
@@ -48,11 +49,12 @@ var FilterTopics = []ethCommon.Hash{ // Matches any of these in the first topic 
 // Entry function, using the database to determine if polling should be
 // used exclusively to receive logs, polling only for catchup, or
 // exclusively websockets.
-func Entry(f features.F, config config.C, thirdwebFactoryAddr, leoAddr types.Address, shouldTrackErc20 bool, ingestorPagination int, pollWait int, c *ethclient.Client, db *gorm.DB) {
+func Entry(f features.F, config config.C, thirdwebFactoryAddr, leoAddr, purrStreamAddr types.Address, shouldTrackErc20, shouldTrackPurrStream bool, ingestorPagination int, pollWait int, c *ethclient.Client, db *gorm.DB) {
 	var (
-		seawaterAddr = ethCommon.HexToAddress(config.SeawaterAddr.String())
-		thirdwebAddr = ethCommon.HexToAddress(thirdwebFactoryAddr.String())
-		leoAddr_     = ethCommon.HexToAddress(leoAddr.String())
+		seawaterAddr    = ethCommon.HexToAddress(config.SeawaterAddr.String())
+		thirdwebAddr    = ethCommon.HexToAddress(thirdwebFactoryAddr.String())
+		leoAddr_        = ethCommon.HexToAddress(leoAddr.String())
+		purrStreamAddr_ = ethCommon.HexToAddress(purrStreamAddr.String())
 	)
 	IngestPolling(
 		f,
@@ -63,7 +65,9 @@ func Entry(f features.F, config config.C, thirdwebFactoryAddr, leoAddr types.Add
 		seawaterAddr,
 		thirdwebAddr,
 		leoAddr_,
+		purrStreamAddr_,
 		shouldTrackErc20,
+		shouldTrackPurrStream,
 	)
 }
 
@@ -71,7 +75,7 @@ func Entry(f features.F, config config.C, thirdwebFactoryAddr, leoAddr types.Add
 // receive log updates. Checks the database first to determine where the
 // last point is before continuing. Assumes ethclient is HTTP.
 // Uses the IngestBlockRange function to do all the lifting.
-func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagination, ingestorPollWait int, seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address, shouldTrackErc20 bool) {
+func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagination, ingestorPollWait int, seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr ethCommon.Address, shouldTrackErc20, shouldTrackPurrStream bool) {
 	if ingestorPagination <= 0 {
 		panic("bad ingestor pagination")
 	}
@@ -94,7 +98,9 @@ func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagin
 			seawaterAddr,
 			thirdwebAddr,
 			leoAddr,
+			purrStreamAddr,
 			shouldTrackErc20,
+			shouldTrackPurrStream,
 			from,
 			to,
 		)
@@ -110,7 +116,7 @@ func IngestPolling(f features.F, c *ethclient.Client, db *gorm.DB, ingestorPagin
 // funciton to write records found to the database. Assumes the ethclient
 // provided is a HTTP client. Also updates the underlying last block it
 // saw into the database checkpoints. Fatals if something goes wrong.
-func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address, shouldTrackErc20 bool, from, to uint64) {
+func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr ethCommon.Address, shouldTrackErc20, shouldTrackPurrStream bool, from, to uint64) {
 	filterLogs := FilterTopics
 	if shouldTrackErc20 {
 		filterLogs = append(filterLogs, erc20.TopicTransfer)
@@ -127,7 +133,15 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 		wasChanged := false
 		biggestBlockNo := from
 		for _, l := range logs {
-			if err := handleLog(db, seawaterAddr, thirdwebAddr, leoAddr, l); err != nil {
+			err := handleLog(
+				db,
+				seawaterAddr,
+				thirdwebAddr,
+				leoAddr,
+				purrStreamAddr,
+				l,
+			)
+			if err != nil {
 				return fmt.Errorf("failed to unpack log: %v", err)
 			}
 			isBiggerOrEqual := biggestBlockNo <= l.BlockNumber
@@ -149,13 +163,14 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 	}
 }
 
-func handleLog(db *gorm.DB, seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address, l ethTypes.Log) error {
-	return handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr, l, func(t string, a any) error {
+func handleLog(db *gorm.DB, seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr ethCommon.Address, l ethTypes.Log) error {
+	return handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr, l, func(t string, a any) error {
 		// Use the database connection as the callback to insert this log.
 		return databaseInsertLog(db, t, a)
 	})
 }
-func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address, l ethTypes.Log, cb func(table string, l any) error) error {
+
+func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr ethCommon.Address, l ethTypes.Log, cb func(table string, l any) error) error {
 	var topic1, topic2, topic3 ethCommon.Hash
 	topic0 := l.Topics[0]
 	if len(l.Topics) > 1 {
@@ -206,10 +221,16 @@ func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address, l 
 	// non-Seawater events should set this to false in this switch. Used to
 	// check the event emitter.
 	isSeawater := true // This should be invalidated by other contracts!
-	var isThirdweb, isLeo bool
+	var isThirdweb, isLeo, isPurrStream bool
 	switch topic0 {
+	case purr_stream.TopicDonated:
+		a, err = purr_stream.UnpackDonated(topic1, topic2, topic3)
+		logEvent("Donated")
+		table = "events_purrstream_donated"
+		isPurrStream = true
+
 	case erc20.TopicTransfer:
-		a, err = erc20.UnpackTransfer(topic1, topic2, data)
+		a, err = erc20.UnpackTransfer(topic1, topic2, topic3, data)
 		table = "events_erc20_transfer"
 		logEvent("Transfer")
 		isSeawater = false
@@ -336,6 +357,17 @@ func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr ethCommon.Address, l 
 		if seawaterAddr != emitterAddr {
 			slog.Warn("ignoring a Seawater log from a sender that wasn't seawater",
 				"seawater address", seawaterAddr,
+				"emitter address", emitterAddr,
+				"topic0", topic0,
+				"transaction hash", transactionHash,
+			)
+			return nil
+		}
+	}
+	if isPurrStream {
+		if purrStreamAddr != emitterAddr {
+			slog.Warn("ignoring a Purr.Stream log from a sender that wasn't seawater",
+				"purr.stream address", purrStreamAddr,
 				"emitter address", emitterAddr,
 				"topic0", topic0,
 				"transaction hash", transactionHash,
