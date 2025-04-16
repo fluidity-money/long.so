@@ -35,7 +35,7 @@ const (
 
 	// DefaultPaginationBlockCountMax to increase the last known block tracked
 	// by with.
-	DefaultPaginationBlockCountMax = 5000
+	DefaultPaginationBlockCountMax = 10000
 
 	// DefaultPaginationPollWait to wait between polls.
 	DefaultPaginationPollWait = 4 // Seconds
