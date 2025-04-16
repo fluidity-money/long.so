@@ -5,8 +5,10 @@ import { graphql } from "@/gql";
 import { useAccount, useChainId } from "wagmi";
 import { useChain } from "@/config/chains";
 import {
+  requestBalances,
   requestGetHolders,
   requestGetPairDetails,
+  requestGetPairStatDetails,
   requestGetTokenEvents,
   requestGetTokenPrice,
 } from "@/data";
@@ -398,7 +400,174 @@ export const useGetPairDetails = ({
 }) => {
   return useQuery({
     queryKey: ["pairDetails", tokenAddress],
-    queryFn: () => requestGetPairDetails(tokenAddress),
+    queryFn: async () => await requestGetPairDetails(tokenAddress),
+    initialData,
+  });
+};
+export const queryBalances = graphql(`
+  query Balances($input: BalancesInput!) {
+    balances(input: $input) {
+      cursor
+      items {
+        walletId
+        tokenId
+        balance
+        shiftedBalance
+      }
+    }
+  }
+`);
+export const useBalances = ({
+  filterToken,
+  initialData,
+  walletAddress,
+  networkId,
+}: {
+  initialData: Awaited<ReturnType<typeof requestBalances>>;
+  walletAddress: string;
+  filterToken?: string;
+  networkId: number;
+}) => {
+  return useInfiniteQuery({
+    queryKey: ["balances", walletAddress, networkId],
+    queryFn: async ({ pageParam }: { pageParam?: string | null }) =>
+      await requestBalances({
+        filterToken,
+        networkId,
+        walletAddress,
+        cursor: pageParam,
+      }),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => lastPage.cursor,
+    initialData: {
+      pageParams: [undefined],
+      pages: [initialData],
+    },
+  });
+};
+export const queryGetPairStatDetails = graphql(`
+  query GetDetailedStats(
+    $pairId: String!
+    $tokenOfInterest: TokenOfInterest
+    $timestamp: Int
+    $windowSizes: [DetailedStatsWindowSize]
+    $bucketCount: Int
+    $statsType: TokenPairStatisticsType
+  ) {
+    getDetailedStats(
+      pairId: $pairId
+      tokenOfInterest: $tokenOfInterest
+      timestamp: $timestamp
+      windowSizes: $windowSizes
+      bucketCount: $bucketCount
+      statsType: $statsType
+    ) {
+      pairId
+      tokenOfInterest
+      statsType
+      stats_min5 {
+        ...WindowedDetailedStatsFields
+        __typename
+      }
+      stats_hour1 {
+        ...WindowedDetailedStatsFields
+        __typename
+      }
+      stats_hour4 {
+        ...WindowedDetailedStatsFields
+        __typename
+      }
+      stats_hour12 {
+        ...WindowedDetailedStatsFields
+        __typename
+      }
+      stats_day1 {
+        ...WindowedDetailedStatsFields
+        __typename
+      }
+      __typename
+    }
+  }
+
+  fragment WindowedDetailedStatsFields on WindowedDetailedStats {
+    windowSize
+    timestamp
+    endTimestamp
+    buckets {
+      start
+      end
+      __typename
+    }
+    transactions {
+      ...DetailedStatsNumberMetricsFields
+      __typename
+    }
+    volume {
+      ...DetailedStatsStringMetricsFields
+      __typename
+    }
+    buys {
+      ...DetailedStatsNumberMetricsFields
+      __typename
+    }
+    sells {
+      ...DetailedStatsNumberMetricsFields
+      __typename
+    }
+    buyers {
+      ...DetailedStatsNumberMetricsFields
+      __typename
+    }
+    sellers {
+      ...DetailedStatsNumberMetricsFields
+      __typename
+    }
+    traders {
+      ...DetailedStatsNumberMetricsFields
+      __typename
+    }
+    buyVolume {
+      ...DetailedStatsStringMetricsFields
+      __typename
+    }
+    sellVolume {
+      ...DetailedStatsStringMetricsFields
+      __typename
+    }
+    __typename
+  }
+
+  fragment DetailedStatsNumberMetricsFields on DetailedStatsNumberMetrics {
+    change
+    currentValue
+    previousValue
+    buckets
+    __typename
+  }
+
+  fragment DetailedStatsStringMetricsFields on DetailedStatsStringMetrics {
+    change
+    currentValue
+    previousValue
+    buckets
+    __typename
+  }
+`);
+export const useGetPairStatDetails = ({
+  pairAddress,
+  quoteToken,
+  networkId,
+  initialData,
+}: {
+  pairAddress: string;
+  quoteToken: "0" | "1";
+  networkId: number;
+  initialData: Awaited<ReturnType<typeof requestGetPairStatDetails>>;
+}) => {
+  return useQuery({
+    queryKey: ["pairStatDetails", pairAddress, quoteToken, networkId],
+    queryFn: () =>
+      requestGetPairStatDetails({ pairAddress, quoteToken, networkId }),
     initialData,
   });
 };

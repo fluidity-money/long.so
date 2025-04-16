@@ -1,10 +1,18 @@
 import request from "graphql-request";
 import appConfig from "@/config/app";
-import { QuoteToken, RankingDirection, SwapEventData } from "@/gql/graphql";
+import {
+  QuoteToken,
+  RankingDirection,
+  SwapEventData,
+  TokenOfInterest,
+  TokenPairStatisticsType,
+} from "@/gql/graphql";
 import { timeAgo } from "@/lib/time";
 import {
+  queryBalances,
   queryGetHolders,
   queryGetPairDetails,
+  queryGetPairStatDetails,
   queryGetTokenEvents,
   queryGetTokenPrice,
 } from "@/hooks/useGraphql";
@@ -173,4 +181,56 @@ export async function requestGetPairDetails(tokenAddress: string) {
     },
   );
   return res?.filterTokens?.results?.[0];
+}
+export async function requestBalances({
+  walletAddress,
+  filterToken,
+  cursor,
+  networkId,
+}: {
+  walletAddress: string;
+  filterToken?: string;
+  cursor?: string | null;
+  networkId: number;
+}) {
+  const res = await request(
+    appConfig.codexApiUrl,
+    queryBalances,
+    {
+      input: {
+        walletId: `${walletAddress}:${networkId}`,
+        filterToken: filterToken ? `${filterToken}:${networkId}` : undefined,
+        cursor,
+      },
+    },
+    {
+      Authorization: process.env.NEXT_PUBLIC_CODEX_API_KEY!,
+    },
+  );
+  return res.balances;
+}
+export async function requestGetPairStatDetails({
+  pairAddress,
+  quoteToken,
+  networkId,
+}: {
+  pairAddress: string;
+  quoteToken: "0" | "1";
+  networkId: number;
+}) {
+  const tokenOfInteresFilter =
+    quoteToken === "0" ? TokenOfInterest.Token0 : TokenOfInterest.Token1;
+  const res = await request(
+    appConfig.codexApiUrl,
+    queryGetPairStatDetails,
+    {
+      pairId: `${pairAddress}:${networkId}`,
+      tokenOfInterest: tokenOfInteresFilter,
+      statsType: TokenPairStatisticsType.Filtered,
+    },
+    {
+      Authorization: process.env.NEXT_PUBLIC_CODEX_API_KEY!,
+    },
+  );
+  return res.getDetailedStats;
 }
