@@ -3,9 +3,9 @@
 DO $$
 BEGIN
 	IF NOT EXISTS (
-		SELECT 1 FROM pg_type WHERE typname = 'bytes8'
+		SELECT 1 FROM pg_type WHERE typname = 'bytes8_0x'
 	) THEN
-		CREATE DOMAIN BYTES8 AS CHAR(16);
+		CREATE DOMAIN BYTES8_0x AS CHAR(18);
 	END IF;
 END $$;
 
@@ -17,7 +17,7 @@ CREATE TABLE events_purrstream_donated(
 	block_number INTEGER NOT NULL,
 	emitter_addr ADDRESS NOT NULL,
 
-	cat BYTES8 NOT NULL,
+	cat BYTES8_0x NOT NULL,
 	address ADDRESS NOT NULL,
 	amount HUGEINT NOT NULL
 );
