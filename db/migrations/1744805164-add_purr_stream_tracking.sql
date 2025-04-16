@@ -18,7 +18,7 @@ CREATE TABLE events_purrstream_donated(
 	emitter_addr ADDRESS NOT NULL,
 
 	cat BYTES8 NOT NULL,
-	address ADDRESS NOT NULL
+	address ADDRESS NOT NULL,
 	amount HUGEINT NOT NULL
 );
 
