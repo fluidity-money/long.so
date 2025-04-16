@@ -1,6 +1,6 @@
 import ProBody from "@/components/Pro/ProBody";
 import Call2Action from "@/components/Pro/Call2Action";
-import DurationControl from "@/components/Pro/DurationControl";
+import StatDetails from "@/components/Pro/StatDetails";
 import ProHeader from "@/components/Pro/ProHeader";
 import TokenDetails from "@/components/Pro/TokenDetails";
 import config from "@/config/app";
@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import {
   requestGetHolders,
   requestGetPairDetails,
+  requestGetPairStatDetails,
   requestGetTokenEvents,
   requestGetTokenPrice,
 } from "@/data";
@@ -49,6 +50,11 @@ export default async function ProMode({
     networkId,
   });
   const pairDetails = await requestGetPairDetails(tokenAddress);
+  const initialStatsData = await requestGetPairStatDetails({
+    pairAddress: address,
+    networkId,
+    quoteToken,
+  });
   return (
     <div className="flex flex-1 gap-4 px-4">
       <div className="flex grow flex-col gap-2">
@@ -71,7 +77,12 @@ export default async function ProMode({
       <div className="relative w-[300px]">
         <div className="absolute inset-0 flex flex-col gap-4 overflow-y-auto border-l border-black px-2">
           <Call2Action />
-          <DurationControl />
+          <StatDetails
+            networkId={networkId}
+            pairAddress={address}
+            quoteToken={quoteToken}
+            initialData={initialStatsData}
+          />
           <TokenDetails pair={pair} />
         </div>
       </div>
