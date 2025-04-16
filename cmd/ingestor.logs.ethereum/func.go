@@ -121,6 +121,9 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 	if shouldTrackErc20 {
 		filterLogs = append(filterLogs, erc20.TopicTransfer)
 	}
+	if shouldTrackPurrStream {
+		filterLogs = append(filterLogs, purr_stream.TopicDonated)
+	}
 	logs, err := c.FilterLogs(context.Background(), ethereum.FilterQuery{
 		FromBlock: new(big.Int).SetUint64(from),
 		ToBlock:   new(big.Int).SetUint64(to),
