@@ -230,6 +230,7 @@ func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr ethCo
 		a, err = purr_stream.UnpackDonated(topic1, topic2, topic3)
 		logEvent("Donated")
 		table = "events_purrstream_donated"
+		isSeawater = false
 		isPurrStream = true
 
 	case erc20.TopicTransfer:

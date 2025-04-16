@@ -9,6 +9,7 @@ import (
 	"github.com/fluidity-money/long.so/lib/events/thirdweb"
 	"github.com/fluidity-money/long.so/lib/events/leo"
 	"github.com/fluidity-money/long.so/lib/events/erc20"
+	"github.com/fluidity-money/long.so/lib/events/purr-stream"
 	"github.com/fluidity-money/long.so/lib/types"
 
 	ethCommon "github.com/ethereum/go-ethereum/common"
@@ -382,6 +383,37 @@ func TestHandleLogCallbackCampaignBalanceUpdated(t *testing.T) {
 	assert.True(t, wasRun)
 }
 
+func TestHandleLogDonated(t *testing.T) {
+	purrStreamAddr := ethCommon.HexToAddress("0x856257adaa752cf59594551791befb3697f2ed39")
+	s := strings.NewReader(`{
+	"address": "0x856257adaa752cf59594551791befb3697f2ed39",
+	"blockHash": "0x561f2479e303d28c9b39250948e1c91ea8fd49bdca4bef891643185796b14702",
+	"blockNumber": "0x153999",
+	"data": "0x",
+	"logIndex": "0x0",
+	"removed": false,
+	"topics": [
+		"0x62de4401acc363103885d9aaf4dcf5da6980d3aaaecd3befd3bc2872b9807a91",
+		"0xdff8b5fd5c097472000000000000000000000000000000000000000000000000",
+		"0x0000000000000000000000006221a9c005f6e47eb398fd867784cacfdcfff4e7",
+		"0x0000000000000000000000000000000000000000000000000000a3b5840f4000"
+	],
+	"transactionHash": "0xc9bb6b8df6ba0ba8d1db52c00d3f8cb5f00e8a741720750eb745840ba1a56383",
+	"transactionIndex": "0x1"
+}`)
+	var l ethTypes.Log
+	wasRun := false
+	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
+	handleLogCallback(EmptyAddr, EmptyAddr, EmptyAddr, purrStreamAddr, l, func(table string, a any) error {
+		assert.Equalf(t, "events_purrstream_donated", table, "table not equal")
+		_, ok := a.(*purr_stream.Donated)
+		assert.Truef(t, ok, "CampaignUpdated type coercion not true")
+		wasRun = true
+		return nil
+	})
+	assert.True(t, wasRun)
+}
+
 func TestCurrentEventIds(t *testing.T) {
 	var currentIds = map[string]bool{ // From `forge selectors`, not including ERC20 Transfer
 		"0x01bacdc82c3891bc884396788e83d024aafbd4e2a08341fb9c9ce422a683830f": false,
@@ -395,8 +427,9 @@ func TestCurrentEventIds(t *testing.T) {
 		"0xd500e81443925d03f2ac45364aa32d71b4bbd8f697bc7b8fc5a4accc4601b54b": false,
 		"0xac631f3001b55ea1509cf3d7e74898f85392a61a76e8149181ae1259622dabc8": false,
 		"0x864ae7d7d1b893bdc1fcaa3bcca9f18e3b6c0e5eb8e71f6cd269e1ffb14eff98": false,
+		"0x62de4401acc363103885d9aaf4dcf5da6980d3aaaecd3befd3bc2872b9807a91": false,
 	}
-	for _, id := range FilterTopics {
+	for _, id := range append(FilterTopics, purr_stream.TopicDonated) {
 		currentIds[id.Hex()] = true
 	}
 	for id, status := range currentIds {
