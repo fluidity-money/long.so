@@ -36,25 +36,33 @@ export default async function ProMode({
   const tokenAddress = quoteToken === "0" ? pair.quoteToken0 : pair.quoteToken1;
   const pairNames = name.split("/");
   const tokenName = pairNames[+quoteToken];
-  const initialEventsData = await requestGetTokenEvents({
-    poolAddress: address,
-    quoteToken,
-    networkId,
-  });
-  const initialHoldersData = await requestGetHolders({
-    tokenAddress,
-    networkId,
-  });
-  const initialTokenPriceData = await requestGetTokenPrice({
-    tokenAddress,
-    networkId,
-  });
-  const pairDetails = await requestGetPairDetails(tokenAddress);
-  const initialStatsData = await requestGetPairStatDetails({
-    pairAddress: address,
-    networkId,
-    quoteToken,
-  });
+  const [
+    initialEventsData,
+    initialHoldersData,
+    initialTokenPriceData,
+    pairDetails,
+    initialStatsData,
+  ] = await Promise.all([
+    requestGetTokenEvents({
+      poolAddress: address,
+      quoteToken,
+      networkId,
+    }),
+    requestGetHolders({
+      tokenAddress,
+      networkId,
+    }),
+    requestGetTokenPrice({
+      tokenAddress,
+      networkId,
+    }),
+    requestGetPairDetails(tokenAddress),
+    requestGetPairStatDetails({
+      pairAddress: address,
+      networkId,
+      quoteToken,
+    }),
+  ]);
   return (
     <div className="flex flex-1 gap-4 px-4">
       <div className="flex grow flex-col gap-2">
