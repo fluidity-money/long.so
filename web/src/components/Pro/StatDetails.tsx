@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { useGetPairStatDetails } from "@/hooks/useGraphql";
-import { requestGetPairStatDetails } from "@/data";
+import { useGetPairDetails, useGetPairStatDetails } from "@/hooks/useGraphql";
+import { requestGetPairDetails, requestGetPairStatDetails } from "@/data";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
 import { useCallback } from "react";
 
@@ -13,7 +13,22 @@ const statModes = [
   "stats_day1",
 ] as const;
 const statModeTitles = ["5m", "1hr", "4hr", "12hr", "24hr"];
-const StatTitleItem = ({ title, mode }: { title: string; mode: string }) => (
+const modeChangeMap = {
+  [statModes[0]]: "change5m",
+  [statModes[1]]: "change1",
+  [statModes[2]]: "change4",
+  [statModes[3]]: "change12",
+  [statModes[4]]: "change24",
+} as const;
+const StatTitleItem = ({
+  title,
+  mode,
+  change,
+}: {
+  title: string;
+  mode: string;
+  change?: null | string;
+}) => (
   <TabsTrigger
     className={cn(
       "group flex flex-1 flex-col gap-2 text-gray-200 data-[state=active]:flex-[2]",
@@ -23,7 +38,14 @@ const StatTitleItem = ({ title, mode }: { title: string; mode: string }) => (
     <span className="group-data-[state=active]:iridescent z-[2] justify-center rounded-sm border border-black bg-[#000] px-2 py-1 text-xs group-data-[state=active]:border-0 group-data-[state=active]:text-black">
       {title}
     </span>
-    <span className="block text-center text-[9px] font-semibold">0.00%</span>
+    <span
+      className={cn(
+        change && +change > 0 ? "text-green-light" : "text-destructive",
+        "block text-center text-[9px] font-semibold",
+      )}
+    >
+      {change ? (+change * 100).toFixed(2) : 0}%
+    </span>
   </TabsTrigger>
 );
 const StatContentItem = ({
@@ -46,17 +68,25 @@ export default function StatDetails({
   quoteToken,
   networkId,
   initialData,
+  pairDetails,
+  tokenAddress,
 }: {
   pairAddress: string;
   quoteToken: "0" | "1";
   networkId: number;
   initialData: Awaited<ReturnType<typeof requestGetPairStatDetails>>;
+  pairDetails: Awaited<ReturnType<typeof requestGetPairDetails>>;
+  tokenAddress: string;
 }) {
   const { data } = useGetPairStatDetails({
     pairAddress,
     quoteToken,
     networkId,
     initialData,
+  });
+  const { data: changeData } = useGetPairDetails({
+    tokenAddress,
+    initialData: pairDetails,
   });
   const contentHeader = useCallback(
     (mode: (typeof statModes)[number]) => [
@@ -114,7 +144,12 @@ export default function StatDetails({
     <Tabs defaultValue={statModes[0]}>
       <TabsList className="relative mb-2 flex gap-1">
         {statModes.map((mode, idx) => (
-          <StatTitleItem title={statModeTitles[idx]} key={mode} mode={mode} />
+          <StatTitleItem
+            title={statModeTitles[idx]}
+            key={mode}
+            mode={mode}
+            change={changeData![modeChangeMap[mode]]}
+          />
         ))}
         <div className="absolute inset-x-0 top-[10px] z-0 h-1 bg-black" />
       </TabsList>

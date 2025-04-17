@@ -89,6 +89,8 @@ export default async function ProMode({
             networkId={networkId}
             pairAddress={address}
             quoteToken={quoteToken}
+            tokenAddress={tokenAddress}
+            pairDetails={pairDetails}
             initialData={initialStatsData}
           />
           <TokenDetails pair={pair} />
