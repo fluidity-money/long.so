@@ -249,4 +249,10 @@ type StatDetail = WindowedDetailedStatsFieldsFragment & {
   transactions: DetailedStatsNumberMetricsFieldsFragment;
   volume: DetailedStatsStringMetricsFieldsFragment;
   traders: DetailedStatsNumberMetricsFieldsFragment;
+  buys: DetailedStatsNumberMetricsFieldsFragment;
+  sells: DetailedStatsNumberMetricsFieldsFragment;
+  buyVolume: DetailedStatsStringMetricsFieldsFragment;
+  sellVolume: DetailedStatsStringMetricsFieldsFragment;
+  buyers: DetailedStatsNumberMetricsFieldsFragment;
+  sellers: DetailedStatsNumberMetricsFieldsFragment;
 };
