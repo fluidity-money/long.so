@@ -10,7 +10,7 @@ import Link from "next/link";
 
 export default function Header() {
   return (
-    <header className="z-20 px-8 py-4">
+    <header className="z-20 p-4">
       <div className="flex w-full flex-col gap-8">
         <div className="flex flex-row items-start justify-around">
           <div className="flex grow basis-0 flex-row items-center gap-4">

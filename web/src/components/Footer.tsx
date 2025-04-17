@@ -3,7 +3,7 @@ const gitHash = process.env.NEXT_PUBLIC_GIT_HASH;
 
 export default function Footer() {
   return (
-    <footer className={"w-full self-end px-8 py-4 dark:text-white"}>
+    <footer className={"w-full self-end p-4 dark:text-white"}>
       <div className="flex flex-row justify-between">
         <div className="flex items-center gap-x-[10px]">
           <a href="https://x.com/superpositionso">𝕏</a>

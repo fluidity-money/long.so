@@ -82,8 +82,8 @@ export default async function ProMode({
           quoteToken={quoteToken as "0" | "1"}
         />
       </div>
-      <div className="relative w-[300px]">
-        <div className="absolute inset-0 flex flex-col gap-4 overflow-y-auto border-l border-black px-2">
+      <div className="relative w-[318px]">
+        <div className="absolute inset-0 flex flex-col gap-4 overflow-y-auto border-l border-black pl-2">
           <Call2Action />
           <StatDetails
             networkId={networkId}
