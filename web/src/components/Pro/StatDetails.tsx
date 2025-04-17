@@ -1,10 +1,19 @@
+"use client";
 import { cn } from "@/lib/utils";
-// import { useGetPairStatDetails } from "@/hooks/useGraphql";
-// import { requestGetPairStatDetails } from "@/data";
+import { useGetPairStatDetails } from "@/hooks/useGraphql";
+import { requestGetPairStatDetails } from "@/data";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
+import { useCallback } from "react";
 
-const statModes = ["5m", "1h", "4h", "12h", "24h"];
-const StatTitleItem = ({ mode }: { mode: string }) => (
+const statModes = [
+  "stats_min5",
+  "stats_hour1",
+  "stats_hour4",
+  "stats_hour12",
+  "stats_day1",
+] as const;
+const statModeTitles = ["5m", "1hr", "4hr", "12hr", "24hr"];
+const StatTitleItem = ({ title, mode }: { title: string; mode: string }) => (
   <TabsTrigger
     className={cn(
       "group flex flex-1 flex-col gap-2 text-gray-200 data-[state=active]:flex-[2]",
@@ -12,7 +21,7 @@ const StatTitleItem = ({ mode }: { mode: string }) => (
     value={mode}
   >
     <span className="group-data-[state=active]:iridescent z-[2] justify-center rounded-sm border border-black bg-[#000] px-2 py-1 text-xs group-data-[state=active]:border-0 group-data-[state=active]:text-black">
-      {mode}
+      {title}
     </span>
     <span className="block text-center text-[9px] font-semibold">0.00%</span>
   </TabsTrigger>
@@ -31,20 +40,6 @@ const StatContentItem = ({
     <span className="text-sm text-gray-200">{value}</span>
   </div>
 );
-const contentHeader = [
-  {
-    title: "Txns",
-    value: 283,
-  },
-  {
-    title: "Volume",
-    value: 3456,
-  },
-  {
-    title: "Traders",
-    value: 54,
-  },
-];
 const contentBody = [
   [
     {
@@ -78,22 +73,53 @@ const contentBody = [
   ],
 ];
 
-export default function StatDetails() {
-// { pairAddress, quoteToken, networkId, initialData } : { pairAddress: string, quoteToken: '0' | '1', networkId: number, initialData: Awaited<ReturnType<typeof requestGetPairStatDetails>> }
-  // const { data } = useGetPairStatDetails({ pairAddress, quoteToken, networkId, initialData })
+export default function StatDetails({
+  pairAddress,
+  quoteToken,
+  networkId,
+  initialData,
+}: {
+  pairAddress: string;
+  quoteToken: "0" | "1";
+  networkId: number;
+  initialData: Awaited<ReturnType<typeof requestGetPairStatDetails>>;
+}) {
+  const { data } = useGetPairStatDetails({
+    pairAddress,
+    quoteToken,
+    networkId,
+    initialData,
+  });
+  const contentHeader = useCallback(
+    (mode: (typeof statModes)[number]) => [
+      {
+        title: "Txns",
+        value: data?.[mode].transactions.currentValue,
+      },
+      {
+        title: "Volume",
+        value: data?.[mode].volume.currentValue,
+      },
+      {
+        title: "Traders",
+        value: data?.[mode].traders.currentValue,
+      },
+    ],
+    [data],
+  );
   return (
     <Tabs defaultValue={statModes[0]}>
       <TabsList className="relative mb-2 flex gap-1">
-        {statModes.map((mode) => (
-          <StatTitleItem mode={mode} key={mode} />
+        {statModes.map((mode, idx) => (
+          <StatTitleItem title={statModeTitles[idx]} key={mode} mode={mode} />
         ))}
         <div className="absolute inset-x-0 top-[10px] z-0 h-1 bg-black" />
       </TabsList>
       {statModes.map((mode) => (
         <TabsContent value={mode} key={mode}>
-          <div key={mode} className="flex flex-col gap-0.5">
+          <div className="flex flex-col gap-0.5">
             <div className="flex flex-1 items-center gap-0.5">
-              {contentHeader.map((i) => (
+              {contentHeader(mode).map((i) => (
                 <div className="flex-1 bg-black px-3 py-1" key={i.title}>
                   <StatContentItem
                     className="flex-1"

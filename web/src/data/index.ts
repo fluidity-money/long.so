@@ -1,11 +1,14 @@
 import request from "graphql-request";
 import appConfig from "@/config/app";
 import {
+  DetailedStatsNumberMetricsFieldsFragment,
+  DetailedStatsStringMetricsFieldsFragment,
   QuoteToken,
   RankingDirection,
   SwapEventData,
   TokenOfInterest,
   TokenPairStatisticsType,
+  WindowedDetailedStatsFieldsFragment,
 } from "@/gql/graphql";
 import { timeAgo } from "@/lib/time";
 import {
@@ -232,5 +235,18 @@ export async function requestGetPairStatDetails({
       Authorization: process.env.NEXT_PUBLIC_CODEX_API_KEY!,
     },
   );
-  return res.getDetailedStats;
+  const data = {
+    ...res.getDetailedStats,
+    stats_min5: res.getDetailedStats?.stats_min5 as StatDetail,
+    stats_hour1: res.getDetailedStats?.stats_hour1 as StatDetail,
+    stats_hour4: res.getDetailedStats?.stats_hour4 as StatDetail,
+    stats_hour12: res.getDetailedStats?.stats_hour12 as StatDetail,
+    stats_day1: res.getDetailedStats?.stats_day1 as StatDetail,
+  };
+  return data;
 }
+type StatDetail = WindowedDetailedStatsFieldsFragment & {
+  transactions: DetailedStatsNumberMetricsFieldsFragment;
+  volume: DetailedStatsStringMetricsFieldsFragment;
+  traders: DetailedStatsNumberMetricsFieldsFragment;
+};
