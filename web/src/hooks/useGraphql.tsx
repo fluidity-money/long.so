@@ -384,6 +384,10 @@ export const queryGetPairDetails = graphql(`
       results {
         liquidity
         marketCap
+        change5m
+        change1
+        change4
+        change12
         change24
         volume24
         priceUSD
