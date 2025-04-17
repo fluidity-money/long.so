@@ -148,7 +148,10 @@ export default function StatDetails({
                   <div className="flex items-center gap-0.5">
                     <div
                       style={{
-                        flex: isNaN(item[0].value)
+                        flex: isNaN(
+                          item[0].value /
+                            item.reduce((acc, v) => acc + v.value, 0),
+                        )
                           ? 0
                           : item[0].value /
                             item.reduce((acc, v) => acc + v.value, 0),
@@ -157,7 +160,10 @@ export default function StatDetails({
                     />
                     <div
                       style={{
-                        flex: isNaN(item[1].value)
+                        flex: isNaN(
+                          item[1].value /
+                            item.reduce((acc, v) => acc + v.value, 0),
+                        )
                           ? 0
                           : item[1].value /
                             item.reduce((acc, v) => acc + v.value, 0),
