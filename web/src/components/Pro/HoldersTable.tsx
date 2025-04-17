@@ -63,7 +63,7 @@ export function HoldersTable({
               "text-green inline-flex items-center gap-1 rounded-full bg-black px-2 py-0.5",
             )}
           >
-            <span>
+            <span className="text-green-light">
               {cell.getValue().slice(0, 6)}...{cell.getValue().slice(-6)}
             </span>
             <CopyIcon className="size-3 text-white" />
