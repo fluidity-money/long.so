@@ -136,10 +136,13 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 		setup.Exitf("failed to filter logs: %v", err)
 	}
 	err = db.Transaction(func(db *gorm.DB) error {
-		var hasChanged bool
+		var (
+			hasChanged bool
+			err error
+		)
 		biggestBlockNo := from
 		for _, l := range logs {
-			err := handleLog(
+			hasChanged, err = handleLog(
 				db,
 				seawaterAddr,
 				thirdwebAddr,
@@ -169,14 +172,14 @@ func IngestBlockRange(f features.F, c *ethclient.Client, db *gorm.DB, seawaterAd
 	}
 }
 
-func handleLog(db *gorm.DB, seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr ethCommon.Address, l ethTypes.Log) error {
+func handleLog(db *gorm.DB, seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr ethCommon.Address, l ethTypes.Log)(bool, error) {
 	return handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr, l, func(t string, a any) error {
 		// Use the database connection as the callback to insert this log.
 		return databaseInsertLog(db, t, a)
 	})
 }
 
-func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr ethCommon.Address, l ethTypes.Log, cb func(table string, l any) error) error {
+func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr ethCommon.Address, l ethTypes.Log, cb func(table string, l any) error) (bool, error) {
 	var topic1, topic2, topic3 ethCommon.Hash
 	topic0 := l.Topics[0]
 	if len(l.Topics) > 1 {
@@ -330,10 +333,10 @@ func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr ethCo
 		table = "events_seawater_swap1"
 
 	default:
-		return fmt.Errorf("unexpected topic: %v", topic0)
+		return false, fmt.Errorf("unexpected topic: %v", topic0)
 	}
 	if err != nil {
-		return fmt.Errorf("failed to process topic for table %#v: %v", table, err)
+		return false, fmt.Errorf("failed to process topic for table %#v: %v", table, err)
 	}
 	// Skip Thirdweb if the defacto contract didn't create the event.
 	if isThirdweb && thirdwebAddr != emitterAddr {
@@ -345,7 +348,7 @@ func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr ethCo
 			"topic0", topic0,
 			"transaction hash", transactionHash,
 		)
-		return nil
+		return false, nil
 	}
 	// Skip Leo if the defacto contract didn't create the event.
 	if isLeo && leoAddr != emitterAddr {
@@ -357,7 +360,7 @@ func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr ethCo
 			"topic0", topic0,
 			"transaction hash", transactionHash,
 		)
-		return nil
+		return false, nil
 	}
 	if isSeawater {
 		// Make sure that the log came from the Seawater contract.
@@ -368,7 +371,7 @@ func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr ethCo
 				"topic0", topic0,
 				"transaction hash", transactionHash,
 			)
-			return nil
+			return false, nil
 		}
 	}
 	if isPurrStream {
@@ -379,11 +382,11 @@ func handleLogCallback(seawaterAddr, thirdwebAddr, leoAddr, purrStreamAddr ethCo
 				"topic0", topic0,
 				"transaction hash", transactionHash,
 			)
-			return nil
+			return false, nil
 		}
 	}
 	setEventFields(&a, blockHash, transactionHash, blockNumber, emitterAddr.String())
-	return cb(table, a)
+	return true, cb(table, a)
 }
 
 func databaseInsertLog(db *gorm.DB, table string, a any) error {

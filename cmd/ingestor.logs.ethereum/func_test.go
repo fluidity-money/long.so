@@ -65,7 +65,7 @@ func TestHandleLogCallbackErc20Transfer(t *testing.T) {
 	var l ethTypes.Log
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
 	wasRun := false
-	err := handleLogCallback(EmptyAddr, EmptyAddr, EmptyAddr, EmptyAddr, l, func(table string, a any) error {
+	_, err := handleLogCallback(EmptyAddr, EmptyAddr, EmptyAddr, EmptyAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_erc20_transfer", table, "table not equal")
 		tx, ok := a.(*erc20.Transfer)
 		assert.Truef(t, ok, "Transfer type coercion not true")
@@ -233,7 +233,7 @@ func TestHandleLogCallbackSwap2(t *testing.T) {
 	var l ethTypes.Log
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
 	wasRun := false
-	err := handleLogCallback(seawaterAddr, EmptyAddr, EmptyAddr, EmptyAddr, l, func(table string, a any) error {
+	_, err := handleLogCallback(seawaterAddr, EmptyAddr, EmptyAddr, EmptyAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_seawater_swap2", table, "table not equal")
 		_, ok := a.(*seawater.Swap2)
 		assert.Truef(t, ok, "Swap2 type coercion not true")
@@ -340,7 +340,7 @@ func TestHandleLogCallbackCampaignUpdated(t *testing.T) {
 	var l ethTypes.Log
 	wasRun := false
 	assert.Nilf(t, json.NewDecoder(s).Decode(&l), "failed to decode log")
-	err := handleLogCallback(EmptyAddr, EmptyAddr, leoAddr, EmptyAddr, l, func(table string, a any) error {
+	_, err := handleLogCallback(EmptyAddr, EmptyAddr, leoAddr, EmptyAddr, l, func(table string, a any) error {
 		assert.Equalf(t, "events_leo_campaignupdated", table, "table not equal")
 		_, ok := a.(*leo.CampaignUpdated)
 		assert.Truef(t, ok, "CampaignUpdated type coercion not true")
