@@ -1848,6 +1848,8 @@ export type LaunchpadData = {
   migratedPoolAddress?: Maybe<Scalars['String']['output']>;
   /** The slot number when the launchpad was migrated. */
   migratedSlot?: Maybe<Scalars['Int']['output']>;
+  /** The name of the launchpad. */
+  name?: Maybe<Scalars['String']['output']>;
   /** The address of the pool. */
   poolAddress?: Maybe<Scalars['String']['output']>;
 };
