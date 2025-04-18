@@ -6,6 +6,7 @@ import { useAccount, useChainId } from "wagmi";
 import { useChain } from "@/config/chains";
 import {
   requestBalances,
+  requestGetBars,
   requestGetHolders,
   requestGetPairDetails,
   requestGetPairStatDetails,
@@ -573,5 +574,66 @@ export const useGetPairStatDetails = ({
     queryFn: () =>
       requestGetPairStatDetails({ pairAddress, quoteToken, networkId }),
     initialData,
+  });
+};
+export const queryGetBars = graphql(`
+  query GetBars(
+    $symbol: String!
+    $countback: Int
+    $from: Int!
+    $to: Int!
+    $resolution: String!
+    $currencyCode: String
+    $quoteToken: QuoteToken
+    $statsType: TokenPairStatisticsType
+    $removeLeadingNullValues: Boolean
+    $removeEmptyBars: Boolean
+  ) {
+    getBars(
+      symbol: $symbol
+      countback: $countback
+      from: $from
+      to: $to
+      resolution: $resolution
+      currencyCode: $currencyCode
+      quoteToken: $quoteToken
+      statsType: $statsType
+      removeLeadingNullValues: $removeLeadingNullValues
+      removeEmptyBars: $removeEmptyBars
+    ) {
+      s
+      o
+      h
+      l
+      c
+      t
+      volume
+      volumeNativeToken
+      buys
+      buyers
+      buyVolume
+      sells
+      sellers
+      sellVolume
+      liquidity
+      traders
+      transactions
+      __typename
+    }
+  }
+`);
+export const useGetBars = ({
+  pairAddress,
+  networkId,
+  quoteToken,
+}: {
+  networkId: number;
+  pairAddress: string;
+  quoteToken: "0" | "1";
+}) => {
+  return useQuery({
+    queryKey: ["chart", pairAddress, networkId, quoteToken],
+    queryFn: async () =>
+      await requestGetBars({ quoteToken, networkId, pairAddress }),
   });
 };

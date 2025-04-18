@@ -13,12 +13,14 @@ import {
 import { timeAgo } from "@/lib/time";
 import {
   queryBalances,
+  queryGetBars,
   queryGetHolders,
   queryGetPairDetails,
   queryGetPairStatDetails,
   queryGetTokenEvents,
   queryGetTokenPrice,
 } from "@/hooks/useGraphql";
+import { CandlestickData, HistogramData } from "lightweight-charts";
 
 export async function requestGetTokenEvents({
   poolAddress,
@@ -256,3 +258,52 @@ type StatDetail = WindowedDetailedStatsFieldsFragment & {
   buyers: DetailedStatsNumberMetricsFieldsFragment;
   sellers: DetailedStatsNumberMetricsFieldsFragment;
 };
+export async function requestGetBars({
+  pairAddress,
+  networkId,
+  quoteToken,
+}: {
+  networkId: number;
+  pairAddress: string;
+  quoteToken: "0" | "1";
+}) {
+  const res = await request(
+    appConfig.codexApiUrl,
+    queryGetBars,
+    {
+      symbol: `${pairAddress}:${networkId}`,
+      resolution: "30",
+      from: 1744276460,
+      to: 1744868660,
+      countback: 330,
+      currencyCode: "USD",
+      statsType: TokenPairStatisticsType.Filtered,
+      quoteToken: quoteToken ? QuoteToken.Token0 : QuoteToken.Token1,
+      removeLeadingNullValues: true,
+      removeEmptyBars: true,
+    },
+    {
+      Authorization: process.env.NEXT_PUBLIC_CODEX_API_KEY!,
+    },
+  );
+  if (!res?.getBars) throw new Error("Could not fetch bars");
+  const candlestick = res.getBars.t.map(
+    (time, idx) =>
+      ({
+        time,
+        open: res.getBars!.o[idx],
+        close: res.getBars!.c[idx],
+        high: res.getBars!.h[idx],
+        low: res.getBars!.l[idx],
+      }) as CandlestickData,
+  );
+  const histogram = res.getBars.t.map(
+    (time, idx) =>
+      ({
+        time,
+        value: +res.getBars!.volume![idx]!,
+      }) as HistogramData,
+  );
+
+  return { candlestick, histogram };
+}

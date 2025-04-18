@@ -1,6 +1,5 @@
 "use client";
 import DataScene from "./DataScene";
-import Chart from "./Chart";
 import {
   requestGetHolders,
   requestGetTokenEvents,
@@ -9,6 +8,11 @@ import {
 import { useEffect, useRef } from "react";
 import interact from "interactjs";
 import ResizeVerticalIcon from "@/assets/icons/sort.svg";
+import dynamic from "next/dynamic";
+const Chart = dynamic(() => import("./Chart"), {
+  loading: () => <p>Loading...</p>,
+  ssr: false,
+});
 export default function ProBody({
   tokenName,
   quoteToken,
@@ -63,7 +67,11 @@ export default function ProBody({
   return (
     <>
       <div className="flex grow items-center justify-center rounded-lg bg-white/10 text-white">
-        <Chart quoteToken={quoteToken} />
+        <Chart
+          networkId={networkId}
+          pairAddress={poolAddress}
+          quoteToken={quoteToken}
+        />
       </div>
       <div className="flex h-[300px] flex-col gap-2" ref={tableContainerRef}>
         <div className="flex h-0.5 items-center">
