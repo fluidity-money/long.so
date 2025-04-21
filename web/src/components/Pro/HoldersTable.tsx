@@ -97,7 +97,9 @@ export function HoldersTable({
         cell: ({ row }) => (
           <span className={contentStyle}>
             {"$" +
-              ((row.getValue("amount") as number) * tokenPrice!).toFixed(2)}
+              (
+                (row.getValue("amount") as number) * tokenPrice![0]!.priceUsd
+              ).toFixed(2)}
           </span>
         ),
       }),

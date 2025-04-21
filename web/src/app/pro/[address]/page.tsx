@@ -53,7 +53,7 @@ export default async function ProMode({
       networkId,
     }),
     requestGetTokenPrice({
-      tokenAddress,
+      tokenAddresses: [tokenAddress],
       networkId,
     }),
     requestGetPairDetails(tokenAddress),
