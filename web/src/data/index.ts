@@ -149,21 +149,19 @@ export async function requestGetHolders({
 }
 export async function requestGetTokenPrice({
   networkId,
-  tokenAddress,
+  tokenAddresses,
 }: {
   networkId: number;
-  tokenAddress: string;
+  tokenAddresses: string[];
 }) {
   const res = await request(
     appConfig.codexApiUrl,
     queryGetTokenPrice,
     {
-      inputs: [
-        {
-          address: tokenAddress,
-          networkId,
-        },
-      ],
+      inputs: tokenAddresses.map((address) => ({
+        address,
+        networkId,
+      })),
     },
     {
       Authorization: process.env.NEXT_PUBLIC_CODEX_API_KEY!,
@@ -187,6 +185,12 @@ export async function requestGetPairDetails(tokenAddress: string) {
   );
   return res?.filterTokens?.results?.[0];
 }
+export type Balance = {
+  balance: string;
+  name: string;
+  address: string;
+  usdValue: string;
+};
 export async function requestBalances({
   walletAddress,
   filterToken,
@@ -212,7 +216,16 @@ export async function requestBalances({
       Authorization: process.env.NEXT_PUBLIC_CODEX_API_KEY!,
     },
   );
-  return res.balances;
+  const balances = res.balances.items.map(
+    (item) =>
+      ({
+        address: item.tokenId,
+        name: "[TOKEN]",
+        balance: item.shiftedBalance.toFixed(2),
+        usdValue: "USD$",
+      }) as Balance,
+  );
+  return { cursor: res.balances.cursor, items: balances };
 }
 export async function requestGetPairStatDetails({
   pairAddress,

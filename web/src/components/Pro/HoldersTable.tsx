@@ -41,7 +41,7 @@ export function HoldersTable({
     //  hasNextPage, fetchNextPage
   } = useGetHolders({ tokenAddress, initialData, networkId });
   const { data: tokenPrice } = useGetTokenPrice({
-    tokenAddress,
+    tokenAddresses: [tokenAddress],
     initialData: initialTokenPriceData,
     networkId,
   });

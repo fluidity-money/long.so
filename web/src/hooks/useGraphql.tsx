@@ -345,19 +345,19 @@ export const queryGetTokenPrice = graphql(`
   }
 `);
 export const useGetTokenPrice = ({
-  tokenAddress,
+  tokenAddresses,
   initialData,
   networkId,
 }: {
-  tokenAddress: string;
+  tokenAddresses: string[];
   initialData: Awaited<ReturnType<typeof requestGetTokenPrice>>;
   networkId: number;
 }) => {
   return useQuery({
-    queryKey: ["tokenPrice", tokenAddress, networkId],
+    queryKey: ["tokenPrice", tokenAddresses, networkId],
     queryFn: async () =>
       await requestGetTokenPrice({
-        tokenAddress,
+        tokenAddresses,
         networkId,
       }),
     initialData,
