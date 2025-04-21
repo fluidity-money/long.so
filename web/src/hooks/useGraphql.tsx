@@ -12,6 +12,7 @@ import {
   requestGetPairStatDetails,
   requestGetTokenEvents,
   requestGetTokenPrice,
+  requestGetTokensInfo,
 } from "@/data";
 import { useAppKitAccount } from "@reown/appkit/react";
 
@@ -355,11 +356,13 @@ export const useGetTokenPrice = ({
 }) => {
   return useQuery({
     queryKey: ["tokenPrice", tokenAddresses, networkId],
-    queryFn: async () =>
-      await requestGetTokenPrice({
+    queryFn: async () => {
+      if (!tokenAddresses || !tokenAddresses.length) return [];
+      return await requestGetTokenPrice({
         tokenAddresses,
         networkId,
-      }),
+      });
+    },
     initialData,
   });
 };
@@ -631,5 +634,52 @@ export const useGetBars = ({
     queryKey: ["chart", pairAddress, networkId, quoteToken],
     queryFn: async () =>
       await requestGetBars({ quoteToken, networkId, pairAddress }),
+  });
+};
+export const queryGetTokensInfo = graphql(`
+  query GetTokensInfo(
+    $filters: TokenFilters
+    $statsType: TokenPairStatisticsType
+    $phrase: String
+    $tokens: [String]
+    $rankings: [TokenRanking]
+    $limit: Int
+    $offset: Int
+  ) {
+    filterTokens(
+      filters: $filters
+      statsType: $statsType
+      phrase: $phrase
+      tokens: $tokens
+      rankings: $rankings
+      limit: $limit
+      offset: $offset
+    ) {
+      results {
+        priceUSD
+        token {
+          decimals
+          address
+          name
+          networkId
+          symbol
+        }
+      }
+    }
+  }
+`);
+export const useGetTokensInfo = ({
+  tokenAddresses,
+  networkId,
+}: {
+  networkId: number;
+  tokenAddresses: string[];
+}) => {
+  return useQuery({
+    queryKey: ["tokensInfo", tokenAddresses, networkId],
+    queryFn: async () => {
+      if (!tokenAddresses || !tokenAddresses.length) return [];
+      return await requestGetTokensInfo({ networkId, tokenAddresses });
+    },
   });
 };

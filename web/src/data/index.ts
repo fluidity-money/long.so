@@ -19,6 +19,7 @@ import {
   queryGetPairStatDetails,
   queryGetTokenEvents,
   queryGetTokenPrice,
+  queryGetTokensInfo,
 } from "@/hooks/useGraphql";
 import { CandlestickData, HistogramData } from "lightweight-charts";
 
@@ -167,9 +168,7 @@ export async function requestGetTokenPrice({
       Authorization: process.env.NEXT_PUBLIC_CODEX_API_KEY!,
     },
   );
-  const data = res.getTokenPrices?.[0];
-  const tokenPrice = data?.priceUsd;
-  return tokenPrice;
+  return res.getTokenPrices;
 }
 export async function requestGetPairDetails(tokenAddress: string) {
   const res = await request(
@@ -186,10 +185,11 @@ export async function requestGetPairDetails(tokenAddress: string) {
   return res?.filterTokens?.results?.[0];
 }
 export type Balance = {
-  balance: string;
-  name: string;
+  balance: number;
+  name?: string;
+  symbol?: string;
   address: string;
-  usdValue: string;
+  usdValue?: string;
 };
 export async function requestBalances({
   walletAddress,
@@ -216,16 +216,7 @@ export async function requestBalances({
       Authorization: process.env.NEXT_PUBLIC_CODEX_API_KEY!,
     },
   );
-  const balances = res.balances.items.map(
-    (item) =>
-      ({
-        address: item.tokenId,
-        name: "[TOKEN]",
-        balance: item.shiftedBalance.toFixed(2),
-        usdValue: "USD$",
-      }) as Balance,
-  );
-  return { cursor: res.balances.cursor, items: balances };
+  return res.balances;
 }
 export async function requestGetPairStatDetails({
   pairAddress,
@@ -319,4 +310,26 @@ export async function requestGetBars({
   );
 
   return { candlestick, histogram };
+}
+export async function requestGetTokensInfo({
+  tokenAddresses,
+  networkId,
+}: {
+  tokenAddresses: string[];
+  networkId: number;
+}) {
+  const res = await request(
+    appConfig.codexApiUrl,
+    queryGetTokensInfo,
+    {
+      tokens: tokenAddresses.map((address) => `${address}:${networkId}`),
+      statsType: TokenPairStatisticsType.Filtered,
+      offset: 0,
+      limit: 100,
+    },
+    {
+      Authorization: process.env.NEXT_PUBLIC_CODEX_API_KEY!,
+    },
+  );
+  return res.filterTokens?.results;
 }

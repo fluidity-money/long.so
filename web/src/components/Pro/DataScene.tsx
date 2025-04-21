@@ -10,6 +10,7 @@ import {
 import { HoldersTable } from "./HoldersTable";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { BalancesTable } from "./BalancesTable";
 
 export default function DataScene({
   quoteToken,
@@ -61,6 +62,7 @@ export default function DataScene({
             </div>
           </TabsTrigger>
           <TabsTrigger value="holders">Holders</TabsTrigger>
+          <TabsTrigger value="balances">Balances</TabsTrigger>
         </TabsList>
         <TabsContent value="txns" className="relative flex grow">
           <EventsTable
@@ -79,6 +81,9 @@ export default function DataScene({
             initialTokenPriceData={initialTokenPriceData}
             tokenAddress={tokenAddress}
           />
+        </TabsContent>
+        <TabsContent value="balances" className="relative flex grow">
+          <BalancesTable networkId={networkId} />
         </TabsContent>
       </Tabs>
     </div>
