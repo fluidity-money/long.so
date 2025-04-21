@@ -424,30 +424,26 @@ export const queryBalances = graphql(`
 `);
 export const useBalances = ({
   filterToken,
-  initialData,
   walletAddress,
   networkId,
 }: {
-  initialData: Awaited<ReturnType<typeof requestBalances>>;
-  walletAddress: string;
+  walletAddress?: string;
   filterToken?: string;
   networkId: number;
 }) => {
   return useInfiniteQuery({
     queryKey: ["balances", walletAddress, networkId],
-    queryFn: async ({ pageParam }: { pageParam?: string | null }) =>
-      await requestBalances({
+    queryFn: async ({ pageParam }: { pageParam?: string | null }) => {
+      if (!walletAddress) return { cursor: null, items: [] };
+      return await requestBalances({
         filterToken,
         networkId,
         walletAddress,
         cursor: pageParam,
-      }),
+      });
+    },
     initialPageParam: undefined,
     getNextPageParam: (lastPage) => lastPage.cursor,
-    initialData: {
-      pageParams: [undefined],
-      pages: [initialData],
-    },
   });
 };
 export const queryGetPairStatDetails = graphql(`
