@@ -18,6 +18,8 @@ use stylus_sdk::call::RawCall;
 
 use crate::permit2_types::*;
 
+use alloc::{vec::Vec, vec};
+
 fn write_selector(bytes: &mut [u8], selector: &[u8; 4]) {
     bytes[0..4].copy_from_slice(&selector[..])
 }

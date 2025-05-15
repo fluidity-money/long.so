@@ -18,7 +18,6 @@ stylus-sdk = { workspace = true }
 alloy-sol-types.workspace = true
 ruint.workspace = true
 ruint-macro.workspace = true
-thiserror.workspace = true
 tiny-keccak.workspace = true
 keccak-const.workspace = true
 const-hex.workspace = true

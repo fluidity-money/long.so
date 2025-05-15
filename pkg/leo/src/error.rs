@@ -1,5 +1,4 @@
 use alloc::vec::Vec;
-use thiserror::Error;
 
 /// Assert or macro taken from Seawater.
 #[macro_export]
@@ -11,118 +10,96 @@ macro_rules! assert_or {
     };
 }
 
-#[derive(Error, Debug)]
+#[derive(Debug)]
 #[repr(u8)]
 pub enum Error {
     /// [ctor] failed, as the contract was already set up!
     // 0 (0x00)
-    #[error("Contract was already set up!")]
     AlreadySetUp,
 
     /// The campaign wasn't configured correctly and has a zero pool.
     // 1 (0x01)
-    #[error("Contract maximum is empty")]
     CampaignMaxEmpty,
 
     /// The campaign finished.
     // 2 (0x02)
-    #[error("Campaign is finished")]
     CampaignFinished,
 
     /// This is an empty campaign!
     // 3 (0x03)
-    #[error("Campaign is empty")]
     NoCampaign,
 
     /// Leo is disabled!
     // 4 (0x04)
-    #[error("Leo is disabled")]
     NotEnabled,
 
     /// Sender is not the position owner!
     // 5 (0x05)
-    #[error("Not position owner")]
     NotPositionOwner,
 
     /// Campaign is fully distributed!
     // 6 (0x06)
-    #[error("Campaign is fully distributed")]
     CampaignDistributedCompletely,
 
     /// Position already exists.
     // 7 (0x07)
-    #[error("Position already exists")]
     PositionAlreadyExists,
 
     /// Campaign configured incorrectly.
     // 8 (0x08)
-    #[error("Campaign is misconfigured")]
     BadCampaignConfig,
 
     /// Campaign already exists.
     // 9 (0x09)
-    #[error("Campaign already exists")]
     CampaignAlreadyExists,
 
     /// Not campaign owner.
     // 10 (0x0a)
-    #[error("Sender is not the campaign owner")]
     NotCampaignOwner,
 
     /// Position is empty!
     // 11 (0x0b)
-    #[error("Position has no liquidity!")]
     PositionHasNoLiquidity,
 
     /// ERC20 during transfer returned false!
     // 12 (0x0c)
-    #[error("ERC20 returned false")]
     ReturnedFalse,
 
     /// Seawater returned nothing.
     // 13 (0x0d)
-    #[error("Seawater returned nothing")]
     SeawaterDecode,
 
     /// Only the NFT manager that's registered can send Leo tokens
     // 14 (0x0e)
-    #[error("Only the NFT manager")]
     OnlyNftManager,
 
     /// The campaign hasn't begun.
     // 14 (0x0e)
-    #[error("Campaign hasn't begun")]
     CampaignHasntBegun,
 
     /// The campaign that a user requested to redeem was duplicated in
     /// the calldata.
     // 15 (0x0f)
-    #[error("Campaign ids were duplicated")]
     DuplicateCampaignIds,
 
     /// A checked multiplication failed!
     // 16 (0x10)
-    #[error("Checked multiplication failed")]
     CheckedMul,
 
     /// A checked division failed!
     // 17 (0x11)
-    #[error("Checked division failed")]
     CheckedDiv,
 
     /// A checked add failed!
     // 18 (0x12)
-    #[error("Checked add failed")]
     CheckedAdd,
 
     /// Sender tried to duplicate a position in their claim.
     // 19 (0x13)
-    #[error("Sender duplicated position")]
     DuplicatedPosition,
 
     /// Sender tried to duplicate a campaign in their claim.
     // 20 (0x14)
-    #[error("Sender duplicated campaign")]
     DuplicatedCampaign,
 }
 

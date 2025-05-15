@@ -1,7 +1,6 @@
 //! The [enum@Error] enum.
 
-use alloc::vec::Vec;
-use thiserror::Error;
+use alloc::{vec, vec::Vec};
 
 /// Asserts that a boolean value is true at runtime, returning an Err if not.
 ///
@@ -59,241 +58,176 @@ macro_rules! assert_neq_or {
 }
 
 /// The list of possible errors the contract can return.
-#[derive(Error, Debug)]
+#[derive(Debug)]
 #[repr(u8)]
 pub enum Error {
     // 0 (0x00)
-    #[error("Denominator is 0")]
     DenominatorIsZero,
 
     // 1 (0x01)
-    #[error("Result is U256::MAX")]
     ResultIsU256MAX,
 
     // 2 (0x02)
-    #[error("Sqrt price is 0")]
     SqrtPriceIsZero,
 
     // 3 (0x03)
-    #[error("Sqrt price is less than or equal to quotient")]
     SqrtPriceIsLteQuotient,
 
     // 4 (0x04)
-    #[error("Can not get most significant bit or least significant bit on zero value")]
     ZeroValue,
 
     // 5 (0x05)
-    #[error("Liquidity is 0")]
     LiquidityIsZero,
 
     // 6 (0x06)
-    #[error(
-        "require((product = amount * sqrtPX96) / amount == sqrtPX96 && numerator1 > product);"
-    )]
     ProductDivAmount,
 
     // 7 (0x07)
-    #[error("Denominator is less than or equal to prod_1")]
     DenominatorIsLteProdOne,
 
     // 8 (0x08)
-    #[error("Liquidity Sub")]
     LiquiditySub,
 
     // 9 (0x09)
-    #[error("Liquidity Add")]
     LiquidityAdd,
 
     // 10 (0x0a)
-    #[error("The given tick must be less than, or equal to, the maximum tick")]
     T,
 
     // 11 (0x0b)
-    #[error(
-        "Second inequality must be < because the price can never reach the price at the max tick"
-    )]
     R,
 
     // 12 (0x0c)
-    #[error("Overflow when casting to U160")]
     SafeCastToU160Overflow,
 
     // 13 (0x0d)
-    #[error("Liquidity higher than max")]
     LiquidityTooHigh,
 
     // 14 (0x0e)
-    #[error("Fee growth sub overflow position")]
     FeeGrowthSubPos,
 
     // 15 (0x0f)
-    #[error("ERC20 call reverted")]
     Erc20Revert(Vec<u8>),
 
     // 16 (0x10)
-    #[error("ERC20 call reverted with no data")]
     Erc20RevertNoData,
 
     // 17 (0x11)
-    #[error("Pool is already initialised")]
     PoolAlreadyInitialised,
 
     // 18 (0x012)
-    #[error("Contract is already initialised")]
     ContractAlreadyInitialised,
 
-    #[error("Price limit too high")]
     // 19 (0x13)
     PriceLimitTooHigh,
 
     // 20 (0x14)
-    #[error("Price limit too low")]
     PriceLimitTooLow,
 
     // 21 (0x15)
-    #[error("Checked abs called on an unexpected positive number")]
     CheckedAbsIsNegative,
 
     // 22 (0x16)
-    #[error("Checked abs called on an unexpected negative number")]
     CheckedAbsIsPositive,
 
     // 23 (0x17)
-    #[error("Checked abs called on uint.min")]
     AbsTooLow,
 
     // 24 (0x18)
-    #[error("Fee result too high")]
     FeeTooHigh,
 
     // 25 (0x19)
-    #[error("Swap result too high")]
     SwapResultTooHigh,
 
     // 26 (0x1a) UNUSED
-    #[error("Internal swap amounts not matched")]
     InterimSwapNotEq,
 
     // 27 (0x1b)
-    #[error("Internal swap result was positive")]
     InterimSwapPositive,
 
     // 28 (0x1c)
-    #[error("Minimum out not reached")]
     MinOutNotReached,
 
     // 29 (0x1d)
-    #[error("Only the position owner can use this")]
     PositionOwnerOnly,
 
     // 30 (0x1e)
-    #[error("Only the NFT manager can use this")]
     NftManagerOnly,
 
     // 31 (0x1f)
-    #[error("Only the Seawater admin can use this")]
     SeawaterAdminOnly,
 
     // 32 (0x20)
-    #[error("Operation unavailable when the pool is disabled")]
     PoolDisabled,
 
     // 33 (0x21)
-    #[error("Invalid tick spacing")]
     InvalidTickSpacing,
 
     // 34 (0x22)
-    #[error("Swap result too low")]
     SwapResultTooLow,
 
     // 35 (0x23)
-    #[error("Liquidity amount too low or high to be a int128")]
     LiquidityAmountTooWide,
 
     // 36 (0x24)
-    #[error("Invalid tick")]
     InvalidTick,
 
     // 37 (0x25)
-    #[error("Pool enabled")]
     PoolEnabled,
 
     // 38 (0x26)
-    #[error("Position is empty when it shouldn't be")]
     EmptyPosition,
 
     // 39 (0x27)
-    #[error("Liquidity that was taken is too low")]
     LiqResultTooLow,
 
     // 40 (0x28)
-    #[error("The emergency council can only disable pools")]
     SeawaterEmergencyOnlyDisable,
 
     // 41 (0x29)
-    #[error("Amount remaining sub")]
     AmountRemainingSub,
 
     // 42 (0x2a)
-    #[error("Amount remaining add")]
     AmountRemainingAdd,
 
     // 43 (0x2b)
-    #[error("Trying to swap2 between the same pool")]
     SamePool,
 
     // 44 (0x2c)
-    #[error("Swap sending fee taking overflow")]
     TransferToSenderSub,
 
     // 45 (0x2d)
-    #[error("Bad protocol fee was attempted to be set")]
     BadFeeProtocol,
 
     // 46 (0x2e)
-    #[error("Bad pool fee")]
     BadFee,
 
     // 47 (0x2f)
-    #[error("0 was provided as an argument for swap")]
     SwapIsZero,
 
     // 48 (0x30)
-    #[error("Pool is not initialised!")]
     PoolIsNotInitialised,
 
     // 49 (0x31)
-    #[error("Position conversion fail")]
     PositionConvFail,
 
     // 50 (0x32)
-    #[error("Debug assert")]
     DebugAssert,
 
     // 51 (0x33)
-    #[error("Bad sqrt price")]
     BadPrice,
 
     // 52 (0x34)
-    #[error("Checked reserve sub overflow")]
     ReserveSub,
 
     // 53 (0x35)
-    #[error("Checked reserve add overflow")]
     ReserveAdd,
 }
 
 impl From<Error> for Vec<u8> {
-    // tests return the message
-    #[cfg(feature = "testing")]
-    fn from(val: Error) -> Self {
-        val.to_string().into()
-    }
-
     // runtime returns the message code to save binary size
     // TODO - once errors are mostly finalised we should find a way to return actual solidity
     // errors
-    #[cfg(not(feature = "testing"))]
     fn from(val: Error) -> Self {
         // cast the enum to its descriminant
         // https://doc.rust-lang.org/std/mem/fn.discriminant.html

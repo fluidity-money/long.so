@@ -35,12 +35,12 @@ inherits = "release"
 [workspace.dependencies]
 stylus-sdk = "0.7.0"
 stylus-proc = "0.7.0"
-thiserror = "1.0.48"
 tiny-keccak = "2.0.2"
-ruint = { version = "1.11.0", features = ["num-traits"] }
-num-traits = "0.2.19"
-alloy-sol-types = "=0.8.14"
-alloy-sol-macro = "=0.8.14"
+ruint = { version = "1.11.0", features = ["num-traits"], default-features = false }
+num-traits = { version = "0.2.19", default-features = false }
+alloy-primitives = { version = "=0.8.14", default-features = false, features = ["native-keccak"] }
+alloy-sol-types = { version = "=0.8.14", default-features = false }
+alloy-sol-macro = { version = "=0.8.14", default-features = false }
 ruint-macro = "1.2.1"
 keccak-const = "0.2.0"
-const-hex = { version = "1.10.0", features = ["alloc"] }
+const-hex = { version = "1.10.0", features = ["alloc"], default-features = false }

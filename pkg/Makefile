@@ -78,7 +78,7 @@ FORGE_BUILD := forge build
 DOCKER_BUILD := docker build
 
 STYLUS_RELEASE_CODESIZE_DIR := target/wasm32-unknown-unknown/release-codesize
-STYLUS_RELEASE_COMPLETE_DIR := target/wasm32-unknown-unknown/release-complete
+STYLUS_RELEASE_COMPLETE_DIR := target/wasm32-unknown-unknown/release-codesize
 
 WASM_OPT_PASS := \
 	wasm-opt --dce --rse --signature-pruning -Os
@@ -100,19 +100,19 @@ WASM_OPT_PASS_LEO := \
 
 ${OUT_SEAWATER_ADMIN}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_ADMIN}
-	@${CARGO_BUILD_STYLUS_SEAWATER} release-complete --features admin
+	@${CARGO_BUILD_STYLUS_SEAWATER} release-codesize --features admin
 	@${WASM_OPT_PASS_SEAWATER_COMPLETE} ${OUT_SEAWATER_ADMIN}
 	@rm -f ${SEAWATER_COMPLETE_RELEASE}
 
 ${OUT_SEAWATER_POSITIONS}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_POSITIONS}
-	@${CARGO_BUILD_STYLUS_SEAWATER} release-complete --features positions
+	@${CARGO_BUILD_STYLUS_SEAWATER} release-codesize --features positions
 	@${WASM_OPT_PASS_SEAWATER_COMPLETE} ${OUT_SEAWATER_POSITIONS}
 	@rm -f ${SEAWATER_COMPLETE_RELEASE}
 
 ${OUT_SEAWATER_UPDATE_POSITIONS}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_UPDATE_POSITIONS}
-	@${CARGO_BUILD_STYLUS_SEAWATER} release-complete --features update_positions
+	@${CARGO_BUILD_STYLUS_SEAWATER} release-codesize --features update_positions
 	@${WASM_OPT_PASS_SEAWATER_COMPLETE} ${OUT_SEAWATER_UPDATE_POSITIONS}
 	@rm -f ${SEAWATER_COMPLETE_RELEASE}
 
@@ -142,19 +142,19 @@ ${OUT_SEAWATER_QUOTES_B}: ${FILES_RUST}
 
 ${OUT_SEAWATER_MIGRATIONS}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_MIGRATIONS}
-	@${CARGO_BUILD_STYLUS_SEAWATER} release-complete --features migrations
+	@${CARGO_BUILD_STYLUS_SEAWATER} release-codesize --features migrations
 	@${WASM_OPT_PASS_SEAWATER_COMPLETE} ${OUT_SEAWATER_MIGRATIONS}
 	@rm -f ${SEAWATER_COMPLETE_RELEASE}
 
 ${OUT_SEAWATER_ADJUST_POSITIONS_A}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_ADJUST_POSITIONS_A}
-	@${CARGO_BUILD_STYLUS_SEAWATER} release-complete --features adjust_positions_a
+	@${CARGO_BUILD_STYLUS_SEAWATER} release-codesize --features adjust_positions_a
 	@${WASM_OPT_PASS_SEAWATER_COMPLETE} ${OUT_SEAWATER_ADJUST_POSITIONS_A}
 	@rm -f ${SEAWATER_COMPLETE_RELEASE}
 
 ${OUT_SEAWATER_ADJUST_POSITIONS_B}: ${FILES_RUST}
 	@rm -f ${OUT_SEAWATER_ADJUST_POSITIONS_B}
-	@${CARGO_BUILD_STYLUS_SEAWATER} release-complete --features adjust_positions_b
+	@${CARGO_BUILD_STYLUS_SEAWATER} release-codesize --features adjust_positions_b
 	@${WASM_OPT_PASS_SEAWATER_COMPLETE} ${OUT_SEAWATER_ADJUST_POSITIONS_B}
 	@rm -f ${SEAWATER_COMPLETE_RELEASE}
 
@@ -172,13 +172,13 @@ ${OUT_SEAWATER_SWAPS_B}: ${FILES_RUST}
 
 ${OUT_LEO_COLLECT}: ${FILES_RUST}
 	@rm -f ${OUT_LEO_COLLECT}
-	@${CARGO_BUILD_STYLUS_LEO} release-complete --features contract-collect
+	@${CARGO_BUILD_STYLUS_LEO} release-codesize --features contract-collect
 	@${WASM_OPT_PASS_LEO} leo-collect.wasm
 
 ${OUT_LEO_EXTRAS}: ${FILES_RUST}
 	@rm -f ${OUT_LEO_EXTRAS}
-	${CARGO_BUILD_STYLUS_LEO} release-complete --features contract-extras
-	@${CARGO_BUILD_STYLUS_LEO} release-complete --features contract-extras
+	${CARGO_BUILD_STYLUS_LEO} release-codesize --features contract-extras
+	@${CARGO_BUILD_STYLUS_LEO} release-codesize --features contract-extras
 	@${WASM_OPT_PASS_LEO} leo-extras.wasm
 
 ### STYLUS CHECK

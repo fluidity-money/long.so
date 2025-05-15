@@ -2,7 +2,7 @@
 //!
 //! Seawater is an AMM designed for arbitrum's stylus environment based on uniswap v3.
 
-#![deny(clippy::unwrap_used)]
+#![cfg_attr(target_arch = "wasm32", no_std)]
 
 pub mod immutables;
 #[macro_use]
@@ -58,6 +58,8 @@ type Revert = Vec<u8>;
 
 extern crate alloc;
 
+use alloc::{string::ToString, vec::Vec};
+
 #[link(wasm_import_module = "stylus_test_runner")]
 extern "C" {
     #[allow(dead_code)]
@@ -88,6 +90,12 @@ fn wasm_get_random(buf: &mut [u8]) -> Result<(), getrandom::Error> {
 #[cfg(all(target_arch = "wasm32", feature = "testing"))]
 register_custom_getrandom!(wasm_get_random);
 
+#[cfg(target_arch = "wasm32")]
+#[panic_handler]
+fn panic(_: &core::panic::PanicInfo) -> ! {
+    core::arch::wasm32::unreachable()
+}
+
 // we split our entrypoint functions into three sets, and call them via diamond proxies, to
 // save on binary size
 #[cfg(not(any(
@@ -105,10 +113,10 @@ register_custom_getrandom!(wasm_get_random);
     feature = "quotes_b",
 )))]
 mod shim {
+    use alloc::vec::Vec;
+
     #[cfg(all(not(target_arch = "wasm32"), not(feature = "testing")))]
-    compile_error!(
-        "A contract facet feature flag must be enabled when building for wasm."
-    );
+    compile_error!("A contract facet feature flag must be enabled when building for wasm.");
     #[stylus_sdk::prelude::public]
     impl crate::Pools {}
 }
@@ -221,7 +229,7 @@ impl Pools {
         to: Address,
         amount: U256,
         min_out: U256,
-        track_reserves: bool
+        track_reserves: bool,
     ) -> Result<(U256, U256, U256, I256, i32, i32), Revert> {
         assert_or!(from != to, Error::SamePool);
         assert_or!(!amount.is_zero(), Error::SwapIsZero);
@@ -236,7 +244,7 @@ impl Pools {
             amount,
             // swap with no price limit, since we use min_out instead
             tick_math::MIN_SQRT_RATIO + U256::one(),
-            track_reserves
+            track_reserves,
         )?;
 
         // make this positive for exact in
@@ -249,7 +257,7 @@ impl Pools {
             false,
             interim_usdc_out,
             tick_math::MAX_SQRT_RATIO - U256::one(),
-            track_reserves
+            track_reserves,
         )?;
 
         let amount_in = amount_in.abs_pos()?;
@@ -1093,18 +1101,18 @@ impl Pools {
         Ok(())
     }
 
-   pub fn send_amounts_from_sender(
-       &mut self,
-       token: Address,
-       recipients: Vec<Address>,
-       amounts: Vec<U256>
-   ) -> Result<(), Revert> {
-       for (addr, amount) in recipients.into_iter().zip(amounts) {
-           erc20::take_from_to(token, addr, amount)?;
-       }
+    pub fn send_amounts_from_sender(
+        &mut self,
+        token: Address,
+        recipients: Vec<Address>,
+        amounts: Vec<U256>,
+    ) -> Result<(), Revert> {
+        for (addr, amount) in recipients.into_iter().zip(amounts) {
+            erc20::take_from_to(token, addr, amount)?;
+        }
 
-       Ok(())
-   }
+        Ok(())
+    }
 }
 
 /// Functions for adjusting positions using in-contract calculation of certain values.

@@ -1,6 +1,6 @@
 //! Operations on an integer's bit pattern
 
-use std::ops::ShrAssign;
+use core::ops::ShrAssign;
 
 use crate::types::{U256Extension, U256};
 

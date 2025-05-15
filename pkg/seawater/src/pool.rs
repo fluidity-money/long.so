@@ -525,7 +525,7 @@ impl StoragePool {
                                 crate::pool::full_math::mul_div(
                                     amount_0.into_raw(),
                                     U256::from(1e6 as u32 - fee),
-                                    U256::from(1e6),
+                                    U256::from(1e6 as u32),
                                 )
                                 .unwrap(),
                             )
@@ -549,7 +549,7 @@ impl StoragePool {
                                     crate::pool::full_math::mul_div(
                                         amount_1.into_raw(),
                                         U256::from(1e6 as u32 - fee),
-                                        U256::from(1e6),
+                                        U256::from(1e6 as u32),
                                     )
                                     .unwrap(),
                                 )
