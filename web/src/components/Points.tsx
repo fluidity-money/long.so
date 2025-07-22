@@ -36,7 +36,7 @@ export default function Points() {
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content sideOffset={5}>
-          <DropdownMenu.Item>
+          <div>
             {isLoading ? (
               <PlaceholderDiv>
                 <Hourglass
@@ -60,7 +60,7 @@ export default function Points() {
                 className="overflow-hidden rounded-[8px]"
               />
             )}
-          </DropdownMenu.Item>
+          </div>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
